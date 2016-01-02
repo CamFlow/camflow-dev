@@ -17,6 +17,8 @@
 #include <linux/provenance.h>
 #include <linux/debugfs.h>
 
+#define BASE_NAME "provenance"
+
 /* global variable, extern in relay_prov.h */
  struct rchan *prov_chan;
  atomic64_t prov_evt_count=ATOMIC64_INIT(1);
@@ -54,8 +56,8 @@ static struct rchan_callbacks relay_callbacks =
 
 static int __init relay_prov_init(void)
 {
-  printk(KERN_INFO "RelayProv init.\n");
-  prov_chan = relay_open("relay_prov", NULL, 8192, 4, &relay_callbacks, NULL);
+  printk(KERN_INFO "Provenance init.\n");
+  prov_chan = relay_open(BASE_NAME, NULL, 8192, 4, &relay_callbacks, NULL);
   if(prov_chan==NULL){
     printk(KERN_ERR "RelayProv: relay_open failure\n");
     return 0;
