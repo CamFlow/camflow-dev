@@ -1,0 +1,7 @@
+config SECURITY_PROVENANCE
+         bool "Provenance"
+         depends on RELAY
+         default n
+         help
+          This selects Provenance.
+          Provenance is an helper to capture provenance data.
