@@ -1,6 +1,6 @@
 /*
 *
-* /linux/include/linux/provenance.h
+* provenancelib.h
 *
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
@@ -11,12 +11,12 @@
 * published by the Free Software Foundation.
 *
 */
-#ifndef _LINUX_PROVENANCE_H
-#define _LINUX_PROVENANCE_H
+#ifndef __PROVENANCE_H
+#define __PROVENANCE_H
 
-#include <linux/types.h>
-#include <linux/bug.h>
-#include <linux/relay.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #define MSG_MAX_SIZE 256
 #define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
@@ -65,32 +65,14 @@ typedef union msg{
   struct edge_struct edge_info;
 } prov_msg_t;
 
-extern atomic64_t prov_evt_count;
+struct provenance_ops{
+  void (*init)(void);
+  void (*log_edge)(struct edge_struct*);
+  void (*log_node)(struct node_struct*);
+  void (*log_str)(struct str_struct*);
+};
 
-static inline event_id_t prov_next_evtid( void ){
-  return (event_id_t)atomic64_inc_return(&prov_evt_count);
-}
+int provenance_register(struct provenance_ops* ops);
+void provenance_stop(void);
 
-extern struct rchan *prov_chan;
-
-static inline void prov_write(prov_msg_t* msg)
-{
-  msg->msg_info.event_id=prov_next_evtid(); /* assign an event id */
-  relay_write(prov_chan, &(msg->raw), sizeof(prov_msg_t));
-}
-
-static inline int prov_print(const char *fmt, ...)
-{
-  prov_msg_t msg;
-  va_list args;
-  va_start(args, fmt);
-  /* set message type */
-  msg.str_info.message_id=MSG_STR;
-  memset(msg.str_info.str, 0, sizeof(msg.str_info.str));
-  msg.str_info.length = vscnprintf(msg.str_info.str, sizeof(msg.str_info.str), fmt, args);
-  prov_write(&msg);
-  va_end(args);
-  return msg.str_info.length;
-}
-
-#endif /* _LINUX_PROVENANCE_H */
+#endif /* __PROVENANCE_H */

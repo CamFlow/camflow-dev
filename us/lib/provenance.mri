@@ -1,0 +1,5 @@
+create provenancelib.a
+addlib provenance.a
+addlib ../threadpool/thpool.a
+save
+end
