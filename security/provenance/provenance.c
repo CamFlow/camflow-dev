@@ -59,9 +59,10 @@ static int __init relay_prov_init(void)
   printk(KERN_INFO "Provenance init.\n");
   prov_chan = relay_open(BASE_NAME, NULL, 8192, 4, &relay_callbacks, NULL);
   if(prov_chan==NULL){
-    printk(KERN_ERR "RelayProv: relay_open failure\n");
+    printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
+  prov_print("Provenance module started!");
   return 0;
 }
 
