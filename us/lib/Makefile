@@ -17,7 +17,7 @@ static: $(OUT)
 
 $(OUT): $(OBJ)
 	ar rcs provenance.a $(OBJ)
-	ar -M <provenance.mri
+	ar -M <provenancelib.mri
 
 clean:
 	rm -f $(OBJ) $(OUT)
