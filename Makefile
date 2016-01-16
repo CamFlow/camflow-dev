@@ -27,7 +27,6 @@ compile_security:
 
 compile_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
-	cd ./build/linux-$(kernel-version) && $(MAKE) -j4 modules
 
 compile_us:
 	cd ./us && $(MAKE) all

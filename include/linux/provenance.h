@@ -21,28 +21,28 @@
 #define MSG_MAX_SIZE 256
 #define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
 
-typedef uint64_t entity_id_t;
 typedef uint64_t event_id_t;
-typedef uint64_t nodeid_t;
+typedef uint64_t node_id_t;
 typedef enum {MSG_EDGE=1, MSG_NODE=2, MSG_STR=3} message_type_t;
 typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
-typedef enum {ND_PROCESS=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} entity_type_t;
+typedef enum {ND_TASK=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} node_type_t;
 
 struct edge_struct{
   message_type_t message_id;
   event_id_t event_id;
-  entity_id_t snd_id;
-  entity_id_t rcv_id;
+  node_id_t snd_id;
+  node_id_t rcv_id;
   bool allowed;
   edge_type_t type;
-  uid_t user_id;
 };
 
 struct node_struct{
   message_type_t message_id;
   event_id_t event_id;
-  nodeid_t node_id;
-  entity_type_t type;
+  node_id_t node_id;
+  node_id_t type;
+  uid_t uid;
+  gid_t gid;
 };
 
 struct msg_struct{
@@ -75,6 +75,11 @@ extern struct rchan *prov_chan;
 
 static inline void prov_write(prov_msg_t* msg)
 {
+  if(!prov_chan) // not set yet
+  {
+    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
+    return;
+  }
   msg->msg_info.event_id=prov_next_evtid(); /* assign an event id */
   relay_write(prov_chan, &(msg->raw), sizeof(prov_msg_t));
 }

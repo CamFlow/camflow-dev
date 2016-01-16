@@ -1,6 +1,6 @@
 /*
 *
-* /linux/security/relay_prov/relay_prov.c
+* /linux/security/provenance/provenance.c
 *
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
@@ -20,8 +20,8 @@
 #define BASE_NAME "provenance"
 
 /* global variable, extern in provenance.h */
- struct rchan *prov_chan;
- atomic64_t prov_evt_count=ATOMIC64_INIT(1);
+ struct rchan *prov_chan=NULL;
+ atomic64_t prov_evt_count=ATOMIC64_INIT(0);
 
 /*
  * create_buf_file() callback.  Creates relay file in debugfs.
@@ -70,7 +70,7 @@ static int __init relay_prov_init(void)
   /* write a node */
   prov.node_info.message_id=MSG_NODE;
   prov.node_info.node_id=1;
-  prov.node_info.type=ND_PROCESS;
+  prov.node_info.type=ND_TASK;
   prov_write(&prov);
 
   prov.node_info.message_id=MSG_NODE;
@@ -83,7 +83,6 @@ static int __init relay_prov_init(void)
   prov.edge_info.rcv_id=2;
   prov.edge_info.allowed=true;
   prov.edge_info.type=ED_DATA;
-  prov.edge_info.user_id=0;
   prov_write(&prov);
 
   return 0;
