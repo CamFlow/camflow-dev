@@ -172,10 +172,10 @@ static struct security_hook_list provenance_hooks[] = {
 };
 
 void __init provenance_add_hooks(void){
-  cred_init_provenance();
   provenance_cache = kmem_cache_create("cred_provenance_struct",
 					    sizeof(struct cred_provenance_struct),
 					    0, SLAB_PANIC, NULL);
+  cred_init_provenance();
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
   prov_print("Provenance lsm hooks attached!");
