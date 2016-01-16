@@ -1,11 +1,11 @@
-SRC = ./build/thpool.c
+SRC = ./build/simplog.c
 OBJ = $(SRC:.c=.o)
-OUT = thpool.a
+OUT = simplog.a
 INCLUDES = -I./build
 CCFLAGS = -g -O2 -fpic
 CCC = gcc
 LDFLAGS = -g
-GIT_SOURCE=https://github.com/Pithikos/C-Thread-Pool.git
+GIT_SOURCE=https://github.com/ntpeters/SimpleLogger.git
 
 .SUFFIXES: .c
 
@@ -25,4 +25,4 @@ clean:
 prepare:
 	mkdir -p build
 	cd ./build && git init && git remote add origin $(GIT_SOURCE) && git fetch origin && git checkout -b master --track origin/master
-	cp --force ./build/thpool.h ./thpool.h
+	cp --force ./build/simplog.h ./simplog.h

@@ -127,20 +127,23 @@ static void callback_job(void* data)
   prov_msg_t* msg = (prov_msg_t*)data;
 
   /* initialise per worker thread */
-  if(!initialised){
+  if(!initialised && prov_ops.init!=NULL){
     prov_ops.init();
     initialised=1;
   }
 
   switch(msg->msg_info.message_id){
     case MSG_EDGE:
-      prov_ops.log_edge(&(msg->edge_info));
+      if(prov_ops.log_edge!=NULL)
+        prov_ops.log_edge(&(msg->edge_info));
       break;
     case MSG_NODE:
-      prov_ops.log_node(&(msg->node_info));
+      if(prov_ops.log_node!=NULL)
+        prov_ops.log_node(&(msg->node_info));
       break;
     case MSG_STR:
-      prov_ops.log_str(&(msg->str_info));
+      if(prov_ops.log_str!=NULL)
+        prov_ops.log_str(&(msg->str_info));
       break;
     default:
       break;

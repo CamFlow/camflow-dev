@@ -1,0 +1,11 @@
+[Unit]
+Description=Provenance Relay Audit Usher
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/relay-audit
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target
