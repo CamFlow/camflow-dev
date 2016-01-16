@@ -24,9 +24,15 @@
 typedef uint64_t entity_id_t;
 typedef uint64_t event_id_t;
 typedef uint64_t nodeid_t;
+
 typedef enum {MSG_EDGE=1, MSG_NODE=2, MSG_STR=3} message_type_t;
-typedef enum {FL_DATA=0, FL_CREATE=1, FL_PASS=2, FL_CHANGE=3} flow_type_t;
-typedef enum {ENT_PROCESS=0, ENT_FILE=1, ENT_FIFO=2, ENT_SOCKET=3, ENT_DIRECTORY=4, ENT_LINK=5, ENT_CHAR_SPECIAL=6, ENT_BLOCK_SPECIAL=7, ENT_MESSAGE=8, ENT_SHM=9, ENT_SEM=10, ENT_UNKOWN=11} entity_type_t;
+
+typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
+char* edge_str[]={"data", "create", "pass", "change"};
+
+typedef enum {ND_PROCESS=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} entity_type_t;
+char* entity_str[]={"process", "file", "fifo", "socket", "directory", "link", "char_special", "block_special", "message", "unknown"};
+
 
 struct edge_struct{
   message_type_t message_id;
@@ -34,7 +40,7 @@ struct edge_struct{
   entity_id_t snd_id;
   entity_id_t rcv_id;
   bool allowed;
-  flow_type_t type;
+  edge_type_t type;
   uid_t user_id;
 };
 
