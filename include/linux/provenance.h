@@ -72,9 +72,13 @@ static inline event_id_t prov_next_evtid( void ){
 }
 
 extern struct rchan *prov_chan;
+extern bool prov_enabled;
 
 static inline void prov_write(prov_msg_t* msg)
 {
+  if(!prov_enabled){
+    return;
+  }
   if(!prov_chan) // not set yet
   {
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");

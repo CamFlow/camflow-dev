@@ -88,7 +88,6 @@ static inline struct cred_provenance_struct* provenance_clone(node_type_t ntype,
   {
     return NULL;
   }
-  prov->tracked=old->tracked;
   return prov;
 }
 
@@ -178,5 +177,4 @@ void __init provenance_add_hooks(void){
   cred_init_provenance();
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
-  prov_print("Provenance lsm hooks attached!");
 }
