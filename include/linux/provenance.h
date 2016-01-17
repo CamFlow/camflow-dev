@@ -25,13 +25,15 @@ typedef uint64_t event_id_t;
 typedef uint64_t node_id_t;
 typedef enum {MSG_EDGE=1, MSG_NODE=2, MSG_STR=3} message_type_t;
 typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
-typedef enum {ND_TASK=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} node_type_t;
+typedef enum {ND_TASK=0, ND_INODE=1} node_type_t;
 
 struct edge_struct{
   message_type_t message_id;
   event_id_t event_id;
   node_id_t snd_id;
+  dev_t snd_dev;
   node_id_t rcv_id;
+  dev_t rcv_dev;
   bool allowed;
   edge_type_t type;
 };
@@ -43,6 +45,7 @@ struct node_struct{
   node_id_t type;
   uid_t uid;
   gid_t gid;
+  dev_t dev;
 };
 
 struct msg_struct{
@@ -73,12 +76,10 @@ static inline event_id_t prov_next_evtid( void ){
 
 extern struct rchan *prov_chan;
 extern bool prov_enabled;
+extern bool prov_all;
 
 static inline void prov_write(prov_msg_t* msg)
 {
-  if(!prov_enabled){
-    return;
-  }
   if(!prov_chan) // not set yet
   {
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");

@@ -29,15 +29,17 @@ typedef enum {MSG_EDGE=1, MSG_NODE=2, MSG_STR=3} message_type_t;
 typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
 char* edge_str[]={"data", "create", "pass", "change"};
 
-typedef enum {ND_TASK=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} node_type_t;
-char* node_str[]={"task", "file", "fifo", "socket", "directory", "link", "char_special", "block_special", "message", "unknown"};
+typedef enum {ND_TASK=0, ND_INODE=1} node_type_t;
+char* node_str[]={"task", "inode", "unknown"};
 
 
 struct edge_struct{
   message_type_t message_id;
   event_id_t event_id;
   node_id_t snd_id;
+  dev_t snd_dev;
   node_id_t rcv_id;
+  dev_t rcv_dev;
   bool allowed;
   edge_type_t type;
 };
@@ -46,6 +48,7 @@ struct node_struct{
   message_type_t message_id;
   event_id_t event_id;
   node_id_t node_id;
+  dev_t dev;
   node_type_t type;
   uid_t uid;
   gid_t gid;

@@ -79,13 +79,13 @@ void log_str(struct str_struct* data){
 
 void log_edge(struct edge_struct* edge){
   if(edge->allowed)
-    write_to_log("%s[%ld]{%ld->%ld} allowed", edge_str[edge->type], edge->event_id, edge->snd_id, edge->rcv_id);
+    write_to_log("%s[%lu]{%lu:%u->%lu:%u} true", edge_str[edge->type], edge->event_id, edge->snd_id, edge->snd_dev, edge->rcv_id, edge->rcv_dev);
   else
-    write_to_log("%s[%ld]{%ld->%ld} disallowed", edge_str[edge->type], edge->event_id, edge->snd_id, edge->rcv_id);
+    write_to_log("%s[%lu]{%lu:%u->%lu:%u} false", edge_str[edge->type], edge->event_id, edge->snd_id, edge->snd_dev, edge->rcv_id, edge->rcv_dev);
 }
 
 void log_node(struct node_struct* node){
-  write_to_log("%s[%ld]{%ld|%ld|%ld}", node_str[node->type], node->event_id, node->node_id, node->uid, node->gid);
+  write_to_log("%s[%lu]{%lu:%u|%lu|%lu}", node_str[node->type], node->event_id, node->node_id, node->dev, node->uid, node->gid);
 }
 
 struct provenance_ops ops = {
