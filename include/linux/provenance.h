@@ -73,6 +73,7 @@ static inline event_id_t prov_next_evtid( void ){
 
 extern struct rchan *prov_chan;
 extern bool prov_enabled;
+extern bool prov_all;
 
 static inline void prov_write(prov_msg_t* msg)
 {
