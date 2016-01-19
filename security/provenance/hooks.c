@@ -31,6 +31,10 @@ struct cred_provenance_struct{
 
 static inline void record_node(struct cred_provenance_struct* prov){
   prov_msg_t msg;
+
+  if(!prov_enabled) // capture is not enabled, ignore
+    return;
+
   prov->recorded=true;
   msg.node_info.message_id=MSG_NODE;
   msg.node_info.node_id=prov->node_id;
@@ -40,6 +44,9 @@ static inline void record_node(struct cred_provenance_struct* prov){
 
 static inline void record_edge(edge_type_t type, struct cred_provenance_struct* from, struct cred_provenance_struct* to){
   prov_msg_t msg;
+
+  if(!prov_enabled) // capture is not enabled, ignore
+    return;
 
   if(!from->recorded)
     record_node(from);
@@ -142,7 +149,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   prov->uid=__kuid_val(new->euid);
   prov->gid=__kgid_val(new->egid);
 
-  if(old_prov->tracked)
+  if(old_prov->tracked || prov_all)
   {
     record_edge(ED_CREATE, old_prov, prov);
   }

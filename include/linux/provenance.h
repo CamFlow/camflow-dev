@@ -77,10 +77,7 @@ extern bool prov_all;
 
 static inline void prov_write(prov_msg_t* msg)
 {
-  if(!prov_enabled){
-    return;
-  }
-  if(!prov_chan) // not set yet
+  if(prov_chan==NULL) // not set yet
   {
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;
