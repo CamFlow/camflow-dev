@@ -170,11 +170,25 @@ static void provenance_cred_transfer(struct cred *new, const struct cred *old)
   *prov=*old_prov;
 }
 
+static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, int flags)
+{
+  struct cred_provenance_struct *old_prov = old->provenance;
+	struct cred_provenance_struct *prov = new->provenance;
+
+  if(old_prov->tracked || prov->tracked || prov_all) // record if entity tracked or if record everyting
+  {
+    record_edge(ED_CHANGE, old_prov, prov);
+  }
+
+  return 0;
+}
+
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
   LSM_HOOK_INIT(cred_prepare, provenance_cred_prepare),
   LSM_HOOK_INIT(cred_transfer, provenance_cred_transfer),
+  LSM_HOOK_INIT(task_fix_setuid, provenance_task_fix_setuid),
 };
 
 void __init provenance_add_hooks(void){

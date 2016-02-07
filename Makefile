@@ -16,6 +16,9 @@ config:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
 	cd ./build/linux-$(kernel-version) && cp -r ../../include .
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
+	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
+	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
+	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
 compile: compile_security compile_kernel compile_us
