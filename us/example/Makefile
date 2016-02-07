@@ -8,6 +8,9 @@ LIB = ../lib/provenancelib.a ../simplelogger/simplog.a -lpthread
 all:
 	$(CCC) $(INCLUDES) audit.c $(LIB) -o audit.o $(CCFLAGS)
 
+debug:
+	$(CCC) $(INCLUDES) audit.c $(LIB) -o audit.o $(CCFLAGS) -g
+
 install:
 	cp --force ./audit.o /usr/bin/relay-audit
 	mkdir -p /var/relay

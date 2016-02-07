@@ -18,20 +18,24 @@
 #include <linux/bug.h>
 #include <linux/relay.h>
 
-#define MSG_MAX_SIZE 256
-#define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
 
 typedef uint64_t event_id_t;
 typedef uint64_t node_id_t;
-typedef enum {MSG_EDGE=1, MSG_NODE=2, MSG_STR=3} message_type_t;
+typedef enum {MSG_EDGE=0, MSG_NODE=1, MSG_STR=2} message_type_t;
 typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
-typedef enum {ND_TASK=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} node_type_t;
+typedef enum {ND_TASK=0, ND_INODE=1} node_type_t;
+
+
+#define MSG_MAX_SIZE 512
+#define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
 
 struct edge_struct{
   message_type_t message_id;
   event_id_t event_id;
   node_id_t snd_id;
+  dev_t snd_dev;
   node_id_t rcv_id;
+  dev_t rcv_dev;
   bool allowed;
   edge_type_t type;
 };
@@ -40,9 +44,10 @@ struct node_struct{
   message_type_t message_id;
   event_id_t event_id;
   node_id_t node_id;
-  node_id_t type;
+  node_type_t type;
   uid_t uid;
   gid_t gid;
+  dev_t dev;
 };
 
 struct msg_struct{
@@ -91,9 +96,10 @@ static inline int prov_print(const char *fmt, ...)
   prov_msg_t msg;
   va_list args;
   va_start(args, fmt);
+  // set message content to nil
+  memset(&msg, 0, sizeof(prov_msg_t));
   /* set message type */
   msg.str_info.message_id=MSG_STR;
-  memset(msg.str_info.str, 0, sizeof(msg.str_info.str));
   msg.str_info.length = vscnprintf(msg.str_info.str, sizeof(msg.str_info.str), fmt, args);
   prov_write(&msg);
   va_end(args);

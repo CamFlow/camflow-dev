@@ -18,26 +18,27 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define MSG_MAX_SIZE 256
-#define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
 
 typedef uint64_t event_id_t;
 typedef uint64_t node_id_t;
-
-typedef enum {MSG_EDGE=1, MSG_NODE=2, MSG_STR=3} message_type_t;
+typedef enum {MSG_EDGE=0, MSG_NODE=1, MSG_STR=2} message_type_t;
 
 typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
-static char* edge_str[]={"data", "create", "pass", "change"};
+static char* edge_str[]={"data", "create", "pass", "change", "unknown"};
 
-typedef enum {ND_TASK=0, ND_FILE=1, ND_FIFO=2, ND_SOCKET=3, ND_DIRECTORY=4, ND_LINK=5, ND_CHAR_SPECIAL=6, ND_BLOCK_SPECIAL=7, ND_MESSAGE=8, ND_SHM=9, ND_SEM=10, ND_UNKOWN=11} node_type_t;
-static char* node_str[]={"task", "file", "fifo", "socket", "directory", "link", "char_special", "block_special", "message", "unknown"};
+typedef enum {ND_TASK=0, ND_INODE=1} node_type_t;
+static char* node_str[]={"task", "inode", "unknown"};
 
+#define MSG_MAX_SIZE 512
+#define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
 
 struct edge_struct{
   message_type_t message_id;
   event_id_t event_id;
   node_id_t snd_id;
+  dev_t snd_dev;
   node_id_t rcv_id;
+  dev_t rcv_dev;
   bool allowed;
   edge_type_t type;
 };
@@ -49,6 +50,7 @@ struct node_struct{
   node_type_t type;
   uid_t uid;
   gid_t gid;
+  dev_t dev;
 };
 
 struct msg_struct{

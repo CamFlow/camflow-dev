@@ -27,6 +27,7 @@ struct cred_provenance_struct{
   struct mutex lock;
   uid_t uid;
   gid_t gid;
+  dev_t dev;
 };
 
 static inline void record_node(struct cred_provenance_struct* prov){
@@ -39,6 +40,9 @@ static inline void record_node(struct cred_provenance_struct* prov){
   msg.node_info.message_id=MSG_NODE;
   msg.node_info.node_id=prov->node_id;
   msg.node_info.type=prov->node_type;
+  msg.node_info.uid=prov->uid;
+  msg.node_info.gid=prov->gid;
+  msg.node_info.dev=prov->dev;
   prov_write(&msg);
 }
 
@@ -56,7 +60,9 @@ static inline void record_edge(edge_type_t type, struct cred_provenance_struct* 
 
   msg.edge_info.message_id=MSG_EDGE;
   msg.edge_info.snd_id=from->node_id;
+  msg.edge_info.snd_dev=from->dev;
   msg.edge_info.rcv_id=to->node_id;
+  msg.edge_info.rcv_dev=to->dev;
   msg.edge_info.allowed=true;
   msg.edge_info.type=type;
   prov_write(&msg);
@@ -67,7 +73,7 @@ static inline node_id_t prov_next_nodeid( void )
   return (node_id_t)atomic64_inc_return(&prov_node_id);
 }
 
-static inline struct cred_provenance_struct* alloc_provenance(node_type_t ntype, gfp_t gfp)
+static inline struct cred_provenance_struct* alloc_provenance(node_id_t nid, node_type_t ntype, gfp_t gfp)
 {
   struct cred_provenance_struct* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
@@ -75,7 +81,12 @@ static inline struct cred_provenance_struct* alloc_provenance(node_type_t ntype,
   }
 
   mutex_init(&prov->lock);
-  prov->node_id=prov_next_nodeid();
+  if(nid==0)
+  {
+    prov->node_id=prov_next_nodeid();
+  }else{
+    prov->node_id=nid;
+  }
   prov->node_type=ntype;
   prov->tracked=false;
   prov->recorded=false;
@@ -90,7 +101,7 @@ static inline void free_provenance(struct cred_provenance_struct* prov){
 
 static inline struct cred_provenance_struct* provenance_clone(node_type_t ntype, struct cred_provenance_struct* old, gfp_t gfp)
 {
-  struct cred_provenance_struct* prov =   alloc_provenance(ntype, gfp);
+  struct cred_provenance_struct* prov =   alloc_provenance(0, ntype, gfp);
   if(!prov)
   {
     return NULL;
@@ -107,7 +118,7 @@ static void cred_init_provenance(void)
 	struct cred *cred = (struct cred *) current->real_cred;
 	struct cred_provenance_struct *prov;
 
-	prov = alloc_provenance(ND_TASK, GFP_KERNEL);
+	prov = alloc_provenance(0, ND_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
   prov->uid=__kuid_val(cred->euid);
@@ -120,7 +131,7 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
   struct cred_provenance_struct* prov;
 
-  prov = alloc_provenance(ND_TASK, gfp);
+  prov = alloc_provenance(0, ND_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
@@ -183,12 +194,68 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
   return 0;
 }
 
+/* inode stuff */
+
+static int provenance_inode_alloc_security(struct inode *inode)
+{
+  struct cred_provenance_struct* prov;
+  prov = alloc_provenance(inode->i_ino, ND_INODE, GFP_NOFS);
+  if(unlikely(!prov))
+    return -ENOMEM;
+  prov->uid=__kuid_val(inode->i_uid);
+  prov->gid=__kgid_val(inode->i_gid);
+  prov->dev=inode->i_rdev;
+
+  inode->i_provenance = prov;
+  return 0;
+}
+
+static void provenance_inode_free_security(struct inode *inode)
+{
+  struct cred_provenance_struct* prov = inode->i_provenance;
+  inode->i_provenance=NULL;
+  if(!prov)
+    free_provenance(prov);
+}
+
+/* called on open */
+static int provenance_inode_permission(struct inode *inode, int mask)
+{
+  struct cred_provenance_struct* cprov = current_provenance();
+  struct cred_provenance_struct* iprov;
+
+  if(!inode->i_provenance){ // alloc provenance if none there
+    provenance_inode_alloc_security(inode);
+  }
+
+  iprov = inode->i_provenance;
+
+   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
+
+  if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
+    if(cprov->tracked || iprov->tracked || prov_all){
+
+      record_edge(ED_DATA, cprov, iprov);
+    }
+  }
+  if((mask & (MAY_READ|MAY_EXEC|MAY_WRITE|MAY_APPEND)) != 0){
+    // conservatively assume write imply read
+    if(cprov->tracked || iprov->tracked || prov_all){
+      record_edge(ED_DATA, iprov, cprov);
+    }
+  }
+  return 0;
+}
+
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
   LSM_HOOK_INIT(cred_prepare, provenance_cred_prepare),
   LSM_HOOK_INIT(cred_transfer, provenance_cred_transfer),
   LSM_HOOK_INIT(task_fix_setuid, provenance_task_fix_setuid),
+  LSM_HOOK_INIT(inode_alloc_security, provenance_inode_alloc_security),
+  LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
+  LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
 };
 
 void __init provenance_add_hooks(void){

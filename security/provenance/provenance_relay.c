@@ -75,7 +75,7 @@ static int __init relay_prov_init(void)
 
   prov.node_info.message_id=MSG_NODE;
   prov.node_info.node_id=2;
-  prov.node_info.type=ND_FILE;
+  prov.node_info.type=ND_INODE;
   prov_write(&prov);
 
   prov.edge_info.message_id=MSG_EDGE;
