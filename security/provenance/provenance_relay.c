@@ -59,32 +59,40 @@ static int __init relay_prov_init(void)
   prov_msg_t prov;
 
   printk(KERN_INFO "Provenance init.\n");
-  prov_chan = relay_open(BASE_NAME, NULL, 8192, 4, &relay_callbacks, NULL);
+  prov_chan = relay_open(BASE_NAME, NULL, 16384, 4, &relay_callbacks, NULL);
   if(prov_chan==NULL){
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
 
+  printk(KERN_INFO "Provenance size: %lu.\n", sizeof(prov_msg_t));
+
   prov_print("Provenance module started!");
 
-  /* write a node */
+  /*
+  // write a node
+  memset(&prov, 0, sizeof(prov_msg_t));
   prov.node_info.message_id=MSG_NODE;
   prov.node_info.node_id=1;
   prov.node_info.type=ND_TASK;
   prov_write(&prov);
 
+  // write a node
+  memset(&prov, 0, sizeof(prov_msg_t));
   prov.node_info.message_id=MSG_NODE;
   prov.node_info.node_id=2;
   prov.node_info.type=ND_INODE;
   prov_write(&prov);
 
+  // write an edge
+  memset(&prov, 0, sizeof(prov_msg_t));
   prov.edge_info.message_id=MSG_EDGE;
   prov.edge_info.snd_id=1;
   prov.edge_info.rcv_id=2;
   prov.edge_info.allowed=true;
   prov.edge_info.type=ED_DATA;
   prov_write(&prov);
-
+  */
   return 0;
 }
 

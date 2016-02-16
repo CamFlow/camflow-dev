@@ -139,6 +139,61 @@ static const struct file_operations prov_all_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static ssize_t prov_write_opaque(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+	struct provenance_struct* cprov = current_provenance();
+  char* page = NULL;
+  ssize_t length;
+  bool new_value;
+  int tmp;
+
+  /* no partial write */
+  if(*ppos > 0)
+    return -EINVAL;
+
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
+
+  page = (char *)get_zeroed_page(GFP_KERNEL);
+  if (!page)
+    return -ENOMEM;
+
+  length=-EFAULT;
+	if (copy_from_user(page, buf, count))
+		goto out;
+
+  length = -EINVAL;
+  if (sscanf(page, "%d", &tmp) != 1)
+		goto out;
+
+  new_value=tmp;
+	cprov->opaque=new_value;
+  length=count;
+out:
+  free_page((unsigned long)page);
+  return length;
+}
+
+static ssize_t prov_read_opaque(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	struct provenance_struct* cprov = current_provenance();
+	char tmpbuf[TMPBUFLEN];
+	ssize_t length;
+  int tmp = cprov->opaque;
+
+	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
+	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
+}
+
+static const struct file_operations prov_opaque_ops = {
+	.write		= prov_write_opaque,
+  .read     = prov_read_opaque,
+	.llseek		= generic_file_llseek,
+};
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -147,6 +202,7 @@ static int __init init_prov_fs(void)
 
    securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
 	 securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
+	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
    return 0;
 }
 

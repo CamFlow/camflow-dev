@@ -1,6 +1,6 @@
 /*
 *
-* /linux/include/linux/provenance.h
+* /linux/provenance.h
 *
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
@@ -11,13 +11,8 @@
 * published by the Free Software Foundation.
 *
 */
-#ifndef _LINUX_PROVENANCE_H
-#define _LINUX_PROVENANCE_H
-
-#include <linux/types.h>
-#include <linux/bug.h>
-#include <linux/relay.h>
-
+#ifndef _UAPI_LINUX_PROVENANCE_H
+#define _UAPI_LINUX_PROVENANCE_H
 
 #define MSG_STR   0
 #define MSG_EDGE  1
@@ -45,7 +40,7 @@ typedef uint8_t message_type_t;
 struct edge_struct{
   message_type_t message_type;
   event_id_t event_id;
-  edge_type_t type;  
+  edge_type_t type;
   uint8_t allowed;
   node_id_t snd_id;
   dev_t snd_dev;
@@ -82,50 +77,4 @@ typedef union msg{
   struct edge_struct edge_info;
 } prov_msg_t;
 
-extern atomic64_t prov_evt_count;
-
-static inline event_id_t prov_next_evtid( void ){
-  return (event_id_t)atomic64_inc_return(&prov_evt_count);
-}
-
-extern struct rchan *prov_chan;
-extern bool prov_enabled;
-extern bool prov_all;
-
-static inline void prov_write(prov_msg_t* msg)
-{
-  if(prov_chan==NULL) // not set yet
-  {
-    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
-    return;
-  }
-  msg->msg_info.event_id=prov_next_evtid(); /* assign an event id */
-  relay_write(prov_chan, msg, sizeof(prov_msg_t));
-}
-
-static inline int prov_print(const char *fmt, ...)
-{
-  prov_msg_t msg;
-  va_list args;
-  va_start(args, fmt);
-  /* set message type */
-  msg.str_info.message_type=MSG_STR;
-  msg.str_info.length = vscnprintf(msg.str_info.str, sizeof(msg.str_info.str), fmt, args);
-  prov_write(&msg);
-  va_end(args);
-  return msg.str_info.length;
-}
-
-struct provenance_struct{
-  node_id_t node_id;
-  uint8_t node_type;
-  bool tracked;
-  bool recorded;
-  bool opaque;
-  struct mutex lock;
-  uid_t uid;
-  gid_t gid;
-  dev_t dev;
-};
-
-#endif /* _LINUX_PROVENANCE_H */
+#endif

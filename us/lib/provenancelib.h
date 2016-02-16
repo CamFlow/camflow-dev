@@ -11,67 +11,17 @@
 * published by the Free Software Foundation.
 *
 */
-#ifndef __PROVENANCE_H
-#define __PROVENANCE_H
+#ifndef __PROVENANCELIB_H
+#define __PROVENANCELIB_H
 
-#include <sys/types.h>
+
 #include <stdint.h>
 #include <stdbool.h>
+#include <sys/types.h>
+#include <linux/provenance.h>
 
-
-typedef uint64_t event_id_t;
-typedef uint64_t node_id_t;
-typedef enum {MSG_EDGE=0, MSG_NODE=1, MSG_STR=2} message_type_t;
-
-typedef enum {ED_DATA=0, ED_CREATE=1, ED_PASS=2, ED_CHANGE=3} edge_type_t;
 static char* edge_str[]={"data", "create", "pass", "change", "unknown"};
-
-typedef enum {ND_TASK=0, ND_INODE=1} node_type_t;
 static char* node_str[]={"task", "inode", "unknown"};
-
-#define MSG_MAX_SIZE 512
-#define STR_MAX_SIZE (MSG_MAX_SIZE-sizeof(message_type_t)-sizeof(event_id_t)-sizeof(size_t))
-
-struct edge_struct{
-  message_type_t message_id;
-  event_id_t event_id;
-  node_id_t snd_id;
-  dev_t snd_dev;
-  node_id_t rcv_id;
-  dev_t rcv_dev;
-  bool allowed;
-  edge_type_t type;
-};
-
-struct node_struct{
-  message_type_t message_id;
-  event_id_t event_id;
-  node_id_t node_id;
-  node_type_t type;
-  uid_t uid;
-  gid_t gid;
-  dev_t dev;
-};
-
-struct msg_struct{
-  message_type_t message_id;
-  event_id_t event_id;
-};
-
-struct str_struct{
-  message_type_t message_id;
-  event_id_t event_id;
-  size_t length;
-  char str[STR_MAX_SIZE];
-};
-
-typedef union msg{
-  uint8_t raw[MSG_MAX_SIZE];
-  struct msg_struct msg_info;
-  struct str_struct str_info;
-  struct node_struct node_info;
-  struct edge_struct edge_info;
-} prov_msg_t;
 
 struct provenance_ops{
   void (*init)(void);
@@ -80,7 +30,13 @@ struct provenance_ops{
   void (*log_str)(struct str_struct*);
 };
 
+/* provenance usher functions */
 int provenance_register(struct provenance_ops* ops);
 void provenance_stop(void);
 
-#endif /* __PROVENANCE_H */
+/* security file manipulation */
+int provenance_set_enable(bool v);
+int provenance_set_all(bool v);
+int provenance_set_opaque(bool v);
+
+#endif /* __PROVENANCELIB_H */

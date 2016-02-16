@@ -74,18 +74,20 @@ void init( void ){
 }
 
 void log_str(struct str_struct* data){
-  write_to_log("%ld - %s", data->event_id, data->str);
+  write_to_log("%lu - %s", data->event_id, data->str);
 }
 
 void log_edge(struct edge_struct* edge){
-  if(edge->allowed)
-    write_to_log("[%ld]{%ld->%ld} allowed", edge->event_id, edge->snd_id, edge->rcv_id);
-  else
-    write_to_log("[%ld]{%ld->%ld} disallowed", edge->event_id, edge->snd_id, edge->rcv_id);
+  if(edge->allowed==FLOW_ALLOWED)
+  {
+    write_to_log("%d[%lu]{%lu->%lu} allowed", edge_str[edge->type], edge->event_id, edge->snd_id, edge->rcv_id);
+  }else{
+    write_to_log("%d[%lu]{%lu->%lu} disallowed", edge_str[edge->type], edge->event_id, edge->snd_id, edge->rcv_id);
+  }
 }
 
 void log_node(struct node_struct* node){
-  write_to_log("[%ld]{%ld|%ld|%ld}", node->event_id, node->node_id, node->uid, node->gid);
+  write_to_log("%s[%lu]{%lu|%lu|%lu}", node_str[node->type], node->event_id, node->node_id, node->uid, node->gid);
 }
 
 struct provenance_ops ops = {
@@ -97,6 +99,7 @@ struct provenance_ops ops = {
 
 int main(void){
   int rc;
+  printf("Size: %d.\n", sizeof(prov_msg_t));
 	_init_logs();
   simplog.writeLog(SIMPLOG_INFO, "audit process pid: %d", getpid());
   rc = provenance_register(&ops);

@@ -24,8 +24,12 @@
 #include "thpool.h"
 #include "provenancelib.h"
 
-#define NUMBER_CPUS 256 /* support 256 core max */
-#define BASE_NAME "/sys/kernel/debug/provenance"
+#define NUMBER_CPUS   256 /* support 256 core max */
+#define BASE_NAME     "/sys/kernel/debug/provenance"
+
+#define ENABLE_FILE   "/sys/kernel/security/provenance/enable"
+#define ALL_FILE      "/sys/kernel/security/provenance/all"
+#define OPAQUE_FILE   "/sys/kernel/security/provenance/opaque"
 
 /* internal variables */
 static struct provenance_ops prov_ops;
@@ -47,6 +51,13 @@ static void reader_job(void *data);
 
 int provenance_register(struct provenance_ops* ops)
 {
+  int err;
+  /* the provenance usher will not appear in trace */
+  err = provenance_set_opaque(true);
+  if(err)
+  {
+    return err;
+  }
   /* copy ops function pointers */
   memcpy(&prov_ops, ops, sizeof(struct provenance_ops));
 
@@ -132,7 +143,7 @@ static void callback_job(void* data)
     initialised=1;
   }
 
-  switch(msg->msg_info.message_id){
+  switch(msg->msg_info.message_type){
     case MSG_EDGE:
       if(prov_ops.log_edge!=NULL)
         prov_ops.log_edge(&(msg->edge_info));
@@ -146,6 +157,7 @@ static void callback_job(void* data)
         prov_ops.log_str(&(msg->str_info));
       break;
     default:
+      printf("Error: unknown message type %u\n", msg->msg_info.message_type);
       break;
   }
   free(data); /* free the memory allocated in the reader */
@@ -175,7 +187,7 @@ static void reader_job(void *data)
     }
     buf = (uint8_t*)malloc(sizeof(prov_msg_t)); /* freed by worker thread */
     rc = read(relay_file[cpu], buf, sizeof(prov_msg_t));
-    if(!rc){ /* we did not read anything */
+    if(rc==0){ /* we did not read anything */
       continue;
     }
     if(rc<0){
@@ -184,7 +196,64 @@ static void reader_job(void *data)
       }
       break; // something bad happened
     }
+    if(rc!=sizeof(prov_msg_t)){
+      perror("Did not read a full message");
+      printf("read: %d\n", rc);
+      /* to we need to seek? */
+      break; // something bad happened
+    }
     /* add job to queue */
     thpool_add_work(worker_thpool, (void*)callback_job, buf);
   }while(1);
+}
+
+int provenance_set_enable(bool value){
+  int fd = open(ENABLE_FILE, O_WRONLY);
+
+  if(fd<0)
+  {
+    return fd;
+  }
+  if(value)
+  {
+    write(fd, "1", sizeof(char));
+  }else{
+    write(fd, "0", sizeof(char));
+  }
+  close(fd);
+  return 0;
+}
+
+int provenance_set_all(bool value){
+  int fd = open(ALL_FILE, O_WRONLY);
+
+  if(fd<0)
+  {
+    return fd;
+  }
+  if(value)
+  {
+    write(fd, "1", sizeof(char));
+  }else{
+    write(fd, "0", sizeof(char));
+  }
+  close(fd);
+  return 0;
+}
+
+int provenance_set_opaque(bool value){
+  int fd = open(OPAQUE_FILE, O_WRONLY);
+
+  if(fd<0)
+  {
+    return fd;
+  }
+  if(value)
+  {
+    write(fd, "1", sizeof(char));
+  }else{
+    write(fd, "0", sizeof(char));
+  }
+  close(fd);
+  return 0;
 }

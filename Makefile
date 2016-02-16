@@ -32,7 +32,11 @@ compile_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
 
 compile_us:
+	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install_all INSTALL_HDR_PATH=/usr
 	cd ./us && $(MAKE) all
+
+install_header:
+	cd ./build/linux-$(kernel-version) && $(MAKE) headers_install_all INSTALL_HDR_PATH=/usr
 
 install:
 	cd ./build/linux-$(kernel-version) && $(MAKE) modules_install
