@@ -19,45 +19,37 @@
 atomic64_t prov_node_id=ATOMIC64_INIT(0);
 static struct kmem_cache *provenance_cache;
 
-static inline void record_node(struct provenance_struct* prov){
-  prov_msg_t msg;
-
+static inline void record_node(prov_msg_t* prov){
   if(!prov_enabled) // capture is not enabled, ignore
     return;
 
-  prov->recorded=true;
-  msg.node_info.message_type=MSG_NODE;
-  msg.node_info.node_id=prov->node_id;
-  msg.node_info.type=prov->node_type;
-  msg.node_info.uid=prov->uid;
-  msg.node_info.gid=prov->gid;
-  msg.node_info.dev=prov->dev;
-  prov_write(&msg);
+  prov->node_info.recorded=NODE_RECORDED;
+  prov_write(prov);
 }
 
-static inline void record_edge(edge_type_t type, struct provenance_struct* from, struct provenance_struct* to){
-  prov_msg_t msg;
+static inline void record_edge(edge_type_t type, prov_msg_t* from, prov_msg_t* to){
+  prov_msg_t edge;
 
-  if(from->opaque || to->opaque) // to or from are opaque
+  if(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE) // to or from are opaque
     return;
 
   if(!prov_enabled) // capture is not enabled, ignore
     return;
 
-  if(!from->recorded)
+  if(!(from->node_info.recorded == NODE_RECORDED) )
     record_node(from);
 
-  if(!to->recorded)
+  if(!(to->node_info.recorded == NODE_RECORDED) )
     record_node(to);
 
-  msg.edge_info.message_type=MSG_EDGE;
-  msg.edge_info.snd_id=from->node_id;
-  msg.edge_info.snd_dev=from->dev;
-  msg.edge_info.rcv_id=to->node_id;
-  msg.edge_info.rcv_dev=to->dev;
-  msg.edge_info.allowed=FLOW_ALLOWED;
-  msg.edge_info.type=type;
-  prov_write(&msg);
+  edge.edge_info.message_type=MSG_EDGE;
+  edge.edge_info.snd_id=from->node_info.node_id;
+  edge.edge_info.snd_dev=from->node_info.dev;
+  edge.edge_info.rcv_id=to->node_info.node_id;
+  edge.edge_info.rcv_dev=to->node_info.dev;
+  edge.edge_info.allowed=FLOW_ALLOWED;
+  edge.edge_info.type=type;
+  prov_write(&edge);
 }
 
 static inline node_id_t prov_next_nodeid( void )
@@ -65,40 +57,37 @@ static inline node_id_t prov_next_nodeid( void )
   return (node_id_t)atomic64_inc_return(&prov_node_id);
 }
 
-static inline struct provenance_struct* alloc_provenance(node_id_t nid, node_type_t ntype, gfp_t gfp)
+static inline prov_msg_t* alloc_provenance(node_id_t nid, node_type_t ntype, gfp_t gfp)
 {
-  struct provenance_struct* prov =  kmem_cache_zalloc(provenance_cache, gfp);
+  prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
     return NULL;
   }
 
-  mutex_init(&prov->lock);
   if(nid==0)
   {
-    prov->node_id=prov_next_nodeid();
+    prov->node_info.node_id=prov_next_nodeid();
   }else{
-    prov->node_id=nid;
+    prov->node_info.node_id=nid;
   }
-  prov->node_type=ntype;
-  prov->tracked=false;
-  prov->recorded=false;
-  prov->opaque=false;
-  prov->uid=0;
-  prov->gid=0;
+  prov->node_info.type=ntype;
+  prov->node_info.message_type=MSG_NODE;
   return prov;
 }
 
-static inline void free_provenance(struct provenance_struct* prov){
+static inline void free_provenance(prov_msg_t* prov){
   kmem_cache_free(provenance_cache, prov);
 }
 
-static inline struct provenance_struct* provenance_clone(node_type_t ntype, struct provenance_struct* old, gfp_t gfp)
+static inline prov_msg_t* provenance_clone(node_type_t ntype, prov_msg_t* old, gfp_t gfp)
 {
-  struct provenance_struct* prov =   alloc_provenance(0, ntype, gfp);
+  prov_msg_t* prov =   alloc_provenance(0, ntype, gfp);
   if(!prov)
   {
     return NULL;
   }
+  /* if parent was tracked, track it */
+  prov->node_info.tracked = old->node_info.tracked;
   return prov;
 }
 
@@ -109,27 +98,27 @@ static inline struct provenance_struct* provenance_clone(node_type_t ntype, stru
 static void cred_init_provenance(void)
 {
 	struct cred *cred = (struct cred *) current->real_cred;
-	struct provenance_struct *prov;
+	prov_msg_t *prov;
 
 	prov = alloc_provenance(0, ND_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
-  prov->uid=__kuid_val(cred->euid);
-  prov->gid=__kgid_val(cred->egid);
+  prov->node_info.uid=__kuid_val(cred->euid);
+  prov->node_info.gid=__kgid_val(cred->egid);
 
 	cred->provenance = prov;
 }
 
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
-  struct provenance_struct* prov;
+  prov_msg_t* prov;
 
   prov = alloc_provenance(0, ND_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
-  prov->uid=__kuid_val(cred->euid);
-  prov->gid=__kgid_val(cred->egid);
+  prov->node_info.uid=__kuid_val(cred->euid);
+  prov->node_info.gid=__kgid_val(cred->egid);
 
   cred->provenance = prov;
   return 0;
@@ -145,15 +134,15 @@ static void provenance_cred_free(struct cred *cred)
 
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
-  struct provenance_struct* old_prov = old->provenance;
-  struct provenance_struct* prov = provenance_clone(ND_TASK, old_prov, gfp);
+  prov_msg_t* old_prov = old->provenance;
+  prov_msg_t* prov = provenance_clone(ND_TASK, old_prov, gfp);
 
   if(!prov)
     return -ENOMEM;
-  prov->uid=__kuid_val(new->euid);
-  prov->gid=__kgid_val(new->egid);
+  prov->node_info.uid=__kuid_val(new->euid);
+  prov->node_info.gid=__kgid_val(new->egid);
 
-  if(old_prov->tracked || prov_all)
+  if(old_prov->node_info.tracked == NODE_TRACKED || prov_all)
   {
     record_edge(ED_CREATE, old_prov, prov);
   }
@@ -168,18 +157,18 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 */
 static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 {
-  const struct provenance_struct *old_prov = old->provenance;
-	struct provenance_struct *prov = new->provenance;
+  const prov_msg_t *old_prov = old->provenance;
+	prov_msg_t *prov = new->provenance;
 
   *prov=*old_prov;
 }
 
 static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, int flags)
 {
-  struct provenance_struct *old_prov = old->provenance;
-	struct provenance_struct *prov = new->provenance;
+  prov_msg_t *old_prov = old->provenance;
+	prov_msg_t *prov = new->provenance;
 
-  if(old_prov->tracked || prov->tracked || prov_all) // record if entity tracked or if record everyting
+  if(old_prov->node_info.tracked == NODE_TRACKED || prov->node_info.tracked == NODE_TRACKED || prov_all) // record if entity tracked or if record everyting
   {
     record_edge(ED_CHANGE, old_prov, prov);
   }
@@ -191,13 +180,13 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-  struct provenance_struct* prov;
+  prov_msg_t* prov;
   prov = alloc_provenance(inode->i_ino, ND_INODE, GFP_NOFS);
   if(unlikely(!prov))
     return -ENOMEM;
-  prov->uid=__kuid_val(inode->i_uid);
-  prov->gid=__kgid_val(inode->i_gid);
-  prov->dev=inode->i_rdev;
+  prov->node_info.uid=__kuid_val(inode->i_uid);
+  prov->node_info.gid=__kgid_val(inode->i_gid);
+  prov->node_info.dev=inode->i_rdev;
 
   inode->i_provenance = prov;
   return 0;
@@ -205,7 +194,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
 static void provenance_inode_free_security(struct inode *inode)
 {
-  struct provenance_struct* prov = inode->i_provenance;
+  prov_msg_t* prov = inode->i_provenance;
   inode->i_provenance=NULL;
   if(!prov)
     free_provenance(prov);
@@ -214,8 +203,8 @@ static void provenance_inode_free_security(struct inode *inode)
 /* called on open */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
-  struct provenance_struct* cprov = current_provenance();
-  struct provenance_struct* iprov;
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* iprov;
 
   if(!inode->i_provenance){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
@@ -226,14 +215,14 @@ static int provenance_inode_permission(struct inode *inode, int mask)
    mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
-    if(cprov->tracked || iprov->tracked || prov_all){
+    if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
 
       record_edge(ED_DATA, cprov, iprov);
     }
   }
   if((mask & (MAY_READ|MAY_EXEC|MAY_WRITE|MAY_APPEND)) != 0){
     // conservatively assume write imply read
-    if(cprov->tracked || iprov->tracked || prov_all){
+    if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
       record_edge(ED_DATA, iprov, cprov);
     }
   }
@@ -253,7 +242,7 @@ static struct security_hook_list provenance_hooks[] = {
 
 void __init provenance_add_hooks(void){
   provenance_cache = kmem_cache_create("provenance_struct",
-					    sizeof(struct provenance_struct),
+					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);
   cred_init_provenance();
   /* register the provenance security hooks */

@@ -56,7 +56,7 @@ static struct rchan_callbacks relay_callbacks =
 
 static int __init relay_prov_init(void)
 {
-  prov_msg_t prov;
+  //prov_msg_t prov;
 
   printk(KERN_INFO "Provenance init.\n");
   prov_chan = relay_open(BASE_NAME, NULL, 16384, 4, &relay_callbacks, NULL);

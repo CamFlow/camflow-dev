@@ -34,6 +34,15 @@
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
 
+#define NODE_TRACKED      1
+#define NODE_NOT_TRACKED  0
+
+#define NODE_RECORDED     1
+#define NODE_UNRECORDED   0
+
+#define NODE_OPAQUE       1
+#define NODE_NOT_OPAQUE   0
+
 #define STR_MAX_SIZE 128
 
 typedef uint64_t event_id_t;
@@ -45,7 +54,7 @@ typedef uint8_t message_type_t;
 struct edge_struct{
   message_type_t message_type;
   event_id_t event_id;
-  edge_type_t type;  
+  edge_type_t type;
   uint8_t allowed;
   node_id_t snd_id;
   dev_t snd_dev;
@@ -58,6 +67,9 @@ struct node_struct{
   event_id_t event_id;
   node_type_t type;
   node_id_t node_id;
+  uint8_t recorded;
+  uint8_t tracked;
+  uint8_t opaque;
   uid_t uid;
   gid_t gid;
   dev_t dev;
@@ -115,17 +127,4 @@ static inline int prov_print(const char *fmt, ...)
   va_end(args);
   return msg.str_info.length;
 }
-
-struct provenance_struct{
-  node_id_t node_id;
-  uint8_t node_type;
-  bool tracked;
-  bool recorded;
-  bool opaque;
-  struct mutex lock;
-  uid_t uid;
-  gid_t gid;
-  dev_t dev;
-};
-
 #endif /* _LINUX_PROVENANCE_H */

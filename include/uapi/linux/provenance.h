@@ -29,6 +29,12 @@
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
 
+#define NODE_RECORDED     1
+#define NODE_UNRECORDED   0
+
+#define NODE_OPAQUE       1
+#define NODE_NOT_OPAQUE   0
+
 #define STR_MAX_SIZE 128
 
 typedef uint64_t event_id_t;
@@ -53,6 +59,9 @@ struct node_struct{
   event_id_t event_id;
   node_type_t type;
   node_id_t node_id;
+  uint8_t recorded;
+  uint8_t tracked;
+  uint8_t opaque;
   uid_t uid;
   gid_t gid;
   dev_t dev;

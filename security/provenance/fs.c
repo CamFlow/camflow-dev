@@ -143,10 +143,9 @@ static ssize_t prov_write_opaque(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	struct provenance_struct* cprov = current_provenance();
+	prov_msg_t* cprov = current_provenance();
   char* page = NULL;
   ssize_t length;
-  bool new_value;
   int tmp;
 
   /* no partial write */
@@ -168,8 +167,7 @@ static ssize_t prov_write_opaque(struct file *file, const char __user *buf,
   if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
-  new_value=tmp;
-	cprov->opaque=new_value;
+	cprov->node_info.opaque=tmp;
   length=count;
 out:
   free_page((unsigned long)page);
@@ -179,10 +177,10 @@ out:
 static ssize_t prov_read_opaque(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	struct provenance_struct* cprov = current_provenance();
+	prov_msg_t* cprov = current_provenance();
 	char tmpbuf[TMPBUFLEN];
 	ssize_t length;
-  int tmp = cprov->opaque;
+  int tmp = cprov->node_info.opaque;
 
 	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
