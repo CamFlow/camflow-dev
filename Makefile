@@ -36,11 +36,11 @@ compile_us:
 	cd ./us && $(MAKE) all
 
 install_header:
-	cd ./build/linux-$(kernel-version) && $(MAKE) headers_install_all INSTALL_HDR_PATH=/usr
+	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install_all INSTALL_HDR_PATH=/usr
 
 install:
-	cd ./build/linux-$(kernel-version) && $(MAKE) modules_install
-	cd ./build/linux-$(kernel-version) && $(MAKE) install
+	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
+	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
 
 clean: clean_kernel clean_us
 

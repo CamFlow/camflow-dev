@@ -70,30 +70,35 @@ void write_to_log(const char* fmt, ...){
 
 void init( void ){
   pid_t tid = gettid();
-  write_to_log("audit writer thread, tid:%ld", tid);
+  write_to_log("audit writer thread, tid:%ld",
+    tid);
 }
 
 void log_str(struct str_struct* data){
-  write_to_log("%lu - %s", data->event_id, data->str);
+  write_to_log("%lu-\t%s",
+    data->event_id, data->str);
 }
 
 void log_edge(struct edge_struct* edge){
-  if(edge->allowed==FLOW_ALLOWED)
-  {
-    write_to_log("%d[%lu]{%lu->%lu} allowed", edge_str[edge->type], edge->event_id, edge->snd_id, edge->rcv_id);
-  }else{
-    write_to_log("%d[%lu]{%lu->%lu} disallowed", edge_str[edge->type], edge->event_id, edge->snd_id, edge->rcv_id);
-  }
+    write_to_log("%lu-\t%s{%lu->%lu}%d",
+      edge->event_id, edge_str[edge->type], edge->snd_id, edge->rcv_id, edge->allowed);
 }
 
-void log_node(struct node_struct* node){
-  write_to_log("%s[%lu]{%lu|%lu|%lu}", node_str[node->type], node->event_id, node->node_id, node->uid, node->gid);
+void log_task(struct task_prov_struct* task){
+  write_to_log("%lu-\ttask[%lu]{%u|%u}",
+    task->event_id, task->node_id, task->uid, task->gid);
+}
+
+void log_inode(struct inode_prov_struct* inode){
+  write_to_log("%lu-\tinode[%lu:%u]{%u|%u|0X%04hhX}",
+    inode->event_id, inode->node_id, inode->rdev, inode->uid, inode->gid, inode->mode);
 }
 
 struct provenance_ops ops = {
   .init=init,
   .log_edge=log_edge,
-  .log_node=log_node,
+  .log_task=log_task,
+  .log_inode=log_inode,
   .log_str=log_str
 };
 

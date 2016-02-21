@@ -20,13 +20,13 @@
 #include <sys/types.h>
 #include <linux/provenance.h>
 
-static char* edge_str[]={"data", "create", "pass", "change", "unknown"};
-static char* node_str[]={"task", "inode", "unknown"};
+static char* edge_str[]={"data", "create", "pass", "change", "mmap", "unknown"};
 
 struct provenance_ops{
   void (*init)(void);
   void (*log_edge)(struct edge_struct*);
-  void (*log_node)(struct node_struct*);
+  void (*log_task)(struct task_prov_struct*);
+  void (*log_inode)(struct inode_prov_struct*);
   void (*log_str)(struct str_struct*);
 };
 

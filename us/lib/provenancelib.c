@@ -148,9 +148,13 @@ static void callback_job(void* data)
       if(prov_ops.log_edge!=NULL)
         prov_ops.log_edge(&(msg->edge_info));
       break;
-    case MSG_NODE:
-      if(prov_ops.log_node!=NULL)
-        prov_ops.log_node(&(msg->node_info));
+    case MSG_TASK:
+      if(prov_ops.log_task!=NULL)
+        prov_ops.log_task(&(msg->task_info));
+      break;
+    case MSG_INODE:
+      if(prov_ops.log_inode!=NULL)
+        prov_ops.log_inode(&(msg->inode_info));
       break;
     case MSG_STR:
       if(prov_ops.log_str!=NULL)
