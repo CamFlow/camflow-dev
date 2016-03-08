@@ -31,6 +31,8 @@
 #define ENABLE_FILE           "/sys/kernel/security/provenance/enable"
 #define ALL_FILE              "/sys/kernel/security/provenance/all"
 #define OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
+#define NODE_FILE           "/sys/kernel/security/provenance/node"
+#define EDGE_FILE           "/sys/kernel/security/provenance/edge"
 
 /* internal variables */
 static struct provenance_ops prov_ops;
@@ -167,6 +169,10 @@ static void callback_job(void* data)
       if(prov_ops.log_inode!=NULL)
         prov_ops.log_inode(&(msg->inode_info));
       break;
+    case MSG_DISC_NODE:
+      if(prov_ops.log_disc!=NULL)
+        prov_ops.log_disc(&(msg->disc_node_info));
+      break;
     default:
       printf("Error: unknown message type %u\n", msg->msg_info.message_type);
       break;
@@ -191,11 +197,11 @@ static void long_callback_job(void* data)
         prov_ops.log_str(&(msg->str_info));
       break;
     case MSG_LINK:
-      if(prov_ops.log_str!=NULL)
+      if(prov_ops.log_link!=NULL)
         prov_ops.log_link(&(msg->link_info));
       break;
     case MSG_UNLINK:
-      if(prov_ops.log_str!=NULL)
+      if(prov_ops.log_unlink!=NULL)
         prov_ops.log_unlink(&(msg->unlink_info));
       break;
     default:
@@ -338,4 +344,30 @@ int provenance_set_opaque(bool value){
   }
   close(fd);
   return 0;
+}
+
+int provenance_disclose_node(struct disc_node_struct* node){
+  int rc;
+  int fd = open(NODE_FILE, O_WRONLY);
+
+  if(fd<0)
+  {
+    return fd;
+  }
+  rc = write(fd, node, sizeof(struct disc_node_struct));
+  close(fd);
+  return rc;
+}
+
+int provenance_disclose_edge(struct edge_struct* edge){
+  int rc;
+  int fd = open(EDGE_FILE, O_WRONLY);
+
+  if(fd<0)
+  {
+    return fd;
+  }
+  rc = write(fd, edge, sizeof(struct edge_struct));
+  close(fd);
+  return rc;
 }

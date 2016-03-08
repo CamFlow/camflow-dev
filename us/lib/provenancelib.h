@@ -30,6 +30,7 @@ struct provenance_ops{
   void (*log_str)(struct str_struct*);
   void (*log_link)(struct link_struct*);
   void (*log_unlink)(struct unlink_struct*);
+  void (*log_disc)(struct disc_node_struct*);
 };
 
 /* provenance usher functions */
@@ -40,5 +41,7 @@ void provenance_stop(void);
 int provenance_set_enable(bool v);
 int provenance_set_all(bool v);
 int provenance_set_opaque(bool v);
+int provenance_disclose_node(struct disc_node_struct* node);
+int provenance_disclose_edge(struct edge_struct* edge);
 
 #endif /* __PROVENANCELIB_H */

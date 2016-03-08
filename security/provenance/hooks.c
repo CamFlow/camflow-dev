@@ -20,11 +20,6 @@ atomic64_t prov_node_id=ATOMIC64_INIT(0);
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
 
-static inline node_id_t prov_next_nodeid( void )
-{
-  return (node_id_t)atomic64_inc_return(&prov_node_id);
-}
-
 static inline prov_msg_t* alloc_provenance(node_id_t nid, message_type_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
@@ -259,9 +254,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
-  long_prov_msg_t* link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
-  memset(link_prov, 0, sizeof(long_prov_msg_t));
-  link_prov->link_info.message_type = MSG_LINK;
+  long_prov_msg_t* link_prov;
 
   if(!dir->i_provenance){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
@@ -283,13 +276,17 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
     record_edge(ED_DATA, cprov, iprov);
   }
 
-  link_prov->link_info.length = new_dentry->d_name.len;
-  memcpy(link_prov->link_info.name, new_dentry->d_name.name, link_prov->link_info.length);
-  link_prov->link_info.dir_id = dprov->inode_info.node_id;
-  link_prov->link_info.task_id = cprov->task_info.node_id;
-  link_prov->link_info.inode_id = iprov->task_info.node_id;
-  long_prov_write(link_prov);
-  kmem_cache_free(long_provenance_cache, link_prov);
+  if(prov_enabled){
+    link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
+    link_prov->link_info.message_type = MSG_LINK;
+    link_prov->link_info.length = new_dentry->d_name.len;
+    memcpy(link_prov->link_info.name, new_dentry->d_name.name, link_prov->link_info.length);
+    link_prov->link_info.dir_id = dprov->inode_info.node_id;
+    link_prov->link_info.task_id = cprov->task_info.node_id;
+    link_prov->link_info.inode_id = iprov->task_info.node_id;
+    long_prov_write(link_prov);
+    kmem_cache_free(long_provenance_cache, link_prov);
+  }
   return 0;
 }
 
@@ -304,9 +301,7 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
-  long_prov_msg_t* link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
-  memset(&link_prov, 0, sizeof(long_prov_msg_t));
-  link_prov->link_info.message_type = MSG_UNLINK;
+  long_prov_msg_t* link_prov;
 
   if(!dir->i_provenance){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
@@ -328,13 +323,17 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
     record_edge(ED_DATA, cprov, iprov);
   }
 
-  link_prov->unlink_info.length = dentry->d_name.len;
-  memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
-  link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
-  link_prov->unlink_info.task_id = cprov->task_info.node_id;
-  link_prov->unlink_info.inode_id = iprov->task_info.node_id;
-  long_prov_write(link_prov);
-  kmem_cache_free(long_provenance_cache, link_prov);
+  if(prov_enabled){
+    link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
+    link_prov->link_info.message_type = MSG_UNLINK;
+    link_prov->unlink_info.length = dentry->d_name.len;
+    memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
+    link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
+    link_prov->unlink_info.task_id = cprov->task_info.node_id;
+    link_prov->unlink_info.inode_id = iprov->task_info.node_id;
+    long_prov_write(link_prov);
+    kmem_cache_free(long_provenance_cache, link_prov);
+  }
   return 0;
 }
 

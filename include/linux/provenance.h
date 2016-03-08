@@ -27,6 +27,13 @@ static inline event_id_t prov_next_evtid( void ){
   return (event_id_t)atomic64_inc_return(&prov_evt_count);
 }
 
+extern atomic64_t prov_node_id;
+
+static inline node_id_t prov_next_nodeid( void )
+{
+  return (node_id_t)atomic64_inc_return(&prov_node_id);
+}
+
 extern struct rchan *prov_chan;
 extern struct rchan *long_prov_chan;
 extern bool prov_enabled;

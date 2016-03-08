@@ -167,7 +167,7 @@ static ssize_t prov_write_opaque(struct file *file, const char __user *buf,
   if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
-	cprov->node_info.opaque=tmp;
+	cprov->task_info.opaque=tmp;
   length=count;
 out:
   free_page((unsigned long)page);
@@ -180,7 +180,7 @@ static ssize_t prov_read_opaque(struct file *filp, char __user *buf,
 	prov_msg_t* cprov = current_provenance();
 	char tmpbuf[TMPBUFLEN];
 	ssize_t length;
-  int tmp = cprov->node_info.opaque;
+  int tmp = cprov->task_info.opaque;
 
 	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
@@ -189,6 +189,64 @@ static ssize_t prov_read_opaque(struct file *filp, char __user *buf,
 static const struct file_operations prov_opaque_ops = {
 	.write		= prov_write_opaque,
   .read     = prov_read_opaque,
+	.llseek		= generic_file_llseek,
+};
+
+static ssize_t prov_write_node(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+	prov_msg_t* tmp = (prov_msg_t*)buf;
+
+	if(count < sizeof(struct disc_node_struct))
+	{
+		return -ENOMEM;
+	}
+	tmp->disc_node_info.node_id = prov_next_nodeid(); // assign node id
+	tmp->disc_node_info.message_type = MSG_DISC_NODE;
+	prov_write(tmp);
+	return count;
+}
+
+static ssize_t prov_read_node(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	return -EPERM; // write only
+}
+
+static const struct file_operations prov_node_ops = {
+	.write		= prov_write_node,
+  .read     = prov_read_node,
+	.llseek		= generic_file_llseek,
+};
+
+static ssize_t prov_write_edge(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	prov_msg_t edge;
+	memset(&edge, 0, sizeof(prov_msg_t));
+
+	if(count < sizeof(struct edge_struct))
+	{
+		return -ENOMEM;
+	}
+	if(copy_from_user(&edge, buf, sizeof(struct edge_struct))){
+		return -ENOMEM;
+	}
+	edge.msg_info.message_type=MSG_EDGE;
+	prov_write(&edge);
+	return count;
+}
+
+static ssize_t prov_read_edge(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	return -EPERM; // write only
+}
+
+static const struct file_operations prov_edge_ops = {
+	.write		= prov_write_edge,
+  .read     = prov_read_edge,
 	.llseek		= generic_file_llseek,
 };
 
@@ -201,6 +259,8 @@ static int __init init_prov_fs(void)
    securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
 	 securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
 	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
+	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
+	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
    return 0;
 }
 

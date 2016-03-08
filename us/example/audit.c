@@ -104,6 +104,11 @@ void log_inode(struct inode_prov_struct* inode){
     inode->event_id, inode->node_id, inode->rdev, inode->uid, inode->gid, inode->mode);
 }
 
+void log_disc(struct disc_node_struct* node){
+  write_to_log("%lu-\tdisclosed[%lu]",
+    node->event_id, node->node_id);
+}
+
 struct provenance_ops ops = {
   .init=init,
   .log_edge=log_edge,
@@ -111,13 +116,29 @@ struct provenance_ops ops = {
   .log_inode=log_inode,
   .log_str=log_str,
   .log_link=log_link,
-  .log_unlink=log_unlink
+  .log_unlink=log_unlink,
+  .log_disc=log_disc
 };
+
+void test(void){
+  int rc;
+  struct disc_node_struct node1, node2;
+  struct edge_struct edge;
+  if((rc = provenance_disclose_node(&node1))<0){
+    printf("Error %d\n", rc);
+  }
+  if((rc = provenance_disclose_node(&node2))<0){
+    printf("Error %d\n", rc);
+  }
+  edge.type = ED_DATA;
+  edge.allowed=FLOW_ALLOWED;
+  edge.snd_id=node1.node_id;
+  edge.rcv_id=node2.node_id;
+  provenance_disclose_edge(&edge);
+}
 
 int main(void){
   int rc;
-  printf("Size: %d.\n", sizeof(prov_msg_t));
-  printf("Size: %d.\n", sizeof(long_prov_msg_t));
 	_init_logs();
   simplog.writeLog(SIMPLOG_INFO, "audit process pid: %d", getpid());
   rc = provenance_register(&ops);
@@ -125,6 +146,8 @@ int main(void){
     simplog.writeLog(SIMPLOG_ERROR, "Failed registering audit operation.");
     exit(rc);
   }
+  sleep(2);
+  test();
   while(1) sleep(60);
   provenance_stop();
   return 0;
