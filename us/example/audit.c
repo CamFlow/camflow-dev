@@ -79,6 +79,16 @@ void log_str(struct str_struct* data){
     data->event_id, data->str);
 }
 
+void log_link(struct link_struct* link){
+  write_to_log("%lu-\tlink[%s]{%lu|%lu|%lu}",
+    link->event_id, link->name, link->inode_id, link->task_id, link->dir_id);
+}
+
+void log_unlink(struct unlink_struct* unlink){
+  write_to_log("%lu-\tunlink[%s]{%lu|%lu|%lu}",
+    unlink->event_id, unlink->name, unlink->inode_id, unlink->task_id, unlink->dir_id);
+}
+
 void log_edge(struct edge_struct* edge){
     write_to_log("%lu-\t%s{%lu->%lu}%d",
       edge->event_id, edge_str[edge->type], edge->snd_id, edge->rcv_id, edge->allowed);
@@ -99,12 +109,15 @@ struct provenance_ops ops = {
   .log_edge=log_edge,
   .log_task=log_task,
   .log_inode=log_inode,
-  .log_str=log_str
+  .log_str=log_str,
+  .log_link=log_link,
+  .log_unlink=log_unlink
 };
 
 int main(void){
   int rc;
   printf("Size: %d.\n", sizeof(prov_msg_t));
+  printf("Size: %d.\n", sizeof(long_prov_msg_t));
 	_init_logs();
   simplog.writeLog(SIMPLOG_INFO, "audit process pid: %d", getpid());
   rc = provenance_register(&ops);

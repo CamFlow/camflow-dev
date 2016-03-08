@@ -17,39 +17,8 @@
 #include <linux/lsm_hooks.h>
 
 atomic64_t prov_node_id=ATOMIC64_INIT(0);
-static struct kmem_cache *provenance_cache;
-
-static inline void record_node(prov_msg_t* prov){
-  if(!prov_enabled) // capture is not enabled, ignore
-    return;
-
-  prov->node_info.recorded=NODE_RECORDED;
-  prov_write(prov);
-}
-
-static inline void record_edge(edge_type_t type, prov_msg_t* from, prov_msg_t* to){
-  prov_msg_t edge;
-  memset(&edge, 0, sizeof(prov_msg_t));
-
-  if(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE) // to or from are opaque
-    return;
-
-  if(!prov_enabled) // capture is not enabled, ignore
-    return;
-
-  if(!(from->node_info.recorded == NODE_RECORDED) )
-    record_node(from);
-
-  if(!(to->node_info.recorded == NODE_RECORDED) )
-    record_node(to);
-
-  edge.edge_info.message_type=MSG_EDGE;
-  edge.edge_info.snd_id=from->node_info.node_id;
-  edge.edge_info.rcv_id=to->node_info.node_id;
-  edge.edge_info.allowed=FLOW_ALLOWED;
-  edge.edge_info.type=type;
-  prov_write(&edge);
-}
+struct kmem_cache *provenance_cache=NULL;
+struct kmem_cache *long_provenance_cache=NULL;
 
 static inline node_id_t prov_next_nodeid( void )
 {
@@ -276,6 +245,100 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 }
 
 /*
+* Check permission before creating a new hard link to a file.
+* @old_dentry contains the dentry structure for an existing
+* link to the file.
+* @dir contains the inode structure of the parent directory
+* of the new link.
+* @new_dentry contains the dentry structure for the new link.
+* Return 0 if permission is granted.
+*/
+
+static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
+{
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* dprov;
+  prov_msg_t* iprov;
+  long_prov_msg_t* link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
+  memset(link_prov, 0, sizeof(long_prov_msg_t));
+  link_prov->link_info.message_type = MSG_LINK;
+
+  if(!dir->i_provenance){ // alloc provenance if none there
+    provenance_inode_alloc_security(dir);
+  }
+
+  if(!old_dentry->d_inode->i_provenance){
+    provenance_inode_alloc_security(old_dentry->d_inode);
+  }
+
+  dprov = dir->i_provenance; // directory
+  iprov = old_dentry->d_inode->i_provenance; // inode pointed by dentry
+
+  // writing to the directory
+  if(cprov->node_info.tracked==NODE_TRACKED
+    || dprov->node_info.tracked==NODE_TRACKED
+    || iprov->node_info.tracked==NODE_TRACKED
+    || prov_all){
+    record_edge(ED_DATA, cprov, dprov);
+    record_edge(ED_DATA, cprov, iprov);
+  }
+
+  link_prov->link_info.length = new_dentry->d_name.len;
+  memcpy(link_prov->link_info.name, new_dentry->d_name.name, link_prov->link_info.length);
+  link_prov->link_info.dir_id = dprov->inode_info.node_id;
+  link_prov->link_info.task_id = cprov->task_info.node_id;
+  link_prov->link_info.inode_id = iprov->task_info.node_id;
+  long_prov_write(link_prov);
+  kmem_cache_free(long_provenance_cache, link_prov);
+  return 0;
+}
+
+/*
+* Check the permission to remove a hard link to a file.
+* @dir contains the inode structure of parent directory of the file.
+* @dentry contains the dentry structure for file to be unlinked.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
+{
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* dprov;
+  prov_msg_t* iprov;
+  long_prov_msg_t* link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
+  memset(&link_prov, 0, sizeof(long_prov_msg_t));
+  link_prov->link_info.message_type = MSG_UNLINK;
+
+  if(!dir->i_provenance){ // alloc provenance if none there
+    provenance_inode_alloc_security(dir);
+  }
+
+  if(!dentry->d_inode->i_provenance){
+    provenance_inode_alloc_security(dentry->d_inode);
+  }
+
+  dprov = dir->i_provenance; // directory
+  iprov = dentry->d_inode->i_provenance; // inode pointed by dentry
+
+  // writing to the directory
+  if(cprov->node_info.tracked==NODE_TRACKED
+    || dprov->node_info.tracked==NODE_TRACKED
+    || iprov->node_info.tracked==NODE_TRACKED
+    || prov_all){
+    record_edge(ED_DATA, cprov, dprov);
+    record_edge(ED_DATA, cprov, iprov);
+  }
+
+  link_prov->unlink_info.length = dentry->d_name.len;
+  memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
+  link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
+  link_prov->unlink_info.task_id = cprov->task_info.node_id;
+  link_prov->unlink_info.inode_id = iprov->task_info.node_id;
+  long_prov_write(link_prov);
+  kmem_cache_free(long_provenance_cache, link_prov);
+  return 0;
+}
+
+/*
 * Check file permissions before accessing an open file.  This hook is
 * called by various operations that read or write files.  A security
 * module can use this hook to perform additional checking on these
@@ -381,11 +444,16 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
   LSM_HOOK_INIT(mmap_file, provenance_mmap_file),
   LSM_HOOK_INIT(file_ioctl, provenance_file_ioctl),
+  LSM_HOOK_INIT(inode_link, provenance_inode_link),
+	LSM_HOOK_INIT(inode_unlink, provenance_inode_unlink),
 };
 
 void __init provenance_add_hooks(void){
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
+					    0, SLAB_PANIC, NULL);
+  long_provenance_cache = kmem_cache_create("long_provenance_struct",
+					    sizeof(long_prov_msg_t),
 					    0, SLAB_PANIC, NULL);
   cred_init_provenance();
   /* register the provenance security hooks */

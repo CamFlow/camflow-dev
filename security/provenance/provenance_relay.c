@@ -17,10 +17,12 @@
 #include <linux/provenance.h>
 #include <linux/debugfs.h>
 
-#define BASE_NAME "provenance"
+#define PROV_BASE_NAME "provenance"
+#define LONG_PROV_BASE_NAME "long_provenance"
 
 /* global variable, extern in provenance.h */
  struct rchan *prov_chan=NULL;
+ struct rchan *long_prov_chan=NULL;
  atomic64_t prov_evt_count=ATOMIC64_INIT(0);
 
 /*
@@ -57,11 +59,18 @@ static struct rchan_callbacks relay_callbacks =
 static int __init relay_prov_init(void)
 {
   printk(KERN_INFO "Provenance init.\n");
-  prov_chan = relay_open(BASE_NAME, NULL, 16384, 4, &relay_callbacks, NULL);
+  prov_chan = relay_open(PROV_BASE_NAME, NULL, 128*sizeof(prov_msg_t), 4, &relay_callbacks, NULL);
   if(prov_chan==NULL){
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
+
+  long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, 32*sizeof(long_prov_msg_t), 4, &relay_callbacks, NULL);
+  if(long_prov_chan==NULL){
+    printk(KERN_ERR "Provenance: relay_open failure\n");
+    return 0;
+  }
+
   printk(KERN_INFO "Provenance module started!\n");
   prov_print("Provenance module started!");
 

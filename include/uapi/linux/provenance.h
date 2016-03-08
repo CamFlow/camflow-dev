@@ -18,6 +18,8 @@
 #define MSG_EDGE        1
 #define MSG_TASK        2
 #define MSG_INODE       3
+#define MSG_LINK        4
+#define MSG_UNLINK      5
 
 #define ED_DATA   0
 #define ED_CREATE 1
@@ -96,20 +98,46 @@ struct msg_struct{
   event_id_t event_id;
 };
 
-struct str_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  size_t length;
-  char str[STR_MAX_SIZE];
-};
-
 typedef union msg{
   struct msg_struct           msg_info;
-  struct str_struct           str_info;
   struct node_struct          node_info;
   struct task_prov_struct     task_info;
   struct inode_prov_struct    inode_info;
   struct edge_struct          edge_info;
 } prov_msg_t;
+
+struct str_struct{
+  message_type_t message_type;
+  event_id_t event_id;
+  size_t length;
+  char str[4096];
+};
+
+struct link_struct{
+  message_type_t message_type;
+  event_id_t event_id;
+  size_t length;
+  char name[4096];
+  node_id_t dir_id;
+  node_id_t task_id;
+  node_id_t inode_id;
+};
+
+struct unlink_struct{
+  message_type_t message_type;
+  event_id_t event_id;
+  size_t length;
+  char name[4096];
+  node_id_t dir_id;
+  node_id_t task_id;
+  node_id_t inode_id;
+};
+
+typedef union long_msg{
+  struct msg_struct           msg_info;
+  struct str_struct           str_info;
+  struct link_struct          link_info;
+  struct unlink_struct        unlink_info;
+} long_prov_msg_t;
 
 #endif

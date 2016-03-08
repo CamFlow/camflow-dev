@@ -1,4 +1,5 @@
 kernel-version=4.2.8
+arch=x86_64
 
 all: config compile
 
@@ -32,11 +33,11 @@ compile_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
 
 compile_us:
-	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install_all INSTALL_HDR_PATH=/usr
+	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 	cd ./us && $(MAKE) all
 
 install_header:
-	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install_all INSTALL_HDR_PATH=/usr
+	cd ./build/linux-$(kernel-version) && sudo $(MAKE) $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 
 install:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install

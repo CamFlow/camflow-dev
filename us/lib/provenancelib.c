@@ -24,18 +24,20 @@
 #include "thpool.h"
 #include "provenancelib.h"
 
-#define NUMBER_CPUS   256 /* support 256 core max */
-#define BASE_NAME     "/sys/kernel/debug/provenance"
+#define NUMBER_CPUS           256 /* support 256 core max */
+#define PROV_BASE_NAME        "/sys/kernel/debug/provenance"
+#define LONG_PROV_BASE_NAME   "/sys/kernel/debug/long_provenance"
 
-#define ENABLE_FILE   "/sys/kernel/security/provenance/enable"
-#define ALL_FILE      "/sys/kernel/security/provenance/all"
-#define OPAQUE_FILE   "/sys/kernel/security/provenance/opaque"
+#define ENABLE_FILE           "/sys/kernel/security/provenance/enable"
+#define ALL_FILE              "/sys/kernel/security/provenance/all"
+#define OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
 
 /* internal variables */
 static struct provenance_ops prov_ops;
 static uint8_t ncpus;
 /* per cpu variables */
 static int relay_file[NUMBER_CPUS];
+static int long_relay_file[NUMBER_CPUS];
 /* worker pool */
 static threadpool worker_thpool=NULL;
 
@@ -46,7 +48,9 @@ static int create_worker_pool(void);
 static int destroy_worker_pool(void);
 
 static void callback_job(void* data);
+static void long_callback_job(void* data);
 static void reader_job(void *data);
+static void long_reader_job(void *data);
 
 
 int provenance_register(struct provenance_ops* ops)
@@ -92,9 +96,14 @@ static int open_files(void)
   char tmp[4096]; // to store file name
 
   for(i=0; i<ncpus; i++){
-    sprintf(tmp, "%s%d", BASE_NAME, i);
+    sprintf(tmp, "%s%d", PROV_BASE_NAME, i);
     relay_file[i] = open(tmp, O_RDONLY | O_NONBLOCK);
     if(relay_file[i]<0){
+      return -1;
+    }
+    sprintf(tmp, "%s%d", LONG_PROV_BASE_NAME, i);
+    long_relay_file[i] = open(tmp, O_RDONLY | O_NONBLOCK);
+    if(long_relay_file[i]<0){
       return -1;
     }
   }
@@ -106,6 +115,7 @@ static int close_files(void)
   int i;
   for(i=0; i<ncpus;i++){
     close(relay_file[i]);
+    close(long_relay_file[i]);
   }
   return 0;
 }
@@ -114,12 +124,13 @@ static int create_worker_pool(void)
 {
   int i;
   uint8_t* cpunb;
-  worker_thpool = thpool_init(ncpus*2);
+  worker_thpool = thpool_init(ncpus*4);
   /* set reader jobs */
   for(i=0; i<ncpus; i++){
     cpunb = (uint8_t*)malloc(sizeof(uint8_t)); // will be freed in worker
     (*cpunb)=i;
     thpool_add_work(worker_thpool, (void*)reader_job, (void*)cpunb);
+    thpool_add_work(worker_thpool, (void*)long_reader_job, (void*)cpunb);
   }
 }
 
@@ -156,9 +167,36 @@ static void callback_job(void* data)
       if(prov_ops.log_inode!=NULL)
         prov_ops.log_inode(&(msg->inode_info));
       break;
+    default:
+      printf("Error: unknown message type %u\n", msg->msg_info.message_type);
+      break;
+  }
+  free(data); /* free the memory allocated in the reader */
+}
+
+/* handle application callbacks */
+static void long_callback_job(void* data)
+{
+  long_prov_msg_t* msg = (long_prov_msg_t*)data;
+
+  /* initialise per worker thread */
+  if(!initialised && prov_ops.init!=NULL){
+    prov_ops.init();
+    initialised=1;
+  }
+
+  switch(msg->msg_info.message_type){
     case MSG_STR:
       if(prov_ops.log_str!=NULL)
         prov_ops.log_str(&(msg->str_info));
+      break;
+    case MSG_LINK:
+      if(prov_ops.log_str!=NULL)
+        prov_ops.log_link(&(msg->link_info));
+      break;
+    case MSG_UNLINK:
+      if(prov_ops.log_str!=NULL)
+        prov_ops.log_unlink(&(msg->unlink_info));
       break;
     default:
       printf("Error: unknown message type %u\n", msg->msg_info.message_type);
@@ -173,10 +211,8 @@ static void reader_job(void *data)
   uint8_t* buf;
   int rc;
   uint8_t cpu = (uint8_t)(*(uint8_t*)data);
-  free(data); // free from caller
   struct pollfd pollfd;
 
-  pollfd.fd=relay_file[cpu];
   do{
     /* file to look on */
     pollfd.fd = relay_file[cpu];
@@ -208,6 +244,48 @@ static void reader_job(void *data)
     }
     /* add job to queue */
     thpool_add_work(worker_thpool, (void*)callback_job, buf);
+  }while(1);
+}
+
+/* read from relayfs file */
+static void long_reader_job(void *data)
+{
+  uint8_t* buf;
+  int rc;
+  uint8_t cpu = (uint8_t)(*(uint8_t*)data);
+  struct pollfd pollfd;
+
+  do{
+    /* file to look on */
+    pollfd.fd = long_relay_file[cpu];
+    /* something to read */
+		pollfd.events = POLLIN;
+    /* one file, timeout 100ms */
+    rc = poll(&pollfd, 1, 100);
+    if(rc<0){
+      if(errno!=EINTR){
+        break; /* something bad happened */
+      }
+    }
+    buf = (uint8_t*)malloc(sizeof(long_prov_msg_t)); /* freed by worker thread */
+    rc = read(long_relay_file[cpu], buf, sizeof(long_prov_msg_t));
+    if(rc==0){ /* we did not read anything */
+      continue;
+    }
+    if(rc<0){
+      if(errno==EAGAIN){ // retry
+        continue;
+      }
+      break; // something bad happened
+    }
+    if(rc!=sizeof(long_prov_msg_t)){
+      rc = read(long_relay_file[cpu], buf+rc, sizeof(long_prov_msg_t)-rc);
+      if(rc<0){
+        break;
+      }
+    }
+    /* add job to queue */
+    thpool_add_work(worker_thpool, (void*)long_callback_job, buf);
   }while(1);
 }
 

@@ -14,6 +14,7 @@
 #ifndef _LINUX_PROVENANCE_H
 #define _LINUX_PROVENANCE_H
 
+#include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/bug.h>
 #include <linux/relay.h>
@@ -27,6 +28,7 @@ static inline event_id_t prov_next_evtid( void ){
 }
 
 extern struct rchan *prov_chan;
+extern struct rchan *long_prov_chan;
 extern bool prov_enabled;
 extern bool prov_all;
 
@@ -41,16 +43,64 @@ static inline void prov_write(prov_msg_t* msg)
   relay_write(prov_chan, msg, sizeof(prov_msg_t));
 }
 
+static inline void long_prov_write(long_prov_msg_t* msg){
+  if(long_prov_chan==NULL) // not set yet
+  {
+    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
+    return;
+  }
+  msg->msg_info.event_id=prov_next_evtid(); /* assign an event id */
+  relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
+}
+
 static inline int prov_print(const char *fmt, ...)
 {
-  prov_msg_t msg;
+  long_prov_msg_t* msg;
+  int length;
   va_list args;
   va_start(args, fmt);
+
+  msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+
   /* set message type */
-  msg.str_info.message_type=MSG_STR;
-  msg.str_info.length = vscnprintf(msg.str_info.str, sizeof(msg.str_info.str), fmt, args);
-  prov_write(&msg);
+  msg->str_info.message_type=MSG_STR;
+  msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
+  long_prov_write(msg);
   va_end(args);
-  return msg.str_info.length;
+  length = msg->str_info.length;
+  kfree(msg);
+  return length;
+}
+
+static inline void record_node(prov_msg_t* prov){
+  if(!prov_enabled) // capture is not enabled, ignore
+    return;
+
+  prov->node_info.recorded=NODE_RECORDED;
+  prov_write(prov);
+}
+
+static inline void record_edge(edge_type_t type, prov_msg_t* from, prov_msg_t* to){
+  prov_msg_t edge;
+  memset(&edge, 0, sizeof(prov_msg_t));
+
+  if(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE) // to or from are opaque
+    return;
+
+  if(!prov_enabled) // capture is not enabled, ignore
+    return;
+
+  if(!(from->node_info.recorded == NODE_RECORDED) )
+    record_node(from);
+
+  if(!(to->node_info.recorded == NODE_RECORDED) )
+    record_node(to);
+
+  edge.edge_info.message_type=MSG_EDGE;
+  edge.edge_info.snd_id=from->node_info.node_id;
+  edge.edge_info.rcv_id=to->node_info.node_id;
+  edge.edge_info.allowed=FLOW_ALLOWED;
+  edge.edge_info.type=type;
+  prov_write(&edge);
 }
 #endif /* _LINUX_PROVENANCE_H */

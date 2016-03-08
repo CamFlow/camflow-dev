@@ -28,6 +28,8 @@ struct provenance_ops{
   void (*log_task)(struct task_prov_struct*);
   void (*log_inode)(struct inode_prov_struct*);
   void (*log_str)(struct str_struct*);
+  void (*log_link)(struct link_struct*);
+  void (*log_unlink)(struct unlink_struct*);
 };
 
 /* provenance usher functions */
