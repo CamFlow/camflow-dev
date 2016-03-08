@@ -31,8 +31,9 @@
 #define ENABLE_FILE           "/sys/kernel/security/provenance/enable"
 #define ALL_FILE              "/sys/kernel/security/provenance/all"
 #define OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
-#define NODE_FILE           "/sys/kernel/security/provenance/node"
-#define EDGE_FILE           "/sys/kernel/security/provenance/edge"
+#define NODE_FILE             "/sys/kernel/security/provenance/node"
+#define EDGE_FILE             "/sys/kernel/security/provenance/edge"
+#define SELF_FILE             "/sys/kernel/security/provenance/self"
 
 /* internal variables */
 static struct provenance_ops prov_ops;
@@ -368,6 +369,19 @@ int provenance_disclose_edge(struct edge_struct* edge){
     return fd;
   }
   rc = write(fd, edge, sizeof(struct edge_struct));
+  close(fd);
+  return rc;
+}
+
+int provenance_self(struct task_prov_struct* self){
+  int rc;
+  int fd = open(SELF_FILE, O_RDONLY);
+
+  if(fd<0)
+  {
+    return fd;
+  }
+  rc = read(fd, self, sizeof(struct task_prov_struct));
   close(fd);
   return rc;
 }

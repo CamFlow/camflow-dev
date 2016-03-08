@@ -122,7 +122,9 @@ struct provenance_ops ops = {
 
 void test(void){
   int rc;
+
   struct disc_node_struct node1, node2;
+  struct task_prov_struct self;
   struct edge_struct edge;
   if((rc = provenance_disclose_node(&node1))<0){
     printf("Error %d\n", rc);
@@ -134,6 +136,12 @@ void test(void){
   edge.allowed=FLOW_ALLOWED;
   edge.snd_id=node1.node_id;
   edge.rcv_id=node2.node_id;
+  provenance_disclose_edge(&edge);
+  provenance_self(&self);
+  edge.type = ED_DATA;
+  edge.allowed=FLOW_ALLOWED;
+  edge.snd_id=node1.node_id;
+  edge.rcv_id=self.node_id;
   provenance_disclose_edge(&edge);
 }
 

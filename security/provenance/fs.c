@@ -250,6 +250,41 @@ static const struct file_operations prov_edge_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static ssize_t prov_write_self(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	return -EPERM; // read only
+}
+
+static ssize_t prov_read_self(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	prov_msg_t* tmp = (prov_msg_t*)buf;
+	prov_msg_t* cprov = current_provenance();
+
+	if(count < sizeof(struct task_prov_struct))
+	{
+		return -ENOMEM;
+	}
+
+	tmp->task_info.message_type = cprov->task_info.message_type;
+	tmp->task_info.event_id = cprov->task_info.event_id;
+  tmp->task_info.node_id = cprov->task_info.node_id;
+  tmp->task_info.recorded = cprov->task_info.recorded;
+  tmp->task_info.tracked = cprov->task_info.tracked;
+  tmp->task_info.opaque = cprov->task_info.opaque;
+  tmp->task_info.uid = cprov->task_info.uid;
+  tmp->task_info.gid = cprov->task_info.gid;
+	record_node(cprov); // record self
+	return count; // write only
+}
+
+static const struct file_operations prov_self_ops = {
+	.write		= prov_write_self,
+  .read     = prov_read_self,
+	.llseek		= generic_file_llseek,
+};
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -261,6 +296,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
 	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
 	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
+	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
    return 0;
 }
 

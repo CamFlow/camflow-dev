@@ -43,5 +43,6 @@ int provenance_set_all(bool v);
 int provenance_set_opaque(bool v);
 int provenance_disclose_node(struct disc_node_struct* node);
 int provenance_disclose_edge(struct edge_struct* edge);
+int provenance_self(struct task_prov_struct* self);
 
 #endif /* __PROVENANCELIB_H */
