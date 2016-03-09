@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <linux/provenance.h>
 
-static char* edge_str[]={"data", "create", "pass", "change", "mmap", "unknown"};
+static char* edge_str[]={"data", "create", "pass", "change", "mmap", "attach", "unknown"};
 
 struct provenance_ops{
   void (*init)(void);
@@ -31,7 +31,7 @@ struct provenance_ops{
   void (*log_link)(struct link_struct*);
   void (*log_unlink)(struct unlink_struct*);
   void (*log_disc)(struct disc_node_struct*);
-  void (*log_msg)(struct msg_prov_struct*);
+  void (*log_msg)(struct msg_msg_struct*);
 };
 
 /* provenance usher functions */

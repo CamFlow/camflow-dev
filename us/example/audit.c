@@ -109,7 +109,7 @@ void log_disc(struct disc_node_struct* node){
     node->event_id, node->node_id);
 }
 
-void log_msg(struct msg_prov_struct* msg){
+void log_msg(struct msg_msg_struct* msg){
   write_to_log("%lu-\tmsg[%lu]{%ld}",
     msg->event_id, msg->node_id, msg->type);
 }

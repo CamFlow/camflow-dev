@@ -511,6 +511,38 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
   return 0;
 }
 
+/*
+* Allocate and attach a security structure to the shp->shm_perm.security
+* field.  The security field is initialized to NULL when the structure is
+* first created.
+* @shp contains the shared memory structure to be modified.
+* Return 0 if operation was successful and permission is granted.
+*/
+static int provenance_shm_alloc_security(struct shmid_kernel *shp)
+{
+	prov_msg_t* cprov = current_provenance();
+  prov_msg_t* sprov = alloc_provenance(0, MSG_SHM, GFP_NOFS);
+
+  if(!sprov)
+    return -ENOMEM;
+  sprov->shm_info.mode=shp->shm_perm.mode;
+  shp->shm_perm.provenance=sprov;
+  if(cprov->node_info.tracked==NODE_TRACKED || sprov->node_info.tracked==NODE_TRACKED || prov_all){
+    record_edge(ED_ATTACH, sprov, cprov);
+  }
+	return 0;
+}
+
+/*
+* Deallocate the security struct for this memory segment.
+* @shp contains the shared memory structure to be modified.
+*/
+static void provenance_shm_free_security(struct shmid_kernel *shp)
+{
+  free_provenance(shp->shm_perm.provenance);
+  shp->shm_perm.provenance=NULL;
+}
+
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
@@ -529,6 +561,8 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(msg_msg_free_security, provenance_msg_msg_free_security),
   LSM_HOOK_INIT(msg_queue_msgsnd, provenance_msg_queue_msgsnd),
   LSM_HOOK_INIT(msg_queue_msgrcv, provenance_msg_queue_msgrcv),
+  LSM_HOOK_INIT(shm_alloc_security, provenance_shm_alloc_security),
+  LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
 };
 
 void __init provenance_add_hooks(void){
