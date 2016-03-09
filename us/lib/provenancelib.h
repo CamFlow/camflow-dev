@@ -32,6 +32,7 @@ struct provenance_ops{
   void (*log_unlink)(struct unlink_struct*);
   void (*log_disc)(struct disc_node_struct*);
   void (*log_msg)(struct msg_msg_struct*);
+  void (*log_shm)(struct shm_struct*);
 };
 
 /* provenance usher functions */

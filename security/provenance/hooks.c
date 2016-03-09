@@ -529,6 +529,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
   shp->shm_perm.provenance=sprov;
   if(cprov->node_info.tracked==NODE_TRACKED || sprov->node_info.tracked==NODE_TRACKED || prov_all){
     record_edge(ED_ATTACH, sprov, cprov);
+    record_edge(ED_ATTACH, cprov, sprov);
   }
 	return 0;
 }
@@ -541,6 +542,36 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
 {
   free_provenance(shp->shm_perm.provenance);
   shp->shm_perm.provenance=NULL;
+}
+
+/*
+* Check permissions prior to allowing the shmat system call to attach the
+* shared memory segment @shp to the data segment of the calling process.
+* The attaching address is specified by @shmaddr.
+* @shp contains the shared memory structure to be modified.
+* @shmaddr contains the address to attach memory region to.
+* @shmflg contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int provenance_shm_shmat(struct shmid_kernel *shp,
+			     char __user *shmaddr, int shmflg)
+{
+  prov_msg_t* cprov = current_provenance();
+	prov_msg_t* sprov = shp->shm_perm.provenance;
+
+  if(!sprov)
+    return -ENOMEM;
+
+  if(cprov->node_info.tracked==NODE_TRACKED || sprov->node_info.tracked==NODE_TRACKED || prov_all){
+    if(shmflg & SHM_RDONLY){
+      record_edge(ED_ATTACH, sprov, cprov);
+    }else{
+      record_edge(ED_ATTACH, sprov, cprov);
+      record_edge(ED_ATTACH, cprov, sprov);
+    }
+  }
+
+	return 0;
 }
 
 static struct security_hook_list provenance_hooks[] = {
@@ -563,6 +594,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(msg_queue_msgrcv, provenance_msg_queue_msgrcv),
   LSM_HOOK_INIT(shm_alloc_security, provenance_shm_alloc_security),
   LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
+  LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
 };
 
 void __init provenance_add_hooks(void){

@@ -114,6 +114,11 @@ void log_msg(struct msg_msg_struct* msg){
     msg->event_id, msg->node_id, msg->type);
 }
 
+void log_shm(struct shm_struct* shm){
+  write_to_log("%lu-\tshm[%lu]{0X%04hhX}",
+    shm->event_id, shm->node_id, shm->mode);
+}
+
 struct provenance_ops ops = {
   .init=init,
   .log_edge=log_edge,
@@ -123,7 +128,8 @@ struct provenance_ops ops = {
   .log_link=log_link,
   .log_unlink=log_unlink,
   .log_disc=log_disc,
-  .log_msg=log_msg
+  .log_msg=log_msg,
+  .log_shm=log_shm
 };
 
 void test(void){
