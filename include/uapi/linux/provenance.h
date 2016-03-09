@@ -21,6 +21,7 @@
 #define MSG_LINK          4
 #define MSG_UNLINK        5
 #define MSG_DISC_NODE     6
+#define MSG_MSG           7
 
 #define ED_DATA           0
 #define ED_CREATE         1
@@ -100,18 +101,26 @@ struct inode_prov_struct{
   uint32_t rdev;
 };
 
+struct msg_prov_struct{
+  message_type_t message_type;
+  event_id_t event_id;
+  node_id_t node_id;
+  long type;
+};
+
 struct msg_struct{
   message_type_t message_type;
   event_id_t event_id;
 };
 
-typedef union msg{
+typedef union prov_msg{
   struct msg_struct           msg_info;
   struct node_struct          node_info;
   struct disc_node_struct     disc_node_info;
   struct task_prov_struct     task_info;
   struct inode_prov_struct    inode_info;
   struct edge_struct          edge_info;
+  struct msg_prov_struct      msg_msg_info;
 } prov_msg_t;
 
 struct str_struct{

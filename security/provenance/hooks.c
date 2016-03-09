@@ -15,6 +15,7 @@
 #include <linux/provenance.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
+#include <linux/msg.h>
 
 atomic64_t prov_node_id=ATOMIC64_INIT(0);
 struct kmem_cache *provenance_cache=NULL;
@@ -431,6 +432,85 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   return 0;
 }
 
+/* msg */
+
+/*
+* Allocate and attach a security structure to the msg->security field.
+* The security field is initialized to NULL when the structure is first
+* created.
+* @msg contains the message structure to be modified.
+* Return 0 if operation was successful and permission is granted.
+*/
+static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
+{
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* mprov;
+  /* alloc new prov struct with generated id */
+  mprov = alloc_provenance(0, MSG_MSG, GFP_NOFS);
+
+  if(!mprov)
+    return -ENOMEM;
+
+  mprov->msg_msg_info.type=msg->m_type;
+  msg->provenance = mprov;
+  if(cprov->node_info.tracked==NODE_TRACKED || mprov->node_info.tracked==NODE_TRACKED || prov_all){
+    record_edge(ED_CREATE, cprov, mprov);
+  }
+  return 0;
+}
+
+/*
+* Deallocate the security structure for this message.
+* @msg contains the message structure to be modified.
+*/
+static void provenance_msg_msg_free_security(struct msg_msg *msg)
+{
+  free_provenance(msg->provenance);
+  msg->provenance=NULL;
+}
+
+/*
+* Check permission before a message, @msg, is enqueued on the message
+* queue, @msq.
+* @msq contains the message queue to send message to.
+* @msg contains the message to be enqueued.
+* @msqflg contains operational flags.
+* Return 0 if permission is granted.
+*/
+static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int msqflg)
+{
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* mprov = msg->provenance;
+  if(cprov->node_info.tracked==NODE_TRACKED || mprov->node_info.tracked==NODE_TRACKED || prov_all){
+    record_edge(ED_DATA, cprov, mprov);
+  }
+  return 0;
+}
+/*
+* Check permission before a message, @msg, is removed from the message
+* queue, @msq.  The @target task structure contains a pointer to the
+* process that will be receiving the message (not equal to the current
+* process when inline receives are being performed).
+* @msq contains the message queue to retrieve message from.
+* @msg contains the message destination.
+* @target contains the task structure for recipient process.
+* @type contains the type of message requested.
+* @mode contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *msg,
+				    struct task_struct *target,
+				    long type, int mode)
+{
+  prov_msg_t* cprov = target->cred->provenance;
+  prov_msg_t* mprov = msg->provenance;
+
+  if(cprov->node_info.tracked==NODE_TRACKED || mprov->node_info.tracked==NODE_TRACKED || prov_all){
+    record_edge(ED_DATA, mprov, cprov);
+  }
+  return 0;
+}
+
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
@@ -445,6 +525,10 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(file_ioctl, provenance_file_ioctl),
   LSM_HOOK_INIT(inode_link, provenance_inode_link),
 	LSM_HOOK_INIT(inode_unlink, provenance_inode_unlink),
+	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
+	LSM_HOOK_INIT(msg_msg_free_security, provenance_msg_msg_free_security),
+  LSM_HOOK_INIT(msg_queue_msgsnd, provenance_msg_queue_msgsnd),
+  LSM_HOOK_INIT(msg_queue_msgrcv, provenance_msg_queue_msgrcv),
 };
 
 void __init provenance_add_hooks(void){

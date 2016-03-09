@@ -109,6 +109,11 @@ void log_disc(struct disc_node_struct* node){
     node->event_id, node->node_id);
 }
 
+void log_msg(struct msg_prov_struct* msg){
+  write_to_log("%lu-\tmsg[%lu]{%ld}",
+    msg->event_id, msg->node_id, msg->type);
+}
+
 struct provenance_ops ops = {
   .init=init,
   .log_edge=log_edge,
@@ -117,7 +122,8 @@ struct provenance_ops ops = {
   .log_str=log_str,
   .log_link=log_link,
   .log_unlink=log_unlink,
-  .log_disc=log_disc
+  .log_disc=log_disc,
+  .log_msg=log_msg
 };
 
 void test(void){

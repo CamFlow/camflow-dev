@@ -174,6 +174,10 @@ static void callback_job(void* data)
       if(prov_ops.log_disc!=NULL)
         prov_ops.log_disc(&(msg->disc_node_info));
       break;
+    case MSG_MSG:
+      if(prov_ops.log_msg!=NULL)
+        prov_ops.log_msg(&(msg->msg_msg_info));
+      break;
     default:
       printf("Error: unknown message type %u\n", msg->msg_info.message_type);
       break;
