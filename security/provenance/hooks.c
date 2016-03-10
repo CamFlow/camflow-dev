@@ -16,6 +16,7 @@
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
+#include <net/sock.h>
 
 atomic64_t prov_node_id=ATOMIC64_INIT(0);
 struct kmem_cache *provenance_cache=NULL;
@@ -539,7 +540,6 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 */
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
-  prov_msg_t* cprov = current_provenance();
   prov_msg_t* skprov = alloc_provenance(0, MSG_SOCK, priority);
 
   if(!skprov)
@@ -552,9 +552,13 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 */
 static void provenance_sk_free_security(struct sock *sk)
 {
-	free_provenance(sk->sk_provenance);
+  if(sk->sk_provenance!=NULL){
+	   free_provenance(sk->sk_provenance);
+   }
 	sk->sk_provenance = NULL;
 }
+
+
 
 /*
 * This hook allows a module to update or allocate a per-socket security
@@ -571,16 +575,41 @@ static void provenance_sk_free_security(struct sock *sk)
 * @protocol contains the requested protocol.
 * @kern set to 1 if a kernel socket.
 */
+/*
 static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
   prov_msg_t* cprov  = current_provenance();
-  prov_msg_t* skprov = sock->sk_provenance;
-  prov_msg_t* iprov  = SOCK_INODE(sock)->i_provenance;
+  prov_msg_t* skprov = NULL;
+  prov_msg_t* iprov  = NULL;
+
+  if(!sock->sk)
+    return 0;
+
+  if(!SOCK_INODE(sock))
+    return 0;
+
+  skprov = sock->sk->sk_provenance;
+  iprov = SOCK_INODE(sock)->i_provenance;
+
+  if(skprov==NULL){
+    provenance_sk_alloc_security(sock->sk, family, GFP_NOFS);
+    skprov = sock->sk->sk_provenance;
+  }
+
+  if(iprov==NULL){
+    provenance_inode_alloc_security(SOCK_INODE(sock));
+    iprov = SOCK_INODE(sock)->i_provenance;
+  }
+
+  skprov->sock_info.type = type;
+  skprov->sock_info.family = family;
+  skprov->sock_info.protocol = protocol;
   record_edge(ED_CREATE, cprov, skprov);
   record_edge(ED_ASSOCIATE, skprov, iprov);
   return 0;
 }
+*/
 
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
@@ -604,8 +633,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
   LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
-  LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
+  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security)
 };
 
 void __init provenance_add_hooks(void){

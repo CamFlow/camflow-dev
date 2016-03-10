@@ -12,6 +12,6 @@
  * it will ask for root password
 
 
-##Note
-* At the moment simply demonstrate module stacking as per Appendix C.
-* Tested on Fedora only
+##TODO
+* Look at NetLabel, XFRM and IPSEC for labelled packet (may not be able to get what we want).
+* Investigate audit data captured.

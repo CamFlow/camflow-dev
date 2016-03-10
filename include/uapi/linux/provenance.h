@@ -119,6 +119,15 @@ struct shm_struct{
   uint16_t mode;
 };
 
+struct sock_struct{
+  message_type_t message_type;
+  event_id_t event_id;
+  node_id_t node_id;
+  uint16_t type;
+  uint16_t family;
+  uint8_t protocol;
+};
+
 struct msg_struct{
   message_type_t message_type;
   event_id_t event_id;
@@ -133,6 +142,7 @@ typedef union prov_msg{
   struct edge_struct          edge_info;
   struct msg_msg_struct       msg_msg_info;
   struct shm_struct           shm_info;
+  struct sock_struct          sock_info;
 } prov_msg_t;
 
 struct str_struct{

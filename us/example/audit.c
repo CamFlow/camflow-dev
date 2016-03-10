@@ -119,6 +119,12 @@ void log_shm(struct shm_struct* shm){
     shm->event_id, shm->node_id, shm->mode);
 }
 
+
+void log_sock(struct sock_struct* sock){
+  write_to_log("%lu-\tsock[%lu]{%u|%u|%u}",
+    sock->event_id, sock->node_id, sock->type, sock->family, sock->protocol);
+}
+
 struct provenance_ops ops = {
   .init=init,
   .log_edge=log_edge,
