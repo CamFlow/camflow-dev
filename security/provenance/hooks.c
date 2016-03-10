@@ -544,6 +544,7 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 
   if(!skprov)
     return -ENOMEM;
+  sk->sk_provenance=skprov;
   return 0;
 }
 
@@ -559,6 +560,9 @@ static void provenance_sk_free_security(struct sock *sk)
 }
 
 
+static inline prov_msg_t* inode_provenance(struct inode *inode){
+  return inode->i_provenance;
+}
 
 /*
 * This hook allows a module to update or allocate a per-socket security
@@ -575,41 +579,29 @@ static void provenance_sk_free_security(struct sock *sk)
 * @protocol contains the requested protocol.
 * @kern set to 1 if a kernel socket.
 */
-/*
 static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
   prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* iprov  = inode_provenance(SOCK_INODE(sock));
   prov_msg_t* skprov = NULL;
-  prov_msg_t* iprov  = NULL;
 
-  if(!sock->sk)
+
+  if(kern){
     return 0;
+  }
 
-  if(!SOCK_INODE(sock))
-    return 0;
-
-  skprov = sock->sk->sk_provenance;
-  iprov = SOCK_INODE(sock)->i_provenance;
-
-  if(skprov==NULL){
-    provenance_sk_alloc_security(sock->sk, family, GFP_NOFS);
+  if(sock->sk){
     skprov = sock->sk->sk_provenance;
+    skprov->sock_info.type = type;
+    skprov->sock_info.family = family;
+    skprov->sock_info.protocol = protocol;
+    record_edge(ED_CREATE, cprov, skprov);
+    record_edge(ED_ASSOCIATE, skprov, iprov);
   }
 
-  if(iprov==NULL){
-    provenance_inode_alloc_security(SOCK_INODE(sock));
-    iprov = SOCK_INODE(sock)->i_provenance;
-  }
-
-  skprov->sock_info.type = type;
-  skprov->sock_info.family = family;
-  skprov->sock_info.protocol = protocol;
-  record_edge(ED_CREATE, cprov, skprov);
-  record_edge(ED_ASSOCIATE, skprov, iprov);
   return 0;
 }
-*/
 
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
@@ -633,7 +625,8 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
   LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security)
+  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
+  LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create)
 };
 
 void __init provenance_add_hooks(void){

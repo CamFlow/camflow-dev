@@ -185,6 +185,7 @@ static void callback_job(void* data)
     case MSG_SOCK:
       if(prov_ops.log_sock!=NULL)
         prov_ops.log_sock(&(msg->sock_info));
+      break;
     default:
       printf("Error: unknown message type %u\n", msg->msg_info.message_type);
       break;

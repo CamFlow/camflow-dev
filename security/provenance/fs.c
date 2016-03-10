@@ -111,9 +111,9 @@ static ssize_t prov_write_all(struct file *file, const char __user *buf,
   new_value=tmp;
   if(new_value!=prov_all){
     if(new_value)
-      prov_print("Enabling provenance capture");
+      prov_print("Enabling all capture");
     else
-      prov_print("Disabling provenance capture");
+      prov_print("Disabling all capture");
     prov_all=new_value;
   }
   length=count;
