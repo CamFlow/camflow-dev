@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <linux/provenance.h>
 
-static char* edge_str[]={"data", "create", "pass", "change", "mmap", "attach", "unknown"};
+static char* edge_str[]={"data", "create", "pass", "change", "mmap", "attach", "associate", "unknown"};
 
 struct provenance_ops{
   void (*init)(void);

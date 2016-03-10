@@ -117,11 +117,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   prov->node_info.uid=__kuid_val(new->euid);
   prov->node_info.gid=__kgid_val(new->egid);
 
-  if(old_prov->node_info.tracked == NODE_TRACKED || prov_all)
-  {
-    record_edge(ED_CREATE, old_prov, prov);
-  }
-
+  record_edge(ED_CREATE, old_prov, prov);
   new->provenance = prov;
   return 0;
 }
@@ -154,11 +150,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
   prov_msg_t *old_prov = old->provenance;
 	prov_msg_t *prov = new->provenance;
 
-  if(old_prov->node_info.tracked == NODE_TRACKED || prov->node_info.tracked == NODE_TRACKED || prov_all) // record if entity tracked or if record everyting
-  {
-    record_edge(ED_CHANGE, old_prov, prov);
-  }
-
+  record_edge(ED_CHANGE, old_prov, prov);
   return 0;
 }
 
@@ -183,9 +175,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
   inode->i_provenance = iprov;
 
-  if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
-    record_edge(ED_CREATE, cprov, iprov); /* creating inode != creating the file */
-  }
+  record_edge(ED_CREATE, cprov, iprov); /* creating inode != creating the file */
   return 0;
 }
 
@@ -227,15 +217,11 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
-    if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
       record_edge(ED_DATA, cprov, iprov);
-    }
   }
   if((mask & (MAY_READ|MAY_EXEC|MAY_WRITE|MAY_APPEND)) != 0){
     // conservatively assume write imply read
-    if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
-      record_edge(ED_DATA, iprov, cprov);
-    }
+    record_edge(ED_DATA, iprov, cprov);
   }
   return 0;
 }
@@ -269,13 +255,8 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   iprov = old_dentry->d_inode->i_provenance; // inode pointed by dentry
 
   // writing to the directory
-  if(cprov->node_info.tracked==NODE_TRACKED
-    || dprov->node_info.tracked==NODE_TRACKED
-    || iprov->node_info.tracked==NODE_TRACKED
-    || prov_all){
-    record_edge(ED_DATA, cprov, dprov);
-    record_edge(ED_DATA, cprov, iprov);
-  }
+  record_edge(ED_DATA, cprov, dprov);
+  record_edge(ED_DATA, cprov, iprov);
 
   if(prov_enabled){
     link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
@@ -316,17 +297,12 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   iprov = dentry->d_inode->i_provenance; // inode pointed by dentry
 
   // writing to the directory
-  if(cprov->node_info.tracked==NODE_TRACKED
-    || dprov->node_info.tracked==NODE_TRACKED
-    || iprov->node_info.tracked==NODE_TRACKED
-    || prov_all){
-    record_edge(ED_DATA, cprov, dprov);
-    record_edge(ED_DATA, cprov, iprov);
-  }
+  record_edge(ED_DATA, cprov, dprov);
+  record_edge(ED_DATA, cprov, iprov);
 
   if(prov_enabled){
     link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
-    link_prov->link_info.message_type = MSG_UNLINK;
+    link_prov->unlink_info.message_type = MSG_UNLINK;
     link_prov->unlink_info.length = dentry->d_name.len;
     memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
     link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
@@ -391,15 +367,11 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
 
   if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
-    if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
-      record_edge(ED_MMAP, cprov, iprov);
-    }
+    record_edge(ED_MMAP, cprov, iprov);
   }
   if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
     // conservatively assume write imply read
-    if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
-      record_edge(ED_MMAP, iprov, cprov);
-    }
+    record_edge(ED_MMAP, iprov, cprov);
   }
   return 0;
 }
@@ -424,10 +396,8 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
     provenance_inode_alloc_security(inode);
   }
   iprov = inode->i_provenance;
-  if(cprov->node_info.tracked==NODE_TRACKED || iprov->node_info.tracked==NODE_TRACKED || prov_all){
-    record_edge(ED_DATA, iprov, cprov); // both way exchange
-    record_edge(ED_DATA, cprov, iprov);
-  }
+  record_edge(ED_DATA, iprov, cprov); // both way exchange
+  record_edge(ED_DATA, cprov, iprov);
 
   return 0;
 }
@@ -453,9 +423,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 
   mprov->msg_msg_info.type=msg->m_type;
   msg->provenance = mprov;
-  if(cprov->node_info.tracked==NODE_TRACKED || mprov->node_info.tracked==NODE_TRACKED || prov_all){
-    record_edge(ED_CREATE, cprov, mprov);
-  }
+  record_edge(ED_CREATE, cprov, mprov);
   return 0;
 }
 
@@ -481,9 +449,7 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov = msg->provenance;
-  if(cprov->node_info.tracked==NODE_TRACKED || mprov->node_info.tracked==NODE_TRACKED || prov_all){
-    record_edge(ED_DATA, cprov, mprov);
-  }
+  record_edge(ED_DATA, cprov, mprov);
   return 0;
 }
 /*
@@ -505,9 +471,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
   prov_msg_t* cprov = target->cred->provenance;
   prov_msg_t* mprov = msg->provenance;
 
-  if(cprov->node_info.tracked==NODE_TRACKED || mprov->node_info.tracked==NODE_TRACKED || prov_all){
-    record_edge(ED_DATA, mprov, cprov);
-  }
+  record_edge(ED_DATA, mprov, cprov);
   return 0;
 }
 
@@ -527,10 +491,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
     return -ENOMEM;
   sprov->shm_info.mode=shp->shm_perm.mode;
   shp->shm_perm.provenance=sprov;
-  if(cprov->node_info.tracked==NODE_TRACKED || sprov->node_info.tracked==NODE_TRACKED || prov_all){
-    record_edge(ED_ATTACH, sprov, cprov);
-    record_edge(ED_ATTACH, cprov, sprov);
-  }
+  record_edge(ED_ATTACH, sprov, cprov);
+  record_edge(ED_ATTACH, cprov, sprov);
 	return 0;
 }
 
@@ -562,16 +524,62 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
   if(!sprov)
     return -ENOMEM;
 
-  if(cprov->node_info.tracked==NODE_TRACKED || sprov->node_info.tracked==NODE_TRACKED || prov_all){
-    if(shmflg & SHM_RDONLY){
-      record_edge(ED_ATTACH, sprov, cprov);
-    }else{
-      record_edge(ED_ATTACH, sprov, cprov);
-      record_edge(ED_ATTACH, cprov, sprov);
-    }
+  if(shmflg & SHM_RDONLY){
+    record_edge(ED_ATTACH, sprov, cprov);
+  }else{
+    record_edge(ED_ATTACH, sprov, cprov);
+    record_edge(ED_ATTACH, cprov, sprov);
   }
-
 	return 0;
+}
+
+/*
+* Allocate and attach a security structure to the sk->sk_security field,
+* which is used to copy security attributes between local stream sockets.
+*/
+static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
+{
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* skprov = alloc_provenance(0, MSG_SOCK, priority);
+
+  if(!skprov)
+    return -ENOMEM;
+  return 0;
+}
+
+/*
+* Deallocate security structure.
+*/
+static void provenance_sk_free_security(struct sock *sk)
+{
+	free_provenance(sk->sk_provenance);
+	sk->sk_provenance = NULL;
+}
+
+/*
+* This hook allows a module to update or allocate a per-socket security
+* structure. Note that the security field was not added directly to the
+* socket structure, but rather, the socket security information is stored
+* in the associated inode.  Typically, the inode alloc_security hook will
+* allocate and and attach security information to
+* sock->inode->i_security.  This hook may be used to update the
+* sock->inode->i_security field with additional information that wasn't
+* available when the inode was allocated.
+* @sock contains the newly created socket structure.
+* @family contains the requested protocol family.
+* @type contains the requested communications type.
+* @protocol contains the requested protocol.
+* @kern set to 1 if a kernel socket.
+*/
+static int provenance_socket_post_create(struct socket *sock, int family,
+				      int type, int protocol, int kern)
+{
+  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* skprov = sock->sk_provenance;
+  prov_msg_t* iprov  = SOCK_INODE(sock)->i_provenance;
+  record_edge(ED_CREATE, cprov, skprov);
+  record_edge(ED_ASSOCIATE, skprov, iprov);
+  return 0;
 }
 
 static struct security_hook_list provenance_hooks[] = {
@@ -595,6 +603,9 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(shm_alloc_security, provenance_shm_alloc_security),
   LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
   LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
+  LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
+  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
+  LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
 };
 
 void __init provenance_add_hooks(void){

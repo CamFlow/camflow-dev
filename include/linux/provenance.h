@@ -91,7 +91,12 @@ static inline void record_edge(edge_type_t type, prov_msg_t* from, prov_msg_t* t
   prov_msg_t edge;
   memset(&edge, 0, sizeof(prov_msg_t));
 
-  if(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE) // to or from are opaque
+  // ignore if not tracked
+  if(from->node_info.tracked!=NODE_TRACKED && to->node_info.tracked!=NODE_TRACKED && !prov_all)
+    return;
+
+  // don't record if to or from are opaque
+  if(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE)
     return;
 
   if(!prov_enabled) // capture is not enabled, ignore

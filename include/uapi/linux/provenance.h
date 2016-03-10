@@ -23,6 +23,7 @@
 #define MSG_DISC_NODE     6
 #define MSG_MSG           7
 #define MSG_SHM           8
+#define MSG_SOCK          9
 
 #define ED_DATA           0
 #define ED_CREATE         1
@@ -30,6 +31,7 @@
 #define ED_CHANGE         3
 #define ED_MMAP           4
 #define ED_ATTACH         5
+#define ED_ASSOCIATE      6
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
