@@ -141,7 +141,8 @@ struct provenance_ops ops = {
   .log_disc=log_disc,
   .log_msg=log_msg,
   .log_shm=log_shm,
-  .log_sock=log_sock
+  .log_sock=log_sock,
+  .log_address=log_address
 };
 
 void test(void){
