@@ -18,6 +18,7 @@
 #include <linux/types.h>
 #include <linux/bug.h>
 #include <linux/relay.h>
+#include <linux/socket.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 

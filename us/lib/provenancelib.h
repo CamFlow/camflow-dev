@@ -18,9 +18,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <linux/provenance.h>
 
-static char* edge_str[]={"data", "create", "pass", "change", "mmap", "attach", "associate", "unknown"};
+
+static char* edge_str[]={"data", "create", "pass", "change", "mmap", "attach", "associate", "bind", "connect", "unknown"};
 
 struct provenance_ops{
   void (*init)(void);
@@ -34,6 +36,7 @@ struct provenance_ops{
   void (*log_msg)(struct msg_msg_struct*);
   void (*log_shm)(struct shm_struct*);
   void (*log_sock)(struct sock_struct*);
+  void (*log_address)(struct address_struct*);
 };
 
 /* provenance usher functions */

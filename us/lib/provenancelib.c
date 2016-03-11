@@ -217,6 +217,10 @@ static void long_callback_job(void* data)
       if(prov_ops.log_unlink!=NULL)
         prov_ops.log_unlink(&(msg->unlink_info));
       break;
+    case MSG_ADDR:
+      if(prov_ops.log_address!=NULL)
+        prov_ops.log_address(&(msg->address_info));
+      break;
     default:
       printf("Error: unknown message type %u\n", msg->msg_info.message_type);
       break;

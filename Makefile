@@ -1,4 +1,5 @@
 kernel-version=4.2.8
+lsm-version=0.1
 arch=x86_64
 
 all: config compile
@@ -51,3 +52,12 @@ clean_kernel:
 
 clean_us:
 	cd ./us && $(MAKE) clean
+
+patch:
+	cd build && mkdir -p pristine
+	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine
+	cd build/pristine/linux-$(kernel-version) && $(MAKE) clean
+	cd build/pristine/linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build/linux-$(kernel-version) && $(MAKE) clean
+	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
+	diff -rcNP ./build/pristine/linux-$(kernel-version) ./build/linux-$(kernel-version) > ./build/patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]

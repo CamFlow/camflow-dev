@@ -39,9 +39,24 @@ static inline prov_msg_t* alloc_provenance(node_id_t nid, message_type_t ntype, 
   return prov;
 }
 
+static inline long_prov_msg_t* alloc_long_provenance(message_type_t ntype, gfp_t gfp)
+{
+  long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
+  if(!prov){
+    return NULL;
+  }
+  prov->msg_info.message_type=ntype;
+  return prov;
+}
+
 static inline void free_provenance(prov_msg_t* prov){
   kmem_cache_free(provenance_cache, prov);
 }
+
+static inline void free_long_provenance(long_prov_msg_t* prov){
+  kmem_cache_free(long_provenance_cache, prov);
+}
+
 
 static inline prov_msg_t* provenance_clone(message_type_t ntype, prov_msg_t* old, gfp_t gfp)
 {
@@ -65,8 +80,8 @@ static void cred_init_provenance(void)
 	prov = alloc_provenance(0, MSG_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
-  prov->node_info.uid=__kuid_val(cred->euid);
-  prov->node_info.gid=__kgid_val(cred->egid);
+  prov->task_info.uid=__kuid_val(cred->euid);
+  prov->task_info.gid=__kgid_val(cred->egid);
 
 	cred->provenance = prov;
 }
@@ -85,8 +100,8 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 
   if(!prov)
     return -ENOMEM;
-  prov->node_info.uid=__kuid_val(cred->euid);
-  prov->node_info.gid=__kgid_val(cred->egid);
+  prov->task_info.uid=__kuid_val(cred->euid);
+  prov->task_info.gid=__kgid_val(cred->egid);
 
   cred->provenance = prov;
   return 0;
@@ -115,8 +130,8 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 
   if(!prov)
     return -ENOMEM;
-  prov->node_info.uid=__kuid_val(new->euid);
-  prov->node_info.gid=__kgid_val(new->egid);
+  prov->task_info.uid=__kuid_val(new->euid);
+  prov->task_info.gid=__kgid_val(new->egid);
 
   record_edge(ED_CREATE, old_prov, prov);
   new->provenance = prov;
@@ -260,15 +275,14 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   record_edge(ED_DATA, cprov, iprov);
 
   if(prov_enabled){
-    link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
-    link_prov->link_info.message_type = MSG_LINK;
+    link_prov = alloc_long_provenance(MSG_LINK, GFP_NOFS);
     link_prov->link_info.length = new_dentry->d_name.len;
     memcpy(link_prov->link_info.name, new_dentry->d_name.name, link_prov->link_info.length);
     link_prov->link_info.dir_id = dprov->inode_info.node_id;
     link_prov->link_info.task_id = cprov->task_info.node_id;
     link_prov->link_info.inode_id = iprov->task_info.node_id;
     long_prov_write(link_prov);
-    kmem_cache_free(long_provenance_cache, link_prov);
+    free_long_provenance(link_prov);
   }
   return 0;
 }
@@ -302,15 +316,14 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   record_edge(ED_DATA, cprov, iprov);
 
   if(prov_enabled){
-    link_prov = kmem_cache_zalloc(long_provenance_cache, GFP_NOFS);
-    link_prov->unlink_info.message_type = MSG_UNLINK;
+    link_prov = alloc_long_provenance(MSG_UNLINK, GFP_NOFS);
     link_prov->unlink_info.length = dentry->d_name.len;
     memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
     link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
     link_prov->unlink_info.task_id = cprov->task_info.node_id;
     link_prov->unlink_info.inode_id = iprov->task_info.node_id;
     long_prov_write(link_prov);
-    kmem_cache_free(long_provenance_cache, link_prov);
+    free_long_provenance(link_prov);
   }
   return 0;
 }
@@ -586,7 +599,6 @@ static int provenance_socket_post_create(struct socket *sock, int family,
   prov_msg_t* iprov  = inode_provenance(SOCK_INODE(sock));
   prov_msg_t* skprov = NULL;
 
-
   if(kern){
     return 0;
   }
@@ -602,6 +614,107 @@ static int provenance_socket_post_create(struct socket *sock, int family,
 
   return 0;
 }
+
+/*
+* Check permission before socket protocol layer bind operation is
+* performed and the socket @sock is bound to the address specified in the
+* @address parameter.
+* @sock contains the socket structure.
+* @address contains the address to bind to.
+* @addrlen contains the length of address.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
+{
+  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* skprov = sock->sk->sk_provenance;
+  long_prov_msg_t* addr_info = NULL;
+
+
+  if(!skprov)
+    return -ENOMEM;
+
+  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
+  addr_info->address_info.sock_id = skprov->sock_info.node_id;
+  addr_info->address_info.length=addrlen;
+  memcpy(&(addr_info->address_info.addr), address, addrlen);
+  long_prov_write(addr_info);
+  free_long_provenance(addr_info);
+  record_edge(ED_BIND, cprov, skprov);
+
+  return 0;
+}
+
+/*
+* Check permission before socket protocol layer connect operation
+* attempts to connect socket @sock to a remote address, @address.
+* @sock contains the socket structure.
+* @address contains the address of remote endpoint.
+* @addrlen contains the length of address.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
+{
+  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* skprov = sock->sk->sk_provenance;
+  long_prov_msg_t* addr_info = NULL;
+
+  if(!skprov)
+    return -ENOMEM;
+
+  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
+  addr_info->address_info.sock_id = skprov->sock_info.node_id;
+  addr_info->address_info.length=addrlen;
+  memcpy(&(addr_info->address_info.addr), address, addrlen);
+  long_prov_write(addr_info);
+  free_long_provenance(addr_info);
+  record_edge(ED_CONNECT, cprov, skprov);
+
+  return 0;
+}
+
+/*
+* Check permission before socket protocol layer listen operation.
+* @sock contains the socket structure.
+* @backlog contains the maximum length for the pending connection queue.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_listen(struct socket *sock, int backlog)
+{
+  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* skprov = sock->sk->sk_provenance;
+
+  record_edge(ED_LISTEN, cprov, skprov);
+  return 0;
+}
+
+/*
+* Check permission before transmitting a message to another socket.
+* @sock contains the socket structure.
+* @msg contains the message to be transmitted.
+* @size contains the size of message.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
+				  int size)
+{
+	return provenance_inode_permission(SOCK_INODE(sock), MAY_WRITE);
+}
+
+/*
+* Check permission before receiving a message from a socket.
+* @sock contains the socket structure.
+* @msg contains the message structure.
+* @size contains the size of message structure.
+* @flags contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
+				  int size, int flags)
+{
+	return provenance_inode_permission(SOCK_INODE(sock), MAY_READ);
+}
+
 
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
@@ -626,7 +739,12 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
   LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
-  LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create)
+  LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
+  LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
+  LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
+  LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
+  LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
+  LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg)
 };
 
 void __init provenance_add_hooks(void){

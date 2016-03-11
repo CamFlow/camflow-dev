@@ -125,6 +125,11 @@ void log_sock(struct sock_struct* sock){
     sock->event_id, sock->node_id, sock->type, sock->family, sock->protocol);
 }
 
+void log_address(struct address_struct* address){
+  write_to_log("%lu-\taddress[%lu:name]{%u}",
+  address->event_id, address->sock_id, address->addr.sa_family);
+}
+
 struct provenance_ops ops = {
   .init=init,
   .log_edge=log_edge,

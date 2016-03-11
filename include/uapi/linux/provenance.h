@@ -24,6 +24,7 @@
 #define MSG_MSG           7
 #define MSG_SHM           8
 #define MSG_SOCK          9
+#define MSG_ADDR          10
 
 #define ED_DATA           0
 #define ED_CREATE         1
@@ -32,6 +33,9 @@
 #define ED_MMAP           4
 #define ED_ATTACH         5
 #define ED_ASSOCIATE      6
+#define ED_BIND           7
+#define ED_CONNECT        8
+#define ED_LISTEN         9
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -71,14 +75,15 @@ struct node_struct{
   uint8_t recorded;
   uint8_t tracked;
   uint8_t opaque;
-  uint32_t uid;
-  uint32_t gid;
 };
 
 struct disc_node_struct{
   message_type_t message_type;
   event_id_t event_id;
   node_id_t node_id;
+  uint8_t recorded;
+  uint8_t tracked;
+  uint8_t opaque;
 };
 
 struct task_prov_struct{
@@ -109,6 +114,9 @@ struct msg_msg_struct{
   message_type_t message_type;
   event_id_t event_id;
   node_id_t node_id;
+  uint8_t recorded;
+  uint8_t tracked;
+  uint8_t opaque;
   long type;
 };
 
@@ -116,6 +124,9 @@ struct shm_struct{
   message_type_t message_type;
   event_id_t event_id;
   node_id_t node_id;
+  uint8_t recorded;
+  uint8_t tracked;
+  uint8_t opaque;
   uint16_t mode;
 };
 
@@ -123,6 +134,9 @@ struct sock_struct{
   message_type_t message_type;
   event_id_t event_id;
   node_id_t node_id;
+  uint8_t recorded;
+  uint8_t tracked;
+  uint8_t opaque;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
@@ -172,11 +186,20 @@ struct unlink_struct{
   node_id_t inode_id;
 };
 
+struct address_struct{
+  message_type_t message_type;
+  event_id_t event_id;
+  node_id_t sock_id;
+  size_t length;
+  struct sockaddr addr;
+};
+
 typedef union long_msg{
   struct msg_struct           msg_info;
   struct str_struct           str_info;
   struct link_struct          link_info;
   struct unlink_struct        unlink_info;
+  struct address_struct       address_info;
 } long_prov_msg_t;
 
 #endif
