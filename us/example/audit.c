@@ -20,6 +20,9 @@
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netdb.h>
 #include <unistd.h>
 
 #include "simplog.h"
@@ -126,8 +129,24 @@ void log_sock(struct sock_struct* sock){
 }
 
 void log_address(struct address_struct* address){
-  write_to_log("%lu-\taddress[%lu:name]{%u}",
-  address->event_id, address->sock_id, address->addr.sa_family);
+  char host[NI_MAXHOST];
+  char serv[NI_MAXSERV];
+  int err;
+
+  if(address->addr.sa_family == AF_INET || address->addr.sa_family == AF_INET6){
+    err = getnameinfo(&(address->addr), address->length, host, NI_MAXHOST, serv, NI_MAXSERV, 0);
+    if(err){
+      printf("Error %d\n", err);
+    }
+    write_to_log("%lu-\taddress[%lu:%s:%s]{%u}",
+    address->event_id, address->sock_id, host, serv, address->addr.sa_family);
+  }else if((address->addr).sa_family == AF_UNIX){
+    write_to_log("%lu-\taddress[%lu:%s]{%u}",
+    address->event_id, address->sock_id, ((struct sockaddr_un*)&(address->addr))->sun_path, address->addr.sa_family);
+  }else{
+    write_to_log("%lu-\taddress[%lu:%s]{%u}",
+    address->event_id, address->sock_id, "type not handled", address->addr.sa_family);
+  }
 }
 
 struct provenance_ops ops = {

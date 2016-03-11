@@ -630,6 +630,8 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   prov_msg_t* skprov = sock->sk->sk_provenance;
   long_prov_msg_t* addr_info = NULL;
 
+  if(cprov->task_info.opaque==NODE_OPAQUE)
+    return 0;
 
   if(!skprov)
     return -ENOMEM;
@@ -658,6 +660,9 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
   long_prov_msg_t* addr_info = NULL;
+
+  if(cprov->task_info.opaque==NODE_OPAQUE)
+    return 0;
 
   if(!skprov)
     return -ENOMEM;
