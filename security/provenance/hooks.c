@@ -24,49 +24,14 @@ atomic64_t prov_node_id=ATOMIC64_INIT(0);
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
 
-static inline prov_msg_t* alloc_provenance(node_id_t nid, message_type_t ntype, gfp_t gfp)
-{
-  prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
-  if(!prov){
-    return NULL;
-  }
-
-  if(nid==0)
-  {
-    prov->node_info.node_id=prov_next_nodeid();
-  }else{
-    prov->node_info.node_id=nid;
-  }
-  prov->node_info.message_type=ntype;
-  return prov;
-}
-
-static inline long_prov_msg_t* alloc_long_provenance(message_type_t ntype, gfp_t gfp)
-{
-  long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
-  if(!prov){
-    return NULL;
-  }
-  prov->msg_info.message_type=ntype;
-  return prov;
-}
-
-static inline void free_provenance(prov_msg_t* prov){
-  kmem_cache_free(provenance_cache, prov);
-}
-
-static inline void free_long_provenance(long_prov_msg_t* prov){
-  kmem_cache_free(long_provenance_cache, prov);
-}
-
-
 static inline prov_msg_t* provenance_clone(message_type_t ntype, prov_msg_t* old, gfp_t gfp)
 {
-  prov_msg_t* prov =   alloc_provenance(0, ntype, gfp);
+  prov_msg_t* prov =   alloc_provenance(ntype, gfp);
   if(!prov)
   {
     return NULL;
   }
+  set_node_id(prov, RANDOM_NODE_ID);
   return prov;
 }
 
@@ -79,9 +44,10 @@ static void cred_init_provenance(void)
 	struct cred *cred = (struct cred *) current->real_cred;
 	prov_msg_t *prov;
 
-	prov = alloc_provenance(0, MSG_TASK, GFP_KERNEL);
+	prov = alloc_provenance(MSG_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
+  set_node_id(prov, RANDOM_NODE_ID);
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
 
@@ -98,10 +64,12 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
   prov_msg_t* prov;
 
-  prov = alloc_provenance(0, MSG_TASK, gfp);
+  prov = alloc_provenance(MSG_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
+  set_node_id(prov, RANDOM_NODE_ID);
+
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
 
@@ -183,9 +151,11 @@ static int provenance_inode_alloc_security(struct inode *inode)
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov;
-  iprov = alloc_provenance(inode->i_ino, MSG_INODE, GFP_NOFS);
+  iprov = alloc_provenance(MSG_INODE, GFP_NOFS);
   if(unlikely(!iprov))
     return -ENOMEM;
+  set_node_id(iprov, inode->i_ino);
+
   iprov->inode_info.uid=__kuid_val(inode->i_uid);
   iprov->inode_info.gid=__kgid_val(inode->i_gid);
   iprov->inode_info.mode=inode->i_mode;
@@ -432,11 +402,12 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov;
   /* alloc new prov struct with generated id */
-  mprov = alloc_provenance(0, MSG_MSG, GFP_NOFS);
+  mprov = alloc_provenance(MSG_MSG, GFP_NOFS);
 
   if(!mprov)
     return -ENOMEM;
 
+  set_node_id(mprov, RANDOM_NODE_ID);
   mprov->msg_msg_info.type=msg->m_type;
   msg->provenance = mprov;
   record_edge(ED_CREATE, cprov, mprov);
@@ -501,10 +472,12 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	prov_msg_t* cprov = current_provenance();
-  prov_msg_t* sprov = alloc_provenance(0, MSG_SHM, GFP_NOFS);
+  prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_NOFS);
 
   if(!sprov)
     return -ENOMEM;
+
+  set_node_id(sprov, RANDOM_NODE_ID);
   sprov->shm_info.mode=shp->shm_perm.mode;
   shp->shm_perm.provenance=sprov;
   record_edge(ED_ATTACH, sprov, cprov);
@@ -555,10 +528,12 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 */
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
-  prov_msg_t* skprov = alloc_provenance(0, MSG_SOCK, priority);
+  prov_msg_t* skprov = alloc_provenance(MSG_SOCK, priority);
 
   if(!skprov)
     return -ENOMEM;
+  set_node_id(skprov, RANDOM_NODE_ID);
+
   sk->sk_provenance=skprov;
   return 0;
 }

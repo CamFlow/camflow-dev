@@ -22,6 +22,8 @@
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 
+#define RANDOM_NODE_ID 0
+
 extern atomic64_t prov_evt_count;
 
 static inline event_id_t prov_next_evtid( void ){
@@ -39,6 +41,45 @@ extern struct rchan *prov_chan;
 extern struct rchan *long_prov_chan;
 extern bool prov_enabled;
 extern bool prov_all;
+extern struct kmem_cache *provenance_cache;
+extern struct kmem_cache *long_provenance_cache;
+
+static inline prov_msg_t* alloc_provenance(message_type_t ntype, gfp_t gfp)
+{
+  prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
+  if(!prov){
+    return NULL;
+  }
+
+  prov->msg_info.message_type=ntype;
+  return prov;
+}
+
+static inline void set_node_id(prov_msg_t* node, node_id_t nid){
+  if(nid==RANDOM_NODE_ID){
+    node->node_info.node_id=prov_next_nodeid();
+  }else{
+    node->node_info.node_id=nid;
+  }
+}
+
+static inline long_prov_msg_t* alloc_long_provenance(message_type_t ntype, gfp_t gfp)
+{
+  long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
+  if(!prov){
+    return NULL;
+  }
+  prov->msg_info.message_type=ntype;
+  return prov;
+}
+
+static inline void free_provenance(prov_msg_t* prov){
+  kmem_cache_free(provenance_cache, prov);
+}
+
+static inline void free_long_provenance(long_prov_msg_t* prov){
+  kmem_cache_free(long_provenance_cache, prov);
+}
 
 static inline void prov_write(prov_msg_t* msg)
 {
