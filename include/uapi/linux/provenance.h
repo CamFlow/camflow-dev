@@ -36,6 +36,7 @@
 #define ED_BIND           7
 #define ED_CONNECT        8
 #define ED_LISTEN         9
+#define ED_ACCEPT         10
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1

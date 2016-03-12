@@ -17,6 +17,8 @@
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
 #include <net/sock.h>
+#include <linux/binfmts.h>
+#include <linux/random.h>
 
 atomic64_t prov_node_id=ATOMIC64_INIT(0);
 struct kmem_cache *provenance_cache=NULL;
@@ -720,6 +722,103 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 	return provenance_inode_permission(SOCK_INODE(sock), MAY_READ);
 }
 
+/*
+* Check permission before accepting a new connection.  Note that the new
+* socket, @newsock, has been created and some information copied to it,
+* but the accept operation has not actually been performed.
+* @sock contains the listening socket structure.
+* @newsock contains the newly created server socket for connection.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
+{
+  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* skprov = inode_provenance(SOCK_INODE(sock));
+  prov_msg_t* nskprov = inode_provenance(SOCK_INODE(newsock));
+
+  record_edge(ED_CREATE, skprov, nskprov);
+  record_edge(ED_ACCEPT, nskprov, cprov);
+  return 0;
+}
+
+/*
+* Check permissions before establishing a Unix domain stream connection
+* between @sock and @other.
+* @sock contains the sock structure.
+* @other contains the peer sock structure.
+* @newsk contains the new sock structure.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_unix_stream_connect(struct sock *sock,
+					      struct sock *other,
+					      struct sock *newsk)
+{
+  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* skprov = sock->sk_provenance;
+  prov_msg_t* nskprov = newsk->sk_provenance;
+  prov_msg_t* okprov = other->sk_provenance;
+
+  record_edge(ED_CONNECT, cprov, skprov);
+  record_edge(ED_ASSOCIATE, skprov, nskprov);
+  record_edge(ED_ASSOCIATE, skprov, okprov);
+  return 0;
+}
+
+/*
+* Check permissions before connecting or sending datagrams from @sock to
+* @other.
+* @sock contains the socket structure.
+* @other contains the peer socket structure.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_unix_may_send(struct socket *sock,
+					struct socket *other)
+{
+  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* okprov = other->sk->sk_provenance;
+
+  record_edge(ED_DATA, skprov, okprov);
+  return 0;
+}
+
+/* outdated description */
+/*
+* Save security information in the bprm->security field, typically based
+* on information about the bprm->file, for later use by the apply_creds
+* hook.  This hook may also optionally check permissions (e.g. for
+* transitions between security domains).
+* This hook may be called multiple times during a single execve, e.g. for
+* interpreters.  The hook can tell whether it has already been called by
+* checking to see if @bprm->security is non-NULL.  If so, then the hook
+* may decide either to retain the security information saved earlier or
+* to replace it.
+* @bprm contains the linux_binprm structure.
+* Return 0 if the hook is successful and permission is granted.
+*/
+static int provenance_bprm_set_creds(struct linux_binprm *bprm){
+  if(!bprm->cred->provenance){
+    return provenance_cred_alloc_blank(bprm->cred, GFP_NOFS);
+  }
+  return 0;
+}
+
+/*
+* Tidy up after the installation of the new security attributes of a
+* process being transformed by an execve operation.  The new credentials
+* have, by this point, been set to @current->cred.  @bprm points to the
+* linux_binprm structure.  This hook is a good place to perform state
+* changes on the process such as clearing out non-inheritable signal
+* state.  This is called immediately after commit_creds().
+*/
+ static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
+   prov_msg_t* cprov  = current_provenance();
+   prov_msg_t* nprov = bprm->cred->provenance;
+   struct inode *inode = file_inode(bprm->file);
+   prov_msg_t* iprov = inode_provenance(inode);
+
+   record_edge(ED_CREATE, cprov, nprov);
+   record_edge(ED_CREATE, iprov, nprov);
+ }
 
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
@@ -749,10 +848,18 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
   LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
   LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
-  LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg)
+  LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
+  LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
+  LSM_HOOK_INIT(unix_stream_connect, provenance_socket_unix_stream_connect),
+  LSM_HOOK_INIT(unix_may_send, provenance_socket_unix_may_send),
+  LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
+  LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds)
 };
 
+uint64_t prov_boot_id;
+
 void __init provenance_add_hooks(void){
+  get_random_bytes(&prov_boot_id, sizeof(uint64_t));
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);
