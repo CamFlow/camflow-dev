@@ -20,21 +20,8 @@
 #include <linux/binfmts.h>
 #include <linux/random.h>
 
-atomic64_t prov_node_id=ATOMIC64_INIT(0);
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
-
-static inline prov_msg_t* provenance_clone(message_type_t ntype, prov_msg_t* old, gfp_t gfp)
-{
-  prov_msg_t* prov =   alloc_provenance(ntype, gfp);
-  if(!prov)
-  {
-    return NULL;
-  }
-  set_node_id(prov, RANDOM_NODE_ID);
-  return prov;
-}
-
 
 /*
  * initialise the security for the init task
@@ -42,12 +29,10 @@ static inline prov_msg_t* provenance_clone(message_type_t ntype, prov_msg_t* old
 static void cred_init_provenance(void)
 {
 	struct cred *cred = (struct cred *) current->real_cred;
-	prov_msg_t *prov;
-
-	prov = alloc_provenance(MSG_TASK, GFP_KERNEL);
+	prov_msg_t *prov = alloc_provenance(MSG_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
-  set_node_id(prov, RANDOM_NODE_ID);
+  set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
 
@@ -62,13 +47,11 @@ static void cred_init_provenance(void)
 */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
-  prov_msg_t* prov;
-
-  prov = alloc_provenance(MSG_TASK, gfp);
+  prov_msg_t* prov  = alloc_provenance(MSG_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
-  set_node_id(prov, RANDOM_NODE_ID);
+  set_node_id(prov, ASSIGN_NODE_ID);
 
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
@@ -96,10 +79,12 @@ static void provenance_cred_free(struct cred *cred)
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
   prov_msg_t* old_prov = old->provenance;
-  prov_msg_t* prov = provenance_clone(MSG_TASK, old_prov, gfp);
+  prov_msg_t* prov = alloc_provenance(MSG_TASK, gfp);
 
-  if(!prov)
+  if(!prov){
     return -ENOMEM;
+  }
+  set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
 
@@ -151,6 +136,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov;
+  prov_msg_t* sprov;
   iprov = alloc_provenance(MSG_INODE, GFP_NOFS);
   if(unlikely(!iprov))
     return -ENOMEM;
@@ -159,7 +145,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
   iprov->inode_info.uid=__kuid_val(inode->i_uid);
   iprov->inode_info.gid=__kgid_val(inode->i_gid);
   iprov->inode_info.mode=inode->i_mode;
-  iprov->inode_info.rdev=inode->i_rdev;
+  sprov = inode->i_sb->s_provenance;
+  memcpy(iprov->inode_info.sb_uuid, sprov->sb_info.uuid, 16*sizeof(uint8_t));
 
   inode->i_provenance = iprov;
 
@@ -407,7 +394,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   if(!mprov)
     return -ENOMEM;
 
-  set_node_id(mprov, RANDOM_NODE_ID);
+  set_node_id(mprov, ASSIGN_NODE_ID);
   mprov->msg_msg_info.type=msg->m_type;
   msg->provenance = mprov;
   record_edge(ED_CREATE, cprov, mprov);
@@ -477,7 +464,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
   if(!sprov)
     return -ENOMEM;
 
-  set_node_id(sprov, RANDOM_NODE_ID);
+  set_node_id(sprov, ASSIGN_NODE_ID);
   sprov->shm_info.mode=shp->shm_perm.mode;
   shp->shm_perm.provenance=sprov;
   record_edge(ED_ATTACH, sprov, cprov);
@@ -532,7 +519,7 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 
   if(!skprov)
     return -ENOMEM;
-  set_node_id(skprov, RANDOM_NODE_ID);
+  set_node_id(skprov, ASSIGN_NODE_ID);
 
   sk->sk_provenance=skprov;
   return 0;
@@ -795,6 +782,47 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    record_edge(ED_CREATE, iprov, nprov);
  }
 
+/*
+* Allocate and attach a security structure to the sb->s_security field.
+* The s_security field is initialized to NULL when the structure is
+* allocated.
+* @sb contains the super_block structure to be modified.
+* Return 0 if operation was successful.
+*/
+static int provenance_sb_alloc_security(struct super_block *sb)
+{
+  prov_msg_t* sbprov  = alloc_provenance(MSG_SB, GFP_KERNEL);
+  if(!sbprov)
+    return -ENOMEM;
+  sb->s_provenance = sbprov;
+  return 0;
+}
+
+/*
+* Deallocate and clear the sb->s_security field.
+* @sb contains the super_block structure to be modified.
+*/
+static void provenance_sb_free_security(struct super_block *sb)
+{
+  free_provenance(sb->s_provenance);
+  sb->s_provenance=NULL;
+}
+
+static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *data)
+{
+  int i;
+  uint8_t c=0;
+  prov_msg_t* sbprov = sb->s_provenance;
+  for(i=0; i<16; i++){
+    sbprov->sb_info.uuid[i]=sb->s_uuid[i];
+    c|=sb->s_uuid[i];
+  }
+  if(c==0){ // no uuid defined, generate random one
+    get_random_bytes(sbprov->sb_info.uuid, 16*sizeof(uint8_t));
+  }
+  return 0;
+}
+
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
@@ -828,13 +856,13 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(unix_stream_connect, provenance_socket_unix_stream_connect),
   LSM_HOOK_INIT(unix_may_send, provenance_socket_unix_may_send),
   LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
-  LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds)
+  LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
+  LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
+  LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
+  LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
 };
 
-uint64_t prov_boot_id;
-
 void __init provenance_add_hooks(void){
-  get_random_bytes(&prov_boot_id, sizeof(uint64_t));
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);

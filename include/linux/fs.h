@@ -1310,6 +1310,9 @@ struct super_block {
 #ifdef CONFIG_SECURITY
 	void                    *s_security;
 #endif
+#ifdef CONFIG_SECURITY_PROVENANCE
+	void			*s_provenance;
+#endif
 	const struct xattr_handler **s_xattr;
 
 	struct list_head	s_inodes;	/* all inodes */

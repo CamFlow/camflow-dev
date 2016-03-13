@@ -232,6 +232,7 @@ static void long_callback_job(void* data)
 static void reader_job(void *data)
 {
   uint8_t* buf;
+  size_t size;
   int rc;
   uint8_t cpu = (uint8_t)(*(uint8_t*)data);
   struct pollfd pollfd;
@@ -249,22 +250,22 @@ static void reader_job(void *data)
       }
     }
     buf = (uint8_t*)malloc(sizeof(prov_msg_t)); /* freed by worker thread */
-    rc = read(relay_file[cpu], buf, sizeof(prov_msg_t));
-    if(rc==0){ /* we did not read anything */
-      continue;
-    }
-    if(rc<0){
-      if(errno==EAGAIN){ // retry
+
+    size = 0;
+    do{
+      rc = read(relay_file[cpu], buf+size, sizeof(prov_msg_t)-size);
+      if(rc==0){ /* we did not read anything */
         continue;
       }
-      break; // something bad happened
-    }
-    if(rc!=sizeof(prov_msg_t)){
-      perror("Did not read a full message");
-      printf("read: %d\n", rc);
-      /* to we need to seek? */
-      break; // something bad happened
-    }
+      if(rc<0){
+        if(errno==EAGAIN){ // retry
+          continue;
+        }
+        thpool_add_work(worker_thpool, (void*)reader_job, (void*)data);
+        return; // something bad happened
+      }
+      size+=rc;
+    }while(size<sizeof(prov_msg_t));
     /* add job to queue */
     thpool_add_work(worker_thpool, (void*)callback_job, buf);
   }while(1);
@@ -274,6 +275,7 @@ static void reader_job(void *data)
 static void long_reader_job(void *data)
 {
   uint8_t* buf;
+  size_t size;
   int rc;
   uint8_t cpu = (uint8_t)(*(uint8_t*)data);
   struct pollfd pollfd;
@@ -291,22 +293,23 @@ static void long_reader_job(void *data)
       }
     }
     buf = (uint8_t*)malloc(sizeof(long_prov_msg_t)); /* freed by worker thread */
-    rc = read(long_relay_file[cpu], buf, sizeof(long_prov_msg_t));
-    if(rc==0){ /* we did not read anything */
-      continue;
-    }
-    if(rc<0){
-      if(errno==EAGAIN){ // retry
+
+    size = 0;
+    do{
+      rc = read(long_relay_file[cpu], buf+size, sizeof(long_prov_msg_t)-size);
+      if(rc==0){ /* we did not read anything */
         continue;
       }
-      break; // something bad happened
-    }
-    if(rc!=sizeof(long_prov_msg_t)){
-      rc = read(long_relay_file[cpu], buf+rc, sizeof(long_prov_msg_t)-rc);
       if(rc<0){
-        break;
+        printf("Error %d\n", rc);
+        if(errno==EAGAIN){ // retry
+          continue;
+        }
+        thpool_add_work(worker_thpool, (void*)long_reader_job, (void*)data);
+        return; // something bad happened
       }
-    }
+      size+=rc;
+    }while(size<sizeof(long_prov_msg_t));
     /* add job to queue */
     thpool_add_work(worker_thpool, (void*)long_callback_job, buf);
   }while(1);

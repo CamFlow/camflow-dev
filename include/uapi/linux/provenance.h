@@ -25,6 +25,7 @@
 #define MSG_SHM           8
 #define MSG_SOCK          9
 #define MSG_ADDR          10
+#define MSG_SB            11
 
 #define ED_DATA           0
 #define ED_CREATE         1
@@ -55,97 +56,70 @@
 
 #define STR_MAX_SIZE      128
 
-typedef uint64_t event_id_t;
-typedef uint64_t node_id_t;
-typedef uint8_t edge_type_t;
-typedef uint8_t message_type_t;
+#define MESSAGE_ELEMENTS uint8_t message_type; uint64_t event_id;
+#define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t tracked; uint8_t opaque;
+
+struct msg_struct{
+  MESSAGE_ELEMENTS
+};
 
 struct edge_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  edge_type_t type;
+  MESSAGE_ELEMENTS
+  uint8_t type;
   uint8_t allowed;
-  node_id_t snd_id;
-  node_id_t rcv_id;
+  uint64_t snd_id;
+  uint64_t rcv_id;
 };
 
 struct node_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
 };
 
 struct disc_node_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
 };
 
 struct task_prov_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
-  uint32_t rdev;
+  uint8_t sb_uuid[16];
+};
+
+struct sb_struct{
+  MESSAGE_ELEMENTS
+  uint8_t uuid[16];
 };
 
 struct msg_msg_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
   long type;
 };
 
 struct shm_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
   uint16_t mode;
 };
 
 struct sock_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t node_id;
-  uint8_t recorded;
-  uint8_t tracked;
-  uint8_t opaque;
+  MESSAGE_ELEMENTS
+  NODE_ELEMENTS
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
-};
-
-struct msg_struct{
-  message_type_t message_type;
-  event_id_t event_id;
 };
 
 typedef union prov_msg{
@@ -158,39 +132,36 @@ typedef union prov_msg{
   struct msg_msg_struct       msg_msg_info;
   struct shm_struct           shm_info;
   struct sock_struct          sock_info;
+  struct sb_struct            sb_info;
 } prov_msg_t;
 
 struct str_struct{
-  message_type_t message_type;
-  event_id_t event_id;
+  MESSAGE_ELEMENTS
   size_t length;
   char str[4096];
 };
 
 struct link_struct{
-  message_type_t message_type;
-  event_id_t event_id;
+  MESSAGE_ELEMENTS
   size_t length;
   char name[4096];
-  node_id_t dir_id;
-  node_id_t task_id;
-  node_id_t inode_id;
+  uint64_t dir_id;
+  uint64_t task_id;
+  uint64_t inode_id;
 };
 
 struct unlink_struct{
-  message_type_t message_type;
-  event_id_t event_id;
+  MESSAGE_ELEMENTS
   size_t length;
   char name[4096];
-  node_id_t dir_id;
-  node_id_t task_id;
-  node_id_t inode_id;
+  uint64_t dir_id;
+  uint64_t task_id;
+  uint64_t inode_id;
 };
 
 struct address_struct{
-  message_type_t message_type;
-  event_id_t event_id;
-  node_id_t sock_id;
+  MESSAGE_ELEMENTS
+  uint64_t sock_id;
   size_t length;
   struct sockaddr addr;
 };

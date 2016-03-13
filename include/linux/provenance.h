@@ -22,19 +22,19 @@
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 
-#define RANDOM_NODE_ID 0
+#define ASSIGN_NODE_ID 0
 
 extern atomic64_t prov_evt_count;
 
-static inline event_id_t prov_next_evtid( void ){
-  return (event_id_t)atomic64_inc_return(&prov_evt_count);
+static inline uint64_t prov_next_evtid( void ){
+  return (uint64_t)atomic64_inc_return(&prov_evt_count);
 }
 
 extern atomic64_t prov_node_id;
 
-static inline node_id_t prov_next_nodeid( void )
+static inline uint64_t prov_next_nodeid( void )
 {
-  return (node_id_t)atomic64_inc_return(&prov_node_id);
+  return (uint64_t)atomic64_inc_return(&prov_node_id);
 }
 
 extern struct rchan *prov_chan;
@@ -44,7 +44,7 @@ extern bool prov_all;
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
-static inline prov_msg_t* alloc_provenance(message_type_t ntype, gfp_t gfp)
+static inline prov_msg_t* alloc_provenance(uint8_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
@@ -55,15 +55,15 @@ static inline prov_msg_t* alloc_provenance(message_type_t ntype, gfp_t gfp)
   return prov;
 }
 
-static inline void set_node_id(prov_msg_t* node, node_id_t nid){
-  if(nid==RANDOM_NODE_ID){
+static inline void set_node_id(prov_msg_t* node, uint64_t nid){
+  if(nid==ASSIGN_NODE_ID){
     node->node_info.node_id=prov_next_nodeid();
   }else{
     node->node_info.node_id=nid;
   }
 }
 
-static inline long_prov_msg_t* alloc_long_provenance(message_type_t ntype, gfp_t gfp)
+static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
 {
   long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
   if(!prov){
@@ -129,9 +129,8 @@ static inline void record_node(prov_msg_t* prov){
   prov_write(prov);
 }
 
-static inline void record_edge(edge_type_t type, prov_msg_t* from, prov_msg_t* to){
+static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to){
   prov_msg_t edge;
-  memset(&edge, 0, sizeof(prov_msg_t));
 
   // ignore if not tracked
   if(from->node_info.tracked!=NODE_TRACKED && to->node_info.tracked!=NODE_TRACKED && !prov_all)

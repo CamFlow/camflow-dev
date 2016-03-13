@@ -196,15 +196,19 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	prov_msg_t* tmp = (prov_msg_t*)buf;
+	prov_msg_t node;
 
 	if(count < sizeof(struct disc_node_struct))
 	{
 		return -ENOMEM;
 	}
-	tmp->disc_node_info.node_id = prov_next_nodeid(); // assign node id
-	tmp->disc_node_info.message_type = MSG_DISC_NODE;
-	prov_write(tmp);
+	if(copy_from_user(&node, buf, sizeof(struct disc_node_struct))){
+		return -ENOMEM;
+	}
+	
+	set_node_id(&node, ASSIGN_NODE_ID);
+	node.disc_node_info.message_type = MSG_DISC_NODE;
+	prov_write(&node);
 	return count;
 }
 
@@ -224,7 +228,6 @@ static ssize_t prov_write_edge(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	prov_msg_t edge;
-	memset(&edge, 0, sizeof(prov_msg_t));
 
 	if(count < sizeof(struct edge_struct))
 	{
