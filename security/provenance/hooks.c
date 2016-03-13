@@ -135,9 +135,8 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 static int provenance_inode_alloc_security(struct inode *inode)
 {
   prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov;
+  prov_msg_t* iprov = alloc_provenance(MSG_INODE, GFP_NOFS);
   prov_msg_t* sprov;
-  iprov = alloc_provenance(MSG_INODE, GFP_NOFS);
   if(unlikely(!iprov))
     return -ENOMEM;
   set_node_id(iprov, inode->i_ino);
@@ -313,6 +312,25 @@ static int provenance_file_permission(struct file *file, int mask)
   }
   provenance_inode_permission(inode, mask);
   return 0;
+}
+
+/*
+* Save open-time permission checking state for later use upon
+* file_permission, and recheck access if anything has changed
+* since inode_permission.
+*/
+static int provenance_file_open(struct file *file, const struct cred *cred)
+{
+	prov_msg_t* cprov = current_provenance();
+	struct inode *inode = file_inode(file);
+	prov_msg_t* iprov;
+
+	if(!inode->i_provenance){ // alloc provenance if none there
+    provenance_inode_alloc_security(inode);
+  }
+	iprov = inode->i_provenance;
+	record_edge(ED_OPEN, cprov, iprov);
+	return 0;
 }
 
 /*
@@ -599,14 +617,15 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
   if(!skprov)
     return -ENOMEM;
-
-  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
-  addr_info->address_info.sock_id = skprov->sock_info.node_id;
-  addr_info->address_info.length=addrlen;
-  memcpy(&(addr_info->address_info.addr), address, addrlen);
-  long_prov_write(addr_info);
-  free_long_provenance(addr_info);
-  record_edge(ED_BIND, cprov, skprov);
+	if(prov_enabled){
+	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
+	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
+	  addr_info->address_info.length=addrlen;
+	  memcpy(&(addr_info->address_info.addr), address, addrlen);
+	  long_prov_write(addr_info);
+	  free_long_provenance(addr_info);
+	  record_edge(ED_BIND, cprov, skprov);
+	}
 
   return 0;
 }
@@ -630,14 +649,15 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 
   if(!skprov)
     return -ENOMEM;
-
-  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
-  addr_info->address_info.sock_id = skprov->sock_info.node_id;
-  addr_info->address_info.length=addrlen;
-  memcpy(&(addr_info->address_info.addr), address, addrlen);
-  long_prov_write(addr_info);
-  free_long_provenance(addr_info);
-  record_edge(ED_CONNECT, cprov, skprov);
+	if(prov_enabled){
+	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
+	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
+	  addr_info->address_info.length=addrlen;
+	  memcpy(&(addr_info->address_info.addr), address, addrlen);
+	  long_prov_write(addr_info);
+	  free_long_provenance(addr_info);
+	  record_edge(ED_CONNECT, cprov, skprov);
+	}
 
   return 0;
 }
@@ -859,7 +879,8 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
   LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
-  LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
+  LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount),
+	LSM_HOOK_INIT(file_open, provenance_file_open)
 };
 
 void __init provenance_add_hooks(void){

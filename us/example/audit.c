@@ -243,14 +243,19 @@ void log_address(struct address_struct* address){
       return;
     }
     write_to_log("%u-%lu-\taddress[%lu:%s:%s]{%u}",
-    hostid, address->event_id, address->sock_id, host, serv, address->addr.sa_family);
+      hostid, address->event_id, address->sock_id, host, serv, address->addr.sa_family);
   }else if((address->addr).sa_family == AF_UNIX){
     write_to_log("%u-%lu-\taddress[%lu:%s]{%u}",
-    hostid, address->event_id, address->sock_id, ((struct sockaddr_un*)&(address->addr))->sun_path, address->addr.sa_family);
+      hostid, address->event_id, address->sock_id, ((struct sockaddr_un*)&(address->addr))->sun_path, address->addr.sa_family);
   }else{
     write_to_log("%u-%lu-\taddress[%lu:%s]{%u}",
-    hostid, address->event_id, address->sock_id, "type not handled", address->addr.sa_family);
+      hostid, address->event_id, address->sock_id, "type not handled", address->addr.sa_family);
   }
+}
+
+void log_file_name(struct file_name_struct* f_name){
+  write_to_log("%u-%lu-\tfile_name[%lu:%s]{}",
+    hostid, f_name->event_id, f_name->inode_id, f_name->name);
 }
 
 struct provenance_ops ops = {
@@ -265,7 +270,8 @@ struct provenance_ops ops = {
   .log_msg=log_msg,
   .log_shm=log_shm,
   .log_sock=log_sock,
-  .log_address=log_address
+  .log_address=log_address,
+  .log_file_name=log_file_name
 };
 
 void test(void){

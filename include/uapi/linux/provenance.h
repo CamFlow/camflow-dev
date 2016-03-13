@@ -26,6 +26,7 @@
 #define MSG_SOCK          9
 #define MSG_ADDR          10
 #define MSG_SB            11
+#define MSG_FILE_NAME     12
 
 #define ED_DATA           0
 #define ED_CREATE         1
@@ -38,6 +39,7 @@
 #define ED_CONNECT        8
 #define ED_LISTEN         9
 #define ED_ACCEPT         10
+#define ED_OPEN           11
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -150,6 +152,13 @@ struct link_struct{
   uint64_t inode_id;
 };
 
+struct file_name_struct{
+  MESSAGE_ELEMENTS
+  size_t length;
+  char name[4096];
+  uint64_t inode_id;
+};
+
 struct unlink_struct{
   MESSAGE_ELEMENTS
   size_t length;
@@ -171,6 +180,7 @@ typedef union long_msg{
   struct str_struct           str_info;
   struct link_struct          link_info;
   struct unlink_struct        unlink_info;
+  struct file_name_struct     file_name_info;
   struct address_struct       address_info;
 } long_prov_msg_t;
 
