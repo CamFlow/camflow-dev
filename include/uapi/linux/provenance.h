@@ -58,7 +58,7 @@
 
 #define STR_MAX_SIZE      128
 
-#define MESSAGE_ELEMENTS uint8_t message_type; uint64_t event_id;
+#define MESSAGE_ELEMENTS uint8_t message_type; uint32_t boot_id; uint64_t event_id;
 #define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t tracked; uint8_t opaque;
 
 struct msg_struct{

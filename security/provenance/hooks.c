@@ -883,7 +883,9 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(file_open, provenance_file_open)
 };
 
+uint32_t prov_boot_id=0;
 void __init provenance_add_hooks(void){
+	get_random_bytes(&prov_boot_id, sizeof(uint32_t));
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);

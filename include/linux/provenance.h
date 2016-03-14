@@ -81,6 +81,7 @@ static inline void free_long_provenance(long_prov_msg_t* prov){
   kmem_cache_free(long_provenance_cache, prov);
 }
 
+extern uint32_t prov_boot_id;
 static inline void prov_write(prov_msg_t* msg)
 {
   if(prov_chan==NULL) // not set yet
@@ -89,6 +90,7 @@ static inline void prov_write(prov_msg_t* msg)
     return;
   }
   msg->msg_info.event_id=prov_next_evtid(); /* assign an event id */
+  msg->msg_info.boot_id=prov_boot_id;
   relay_write(prov_chan, msg, sizeof(prov_msg_t));
 }
 
@@ -99,6 +101,7 @@ static inline void long_prov_write(long_prov_msg_t* msg){
     return;
   }
   msg->msg_info.event_id=prov_next_evtid(); /* assign an event id */
+  msg->msg_info.boot_id=prov_boot_id;
   relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
 }
 

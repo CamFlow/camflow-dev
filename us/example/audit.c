@@ -150,28 +150,28 @@ void init( void ){
 
 
 void log_str(struct str_struct* data){
-  write_to_log("%u-%lu-\t%s",
-    hostid, data->event_id, data->str);
+  write_to_log("%u-%u-%lu-\t%s",
+    hostid, data->boot_id, data->event_id, data->str);
 }
 
 void log_link(struct link_struct* link){
-  write_to_log("%u-%lu-\tlink[%s]{%lu|%lu|%lu}",
-    hostid, link->event_id, link->name, link->inode_id, link->task_id, link->dir_id);
+  write_to_log("%u-%u-%lu-\tlink[%s]{%lu|%lu|%lu}",
+    hostid, link->boot_id,link->event_id, link->name, link->inode_id, link->task_id, link->dir_id);
 }
 
 void log_unlink(struct unlink_struct* unlink){
-  write_to_log("%u-%lu-\tunlink[%s]{%lu|%lu|%lu}",
-    hostid, unlink->event_id, unlink->name, unlink->inode_id, unlink->task_id, unlink->dir_id);
+  write_to_log("%u-%u-%lu-\tunlink[%s]{%lu|%lu|%lu}",
+    hostid, unlink->boot_id, unlink->event_id, unlink->name, unlink->inode_id, unlink->task_id, unlink->dir_id);
 }
 
 void log_edge(struct edge_struct* edge){
-    write_to_log("%u-%lu-\t%s{%lu->%lu}%d",
-      hostid, edge->event_id, edge_str[edge->type], edge->snd_id, edge->rcv_id, edge->allowed);
+    write_to_log("%u-%u-%lu-\t%s{%lu->%lu}%d",
+      hostid, edge->boot_id, edge->event_id, edge_str[edge->type], edge->snd_id, edge->rcv_id, edge->allowed);
 }
 
 void log_task(struct task_prov_struct* task){
-  write_to_log("%u-%lu-\ttask[%lu]{%u|%u}",
-    hostid, task->event_id, task->node_id, task->uid, task->gid);
+  write_to_log("%u-%u-%lu-\ttask[%lu]{%u|%u}",
+    hostid, task->boot_id, task->event_id, task->node_id, task->uid, task->gid);
 }
 
 static char STR_UNKNOWN[]= "unknown";
@@ -206,29 +206,29 @@ static inline char* get_inode_type(mode_t mode){
 void log_inode(struct inode_prov_struct* inode){
   char sb_uuid[UUID_STR_SIZE];
   uuid_to_str(inode->sb_uuid, sb_uuid, UUID_STR_SIZE);
-  write_to_log("%u-%lu-\tinode[%s:%lu:%s]{%u|%u|0X%04hhX}",
-    hostid, inode->event_id, get_inode_type(inode->mode), inode->node_id, sb_uuid, inode->uid, inode->gid, inode->mode);
+  write_to_log("%u-%u-%lu-\tinode[%s:%lu:%s]{%u|%u|0X%04hhX}",
+    hostid, inode->boot_id, inode->event_id, get_inode_type(inode->mode), inode->node_id, sb_uuid, inode->uid, inode->gid, inode->mode);
 }
 
 void log_disc(struct disc_node_struct* node){
-  write_to_log("%u-%lu-\tdisclosed[%lu]",
-    hostid, node->event_id, node->node_id);
+  write_to_log("%u-%u-%lu-\tdisclosed[%lu]",
+    hostid, node->boot_id, node->event_id, node->node_id);
 }
 
 void log_msg(struct msg_msg_struct* msg){
-  write_to_log("%u-%lu-\tmsg[%lu]{%ld}",
-    hostid, msg->event_id, msg->node_id, msg->type);
+  write_to_log("%u-%u-%lu-\tmsg[%lu]{%ld}",
+    hostid, msg->boot_id, msg->event_id, msg->node_id, msg->type);
 }
 
 void log_shm(struct shm_struct* shm){
-  write_to_log("%u-%lu-\tshm[%lu]{0X%04hhX}",
-    hostid, shm->event_id, shm->node_id, shm->mode);
+  write_to_log("%u-%u-%lu-\tshm[%lu]{0X%04hhX}",
+    hostid, shm->boot_id, shm->event_id, shm->node_id, shm->mode);
 }
 
 
 void log_sock(struct sock_struct* sock){
-  write_to_log("%u-%lu-\tsock[%lu]{%u|%u|%u}",
-    hostid, sock->event_id, sock->node_id, sock->type, sock->family, sock->protocol);
+  write_to_log("%u-%u-%lu-\tsock[%lu]{%u|%u|%u}",
+    hostid, sock->boot_id, sock->event_id, sock->node_id, sock->type, sock->family, sock->protocol);
 }
 
 void log_address(struct address_struct* address){
@@ -242,20 +242,20 @@ void log_address(struct address_struct* address){
       printf("Error %d\n", err);
       return;
     }
-    write_to_log("%u-%lu-\taddress[%lu:%s:%s]{%u}",
-      hostid, address->event_id, address->sock_id, host, serv, address->addr.sa_family);
+    write_to_log("%u-%u-%lu-\taddress[%lu:%s:%s]{%u}",
+      hostid, address->boot_id, address->event_id, address->sock_id, host, serv, address->addr.sa_family);
   }else if((address->addr).sa_family == AF_UNIX){
-    write_to_log("%u-%lu-\taddress[%lu:%s]{%u}",
-      hostid, address->event_id, address->sock_id, ((struct sockaddr_un*)&(address->addr))->sun_path, address->addr.sa_family);
+    write_to_log("%u-%u-%lu-\taddress[%lu:%s]{%u}",
+      hostid, address->boot_id, address->event_id, address->sock_id, ((struct sockaddr_un*)&(address->addr))->sun_path, address->addr.sa_family);
   }else{
-    write_to_log("%u-%lu-\taddress[%lu:%s]{%u}",
-      hostid, address->event_id, address->sock_id, "type not handled", address->addr.sa_family);
+    write_to_log("%u-%u-%lu-\taddress[%lu:%s]{%u}",
+      hostid, address->boot_id, address->event_id, address->sock_id, "type not handled", address->addr.sa_family);
   }
 }
 
 void log_file_name(struct file_name_struct* f_name){
-  write_to_log("%u-%lu-\tfile_name[%lu:%s]{}",
-    hostid, f_name->event_id, f_name->inode_id, f_name->name);
+  write_to_log("%u-%u-%lu-\tfile_name[%lu:%s]{}",
+    hostid, f_name->boot_id, f_name->event_id, f_name->inode_id, f_name->name);
 }
 
 struct provenance_ops ops = {
