@@ -123,6 +123,7 @@ source security/tomoyo/Kconfig
 source security/apparmor/Kconfig
 source security/yama/Kconfig
 source security/provenance/Kconfig
+source security/ifc/Kconfig
 
 source security/integrity/Kconfig
 
@@ -133,6 +134,7 @@ choice
 	default DEFAULT_SECURITY_TOMOYO if SECURITY_TOMOYO
 	default DEFAULT_SECURITY_APPARMOR if SECURITY_APPARMOR
 	default DEFAULT_SECURITY_PROVENANCE if SECURITY_PROVENANCE
+	default DEFAULT_SECURITY_IFC if SECURITY_IFC
 	default DEFAULT_SECURITY_DAC
 
 	help
@@ -154,6 +156,9 @@ choice
 	config DEFAULT_SECURITY_PROVENANCE
 		bool "Provenance" if SECURITY_PROVENANCE=y
 
+	config DEFAULT_SECURITY_IFC
+		bool "IFC" if SECURITY_IFC=y
+
 	config DEFAULT_SECURITY_DAC
 		bool "Unix Discretionary Access Controls"
 
@@ -166,5 +171,6 @@ config DEFAULT_SECURITY
 	default "tomoyo" if DEFAULT_SECURITY_TOMOYO
 	default "apparmor" if DEFAULT_SECURITY_APPARMOR
 	default "provenance" if DEFAULT_SECURITY_PROVENANCE
+	default "ifc" if DEFAULT_SECURITY_IFC
 	default "" if DEFAULT_SECURITY_DAC
 endmenu

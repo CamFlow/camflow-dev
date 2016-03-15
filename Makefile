@@ -12,7 +12,9 @@ prepare_kernel:
 
 
 prepare_us:
-	cd ./us && $(MAKE) prepare
+	mkdir -p build
+	cd ./build && git clone https://github.com/tfjmp/camflow-audit-lib.git
+	cd ./build/camflow-audit-lib && $(MAKE) prepare
 
 config:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
@@ -35,7 +37,7 @@ compile_kernel:
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
-	cd ./us && $(MAKE) all
+	cd ./build/camflow-audit-lib && $(MAKE) all
 
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -51,7 +53,7 @@ clean_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 
 clean_us:
-	cd ./us && $(MAKE) clean
+	cd ./build/camflow-audit-lib && $(MAKE) clean
 
 patch:
 	cd build && mkdir -p pristine

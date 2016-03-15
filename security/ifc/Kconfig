@@ -1,0 +1,7 @@
+config SECURITY_IFC
+         bool "IFC"
+         depends on RELAY
+         default n
+         help
+          This selects IFC.
+          The IFC security module enforce DIFC.
