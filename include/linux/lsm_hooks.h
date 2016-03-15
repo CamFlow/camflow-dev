@@ -1887,5 +1887,8 @@ void __init yama_add_hooks(void);
 #ifdef CONFIG_SECURITY_PROVENANCE
 extern void __init provenance_add_hooks(void);
 #endif
+#ifdef CONFIG_SECURITY_IFC
+extern void __init ifc_add_hooks(void);
+#endif
 
 #endif /* ! __LINUX_LSM_HOOKS_H */

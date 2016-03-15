@@ -1091,4 +1091,5 @@ void __init provenance_add_hooks(void){
   cred_init_provenance();
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
+	printk(KERN_INFO "Provenance hooks ready.\n");
 }

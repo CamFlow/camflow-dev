@@ -71,6 +71,12 @@ int __init security_init(void)
 	 */
 	do_security_initcalls();
 
+#ifdef CONFIG_SECURITY_IFC
+	/*
+	* If IFC is configured load it next
+	*/
+	ifc_add_hooks();
+#endif
 #ifdef CONFIG_SECURITY_PROVENANCE
 	/*
 	* If Provenance is configured load it next
