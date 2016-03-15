@@ -40,6 +40,7 @@
 #define ED_LISTEN         9
 #define ED_ACCEPT         10
 #define ED_OPEN           11
+#define ED_PARENT         12
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
