@@ -11,3 +11,6 @@
 * published by the Free Software Foundation.
 *
 */
+
+#include <linux/security.h>
+#include <linux/ifc.h>
