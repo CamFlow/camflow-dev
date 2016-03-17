@@ -78,6 +78,12 @@ static inline bool ifc_is_subset(struct ifc_label* set, struct ifc_label* sub){
   return true;
 }
 
+static inline bool ifc_can_flow(struct ifc_context *from, struct ifc_context* to){
+  bool rv = ifc_is_subset(&from->secrecy, &to->secrecy);
+  rv &= ifc_is_subset(&to->integrity, &from->integrity);
+  return rv;
+}
+
 static inline bool ifc_contains_value(struct ifc_label* label, uint64_t value){
   if(bsearch(&value, label->array, label->size, sizeof(uint64_t), &ifc_compare)==NULL){
     return false;
@@ -89,6 +95,30 @@ static inline bool is_labelled(struct ifc_context* context){
   if(context->secrecy.size > 0 || context->integrity.size > 0)
     return true;
   return false;
+}
+
+static inline bool ifc_add_privilege(struct ifc_context* context, uint8_t type, uint64_t tag){
+  struct ifc_label* privilege=NULL;
+
+  switch(type){
+    case IFC_SECRECY:
+      privilege = &context->secrecy_p;
+      break;
+    case IFC_INTEGRITY:
+      privilege = &context->integrity_p;
+      break;
+  }
+
+  if(privilege->size >= IFC_LABEL_MAX_SIZE) // label is full
+    return false;
+
+  if(ifc_contains_value(privilege, tag)) // aleady contains tag
+    return false;
+
+  privilege->array[privilege->size] = tag;
+  privilege->size++;
+  ifc_sort_label(privilege);
+  return true;
 }
 
 static inline bool ifc_add_tag(struct ifc_context* context, uint8_t type, uint64_t tag){
