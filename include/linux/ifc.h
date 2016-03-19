@@ -14,6 +14,8 @@
 #ifndef _LINUX_IFC_H
 #define _LINUX_IFC_H
 
+#ifdef CONFIG_SECURITY_IFC
+
 #include <linux/sort.h>
 #include <linux/bsearch.h>
 #include <uapi/linux/ifc.h>
@@ -22,13 +24,13 @@
 extern atomic64_t ifc_tag_count;
 extern struct crypto_cipher *ifc_tfm;
 
-static inline void save_tag(uint64_t tag){
+static inline void ifc_save_tag(tag_t tag){
   // TODO
 }
 
 static inline uint64_t ifc_next_tag_count( void ){
   uint64_t tag = (uint64_t)atomic64_inc_return(&ifc_tag_count);
-  save_tag(tag);
+  ifc_save_tag(tag);
   return tag;
 }
 
@@ -36,7 +38,7 @@ static inline void ifc_set_tag_count(uint64_t count){
   atomic64_set(&ifc_tag_count, count);
 }
 
-static inline uint64_t ifc_create_tag(void){
+static inline tag_t ifc_create_tag(void){
   uint64_t in = ifc_next_tag_count();
   uint64_t out = 0;
   crypto_cipher_encrypt_one(ifc_tfm, (u8*)&out, (u8*)&in);
@@ -58,6 +60,10 @@ static inline void ifc_sort_label(struct ifc_label* label){
 
 static inline bool ifc_is_subset(struct ifc_label* set, struct ifc_label* sub){
   int i=0, j=0;
+
+  if(sub->size == 0) // empty set is subset of everything
+    return 0;
+
   if(set->size < sub->size)
     return false;
 
@@ -84,30 +90,39 @@ static inline bool ifc_can_flow(struct ifc_context *from, struct ifc_context* to
   return rv;
 }
 
-static inline bool ifc_contains_value(struct ifc_label* label, uint64_t value){
+static inline bool ifc_contains_value(struct ifc_label* label, tag_t value){
   if(bsearch(&value, label->array, label->size, sizeof(uint64_t), &ifc_compare)==NULL){
     return false;
   }
   return true;
 }
 
-static inline bool is_labelled(struct ifc_context* context){
+static inline bool ifc_is_labelled(struct ifc_context* context){
   if(context->secrecy.size > 0 || context->integrity.size > 0)
     return true;
   return false;
 }
 
-static inline bool ifc_add_privilege(struct ifc_context* context, uint8_t type, uint64_t tag){
+static inline bool ifc_add_privilege(struct ifc_context* context, uint8_t type, tag_t tag){
   struct ifc_label* privilege=NULL;
 
   switch(type){
-    case IFC_SECRECY:
+    case IFC_SECRECY_P:
       privilege = &context->secrecy_p;
       break;
-    case IFC_INTEGRITY:
+    case IFC_INTEGRITY_P:
       privilege = &context->integrity_p;
       break;
+    case IFC_SECRECY_N:
+      privilege = &context->secrecy_n;
+      break;
+    case IFC_INTEGRITY_N:
+      privilege = &context->integrity_n;
+      break;
   }
+
+  if(privilege==NULL)
+    return false;
 
   if(privilege->size >= IFC_LABEL_MAX_SIZE) // label is full
     return false;
@@ -121,19 +136,23 @@ static inline bool ifc_add_privilege(struct ifc_context* context, uint8_t type, 
   return true;
 }
 
-static inline bool ifc_add_tag(struct ifc_context* context, uint8_t type, uint64_t tag){
+static inline bool ifc_add_tag(struct ifc_context* context, uint8_t type, tag_t tag){
   struct ifc_label* label=NULL;
   struct ifc_label* privilege=NULL;
 
   switch(type){
     case IFC_SECRECY:
       label = &context->secrecy;
+      privilege = &context->secrecy_p;
       break;
     case IFC_INTEGRITY:
       label = &context->integrity;
       privilege = &context->integrity_p;
       break;
   }
+
+  if(privilege==NULL || label==NULL)
+    return false;
 
   if(label->size >= IFC_LABEL_MAX_SIZE) // label is full
     return false;
@@ -141,17 +160,16 @@ static inline bool ifc_add_tag(struct ifc_context* context, uint8_t type, uint64
   if(ifc_contains_value(label, tag)) // aleady contains tag
     return false;
 
-  if(privilege!=NULL){
-    if(!ifc_contains_value(privilege, tag)) // not appropriate privilege
-      return false;
-  }
+  if(!ifc_contains_value(privilege, tag)) // not appropriate privilege
+    return false;
+
   label->array[label->size]=tag;
   label->size++;
   ifc_sort_label(label);
   return true;
 }
 
-static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, uint64_t tag){
+static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, tag_t tag){
   struct ifc_label* label=NULL;
   struct ifc_label* privilege=NULL;
   int i = 0;
@@ -159,12 +177,16 @@ static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, uin
   switch(type){
     case IFC_SECRECY:
       label = &context->secrecy;
-      privilege = &context->integrity_p;
+      privilege = &context->secrecy_n;
       break;
     case IFC_INTEGRITY:
       label = &context->integrity;
+      privilege = &context->integrity_n;
       break;
   }
+
+  if(privilege==NULL || label==NULL)
+    return false;
 
   if(label->size <= 0) // label is empty
     return false;
@@ -172,10 +194,8 @@ static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, uin
   if(!ifc_contains_value(label, tag)) // the tag is not there to removed
     return false;
 
-  if(privilege!=NULL){
-    if(!ifc_contains_value(privilege, tag)) // does not have the proper privileges
-      return false;
-  }
+  if(!ifc_contains_value(privilege, tag)) // does not have the proper privileges
+    return false;
 
   /* remove the tag */
   for(i=0; i < label->size; i++){
@@ -189,4 +209,5 @@ static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, uin
   return true;
 }
 
+#endif
 #endif

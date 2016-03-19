@@ -1,6 +1,8 @@
 config SECURITY_PROVENANCE
          bool "Provenance"
          depends on RELAY
+         depends on SECURITY
+         select SECURITYFS
          default n
          help
           This selects Provenance.

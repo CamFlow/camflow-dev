@@ -13,6 +13,7 @@
 */
 
 #include <linux/provenance.h>
+#include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
@@ -79,6 +80,9 @@ static void provenance_cred_free(struct cred *cred)
 */
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
+/*#ifdef CONFIG_SECURITY_IFC
+	struct ifc_struct *ifc = new->ifc;
+#endif*/
   prov_msg_t* old_prov = old->provenance;
   prov_msg_t* prov = alloc_provenance(MSG_TASK, gfp);
 
@@ -88,6 +92,13 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
+
+/*#ifdef CONFIG_SECURITY_IFC
+	// if labelled we track
+  if(ifc_is_labelled(&ifc->context)){
+		prov->node_info.tracked=NODE_TRACKED;
+  }
+#endif*/
 
   record_edge(ED_CREATE, old_prov, prov);
   new->provenance = prov;
