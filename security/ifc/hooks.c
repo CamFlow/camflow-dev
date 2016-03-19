@@ -22,21 +22,7 @@
 #include <linux/random.h>
 #include <linux/xattr.h>
 
-struct crypto_cipher *ifc_tfm;
-atomic64_t ifc_tag_count=ATOMIC64_INIT(0);
 struct kmem_cache *ifc_cache=NULL;
-
-static const uint64_t key=0xAEF; // not safe
-int tag_crypto_init(void){
-  int rv;
-  ifc_tfm = crypto_alloc_cipher("blowfish", 0, CRYPTO_ALG_ASYNC);
-  if(IS_ERR((void *)ifc_tfm)){
-    printk(KERN_INFO "IFC: cannot alloc crypto cipher. Error: %ld.\n", PTR_ERR((void *)ifc_tfm));
-    return PTR_ERR((void *)ifc_tfm);
-  }
-  rv = crypto_cipher_setkey(ifc_tfm, (const u8*)&key, sizeof(uint64_t));
-  return rv;
-}
 
 static inline struct ifc_struct* alloc_ifc(gfp_t gfp)
 {
@@ -62,7 +48,7 @@ static inline struct ifc_struct* inherit_ifc(struct ifc_struct* old, gfp_t gfp)
 }
 
 static inline void free_ifc(struct ifc_struct* ifc){
-  kfree(ifc);
+  kmem_cache_free(ifc_cache, ifc);
 }
 
 /*
@@ -125,10 +111,27 @@ static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_transfer, ifc_cred_transfer)
 };
 
+#define CRYPTO_DRIVER_NAME "blowfish"
+struct crypto_cipher *ifc_tfm = NULL;
+static const uint64_t ifc_key=0xAEF; // not safe
+
+int ifc_crypto_init(void){
+  ifc_tfm = crypto_alloc_cipher(CRYPTO_DRIVER_NAME, 0, 0);
+  if(IS_ERR((void *)ifc_tfm)){
+    printk(KERN_ERR "IFC: Failed to load transform for %s: %ld\n", CRYPTO_DRIVER_NAME, PTR_ERR(ifc_tfm));
+    ifc_tfm = NULL;
+    return PTR_ERR((void *)ifc_tfm);
+  }
+  return crypto_cipher_setkey(ifc_tfm, (const u8*)&ifc_key, sizeof(uint64_t));
+}
+
+atomic64_t ifc_tag_count=ATOMIC64_INIT(1);
+
 void __init ifc_add_hooks(void){
-  /*if(tag_crypto_init()){
-    printk(KERN_ERR "IFC: tag_crypto_init failure\n");
-  }*/
+  int rc = ifc_crypto_init();
+  if(rc){
+    printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);
+  }
 
   ifc_cache = kmem_cache_create("ifc_struct",
 					    sizeof(struct ifc_struct),

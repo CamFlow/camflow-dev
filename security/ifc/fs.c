@@ -12,5 +12,4 @@
 *
 */
 
-#include <linux/security.h>
 #include <linux/ifc.h>

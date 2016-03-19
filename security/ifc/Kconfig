@@ -2,7 +2,7 @@ config SECURITY_IFC
          bool "IFC"
          depends on SECURITY
          select SECURITYFS
-	       select CRYPTO_BLOWFISH_X86_64
+         select CRYPTO_BLOWFISH_X86_64
          default n
          help
           This selects IFC.

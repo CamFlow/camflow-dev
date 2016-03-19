@@ -13,7 +13,6 @@
 */
 
 #include <linux/provenance.h>
-#include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
@@ -80,9 +79,6 @@ static void provenance_cred_free(struct cred *cred)
 */
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
-/*#ifdef CONFIG_SECURITY_IFC
-	struct ifc_struct *ifc = new->ifc;
-#endif*/
   prov_msg_t* old_prov = old->provenance;
   prov_msg_t* prov = alloc_provenance(MSG_TASK, gfp);
 
@@ -92,13 +88,6 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
-
-/*#ifdef CONFIG_SECURITY_IFC
-	// if labelled we track
-  if(ifc_is_labelled(&ifc->context)){
-		prov->node_info.tracked=NODE_TRACKED;
-  }
-#endif*/
 
   record_edge(ED_CREATE, old_prov, prov);
   new->provenance = prov;
@@ -147,7 +136,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 static int provenance_inode_alloc_security(struct inode *inode)
 {
 	prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov = alloc_provenance(MSG_INODE, GFP_NOFS);
+  prov_msg_t* iprov = alloc_provenance(MSG_INODE, GFP_KERNEL);
   prov_msg_t* sprov;
   if(unlikely(!iprov))
     return -ENOMEM;
@@ -245,7 +234,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   record_edge(ED_DATA, cprov, iprov);
 
   if(prov_enabled){
-    link_prov = alloc_long_provenance(MSG_LINK, GFP_NOFS);
+    link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
     link_prov->link_info.length = new_dentry->d_name.len;
     memcpy(link_prov->link_info.name, new_dentry->d_name.name, link_prov->link_info.length);
     link_prov->link_info.dir_id = dprov->inode_info.node_id;
@@ -286,7 +275,7 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   record_edge(ED_DATA, cprov, iprov);
 
   if(prov_enabled){
-    link_prov = alloc_long_provenance(MSG_UNLINK, GFP_NOFS);
+    link_prov = alloc_long_provenance(MSG_UNLINK, GFP_KERNEL);
     link_prov->unlink_info.length = dentry->d_name.len;
     memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
     link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
@@ -419,7 +408,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov;
   /* alloc new prov struct with generated id */
-  mprov = alloc_provenance(MSG_MSG, GFP_NOFS);
+  mprov = alloc_provenance(MSG_MSG, GFP_KERNEL);
 
   if(!mprov)
     return -ENOMEM;
@@ -489,7 +478,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	prov_msg_t* cprov = current_provenance();
-  prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_NOFS);
+  prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_KERNEL);
 
   if(!sprov)
     return -ENOMEM;
@@ -630,7 +619,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   if(!skprov)
     return -ENOMEM;
 	if(prov_enabled){
-	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
+	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
 	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
@@ -662,7 +651,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   if(!skprov)
     return -ENOMEM;
 	if(prov_enabled){
-	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_NOFS);
+	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
 	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
@@ -791,7 +780,7 @@ static int provenance_socket_unix_may_send(struct socket *sock,
 */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm){
   if(!bprm->cred->provenance){
-    return provenance_cred_alloc_blank(bprm->cred, GFP_NOFS);
+    return provenance_cred_alloc_blank(bprm->cred, GFP_KERNEL);
   }
   return 0;
 }

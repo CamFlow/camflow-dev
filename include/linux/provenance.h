@@ -114,7 +114,7 @@ static inline int prov_print(const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
 
-  msg = alloc_long_provenance(MSG_STR, GFP_KERNEL);
+  msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
 
   /* set message type */
   msg->str_info.message_type=MSG_STR;
@@ -161,6 +161,5 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to){
   edge.edge_info.type=type;
   prov_write(&edge);
 }
-
 #endif
 #endif /* _LINUX_PROVENANCE_H */

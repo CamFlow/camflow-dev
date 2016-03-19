@@ -603,9 +603,6 @@ struct inode {
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void			*i_provenance;
 #endif
-#ifdef CONFIG_SECURITY_IFC
-	void			*i_ifc;
-#endif
 
 	/* Stat data, not accessed from path walking */
 	unsigned long		i_ino;
