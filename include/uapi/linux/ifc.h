@@ -50,6 +50,7 @@ struct ifc_tag_msg{
   tag_t tag;
   uint8_t tag_type;
   uint8_t op;
+  uint32_t pid;
 };
 
 #endif

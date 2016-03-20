@@ -40,13 +40,17 @@ static inline void ifc_set_tag_count(uint64_t count){
 }
 
 static inline tag_t ifc_create_tag(void){
-  uint64_t in = ifc_next_tag_count();
+  /*uint64_t in = ifc_next_tag_count();
   uint64_t out = 0;
   crypto_cipher_encrypt_one(ifc_tfm, (u8*)&out, (u8*)&in);
-  return out;
+  return out;*/
+  return ifc_next_tag_count();
 }
 
 static inline bool ifc_tag_valid(tag_t tag){
+  tag_t counter = atomic64_read(&ifc_tag_count);
+  if(tag>counter)
+    return false;
   return true;
 }
 
