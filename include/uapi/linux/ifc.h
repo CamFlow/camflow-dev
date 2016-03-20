@@ -15,12 +15,16 @@
 #define _UAPI_LINUX_IFC_H
 
 #define IFC_LABEL_MAX_SIZE  32
+
 #define IFC_SECRECY         1
 #define IFC_INTEGRITY       2
-#define IFC_SECRECY_P       1
-#define IFC_INTEGRITY_P     2
-#define IFC_SECRECY_N       3
-#define IFC_INTEGRITY_N     4
+#define IFC_SECRECY_P       3
+#define IFC_INTEGRITY_P     4
+#define IFC_SECRECY_N       5
+#define IFC_INTEGRITY_N     6
+
+#define IFC_ADD_TAG         1
+#define IFC_REMOVE_TAG      2
 
 typedef uint64_t tag_t;
 
@@ -40,6 +44,12 @@ struct ifc_context{
 
 struct ifc_struct{
   struct ifc_context context;
+};
+
+struct ifc_tag_msg{
+  tag_t tag;
+  uint8_t tag_type;
+  uint8_t op;
 };
 
 #endif

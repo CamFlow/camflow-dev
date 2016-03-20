@@ -16,6 +16,7 @@
 
 #ifdef CONFIG_SECURITY_IFC
 
+#include <linux/slab.h>
 #include <linux/sort.h>
 #include <linux/bsearch.h>
 #include <uapi/linux/ifc.h>
@@ -43,6 +44,10 @@ static inline tag_t ifc_create_tag(void){
   uint64_t out = 0;
   crypto_cipher_encrypt_one(ifc_tfm, (u8*)&out, (u8*)&in);
   return out;
+}
+
+static inline bool ifc_tag_valid(tag_t tag){
+  return true;
 }
 
 static int ifc_compare(const void *lhs, const void *rhs) {
@@ -103,7 +108,7 @@ static inline bool ifc_is_labelled(struct ifc_context* context){
   return false;
 }
 
-static inline bool ifc_add_privilege(struct ifc_context* context, uint8_t type, tag_t tag){
+static inline int ifc_add_privilege(struct ifc_context* context, uint8_t type, tag_t tag){
   struct ifc_label* privilege=NULL;
 
   switch(type){
@@ -122,21 +127,61 @@ static inline bool ifc_add_privilege(struct ifc_context* context, uint8_t type, 
   }
 
   if(privilege==NULL)
-    return false;
+    return -EINVAL;
 
   if(privilege->size >= IFC_LABEL_MAX_SIZE) // label is full
-    return false;
+    return -ENOMEM;
 
   if(ifc_contains_value(privilege, tag)) // aleady contains tag
-    return false;
+    return -EINVAL;
 
   privilege->array[privilege->size] = tag;
   privilege->size++;
   ifc_sort_label(privilege);
-  return true;
+  return 0;
 }
 
-static inline bool ifc_add_tag(struct ifc_context* context, uint8_t type, tag_t tag){
+static inline int ifc_remove_privilege(struct ifc_context* context, uint8_t type, tag_t tag){
+  struct ifc_label* privilege=NULL;
+  int i = 0;
+
+  switch(type){
+    case IFC_SECRECY_P:
+      privilege = &context->secrecy_p;
+      break;
+    case IFC_INTEGRITY_P:
+      privilege = &context->integrity_p;
+      break;
+    case IFC_SECRECY_N:
+      privilege = &context->secrecy_n;
+      break;
+    case IFC_INTEGRITY_N:
+      privilege = &context->integrity_n;
+      break;
+  }
+
+  if(privilege==NULL)
+    return -EINVAL;
+
+  if(privilege->size <= 0) // label is empty
+    return -EINVAL;
+
+  if(!ifc_contains_value(privilege, tag)) // does not contains the privilege to be removed
+    return -EINVAL;
+
+  /* remove the tag */
+  for(i=0; i < privilege->size; i++){
+    if(privilege->array[i]==tag)
+      break;
+  }
+  for(;i < privilege->size-1; i++){
+    privilege->array[i]=privilege->array[i+1];
+  }
+  privilege->size--;
+  return 0;
+}
+
+static inline int ifc_add_tag(struct ifc_context* context, uint8_t type, tag_t tag){
   struct ifc_label* label=NULL;
   struct ifc_label* privilege=NULL;
 
@@ -152,24 +197,24 @@ static inline bool ifc_add_tag(struct ifc_context* context, uint8_t type, tag_t 
   }
 
   if(privilege==NULL || label==NULL)
-    return false;
+    return -EINVAL;
 
   if(label->size >= IFC_LABEL_MAX_SIZE) // label is full
-    return false;
+    return -ENOMEM;
 
   if(ifc_contains_value(label, tag)) // aleady contains tag
-    return false;
+    return -EINVAL;
 
   if(!ifc_contains_value(privilege, tag)) // not appropriate privilege
-    return false;
+    return -EPERM;
 
   label->array[label->size]=tag;
   label->size++;
   ifc_sort_label(label);
-  return true;
+  return 0;
 }
 
-static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, tag_t tag){
+static inline int ifc_remove_tag(struct ifc_context* context, uint8_t type, tag_t tag){
   struct ifc_label* label=NULL;
   struct ifc_label* privilege=NULL;
   int i = 0;
@@ -186,16 +231,16 @@ static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, tag
   }
 
   if(privilege==NULL || label==NULL)
-    return false;
+    return -EINVAL;
 
   if(label->size <= 0) // label is empty
-    return false;
+    return -EINVAL;
 
   if(!ifc_contains_value(label, tag)) // the tag is not there to removed
-    return false;
+    return -EINVAL;
 
   if(!ifc_contains_value(privilege, tag)) // does not have the proper privileges
-    return false;
+    return -EPERM;
 
   /* remove the tag */
   for(i=0; i < label->size; i++){
@@ -206,7 +251,7 @@ static inline bool ifc_remove_tag(struct ifc_context* context, uint8_t type, tag
     label->array[i]=label->array[i+1];
   }
   label->size--;
-  return true;
+  return 0;
 }
 
 #endif
