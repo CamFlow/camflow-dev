@@ -234,6 +234,71 @@ static const struct file_operations ifc_process_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+  pid_t pid = task_pid_vnr(current);
+  struct ifc_bridge_config *config;
+  char *argv[2];
+
+  printk(KERN_INFO "IFC: write bridge pid: %u.", pid);
+
+  if(count < sizeof(struct ifc_bridge_config))
+    return -ENOMEM;
+
+  config = (struct ifc_bridge_config*)buf;
+
+  switch(config->op){
+    case IFC_ADD_BRIDGE:
+      break;
+    case IFC_START_BRIDGE:
+      printk(KERN_INFO "IFC: start bridge.");
+      argv[0]=kmalloc(sizeof(config->path), GFP_KERNEL);
+      if(copy_from_user (argv[0], config->path, sizeof(config->path))!=0){
+        printk(KERN_INFO "IFC: copy failed.");
+        return -ENOMEM;
+      }
+      argv[1] = NULL;
+      ifc_create_bridge(pid, argv);
+      kfree(argv[0]);
+      break;
+    default:
+      return -EINVAL;
+  }
+  printk(KERN_INFO "IFC: write bridge done.");
+	return 0;
+}
+
+static ssize_t ifc_read_bridge(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+  struct ifc_struct *cifc = current_ifc();
+  uint32_t pid;
+
+  printk(KERN_INFO "IFC: read bridge.");
+
+  if(count<sizeof(uint32_t))
+    return -EINVAL;
+
+  if(cifc->bridge.bridge==true){
+    pid = cifc->bridge.remote_pid;
+  }else{
+    pid = 0;
+  }
+
+  if(copy_to_user(buf, &pid, sizeof(uint32_t))){
+    return -EAGAIN;
+  }
+	return sizeof(uint32_t);
+}
+
+static const struct file_operations ifc_bridge_ops = {
+	.write		= ifc_write_bridge,
+  .read     = ifc_read_bridge,
+	.llseek		= generic_file_llseek,
+};
+
 static int __init init_ifc_fs(void)
 {
    struct dentry *ifc_dir;
@@ -243,6 +308,7 @@ static int __init init_ifc_fs(void)
    securityfs_create_file("self", 0666, ifc_dir, NULL, &ifc_self_ops);
 	 securityfs_create_file("tag", 0644, ifc_dir, NULL, &ifc_tag_ops);
 	 securityfs_create_file("process", 0666, ifc_dir, NULL, &ifc_process_ops);
+   securityfs_create_file("bridge", 0666, ifc_dir, NULL, &ifc_bridge_ops);
    return 0;
 }
 

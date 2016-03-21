@@ -14,6 +14,7 @@
 
 #include <linux/kmod.h>
 #include <linux/ifc.h>
+#include <linux/sched.h>
 #include <net/net_namespace.h>
 #include <net/netlink.h>
 
@@ -22,6 +23,9 @@ int prepare_bridge_usher(struct subprocess_info *info, struct cred *new){
   struct task_struct* dest;
   const struct cred* old;
   struct ifc_struct *new_ifc = new->ifc;
+
+  printk(KERN_INFO "IFC: prepare bridge %u.", parent_pid);
+
   if(new_ifc==NULL){
     printk(KERN_ALERT "IFC: no context attached to this process.");
     return -EFAULT;
@@ -29,6 +33,7 @@ int prepare_bridge_usher(struct subprocess_info *info, struct cred *new){
 
   dest = find_task_by_vpid(parent_pid);
   if(dest==NULL){
+    printk(KERN_INFO "IFC: could not find task.");
     return -EFAULT;
   }
   old = __task_cred(dest);
@@ -44,23 +49,27 @@ int prepare_bridge_usher(struct subprocess_info *info, struct cred *new){
   new->sgid = old->sgid;
   new->fsuid = old->fsuid;
   new->fsgid = old->fsgid;
+  printk(KERN_INFO "IFC: prepare done.");
   return 0;
 }
 
-int create_bridge_usher(pid_t parent_pid, char **argv){
+int ifc_create_bridge(pid_t parent_pid, char *argv[]){
   struct subprocess_info *sub_info;
   static char *envp[] = {
         "HOME=/",
         "TERM=linux",
         "PATH=/sbin:/bin:/usr/sbin:/usr/bin", NULL };
+  char *argv1[] = {"/home/thomas/workspace/camflow2/build/camflow-ifc-lib/bridge/logger.o", NULL};
 
-  sub_info = call_usermodehelper_setup(argv[0], argv, envp, GFP_KERNEL,
+  printk(KERN_INFO "IFC: Creating bridge %u.", parent_pid);
+  sub_info = call_usermodehelper_setup(argv1[0], argv, envp, GFP_KERNEL,
     prepare_bridge_usher, NULL, &parent_pid);
 
   if (sub_info == NULL){
+    printk(KERN_INFO "IFC: Creating bridge failed setup.");
     return -ENOMEM;
   }
-  return call_usermodehelper_exec(sub_info, UMH_NO_WAIT);
+  return call_usermodehelper_exec(sub_info, UMH_WAIT_EXEC);
 }
 
 static struct sock *nl_sk = NULL;

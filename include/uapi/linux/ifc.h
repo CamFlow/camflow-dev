@@ -14,6 +14,12 @@
 #ifndef _UAPI_LINUX_IFC_H
 #define _UAPI_LINUX_IFC_H
 
+#ifndef __KERNEL__
+#include <linux/limits.h>
+#else
+#include <uapi/linux/limits.h>
+#endif
+
 #define IFC_LABEL_MAX_SIZE  32
 
 #define IFC_SECRECY         1
@@ -25,6 +31,8 @@
 
 #define IFC_ADD_TAG         1
 #define IFC_REMOVE_TAG      2
+#define IFC_ADD_BRIDGE      3
+#define IFC_START_BRIDGE    4
 
 typedef uint64_t tag_t;
 
@@ -57,6 +65,13 @@ struct ifc_context_msg{
 struct ifc_bridge_msg{
   uint32_t remote_pid;
   uint64_t msg_id; /* contain provenance id if active */
-}
+};
+
+
+
+struct ifc_bridge_config{
+  char path[PATH_MAX];
+  uint8_t op;
+};
 
 #endif
