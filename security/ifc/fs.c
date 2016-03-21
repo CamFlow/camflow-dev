@@ -208,7 +208,24 @@ static ssize_t ifc_write_process(struct file *file, const char __user *buf,
 static ssize_t ifc_read_process(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	return -EPERM; // does nothing for now
+	struct ifc_context *oifc = NULL;
+  struct ifc_context_msg *msg;
+
+  if(count < sizeof(struct ifc_context_msg)){
+    return -ENOMEM;
+  }
+
+  msg = (struct ifc_context_msg*)buf;
+
+  oifc = context_from_pid(msg->pid);
+	if(!oifc){ // did not find anything
+		return -EINVAL;
+	}
+
+  if(copy_to_user(&msg->context, oifc, sizeof(struct ifc_context))){
+    return -EAGAIN;
+  }
+  return sizeof(struct ifc_context_msg);
 }
 
 static const struct file_operations ifc_process_ops = {

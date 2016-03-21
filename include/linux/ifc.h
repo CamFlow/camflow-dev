@@ -20,6 +20,7 @@
 #include <linux/sort.h>
 #include <linux/bsearch.h>
 #include <uapi/linux/ifc.h>
+#include <uapi/linux/camflow.h>
 #include <linux/crypto.h>
 
 extern atomic64_t ifc_tag_count;

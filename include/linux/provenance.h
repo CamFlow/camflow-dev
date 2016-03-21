@@ -23,6 +23,7 @@
 #include <linux/socket.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
+#include <uapi/linux/camflow.h>
 
 #define ASSIGN_NODE_ID 0
 

@@ -53,4 +53,9 @@ struct ifc_tag_msg{
   uint32_t pid;
 };
 
+struct ifc_context_msg{
+  struct ifc_context context;
+  uint32_t pid;
+};
+
 #endif

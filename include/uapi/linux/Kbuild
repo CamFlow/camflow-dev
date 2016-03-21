@@ -1,8 +1,8 @@
 # UAPI Header export list
 header-y += android/
 header-y += byteorder/
-header-y += can/
 header-y += caif/
+header-y += can/
 header-y += dvb/
 header-y += hdlc/
 header-y += hsi/
@@ -75,6 +75,7 @@ header-y += bpf.h
 header-y += bpqether.h
 header-y += bsg.h
 header-y += btrfs.h
+header-y += camflow.h
 header-y += can.h
 header-y += capability.h
 header-y += capi.h

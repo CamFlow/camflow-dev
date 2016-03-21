@@ -128,7 +128,10 @@ int ifc_crypto_init(void){
 atomic64_t ifc_tag_count=ATOMIC64_INIT(1);
 
 void __init ifc_add_hooks(void){
-  int rc = ifc_crypto_init();
+  int rc;
+  
+  printk(KERN_INFO "IFC Camflow %s\n", CAMFLOW_VERSION_STR);
+  rc = ifc_crypto_init();
   if(rc){
     printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);
   }
