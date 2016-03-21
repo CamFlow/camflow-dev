@@ -23,6 +23,20 @@
 #include <uapi/linux/camflow.h>
 #include <linux/crypto.h>
 
+struct ifc_bridge{
+  bool spawner;
+  bool bridge;
+  pid_t remote_pid;
+};
+
+struct ifc_struct{
+  struct ifc_context context;
+  struct ifc_bridge bridge;
+};
+
+int ifc_bridge_send_message(void* data, size_t size);
+int ifc_bridge_init(void);
+
 extern atomic64_t ifc_tag_count;
 extern struct crypto_cipher *ifc_tfm;
 

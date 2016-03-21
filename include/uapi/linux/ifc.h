@@ -42,10 +42,6 @@ struct ifc_context{
   struct ifc_label integrity_n;
 };
 
-struct ifc_struct{
-  struct ifc_context context;
-};
-
 struct ifc_tag_msg{
   tag_t tag;
   uint8_t tag_type;
@@ -57,5 +53,10 @@ struct ifc_context_msg{
   struct ifc_context context;
   uint32_t pid;
 };
+
+struct ifc_bridge_msg{
+  uint32_t remote_pid;
+  uint64_t msg_id; /* contain provenance id if active */
+}
 
 #endif

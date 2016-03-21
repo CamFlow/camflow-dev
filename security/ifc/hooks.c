@@ -86,7 +86,19 @@ static void ifc_cred_free(struct cred *cred)
 static int ifc_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
   struct ifc_struct *old_ifc = old->ifc;
-  struct ifc_struct *new_ifc = inherit_ifc(old_ifc, gfp); //inherit_ifc(old_ifc, gfp);
+  struct ifc_struct *new_ifc;
+
+  if(unlikely(old_ifc->bridge.spawner==true)){
+    new_ifc = alloc_ifc(gfp);
+    if(!new_ifc){
+      return -ENOMEM;
+    }
+    new_ifc->bridge.remote_pid = old_ifc->bridge.remote_pid;
+    new_ifc->bridge.bridge=true;
+  }else{
+    new_ifc = inherit_ifc(old_ifc, gfp);
+  }
+
   new->ifc=new_ifc;
 	return 0;
 }
@@ -125,11 +137,23 @@ int ifc_crypto_init(void){
   return crypto_cipher_setkey(ifc_tfm, (const u8*)&ifc_key, sizeof(uint64_t));
 }
 
+/* init security of the first process */
+static void cred_init_security(void){
+	struct cred *cred = (struct cred *)current->real_cred;
+	struct ifc_struct *ifc;
+
+  ifc = alloc_ifc(GFP_KERNEL);
+	if(!ifc){
+		panic("IFC: Failed to initialize initial task.\n");
+	}
+	cred->ifc = ifc;
+}
+
 atomic64_t ifc_tag_count=ATOMIC64_INIT(1);
 
 void __init ifc_add_hooks(void){
   int rc;
-  
+
   printk(KERN_INFO "IFC Camflow %s\n", CAMFLOW_VERSION_STR);
   rc = ifc_crypto_init();
   if(rc){
@@ -139,7 +163,7 @@ void __init ifc_add_hooks(void){
   ifc_cache = kmem_cache_create("ifc_struct",
 					    sizeof(struct ifc_struct),
 					    0, SLAB_PANIC, NULL);
-
+  cred_init_security();
   security_add_hooks(ifc_hooks, ARRAY_SIZE(ifc_hooks));
   printk(KERN_INFO "IFC hooks ready.\n");
 }
