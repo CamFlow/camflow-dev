@@ -68,9 +68,10 @@ struct ifc_bridge_msg{
 };
 
 
-
+#define PARAM_MAX 256
 struct ifc_bridge_config{
   char path[PATH_MAX];
+  char param[PARAM_MAX];
   uint8_t op;
 };
 

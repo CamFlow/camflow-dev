@@ -34,7 +34,7 @@ struct ifc_struct{
   struct ifc_bridge bridge;
 };
 
-int ifc_create_bridge(pid_t parent_pid, char *argv[]);
+int ifc_create_bridge(pid_t parent_pid, char **argv[]);
 int ifc_bridge_send_message(void* data, size_t size);
 int ifc_bridge_init(void);
 

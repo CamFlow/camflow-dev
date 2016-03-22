@@ -86,7 +86,10 @@ static void ifc_cred_free(struct cred *cred)
 static int ifc_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
   struct ifc_struct *old_ifc = old->ifc;
-  struct ifc_struct *new_ifc;
+  struct ifc_struct *new_ifc, *caller_ifc;
+  pid_t cpid;
+  struct task_struct* dest;
+  const struct cred* caller;
 
   if(unlikely(old_ifc->bridge.spawner==true)){
     new_ifc = alloc_ifc(gfp);
@@ -95,6 +98,14 @@ static int ifc_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
     }
     new_ifc->bridge.remote_pid = old_ifc->bridge.remote_pid;
     new_ifc->bridge.bridge=true;
+    cpid = task_pid_vnr(current);
+    dest = find_task_by_vpid(new_ifc->bridge.remote_pid);
+    if(dest==NULL){
+      return -EFAULT;
+    }
+    caller = __task_cred(dest);
+    caller_ifc = caller->ifc;
+    caller_ifc->bridge.remote_pid = cpid;
   }else{
     new_ifc = inherit_ifc(old_ifc, gfp);
   }

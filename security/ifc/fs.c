@@ -15,6 +15,7 @@
 #include <linux/security.h>
 #include <linux/fs.h>
 #include <linux/ifc.h>
+#include <linux/delay.h>
 
 static inline struct ifc_context* context_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
@@ -240,9 +241,7 @@ static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
 {
   pid_t pid = task_pid_vnr(current);
   struct ifc_bridge_config *config;
-  char *argv[2];
-
-  printk(KERN_INFO "IFC: write bridge pid: %u.", pid);
+  char **argv;
 
   if(count < sizeof(struct ifc_bridge_config))
     return -ENOMEM;
@@ -253,20 +252,24 @@ static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
     case IFC_ADD_BRIDGE:
       break;
     case IFC_START_BRIDGE:
-      printk(KERN_INFO "IFC: start bridge.");
-      argv[0]=kmalloc(sizeof(config->path), GFP_KERNEL);
-      if(copy_from_user (argv[0], config->path, sizeof(config->path))!=0){
-        printk(KERN_INFO "IFC: copy failed.");
+      argv=kzalloc(3*sizeof(char*), GFP_KERNEL);
+      argv[0]=kzalloc(PATH_MAX, GFP_KERNEL);
+      if(copy_from_user (argv[0], config->path, PATH_MAX)!=0){
         return -ENOMEM;
       }
-      argv[1] = NULL;
-      ifc_create_bridge(pid, argv);
+      argv[1]=kzalloc(PARAM_MAX, GFP_KERNEL);
+      if(copy_from_user (argv[1], config->param, PARAM_MAX)!=0){
+        return -ENOMEM;
+      }
+      argv[2] = NULL;
+      ifc_create_bridge(pid, &argv);
       kfree(argv[0]);
+      kfree(argv[1]);
+      kfree(argv);
       break;
     default:
       return -EINVAL;
   }
-  printk(KERN_INFO "IFC: write bridge done.");
 	return 0;
 }
 
@@ -274,9 +277,8 @@ static ssize_t ifc_read_bridge(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
   struct ifc_struct *cifc = current_ifc();
-  uint32_t pid;
-
-  printk(KERN_INFO "IFC: read bridge.");
+  uint32_t pid=0;
+  int i=0;
 
   if(count<sizeof(uint32_t))
     return -EINVAL;
@@ -284,7 +286,19 @@ static ssize_t ifc_read_bridge(struct file *filp, char __user *buf,
   if(cifc->bridge.bridge==true){
     pid = cifc->bridge.remote_pid;
   }else{
-    pid = 0;
+    /* we try to read the pid of the started bridge usher */
+    while(i<100){
+      i++;
+      if(cifc->bridge.remote_pid!=0){
+        pid = cifc->bridge.remote_pid;
+        cifc->bridge.remote_pid = 0;
+        break;
+      }
+      msleep(10);
+    }
+    if(i>=100){
+      return -EAGAIN; // could not get the remote_pid
+    }
   }
 
   if(copy_to_user(buf, &pid, sizeof(uint32_t))){
