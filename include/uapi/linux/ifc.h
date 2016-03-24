@@ -34,6 +34,14 @@
 #define IFC_ADD_BRIDGE      3
 #define IFC_START_BRIDGE    4
 
+#define IFC_TRUSTED         1
+#define IFC_UNTRUSTED       0
+
+#define IFC_SELF_FILE             "/sys/kernel/security/ifc/self"
+#define IFC_TAG_FILE              "/sys/kernel/security/ifc/tag"
+#define IFC_PROCESS_FILE          "/sys/kernel/security/ifc/process"
+#define IFC_BRIDGE_FILE           "/sys/kernel/security/ifc/bridge"
+
 typedef uint64_t tag_t;
 
 struct ifc_label{
@@ -48,6 +56,7 @@ struct ifc_context{
   struct ifc_label integrity_p;
   struct ifc_label secrecy_n;
   struct ifc_label integrity_n;
+  uint8_t trusted;
 };
 
 struct ifc_tag_msg{

@@ -16,6 +16,32 @@
 #include <linux/fs.h>
 #include <linux/ifc.h>
 #include <linux/delay.h>
+#include <linux/camflow.h>
+
+static void mark_as_trusted(const char* name){
+  struct inode* in;
+  struct ifc_struct* ifc;
+
+  in = file_name_to_inode(name);
+  if(!in){
+    printk(KERN_ERR "IFC: could not find %s file.", name);
+  }else{
+    ifc = inode_get_ifc(in);
+    ifc->context.trusted=IFC_TRUSTED;
+  }
+}
+
+static bool is_initialised=false;
+
+static inline void initialize(void){
+  if(is_initialised)
+    return;
+  mark_as_trusted(IFC_SELF_FILE);
+  mark_as_trusted(IFC_TAG_FILE);
+  mark_as_trusted(IFC_PROCESS_FILE);
+  mark_as_trusted(IFC_BRIDGE_FILE);
+  is_initialised=true;
+}
 
 static inline struct ifc_context* context_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
@@ -31,6 +57,8 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
   struct ifc_context *cifc = current_ifc();
   struct ifc_tag_msg *msg;
   int rv=-EINVAL;
+
+  initialize();
 
   if(count < sizeof(struct ifc_tag_msg)){
     return -ENOMEM;
@@ -95,6 +123,8 @@ static ssize_t ifc_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
   struct ifc_context *cifc = current_ifc();
+
+  initialize();
 
 	if(count < sizeof(struct ifc_context)){
     return -ENOMEM;
@@ -313,17 +343,34 @@ static const struct file_operations ifc_bridge_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+#define CRYPTO_DRIVER_NAME "blowfish"
+struct crypto_cipher *ifc_tfm = NULL;
+static const uint64_t ifc_key=0xAEF; // not safe
+
+int ifc_crypto_init(void){
+  ifc_tfm = crypto_alloc_cipher(CRYPTO_DRIVER_NAME, 0, 0);
+  if(IS_ERR((void *)ifc_tfm)){
+    printk(KERN_ERR "IFC: Failed to load transform for %s: %ld\n", CRYPTO_DRIVER_NAME, PTR_ERR(ifc_tfm));
+    ifc_tfm = NULL;
+    return PTR_ERR((void *)ifc_tfm);
+  }
+  return crypto_cipher_setkey(ifc_tfm, (const u8*)&ifc_key, sizeof(uint64_t));
+}
+
 static int __init init_ifc_fs(void)
 {
-   struct dentry *ifc_dir;
+  int rc;
+  struct dentry *ifc_dir= securityfs_create_dir("ifc", NULL);
 
-   ifc_dir = securityfs_create_dir("ifc", NULL);
-
-   securityfs_create_file("self", 0666, ifc_dir, NULL, &ifc_self_ops);
-	 securityfs_create_file("tag", 0644, ifc_dir, NULL, &ifc_tag_ops);
-	 securityfs_create_file("process", 0666, ifc_dir, NULL, &ifc_process_ops);
-   securityfs_create_file("bridge", 0666, ifc_dir, NULL, &ifc_bridge_ops);
-   return 0;
+  securityfs_create_file("self", 0666, ifc_dir, NULL, &ifc_self_ops);
+  securityfs_create_file("tag", 0644, ifc_dir, NULL, &ifc_tag_ops);
+  securityfs_create_file("process", 0666, ifc_dir, NULL, &ifc_process_ops);
+  securityfs_create_file("bridge", 0666, ifc_dir, NULL, &ifc_bridge_ops);
+  rc = ifc_crypto_init();
+  if(rc){
+    printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);
+  }
+  return 0;
 }
 
 __initcall(init_ifc_fs);

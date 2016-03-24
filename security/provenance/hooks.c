@@ -20,6 +20,7 @@
 #include <linux/binfmts.h>
 #include <linux/random.h>
 #include <linux/xattr.h>
+#include <linux/camflow.h>
 
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
@@ -148,7 +149,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
   sprov = inode->i_sb->s_provenance;
   memcpy(iprov->inode_info.sb_uuid, sprov->sb_info.uuid, 16*sizeof(uint8_t));
 
-  inode->i_provenance = iprov;
+	alloc_camflow(inode, GFP_KERNEL);
+  inode_set_provenance(inode, (void**)&iprov);
 
   record_edge(ED_CREATE, cprov, iprov); /* creating inode != creating the file */
   return 0;
@@ -161,10 +163,11 @@ static int provenance_inode_alloc_security(struct inode *inode)
 */
 static void provenance_inode_free_security(struct inode *inode)
 {
-  prov_msg_t* prov = inode->i_provenance;
-  inode->i_provenance=NULL;
+  prov_msg_t* prov = inode_get_provenance(inode);
   if(!prov)
     free_provenance(prov);
+	inode_set_provenance(inode, NULL);
+	free_camflow(inode);
 }
 
 /*
@@ -183,19 +186,23 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov;
 
-  if(!inode->i_provenance){ // alloc provenance if none there
+	if(unlikely(IS_PRIVATE(inode)))
+		return 0;
+
+	iprov = inode_get_provenance(inode);
+  if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
+		iprov = inode_get_provenance(inode);
   }
 
-  iprov = inode->i_provenance;
+
 
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
       record_edge(ED_DATA, cprov, iprov);
   }
-  if((mask & (MAY_READ|MAY_EXEC|MAY_WRITE|MAY_APPEND)) != 0){
-    // conservatively assume write imply read
+  if((mask & (MAY_READ|MAY_EXEC)) != 0){
     record_edge(ED_DATA, iprov, cprov);
   }
   return 0;
@@ -218,16 +225,16 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   prov_msg_t* iprov;
   long_prov_msg_t* link_prov;
 
-  if(!dir->i_provenance){ // alloc provenance if none there
+  if(!inode_get_provenance(dir)){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
   }
 
-  if(!old_dentry->d_inode->i_provenance){
+  if(!inode_get_provenance(old_dentry->d_inode)){
     provenance_inode_alloc_security(old_dentry->d_inode);
   }
 
-  dprov = dir->i_provenance; // directory
-  iprov = old_dentry->d_inode->i_provenance; // inode pointed by dentry
+  dprov = inode_get_provenance(dir); // directory
+  iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
 
   // writing to the directory
   record_edge(ED_DATA, cprov, dprov);
@@ -259,16 +266,16 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   prov_msg_t* iprov;
   long_prov_msg_t* link_prov;
 
-  if(!dir->i_provenance){ // alloc provenance if none there
+  if(!inode_get_provenance(dir)){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
   }
 
-  if(!dentry->d_inode->i_provenance){
+  if(!inode_get_provenance(dentry->d_inode)){
     provenance_inode_alloc_security(dentry->d_inode);
   }
 
-  dprov = dir->i_provenance; // directory
-  iprov = dentry->d_inode->i_provenance; // inode pointed by dentry
+  dprov = inode_get_provenance(dir); // directory
+  iprov = inode_get_provenance(dentry->d_inode); // inode pointed by dentry
 
   // writing to the directory
   record_edge(ED_DATA, cprov, dprov);
@@ -308,9 +315,6 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 static int provenance_file_permission(struct file *file, int mask)
 {
   struct inode *inode = file_inode(file);
-  if(!inode->i_provenance){ // alloc provenance if none there
-    provenance_inode_alloc_security(inode);
-  }
   provenance_inode_permission(inode, mask);
   return 0;
 }
@@ -326,10 +330,10 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	struct inode *inode = file_inode(file);
 	prov_msg_t* iprov;
 
-	if(!inode->i_provenance){ // alloc provenance if none there
+	if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
-	iprov = inode->i_provenance;
+	iprov = inode_get_provenance(inode);
 	record_edge(ED_OPEN, cprov, iprov);
 	return 0;
 }
@@ -352,10 +356,10 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
     return 0;
   }
   inode = file_inode(file);
-  if(!inode->i_provenance){ // alloc provenance if none there
+  if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
-  iprov = inode->i_provenance;
+  iprov = inode_get_provenance(inode);
   prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
 
   if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
@@ -384,10 +388,10 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   prov_msg_t* iprov;
   struct inode *inode = file_inode(file);
 
-  if(!inode->i_provenance){ // alloc provenance if none there
+  if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
-  iprov = inode->i_provenance;
+  iprov = inode_get_provenance(inode);
   record_edge(ED_DATA, iprov, cprov); // both way exchange
   record_edge(ED_DATA, cprov, iprov);
 
@@ -555,11 +559,6 @@ static void provenance_sk_free_security(struct sock *sk)
 	sk->sk_provenance = NULL;
 }
 
-
-static inline prov_msg_t* inode_provenance(struct inode *inode){
-  return inode->i_provenance;
-}
-
 /*
 * This hook allows a module to update or allocate a per-socket security
 * structure. Note that the security field was not added directly to the
@@ -579,7 +578,7 @@ static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
   prov_msg_t* cprov  = current_provenance();
-  prov_msg_t* iprov  = inode_provenance(SOCK_INODE(sock));
+  prov_msg_t* iprov  = inode_get_provenance(SOCK_INODE(sock));
   prov_msg_t* skprov = NULL;
 
   if(kern){
@@ -716,8 +715,8 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
   prov_msg_t* cprov  = current_provenance();
-  prov_msg_t* skprov = inode_provenance(SOCK_INODE(sock));
-  prov_msg_t* nskprov = inode_provenance(SOCK_INODE(newsock));
+  prov_msg_t* skprov = inode_get_provenance(SOCK_INODE(sock));
+  prov_msg_t* nskprov = inode_get_provenance(SOCK_INODE(newsock));
 
   record_edge(ED_CREATE, skprov, nskprov);
   record_edge(ED_ACCEPT, nskprov, cprov);
@@ -797,7 +796,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    prov_msg_t* cprov  = current_provenance();
    prov_msg_t* nprov = bprm->cred->provenance;
    struct inode *inode = file_inode(bprm->file);
-   prov_msg_t* iprov = inode_provenance(inode);
+   prov_msg_t* iprov = inode_get_provenance(inode);
 
    record_edge(ED_CREATE, cprov, nprov);
    record_edge(ED_CREATE, iprov, nprov);
@@ -874,7 +873,7 @@ static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size
 static int provenance_inode_setsecurity(struct inode *inode, const char *name,
 				     const void *value, size_t size, int flags)
 {
-	prov_msg_t* iprov = inode_provenance(inode);
+	prov_msg_t* iprov = inode_get_provenance(inode);
 
 	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
 		return -EOPNOTSUPP;
@@ -902,7 +901,7 @@ static int provenance_inode_setsecurity(struct inode *inode, const char *name,
 */
 static int provenance_inode_getsecurity(const struct inode *inode, const char *name, void **buffer, bool alloc)
 {
-	prov_msg_t* iprov = inode->i_provenance;
+	prov_msg_t* iprov = inode_get_provenance(inode);
 	prov_msg_t* tmp;
 
 	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
@@ -1006,8 +1005,8 @@ static int provenance_inode_init_security(struct inode *inode, struct inode *dir
 				       const char **name,
 				       void **value, size_t *len)
 {
-  prov_msg_t* iprov = inode_provenance(inode);
-	prov_msg_t* dprov = inode_provenance(dir);
+  prov_msg_t* iprov = inode_get_provenance(inode);
+	prov_msg_t* dprov = inode_get_provenance(dir);
 	prov_msg_t* tmp;
 
 	if(!iprov)
@@ -1078,6 +1077,9 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(inode_notifysecctx, provenance_inode_notifysecctx),
 	LSM_HOOK_INIT(inode_setsecctx, provenance_inode_setsecctx)
 };
+#ifndef CONFIG_SECURITY_IFC
+struct kmem_cache *camflow_cache=NULL;
+#endif
 
 uint32_t prov_boot_id=0;
 void __init provenance_add_hooks(void){
@@ -1089,6 +1091,11 @@ void __init provenance_add_hooks(void){
   long_provenance_cache = kmem_cache_create("long_provenance_struct",
 					    sizeof(long_prov_msg_t),
 					    0, SLAB_PANIC, NULL);
+#ifndef CONFIG_SECURITY_IFC
+	camflow_cache = kmem_cache_create("camflow_i_ptr",
+							sizeof(struct camflow_i_ptr),
+							0, SLAB_PANIC, NULL);
+#endif
   cred_init_provenance();
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));

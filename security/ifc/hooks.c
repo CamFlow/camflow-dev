@@ -13,6 +13,7 @@
 */
 
 #include <linux/provenance.h>
+#include <linux/camflow.h>
 #include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
@@ -127,26 +128,129 @@ static void ifc_cred_transfer(struct cred *new, const struct cred *old)
   *old_ifc=*ifc;
 }
 
+/*
+* Allocate and attach a security structure to @inode->i_security.  The
+* i_security field is initialized to NULL when the inode structure is
+* allocated.
+* @inode contains the inode structure.
+* Return 0 if operation was successful.
+*/
+static int ifc_inode_alloc_security(struct inode *inode)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* ifc = inherit_ifc(cifc, GFP_KERNEL);
+  if(!ifc){
+    return -ENOMEM;
+  }
+  alloc_camflow(inode, GFP_KERNEL);
+  inode_set_ifc(inode, (void**)&ifc);
+  return 0;
+}
+
+/*
+* @inode contains the inode structure.
+* Deallocate the inode security structure and set @inode->i_security to
+* NULL.
+*/
+static void ifc_inode_free_security(struct inode *inode)
+{
+  struct ifc_struct* ifc = inode_get_ifc(inode);
+  if(!ifc)
+    free_ifc(ifc);
+	inode_set_ifc(inode, NULL);
+	free_camflow(inode);
+}
+
+/*
+* Check permission before accessing an inode.  This hook is called by the
+* existing Linux permission function, so a security module can use it to
+* provide additional checking for existing Linux permission checks.
+* Notice that this hook is called when a file is opened (as well as many
+* other operations), whereas the file_security_ops permission hook is
+* called when the actual read/write operations are performed.
+* @inode contains the inode structure to check.
+* @mask contains the permission mask.
+* Return 0 if permission is granted.
+*/
+static int ifc_inode_permission(struct inode *inode, int mask)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* ifc=NULL;
+  pid_t pid;
+
+  mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
+  // no permission to check. Existence test
+  if (!mask)
+		return 0;
+
+  if(unlikely(IS_PRIVATE(inode)))
+		return 0;
+
+  ifc = inode_get_ifc(inode);
+  if(!ifc){
+    ifc_inode_alloc_security(inode);
+    ifc = inode_get_ifc(inode);
+  }
+
+  if(ifc==NULL)
+    printk(KERN_INFO "IFC: ifc is NULL");
+
+  if(cifc==NULL)
+    printk(KERN_INFO "IFC: cifc is NULL");
+
+  if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
+    // process -> inode
+    if(!ifc_can_flow(&cifc->context, &ifc->context)){
+      pid = task_pid_vnr(current);
+      printk(KERN_INFO "IFC: may write refused process (%u) -> inode", pid);
+      return -EPERM;
+    }
+  }
+  if((mask & (MAY_READ)) != 0){
+    // inode -> process
+    if(!ifc_can_flow(&ifc->context, &cifc->context)){
+      pid = task_pid_vnr(current);
+      printk(KERN_INFO "IFC: may read refused inode -> process (%u)", pid);
+      return -EPERM;
+    }
+  }
+  return 0;
+}
+
+/*
+* Check file permissions before accessing an open file.  This hook is
+* called by various operations that read or write files.  A security
+* module can use this hook to perform additional checking on these
+* operations, e.g.  to revalidate permissions on use to support privilege
+* bracketing or policy changes.  Notice that this hook is used when the
+* actual read/write operations are performed, whereas the
+* inode_security_ops hook is called when a file is opened (as well as
+* many other operations).
+* Caveat:  Although this hook can be used to revalidate permissions for
+* various system call operations that read or write files, it does not
+* address the revalidation of permissions for memory-mapped files.
+* Security modules must handle this separately if they need such
+* revalidation.
+* @file contains the file structure being accessed.
+* @mask contains the requested permissions.
+* Return 0 if permission is granted.
+*/
+static int ifc_file_permission(struct file *file, int mask)
+{
+  struct inode *inode = file_inode(file);
+  return ifc_inode_permission(inode, mask);
+}
+
 static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, ifc_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, ifc_cred_free),
   LSM_HOOK_INIT(cred_prepare, ifc_cred_prepare),
-  LSM_HOOK_INIT(cred_transfer, ifc_cred_transfer)
+  LSM_HOOK_INIT(cred_transfer, ifc_cred_transfer),
+  LSM_HOOK_INIT(inode_alloc_security, ifc_inode_alloc_security),
+  LSM_HOOK_INIT(inode_free_security, ifc_inode_free_security),
+  LSM_HOOK_INIT(inode_permission, ifc_inode_permission),
+  LSM_HOOK_INIT(file_permission, ifc_file_permission)
 };
-
-#define CRYPTO_DRIVER_NAME "blowfish"
-struct crypto_cipher *ifc_tfm = NULL;
-static const uint64_t ifc_key=0xAEF; // not safe
-
-int ifc_crypto_init(void){
-  ifc_tfm = crypto_alloc_cipher(CRYPTO_DRIVER_NAME, 0, 0);
-  if(IS_ERR((void *)ifc_tfm)){
-    printk(KERN_ERR "IFC: Failed to load transform for %s: %ld\n", CRYPTO_DRIVER_NAME, PTR_ERR(ifc_tfm));
-    ifc_tfm = NULL;
-    return PTR_ERR((void *)ifc_tfm);
-  }
-  return crypto_cipher_setkey(ifc_tfm, (const u8*)&ifc_key, sizeof(uint64_t));
-}
 
 /* init security of the first process */
 static void cred_init_security(void){
@@ -162,19 +266,18 @@ static void cred_init_security(void){
 
 atomic64_t ifc_tag_count=ATOMIC64_INIT(1);
 
+struct kmem_cache *camflow_cache=NULL;
+
 void __init ifc_add_hooks(void){
-  int rc;
-
-  printk(KERN_INFO "IFC Camflow %s\n", CAMFLOW_VERSION_STR);
-  rc = ifc_crypto_init();
-  if(rc){
-    printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);
-  }
-
   ifc_cache = kmem_cache_create("ifc_struct",
 					    sizeof(struct ifc_struct),
 					    0, SLAB_PANIC, NULL);
+
+  camflow_cache = kmem_cache_create("camflow_i_ptr",
+					    sizeof(struct camflow_i_ptr),
+					    0, SLAB_PANIC, NULL);
   cred_init_security();
   security_add_hooks(ifc_hooks, ARRAY_SIZE(ifc_hooks));
+  printk(KERN_INFO "IFC Camflow %s\n", CAMFLOW_VERSION_STR);
   printk(KERN_INFO "IFC hooks ready.\n");
 }

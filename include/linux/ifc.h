@@ -87,7 +87,7 @@ static inline bool ifc_is_subset(struct ifc_label* set, struct ifc_label* sub){
   int i=0, j=0;
 
   if(sub->size == 0) // empty set is subset of everything
-    return 0;
+    return true;
 
   if(set->size < sub->size)
     return false;
@@ -110,9 +110,16 @@ static inline bool ifc_is_subset(struct ifc_label* set, struct ifc_label* sub){
 }
 
 static inline bool ifc_can_flow(struct ifc_context *from, struct ifc_context* to){
-  bool rv = ifc_is_subset(&from->secrecy, &to->secrecy);
-  rv &= ifc_is_subset(&to->integrity, &from->integrity);
-  return rv;
+  if(from->trusted==IFC_TRUSTED || to->trusted==IFC_TRUSTED){
+    return true;
+  }
+  if(!ifc_is_subset(&from->secrecy, &to->secrecy)){
+    return false;
+  }
+  if(!ifc_is_subset(&to->integrity, &from->integrity)){
+    return false;
+  }
+  return true;
 }
 
 static inline bool ifc_contains_value(struct ifc_label* label, tag_t value){

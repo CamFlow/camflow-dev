@@ -599,9 +599,7 @@ struct inode {
 
 #ifdef CONFIG_SECURITY
 	void			*i_security;
-#endif
-#ifdef CONFIG_SECURITY_PROVENANCE
-	void			*i_provenance;
+	void 			*i_camflow;
 #endif
 
 	/* Stat data, not accessed from path walking */
