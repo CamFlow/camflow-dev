@@ -176,7 +176,12 @@ static int ifc_inode_permission(struct inode *inode, int mask)
 {
   struct ifc_struct* cifc = current_ifc();
   struct ifc_struct* ifc=NULL;
-  pid_t pid;
+#ifdef CONFIG_SECURITY_PROVENANCE
+	prov_msg_t *i_prov=NULL;
+  prov_msg_t *p_prov=NULL;
+#else
+    pid_t pid;
+#endif
 
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
   // no permission to check. Existence test
@@ -192,29 +197,39 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     ifc = inode_get_ifc(inode);
   }
 
-  if(ifc==NULL)
-    printk(KERN_INFO "IFC: ifc is NULL");
-
-  if(cifc==NULL)
-    printk(KERN_INFO "IFC: cifc is NULL");
-
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
     // process -> inode
     if(!ifc_can_flow(&cifc->context, &ifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+      pid = task_pid_vnr(current);
+      printk(KERN_INFO "IFC: may write refused process (%u) -> inode", pid);
+      i_prov=inode_get_provenance(inode);
+      p_prov=current_provenance();
+      record_edge(ED_DATA, p_prov, i_prov, FLOW_DISALLOWED);
+#else
       pid = task_pid_vnr(current);
       printk(KERN_INFO "IFC: may write refused process (%u) -> inode", pid);
       print_context(&cifc->context);
       print_context(&ifc->context);
+#endif
       return -EPERM;
     }
   }
   if((mask & (MAY_READ)) != 0){
     // inode -> process
     if(!ifc_can_flow(&ifc->context, &cifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+      pid = task_pid_vnr(current);
+      printk(KERN_INFO "IFC: may read refused inode -> process (%u)", pid);
+      i_prov=inode_get_provenance(inode);
+      p_prov=current_provenance();
+      record_edge(ED_DATA, i_prov, p_prov, FLOW_DISALLOWED);
+#else
       pid = task_pid_vnr(current);
       printk(KERN_INFO "IFC: may read refused inode -> process (%u)", pid);
       print_context(&ifc->context);
       print_context(&cifc->context);
+#endif
       return -EPERM;
     }
   }

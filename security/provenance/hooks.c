@@ -13,6 +13,7 @@
 */
 
 #include <linux/provenance.h>
+#include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
@@ -82,6 +83,9 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 {
   prov_msg_t* old_prov = old->provenance;
   prov_msg_t* prov = alloc_provenance(MSG_TASK, gfp);
+#ifdef CONFIG_SECURITY_IFC
+	struct ifc_struct *new_ifc;
+#endif
 
   if(!prov){
     return -ENOMEM;
@@ -90,7 +94,14 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
 
-  record_edge(ED_CREATE, old_prov, prov);
+#ifdef CONFIG_SECURITY_IFC
+	new_ifc = new->ifc;
+	if(ifc_is_labelled(&new_ifc->context)){
+		prov->node_info.tracked=NODE_TRACKED;
+	}
+#endif
+
+  record_edge(ED_CREATE, old_prov, prov, FLOW_ALLOWED);
   new->provenance = prov;
   return 0;
 }
@@ -123,7 +134,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
   prov_msg_t *old_prov = old->provenance;
 	prov_msg_t *prov = new->provenance;
 
-  record_edge(ED_CHANGE, old_prov, prov);
+  record_edge(ED_CHANGE, old_prov, prov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -152,7 +163,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	alloc_camflow(inode, GFP_KERNEL);
   inode_set_provenance(inode, (void**)&iprov);
 
-  record_edge(ED_CREATE, cprov, iprov); /* creating inode != creating the file */
+  record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED); /* creating inode != creating the file */
   return 0;
 }
 
@@ -195,15 +206,13 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		iprov = inode_get_provenance(inode);
   }
 
-
-
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
-      record_edge(ED_DATA, cprov, iprov);
+    record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
   }
   if((mask & (MAY_READ|MAY_EXEC)) != 0){
-    record_edge(ED_DATA, iprov, cprov);
+    record_edge(ED_DATA, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
 }
@@ -237,8 +246,8 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
 
   // writing to the directory
-  record_edge(ED_DATA, cprov, dprov);
-  record_edge(ED_DATA, cprov, iprov);
+  record_edge(ED_DATA, cprov, dprov, FLOW_ALLOWED);
+  record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
 
   if(prov_enabled){
     link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
@@ -278,8 +287,8 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   iprov = inode_get_provenance(dentry->d_inode); // inode pointed by dentry
 
   // writing to the directory
-  record_edge(ED_DATA, cprov, dprov);
-  record_edge(ED_DATA, cprov, iprov);
+  record_edge(ED_DATA, cprov, dprov, FLOW_ALLOWED);
+  record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
 
   if(prov_enabled){
     link_prov = alloc_long_provenance(MSG_UNLINK, GFP_KERNEL);
@@ -334,7 +343,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
     provenance_inode_alloc_security(inode);
   }
 	iprov = inode_get_provenance(inode);
-	record_edge(ED_OPEN, cprov, iprov);
+	record_edge(ED_OPEN, cprov, iprov, FLOW_ALLOWED);
 	return 0;
 }
 
@@ -363,11 +372,11 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
 
   if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
-    record_edge(ED_MMAP, cprov, iprov);
+    record_edge(ED_MMAP, cprov, iprov, FLOW_ALLOWED);
   }
   if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
     // conservatively assume write imply read
-    record_edge(ED_MMAP, iprov, cprov);
+    record_edge(ED_MMAP, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
 }
@@ -392,8 +401,8 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
     provenance_inode_alloc_security(inode);
   }
   iprov = inode_get_provenance(inode);
-  record_edge(ED_DATA, iprov, cprov); // both way exchange
-  record_edge(ED_DATA, cprov, iprov);
+  record_edge(ED_DATA, iprov, cprov, FLOW_ALLOWED); // both way exchange
+  record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
 
   return 0;
 }
@@ -420,7 +429,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   set_node_id(mprov, ASSIGN_NODE_ID);
   mprov->msg_msg_info.type=msg->m_type;
   msg->provenance = mprov;
-  record_edge(ED_CREATE, cprov, mprov);
+  record_edge(ED_CREATE, cprov, mprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -446,7 +455,7 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov = msg->provenance;
-  record_edge(ED_DATA, cprov, mprov);
+  record_edge(ED_DATA, cprov, mprov, FLOW_ALLOWED);
   return 0;
 }
 /*
@@ -468,7 +477,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
   prov_msg_t* cprov = target->cred->provenance;
   prov_msg_t* mprov = msg->provenance;
 
-  record_edge(ED_DATA, mprov, cprov);
+  record_edge(ED_DATA, mprov, cprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -490,8 +499,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
   set_node_id(sprov, ASSIGN_NODE_ID);
   sprov->shm_info.mode=shp->shm_perm.mode;
   shp->shm_perm.provenance=sprov;
-  record_edge(ED_ATTACH, sprov, cprov);
-  record_edge(ED_ATTACH, cprov, sprov);
+  record_edge(ED_ATTACH, sprov, cprov, FLOW_ALLOWED);
+  record_edge(ED_ATTACH, cprov, sprov, FLOW_ALLOWED);
 	return 0;
 }
 
@@ -524,10 +533,10 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
     return -ENOMEM;
 
   if(shmflg & SHM_RDONLY){
-    record_edge(ED_ATTACH, sprov, cprov);
+    record_edge(ED_ATTACH, sprov, cprov, FLOW_ALLOWED);
   }else{
-    record_edge(ED_ATTACH, sprov, cprov);
-    record_edge(ED_ATTACH, cprov, sprov);
+    record_edge(ED_ATTACH, sprov, cprov, FLOW_ALLOWED);
+    record_edge(ED_ATTACH, cprov, sprov, FLOW_ALLOWED);
   }
 	return 0;
 }
@@ -590,8 +599,8 @@ static int provenance_socket_post_create(struct socket *sock, int family,
     skprov->sock_info.type = type;
     skprov->sock_info.family = family;
     skprov->sock_info.protocol = protocol;
-    record_edge(ED_CREATE, cprov, skprov);
-    record_edge(ED_ASSOCIATE, skprov, iprov);
+    record_edge(ED_CREATE, cprov, skprov, FLOW_ALLOWED);
+    record_edge(ED_ASSOCIATE, skprov, iprov, FLOW_ALLOWED);
   }
 
   return 0;
@@ -624,7 +633,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
 	  long_prov_write(addr_info);
 	  free_long_provenance(addr_info);
-	  record_edge(ED_BIND, cprov, skprov);
+	  record_edge(ED_BIND, cprov, skprov, FLOW_ALLOWED);
 	}
 
   return 0;
@@ -656,7 +665,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
 	  long_prov_write(addr_info);
 	  free_long_provenance(addr_info);
-	  record_edge(ED_CONNECT, cprov, skprov);
+	  record_edge(ED_CONNECT, cprov, skprov, FLOW_ALLOWED);
 	}
 
   return 0;
@@ -673,7 +682,7 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  record_edge(ED_LISTEN, cprov, skprov);
+  record_edge(ED_LISTEN, cprov, skprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -718,8 +727,8 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
   prov_msg_t* skprov = inode_get_provenance(SOCK_INODE(sock));
   prov_msg_t* nskprov = inode_get_provenance(SOCK_INODE(newsock));
 
-  record_edge(ED_CREATE, skprov, nskprov);
-  record_edge(ED_ACCEPT, nskprov, cprov);
+  record_edge(ED_CREATE, skprov, nskprov, FLOW_ALLOWED);
+  record_edge(ED_ACCEPT, nskprov, cprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -740,9 +749,9 @@ static int provenance_socket_unix_stream_connect(struct sock *sock,
   prov_msg_t* nskprov = newsk->sk_provenance;
   prov_msg_t* okprov = other->sk_provenance;
 
-  record_edge(ED_CONNECT, cprov, skprov);
-  record_edge(ED_ASSOCIATE, skprov, nskprov);
-  record_edge(ED_ASSOCIATE, skprov, okprov);
+  record_edge(ED_CONNECT, cprov, skprov, FLOW_ALLOWED);
+  record_edge(ED_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
+  record_edge(ED_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -759,7 +768,7 @@ static int provenance_socket_unix_may_send(struct socket *sock,
   prov_msg_t* skprov = sock->sk->sk_provenance;
   prov_msg_t* okprov = other->sk->sk_provenance;
 
-  record_edge(ED_DATA, skprov, okprov);
+  record_edge(ED_DATA, skprov, okprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -798,8 +807,8 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    struct inode *inode = file_inode(bprm->file);
    prov_msg_t* iprov = inode_get_provenance(inode);
 
-   record_edge(ED_CREATE, cprov, nprov);
-   record_edge(ED_CREATE, iprov, nprov);
+   record_edge(ED_CREATE, cprov, nprov, FLOW_ALLOWED);
+   record_edge(ED_CREATE, iprov, nprov, FLOW_ALLOWED);
  }
 
 /*
@@ -1025,7 +1034,7 @@ static int provenance_inode_init_security(struct inode *inode, struct inode *dir
 		*len = sizeof(prov_msg_t);
 	}
 
-	record_edge(ED_PARENT, dprov, iprov);
+	record_edge(ED_PARENT, dprov, iprov, FLOW_ALLOWED);
 
 	return 0;
 }

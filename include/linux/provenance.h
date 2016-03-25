@@ -135,18 +135,26 @@ static inline void record_node(prov_msg_t* prov){
   prov_write(prov);
 }
 
-static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to){
+static inline bool provenance_is_tracked(prov_msg_t* node){
+  if(prov_all && node->node_info.opaque != NODE_OPAQUE)
+    return true; // log everything but opaque
+  if(node->node_info.tracked == NODE_TRACKED && node->node_info.opaque != NODE_OPAQUE)
+    return true; // log tracked node, except if opaque
+  return false;
+}
+
+static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t edge;
 
-  // ignore if not tracked
-  if(from->node_info.tracked!=NODE_TRACKED && to->node_info.tracked!=NODE_TRACKED && !prov_all)
+  if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
 
   // don't record if to or from are opaque
-  if(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE)
+  if(unlikely(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE))
     return;
 
-  if(!prov_enabled) // capture is not enabled, ignore
+  // ignore if not tracked
+  if(!provenance_is_tracked(from) && !provenance_is_tracked(to))
     return;
 
   if(!(from->node_info.recorded == NODE_RECORDED) )
@@ -158,7 +166,7 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to){
   edge.edge_info.message_type=MSG_EDGE;
   edge.edge_info.snd_id=from->node_info.node_id;
   edge.edge_info.rcv_id=to->node_info.node_id;
-  edge.edge_info.allowed=FLOW_ALLOWED;
+  edge.edge_info.allowed=allowed;
   edge.edge_info.type=type;
   prov_write(&edge);
 }

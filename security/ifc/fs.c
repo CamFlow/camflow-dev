@@ -17,10 +17,14 @@
 #include <linux/ifc.h>
 #include <linux/delay.h>
 #include <linux/camflow.h>
+#include <linux/provenance.h>
 
 static void mark_as_trusted(const char* name){
   struct inode* in;
   struct ifc_struct* ifc;
+#ifdef CONFIG_SECURITY_PROVENANCE
+  prov_msg_t* provenance;
+#endif
 
   in = file_name_to_inode(name);
   if(!in){
@@ -28,6 +32,11 @@ static void mark_as_trusted(const char* name){
   }else{
     ifc = inode_get_ifc(in);
     ifc->context.trusted=IFC_TRUSTED;
+#ifdef CONFIG_SECURITY_PROVENANCE
+    // opaque NODES are not recorded in audit data
+    provenance = inode_get_provenance(in);
+    provenance->node_info.opaque=NODE_OPAQUE;
+#endif
   }
 }
 
@@ -56,6 +65,7 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
 
 {
   struct ifc_context *cifc = current_ifc();
+  prov_msg_t* cprovenance;
   struct ifc_tag_msg *msg;
   int rv=-EINVAL;
 
@@ -115,6 +125,15 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
     }
   }
   if(!rv){
+#ifdef CONFIG_SECURITY_PROVENANCE
+  // mark as tracked depending of the label state
+  cprovenance = current_provenance();
+  if(ifc_is_labelled(cifc)){
+    cprovenance->node_info.tracked=NODE_TRACKED;
+  }else{
+    cprovenance->node_info.tracked=NODE_NOT_TRACKED;
+  }
+#endif
     return sizeof(struct ifc_tag_msg);
   }
   return rv; // return error
@@ -371,6 +390,10 @@ static int __init init_ifc_fs(void)
   if(rc){
     printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);
   }
+#ifdef CONFIG_SECURITY_PROVENANCE
+  printk(KERN_INFO "IFC: activivating provenance capture.");
+  prov_enabled = true;
+#endif
   return 0;
 }
 

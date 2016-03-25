@@ -48,6 +48,7 @@ install_header:
 install:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
+	cd ./build/camflow-audit-lib && $(MAKE) install
 
 clean: clean_kernel clean_us
 
