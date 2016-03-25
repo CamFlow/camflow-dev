@@ -31,16 +31,17 @@ static void mark_as_trusted(const char* name){
   }
 }
 
-static bool is_initialised=false;
+static bool ifc_fs_is_initialised=false;
 
 static inline void initialize(void){
-  if(is_initialised)
+  if(ifc_fs_is_initialised)
     return;
+  printk(KERN_INFO "IFC: marking API files as trusted...");
   mark_as_trusted(IFC_SELF_FILE);
   mark_as_trusted(IFC_TAG_FILE);
   mark_as_trusted(IFC_PROCESS_FILE);
   mark_as_trusted(IFC_BRIDGE_FILE);
-  is_initialised=true;
+  ifc_fs_is_initialised=true;
 }
 
 static inline struct ifc_context* context_from_pid(pid_t pid){

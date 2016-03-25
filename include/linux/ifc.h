@@ -83,7 +83,7 @@ static inline void ifc_sort_label(struct ifc_label* label){
   sort(label->array, label->size, sizeof(uint64_t), &ifc_compare, NULL);
 }
 
-static inline bool ifc_is_subset(struct ifc_label* set, struct ifc_label* sub){
+static inline bool ifc_is_subset(struct ifc_label* sub, struct ifc_label* set){
   int i=0, j=0;
 
   if(sub->size == 0) // empty set is subset of everything
@@ -279,6 +279,23 @@ static inline int ifc_remove_tag(struct ifc_context* context, uint8_t type, tag_
   }
   label->size--;
   return 0;
+}
+
+static inline void print_label(struct ifc_label* label){
+  int i;
+  for(i=0; i < label->size; i++){
+    printk(KERN_INFO "%llu", label->array[i]);
+  }
+}
+
+static inline void print_context(struct ifc_context* context){
+  if(context->trusted==IFC_TRUSTED){
+    printk(KERN_INFO "TRUSTED");
+  }
+  printk(KERN_INFO "SECRECY");
+  print_label(&context->secrecy);
+  printk(KERN_INFO "INTEGRITY");
+  print_label(&context->integrity);
 }
 
 #endif

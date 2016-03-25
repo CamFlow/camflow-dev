@@ -203,6 +203,8 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     if(!ifc_can_flow(&cifc->context, &ifc->context)){
       pid = task_pid_vnr(current);
       printk(KERN_INFO "IFC: may write refused process (%u) -> inode", pid);
+      print_context(&cifc->context);
+      print_context(&ifc->context);
       return -EPERM;
     }
   }
@@ -211,6 +213,8 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     if(!ifc_can_flow(&ifc->context, &cifc->context)){
       pid = task_pid_vnr(current);
       printk(KERN_INFO "IFC: may read refused inode -> process (%u)", pid);
+      print_context(&ifc->context);
+      print_context(&cifc->context);
       return -EPERM;
     }
   }
