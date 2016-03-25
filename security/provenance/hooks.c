@@ -162,7 +162,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
 	alloc_camflow(inode, GFP_KERNEL);
   inode_set_provenance(inode, (void**)&iprov);
-
   record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED); /* creating inode != creating the file */
   return 0;
 }
@@ -726,7 +725,6 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = inode_get_provenance(SOCK_INODE(sock));
   prov_msg_t* nskprov = inode_get_provenance(SOCK_INODE(newsock));
-
   record_edge(ED_CREATE, skprov, nskprov, FLOW_ALLOWED);
   record_edge(ED_ACCEPT, nskprov, cprov, FLOW_ALLOWED);
   return 0;
@@ -806,7 +804,6 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    prov_msg_t* nprov = bprm->cred->provenance;
    struct inode *inode = file_inode(bprm->file);
    prov_msg_t* iprov = inode_get_provenance(inode);
-
    record_edge(ED_CREATE, cprov, nprov, FLOW_ALLOWED);
    record_edge(ED_CREATE, iprov, nprov, FLOW_ALLOWED);
  }

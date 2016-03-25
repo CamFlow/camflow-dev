@@ -136,9 +136,9 @@ static inline void record_node(prov_msg_t* prov){
 }
 
 static inline bool provenance_is_tracked(prov_msg_t* node){
-  if(prov_all && node->node_info.opaque != NODE_OPAQUE)
+  if(prov_all)
     return true; // log everything but opaque
-  if(node->node_info.tracked == NODE_TRACKED && node->node_info.opaque != NODE_OPAQUE)
+  if(node->node_info.tracked == NODE_TRACKED)
     return true; // log tracked node, except if opaque
   return false;
 }
@@ -148,7 +148,6 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
 
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
-
   // don't record if to or from are opaque
   if(unlikely(from->node_info.opaque == NODE_OPAQUE || to->node_info.opaque == NODE_OPAQUE))
     return;
