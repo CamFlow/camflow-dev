@@ -50,6 +50,7 @@ static inline void initialize(void){
   mark_as_trusted(IFC_TAG_FILE);
   mark_as_trusted(IFC_PROCESS_FILE);
   mark_as_trusted(IFC_BRIDGE_FILE);
+  mark_as_trusted(IFC_FILE_FILE);
   ifc_fs_is_initialised=true;
 }
 
@@ -363,6 +364,46 @@ static const struct file_operations ifc_bridge_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static ssize_t ifc_write_file(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+  return -EPERM;
+}
+
+static ssize_t ifc_read_file(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+  struct ifc_file_config *msg;
+  struct inode* in;
+  struct ifc_struct* ifc;
+
+  if(count < sizeof(struct ifc_file_config)){
+    printk(KERN_INFO "IFC: Too short.");
+    return -EINVAL;
+  }
+
+  msg = (struct ifc_file_config*)buf;
+  in = file_name_to_inode(msg->name);
+  if(!in){
+    printk(KERN_ERR "IFC: could not find %s file.", msg->name);
+    return -EINVAL;
+  }else{
+    ifc = inode_get_ifc(in);
+    if(copy_to_user(&msg->context, &ifc->context, sizeof(struct ifc_context))){
+      printk(KERN_INFO "IFC: error copying.");
+      return -ENOMEM;
+    }
+  }
+  return sizeof(struct ifc_file_config);
+}
+
+static const struct file_operations ifc_file_ops = {
+	.write		= ifc_write_file,
+  .read     = ifc_read_file,
+	.llseek		= generic_file_llseek,
+};
+
 #define CRYPTO_DRIVER_NAME "blowfish"
 struct crypto_cipher *ifc_tfm = NULL;
 static const uint64_t ifc_key=0xAEF; // not safe
@@ -386,6 +427,7 @@ static int __init init_ifc_fs(void)
   securityfs_create_file("tag", 0644, ifc_dir, NULL, &ifc_tag_ops);
   securityfs_create_file("process", 0666, ifc_dir, NULL, &ifc_process_ops);
   securityfs_create_file("bridge", 0666, ifc_dir, NULL, &ifc_bridge_ops);
+  securityfs_create_file("file", 0444, ifc_dir, NULL, &ifc_file_ops);
   rc = ifc_crypto_init();
   if(rc){
     printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);

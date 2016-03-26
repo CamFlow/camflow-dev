@@ -45,10 +45,15 @@ compile_us:
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 
-install:
+install: install_kernel install_us
+
+install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
+
+install_us:
 	cd ./build/camflow-audit-lib && $(MAKE) install
+	cd ./build/camflow-ifc-lib && $(MAKE) install
 
 clean: clean_kernel clean_us
 
@@ -58,7 +63,7 @@ clean_kernel:
 
 clean_us:
 	cd ./build/camflow-audit-lib && $(MAKE) clean
-	cd ./build/camflow-install-lib && $(MAKE) clean
+	cd ./build/camflow-ifc-lib && $(MAKE) clean
 
 patch:
 	cd build && mkdir -p pristine

@@ -41,6 +41,7 @@
 #define IFC_TAG_FILE              "/sys/kernel/security/ifc/tag"
 #define IFC_PROCESS_FILE          "/sys/kernel/security/ifc/process"
 #define IFC_BRIDGE_FILE           "/sys/kernel/security/ifc/bridge"
+#define IFC_FILE_FILE             "/sys/kernel/security/ifc/file"
 
 typedef uint64_t tag_t;
 
@@ -82,6 +83,11 @@ struct ifc_bridge_config{
   char path[PATH_MAX];
   char param[PARAM_MAX];
   uint8_t op;
+};
+
+struct ifc_file_config{
+  char name[PATH_MAX+1];
+  struct ifc_context context;
 };
 
 #endif
