@@ -582,9 +582,7 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 */
 static void provenance_sk_free_security(struct sock *sk)
 {
-  if(sk->sk_provenance!=NULL){
-	   free_provenance(sk->sk_provenance);
-   }
+	free_provenance(sk->sk_provenance);
 	sk->sk_provenance = NULL;
 }
 
@@ -614,15 +612,16 @@ static int provenance_socket_post_create(struct socket *sock, int family,
     return 0;
   }
 
-  if(sock->sk){
-    skprov = sock->sk->sk_provenance;
-    skprov->sock_info.type = type;
-    skprov->sock_info.family = family;
-    skprov->sock_info.protocol = protocol;
-    record_edge(ED_CREATE, cprov, skprov, FLOW_ALLOWED);
-    record_edge(ED_ASSOCIATE, skprov, iprov, FLOW_ALLOWED);
-  }
-
+  if(!sock->sk->sk_provenance){
+		provenance_sk_alloc_security(sock->sk, family, GFP_KERNEL);
+	}
+  skprov = sock->sk->sk_provenance;
+  skprov->sock_info.type = type;
+  skprov->sock_info.family = family;
+  skprov->sock_info.protocol = protocol;
+  record_edge(ED_CREATE, cprov, skprov, FLOW_ALLOWED);
+  record_edge(ED_ASSOCIATE, skprov, iprov, FLOW_ALLOWED);
+	
   return 0;
 }
 
@@ -759,7 +758,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 * @newsk contains the new sock structure.
 * Return 0 if permission is granted.
 */
-static int provenance_socket_unix_stream_connect(struct sock *sock,
+static int provenance_unix_stream_connect(struct sock *sock,
 					      struct sock *other,
 					      struct sock *newsk)
 {
@@ -781,7 +780,7 @@ static int provenance_socket_unix_stream_connect(struct sock *sock,
 * @other contains the peer socket structure.
 * Return 0 if permission is granted.
 */
-static int provenance_socket_unix_may_send(struct socket *sock,
+static int provenance_unix_may_send(struct socket *sock,
 					struct socket *other)
 {
   prov_msg_t* skprov = sock->sk->sk_provenance;
@@ -900,8 +899,8 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
   LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
   LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
-  LSM_HOOK_INIT(unix_stream_connect, provenance_socket_unix_stream_connect),
-  LSM_HOOK_INIT(unix_may_send, provenance_socket_unix_may_send),
+  LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
+  LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
   LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
   LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),

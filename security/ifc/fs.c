@@ -471,7 +471,7 @@ static int __init init_ifc_fs(void)
   securityfs_create_file("tag", 0644, ifc_dir, NULL, &ifc_tag_ops);
   securityfs_create_file("process", 0666, ifc_dir, NULL, &ifc_process_ops);
   securityfs_create_file("bridge", 0666, ifc_dir, NULL, &ifc_bridge_ops);
-  securityfs_create_file("file", 0644, ifc_dir, NULL, &ifc_file_ops);
+  securityfs_create_file("file", 0600, ifc_dir, NULL, &ifc_file_ops);
   rc = ifc_crypto_init();
   if(rc){
     printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);

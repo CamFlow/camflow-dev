@@ -431,6 +431,9 @@ struct sock {
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void			*sk_provenance;
 #endif
+#ifdef CONFIG_SECURITY_IFC
+	void			*sk_ifc;
+#endif
 	__u32			sk_mark;
 	u32			sk_classid;
 	struct cg_proto		*sk_cgrp;

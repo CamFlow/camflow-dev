@@ -494,6 +494,223 @@ static int ifc_bprm_set_creds(struct linux_binprm *bprm){
   return 0;
 }
 
+/*
+* Allocate and attach a security structure to the sk->sk_security field,
+* which is used to copy security attributes between local stream sockets.
+*/
+static int ifc_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* ifc = alloc_ifc(priority);;
+  sk->sk_ifc=ifc;
+  if(!ifc_is_labelled(&cifc->context)){
+    return 0;
+  }
+
+  if(family!=AF_UNIX && family!=AF_NETLINK && family!=AF_ALG){
+    return -EPERM;
+  }
+  /* we trust socket to crypto stuff, should we? */
+  if(family==AF_ALG){
+    ifc->context.trusted = IFC_TRUSTED;
+  }else if(family==AF_UNIX){
+    ifc = inherit_ifc(cifc, priority);
+    sk->sk_ifc=ifc;
+  }
+  return 0;
+}
+
+/*
+* Deallocate security structure.
+*/
+static void ifc_sk_free_security(struct sock *sk)
+{
+  if(sk->sk_ifc!=NULL)
+    free_ifc(sk->sk_ifc);
+	sk->sk_ifc = NULL;
+}
+
+/*
+* This hook allows a module to update or allocate a per-socket security
+* structure. Note that the security field was not added directly to the
+* socket structure, but rather, the socket security information is stored
+* in the associated inode.  Typically, the inode alloc_security hook will
+* allocate and and attach security information to
+* sock->inode->i_security.  This hook may be used to update the
+* sock->inode->i_security field with additional information that wasn't
+* available when the inode was allocated.
+* @sock contains the newly created socket structure.
+* @family contains the requested protocol family.
+* @type contains the requested communications type.
+* @protocol contains the requested protocol.
+* @kern set to 1 if a kernel socket.
+*/
+static int ifc_socket_post_create(struct socket *sock, int family,
+				      int type, int protocol, int kern)
+{
+  struct ifc_struct* cifc  = current_ifc();
+  struct ifc_struct* iifc  = inode_get_ifc(SOCK_INODE(sock));
+  struct ifc_struct* skifc = NULL;
+  int rc;
+
+  if(kern){
+    return 0;
+  }
+
+  if(!sock->sk->sk_ifc){
+		rc = ifc_sk_alloc_security(sock->sk, family, GFP_KERNEL);
+    if(rc)
+      return rc;
+	}
+
+  if(!ifc_is_labelled(&cifc->context)){
+    return 0;
+  }
+
+  if(family!=AF_UNIX && family!=AF_NETLINK && family!=AF_ALG){
+    return -EPERM;
+  }
+
+  skifc = sock->sk->sk_ifc;
+
+  if(family==AF_NETLINK){
+    if(protocol!=NETLINK_CAMFLOW_IFC_BRIDGE){
+      return -EPERM;
+    }else{
+      skifc->context.trusted = IFC_TRUSTED;
+    }
+  }
+
+  memcpy(iifc, skifc, sizeof(struct ifc_struct));
+  return 0;
+}
+
+/*
+* Check permission before socket protocol layer bind operation is
+* performed and the socket @sock is bound to the address specified in the
+* @address parameter.
+* @sock contains the socket structure.
+* @address contains the address to bind to.
+* @addrlen contains the length of address.
+* Return 0 if permission is granted.
+*/
+static int ifc_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
+{
+  return ifc_inode_permission(SOCK_INODE(sock), MAY_WRITE); // check if MAY_WRITE is ok
+}
+
+/*
+* Check permission before socket protocol layer connect operation
+* attempts to connect socket @sock to a remote address, @address.
+* @sock contains the socket structure.
+* @address contains the address of remote endpoint.
+* @addrlen contains the length of address.
+* Return 0 if permission is granted.
+*/
+static int ifc_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
+{
+  return ifc_inode_permission(SOCK_INODE(sock), MAY_WRITE); // check if MAY_WRITE is ok
+}
+
+/*
+* Check permission before socket protocol layer listen operation.
+* @sock contains the socket structure.
+* @backlog contains the maximum length for the pending connection queue.
+* Return 0 if permission is granted.
+*/
+static int ifc_socket_listen(struct socket *sock, int backlog)
+{
+  return ifc_inode_permission(SOCK_INODE(sock), MAY_READ); // check if MAY_READ is ok
+}
+
+/*
+* Check permission before transmitting a message to another socket.
+* @sock contains the socket structure.
+* @msg contains the message to be transmitted.
+* @size contains the size of message.
+* Return 0 if permission is granted.
+*/
+static int ifc_socket_sendmsg(struct socket *sock, struct msghdr *msg,
+				  int size)
+{
+	return ifc_inode_permission(SOCK_INODE(sock), MAY_WRITE);
+}
+
+/*
+* Check permission before receiving a message from a socket.
+* @sock contains the socket structure.
+* @msg contains the message structure.
+* @size contains the size of message structure.
+* @flags contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int ifc_socket_recvmsg(struct socket *sock, struct msghdr *msg,
+				  int size, int flags)
+{
+	return ifc_inode_permission(SOCK_INODE(sock), MAY_READ);
+}
+
+/*
+* Check permission before accepting a new connection.  Note that the new
+* socket, @newsock, has been created and some information copied to it,
+* but the accept operation has not actually been performed.
+* @sock contains the listening socket structure.
+* @newsock contains the newly created server socket for connection.
+* Return 0 if permission is granted.
+*/
+static int ifc_socket_accept(struct socket *sock, struct socket *newsock)
+{
+  return ifc_inode_permission(SOCK_INODE(sock), MAY_READ);
+}
+
+/*
+* Check permissions before establishing a Unix domain stream connection
+* between @sock and @other.
+* @sock contains the sock structure.
+* @other contains the peer sock structure.
+* @newsk contains the new sock structure.
+* Return 0 if permission is granted.
+*/
+static int ifc_unix_stream_connect(struct sock *sock,
+					      struct sock *other,
+					      struct sock *newsk)
+{
+  struct ifc_struct* skifc = sock->sk_ifc;
+  struct ifc_struct* okifc = other->sk_ifc;
+  struct ifc_struct* nifc = newsk->sk_ifc;
+
+  if(!ifc_is_labelled(&skifc->context) && !ifc_is_labelled(&okifc->context))
+    return 0;
+
+  if(!ifc_can_flow(&skifc->context, &okifc->context))
+    return -EPERM;
+  if(!ifc_can_flow(&okifc->context, &skifc->context))
+    return -EPERM;
+  memcpy(nifc, skifc, sizeof(struct ifc_struct));
+  return 0;
+}
+
+/*
+* Check permissions before connecting or sending datagrams from @sock to
+* @other.
+* @sock contains the socket structure.
+* @other contains the peer socket structure.
+* Return 0 if permission is granted.
+*/
+static int ifc_unix_may_send(struct socket *sock,
+					struct socket *other)
+{
+  struct ifc_struct* skifc = sock->sk->sk_ifc;
+  struct ifc_struct* okifc = other->sk->sk_ifc;
+
+  if(!ifc_is_labelled(&skifc->context) && !ifc_is_labelled(&okifc->context))
+    return 0;
+
+  if(!ifc_can_flow(&skifc->context, &okifc->context))
+    return -EPERM;
+  return 0;
+}
+
 static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, ifc_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, ifc_cred_free),
@@ -511,7 +728,18 @@ static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(shm_alloc_security, ifc_shm_alloc_security),
   LSM_HOOK_INIT(shm_free_security, ifc_shm_free_security),
   LSM_HOOK_INIT(shm_shmat, ifc_shm_shmat),
-  LSM_HOOK_INIT(bprm_set_creds, ifc_bprm_set_creds)
+  LSM_HOOK_INIT(bprm_set_creds, ifc_bprm_set_creds),
+  LSM_HOOK_INIT(sk_alloc_security, ifc_sk_alloc_security),
+  LSM_HOOK_INIT(sk_free_security, ifc_sk_free_security),
+  LSM_HOOK_INIT(socket_post_create, ifc_socket_post_create),
+  LSM_HOOK_INIT(socket_bind, ifc_socket_bind),
+  LSM_HOOK_INIT(socket_connect, ifc_socket_connect),
+  LSM_HOOK_INIT(socket_listen, ifc_socket_listen),
+  LSM_HOOK_INIT(socket_sendmsg, ifc_socket_sendmsg),
+  LSM_HOOK_INIT(socket_recvmsg, ifc_socket_recvmsg),
+  LSM_HOOK_INIT(socket_accept, ifc_socket_accept),
+  LSM_HOOK_INIT(unix_stream_connect, ifc_unix_stream_connect),
+  LSM_HOOK_INIT(unix_may_send, ifc_unix_may_send)
 };
 
 /* init security of the first process */
