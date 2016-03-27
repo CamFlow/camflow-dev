@@ -343,6 +343,56 @@ static int ifc_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *msg,
   return 0;
 }
 
+/*
+* Check permissions for a mmap operation.  The @file may be NULL, e.g.
+* if mapping anonymous memory.
+* @file contains the file structure for file to map (may be NULL).
+* @reqprot contains the protection requested by the application.
+* @prot contains the protection that will be applied by the kernel.
+* @flags contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long prot, unsigned long flags)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* iifc;
+#ifdef CONFIG_SECURITY_PROVENANCE
+  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* iprov;
+#endif
+  struct inode *inode;
+  if(file==NULL){ // what to do for NULL?
+    return 0;
+  }
+  inode = file_inode(file);
+  iifc = inode_get_ifc(inode);
+
+#ifdef CONFIG_SECURITY_PROVENANCE
+  iprov = inode_get_provenance(inode);
+#endif
+
+  prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
+  if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
+    if(!ifc_can_flow(&cifc->context, &iifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+      record_edge(ED_MMAP, cprov, iprov, FLOW_DISALLOWED);
+#endif
+      return -EPERM;
+    }
+  }
+
+  if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
+    // we assume write imply read
+    if(!ifc_can_flow(&iifc->context, &cifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+      record_edge(ED_MMAP, iprov, cprov, FLOW_DISALLOWED);
+#endif
+      return -EPERM;
+    }
+  }
+  return 0;
+}
+
 static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, ifc_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, ifc_cred_free),
@@ -355,7 +405,8 @@ static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(msg_msg_alloc_security, ifc_msg_msg_alloc_security),
   LSM_HOOK_INIT(msg_msg_free_security, ifc_msg_msg_free_security),
   LSM_HOOK_INIT(msg_queue_msgsnd, ifc_msg_queue_msgsnd),
-  LSM_HOOK_INIT(msg_queue_msgrcv, ifc_msg_queue_msgrcv)
+  LSM_HOOK_INIT(msg_queue_msgrcv, ifc_msg_queue_msgrcv),
+  LSM_HOOK_INIT(mmap_file, ifc_mmap_file)
 };
 
 /* init security of the first process */

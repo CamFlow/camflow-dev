@@ -11,6 +11,9 @@
  * continue to be patient
  * it may ask for sudo password
 
+##Plan
+* 0.1.1 update to kernel version 4.4.6
+* 0.2.0 IFC tags and provenance data persistence across reboot
 
 ##TODO
 * Look at NetLabel, XFRM and IPSEC for labelled packet (may not be able to get what we want).

@@ -364,9 +364,6 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
     return 0;
   }
   inode = file_inode(file);
-  if(!inode_get_provenance(inode)){ // alloc provenance if none there
-    provenance_inode_alloc_security(inode);
-  }
   iprov = inode_get_provenance(inode);
   prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
 
@@ -374,7 +371,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
     record_edge(ED_MMAP, cprov, iprov, FLOW_ALLOWED);
   }
   if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
-    // conservatively assume write imply read
+    // we assume write imply read
     record_edge(ED_MMAP, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
