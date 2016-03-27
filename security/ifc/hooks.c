@@ -250,6 +250,99 @@ static int ifc_file_permission(struct file *file, int mask)
   return ifc_inode_permission(inode, mask);
 }
 
+/*
+* Allocate and attach a security structure to the msg->security field.
+* The security field is initialized to NULL when the structure is first
+* created.
+* @msg contains the message structure to be modified.
+* Return 0 if operation was successful and permission is granted.
+*/
+static int ifc_msg_msg_alloc_security(struct msg_msg *msg)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* ifc= inherit_ifc(cifc, GFP_KERNEL);
+
+  if(!ifc)
+    return -ENOMEM;
+  msg->ifc = ifc;
+  return 0;
+}
+
+/*
+* Deallocate the security structure for this message.
+* @msg contains the message structure to be modified.
+*/
+static void ifc_msg_msg_free_security(struct msg_msg *msg)
+{
+  struct ifc_struct* ifc = msg->ifc;
+  msg->ifc=NULL;
+  free_ifc(ifc);
+}
+
+/*
+* Check permission before a message, @msg, is enqueued on the message
+* queue, @msq.
+* @msq contains the message queue to send message to.
+* @msg contains the message to be enqueued.
+* @msqflg contains operational flags.
+* Return 0 if permission is granted.
+*/
+static int ifc_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int msqflg)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* ifc = msg->ifc;
+#ifdef CONFIG_SECURITY_PROVENANCE
+	prov_msg_t *p_prov=NULL;
+  prov_msg_t *m_prov=NULL;
+#endif
+
+  if(!ifc_can_flow(&cifc->context, &ifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+    p_prov=current_provenance();
+    m_prov=msg->provenance;
+    record_edge(ED_DATA, p_prov, m_prov, FLOW_DISALLOWED);
+#endif
+    return -EPERM;
+  }
+  return 0;
+}
+
+/*
+* Check permission before a message, @msg, is removed from the message
+* queue, @msq.  The @target task structure contains a pointer to the
+* process that will be receiving the message (not equal to the current
+* process when inline receives are being performed).
+* @msq contains the message queue to retrieve message from.
+* @msg contains the message destination.
+* @target contains the task structure for recipient process.
+* @type contains the type of message requested.
+* @mode contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int ifc_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *msg,
+				    struct task_struct *target,
+				    long type, int mode)
+{
+  struct ifc_struct* cifc = target->cred->ifc;
+  struct ifc_struct* ifc = msg->ifc;
+#ifdef CONFIG_SECURITY_PROVENANCE
+	prov_msg_t *p_prov=NULL;
+  prov_msg_t *m_prov=NULL;
+#endif
+
+
+  if(!ifc_can_flow(&ifc->context, &cifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+    p_prov = target->cred->provenance;
+    m_prov = msg->provenance;
+    record_edge(ED_DATA, m_prov, p_prov, FLOW_DISALLOWED);
+#endif
+    return -EPERM;
+  }
+
+  return 0;
+}
+
 static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, ifc_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, ifc_cred_free),
@@ -258,7 +351,11 @@ static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(inode_alloc_security, ifc_inode_alloc_security),
   LSM_HOOK_INIT(inode_free_security, ifc_inode_free_security),
   LSM_HOOK_INIT(inode_permission, ifc_inode_permission),
-  LSM_HOOK_INIT(file_permission, ifc_file_permission)
+  LSM_HOOK_INIT(file_permission, ifc_file_permission),
+  LSM_HOOK_INIT(msg_msg_alloc_security, ifc_msg_msg_alloc_security),
+  LSM_HOOK_INIT(msg_msg_free_security, ifc_msg_msg_free_security),
+  LSM_HOOK_INIT(msg_queue_msgsnd, ifc_msg_queue_msgsnd),
+  LSM_HOOK_INIT(msg_queue_msgrcv, ifc_msg_queue_msgrcv)
 };
 
 /* init security of the first process */

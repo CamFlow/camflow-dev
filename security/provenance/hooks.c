@@ -419,6 +419,9 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov;
+#ifdef CONFIG_SECURITY_IFC
+	struct ifc_struct* ifc= msg->ifc;;
+#endif
   /* alloc new prov struct with generated id */
   mprov = alloc_provenance(MSG_MSG, GFP_KERNEL);
 
@@ -427,6 +430,13 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 
   set_node_id(mprov, ASSIGN_NODE_ID);
   mprov->msg_msg_info.type=msg->m_type;
+#ifdef CONFIG_SECURITY_IFC
+	if(!ifc){
+		if(ifc_is_labelled(&ifc->context)){
+			mprov->msg_msg_info.tracked=NODE_TRACKED;
+		}
+	}
+#endif
   msg->provenance = mprov;
   record_edge(ED_CREATE, cprov, mprov, FLOW_ALLOWED);
   return 0;
@@ -438,8 +448,9 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
-  free_provenance(msg->provenance);
+	prov_msg_t *prov = msg->provenance;
   msg->provenance=NULL;
+  free_provenance(prov);
 }
 
 /*
@@ -457,6 +468,7 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
   record_edge(ED_DATA, cprov, mprov, FLOW_ALLOWED);
   return 0;
 }
+
 /*
 * Check permission before a message, @msg, is removed from the message
 * queue, @msq.  The @target task structure contains a pointer to the
@@ -849,193 +861,6 @@ static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *dat
   return 0;
 }
 
-/*
-* Copy the extended attribute names for the security labels
-* associated with @inode into @buffer.  The maximum size of @buffer
-* is specified by @buffer_size.  @buffer may be NULL to request
-* the size of the buffer required.
-* Returns number of bytes used/required on success.
-*/
-static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t buffer_size)
-{
-	if(buffer){ // buffer exist copy the data
-		if(sizeof(XATTR_NAME_PROVENANCE) <= buffer_size){
-			memcpy(buffer, XATTR_NAME_PROVENANCE, sizeof(XATTR_NAME_PROVENANCE));
-		}else{
-			return -ENOMEM; // buffer was too small
-		}
-	}
-	return sizeof(XATTR_NAME_PROVENANCE);
-}
-
-/*
-* Set the security label associated with @name for @inode from the
-* extended attribute value @value.  @size indicates the size of the
-* @value in bytes.  @flags may be XATTR_CREATE, XATTR_REPLACE, or 0.
-* Note that @name is the remainder of the attribute name after the
-* security. prefix has been removed.
-* Return 0 on success.
-*/
-static int provenance_inode_setsecurity(struct inode *inode, const char *name,
-				     const void *value, size_t size, int flags)
-{
-	prov_msg_t* iprov = inode_get_provenance(inode);
-
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
-		return -EOPNOTSUPP;
-
-	if(!iprov)
-		return -ENOMEM;
-
-	if (!value || !size)
-		return -ENOMEM;
-
-	if(size<sizeof(prov_msg_t))
-		return -ENOMEM;
-
-	memcpy(iprov, value, size);
-	return 0;
-}
-
-/*
-* Retrieve a copy of the extended attribute representation of the
-* security label associated with @name for @inode via @buffer.  Note that
-* @name is the remainder of the attribute name after the security prefix
-* has been removed. @alloc is used to specify of the call should return a
-* value via the buffer or just the value length Return size of buffer on
-* success.
-*/
-static int provenance_inode_getsecurity(const struct inode *inode, const char *name, void **buffer, bool alloc)
-{
-	prov_msg_t* iprov = inode_get_provenance(inode);
-	prov_msg_t* tmp;
-
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
-		return -EOPNOTSUPP;
-
-	if(!iprov)
-		return -EOPNOTSUPP;
-
-	if(!alloc){
-		return sizeof(prov_msg_t); // return size to be allocated
-	}
-
-	tmp = (prov_msg_t*)kmalloc(sizeof(prov_msg_t), GFP_KERNEL);
-	if(!tmp){
-		return -ENOMEM;
-	}
-	memcpy(tmp, iprov, sizeof(prov_msg_t));
-	*buffer = tmp; // freed in provenance_release_secctx
-	return sizeof(prov_msg_t);
-}
-
-static void provenance_release_secctx(char *secdata, u32 seclen)
-{
-	// DO NOTHING HERE
-} // some other module do it, here SELinux, though how to know if someone is handling those?
-
-/*
-* Change the security context of an inode.  Updates the
-* incore security context managed by the security module and invokes the
-* fs code as needed (via __vfs_setxattr_noperm) to update any backing
-* xattrs that represent the context.  Example usage:  NFS server invokes
-* this hook to change the security context in its incore inode and on the
-* backing filesystem to a value provided by the client on a SETATTR
-* operation.
-*/
-static int provenance_inode_setsecctx(struct dentry *dentry, void *ctx, u32 ctxlen)
-{
-	return __vfs_setxattr_noperm(dentry, XATTR_PROVENANCE_SUFFIX, ctx, ctxlen, XATTR_CREATE);
-}
-
-/*
-* Notify the security module of what the security context of an inode
-* should be.  Initializes the incore security context managed by the
-* security module for this inode.  Example usage:  NFS client invokes
-* this hook to initialize the security context in its incore inode to the
-* value provided by the server for the file when the server returned the
-* file's attributes to the client.
-*
-* Must be called with inode->i_mutex locked.
-*
-* @inode we wish to set the security context of.
-* @ctx contains the string which we wish to set in the inode.
-* @ctxlen contains the length of @ctx.
-*/
-static int provenance_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen)
-{
-	return provenance_inode_setsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, ctxlen, 0);
-}
-
-/*
-* On success, returns 0 and fills out @ctx and @ctxlen with the security
-* context for the given @inode.
-*
-* @inode we wish to get the security context of.
-* @ctx is a pointer in which to place the allocated security context.
-* @ctxlen points to the place to put the length of @ctx.
-*/
-static int provenance_inode_getsecctx(struct inode *inode, void **ctx, u32 *ctxlen)
-{
-	int len = 0;
-	len = provenance_inode_getsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, true);
-	if (len < 0)
-		return len;
-	*ctxlen = len;
-	return 0;
-}
-
-/*
-* Obtain the security attribute name suffix and value to set on a newly
-* created inode and set up the incore security field for the new inode.
-* This hook is called by the fs code as part of the inode creation
-* transaction and provides for atomic labeling of the inode, unlike
-* the post_create/mkdir/... hooks called by the VFS.  The hook function
-* is expected to allocate the name and value via kmalloc, with the caller
-* being responsible for calling kfree after using them.
-* If the security module does not use security attributes or does
-* not wish to put a security attribute on this particular inode,
-* then it should return -EOPNOTSUPP to skip this processing.
-* @inode contains the inode structure of the newly created inode.
-* @dir contains the inode structure of the parent directory.
-* @qstr contains the last path component of the new object
-* @name will be set to the allocated name suffix (e.g. selinux).
-* @value will be set to the allocated attribute value.
-* @len will be set to the length of the value.
-* Returns 0 if @name and @value have been successfully set,
-* -EOPNOTSUPP if no security attribute is needed, or
-* -ENOMEM on memory allocation failure.
-*/
-static int provenance_inode_init_security(struct inode *inode, struct inode *dir,
-				       const struct qstr *qstr,
-				       const char **name,
-				       void **value, size_t *len)
-{
-  prov_msg_t* iprov = inode_get_provenance(inode);
-	prov_msg_t* dprov = inode_get_provenance(dir);
-	prov_msg_t* tmp;
-
-	if(!iprov)
-    return -EOPNOTSUPP;
-
-	if(name)
-		*name = XATTR_PROVENANCE_SUFFIX;
-
-	if (value && len) {
-		tmp = (prov_msg_t*)kmalloc(sizeof(prov_msg_t), GFP_KERNEL);
-		if(!tmp){
-			return -ENOMEM;
-		}
-		memcpy(tmp, iprov, sizeof(prov_msg_t));
-		*value = tmp;
-		*len = sizeof(prov_msg_t);
-	}
-
-	record_edge(ED_PARENT, dprov, iprov, FLOW_ALLOWED);
-
-	return 0;
-}
-
 static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
@@ -1073,15 +898,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
   LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
   LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount),
-	LSM_HOOK_INIT(file_open, provenance_file_open),
-	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
-	LSM_HOOK_INIT(inode_setsecurity, provenance_inode_setsecurity),
-	LSM_HOOK_INIT(inode_getsecurity, provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_init_security, provenance_inode_init_security),
-	LSM_HOOK_INIT(release_secctx, provenance_release_secctx),
-	LSM_HOOK_INIT(inode_getsecctx, provenance_inode_getsecctx),
-	LSM_HOOK_INIT(inode_notifysecctx, provenance_inode_notifysecctx),
-	LSM_HOOK_INIT(inode_setsecctx, provenance_inode_setsecctx)
+	LSM_HOOK_INIT(file_open, provenance_file_open)
 };
 #ifndef CONFIG_SECURITY_IFC
 struct kmem_cache *camflow_cache=NULL;
