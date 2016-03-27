@@ -90,4 +90,11 @@ struct ifc_file_config{
   struct ifc_context context;
 };
 
+struct ifc_file_change{
+  tag_t tag;
+  uint8_t tag_type;
+  uint8_t op;
+  char name[PATH_MAX+1];
+};
+
 #endif

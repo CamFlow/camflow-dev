@@ -368,7 +368,51 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-  return -EPERM;
+  struct ifc_file_change* change;
+  struct inode* in;
+  struct ifc_struct* ifc;
+    int rv = -EINVAL;
+
+  if(count < sizeof(struct ifc_file_change)){
+    printk(KERN_INFO "IFC: Too short.");
+    return -EINVAL;
+  }
+
+  change = (struct ifc_file_change*)buf;
+
+  if(!ifc_tag_valid(change->tag)){
+    return -EINVAL;
+  }
+
+  in = file_name_to_inode(change->name);
+  if(!in){
+    printk(KERN_ERR "IFC: could not find %s file.", change->name);
+    return -EINVAL;
+  }
+  ifc = inode_get_ifc(in);
+
+
+  if(change->op==IFC_ADD_TAG){
+    switch(change->tag_type){
+      case IFC_SECRECY:
+        rv=ifc_add_tag_no_check(&ifc->context, IFC_SECRECY, change->tag);
+        break;
+      case IFC_INTEGRITY:
+        rv=ifc_add_tag_no_check(&ifc->context, IFC_INTEGRITY, change->tag);
+        break;
+    }
+  }else{
+    switch(change->tag_type){
+      case IFC_SECRECY:
+        rv=ifc_remove_tag_no_check(&ifc->context, IFC_SECRECY, change->tag);
+        break;
+      case IFC_INTEGRITY:
+        rv=ifc_remove_tag_no_check(&ifc->context, IFC_INTEGRITY, change->tag);
+        break;
+    }
+  }
+
+  return rv;
 }
 
 static ssize_t ifc_read_file(struct file *filp, char __user *buf,
@@ -427,7 +471,7 @@ static int __init init_ifc_fs(void)
   securityfs_create_file("tag", 0644, ifc_dir, NULL, &ifc_tag_ops);
   securityfs_create_file("process", 0666, ifc_dir, NULL, &ifc_process_ops);
   securityfs_create_file("bridge", 0666, ifc_dir, NULL, &ifc_bridge_ops);
-  securityfs_create_file("file", 0444, ifc_dir, NULL, &ifc_file_ops);
+  securityfs_create_file("file", 0644, ifc_dir, NULL, &ifc_file_ops);
   rc = ifc_crypto_init();
   if(rc){
     printk(KERN_ERR "IFC: cannot alloc crypto cipher. Error: %d.\n", rc);

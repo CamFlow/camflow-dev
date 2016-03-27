@@ -156,7 +156,7 @@ static inline int ifc_add_privilege(struct ifc_context* context, uint8_t type, t
   if(privilege==NULL)
     return -EINVAL;
 
-  if(privilege->size >= IFC_LABEL_MAX_SIZE) // label is full
+  if(privilege->size +1 >= IFC_LABEL_MAX_SIZE) // label is full
     return -ENOMEM;
 
   if(ifc_contains_value(privilege, tag)) // aleady contains tag
@@ -226,7 +226,7 @@ static inline int ifc_add_tag(struct ifc_context* context, uint8_t type, tag_t t
   if(privilege==NULL || label==NULL)
     return -EINVAL;
 
-  if(label->size >= IFC_LABEL_MAX_SIZE) // label is full
+  if(label->size + 1 >= IFC_LABEL_MAX_SIZE) // label is full
     return -ENOMEM;
 
   if(ifc_contains_value(label, tag)) // aleady contains tag
@@ -234,6 +234,30 @@ static inline int ifc_add_tag(struct ifc_context* context, uint8_t type, tag_t t
 
   if(!ifc_contains_value(privilege, tag)) // not appropriate privilege
     return -EPERM;
+
+  label->array[label->size]=tag;
+  label->size++;
+  ifc_sort_label(label);
+  return 0;
+}
+
+static inline int ifc_add_tag_no_check(struct ifc_context* context, uint8_t type, tag_t tag){
+  struct ifc_label* label=NULL;
+
+  switch(type){
+    case IFC_SECRECY:
+      label = &context->secrecy;
+      break;
+    case IFC_INTEGRITY:
+      label = &context->integrity;
+      break;
+  }
+
+  if(label==NULL)
+    return -EINVAL;
+
+  if(label->size >= IFC_LABEL_MAX_SIZE) // label is full
+    return -ENOMEM;
 
   label->array[label->size]=tag;
   label->size++;
@@ -268,6 +292,40 @@ static inline int ifc_remove_tag(struct ifc_context* context, uint8_t type, tag_
 
   if(!ifc_contains_value(privilege, tag)) // does not have the proper privileges
     return -EPERM;
+
+  /* remove the tag */
+  for(i=0; i < label->size; i++){
+    if(label->array[i]==tag)
+      break;
+  }
+  for(;i < label->size-1; i++){
+    label->array[i]=label->array[i+1];
+  }
+  label->size--;
+  return 0;
+}
+
+static inline int ifc_remove_tag_no_check(struct ifc_context* context, uint8_t type, tag_t tag){
+  struct ifc_label* label=NULL;
+  int i = 0;
+
+  switch(type){
+    case IFC_SECRECY:
+      label = &context->secrecy;
+      break;
+    case IFC_INTEGRITY:
+      label = &context->integrity;
+      break;
+  }
+
+  if(label==NULL)
+    return -EINVAL;
+
+  if(label->size <= 0) // label is empty
+    return -EINVAL;
+
+  if(!ifc_contains_value(label, tag)) // the tag is not there to removed
+    return -EINVAL;
 
   /* remove the tag */
   for(i=0; i < label->size; i++){
