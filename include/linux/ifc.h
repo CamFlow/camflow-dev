@@ -288,6 +288,33 @@ static inline void print_label(struct ifc_label* label){
   }
 }
 
+static inline int ifc_merge_context(struct ifc_context* main, struct ifc_context* to_add){
+  int i;
+
+  // too conservative TODO change this
+  if(main->secrecy.size + to_add->secrecy.size > IFC_LABEL_MAX_SIZE)
+      return -ENOMEM;
+  if(main->secrecy.size + to_add->secrecy.size > IFC_LABEL_MAX_SIZE)
+      return -ENOMEM;
+
+  for(i=0; i<to_add->secrecy.size; i++){
+    if(!ifc_contains_value(&main->secrecy, to_add->secrecy.array[i])){
+      main->secrecy.array[main->secrecy.size]=to_add->secrecy.array[i];
+      main->secrecy.size++;
+    }
+  }
+  ifc_sort_label(&main->secrecy);
+
+  for(i=0; i<to_add->integrity.size; i++){
+    if(!ifc_contains_value(&main->integrity, to_add->integrity.array[i])){
+      main->secrecy.array[main->integrity.size]=to_add->integrity.array[i];
+      main->integrity.size++;
+    }
+  }
+  ifc_sort_label(&main->integrity);
+  return 0;
+}
+
 static inline void print_context(struct ifc_context* context){
   if(context->trusted==IFC_TRUSTED){
     printk(KERN_INFO "TRUSTED");

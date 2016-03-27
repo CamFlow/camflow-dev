@@ -181,7 +181,7 @@ static int ifc_inode_permission(struct inode *inode, int mask)
   prov_msg_t *p_prov=NULL;
 #endif
 
-  mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
+  mask &= (MAY_READ|MAY_WRITE|MAY_APPEND);
   // no permission to check. Existence test
   if (!mask)
 		return 0;
@@ -361,6 +361,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
   prov_msg_t* iprov;
 #endif
   struct inode *inode;
+
   if(file==NULL){ // what to do for NULL?
     return 0;
   }
@@ -463,6 +464,36 @@ static int ifc_shm_shmat(struct shmid_kernel *shp,
 	return 0;
 }
 
+/*
+* Save security information in the bprm->security field, typically based
+* on information about the bprm->file, for later use by the apply_creds
+* hook.  This hook may also optionally check permissions (e.g. for
+* transitions between security domains).
+* This hook may be called multiple times during a single execve, e.g. for
+* interpreters.  The hook can tell whether it has already been called by
+* checking to see if @bprm->security is non-NULL.  If so, then the hook
+* may decide either to retain the security information saved earlier or
+* to replace it.
+* @bprm contains the linux_binprm structure.
+* Return 0 if the hook is successful and permission is granted.
+*/
+static int ifc_bprm_set_creds(struct linux_binprm *bprm){
+  struct inode *inode;
+  struct ifc_struct* pifc;
+  struct ifc_struct* iifc;
+
+  pifc = bprm->cred->ifc;
+  inode = file_inode(bprm->file);
+  iifc = inode_get_ifc(inode);
+
+  if(!pifc && !iifc){
+    if(ifc_is_labelled(&iifc->context)){
+      return ifc_merge_context(&pifc->context, &iifc->context);
+    }
+  }
+  return 0;
+}
+
 static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, ifc_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, ifc_cred_free),
@@ -479,7 +510,8 @@ static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(mmap_file, ifc_mmap_file),
   LSM_HOOK_INIT(shm_alloc_security, ifc_shm_alloc_security),
   LSM_HOOK_INIT(shm_free_security, ifc_shm_free_security),
-  LSM_HOOK_INIT(shm_shmat, ifc_shm_shmat)
+  LSM_HOOK_INIT(shm_shmat, ifc_shm_shmat),
+  LSM_HOOK_INIT(bprm_set_creds, ifc_bprm_set_creds)
 };
 
 /* init security of the first process */
