@@ -393,6 +393,76 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
   return 0;
 }
 
+/*
+* Allocate and attach a security structure to the shp->shm_perm.security
+* field.  The security field is initialized to NULL when the structure is
+* first created.
+* @shp contains the shared memory structure to be modified.
+* Return 0 if operation was successful and permission is granted.
+*/
+static int ifc_shm_alloc_security(struct shmid_kernel *shp)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* sifc= inherit_ifc(cifc, GFP_KERNEL);
+
+  if(!sifc)
+    return -ENOMEM;
+
+  shp->shm_perm.ifc=sifc;
+	return 0;
+}
+
+/*
+* Deallocate the security struct for this memory segment.
+* @shp contains the shared memory structure to be modified.
+*/
+static void ifc_shm_free_security(struct shmid_kernel *shp)
+{
+  free_ifc(shp->shm_perm.ifc);
+  shp->shm_perm.ifc=NULL;
+}
+
+/*
+* Check permissions prior to allowing the shmat system call to attach the
+* shared memory segment @shp to the data segment of the calling process.
+* The attaching address is specified by @shmaddr.
+* @shp contains the shared memory structure to be modified.
+* @shmaddr contains the address to attach memory region to.
+* @shmflg contains the operational flags.
+* Return 0 if permission is granted.
+*/
+static int ifc_shm_shmat(struct shmid_kernel *shp,
+			     char __user *shmaddr, int shmflg)
+{
+  struct ifc_struct* cifc = current_ifc();
+  struct ifc_struct* sifc = shp->shm_perm.ifc;
+#ifdef CONFIG_SECURITY_PROVENANCE
+  prov_msg_t* cprov = current_provenance();
+	prov_msg_t* sprov = shp->shm_perm.provenance;
+#endif
+
+  if(!sprov)
+    return -ENOMEM;
+
+  if(shmflg & SHM_RDONLY){
+    if(!ifc_can_flow(&sifc->context, &cifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+      record_edge(ED_ATTACH, sprov, cprov, FLOW_DISALLOWED);
+#endif
+      return -EPERM;
+    }
+  }else{
+    if(!ifc_can_flow(&sifc->context, &cifc->context) || !ifc_can_flow(&cifc->context, &sifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+      record_edge(ED_ATTACH, sprov, cprov, FLOW_DISALLOWED);
+      record_edge(ED_ATTACH, cprov, sprov, FLOW_DISALLOWED);
+#endif
+      return -EPERM;
+    }
+  }
+	return 0;
+}
+
 static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(cred_alloc_blank, ifc_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, ifc_cred_free),
@@ -406,7 +476,10 @@ static struct security_hook_list ifc_hooks[] = {
   LSM_HOOK_INIT(msg_msg_free_security, ifc_msg_msg_free_security),
   LSM_HOOK_INIT(msg_queue_msgsnd, ifc_msg_queue_msgsnd),
   LSM_HOOK_INIT(msg_queue_msgrcv, ifc_msg_queue_msgrcv),
-  LSM_HOOK_INIT(mmap_file, ifc_mmap_file)
+  LSM_HOOK_INIT(mmap_file, ifc_mmap_file),
+  LSM_HOOK_INIT(shm_alloc_security, ifc_shm_alloc_security),
+  LSM_HOOK_INIT(shm_free_security, ifc_shm_free_security),
+  LSM_HOOK_INIT(shm_shmat, ifc_shm_shmat)
 };
 
 /* init security of the first process */

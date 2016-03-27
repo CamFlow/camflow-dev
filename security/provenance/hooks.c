@@ -417,7 +417,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov;
 #ifdef CONFIG_SECURITY_IFC
-	struct ifc_struct* ifc= msg->ifc;;
+	struct ifc_struct* ifc= msg->ifc;
 #endif
   /* alloc new prov struct with generated id */
   mprov = alloc_provenance(MSG_MSG, GFP_KERNEL);
@@ -500,12 +500,24 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	prov_msg_t* cprov = current_provenance();
   prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_KERNEL);
+#ifdef CONFIG_SECURITY_IFC
+	struct ifc_struct* ifc= shp->shm_perm.ifc;
+#endif
 
   if(!sprov)
     return -ENOMEM;
 
   set_node_id(sprov, ASSIGN_NODE_ID);
   sprov->shm_info.mode=shp->shm_perm.mode;
+
+#ifdef CONFIG_SECURITY_IFC
+	if(!ifc){
+		if(ifc_is_labelled(&ifc->context)){
+			sprov->shm_info.tracked=NODE_TRACKED;
+		}
+	}
+#endif
+
   shp->shm_perm.provenance=sprov;
   record_edge(ED_ATTACH, sprov, cprov, FLOW_ALLOWED);
   record_edge(ED_ATTACH, cprov, sprov, FLOW_ALLOWED);
