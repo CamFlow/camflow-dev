@@ -478,13 +478,9 @@ static int ifc_shm_shmat(struct shmid_kernel *shp,
 * Return 0 if the hook is successful and permission is granted.
 */
 static int ifc_bprm_set_creds(struct linux_binprm *bprm){
-  struct inode *inode;
-  struct ifc_struct* pifc;
-  struct ifc_struct* iifc;
-
-  pifc = bprm->cred->ifc;
-  inode = file_inode(bprm->file);
-  iifc = inode_get_ifc(inode);
+  struct inode *inode = file_inode(bprm->file);
+  struct ifc_struct* pifc = bprm->cred->ifc;
+  struct ifc_struct* iifc = inode_get_ifc(inode);
 
   if(!pifc && !iifc){
     if(ifc_is_labelled(&iifc->context)){
