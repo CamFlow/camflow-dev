@@ -18,6 +18,7 @@
 #include <linux/delay.h>
 #include <linux/camflow.h>
 #include <linux/provenance.h>
+#include <linux/list.h>
 
 static void mark_as_trusted(const char* name){
   struct inode* in;
@@ -91,15 +92,23 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
         rv=ifc_add_tag(cifc, IFC_INTEGRITY, msg->tag);
         break;
       case IFC_SECRECY_P:
+        if(__kuid_val(current_euid())!=0)
+          return -EPERM;
         rv=ifc_add_privilege(cifc, IFC_SECRECY_P, msg->tag);
         break;
       case IFC_INTEGRITY_P:
+        if(__kuid_val(current_euid())!=0)
+          return -EPERM;
         rv=ifc_add_privilege(cifc, IFC_INTEGRITY_P, msg->tag);
         break;
       case IFC_SECRECY_N:
+        if(__kuid_val(current_euid())!=0)
+          return -EPERM;
         rv=ifc_add_privilege(cifc, IFC_SECRECY_N, msg->tag);
         break;
       case IFC_INTEGRITY_N:
+        if(__kuid_val(current_euid())!=0)
+          return -EPERM;
         rv=ifc_add_privilege(cifc, IFC_INTEGRITY_N, msg->tag);
         break;
     }
@@ -263,6 +272,9 @@ static ssize_t ifc_read_process(struct file *filp, char __user *buf,
 	struct ifc_context *oifc = NULL;
   struct ifc_context_msg *msg;
 
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
+
   if(count < sizeof(struct ifc_context_msg)){
     return -ENOMEM;
   }
@@ -286,6 +298,39 @@ static const struct file_operations ifc_process_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+struct bridge_struct {
+    struct list_head list;
+    char name[PATH_MAX];
+};
+
+static LIST_HEAD(bridge_list);
+
+static int add_name_to_list(const char* name){
+  struct bridge_struct *entry;
+  entry = (struct bridge_struct*)kzalloc(sizeof(struct bridge_struct), GFP_KERNEL);
+  if(copy_from_user(entry->name, name, PATH_MAX)!=0){
+    return -ENOMEM;
+  }
+  list_add(&entry->list, &bridge_list);
+  return 0;
+}
+
+static bool list_contains(const char* name){
+  struct list_head *ptr;
+  struct bridge_struct *entry;
+
+  if(list_empty(&bridge_list)!=0)
+    return false;
+
+  list_for_each(ptr, &bridge_list) {
+        entry = list_entry(ptr, struct bridge_struct, list);
+        if(strcmp(name, entry->name)==0){
+          return true;
+        }
+    }
+    return false;
+}
+
 static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
@@ -293,6 +338,7 @@ static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
   pid_t pid = task_pid_vnr(current);
   struct ifc_bridge_config *config;
   char **argv;
+  int rc = 0;
 
   if(count < sizeof(struct ifc_bridge_config))
     return -ENOMEM;
@@ -301,12 +347,18 @@ static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
 
   switch(config->op){
     case IFC_ADD_BRIDGE:
+      if(__kuid_val(current_euid())!=0)
+        return -EPERM;
+      rc = add_name_to_list(config->path);
       break;
     case IFC_START_BRIDGE:
       argv=kzalloc(3*sizeof(char*), GFP_KERNEL);
       argv[0]=kzalloc(PATH_MAX, GFP_KERNEL);
       if(copy_from_user (argv[0], config->path, PATH_MAX)!=0){
         return -ENOMEM;
+      }
+      if(!list_contains(argv[0])){
+        return -EPERM;
       }
       argv[1]=kzalloc(PARAM_MAX, GFP_KERNEL);
       if(copy_from_user (argv[1], config->param, PARAM_MAX)!=0){
@@ -321,7 +373,7 @@ static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,
     default:
       return -EINVAL;
   }
-	return 0;
+	return rc;
 }
 
 static ssize_t ifc_read_bridge(struct file *filp, char __user *buf,
@@ -371,7 +423,10 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   struct ifc_file_change* change;
   struct inode* in;
   struct ifc_struct* ifc;
-    int rv = -EINVAL;
+  int rv = -EINVAL;
+
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
 
   if(count < sizeof(struct ifc_file_change)){
     printk(KERN_INFO "IFC: Too short.");
@@ -421,6 +476,9 @@ static ssize_t ifc_read_file(struct file *filp, char __user *buf,
   struct ifc_file_config *msg;
   struct inode* in;
   struct ifc_struct* ifc;
+
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
 
   if(count < sizeof(struct ifc_file_config)){
     printk(KERN_INFO "IFC: Too short.");
