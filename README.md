@@ -12,16 +12,16 @@ The source code for the audit and ifc userspace libraries are available [here](h
 
 ### v0.1.1
 
-'''
+```
 - Update kernel from version 4.2.8 to version 4.4.6.
 - Reduce number of file name and address recorded, limit to tracked entities.
-'''
+```
 
 ### v0.1.0
 
-'''
+```
 - Initial release.
-'''
+```
 
 ## Warning
 
