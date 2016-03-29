@@ -7,17 +7,21 @@ The source code for the audit and ifc userspace libraries are available [here](h
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.0           | 4.2.8          | 28/03/2016 |
 | 0.1.1           | 4.4.6          | n/a        |
-
-### v0.1.0
-
-* Initial release.
+| 0.1.0           | 4.2.8          | 28/03/2016 |
 
 ### v0.1.1
 
-* Update kernel from version 4.2.8 to version 4.4.6.
-*
+'''
+- Update kernel from version 4.2.8 to version 4.4.6.
+- Reduce number of file name and address recorded, limit to tracked entities.
+'''
+
+### v0.1.0
+
+'''
+- Initial release.
+'''
 
 ## Warning
 

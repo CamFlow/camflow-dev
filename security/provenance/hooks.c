@@ -248,10 +248,10 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   record_edge(ED_DATA, cprov, dprov, FLOW_ALLOWED);
   record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
 
-  if(prov_enabled){
+  if(prov_enabled && (provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov))){
     link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
     link_prov->link_info.length = new_dentry->d_name.len;
-    memcpy(link_prov->link_info.name, new_dentry->d_name.name, link_prov->link_info.length);
+    memcpy(link_prov->link_info.name, new_dentry->d_name.name, new_dentry->d_name.len);
     link_prov->link_info.dir_id = dprov->inode_info.node_id;
     link_prov->link_info.task_id = cprov->task_info.node_id;
     link_prov->link_info.inode_id = iprov->task_info.node_id;
@@ -289,10 +289,10 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   record_edge(ED_DATA, cprov, dprov, FLOW_ALLOWED);
   record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
 
-  if(prov_enabled){
+  if(prov_enabled && (provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov))){
     link_prov = alloc_long_provenance(MSG_UNLINK, GFP_KERNEL);
     link_prov->unlink_info.length = dentry->d_name.len;
-    memcpy(link_prov->unlink_info.name, dentry->d_name.name, link_prov->unlink_info.length);
+    memcpy(link_prov->unlink_info.name, dentry->d_name.name, dentry->d_name.len);
     link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
     link_prov->unlink_info.task_id = cprov->task_info.node_id;
     link_prov->unlink_info.inode_id = iprov->task_info.node_id;
@@ -621,7 +621,7 @@ static int provenance_socket_post_create(struct socket *sock, int family,
   skprov->sock_info.protocol = protocol;
   record_edge(ED_CREATE, cprov, skprov, FLOW_ALLOWED);
   record_edge(ED_ASSOCIATE, skprov, iprov, FLOW_ALLOWED);
-	
+
   return 0;
 }
 
@@ -645,15 +645,15 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
   if(!skprov)
     return -ENOMEM;
-	if(prov_enabled){
+	if(prov_enabled && (provenance_is_tracked(cprov) || provenance_is_tracked(skprov))){
 	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
 	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
 	  long_prov_write(addr_info);
 	  free_long_provenance(addr_info);
-	  record_edge(ED_BIND, cprov, skprov, FLOW_ALLOWED);
 	}
+	record_edge(ED_BIND, cprov, skprov, FLOW_ALLOWED);
 
   return 0;
 }
@@ -677,15 +677,15 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 
   if(!skprov)
     return -ENOMEM;
-	if(prov_enabled){
+	if(prov_enabled && (provenance_is_tracked(cprov) || provenance_is_tracked(skprov))){
 	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
 	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
 	  long_prov_write(addr_info);
 	  free_long_provenance(addr_info);
-	  record_edge(ED_CONNECT, cprov, skprov, FLOW_ALLOWED);
 	}
+	record_edge(ED_CONNECT, cprov, skprov, FLOW_ALLOWED);
 
   return 0;
 }
