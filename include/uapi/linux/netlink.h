@@ -27,7 +27,6 @@
 #define NETLINK_ECRYPTFS	19
 #define NETLINK_RDMA		20
 #define NETLINK_CRYPTO		21	/* Crypto layer */
-/* leave some free space */
 #define NETLINK_CAMFLOW_IFC_BRIDGE 25 /* CAMFLOW IFC BRIDGE */
 
 #define NETLINK_INET_DIAG	NETLINK_SOCK_DIAG
@@ -56,6 +55,7 @@ struct nlmsghdr {
 #define NLM_F_ACK		4	/* Reply with ack, with zero or error code */
 #define NLM_F_ECHO		8	/* Echo this request 		*/
 #define NLM_F_DUMP_INTR		16	/* Dump was inconsistent due to sequence change */
+#define NLM_F_DUMP_FILTERED	32	/* Dump was filtered as requested */
 
 /* Modifiers to GET request */
 #define NLM_F_ROOT	0x100	/* specify tree	root	*/
@@ -112,6 +112,7 @@ struct nlmsgerr {
 #define NETLINK_TX_RING			7
 #define NETLINK_LISTEN_ALL_NSID		8
 #define NETLINK_LIST_MEMBERSHIPS	9
+#define NETLINK_CAP_ACK			10
 
 struct nl_pktinfo {
 	__u32	group;

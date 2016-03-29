@@ -3,6 +3,22 @@
 If you simply wish to install CamFlow please visit [here](https://github.com/CamFlow/camflow-install).
 The source code for the audit and ifc userspace libraries are available [here](https://github.com/CamFlow/camflow-audit-lib) and [there](https://github.com/CamFlow/camflow-ifc-lib) respectively.
 
+## Version
+
+| CamFlow version | Kernel version | Date       |
+| --------------- |----------------| ---------- |
+| 0.1.0           | 4.2.8          | 28/03/2016 |
+| 0.1.1           | 4.4.6          | n/a        |
+
+### v0.1.0
+
+* Initial release.
+
+### v0.1.1
+
+* Update kernel from version 4.2.8 to version 4.4.6.
+*
+
 ## Warning
 
 The code is neither feature complete nor stable.
