@@ -41,13 +41,13 @@ int ifc_bridge_init(void);
 extern atomic64_t ifc_tag_count;
 extern struct crypto_cipher *ifc_tfm;
 
-static inline void ifc_save_tag(tag_t tag){
+static inline void ifc_save_counter(tag_t counter){
   // TODO
 }
 
 static inline uint64_t ifc_next_tag_count( void ){
   uint64_t tag = (uint64_t)atomic64_inc_return(&ifc_tag_count);
-  ifc_save_tag(tag);
+  ifc_save_counter(tag);
   return tag;
 }
 
@@ -56,16 +56,17 @@ static inline void ifc_set_tag_count(uint64_t count){
 }
 
 static inline tag_t ifc_create_tag(void){
-  /*uint64_t in = ifc_next_tag_count();
+  uint64_t in = ifc_next_tag_count();
   uint64_t out = 0;
   crypto_cipher_encrypt_one(ifc_tfm, (u8*)&out, (u8*)&in);
-  return out;*/
-  return ifc_next_tag_count();
+  return out;
 }
 
 static inline bool ifc_tag_valid(tag_t tag){
+  tag_t out;
   tag_t counter = atomic64_read(&ifc_tag_count);
-  if(tag>counter)
+  crypto_cipher_decrypt_one(ifc_tfm, (u8*)&out, (u8*)&tag);
+  if(out>counter)
     return false;
   return true;
 }
