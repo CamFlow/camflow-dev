@@ -15,6 +15,8 @@ The source code for the audit and ifc userspace libraries are available [here](h
 ```
 - Update kernel from version 4.2.8 to version 4.4.6.
 - Reduce number of file name and address recorded, limit to tracked entities.
+- Obfuscate tag value, to avoid side channel through created tags.
+- Correct a bug that allowed the same tag to be added several times on files.
 ```
 
 ### v0.1.0

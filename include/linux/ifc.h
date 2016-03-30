@@ -260,6 +260,9 @@ static inline int ifc_add_tag_no_check(struct ifc_context* context, uint8_t type
   if(label->size >= IFC_LABEL_MAX_SIZE) // label is full
     return -ENOMEM;
 
+  if(ifc_contains_value(label, tag)) // aleady contains tag
+    return -EINVAL;
+
   label->array[label->size]=tag;
   label->size++;
   ifc_sort_label(label);
