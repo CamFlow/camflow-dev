@@ -47,6 +47,7 @@ Do not hesitate to fork the repository or to report bugs.
 * 0.2.0 IFC tags and provenance data persistence across reboot
 
 ## TODO
+* Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
 * Look at NetLabel, XFRM and IPSEC for labelled packet (may not be able to get what we want).
 * Investigate audit data captured.
 * Look at Coccinelle for patching /security/security.c and .h files.
