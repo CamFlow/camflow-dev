@@ -181,6 +181,9 @@ static int ifc_inode_permission(struct inode *inode, int mask)
   prov_msg_t *p_prov=NULL;
 #endif
 
+  if((mask & MAY_EXEC)!=0)
+    return 0;
+
   mask &= (MAY_READ|MAY_WRITE|MAY_APPEND);
   // no permission to check. Existence test
   if (!mask)
@@ -362,6 +365,9 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
 #endif
   struct inode *inode;
 
+  if((prot & PROT_EXEC) != 0)
+    return 0;
+
   if(file==NULL){ // what to do for NULL?
     return 0;
   }
@@ -372,8 +378,9 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
   iprov = inode_get_provenance(inode);
 #endif
 
-  prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
-  if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
+  prot &= (PROT_READ|PROT_WRITE);
+  //if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
+  if((prot & PROT_WRITE) != 0){
     if(!ifc_can_flow(&cifc->context, &iifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
       record_edge(ED_MMAP, cprov, iprov, FLOW_DISALLOWED);
@@ -382,7 +389,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
     }
   }
 
-  if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
+  if((prot & (PROT_READ|PROT_WRITE)) != 0){
     // we assume write imply read
     if(!ifc_can_flow(&iifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
@@ -478,16 +485,21 @@ static int ifc_shm_shmat(struct shmid_kernel *shp,
 * Return 0 if the hook is successful and permission is granted.
 */
 static int ifc_bprm_set_creds(struct linux_binprm *bprm){
+  int rv=0;
   struct inode *inode = file_inode(bprm->file);
-  struct ifc_struct* pifc = bprm->cred->ifc;
-  struct ifc_struct* iifc = inode_get_ifc(inode);
+  struct ifc_struct* old_ifc = current_ifc();
+  struct ifc_struct* new_ifc = bprm->cred->ifc;
+  struct ifc_struct* file_ifc = inode_get_ifc(inode);
 
-  if(!pifc && !iifc){
-    if(ifc_is_labelled(&iifc->context)){
-      return ifc_merge_context(&pifc->context, &iifc->context);
+  if(!old_ifc && !file_ifc && !new_ifc){
+    if(ifc_is_labelled(&file_ifc->context)){
+      rv |= ifc_merge_context(&new_ifc->context, &file_ifc->context);
+    }
+    if(ifc_is_labelled(&old_ifc->context)){
+      rv |= ifc_merge_context(&new_ifc->context, &old_ifc->context);
     }
   }
-  return 0;
+  return rv;
 }
 
 /*
