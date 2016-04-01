@@ -17,6 +17,7 @@ The source code for the audit and ifc userspace libraries are available [here](h
 - Reduce number of file name and address recorded, limit to tracked entities.
 - Obfuscate tag value, to avoid side channel through created tags.
 - Correct a bug that allowed the same tag to be added several times on files.
+- Name of files should now be properly recorded.
 ```
 
 ### v0.1.0

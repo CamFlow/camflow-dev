@@ -302,6 +302,25 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
   return 0;
 }
 
+static inline void provenance_record_file_name(struct file *file){
+	struct inode *inode = file_inode(file);
+	prov_msg_t *iprov = inode_get_provenance(inode);
+	long_prov_msg_t *fname_prov;
+	char buffer[PATH_MAX];
+	char *ptr;
+
+	if(!provenance_is_name_recorded(iprov) && provenance_is_tracked(iprov)){
+		fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
+		ptr = dentry_path_raw(file->f_path.dentry, buffer, PATH_MAX);
+		strlcpy(fname_prov->file_name_info.name, ptr, PATH_MAX);
+		fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
+		fname_prov->file_name_info.inode_id=iprov->task_info.node_id;
+		long_prov_write(fname_prov);
+		free_long_provenance(fname_prov);
+		iprov->node_info.name_recorded=NAME_RECORDED;
+	}
+}
+
 /*
 * Check file permissions before accessing an open file.  This hook is
 * called by various operations that read or write files.  A security
@@ -323,6 +342,7 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 static int provenance_file_permission(struct file *file, int mask)
 {
   struct inode *inode = file_inode(file);
+	provenance_record_file_name(file);
   provenance_inode_permission(inode, mask);
   return 0;
 }
@@ -341,6 +361,8 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
+	provenance_record_file_name(file);
+
 	iprov = inode_get_provenance(inode);
 	record_edge(ED_OPEN, cprov, iprov, FLOW_ALLOWED);
 	return 0;
@@ -360,9 +382,12 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov;
   struct inode *inode;
+
   if(file==NULL){ // what to do for NULL?
     return 0;
   }
+	provenance_record_file_name(file);
+
   inode = file_inode(file);
   iprov = inode_get_provenance(inode);
   prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
@@ -396,7 +421,10 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
+	provenance_record_file_name(file);
+
   iprov = inode_get_provenance(inode);
+
   record_edge(ED_DATA, iprov, cprov, FLOW_ALLOWED); // both way exchange
   record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
 
@@ -645,6 +673,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
   if(!skprov)
     return -ENOMEM;
+
 	if(prov_enabled && (provenance_is_tracked(cprov) || provenance_is_tracked(skprov))){
 	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
 	  addr_info->address_info.sock_id = skprov->sock_info.node_id;

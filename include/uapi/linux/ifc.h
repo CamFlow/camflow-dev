@@ -86,7 +86,7 @@ struct ifc_bridge_config{
 };
 
 struct ifc_file_config{
-  char name[PATH_MAX+1];
+  char name[PATH_MAX];
   struct ifc_context context;
 };
 

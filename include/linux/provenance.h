@@ -143,6 +143,12 @@ static inline bool provenance_is_tracked(prov_msg_t* node){
   return false;
 }
 
+static inline bool provenance_is_name_recorded(prov_msg_t* node){
+  if(node->node_info.name_recorded == NAME_RECORDED)
+    return true;
+  return false;
+}
+
 static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t edge;
 

@@ -14,6 +14,12 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
+#ifndef __KERNEL__
+#include <linux/limits.h>
+#else
+#include <uapi/linux/limits.h>
+#endif
+
 #define MSG_STR           0
 #define MSG_EDGE          1
 #define MSG_TASK          2
@@ -51,6 +57,9 @@
 #define NODE_RECORDED     1
 #define NODE_UNRECORDED   0
 
+#define NAME_RECORDED     1
+#define NAME_UNRECORDED   0
+
 #define NODE_OPAQUE       1
 #define NODE_NOT_OPAQUE   0
 
@@ -60,7 +69,7 @@
 #define STR_MAX_SIZE      128
 
 #define MESSAGE_ELEMENTS uint8_t message_type; uint32_t boot_id; uint64_t event_id;
-#define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t tracked; uint8_t opaque;
+#define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t name_recorded; uint8_t tracked; uint8_t opaque;
 
 struct msg_struct{
   MESSAGE_ELEMENTS
@@ -141,13 +150,13 @@ typedef union prov_msg{
 struct str_struct{
   MESSAGE_ELEMENTS
   size_t length;
-  char str[4096];
+  char str[PATH_MAX];
 };
 
 struct link_struct{
   MESSAGE_ELEMENTS
   size_t length;
-  char name[4096];
+  char name[PATH_MAX];
   uint64_t dir_id;
   uint64_t task_id;
   uint64_t inode_id;
@@ -156,14 +165,14 @@ struct link_struct{
 struct file_name_struct{
   MESSAGE_ELEMENTS
   size_t length;
-  char name[4096];
+  char name[PATH_MAX];
   uint64_t inode_id;
 };
 
 struct unlink_struct{
   MESSAGE_ELEMENTS
   size_t length;
-  char name[4096];
+  char name[PATH_MAX];
   uint64_t dir_id;
   uint64_t task_id;
   uint64_t inode_id;
