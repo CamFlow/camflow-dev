@@ -55,7 +55,7 @@ static inline void initialize(void){
   ifc_fs_is_initialised=true;
 }
 
-static inline struct ifc_context* context_from_pid(pid_t pid){
+static inline struct ifc_struct* ifc_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
   if(!dest)
     return NULL;
@@ -66,7 +66,7 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-  struct ifc_context *cifc = current_ifc();
+  struct ifc_struct *cifc = current_ifc();
   prov_msg_t* cprovenance;
   struct ifc_tag_msg *msg;
   int rv=-EINVAL;
@@ -86,51 +86,51 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
   if(msg->op==IFC_ADD_TAG){
     switch(msg->tag_type){
       case IFC_SECRECY:
-        rv=ifc_add_tag(cifc, IFC_SECRECY, msg->tag);
+        rv=ifc_add_tag(&cifc->context, IFC_SECRECY, msg->tag);
         break;
       case IFC_INTEGRITY:
-        rv=ifc_add_tag(cifc, IFC_INTEGRITY, msg->tag);
+        rv=ifc_add_tag(&cifc->context, IFC_INTEGRITY, msg->tag);
         break;
       case IFC_SECRECY_P:
         if(__kuid_val(current_euid())!=0)
           return -EPERM;
-        rv=ifc_add_privilege(cifc, IFC_SECRECY_P, msg->tag);
+        rv=ifc_add_privilege(&cifc->context, IFC_SECRECY_P, msg->tag);
         break;
       case IFC_INTEGRITY_P:
         if(__kuid_val(current_euid())!=0)
           return -EPERM;
-        rv=ifc_add_privilege(cifc, IFC_INTEGRITY_P, msg->tag);
+        rv=ifc_add_privilege(&cifc->context, IFC_INTEGRITY_P, msg->tag);
         break;
       case IFC_SECRECY_N:
         if(__kuid_val(current_euid())!=0)
           return -EPERM;
-        rv=ifc_add_privilege(cifc, IFC_SECRECY_N, msg->tag);
+        rv=ifc_add_privilege(&cifc->context, IFC_SECRECY_N, msg->tag);
         break;
       case IFC_INTEGRITY_N:
         if(__kuid_val(current_euid())!=0)
           return -EPERM;
-        rv=ifc_add_privilege(cifc, IFC_INTEGRITY_N, msg->tag);
+        rv=ifc_add_privilege(&cifc->context, IFC_INTEGRITY_N, msg->tag);
         break;
     }
   }else{
     switch(msg->tag_type){
       case IFC_SECRECY:
-        rv=ifc_remove_tag(cifc, IFC_SECRECY, msg->tag);
+        rv=ifc_remove_tag(&cifc->context, IFC_SECRECY, msg->tag);
         break;
       case IFC_INTEGRITY:
-        rv=ifc_remove_tag(cifc, IFC_INTEGRITY, msg->tag);
+        rv=ifc_remove_tag(&cifc->context, IFC_INTEGRITY, msg->tag);
         break;
       case IFC_SECRECY_P:
-        rv=ifc_remove_privilege(cifc, IFC_SECRECY_P, msg->tag);
+        rv=ifc_remove_privilege(&cifc->context, IFC_SECRECY_P, msg->tag);
         break;
       case IFC_INTEGRITY_P:
-        rv=ifc_remove_privilege(cifc, IFC_INTEGRITY_P, msg->tag);
+        rv=ifc_remove_privilege(&cifc->context, IFC_INTEGRITY_P, msg->tag);
         break;
       case IFC_SECRECY_N:
-        rv=ifc_remove_privilege(cifc, IFC_SECRECY_N, msg->tag);
+        rv=ifc_remove_privilege(&cifc->context, IFC_SECRECY_N, msg->tag);
         break;
       case IFC_INTEGRITY_N:
-        rv=ifc_remove_privilege(cifc, IFC_INTEGRITY_N, msg->tag);
+        rv=ifc_remove_privilege(&cifc->context, IFC_INTEGRITY_N, msg->tag);
         break;
     }
   }
@@ -138,7 +138,7 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
 #ifdef CONFIG_SECURITY_PROVENANCE
   // mark as tracked depending of the label state
   cprovenance = current_provenance();
-  if(ifc_is_labelled(cifc)){
+  if(ifc_is_labelled(&cifc->context)){
     cprovenance->node_info.tracked=NODE_TRACKED;
   }else{
     cprovenance->node_info.tracked=NODE_NOT_TRACKED;
@@ -152,14 +152,14 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
 static ssize_t ifc_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-  struct ifc_context *cifc = current_ifc();
+  struct ifc_struct *cifc = current_ifc();
 
   initialize();
 
 	if(count < sizeof(struct ifc_context)){
     return -ENOMEM;
   }
-  if(copy_to_user(buf, cifc, sizeof(struct ifc_context))){
+  if(copy_to_user(buf, &cifc->context, sizeof(struct ifc_context))){
     return -EAGAIN;
   }
   return sizeof(struct ifc_context);
@@ -181,7 +181,7 @@ static ssize_t ifc_write_tag(struct file *file, const char __user *buf,
 static ssize_t ifc_read_tag(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	struct ifc_context *cifc = current_ifc();
+	struct ifc_struct *cifc = current_ifc();
 	tag_t tag;
 	int rv=0;
 
@@ -190,10 +190,10 @@ static ssize_t ifc_read_tag(struct file *filp, char __user *buf,
 
 	tag = ifc_create_tag();
 
-	rv |= ifc_add_privilege(cifc, IFC_SECRECY_P, tag);
-	rv |= ifc_add_privilege(cifc, IFC_INTEGRITY_P, tag);
-	rv |= ifc_add_privilege(cifc, IFC_SECRECY_N, tag);
-	rv |= ifc_add_privilege(cifc, IFC_INTEGRITY_N, tag);
+	rv |= ifc_add_privilege(&cifc->context, IFC_SECRECY_P, tag);
+	rv |= ifc_add_privilege(&cifc->context, IFC_INTEGRITY_P, tag);
+	rv |= ifc_add_privilege(&cifc->context, IFC_SECRECY_N, tag);
+	rv |= ifc_add_privilege(&cifc->context, IFC_INTEGRITY_N, tag);
 
 	if(rv<0){
 		return rv;
@@ -216,8 +216,8 @@ static ssize_t ifc_write_process(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	struct ifc_context *cifc = current_ifc();
-	struct ifc_context *oifc = NULL;
+	struct ifc_struct *cifc = current_ifc();
+	struct ifc_struct *oifc = NULL;
   struct ifc_tag_msg *msg;
   int rv=-EINVAL;
 
@@ -231,7 +231,7 @@ static ssize_t ifc_write_process(struct file *file, const char __user *buf,
     return -EINVAL;
   }
 
-	oifc = context_from_pid(msg->pid);
+	oifc = ifc_from_pid(msg->pid);
 	if(!oifc){ // did not find anything
 		return -EINVAL;
 	}
@@ -239,24 +239,24 @@ static ssize_t ifc_write_process(struct file *file, const char __user *buf,
   if(msg->op==IFC_ADD_TAG){
     switch(msg->tag_type){
       case IFC_SECRECY_P:
-				if(!ifc_contains_value(&cifc->secrecy_p, msg->tag))
+				if(!ifc_contains_value(&cifc->context.secrecy_p, msg->tag))
 					return -EPERM;
-        rv=ifc_add_privilege(oifc, IFC_SECRECY_P, msg->tag);
+        rv=ifc_add_privilege(&oifc->context, IFC_SECRECY_P, msg->tag);
         break;
       case IFC_INTEGRITY_P:
-				if(!ifc_contains_value(&cifc->integrity_p, msg->tag))
+				if(!ifc_contains_value(&cifc->context.integrity_p, msg->tag))
 					return -EPERM;
-        rv=ifc_add_privilege(oifc, IFC_INTEGRITY_P, msg->tag);
+        rv=ifc_add_privilege(&oifc->context, IFC_INTEGRITY_P, msg->tag);
         break;
       case IFC_SECRECY_N:
-				if(!ifc_contains_value(&cifc->secrecy_n, msg->tag))
+				if(!ifc_contains_value(&cifc->context.secrecy_n, msg->tag))
 					return -EPERM;
-        rv=ifc_add_privilege(oifc, IFC_SECRECY_N, msg->tag);
+        rv=ifc_add_privilege(&oifc->context, IFC_SECRECY_N, msg->tag);
         break;
       case IFC_INTEGRITY_N:
-				if(!ifc_contains_value(&cifc->integrity_n, msg->tag))
+				if(!ifc_contains_value(&cifc->context.integrity_n, msg->tag))
 					return -EPERM;
-        rv=ifc_add_privilege(oifc, IFC_INTEGRITY_N, msg->tag);
+        rv=ifc_add_privilege(&oifc->context, IFC_INTEGRITY_N, msg->tag);
         break;
     }
   }
@@ -269,7 +269,7 @@ static ssize_t ifc_write_process(struct file *file, const char __user *buf,
 static ssize_t ifc_read_process(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	struct ifc_context *oifc = NULL;
+	struct ifc_struct *oifc = NULL;
   struct ifc_context_msg *msg;
 
   if(__kuid_val(current_euid())!=0)
@@ -281,12 +281,12 @@ static ssize_t ifc_read_process(struct file *filp, char __user *buf,
 
   msg = (struct ifc_context_msg*)buf;
 
-  oifc = context_from_pid(msg->pid);
+  oifc = ifc_from_pid(msg->pid);
 	if(!oifc){ // did not find anything
 		return -EINVAL;
 	}
 
-  if(copy_to_user(&msg->context, oifc, sizeof(struct ifc_context))){
+  if(copy_to_user(&msg->context, &oifc->context, sizeof(struct ifc_context))){
     return -EAGAIN;
   }
   return sizeof(struct ifc_context_msg);

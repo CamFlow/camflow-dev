@@ -306,18 +306,20 @@ static inline void provenance_record_file_name(struct file *file){
 	struct inode *inode = file_inode(file);
 	prov_msg_t *iprov = inode_get_provenance(inode);
 	long_prov_msg_t *fname_prov;
-	char buffer[PATH_MAX];
+	char *buffer;
 	char *ptr;
 
 	if(!provenance_is_name_recorded(iprov) && provenance_is_tracked(iprov)){
+		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
 		fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
 		ptr = dentry_path_raw(file->f_path.dentry, buffer, PATH_MAX);
 		strlcpy(fname_prov->file_name_info.name, ptr, PATH_MAX);
+		kfree(buffer);
 		fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
 		fname_prov->file_name_info.inode_id=iprov->task_info.node_id;
 		long_prov_write(fname_prov);
 		free_long_provenance(fname_prov);
-		iprov->node_info.name_recorded=NAME_RECORDED;
+		iprov->node_info.name_recorded=NAME_RECORDED;		
 	}
 }
 
