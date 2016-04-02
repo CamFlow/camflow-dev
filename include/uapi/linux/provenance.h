@@ -22,6 +22,13 @@
 #include <uapi/linux/limits.h>
 #endif
 
+#define PROV_ENABLE_FILE           "/sys/kernel/security/provenance/enable"
+#define PROV_ALL_FILE              "/sys/kernel/security/provenance/all"
+#define PROV_OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
+#define PROV_NODE_FILE             "/sys/kernel/security/provenance/node"
+#define PROV_EDGE_FILE             "/sys/kernel/security/provenance/edge"
+#define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
+
 #define MSG_STR           0
 #define MSG_EDGE          1
 #define MSG_TASK          2
@@ -35,6 +42,7 @@
 #define MSG_ADDR          10
 #define MSG_SB            11
 #define MSG_FILE_NAME     12
+#define MSG_IFC           13
 
 #define ED_DATA           0
 #define ED_CREATE         1
@@ -49,6 +57,7 @@
 #define ED_ACCEPT         10
 #define ED_OPEN           11
 #define ED_PARENT         12
+#define ED_VERSION        13
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -71,7 +80,7 @@
 #define STR_MAX_SIZE      128
 
 #define MESSAGE_ELEMENTS uint8_t message_type; uint32_t boot_id; uint64_t event_id;
-#define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t name_recorded; uint8_t tracked; uint8_t opaque;
+#define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t name_recorded; uint8_t tracked; uint8_t opaque; uint32_t version;
 
 struct msg_struct{
   MESSAGE_ELEMENTS
@@ -189,7 +198,8 @@ struct address_struct{
 
 struct ifc_context_struct{
   MESSAGE_ELEMENTS
-  uint64_t inode_id;
+  uint64_t node_id;
+  uint32_t version;
   struct ifc_context context;
 };
 

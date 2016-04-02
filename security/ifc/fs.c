@@ -55,21 +55,16 @@ static inline void initialize(void){
   ifc_fs_is_initialised=true;
 }
 
-static inline struct ifc_struct* ifc_from_pid(pid_t pid){
-  struct task_struct *dest = find_task_by_vpid(pid);
-  if(!dest)
-    return NULL;
-  return __task_cred(dest)->ifc;
-}
-
 static ssize_t ifc_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
   struct ifc_struct *cifc = current_ifc();
-  prov_msg_t* cprovenance;
   struct ifc_tag_msg *msg;
   int rv=-EINVAL;
+#ifdef CONFIG_SECURITY_PROVENANCE
+  prov_msg_t* cprov=NULL;
+#endif
 
   initialize();
 
@@ -135,15 +130,19 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
     }
   }
   if(!rv){
+
 #ifdef CONFIG_SECURITY_PROVENANCE
-  // mark as tracked depending of the label state
-  cprovenance = current_provenance();
-  if(ifc_is_labelled(&cifc->context)){
-    cprovenance->node_info.tracked=NODE_TRACKED;
-  }else{
-    cprovenance->node_info.tracked=NODE_NOT_TRACKED;
-  }
+    // mark as tracked depending of the label state
+    cprov = current_provenance();
+    prov_update_version(cprov);
+    prov_record_ifc(cprov, &cifc->context);
+    if(ifc_is_labelled(&cifc->context)){
+      cprov->node_info.tracked=NODE_TRACKED;
+    }else{
+      cprov->node_info.tracked=NODE_NOT_TRACKED;
+    }
 #endif
+
     return sizeof(struct ifc_tag_msg);
   }
   return rv; // return error
@@ -260,9 +259,11 @@ static ssize_t ifc_write_process(struct file *file, const char __user *buf,
         break;
     }
   }
+
   if(!rv){
     return sizeof(struct ifc_tag_msg);
   }
+
   return rv; // return error
 }
 
@@ -424,6 +425,9 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   struct inode* in;
   struct ifc_struct* ifc;
   int rv = -EINVAL;
+#ifdef CONFIG_SECURITY_PROVENANCE
+  prov_msg_t* prov=NULL;
+#endif
 
   if(__kuid_val(current_euid())!=0)
     return -EPERM;
@@ -466,6 +470,19 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
         break;
     }
   }
+
+#ifdef CONFIG_SECURITY_PROVENANCE
+  // mark as tracked depending of the label state
+  prov = inode_get_provenance(in);
+  prov_update_version(prov);
+  prov_record_ifc(prov, &ifc->context);
+  if(ifc_is_labelled(&ifc->context)){
+    prov->node_info.tracked=NODE_TRACKED;
+  }else{
+    prov->node_info.tracked=NODE_NOT_TRACKED;
+  }
+#endif
+
   return rv;
 }
 

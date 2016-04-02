@@ -379,5 +379,12 @@ static inline void print_context(struct ifc_context* context){
   print_label(&context->integrity);
 }
 
+static inline struct ifc_struct* ifc_from_pid(pid_t pid){
+  struct task_struct *dest = find_task_by_vpid(pid);
+  if(!dest)
+    return NULL;
+  return __task_cred(dest)->ifc;
+}
+
 #endif
 #endif

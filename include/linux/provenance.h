@@ -21,6 +21,7 @@
 #include <linux/bug.h>
 #include <linux/relay.h>
 #include <linux/socket.h>
+#include <uapi/linux/ifc.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/camflow.h>
@@ -28,6 +29,13 @@
 #define ASSIGN_NODE_ID 0
 
 extern atomic64_t prov_evt_count;
+
+static inline struct prov_msg_t* prov_from_pid(pid_t pid){
+  struct task_struct *dest = find_task_by_vpid(pid);
+  if(!dest)
+    return NULL;
+  return __task_cred(dest)->provenance;
+}
 
 static inline uint64_t prov_next_evtid( void ){
   return (uint64_t)atomic64_inc_return(&prov_evt_count);
@@ -175,5 +183,27 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
   edge.edge_info.type=type;
   prov_write(&edge);
 }
+
+static inline void prov_update_version(prov_msg_t* prov){
+  prov_msg_t old_prov;
+  memcpy(&old_prov, prov, sizeof(prov_msg_t));
+  prov->node_info.version++;
+  prov->node_info.recorded = NODE_UNRECORDED;
+  record_edge(ED_VERSION, &old_prov, prov, FLOW_ALLOWED);
+}
+
+#ifdef CONFIG_SECURITY_IFC
+static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context){
+	long_prov_msg_t* ifc_prov = NULL;
+
+  ifc_prov = alloc_long_provenance(MSG_IFC, GFP_KERNEL);
+  ifc_prov->ifc_info.node_id = prov->node_info.node_id;
+  ifc_prov->ifc_info.version = prov->node_info.version;
+  memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
+  long_prov_write(ifc_prov);
+  free_long_provenance(ifc_prov);
+}
+#endif
+
 #endif
 #endif /* _LINUX_PROVENANCE_H */

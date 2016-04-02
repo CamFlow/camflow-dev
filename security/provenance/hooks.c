@@ -98,6 +98,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	new_ifc = new->ifc;
 	if(ifc_is_labelled(&new_ifc->context)){
 		prov->node_info.tracked=NODE_TRACKED;
+		prov_record_ifc(prov, &new_ifc->context);
 	}
 #endif
 
@@ -150,6 +151,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov = alloc_provenance(MSG_INODE, GFP_KERNEL);
   prov_msg_t* sprov;
+#ifdef CONFIG_SECURITY_IFC
+	struct ifc_struct *ifc=NULL;
+#endif
+
   if(unlikely(!iprov))
     return -ENOMEM;
   set_node_id(iprov, inode->i_ino);
@@ -162,6 +167,15 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
 	alloc_camflow(inode, GFP_KERNEL);
   inode_set_provenance(inode, (void**)&iprov);
+
+#ifdef CONFIG_SECURITY_IFC
+	ifc = inode_get_ifc(inode);
+	if(ifc_is_labelled(&ifc->context)){
+		iprov->node_info.tracked=NODE_TRACKED;
+		prov_record_ifc(iprov, &ifc->context);
+	}
+#endif
+
   record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED); /* creating inode != creating the file */
   return 0;
 }
@@ -461,6 +475,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
 			mprov->msg_msg_info.tracked=NODE_TRACKED;
+			prov_record_ifc(mprov, &ifc->context);
 		}
 	}
 #endif
@@ -544,6 +559,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
 			sprov->shm_info.tracked=NODE_TRACKED;
+			prov_record_ifc(sprov, &ifc->context);
 		}
 	}
 #endif
