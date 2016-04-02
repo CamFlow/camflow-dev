@@ -346,7 +346,7 @@ static inline int ifc_remove_tag_no_check(struct ifc_context* context, uint8_t t
 static inline void print_label(struct ifc_label* label){
   int i;
   for(i=0; i < label->size; i++){
-    printk(KERN_INFO "%llu", label->array[i]);
+    printk(KERN_INFO "IFC: %llu", label->array[i]);
   }
 }
 
@@ -356,24 +356,16 @@ static inline int ifc_merge_context(struct ifc_context* main, struct ifc_context
   // too conservative TODO change this
   if(main->secrecy.size + to_add->secrecy.size > IFC_LABEL_MAX_SIZE)
       return -ENOMEM;
-  if(main->secrecy.size + to_add->secrecy.size > IFC_LABEL_MAX_SIZE)
+  if(main->integrity.size + to_add->integrity.size > IFC_LABEL_MAX_SIZE)
       return -ENOMEM;
 
   for(i=0; i<to_add->secrecy.size; i++){
-    if(!ifc_contains_value(&main->secrecy, to_add->secrecy.array[i])){
-      main->secrecy.array[main->secrecy.size]=to_add->secrecy.array[i];
-      main->secrecy.size++;
-    }
+    ifc_add_tag_no_check(main, IFC_SECRECY, to_add->secrecy.array[i]);
   }
-  ifc_sort_label(&main->secrecy);
 
   for(i=0; i<to_add->integrity.size; i++){
-    if(!ifc_contains_value(&main->integrity, to_add->integrity.array[i])){
-      main->secrecy.array[main->integrity.size]=to_add->integrity.array[i];
-      main->integrity.size++;
-    }
+    ifc_add_tag_no_check(main, IFC_INTEGRITY, to_add->integrity.array[i]);
   }
-  ifc_sort_label(&main->integrity);
   return 0;
 }
 
@@ -381,9 +373,9 @@ static inline void print_context(struct ifc_context* context){
   if(context->trusted==IFC_TRUSTED){
     printk(KERN_INFO "TRUSTED");
   }
-  printk(KERN_INFO "SECRECY");
+  printk(KERN_INFO "IFC SECRECY (%d)", context->secrecy.size);
   print_label(&context->secrecy);
-  printk(KERN_INFO "INTEGRITY");
+  printk(KERN_INFO "IFC INTEGRITY (%d)", context->integrity.size);
   print_label(&context->integrity);
 }
 

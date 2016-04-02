@@ -466,7 +466,6 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
         break;
     }
   }
-
   return rv;
 }
 

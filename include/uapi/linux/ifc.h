@@ -91,10 +91,10 @@ struct ifc_file_config{
 };
 
 struct ifc_file_change{
+  char name[PATH_MAX];
   tag_t tag;
   uint8_t tag_type;
   uint8_t op;
-  char name[PATH_MAX+1];
 };
 
 #endif
