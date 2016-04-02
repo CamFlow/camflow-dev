@@ -319,7 +319,7 @@ static inline void provenance_record_file_name(struct file *file){
 		fname_prov->file_name_info.inode_id=iprov->task_info.node_id;
 		long_prov_write(fname_prov);
 		free_long_provenance(fname_prov);
-		iprov->node_info.name_recorded=NAME_RECORDED;		
+		iprov->node_info.name_recorded=NAME_RECORDED;
 	}
 }
 
@@ -655,6 +655,21 @@ static int provenance_socket_post_create(struct socket *sock, int family,
   return 0;
 }
 
+static inline void provenance_record_address(struct socket *sock, struct sockaddr *address, int addrlen){
+	prov_msg_t* skprov = sock->sk->sk_provenance;
+	long_prov_msg_t* addr_info = NULL;
+
+	if(!provenance_is_name_recorded(skprov) && provenance_is_tracked(skprov)){
+	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
+	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
+	  addr_info->address_info.length=addrlen;
+	  memcpy(&(addr_info->address_info.addr), address, addrlen);
+	  long_prov_write(addr_info);
+	  free_long_provenance(addr_info);
+		skprov->node_info.name_recorded=NAME_RECORDED;
+	}
+}
+
 /*
 * Check permission before socket protocol layer bind operation is
 * performed and the socket @sock is bound to the address specified in the
@@ -668,7 +683,6 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 {
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
-  long_prov_msg_t* addr_info = NULL;
 
   if(cprov->task_info.opaque==NODE_OPAQUE)
     return 0;
@@ -676,14 +690,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   if(!skprov)
     return -ENOMEM;
 
-	if(prov_enabled && (provenance_is_tracked(cprov) || provenance_is_tracked(skprov))){
-	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
-	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
-	  addr_info->address_info.length=addrlen;
-	  memcpy(&(addr_info->address_info.addr), address, addrlen);
-	  long_prov_write(addr_info);
-	  free_long_provenance(addr_info);
-	}
+	provenance_record_address(sock, address, addrlen);
 	record_edge(ED_BIND, cprov, skprov, FLOW_ALLOWED);
 
   return 0;
@@ -701,21 +708,14 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 {
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
-  long_prov_msg_t* addr_info = NULL;
 
   if(cprov->task_info.opaque==NODE_OPAQUE)
     return 0;
 
   if(!skprov)
     return -ENOMEM;
-	if(prov_enabled && (provenance_is_tracked(cprov) || provenance_is_tracked(skprov))){
-	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
-	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
-	  addr_info->address_info.length=addrlen;
-	  memcpy(&(addr_info->address_info.addr), address, addrlen);
-	  long_prov_write(addr_info);
-	  free_long_provenance(addr_info);
-	}
+
+	provenance_record_address(sock, address, addrlen);
 	record_edge(ED_CONNECT, cprov, skprov, FLOW_ALLOWED);
 
   return 0;

@@ -16,7 +16,9 @@
 
 #ifndef __KERNEL__
 #include <linux/limits.h>
+#include <linux/ifc.h>
 #else
+#include <uapi/linux/ifc.h>
 #include <uapi/linux/limits.h>
 #endif
 
@@ -185,6 +187,12 @@ struct address_struct{
   struct sockaddr addr;
 };
 
+struct ifc_context_struct{
+  MESSAGE_ELEMENTS
+  uint64_t inode_id;
+  struct ifc_context context;
+};
+
 typedef union long_msg{
   struct msg_struct           msg_info;
   struct str_struct           str_info;
@@ -192,6 +200,7 @@ typedef union long_msg{
   struct unlink_struct        unlink_info;
   struct file_name_struct     file_name_info;
   struct address_struct       address_info;
+  struct ifc_context_struct   ifc_info;
 } long_prov_msg_t;
 
 #endif
