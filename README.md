@@ -7,8 +7,15 @@ The source code for the audit and ifc userspace libraries are available [here](h
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.1.2           | 4.4.6          | n/a        |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.1.2
+
+```
+-
+```
 
 ### v0.1.1
 
