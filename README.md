@@ -7,7 +7,7 @@ The source code for the audit and ifc userspace libraries are available [here](h
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.1           | 4.4.6          | n/a        |
+| 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
 ### v0.1.1
@@ -45,8 +45,8 @@ Do not hesitate to fork the repository or to report bugs.
  * it may ask for sudo password
 
 ## Plan
-* 0.1.1 update to kernel version 4.4.6
-* 0.2.0 IFC tags and provenance data persistence across reboot
+* 0.1.2 look at some form of automated testing.
+* 0.2.0 IFC tags and provenance data persistence across reboot.
 
 ## TODO
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
