@@ -72,9 +72,10 @@ patch:
 	cd build/linux-$(kernel-version) && rm -f  config_sav
 	cd build/linux-$(kernel-version) && rm -f  certs/signing_key.pem
 	cd build/linux-$(kernel-version) && rm -f	certs/x509.genkey
+	cd build/linux-$(kernel-version) && rm -f certs/signing_key.x509
 	cd build && rm -f patch-$(kernel-version)-v$(lsm-version)
 	cd build/pristine/linux-$(kernel-version) && $(MAKE) clean
 	cd build/pristine/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
-	cd ./build && diff -uprN -a ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
+	cd ./build && diff -uprN ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
