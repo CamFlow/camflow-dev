@@ -68,9 +68,13 @@ clean_us:
 patch:
 	cd build && mkdir -p pristine
 	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine
-	cd build/linux-$(kernel-version) && rm -f .config config_sav
+	cd build/linux-$(kernel-version) && rm -f .config
+	cd build/linux-$(kernel-version) && rm -f  config_sav
+	cd build/linux-$(kernel-version) && rm -f  certs/signing_key.pem
+	cd build/linux-$(kernel-version) && rm -f	certs/x509.genkey
+	cd build && rm -f patch-$(kernel-version)-v$(lsm-version)
 	cd build/pristine/linux-$(kernel-version) && $(MAKE) clean
 	cd build/pristine/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
-	cd ./build && diff -uprN ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
+	cd ./build && diff -uprN -a ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
