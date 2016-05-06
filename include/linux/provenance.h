@@ -100,7 +100,7 @@ static inline void prov_write(prov_msg_t* msg)
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;
   }
-  msg->msg_info.msg_info.event_id=prov_next_evtid(); /* assign an event id */
+  msg->msg_info.msg_info.id=prov_next_evtid(); /* assign an event id */
   msg->msg_info.msg_info.boot_id=prov_boot_id;
   msg->msg_info.msg_info.machine_id=0;
   relay_write(prov_chan, msg, sizeof(prov_msg_t));
@@ -112,7 +112,7 @@ static inline void long_prov_write(long_prov_msg_t* msg){
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;
   }
-  msg->msg_info.msg_info.event_id=prov_next_evtid(); /* assign an event id */
+  msg->msg_info.msg_info.id=prov_next_evtid(); /* assign an event id */
   msg->msg_info.msg_info.boot_id=prov_boot_id;
   msg->msg_info.msg_info.machine_id=0;
   relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));

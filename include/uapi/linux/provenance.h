@@ -83,7 +83,7 @@ struct basic_msg_info{
   uint8_t type;
   uint32_t machine_id;
   uint32_t boot_id;
-  uint64_t event_id;
+  uint64_t id;
 };
 
 struct basic_node_info{
