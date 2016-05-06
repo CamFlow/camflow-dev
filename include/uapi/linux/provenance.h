@@ -144,6 +144,7 @@ struct inode_prov_struct{
 
 struct sb_struct{
   struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
   uint8_t uuid[16];
 };
 
