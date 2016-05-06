@@ -202,10 +202,10 @@ static int ifc_inode_permission(struct inode *inode, int mask)
   i_prov=inode_get_provenance(inode);
   p_prov=current_provenance();
   if(ifc_is_labelled(&cifc->context))
-    p_prov->node_info.tracked=NODE_TRACKED;
+    p_prov->node_info.node_kern.tracked=NODE_TRACKED;
 
   if(ifc_is_labelled(&ifc->context))
-    i_prov->node_info.tracked=NODE_TRACKED;
+    i_prov->node_info.node_kern.tracked=NODE_TRACKED;
 #endif
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){

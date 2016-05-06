@@ -167,7 +167,7 @@ static ssize_t prov_write_opaque(struct file *file, const char __user *buf,
   if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
-	cprov->task_info.opaque=tmp;
+	cprov->task_info.node_kern.opaque=tmp;
   length=count;
 out:
   free_page((unsigned long)page);
@@ -180,7 +180,7 @@ static ssize_t prov_read_opaque(struct file *filp, char __user *buf,
 	prov_msg_t* cprov = current_provenance();
 	char tmpbuf[TMPBUFLEN];
 	ssize_t length;
-  int tmp = cprov->task_info.opaque;
+  int tmp = cprov->task_info.node_kern.opaque;
 
 	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
@@ -204,7 +204,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 	set_node_id(node, ASSIGN_NODE_ID);
-	node->disc_node_info.message_type = MSG_DISC_NODE;
+	node->disc_node_info.msg_info.type = MSG_DISC_NODE;
 	prov_write(node);
 	return count;
 }
@@ -233,7 +233,7 @@ static ssize_t prov_write_edge(struct file *file, const char __user *buf,
 	if(copy_from_user(&edge, buf, sizeof(struct edge_struct))){
 		return -ENOMEM;
 	}
-	edge.msg_info.message_type=MSG_EDGE;
+	edge.msg_info.msg_info.type=MSG_EDGE;
 	prov_write(&edge);
 	return count;
 }
@@ -266,15 +266,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	{
 		return -ENOMEM;
 	}
-
-	tmp->task_info.message_type = cprov->task_info.message_type;
-	tmp->task_info.event_id = cprov->task_info.event_id;
-  tmp->task_info.node_id = cprov->task_info.node_id;
-  tmp->task_info.recorded = cprov->task_info.recorded;
-  tmp->task_info.tracked = cprov->task_info.tracked;
-  tmp->task_info.opaque = cprov->task_info.opaque;
-  tmp->task_info.uid = cprov->task_info.uid;
-  tmp->task_info.gid = cprov->task_info.gid;
+	memcpy(tmp, cprov, sizeof(prov_msg_t));
 	record_node(cprov); // record self
 	return count; // write only
 }

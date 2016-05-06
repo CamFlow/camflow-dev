@@ -97,7 +97,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 #ifdef CONFIG_SECURITY_IFC
 	new_ifc = new->ifc;
 	if(ifc_is_labelled(&new_ifc->context)){
-		prov->node_info.tracked=NODE_TRACKED;
+		prov->node_info.node_kern.tracked=NODE_TRACKED;
 		prov_record_ifc(prov, &new_ifc->context);
 	}
 #endif
@@ -171,7 +171,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 #ifdef CONFIG_SECURITY_IFC
 	ifc = inode_get_ifc(inode);
 	if(ifc_is_labelled(&ifc->context)){
-		iprov->node_info.tracked=NODE_TRACKED;
+		iprov->node_info.node_kern.tracked=NODE_TRACKED;
 		prov_record_ifc(iprov, &ifc->context);
 	}
 #endif
@@ -266,9 +266,9 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
     link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
     link_prov->link_info.length = new_dentry->d_name.len;
     memcpy(link_prov->link_info.name, new_dentry->d_name.name, new_dentry->d_name.len);
-    link_prov->link_info.dir_id = dprov->inode_info.node_id;
-    link_prov->link_info.task_id = cprov->task_info.node_id;
-    link_prov->link_info.inode_id = iprov->task_info.node_id;
+    link_prov->link_info.dir_id = dprov->inode_info.node_info.id;
+    link_prov->link_info.task_id = cprov->task_info.node_info.id;
+    link_prov->link_info.inode_id = iprov->task_info.node_info.id;
     long_prov_write(link_prov);
     free_long_provenance(link_prov);
   }
@@ -307,9 +307,9 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
     link_prov = alloc_long_provenance(MSG_UNLINK, GFP_KERNEL);
     link_prov->unlink_info.length = dentry->d_name.len;
     memcpy(link_prov->unlink_info.name, dentry->d_name.name, dentry->d_name.len);
-    link_prov->unlink_info.dir_id = dprov->inode_info.node_id;
-    link_prov->unlink_info.task_id = cprov->task_info.node_id;
-    link_prov->unlink_info.inode_id = iprov->task_info.node_id;
+    link_prov->unlink_info.dir_id = dprov->inode_info.node_info.id;
+    link_prov->unlink_info.task_id = cprov->task_info.node_info.id;
+    link_prov->unlink_info.inode_id = iprov->task_info.node_info.id;
     long_prov_write(link_prov);
     free_long_provenance(link_prov);
   }
@@ -330,10 +330,10 @@ static inline void provenance_record_file_name(struct file *file){
 		strlcpy(fname_prov->file_name_info.name, ptr, PATH_MAX);
 		kfree(buffer);
 		fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-		fname_prov->file_name_info.inode_id=iprov->task_info.node_id;
+		fname_prov->file_name_info.inode_id=iprov->task_info.node_info.id;
 		long_prov_write(fname_prov);
 		free_long_provenance(fname_prov);
-		iprov->node_info.name_recorded=NAME_RECORDED;
+		iprov->node_info.node_kern.name_recorded=NAME_RECORDED;
 	}
 }
 
@@ -474,7 +474,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 #ifdef CONFIG_SECURITY_IFC
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
-			mprov->msg_msg_info.tracked=NODE_TRACKED;
+			mprov->msg_msg_info.node_kern.tracked=NODE_TRACKED;
 			prov_record_ifc(mprov, &ifc->context);
 		}
 	}
@@ -558,7 +558,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 #ifdef CONFIG_SECURITY_IFC
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
-			sprov->shm_info.tracked=NODE_TRACKED;
+			sprov->shm_info.node_kern.tracked=NODE_TRACKED;
 			prov_record_ifc(sprov, &ifc->context);
 		}
 	}
@@ -677,12 +677,12 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 
 	if(!provenance_is_name_recorded(skprov) && provenance_is_tracked(skprov)){
 	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
-	  addr_info->address_info.sock_id = skprov->sock_info.node_id;
+		copy_node_info(&addr_info->address_info.sock_info, &skprov->sock_info.node_info);
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
 	  long_prov_write(addr_info);
 	  free_long_provenance(addr_info);
-		skprov->node_info.name_recorded=NAME_RECORDED;
+		skprov->sock_info.node_kern.name_recorded=NAME_RECORDED;
 	}
 }
 
@@ -700,7 +700,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  if(cprov->task_info.opaque==NODE_OPAQUE)
+  if(cprov->task_info.node_kern.opaque==NODE_OPAQUE)
     return 0;
 
   if(!skprov)
@@ -725,7 +725,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  if(cprov->task_info.opaque==NODE_OPAQUE)
+  if(cprov->task_info.node_kern.opaque==NODE_OPAQUE)
     return 0;
 
   if(!skprov)

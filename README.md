@@ -14,7 +14,7 @@ The source code for the audit and ifc userspace libraries are available [here](h
 ### v0.1.2
 
 ```
--
+- Modified provenance data structure.
 ```
 
 ### v0.1.1

@@ -79,41 +79,63 @@
 
 #define STR_MAX_SIZE      128
 
-#define MESSAGE_ELEMENTS uint8_t message_type; uint32_t boot_id; uint64_t event_id;
-#define NODE_ELEMENTS uint64_t node_id; uint8_t recorded; uint8_t name_recorded; uint8_t tracked; uint8_t opaque; uint32_t version;
+struct basic_msg_info{
+  uint8_t type;
+  uint32_t machine_id;
+  uint32_t boot_id;
+  uint64_t event_id;
+};
+
+struct basic_node_info{
+  uint64_t id;
+  uint32_t boot_id;
+  uint32_t machine_id;
+  uint32_t version;
+};
+
+struct node_kern{
+  uint8_t recorded;
+  uint8_t name_recorded;
+  uint8_t tracked;
+  uint8_t opaque;
+};
 
 struct msg_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
 };
 
 struct edge_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
   uint8_t type;
   uint8_t allowed;
-  uint64_t snd_id;
-  uint64_t rcv_id;
+  struct basic_node_info snd;
+  struct basic_node_info rcv;
 };
 
 struct node_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
 };
 
 struct disc_node_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
 };
 
 struct task_prov_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
@@ -121,25 +143,28 @@ struct inode_prov_struct{
 };
 
 struct sb_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
   uint8_t uuid[16];
 };
 
 struct msg_msg_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
   long type;
 };
 
 struct shm_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
   uint16_t mode;
 };
 
 struct sock_struct{
-  MESSAGE_ELEMENTS
-  NODE_ELEMENTS
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
+  struct node_kern node_kern;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
@@ -159,13 +184,13 @@ typedef union prov_msg{
 } prov_msg_t;
 
 struct str_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
   size_t length;
   char str[PATH_MAX];
 };
 
 struct link_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
   uint64_t dir_id;
@@ -174,14 +199,14 @@ struct link_struct{
 };
 
 struct file_name_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
   uint64_t inode_id;
 };
 
 struct unlink_struct{
-  MESSAGE_ELEMENTS
+  struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
   uint64_t dir_id;
@@ -190,15 +215,15 @@ struct unlink_struct{
 };
 
 struct address_struct{
-  MESSAGE_ELEMENTS
-  uint64_t sock_id;
+  struct basic_msg_info msg_info;
+  struct basic_node_info sock_info;
   size_t length;
   struct sockaddr addr;
 };
 
 struct ifc_context_struct{
-  MESSAGE_ELEMENTS
-  uint64_t node_id;
+  struct basic_msg_info msg_info;
+  struct basic_node_info node_info;
   uint32_t version;
   struct ifc_context context;
 };

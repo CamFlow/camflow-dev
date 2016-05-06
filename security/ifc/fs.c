@@ -36,7 +36,7 @@ static void mark_as_trusted(const char* name){
 #ifdef CONFIG_SECURITY_PROVENANCE
     // opaque NODES are not recorded in audit data
     provenance = inode_get_provenance(in);
-    provenance->node_info.opaque=NODE_OPAQUE;
+    provenance->node_info.node_kern.opaque=NODE_OPAQUE;
 #endif
   }
 }
@@ -137,9 +137,9 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
     prov_update_version(cprov);
     prov_record_ifc(cprov, &cifc->context);
     if(ifc_is_labelled(&cifc->context)){
-      cprov->node_info.tracked=NODE_TRACKED;
+      cprov->node_info.node_kern.tracked=NODE_TRACKED;
     }else{
-      cprov->node_info.tracked=NODE_NOT_TRACKED;
+      cprov->node_info.node_kern.tracked=NODE_NOT_TRACKED;
     }
 #endif
 
@@ -477,9 +477,9 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   prov_update_version(prov);
   prov_record_ifc(prov, &ifc->context);
   if(ifc_is_labelled(&ifc->context)){
-    prov->node_info.tracked=NODE_TRACKED;
+    prov->node_info.node_kern.tracked=NODE_TRACKED;
   }else{
-    prov->node_info.tracked=NODE_NOT_TRACKED;
+    prov->node_info.node_kern.tracked=NODE_NOT_TRACKED;
   }
 #endif
 
