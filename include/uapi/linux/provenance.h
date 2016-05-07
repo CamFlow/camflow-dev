@@ -194,38 +194,37 @@ struct link_struct{
   struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
-  uint64_t dir_id;
-  uint64_t task_id;
-  uint64_t inode_id;
+  struct basic_node_info dir;
+  struct basic_node_info task;
+  struct basic_node_info inode;
 };
 
 struct file_name_struct{
   struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
-  uint64_t inode_id;
+  struct basic_node_info inode;
 };
 
 struct unlink_struct{
   struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
-  uint64_t dir_id;
-  uint64_t task_id;
-  uint64_t inode_id;
+  struct basic_node_info dir;
+  struct basic_node_info task;
+  struct basic_node_info inode;
 };
 
 struct address_struct{
   struct basic_msg_info msg_info;
   struct basic_node_info sock_info;
-  size_t length;
   struct sockaddr addr;
+  size_t length;
 };
 
 struct ifc_context_struct{
   struct basic_msg_info msg_info;
   struct basic_node_info node_info;
-  uint32_t version;
   struct ifc_context context;
 };
 

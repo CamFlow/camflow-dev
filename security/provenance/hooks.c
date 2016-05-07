@@ -266,9 +266,9 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
     link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
     link_prov->link_info.length = new_dentry->d_name.len;
     memcpy(link_prov->link_info.name, new_dentry->d_name.name, new_dentry->d_name.len);
-    link_prov->link_info.dir_id = dprov->inode_info.node_info.id;
-    link_prov->link_info.task_id = cprov->task_info.node_info.id;
-    link_prov->link_info.inode_id = iprov->task_info.node_info.id;
+		copy_node_info(&link_prov->link_info.dir, &dprov->inode_info.node_info);
+		copy_node_info(&link_prov->link_info.task, &cprov->task_info.node_info);
+		copy_node_info(&link_prov->link_info.inode, &iprov->task_info.node_info);
     long_prov_write(link_prov);
     free_long_provenance(link_prov);
   }
@@ -307,9 +307,9 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
     link_prov = alloc_long_provenance(MSG_UNLINK, GFP_KERNEL);
     link_prov->unlink_info.length = dentry->d_name.len;
     memcpy(link_prov->unlink_info.name, dentry->d_name.name, dentry->d_name.len);
-    link_prov->unlink_info.dir_id = dprov->inode_info.node_info.id;
-    link_prov->unlink_info.task_id = cprov->task_info.node_info.id;
-    link_prov->unlink_info.inode_id = iprov->task_info.node_info.id;
+		copy_node_info(&link_prov->unlink_info.dir, &dprov->inode_info.node_info);
+		copy_node_info(&link_prov->unlink_info.task, &cprov->task_info.node_info);
+		copy_node_info(&link_prov->unlink_info.inode, &iprov->task_info.node_info);
     long_prov_write(link_prov);
     free_long_provenance(link_prov);
   }
@@ -330,7 +330,7 @@ static inline void provenance_record_file_name(struct file *file){
 		strlcpy(fname_prov->file_name_info.name, ptr, PATH_MAX);
 		kfree(buffer);
 		fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-		fname_prov->file_name_info.inode_id=iprov->task_info.node_info.id;
+		copy_node_info(&fname_prov->file_name_info.inode, &iprov->task_info.node_info);
 		long_prov_write(fname_prov);
 		free_long_provenance(fname_prov);
 		iprov->node_info.node_kern.name_recorded=NAME_RECORDED;
