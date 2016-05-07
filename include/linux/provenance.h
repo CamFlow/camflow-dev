@@ -66,12 +66,17 @@ static inline prov_msg_t* alloc_provenance(uint8_t ntype, gfp_t gfp)
   return prov;
 }
 
+extern uint32_t prov_machine_id;
+extern uint32_t prov_boot_id;
+
 static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   if(nid==ASSIGN_NODE_ID){
     node->node_info.node_info.id=prov_next_nodeid();
   }else{
     node->node_info.node_info.id=nid;
   }
+  node->node_info.node_info.boot_id=prov_boot_id;
+  node->node_info.node_info.machine_id=prov_machine_id;
 }
 
 static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
@@ -92,7 +97,6 @@ static inline void free_long_provenance(long_prov_msg_t* prov){
   kmem_cache_free(long_provenance_cache, prov);
 }
 
-extern uint32_t prov_boot_id;
 static inline void prov_write(prov_msg_t* msg)
 {
   if(prov_chan==NULL) // not set yet
@@ -102,7 +106,7 @@ static inline void prov_write(prov_msg_t* msg)
   }
   msg->msg_info.msg_info.id=prov_next_evtid(); /* assign an event id */
   msg->msg_info.msg_info.boot_id=prov_boot_id;
-  msg->msg_info.msg_info.machine_id=0;
+  msg->msg_info.msg_info.machine_id=prov_machine_id;
   relay_write(prov_chan, msg, sizeof(prov_msg_t));
 }
 
@@ -114,7 +118,7 @@ static inline void long_prov_write(long_prov_msg_t* msg){
   }
   msg->msg_info.msg_info.id=prov_next_evtid(); /* assign an event id */
   msg->msg_info.msg_info.boot_id=prov_boot_id;
-  msg->msg_info.msg_info.machine_id=0;
+  msg->msg_info.msg_info.machine_id=prov_machine_id;
   relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
 }
 

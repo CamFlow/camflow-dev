@@ -959,6 +959,7 @@ static struct security_hook_list provenance_hooks[] = {
 struct kmem_cache *camflow_cache=NULL;
 #endif
 
+uint32_t prov_machine_id=1; /* TODO get a proper id somehow */
 uint32_t prov_boot_id=0;
 void __init provenance_add_hooks(void){
 	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
