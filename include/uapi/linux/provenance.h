@@ -199,19 +199,19 @@ struct link_struct{
   struct basic_node_info inode;
 };
 
-struct file_name_struct{
-  struct basic_msg_info msg_info;
-  size_t length;
-  char name[PATH_MAX];
-  struct basic_node_info inode;
-};
-
 struct unlink_struct{
   struct basic_msg_info msg_info;
   size_t length;
   char name[PATH_MAX];
   struct basic_node_info dir;
   struct basic_node_info task;
+  struct basic_node_info inode;
+};
+
+struct file_name_struct{
+  struct basic_msg_info msg_info;
+  size_t length;
+  char name[PATH_MAX];
   struct basic_node_info inode;
 };
 
