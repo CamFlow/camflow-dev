@@ -16,6 +16,7 @@ The source code for the audit and ifc userspace libraries are available [here](h
 ```
 - Machine ID provided by kernel module.
 - Modified provenance data structure.
+- Added dependency to userspace configuration service (loaded at boot time).
 ```
 
 ### v0.1.1
