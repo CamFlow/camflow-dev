@@ -14,6 +14,7 @@ The source code for the audit and ifc userspace libraries are available [here](h
 ### v0.1.2
 
 ```
+- Machine ID provided by kernel module.
 - Modified provenance data structure.
 ```
 
@@ -52,7 +53,7 @@ Do not hesitate to fork the repository or to report bugs.
  * it may ask for sudo password
 
 ## Plan
-* 0.1.2 look at some form of automated testing.
+* 0.1.3 look at some form of automated testing.
 * 0.2.0 IFC tags and provenance data persistence across reboot.
 
 ## TODO
