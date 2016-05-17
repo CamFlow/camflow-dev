@@ -1,7 +1,7 @@
 # CamFlow
 
 If you simply wish to install CamFlow please visit [here](https://github.com/CamFlow/camflow-install).
-The source code for the audit and ifc userspace libraries are available [here](https://github.com/CamFlow/camflow-audit-lib) and [there](https://github.com/CamFlow/camflow-ifc-lib) respectively.
+The source code for the provenance and ifc userspace libraries are available [here](https://github.com/CamFlow/camflow-provenance-lib) and [there](https://github.com/CamFlow/camflow-ifc-lib) respectively.
 
 ## Version
 
