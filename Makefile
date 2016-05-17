@@ -13,8 +13,8 @@ prepare_kernel:
 
 prepare_us:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflow-audit-lib.git
-	cd ./build/camflow-audit-lib && $(MAKE) prepare
+	cd ./build && git clone https://github.com/CamFlow/camflow-provenance-lib.git
+	cd ./build/camflow-provenance-lib && $(MAKE) prepare
 	cd ./build && git clone https://github.com/CamFlow/camflow-ifc-lib.git
 	cd ./build/camflow-ifc-lib && $(MAKE) prepare
 	cd ./build && git clone https://github.com/tfjmp/camflow-config.git
@@ -41,7 +41,7 @@ compile_kernel:
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
-	cd ./build/camflow-audit-lib && $(MAKE) all
+	cd ./build/camflow-provenance-lib && $(MAKE) all
 	cd ./build/camflow-ifc-lib && $(MAKE) all
 	cd ./build/camflow-config && $(MAKE) all
 
@@ -55,7 +55,7 @@ install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
 
 install_us:
-	cd ./build/camflow-audit-lib && $(MAKE) install
+	cd ./build/camflow-provenance-lib && $(MAKE) install
 	cd ./build/camflow-ifc-lib && $(MAKE) install
 	cd ./build/camflow-config && $(MAKE) install
 
@@ -66,7 +66,7 @@ clean_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 
 clean_us:
-	cd ./build/camflow-audit-lib && $(MAKE) clean
+	cd ./build/camflow-provenance-lib && $(MAKE) clean
 	cd ./build/camflow-ifc-lib && $(MAKE) clean
 	cd ./build/camflow-config && $(MAKE) clean
 
