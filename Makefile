@@ -55,9 +55,9 @@ install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
 
 install_us:
+	cd ./build/camflow-config && $(MAKE) install
 	cd ./build/camflow-provenance-lib && $(MAKE) install
 	cd ./build/camflow-ifc-lib && $(MAKE) install
-	cd ./build/camflow-config && $(MAKE) install
 
 clean: clean_kernel clean_us
 

@@ -266,7 +266,9 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	{
 		return -ENOMEM;
 	}
-	memcpy(tmp, cprov, sizeof(prov_msg_t));
+	if(copy_to_user(tmp, cprov, sizeof(prov_msg_t))){
+		return -EAGAIN;
+	}
 	record_node(cprov); // record self
 	return count; // write only
 }
@@ -274,6 +276,51 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 static const struct file_operations prov_self_ops = {
 	.write		= prov_write_self,
   .read     = prov_read_self,
+	.llseek		= generic_file_llseek,
+};
+
+static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	uint32_t* tmp = (uint32_t*)buf;
+
+	if(__kuid_val(current_euid())!=0) // only allowed for root
+    return -EPERM;
+
+	if(count < sizeof(uint32_t))
+	{
+		return -ENOMEM;
+	}
+
+	if(copy_from_user(&prov_machine_id, tmp, sizeof(uint32_t)))
+	{
+		return -EAGAIN;
+	}
+	printk(KERN_INFO "Provenance: machine_id set to %u.", prov_machine_id);
+
+	return count; // read only
+}
+
+static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	uint32_t* tmp = (uint32_t*)buf;
+
+	if(count < sizeof(uint32_t))
+	{
+		return -ENOMEM;
+	}
+
+	if(copy_to_user(tmp, &prov_machine_id, sizeof(uint32_t)))
+	{
+		return -EAGAIN;
+	}
+	return count; // write only
+}
+
+static const struct file_operations prov_machine_id_ops = {
+	.write		= prov_write_machine_id,
+  .read     = prov_read_machine_id,
 	.llseek		= generic_file_llseek,
 };
 
@@ -289,6 +336,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
 	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
 	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
+	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
    return 0;
 }
 

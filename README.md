@@ -15,6 +15,7 @@ The source code for the provenance and ifc userspace libraries are available [he
 
 ```
 - Machine ID provided by kernel module.
+- Added pseudo file to set the machine ID.
 - Modified provenance data structure.
 - Added dependency to userspace configuration service (loaded at boot time).
 ```
