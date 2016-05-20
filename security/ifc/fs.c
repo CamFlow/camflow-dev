@@ -306,16 +306,6 @@ struct bridge_struct {
 
 static LIST_HEAD(bridge_list);
 
-static int add_name_to_list(const char* name){
-  struct bridge_struct *entry;
-  entry = (struct bridge_struct*)kzalloc(sizeof(struct bridge_struct), GFP_KERNEL);
-  if(copy_from_user(entry->name, name, PATH_MAX)!=0){
-    return -ENOMEM;
-  }
-  list_add(&entry->list, &bridge_list);
-  return 0;
-}
-
 static bool list_contains(const char* name){
   struct list_head *ptr;
   struct bridge_struct *entry;
@@ -330,6 +320,19 @@ static bool list_contains(const char* name){
         }
     }
     return false;
+}
+
+static int add_name_to_list(const char* name){
+  struct bridge_struct *entry;
+  if(list_contains(name)) // already in the list
+    return 0;
+
+  entry = (struct bridge_struct*)kzalloc(sizeof(struct bridge_struct), GFP_KERNEL);
+  if(copy_from_user(entry->name, name, PATH_MAX)!=0){
+    return -ENOMEM;
+  }
+  list_add(&entry->list, &bridge_list);
+  return 0;
 }
 
 static ssize_t ifc_write_bridge(struct file *file, const char __user *buf,

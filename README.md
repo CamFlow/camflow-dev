@@ -18,6 +18,7 @@ The source code for the provenance and ifc userspace libraries are available [he
 - Added pseudo file to set the machine ID.
 - Modified provenance data structure.
 - Added dependency to userspace configuration service (loaded at boot time).
+- Prevent duplications in the list of allowed bridges.
 ```
 
 ### v0.1.1
