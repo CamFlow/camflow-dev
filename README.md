@@ -19,6 +19,7 @@ The source code for the provenance and ifc userspace libraries are available [he
 - Modified provenance data structure.
 - Added dependency to userspace configuration service (loaded at boot time).
 - Prevent duplications in the list of allowed bridges.
+- Build and install configuration service.
 ```
 
 ### v0.1.1
