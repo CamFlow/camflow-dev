@@ -46,23 +46,24 @@ We are working hard to improve this work, but it is an academic prototype.
 Do not hesitate to fork the repository or to report bugs.
 
 ## Building
-* make prepare
-* make config
- * select relevant modules in security
-* make compile
- * be patient
- * it may ask for sudo password mid-way
-* make install
- * continue to be patient
- * it may ask for sudo password
+
+```
+make prepare
+make config # select relevant modules in security
+make compile # patience, sudo password will be ask during compilation
+make install # patience, sudo password will be ask during instalation
+ ```
 
 ## Plan
-* 0.1.3 look at some form of automated testing.
-* 0.2.0 IFC tags and provenance data persistence across reboot.
 
-## TODO
+### 0.1.3
+
+* look at some form of automated testing.
+* support for Raspberry Pi / ARM
+
+### 0.2.0
+
+* IFC tags and provenance data persistence across reboot.
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
-* Look at NetLabel, XFRM and IPSEC for labelled packet (may not be able to get what we want).
-* Investigate audit data captured.
-* Look at Coccinelle for patching /security/security.c and .h files.
-* Finish/build command line tool(s) to manage the module.
+* Look at [NetLabel](https://www.kernel.org/doc/Documentation/netlabel/introduction.txt), [XFRM](http://man7.org/linux/man-pages/man8/ip-xfrm.8.html) and [IPSEC](http://kernelspec.blogspot.co.uk/2014/10/ipsec-implementation-in-linux-kernel.html) for labelled packet (may or may not do what we want).
+* Look at [Coccinelle](http://coccinelle.lip6.fr/) for patching /security/security.c and .h files.
