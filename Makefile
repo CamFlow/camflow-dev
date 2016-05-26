@@ -17,7 +17,7 @@ prepare_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) prepare
 	cd ./build && git clone https://github.com/CamFlow/camflow-ifc-lib.git
 	cd ./build/camflow-ifc-lib && $(MAKE) prepare
-	cd ./build && git clone https://github.com/tfjmp/camflow-config.git
+	cd ./build && git clone https://github.com/CamFlow/camflow-config.git
 	cd ./build/camflow-config && $(MAKE) prepare
 
 config:
