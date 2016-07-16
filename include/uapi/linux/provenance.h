@@ -34,8 +34,6 @@
 #define MSG_EDGE          1
 #define MSG_TASK          2
 #define MSG_INODE         3
-#define MSG_LINK          4
-#define MSG_UNLINK        5
 #define MSG_DISC_NODE     6
 #define MSG_MSG           7
 #define MSG_SHM           8
@@ -59,6 +57,8 @@
 #define ED_OPEN           11
 #define ED_PARENT         12
 #define ED_VERSION        13
+#define ED_LINK           14
+#define ED_NAMED          15
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -80,19 +80,24 @@
 
 #define STR_MAX_SIZE      128
 
-struct basic_msg_info{
-  uint8_t type;
-  uint32_t machine_id;
-  uint32_t boot_id;
-  uint64_t id;
-};
-
-struct basic_node_info{
+struct node_identifier{
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
   uint32_t version;
 };
+
+struct edge_identifier{
+  uint64_t id;
+  uint32_t boot_id;
+  uint32_t machine_id;
+};
+
+typedef union prov_identifier{
+  struct node_identifier node_id;
+  struct edge_identifier edge_id;
+  uint8_t buffer[20];
+} prov_identifier_t;
 
 struct node_kern{
   uint8_t recorded;
@@ -102,40 +107,42 @@ struct node_kern{
 };
 
 struct msg_struct{
-  struct basic_msg_info msg_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
 };
 
 struct edge_struct{
-  struct basic_msg_info msg_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   uint8_t type;
   uint8_t allowed;
-  struct basic_node_info snd;
-  struct basic_node_info rcv;
+  prov_identifier_t snd;
+  prov_identifier_t rcv;
 };
 
 struct node_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
 };
 
 struct disc_node_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
 };
 
 struct task_prov_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
   uint32_t uid;
   uint32_t gid;
@@ -144,28 +151,29 @@ struct inode_prov_struct{
 };
 
 struct sb_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
+  struct node_kern node_kern;
   uint8_t uuid[16];
 };
 
 struct msg_msg_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
   long type;
 };
 
 struct shm_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
   uint16_t mode;
 };
 
 struct sock_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct node_kern node_kern;
   uint16_t type;
   uint16_t family;
@@ -174,11 +182,11 @@ struct sock_struct{
 
 typedef union prov_msg{
   struct msg_struct           msg_info;
+  struct edge_struct          edge_info;
   struct node_struct          node_info;
   struct disc_node_struct     disc_node_info;
   struct task_prov_struct     task_info;
   struct inode_prov_struct    inode_info;
-  struct edge_struct          edge_info;
   struct msg_msg_struct       msg_msg_info;
   struct shm_struct           shm_info;
   struct sock_struct          sock_info;
@@ -186,54 +194,36 @@ typedef union prov_msg{
 } prov_msg_t;
 
 struct str_struct{
-  struct basic_msg_info msg_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   size_t length;
   char str[PATH_MAX];
 };
 
-struct link_struct{
-  struct basic_msg_info msg_info;
-  size_t length;
-  char name[PATH_MAX];
-  struct basic_node_info dir;
-  struct basic_node_info task;
-  struct basic_node_info inode;
-};
-
-struct unlink_struct{
-  struct basic_msg_info msg_info;
-  size_t length;
-  char name[PATH_MAX];
-  struct basic_node_info dir;
-  struct basic_node_info task;
-  struct basic_node_info inode;
-};
-
 struct file_name_struct{
-  struct basic_msg_info msg_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   size_t length;
   char name[PATH_MAX];
-  struct basic_node_info inode;
 };
 
 struct address_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info sock_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct sockaddr addr;
   size_t length;
 };
 
 struct ifc_context_struct{
-  struct basic_msg_info msg_info;
-  struct basic_node_info node_info;
+  prov_identifier_t identifier;
+  uint8_t msg_type;
   struct ifc_context context;
 };
 
 typedef union long_msg{
   struct msg_struct           msg_info;
+  struct node_struct          node_info;
   struct str_struct           str_info;
-  struct link_struct          link_info;
-  struct unlink_struct        unlink_info;
   struct file_name_struct     file_name_info;
   struct address_struct       address_info;
   struct ifc_context_struct   ifc_info;

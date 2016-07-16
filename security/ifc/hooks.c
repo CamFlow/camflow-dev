@@ -491,6 +491,12 @@ static int ifc_bprm_set_creds(struct linux_binprm *bprm){
   struct ifc_struct* new_ifc = bprm->cred->ifc;
   struct ifc_struct* file_ifc = inode_get_ifc(inode);
 
+  if(!old_ifc){
+    if(ifc_is_labelled(&old_ifc->context)){
+      printk(KERN_INFO "bprm_set_creds.\n");
+    }
+  }
+
   if(!old_ifc && !file_ifc && !new_ifc){
     if(ifc_is_labelled(&file_ifc->context)){
       rv |= ifc_merge_context(&new_ifc->context, &file_ifc->context);

@@ -242,7 +242,8 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
-  prov_msg_t* cprov = current_provenance();
+	/*
+	prov_msg_t* cprov = current_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
   long_prov_msg_t* link_prov;
@@ -251,7 +252,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
     provenance_inode_alloc_security(dir);
   }
 
-  if(!inode_get_provenance(old_dentry->d_inode)){
+  if(!inode_get_provenance(old_dentry->d_inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(old_dentry->d_inode);
   }
 
@@ -272,47 +273,8 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
     long_prov_write(link_prov);
     free_long_provenance(link_prov);
   }
-  return 0;
-}
-
-/*
-* Check the permission to remove a hard link to a file.
-* @dir contains the inode structure of parent directory of the file.
-* @dentry contains the dentry structure for file to be unlinked.
-* Return 0 if permission is granted.
-*/
-static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
-{
-  prov_msg_t* cprov = current_provenance();
-  prov_msg_t* dprov;
-  prov_msg_t* iprov;
-  long_prov_msg_t* link_prov;
-
-  if(!inode_get_provenance(dir)){ // alloc provenance if none there
-    provenance_inode_alloc_security(dir);
-  }
-
-  if(!inode_get_provenance(dentry->d_inode)){
-    provenance_inode_alloc_security(dentry->d_inode);
-  }
-
-  dprov = inode_get_provenance(dir); // directory
-  iprov = inode_get_provenance(dentry->d_inode); // inode pointed by dentry
-
-  // writing to the directory
-  record_edge(ED_DATA, cprov, dprov, FLOW_ALLOWED);
-  record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
-
-  if(prov_enabled && (provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov))){
-    link_prov = alloc_long_provenance(MSG_UNLINK, GFP_KERNEL);
-    link_prov->unlink_info.length = dentry->d_name.len;
-    memcpy(link_prov->unlink_info.name, dentry->d_name.name, dentry->d_name.len);
-		copy_node_info(&link_prov->unlink_info.dir, &dprov->inode_info.node_info);
-		copy_node_info(&link_prov->unlink_info.task, &cprov->task_info.node_info);
-		copy_node_info(&link_prov->unlink_info.inode, &iprov->task_info.node_info);
-    long_prov_write(link_prov);
-    free_long_provenance(link_prov);
-  }
+	TODO link new file name node as alternative
+	*/
   return 0;
 }
 
@@ -330,8 +292,8 @@ static inline void provenance_record_file_name(struct file *file){
 		strlcpy(fname_prov->file_name_info.name, ptr, PATH_MAX);
 		kfree(buffer);
 		fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-		copy_node_info(&fname_prov->file_name_info.inode, &iprov->task_info.node_info);
 		long_prov_write(fname_prov);
+		long_record_edge(ED_NAMED, iprov, fname_prov, FLOW_ALLOWED);
 		free_long_provenance(fname_prov);
 		iprov->node_info.node_kern.name_recorded=NAME_RECORDED;
 	}
@@ -677,10 +639,10 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 
 	if(!provenance_is_name_recorded(skprov) && provenance_is_tracked(skprov)){
 	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
-		copy_node_info(&addr_info->address_info.sock_info, &skprov->sock_info.node_info);
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
 	  long_prov_write(addr_info);
+		long_record_edge(ED_NAMED, skprov, addr_info, FLOW_ALLOWED);
 	  free_long_provenance(addr_info);
 		skprov->sock_info.node_kern.name_recorded=NAME_RECORDED;
 	}
@@ -929,7 +891,6 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(mmap_file, provenance_mmap_file),
   LSM_HOOK_INIT(file_ioctl, provenance_file_ioctl),
   LSM_HOOK_INIT(inode_link, provenance_inode_link),
-	LSM_HOOK_INIT(inode_unlink, provenance_inode_unlink),
 	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
 	LSM_HOOK_INIT(msg_msg_free_security, provenance_msg_msg_free_security),
   LSM_HOOK_INIT(msg_queue_msgsnd, provenance_msg_queue_msgsnd),

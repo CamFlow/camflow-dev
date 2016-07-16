@@ -204,7 +204,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 	set_node_id(node, ASSIGN_NODE_ID);
-	node->disc_node_info.msg_info.type = MSG_DISC_NODE;
+	node->disc_node_info.msg_type = MSG_DISC_NODE;
 	prov_write(node);
 	return count;
 }
@@ -233,7 +233,7 @@ static ssize_t prov_write_edge(struct file *file, const char __user *buf,
 	if(copy_from_user(&edge, buf, sizeof(struct edge_struct))){
 		return -ENOMEM;
 	}
-	edge.msg_info.msg_info.type=MSG_EDGE;
+	edge.msg_info.msg_type=MSG_EDGE;
 	prov_write(&edge);
 	return count;
 }

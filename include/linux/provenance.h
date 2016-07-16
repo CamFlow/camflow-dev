@@ -28,8 +28,6 @@
 
 #define ASSIGN_NODE_ID 0
 
-extern atomic64_t prov_evt_count;
-
 static inline struct prov_msg_t* prov_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
   if(!dest)
@@ -37,8 +35,10 @@ static inline struct prov_msg_t* prov_from_pid(pid_t pid){
   return __task_cred(dest)->provenance;
 }
 
-static inline uint64_t prov_next_evtid( void ){
-  return (uint64_t)atomic64_inc_return(&prov_evt_count);
+extern atomic64_t prov_edge_id;
+
+static inline uint64_t prov_next_edgeid( void ){
+  return (uint64_t)atomic64_inc_return(&prov_edge_id);
 }
 
 extern atomic64_t prov_node_id;
@@ -62,21 +62,24 @@ static inline prov_msg_t* alloc_provenance(uint8_t ntype, gfp_t gfp)
     return NULL;
   }
 
-  prov->msg_info.msg_info.type=ntype;
+  prov->msg_info.msg_type=ntype;
   return prov;
 }
 
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
+#define node_identifier(node) node->node_info.identifier.node_id
+#define edge_identifier(edge) edge->edge_info.identifier.edge_id
+
 static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   if(nid==ASSIGN_NODE_ID){
-    node->node_info.node_info.id=prov_next_nodeid();
+    node_identifier(node).id=prov_next_nodeid();
   }else{
-    node->node_info.node_info.id=nid;
+    node_identifier(node).id=nid;
   }
-  node->node_info.node_info.boot_id=prov_boot_id;
-  node->node_info.node_info.machine_id=prov_machine_id;
+  node_identifier(node).boot_id=prov_boot_id;
+  node_identifier(node).machine_id=prov_machine_id;
 }
 
 static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
@@ -85,7 +88,7 @@ static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
   if(!prov){
     return NULL;
   }
-  prov->msg_info.msg_info.type=ntype;
+  prov->msg_info.msg_type=ntype;
   return prov;
 }
 
@@ -104,9 +107,6 @@ static inline void prov_write(prov_msg_t* msg)
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;
   }
-  msg->msg_info.msg_info.id=prov_next_evtid(); /* assign an event id */
-  msg->msg_info.msg_info.boot_id=prov_boot_id;
-  msg->msg_info.msg_info.machine_id=prov_machine_id;
   relay_write(prov_chan, msg, sizeof(prov_msg_t));
 }
 
@@ -116,9 +116,10 @@ static inline void long_prov_write(long_prov_msg_t* msg){
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;
   }
-  msg->msg_info.msg_info.id=prov_next_evtid(); /* assign an event id */
-  msg->msg_info.msg_info.boot_id=prov_boot_id;
-  msg->msg_info.msg_info.machine_id=prov_machine_id;
+  /* create a new node to containe the info */
+  node_identifier(msg).id=prov_next_nodeid();
+  node_identifier(msg).boot_id=prov_boot_id;
+  node_identifier(msg).machine_id=prov_machine_id;
   relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
 }
 
@@ -132,7 +133,7 @@ static inline int prov_print(const char *fmt, ...)
   msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
 
   /* set message type */
-  msg->str_info.msg_info.type=MSG_STR;
+  msg->str_info.msg_type=MSG_STR;
   msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
   long_prov_write(msg);
   va_end(args);
@@ -163,8 +164,8 @@ static inline bool provenance_is_name_recorded(prov_msg_t* node){
   return false;
 }
 
-static inline void copy_node_info(struct basic_node_info* dest, struct basic_node_info* src){
-  memcpy(dest, src, sizeof(struct basic_node_info));
+static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){
+  memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
 static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
@@ -186,18 +187,49 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
   if(!(to->node_info.node_kern.recorded == NODE_RECORDED) )
     record_node(to);
 
-  edge.edge_info.msg_info.type=MSG_EDGE;
-  copy_node_info(&edge.edge_info.snd, &from->node_info.node_info);
-  copy_node_info(&edge.edge_info.rcv, &to->node_info.node_info);
-  edge.edge_info.allowed=allowed;
+
+  edge_identifier((&edge)).id = prov_next_edgeid();
+  edge_identifier((&edge)).boot_id = prov_boot_id;
+  edge_identifier((&edge)).machine_id = prov_machine_id;
+  edge.edge_info.msg_type=MSG_EDGE;
   edge.edge_info.type=type;
+  edge.edge_info.allowed=allowed;
+  copy_node_info(&edge.edge_info.snd, &from->node_info.identifier);
+  copy_node_info(&edge.edge_info.rcv, &to->node_info.identifier);
+  prov_write(&edge);
+}
+
+static inline void long_record_edge(uint8_t type, prov_msg_t* from, long_prov_msg_t* to, uint8_t allowed){
+  prov_msg_t edge;
+
+  if(unlikely(!prov_enabled)) // capture is not enabled, ignore
+    return;
+  // don't record if to or from are opaque
+  if(unlikely(from->node_info.node_kern.opaque == NODE_OPAQUE || to->node_info.node_kern.opaque == NODE_OPAQUE))
+    return;
+
+  // ignore if not tracked
+  if(!provenance_is_tracked(from))
+    return;
+
+  if(!(from->node_info.node_kern.recorded == NODE_RECORDED) )
+    record_node(from);
+
+  edge_identifier((&edge)).id = prov_next_edgeid();
+  edge_identifier((&edge)).boot_id = prov_boot_id;
+  edge_identifier((&edge)).machine_id = prov_machine_id;
+  edge.edge_info.msg_type=MSG_EDGE;
+  edge.edge_info.type=type;
+  edge.edge_info.allowed=allowed;
+  copy_node_info(&edge.edge_info.snd, &from->node_info.identifier);
+  copy_node_info(&edge.edge_info.rcv, &to->node_info.identifier);
   prov_write(&edge);
 }
 
 static inline void prov_update_version(prov_msg_t* prov){
   prov_msg_t old_prov;
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
-  prov->node_info.node_info.version++;
+  node_identifier(prov).version++;
   prov->node_info.node_kern.recorded = NODE_UNRECORDED;
   record_edge(ED_VERSION, &old_prov, prov, FLOW_ALLOWED);
 }
@@ -207,9 +239,9 @@ static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context
 	long_prov_msg_t* ifc_prov = NULL;
 
   ifc_prov = alloc_long_provenance(MSG_IFC, GFP_KERNEL);
-  copy_node_info(&ifc_prov->ifc_info.node_info, &prov->node_info.node_info);
   memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
   long_prov_write(ifc_prov);
+  // TODO connect via edge to entity/activity
   free_long_provenance(ifc_prov);
 }
 #endif

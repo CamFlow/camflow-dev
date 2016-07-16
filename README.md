@@ -16,6 +16,7 @@ The source code for the provenance and IFC userspace libraries are available [he
 
 ```
 - IFC and Provenance LSM are now part of the default configuration.
+- Modified provenance internal data structure and working to align with W3C Prov model.
 ```
 
 ### v0.1.2
