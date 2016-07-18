@@ -62,15 +62,12 @@ static inline prov_msg_t* alloc_provenance(uint8_t ntype, gfp_t gfp)
     return NULL;
   }
 
-  prov->msg_info.msg_type=ntype;
+  prov_type(prov)=ntype;
   return prov;
 }
 
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
-
-#define node_identifier(node) node->node_info.identifier.node_id
-#define edge_identifier(edge) edge->edge_info.identifier.edge_id
 
 static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   if(nid==ASSIGN_NODE_ID){
@@ -88,7 +85,8 @@ static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
   if(!prov){
     return NULL;
   }
-  prov->msg_info.msg_type=ntype;
+
+  prov_type(prov)=ntype;
   return prov;
 }
 
@@ -133,7 +131,7 @@ static inline int prov_print(const char *fmt, ...)
   msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
 
   /* set message type */
-  msg->str_info.msg_type=MSG_STR;
+  prov_type(msg)=MSG_STR;
   msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
   long_prov_write(msg);
   va_end(args);
@@ -188,10 +186,10 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
     record_node(to);
 
 
+  prov_type((&edge))=MSG_EDGE;
   edge_identifier((&edge)).id = prov_next_edgeid();
   edge_identifier((&edge)).boot_id = prov_boot_id;
   edge_identifier((&edge)).machine_id = prov_machine_id;
-  edge.edge_info.msg_type=MSG_EDGE;
   edge.edge_info.type=type;
   edge.edge_info.allowed=allowed;
   copy_node_info(&edge.edge_info.snd, &from->node_info.identifier);
@@ -215,10 +213,10 @@ static inline void long_record_edge(uint8_t type, prov_msg_t* from, long_prov_ms
   if(!(from->node_info.node_kern.recorded == NODE_RECORDED) )
     record_node(from);
 
+  prov_type((&edge))=MSG_EDGE;
   edge_identifier((&edge)).id = prov_next_edgeid();
   edge_identifier((&edge)).boot_id = prov_boot_id;
   edge_identifier((&edge)).machine_id = prov_machine_id;
-  edge.edge_info.msg_type=MSG_EDGE;
   edge.edge_info.type=type;
   edge.edge_info.allowed=allowed;
   copy_node_info(&edge.edge_info.snd, &from->node_info.identifier);

@@ -80,7 +80,12 @@
 
 #define STR_MAX_SIZE      128
 
+#define prov_type(prov) prov->node_info.identifier.node_id.type
+#define node_identifier(node) node->node_info.identifier.node_id
+#define edge_identifier(edge) edge->edge_info.identifier.edge_id
+
 struct node_identifier{
+  uint8_t  type;
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
@@ -88,15 +93,17 @@ struct node_identifier{
 };
 
 struct edge_identifier{
+  uint8_t  type;
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
 };
 
+#define PROV_IDENTIFIER_BUFFER_LENGTH 21
 typedef union prov_identifier{
   struct node_identifier node_id;
   struct edge_identifier edge_id;
-  uint8_t buffer[20];
+  uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
 struct node_kern{
@@ -108,12 +115,10 @@ struct node_kern{
 
 struct msg_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
 };
 
 struct edge_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   uint8_t type;
   uint8_t allowed;
   prov_identifier_t snd;
@@ -122,19 +127,16 @@ struct edge_struct{
 
 struct node_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
 };
 
 struct disc_node_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
 };
 
 struct task_prov_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
   uint32_t uid;
   uint32_t gid;
@@ -142,7 +144,6 @@ struct task_prov_struct{
 
 struct inode_prov_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
   uint32_t uid;
   uint32_t gid;
@@ -152,28 +153,24 @@ struct inode_prov_struct{
 
 struct sb_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
   uint8_t uuid[16];
 };
 
 struct msg_msg_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
   long type;
 };
 
 struct shm_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
   uint16_t mode;
 };
 
 struct sock_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct node_kern node_kern;
   uint16_t type;
   uint16_t family;
@@ -195,28 +192,24 @@ typedef union prov_msg{
 
 struct str_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   size_t length;
   char str[PATH_MAX];
 };
 
 struct file_name_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   size_t length;
   char name[PATH_MAX];
 };
 
 struct address_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct sockaddr addr;
   size_t length;
 };
 
 struct ifc_context_struct{
   prov_identifier_t identifier;
-  uint8_t msg_type;
   struct ifc_context context;
 };
 
