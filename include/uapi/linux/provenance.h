@@ -25,6 +25,7 @@
 #define PROV_ENABLE_FILE           "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE              "/sys/kernel/security/provenance/all"
 #define PROV_OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
+#define PROV_TRACKED_FILE          "/sys/kernel/security/provenance/tracked"
 #define PROV_NODE_FILE             "/sys/kernel/security/provenance/node"
 #define PROV_EDGE_FILE             "/sys/kernel/security/provenance/edge"
 #define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
