@@ -340,9 +340,6 @@ static ssize_t prov_write_tracked(struct file *file, const char __user *buf,
   if(*ppos > 0)
     return -EINVAL;
 
-  if(__kuid_val(current_euid())!=0)
-    return -EPERM;
-
   page = (char *)get_zeroed_page(GFP_KERNEL);
   if (!page)
     return -ENOMEM;
