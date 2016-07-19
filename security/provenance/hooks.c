@@ -102,7 +102,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	}
 #endif
 
-  record_edge(ED_CREATE, old_prov, prov, FLOW_ALLOWED);
+  record_edge(ED_FORK, old_prov, prov, FLOW_ALLOWED);
   new->provenance = prov;
   return 0;
 }
@@ -222,10 +222,13 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
-    record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
+    record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
-  if((mask & (MAY_READ|MAY_EXEC)) != 0){
-    record_edge(ED_DATA, iprov, cprov, FLOW_ALLOWED);
+  if((mask & (MAY_READ)) != 0){
+    record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+  }
+	if((mask & (MAY_EXEC)) != 0){
+    record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
 }
@@ -342,7 +345,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	provenance_record_file_name(file);
 
 	iprov = inode_get_provenance(inode);
-	record_edge(ED_OPEN, cprov, iprov, FLOW_ALLOWED);
+	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
 }
 
@@ -403,8 +406,11 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
 
   iprov = inode_get_provenance(inode);
 
-  record_edge(ED_DATA, iprov, cprov, FLOW_ALLOWED); // both way exchange
-  record_edge(ED_DATA, cprov, iprov, FLOW_ALLOWED);
+	// both way exchange
+  record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
+	prov_update_version(iprov);
+  record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+	prov_update_version(cprov);
 
   return 0;
 }
@@ -469,7 +475,7 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov = msg->provenance;
-  record_edge(ED_DATA, cprov, mprov, FLOW_ALLOWED);
+  record_edge(ED_WRITE, cprov, mprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -492,7 +498,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
   prov_msg_t* cprov = target->cred->provenance;
   prov_msg_t* mprov = msg->provenance;
 
-  record_edge(ED_DATA, mprov, cprov, FLOW_ALLOWED);
+  record_edge(ED_READ, mprov, cprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -795,7 +801,7 @@ static int provenance_unix_may_send(struct socket *sock,
   prov_msg_t* skprov = sock->sk->sk_provenance;
   prov_msg_t* okprov = other->sk->sk_provenance;
 
-  record_edge(ED_DATA, skprov, okprov, FLOW_ALLOWED);
+  record_edge(ED_UNKNOWN, skprov, okprov, FLOW_ALLOWED);
   return 0;
 }
 
