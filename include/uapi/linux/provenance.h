@@ -99,7 +99,8 @@ struct edge_identifier{
   uint32_t machine_id;
 };
 
-#define PROV_IDENTIFIER_BUFFER_LENGTH 21
+#define PROV_IDENTIFIER_BUFFER_LENGTH 32 // extra space
+
 typedef union prov_identifier{
   struct node_identifier node_id;
   struct edge_identifier edge_id;
