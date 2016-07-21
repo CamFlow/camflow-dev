@@ -26,6 +26,9 @@
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
 
+#define current_pid() (current->pid)
+#define current_comm() (current->comm)
+
 /*
  * initialise the security for the init task
  */
@@ -97,7 +100,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 #ifdef CONFIG_SECURITY_IFC
 	new_ifc = new->ifc;
 	if(ifc_is_labelled(&new_ifc->context)){
-		prov->node_info.node_kern.tracked=NODE_TRACKED;
+		node_kern(prov).tracked=NODE_TRACKED;
 		prov_record_ifc(prov, &new_ifc->context);
 	}
 #endif
@@ -171,7 +174,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 #ifdef CONFIG_SECURITY_IFC
 	ifc = inode_get_ifc(inode);
 	if(ifc_is_labelled(&ifc->context)){
-		iprov->node_info.node_kern.tracked=NODE_TRACKED;
+		node_kern(iprov).tracked=NODE_TRACKED;
 		prov_record_ifc(iprov, &ifc->context);
 	}
 #endif
@@ -194,10 +197,19 @@ static void provenance_inode_free_security(struct inode *inode)
 	free_camflow(inode);
 }
 
+static inline void record_node_name(prov_msg_t* node, char* name){
+	long_prov_msg_t *fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
+	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
+	long_prov_write(fname_prov);
+	long_record_edge(ED_NAMED, fname_prov, node, FLOW_ALLOWED);
+	free_long_provenance(fname_prov);
+	node_kern(node).name_recorded=NAME_RECORDED;
+}
+
 static inline void record_inode_name(struct inode *inode){
 	prov_msg_t* iprov = inode_get_provenance(inode);
 	struct dentry* dentry = d_find_alias(inode);
-	long_prov_msg_t *fname_prov;
 	char *buffer;
 	char *ptr;
 
@@ -206,16 +218,25 @@ static inline void record_inode_name(struct inode *inode){
 
 	if( !provenance_is_name_recorded(iprov) ){
 		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
-		fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
 		ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-		strlcpy(fname_prov->file_name_info.name, ptr, PATH_MAX);
+		record_node_name(iprov, ptr);
 		kfree(buffer);
-		fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-		long_prov_write(fname_prov);
-		long_record_edge(ED_NAMED, fname_prov, iprov, FLOW_ALLOWED);
-		free_long_provenance(fname_prov);
-		node_kern(iprov).name_recorded=NAME_RECORDED;
 	}
+}
+
+static inline void record_task_name(struct task_struct *task){
+	const struct cred *cred = get_task_cred(task);
+	prov_msg_t* tprov = cred->provenance;
+	char *buffer;
+
+	if( !provenance_is_name_recorded(tprov) ){
+		buffer = (char*)kzalloc(TASK_COMM_LEN+1, GFP_KERNEL);
+		buffer = get_task_comm(buffer, task);
+		record_node_name(tprov, buffer);
+		kfree(buffer);
+	}
+
+	put_cred(cred);
 }
 
 /*
@@ -245,6 +266,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
 		record_inode_name(inode);
+		record_task_name(current);
 	}
 
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
@@ -453,7 +475,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 #ifdef CONFIG_SECURITY_IFC
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
-			mprov->msg_msg_info.node_kern.tracked=NODE_TRACKED;
+			node_kern(mprov).tracked=NODE_TRACKED;
 			prov_record_ifc(mprov, &ifc->context);
 		}
 	}
@@ -537,7 +559,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 #ifdef CONFIG_SECURITY_IFC
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
-			sprov->shm_info.node_kern.tracked=NODE_TRACKED;
+			node_kern(sprov).tracked=NODE_TRACKED;
 			prov_record_ifc(sprov, &ifc->context);
 		}
 	}
@@ -661,7 +683,7 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 	  long_prov_write(addr_info);
 		long_record_edge(ED_NAMED, addr_info, skprov, FLOW_ALLOWED);
 	  free_long_provenance(addr_info);
-		skprov->sock_info.node_kern.name_recorded=NAME_RECORDED;
+		node_kern(skprov).name_recorded=NAME_RECORDED;
 	}
 }
 
@@ -679,7 +701,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  if(cprov->task_info.node_kern.opaque==NODE_OPAQUE)
+  if(node_kern(cprov).opaque==NODE_OPAQUE)
     return 0;
 
   if(!skprov)
@@ -704,7 +726,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  if(cprov->task_info.node_kern.opaque==NODE_OPAQUE)
+  if(node_kern(cprov).opaque==NODE_OPAQUE)
     return 0;
 
   if(!skprov)
@@ -852,7 +874,29 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    prov_msg_t* iprov = inode_get_provenance(inode);
    record_edge(ED_CREATE, cprov, nprov, FLOW_ALLOWED);
    record_edge(ED_CREATE, iprov, nprov, FLOW_ALLOWED);
+	 //
  }
+
+/*
+*      Tidy up after the installation of the new security attributes of a
+*      process being transformed by an execve operation.  The new credentials
+*      have, by this point, been set to @current->cred.  @bprm points to the
+*      linux_binprm structure.  This hook is a good place to perform state
+*      changes on the process such as clearing out non-inheritable signal
+*      state.  This is called immediately after commit_creds().
+*/
+static void provenance_bprm_committed_creds(struct linux_binprm *bprm)
+{
+	/*
+	* this will be called after setupnewexec (which among other things set comm).
+	* As far security modules are concerned exec is finished. We can look at comm
+	* to get the process "name".
+	*/
+	prov_msg_t* cprov  = current_provenance();
+	if(!provenance_is_name_recorded(cprov) && provenance_is_tracked(cprov)){
+		record_task_name(current);
+	}
+}
 
 /*
 * Allocate and attach a security structure to the sb->s_security field.
@@ -928,6 +972,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
   LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
   LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
+	LSM_HOOK_INIT(bprm_committed_creds, provenance_bprm_committed_creds),
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
   LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
   LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount),
