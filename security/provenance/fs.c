@@ -197,6 +197,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
+	prov_msg_t* cprov = current_provenance();
 	long_prov_msg_t* node;
 
 	if(count < sizeof(struct disc_node_struct))
@@ -209,13 +210,14 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto exit;
 	}
 	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
+	  copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
 		long_prov_write(node);
 	}else{ // the node is not of disclosed type
 		count = -EINVAL;
 		goto exit;
 	}
 
-	if(copy_to_user(buf, node, sizeof(struct disc_node_struct))){
+	if(copy_to_user((void*)buf, node, sizeof(struct disc_node_struct))){
 		count = -ENOMEM;
 		goto exit;
 	}

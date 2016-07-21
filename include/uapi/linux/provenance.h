@@ -223,6 +223,7 @@ struct disc_node_struct{
   struct node_kern node_kern;
   size_t length;
   char content[PATH_MAX];
+  prov_identifier_t parent;
 };
 
 typedef union long_msg{
