@@ -15,7 +15,9 @@ The source code for the provenance and IFC userspace libraries are available [he
 ### v0.1.3
 
 ```
-- Add pseudo file for a process to request to be tracked.
+- Added a string to the disclosed provenance node data structure.
+- Provided provenance tracking depth setting (how far tracked flag is propagated).
+- Add pseudo file for a process to request to be provenance-tracked.
 - Modified provenance internal data structure and working to align with W3C Prov model.
 - IFC and Provenance LSM are now part of the default configuration.
 ```

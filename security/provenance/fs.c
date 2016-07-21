@@ -197,19 +197,25 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	prov_msg_t node;
+	long_prov_msg_t* node;
 
 	if(count < sizeof(struct disc_node_struct))
 	{
 		return -ENOMEM;
 	}
-	if(copy_from_user(&node, buf, sizeof(struct disc_node_struct))){
-		return -ENOMEM;
+	node = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+	if(copy_from_user(node, buf, sizeof(struct disc_node_struct))){
+		count = -ENOMEM;
+		goto exit;
+	}
+	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
+		long_prov_write(node);
+	}else{ // the node is not of disclosed type
+		count = -EINVAL;
 	}
 
-	set_node_id(&node, ASSIGN_NODE_ID);
-	prov_type((&node)) = MSG_DISC_NODE;
-	prov_write(&node);
+exit:
+	kfree(node);
 	return count;
 }
 

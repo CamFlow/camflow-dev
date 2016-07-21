@@ -35,14 +35,16 @@
 #define MSG_EDGE          1
 #define MSG_TASK          2
 #define MSG_INODE         3
-#define MSG_DISC_NODE     6
-#define MSG_MSG           7
-#define MSG_SHM           8
-#define MSG_SOCK          9
-#define MSG_ADDR          10
-#define MSG_SB            11
-#define MSG_FILE_NAME     12
-#define MSG_IFC           13
+#define MSG_MSG           4
+#define MSG_SHM           5
+#define MSG_SOCK          6
+#define MSG_ADDR          7
+#define MSG_SB            8
+#define MSG_FILE_NAME     9
+#define MSG_IFC           10
+#define MSG_DISC_ENTITY   11
+#define MSG_DISC_ACTIVITY 12
+#define MSG_DISC_AGENT    13
 
 #define ED_READ           0
 #define ED_WRITE          1
@@ -86,9 +88,9 @@
 
 #define STR_MAX_SIZE      128
 
-#define prov_type(prov) prov->node_info.identifier.node_id.type
-#define node_identifier(node) node->node_info.identifier.node_id
-#define edge_identifier(edge) edge->edge_info.identifier.edge_id
+#define prov_type(prov) (prov)->node_info.identifier.node_id.type
+#define node_identifier(node) (node)->node_info.identifier.node_id
+#define edge_identifier(edge) (edge)->edge_info.identifier.edge_id
 
 struct node_identifier{
   uint8_t  type;
@@ -134,11 +136,6 @@ struct edge_struct{
 };
 
 struct node_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
-};
-
-struct disc_node_struct{
   prov_identifier_t identifier;
   struct node_kern node_kern;
 };
@@ -189,7 +186,6 @@ typedef union prov_msg{
   struct msg_struct           msg_info;
   struct edge_struct          edge_info;
   struct node_struct          node_info;
-  struct disc_node_struct     disc_node_info;
   struct task_prov_struct     task_info;
   struct inode_prov_struct    inode_info;
   struct msg_msg_struct       msg_msg_info;
@@ -221,6 +217,13 @@ struct ifc_context_struct{
   struct ifc_context context;
 };
 
+struct disc_node_struct{
+  prov_identifier_t identifier;
+  struct node_kern node_kern;
+  size_t length;
+  char content[PATH_MAX];
+};
+
 typedef union long_msg{
   struct msg_struct           msg_info;
   struct node_struct          node_info;
@@ -228,6 +231,7 @@ typedef union long_msg{
   struct file_name_struct     file_name_info;
   struct address_struct       address_info;
   struct ifc_context_struct   ifc_info;
+  struct disc_node_struct     disc_node_info;
 } long_prov_msg_t;
 
 #endif
