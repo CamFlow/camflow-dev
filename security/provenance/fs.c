@@ -212,6 +212,12 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		long_prov_write(node);
 	}else{ // the node is not of disclosed type
 		count = -EINVAL;
+		goto exit;
+	}
+
+	if(copy_to_user(buf, node, sizeof(struct disc_node_struct))){
+		count = -ENOMEM;
+		goto exit;
 	}
 
 exit:
