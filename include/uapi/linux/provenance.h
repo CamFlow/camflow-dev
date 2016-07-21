@@ -45,6 +45,7 @@
 #define MSG_DISC_ENTITY   11
 #define MSG_DISC_ACTIVITY 12
 #define MSG_DISC_AGENT    13
+#define MSG_DISC_NODE     14
 
 #define ED_READ           0
 #define ED_WRITE          1
