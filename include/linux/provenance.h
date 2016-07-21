@@ -28,6 +28,8 @@
 
 #define ASSIGN_NODE_ID 0
 
+#define node_kern(prov) ((prov)->node_info.node_kern)
+
 static inline struct prov_msg_t* prov_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
   if(!dest)
@@ -144,20 +146,20 @@ static inline void record_node(prov_msg_t* prov){
   if(!prov_enabled) // capture is not enabled, ignore
     return;
 
-  prov->node_info.node_kern.recorded=NODE_RECORDED;
+  node_kern(prov).recorded=NODE_RECORDED;
   prov_write(prov);
 }
 
 static inline bool provenance_is_tracked(prov_msg_t* node){
   if(prov_all)
     return true; // log everything but opaque
-  if(node->node_info.node_kern.tracked == NODE_TRACKED)
+  if(node_kern(node).tracked == NODE_TRACKED)
     return true; // log tracked node, except if opaque
   return false;
 }
 
 static inline bool provenance_is_name_recorded(prov_msg_t* node){
-  if(node->node_info.node_kern.name_recorded == NAME_RECORDED)
+  if(node_kern(node).name_recorded == NAME_RECORDED)
     return true;
   return false;
 }
@@ -172,17 +174,26 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
   // don't record if to or from are opaque
-  if(unlikely(from->node_info.node_kern.opaque == NODE_OPAQUE || to->node_info.node_kern.opaque == NODE_OPAQUE))
+  if(unlikely(node_kern(from).opaque == NODE_OPAQUE || node_kern(to).opaque == NODE_OPAQUE))
     return;
 
   // ignore if not tracked
   if(!provenance_is_tracked(from) && !provenance_is_tracked(to))
     return;
 
-  if(!(from->node_info.node_kern.recorded == NODE_RECORDED) )
+  /* propagate tracked */
+  if(node_kern(from).propagate > 0 && node_kern(from).tracked){
+    node_kern(to).tracked = NODE_TRACKED; // receiving node become tracked
+    // update receiving propagation depth
+    if(node_kern(from).propagate - 1 > node_kern(to).propagate){
+      node_kern(to).propagate = node_kern(from).propagate - 1;
+    }
+  }
+
+  if(!(node_kern(from).recorded == NODE_RECORDED) )
     record_node(from);
 
-  if(!(to->node_info.node_kern.recorded == NODE_RECORDED) )
+  if(!(node_kern(to).recorded == NODE_RECORDED) )
     record_node(to);
 
 
@@ -197,21 +208,17 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
   prov_write(&edge);
 }
 
-static inline void long_record_edge(uint8_t type, prov_msg_t* from, long_prov_msg_t* to, uint8_t allowed){
+static inline void long_record_edge(uint8_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t edge;
 
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
   // don't record if to or from are opaque
-  if(unlikely(from->node_info.node_kern.opaque == NODE_OPAQUE || to->node_info.node_kern.opaque == NODE_OPAQUE))
+  if(unlikely(node_kern(from).opaque == NODE_OPAQUE || node_kern(to).opaque == NODE_OPAQUE))
     return;
 
-  // ignore if not tracked
-  if(!provenance_is_tracked(from))
-    return;
-
-  if(!(from->node_info.node_kern.recorded == NODE_RECORDED) )
-    record_node(from);
+  if(!(node_kern(from).recorded == NODE_RECORDED) )
+    record_node(to);
 
   prov_type((&edge))=MSG_EDGE;
   edge_identifier((&edge)).id = prov_next_edgeid();
@@ -228,7 +235,7 @@ static inline void prov_update_version(prov_msg_t* prov){
   prov_msg_t old_prov;
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
-  prov->node_info.node_kern.recorded = NODE_UNRECORDED;
+  node_kern(prov).recorded = NODE_UNRECORDED;
   record_edge(ED_VERSION, &old_prov, prov, FLOW_ALLOWED);
 }
 

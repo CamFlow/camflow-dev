@@ -118,6 +118,7 @@ struct node_kern{
   uint8_t name_recorded;
   uint8_t tracked;
   uint8_t opaque;
+  uint8_t propagate;
 };
 
 struct msg_struct{

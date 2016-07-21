@@ -16,6 +16,7 @@
 #include <linux/provenance.h>
 
 #define TMPBUFLEN	12
+#define DEFAULT_PROPAGATE_DEPTH 1
 
 bool prov_enabled=false;
 
@@ -352,7 +353,8 @@ static ssize_t prov_write_tracked(struct file *file, const char __user *buf,
   if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
-	cprov->task_info.node_kern.tracked=tmp;
+	node_kern(cprov).tracked=tmp;
+	node_kern(cprov).propagate=DEFAULT_PROPAGATE_DEPTH;
   length=count;
 out:
   free_page((unsigned long)page);
