@@ -150,6 +150,8 @@ static inline void record_node(prov_msg_t* prov){
   prov_write(prov);
 }
 
+#define provenance_is_opaque(prov) (node_kern(prov).opaque == NODE_OPAQUE)
+
 static inline bool provenance_is_tracked(prov_msg_t* node){
   if(prov_all)
     return true; // log everything but opaque
@@ -174,7 +176,7 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
   // don't record if to or from are opaque
-  if(unlikely(node_kern(from).opaque == NODE_OPAQUE || node_kern(to).opaque == NODE_OPAQUE))
+  if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) )
     return;
 
   // ignore if not tracked
@@ -214,7 +216,7 @@ static inline void long_record_edge(uint8_t type, long_prov_msg_t* from, prov_ms
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
   // don't record if to or from are opaque
-  if(unlikely(node_kern(from).opaque == NODE_OPAQUE || node_kern(to).opaque == NODE_OPAQUE))
+  if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) )
     return;
 
   if(!(node_kern(from).recorded == NODE_RECORDED) )

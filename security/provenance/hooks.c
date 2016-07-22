@@ -264,6 +264,11 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		iprov = inode_get_provenance(inode);
   }
 
+	// one of the node is opaque, ignore everything
+	if(unlikely(provenance_is_opaque(iprov) || provenance_is_opaque(cprov))){
+		return 0;
+	}
+
 	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
 		record_inode_name(inode);
 		record_task_name(current);
