@@ -238,7 +238,10 @@ static inline void prov_update_version(prov_msg_t* prov){
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   node_kern(prov).recorded = NODE_UNRECORDED;
-  record_edge(ED_VERSION, &old_prov, prov, FLOW_ALLOWED);
+  if(node_identifier(prov).type == MSG_TASK)
+    record_edge(ED_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
+  else
+    record_edge(ED_VERSION, &old_prov, prov, FLOW_ALLOWED);
 }
 
 #ifdef CONFIG_SECURITY_IFC

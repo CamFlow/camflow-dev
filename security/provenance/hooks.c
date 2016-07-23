@@ -264,11 +264,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		iprov = inode_get_provenance(inode);
   }
 
-	// one of the node is opaque, ignore everything
-	if(unlikely(provenance_is_opaque(iprov) || provenance_is_opaque(cprov))){
-		return 0;
-	}
-
 	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
 		record_inode_name(inode);
 		record_task_name(current);
@@ -359,9 +354,8 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 */
 static int provenance_file_permission(struct file *file, int mask)
 {
-  //struct inode *inode = file_inode(file);
-	//provenance_record_file_name(file);
-  //provenance_inode_permission(inode, mask);
+  struct inode *inode = file_inode(file);
+  provenance_inode_permission(inode, mask);
   return 0;
 }
 
@@ -374,14 +368,13 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 {
 	prov_msg_t* cprov = current_provenance();
 	struct inode *inode = file_inode(file);
-	prov_msg_t* iprov;
+	prov_msg_t* iprov = inode_get_provenance(inode);
 
-	if(!inode_get_provenance(inode)){ // alloc provenance if none there
+	if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
+		iprov = inode_get_provenance(inode);
   }
-	//provenance_record_file_name(file);
 
-	iprov = inode_get_provenance(inode);
 	prov_update_version(cprov);
 	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
@@ -409,6 +402,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 
   inode = file_inode(file);
   iprov = inode_get_provenance(inode);
+
   prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
 
   if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
@@ -513,6 +507,7 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* mprov = msg->provenance;
+
   record_edge(ED_CREATE, cprov, mprov, FLOW_ALLOWED);
   return 0;
 }
