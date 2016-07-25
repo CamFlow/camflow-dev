@@ -264,6 +264,10 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		iprov = inode_get_provenance(inode);
   }
 
+	if(provenance_is_opaque(cprov) || provenance_is_opaque(cprov)){
+    return 0;
+	}
+
 	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
 		record_inode_name(inode);
 		record_task_name(current);
@@ -272,16 +276,16 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
-		prov_update_version(iprov);
     record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
+		prov_update_version(iprov);
   }
   if((mask & (MAY_READ)) != 0){
-		prov_update_version(cprov);
     record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+		prov_update_version(cprov);
   }
 	if((mask & (MAY_EXEC)) != 0){
-		prov_update_version(cprov);
     record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
+			prov_update_version(cprov);
   }
   return 0;
 }
@@ -375,8 +379,8 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 		iprov = inode_get_provenance(inode);
   }
 
-	prov_update_version(cprov);
 	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
+	prov_update_version(cprov);
 	return 0;
 }
 
@@ -439,10 +443,10 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   iprov = inode_get_provenance(inode);
 
 	// both way exchange
-	prov_update_version(iprov);
   record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
-	prov_update_version(cprov);
+	prov_update_version(iprov);
   record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+	prov_update_version(cprov);
 
   return 0;
 }
@@ -701,7 +705,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  if(node_kern(cprov).opaque==NODE_OPAQUE)
+  if(provenance_is_opaque(cprov))
     return 0;
 
   if(!skprov)
@@ -726,7 +730,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   prov_msg_t* cprov  = current_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
-  if(node_kern(cprov).opaque==NODE_OPAQUE)
+  if(provenance_is_opaque(cprov))
     return 0;
 
   if(!skprov)
