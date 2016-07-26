@@ -24,6 +24,8 @@
 #include <linux/camflow.h>
 #include <linux/file.h>
 
+#include "av_utils.h"
+
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
 
@@ -274,6 +276,10 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 {
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov;
+	uint32_t perms;
+
+	if(!mask)
+		return 0;
 
 	if(unlikely(IS_PRIVATE(inode)))
 		return 0;
@@ -293,17 +299,17 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		record_task_name(current);
 	}
 
-  mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
+  perms = file_mask_to_perms(inode->i_mode, mask);
 
-  if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
+  if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
 		prov_update_version(iprov);
     record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
-  if((mask & (MAY_READ)) != 0){
+  if((perms & (FILE__READ)) != 0){
 		prov_update_version(cprov);
     record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
   }
-	if((mask & (MAY_EXEC)) != 0){
+	if((perms & (FILE__EXECUTE)) != 0){
 		prov_update_version(cprov);
     record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
   }
