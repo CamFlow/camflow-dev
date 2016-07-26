@@ -29,6 +29,22 @@
 #define ASSIGN_NODE_ID 0
 
 #define node_kern(prov) ((prov)->node_info.node_kern)
+#define provenance_is_opaque(node) (node_kern(node).opaque == NODE_OPAQUE)
+#define provenance_is_tracked(node) (prov_all || node_kern(node).tracked == NODE_TRACKED)
+#define provenance_is_name_recorded(node) (node_kern(node).name_recorded == NAME_RECORDED)
+#define prov_next_edgeid() ((uint64_t)atomic64_inc_return(&prov_edge_id))
+#define prov_next_nodeid() ((uint64_t)atomic64_inc_return(&prov_node_id))
+#define free_provenance(prov) kmem_cache_free(provenance_cache, prov)
+#define free_long_provenance(prov) kmem_cache_free(long_provenance_cache, prov)
+
+extern atomic64_t prov_edge_id;
+extern atomic64_t prov_node_id;
+extern struct rchan *prov_chan;
+extern struct rchan *long_prov_chan;
+extern bool prov_enabled;
+extern bool prov_all;
+extern struct kmem_cache *provenance_cache;
+extern struct kmem_cache *long_provenance_cache;
 
 static inline struct prov_msg_t* prov_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
@@ -36,26 +52,6 @@ static inline struct prov_msg_t* prov_from_pid(pid_t pid){
     return NULL;
   return __task_cred(dest)->provenance;
 }
-
-extern atomic64_t prov_edge_id;
-
-static inline uint64_t prov_next_edgeid( void ){
-  return (uint64_t)atomic64_inc_return(&prov_edge_id);
-}
-
-extern atomic64_t prov_node_id;
-
-static inline uint64_t prov_next_nodeid( void )
-{
-  return (uint64_t)atomic64_inc_return(&prov_node_id);
-}
-
-extern struct rchan *prov_chan;
-extern struct rchan *long_prov_chan;
-extern bool prov_enabled;
-extern bool prov_all;
-extern struct kmem_cache *provenance_cache;
-extern struct kmem_cache *long_provenance_cache;
 
 static inline prov_msg_t* alloc_provenance(uint8_t ntype, gfp_t gfp)
 {
@@ -90,14 +86,6 @@ static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
 
   prov_type(prov)=ntype;
   return prov;
-}
-
-static inline void free_provenance(prov_msg_t* prov){
-  kmem_cache_free(provenance_cache, prov);
-}
-
-static inline void free_long_provenance(long_prov_msg_t* prov){
-  kmem_cache_free(long_provenance_cache, prov);
 }
 
 static inline void prov_write(prov_msg_t* msg)
@@ -148,22 +136,6 @@ static inline void record_node(prov_msg_t* prov){
 
   node_kern(prov).recorded=NODE_RECORDED;
   prov_write(prov);
-}
-
-#define provenance_is_opaque(prov) (node_kern(prov).opaque == NODE_OPAQUE)
-
-static inline bool provenance_is_tracked(prov_msg_t* node){
-  if(prov_all)
-    return true; // log everything but opaque
-  if(node_kern(node).tracked == NODE_TRACKED)
-    return true; // log tracked node, except if opaque
-  return false;
-}
-
-static inline bool provenance_is_name_recorded(prov_msg_t* node){
-  if(node_kern(node).name_recorded == NAME_RECORDED)
-    return true;
-  return false;
 }
 
 static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){
