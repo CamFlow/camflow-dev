@@ -13,12 +13,38 @@
 */
 
 #include <linux/security.h>
+#include <linux/camflow.h>
 #include <linux/provenance.h>
 
 #define TMPBUFLEN	12
 #define DEFAULT_PROPAGATE_DEPTH 1
 
 bool prov_enabled=false;
+
+void provenance_mark_as_opaque(const char* name){
+  struct inode* in;
+  prov_msg_t* prov;
+
+  in = file_name_to_inode(name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", name);
+  }else{
+    prov = inode_get_provenance(in);
+    node_kern(prov).opaque=NODE_OPAQUE;
+  }
+}
+
+static inline void __provenance_init_fs(void){
+  // TODO fix this not working
+	provenance_mark_as_opaque(PROV_ENABLE_FILE);
+	provenance_mark_as_opaque(PROV_ALL_FILE);
+	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
+	provenance_mark_as_opaque(PROV_TRACKED_FILE);
+	provenance_mark_as_opaque(PROV_NODE_FILE);
+	provenance_mark_as_opaque(PROV_EDGE_FILE);
+	provenance_mark_as_opaque(PROV_SELF_FILE);
+	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
+}
 
 static ssize_t prov_write_enable(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
@@ -323,6 +349,8 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 {
 	uint32_t* tmp = (uint32_t*)buf;
 
+	__provenance_init_fs();
+
 	if(count < sizeof(uint32_t))
 	{
 		return -ENOMEM;
@@ -392,7 +420,6 @@ static const struct file_operations prov_tracked_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -410,4 +437,4 @@ static int __init init_prov_fs(void)
    return 0;
 }
 
-__initcall(init_prov_fs);
+late_initcall_sync(init_prov_fs);

@@ -20,12 +20,11 @@
 #include <linux/provenance.h>
 #include <linux/list.h>
 
+static bool ifc_fs_is_initialised=false;
+
 static void mark_as_trusted(const char* name){
   struct inode* in;
   struct ifc_struct* ifc;
-#ifdef CONFIG_SECURITY_PROVENANCE
-  prov_msg_t* provenance;
-#endif
 
   in = file_name_to_inode(name);
   if(!in){
@@ -33,15 +32,8 @@ static void mark_as_trusted(const char* name){
   }else{
     ifc = inode_get_ifc(in);
     ifc->context.trusted=IFC_TRUSTED;
-#ifdef CONFIG_SECURITY_PROVENANCE
-    // opaque NODES are not recorded in audit data
-    provenance = inode_get_provenance(in);
-    provenance->node_info.node_kern.opaque=NODE_OPAQUE;
-#endif
   }
 }
-
-static bool ifc_fs_is_initialised=false;
 
 static inline void initialize(void){
   if(ifc_fs_is_initialised)
@@ -560,4 +552,4 @@ static int __init init_ifc_fs(void)
   return 0;
 }
 
-__initcall(init_ifc_fs);
+late_initcall_sync(init_ifc_fs);

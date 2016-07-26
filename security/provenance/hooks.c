@@ -264,7 +264,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		iprov = inode_get_provenance(inode);
   }
 
-	if(provenance_is_opaque(cprov) || provenance_is_opaque(cprov)){
+	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
     return 0;
 	}
 
@@ -276,16 +276,16 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   mask &= (MAY_READ|MAY_WRITE|MAY_EXEC|MAY_APPEND);
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){
-    record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
 		prov_update_version(iprov);
+    record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
   if((mask & (MAY_READ)) != 0){
-    record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
 		prov_update_version(cprov);
+    record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
   }
 	if((mask & (MAY_EXEC)) != 0){
+		prov_update_version(cprov);
     record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
-			prov_update_version(cprov);
   }
   return 0;
 }
@@ -379,8 +379,8 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 		iprov = inode_get_provenance(inode);
   }
 
-	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
 	prov_update_version(cprov);
+	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
 }
 
@@ -443,10 +443,10 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   iprov = inode_get_provenance(inode);
 
 	// both way exchange
-  record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
 	prov_update_version(iprov);
-  record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+  record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
 	prov_update_version(cprov);
+  record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
 
   return 0;
 }

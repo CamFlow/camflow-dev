@@ -15,6 +15,7 @@
 #ifndef _LINUX_CAMFLOW_HEAD_H
 #define _LINUX_CAMFLOW_HEAD_H
 
+#include <linux/security.h>
 #include <linux/fs.h>
 #include <linux/namei.h>
 

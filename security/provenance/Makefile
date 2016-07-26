@@ -3,4 +3,4 @@
 #
 obj-$(CONFIG_SECURITY_PROVENANCE) := provenance.o
 
-provenance-y := provenance_relay.o hooks.o fs.o
+provenance-y := provenance_relay.o hooks.o fs.o exports.o
