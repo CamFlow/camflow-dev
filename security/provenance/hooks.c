@@ -30,7 +30,7 @@ struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
 
 #define current_pid() (current->pid)
-#define current_comm() (current->comm)
+#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
 
 /*
  * initialise the security for the init task
@@ -184,7 +184,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	}
 #endif
 
-  record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED); /* creating inode != creating the file */
+	if(is_inode_dir(inode) && !prov_track_dir) // we ignore directory
+		return 0;
+
+	record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED); /* creating inode != creating the file */
   return 0;
 }
 
@@ -263,8 +266,6 @@ static inline void record_task_name(struct task_struct *task){
 	put_cred(cred);
 }
 
-#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
-
 /*
 * Check permission before accessing an inode.  This hook is called by the
 * existing Linux permission function, so a security module can use it to
@@ -337,7 +338,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	    record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}
-	
+
   return 0;
 }
 
@@ -424,6 +425,9 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	prov_msg_t* cprov = current_provenance();
 	struct inode *inode = file_inode(file);
 	prov_msg_t* iprov = inode_get_provenance(inode);
+
+	if(is_inode_dir(inode) && !prov_track_dir) // we ignore directory
+		return 0;
 
 	if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
