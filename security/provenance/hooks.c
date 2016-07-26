@@ -22,6 +22,7 @@
 #include <linux/random.h>
 #include <linux/xattr.h>
 #include <linux/camflow.h>
+#include <linux/file.h>
 
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
@@ -226,13 +227,32 @@ static inline void record_inode_name(struct inode *inode){
 
 static inline void record_task_name(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
-	prov_msg_t* tprov = cred->provenance;
+	prov_msg_t* tprov;
+	struct mm_struct *mm;
+ 	struct file *exe_file;
+	char *ptr = NULL;
 	char *buffer;
 
-	if( !provenance_is_name_recorded(tprov) ){
-		buffer = (char*)kzalloc(TASK_COMM_LEN+1, GFP_KERNEL);
-		buffer = get_task_comm(buffer, task);
-		record_node_name(tprov, buffer);
+	if(!cred)
+		return;
+
+	tprov = cred->provenance;
+
+	// name already recorded
+	if(provenance_is_name_recorded(tprov))
+		return;
+
+	mm = get_task_mm(task);
+	if (!mm)
+ 		return;
+	exe_file = get_mm_exe_file(mm);
+	mmput(mm);
+
+	if(exe_file){
+		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
+		ptr = file_path(exe_file, buffer, PATH_MAX);
+		fput(exe_file);
+		record_node_name(tprov, ptr);
 		kfree(buffer);
 	}
 
