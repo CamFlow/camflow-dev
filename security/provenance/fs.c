@@ -420,6 +420,63 @@ static const struct file_operations prov_tracked_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+bool prov_track_dir=false;
+
+static ssize_t prov_write_track_dir(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+  char* page = NULL;
+  ssize_t length;
+  bool new_value;
+  int tmp;
+
+  /* no partial write */
+  if(*ppos > 0)
+    return -EINVAL;
+
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
+
+  page = (char *)get_zeroed_page(GFP_KERNEL);
+  if (!page)
+    return -ENOMEM;
+
+  length=-EFAULT;
+	if (copy_from_user(page, buf, count))
+		goto out;
+
+  length = -EINVAL;
+  if (sscanf(page, "%d", &tmp) != 1)
+		goto out;
+
+  new_value=tmp;
+  if(new_value!=prov_track_dir){
+    prov_track_dir=new_value;
+  }
+  length=count;
+out:
+  free_page((unsigned long)page);
+  return length;
+}
+
+static ssize_t prov_read_track_dir(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	char tmpbuf[TMPBUFLEN];
+	ssize_t length;
+  int tmp = prov_track_dir;
+
+	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
+	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
+}
+
+static const struct file_operations prov_track_dir_ops = {
+	.write		= prov_write_track_dir,
+  .read     = prov_read_track_dir,
+	.llseek		= generic_file_llseek,
+};
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -434,6 +491,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
 	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
 	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
+	 securityfs_create_file("dir", 0644, prov_dir, NULL, &prov_track_dir_ops);
    return 0;
 }
 

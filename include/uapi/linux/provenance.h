@@ -69,6 +69,7 @@
 #define ED_FORK             19
 #define ED_UNKNOWN          20
 #define ED_VERSION_PROCESS  21
+#define ED_SEARCH           22
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1

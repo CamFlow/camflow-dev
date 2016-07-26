@@ -43,6 +43,7 @@ extern struct rchan *prov_chan;
 extern struct rchan *long_prov_chan;
 extern bool prov_enabled;
 extern bool prov_all;
+extern bool prov_track_dir;
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 

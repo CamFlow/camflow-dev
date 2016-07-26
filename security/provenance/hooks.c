@@ -145,6 +145,8 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
   return 0;
 }
 
+#define prov_copy_inode_mode(iprov, inode) iprov->inode_info.mode=inode->i_mode
+
 /*
 * Allocate and attach a security structure to @inode->i_security.  The
 * i_security field is initialized to NULL when the inode structure is
@@ -167,7 +169,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
   iprov->inode_info.uid=__kuid_val(inode->i_uid);
   iprov->inode_info.gid=__kgid_val(inode->i_gid);
-  iprov->inode_info.mode=inode->i_mode;
+  prov_copy_inode_mode(iprov, inode);
   sprov = inode->i_sb->s_provenance;
   memcpy(iprov->inode_info.sb_uuid, sprov->sb_info.uuid, 16*sizeof(uint8_t));
 
@@ -261,6 +263,8 @@ static inline void record_task_name(struct task_struct *task){
 	put_cred(cred);
 }
 
+#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
+
 /*
 * Check permission before accessing an inode.  This hook is called by the
 * existing Linux permission function, so a security module can use it to
@@ -289,30 +293,51 @@ static int provenance_inode_permission(struct inode *inode, int mask)
     provenance_inode_alloc_security(inode);
 		iprov = inode_get_provenance(inode);
   }
+	prov_copy_inode_mode(iprov, inode);
 
 	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
     return 0;
 	}
 
-	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
-		record_inode_name(inode);
-		record_task_name(current);
+	perms = file_mask_to_perms(inode->i_mode, mask);
+	if(is_inode_dir(inode) && prov_track_dir){
+		if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
+			record_inode_name(inode);
+			record_task_name(current);
+		}
+
+		if((perms & (DIR__WRITE)) != 0){
+			prov_update_version(iprov);
+	    record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
+	  }
+	  if((perms & (DIR__READ)) != 0){
+			prov_update_version(cprov);
+	    record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+	  }
+		if((perms & (DIR__SEARCH)) != 0){
+			prov_update_version(cprov);
+	    record_edge(ED_SEARCH, iprov, cprov, FLOW_ALLOWED);
+	  }
+	}else{
+		if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
+			record_inode_name(inode);
+			record_task_name(current);
+		}
+
+		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
+			prov_update_version(iprov);
+	    record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
+	  }
+	  if((perms & (FILE__READ)) != 0){
+			prov_update_version(cprov);
+	    record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
+	  }
+		if((perms & (FILE__EXECUTE)) != 0){
+			prov_update_version(cprov);
+	    record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
+	  }
 	}
-
-  perms = file_mask_to_perms(inode->i_mode, mask);
-
-  if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-		prov_update_version(iprov);
-    record_edge(ED_WRITE, cprov, iprov, FLOW_ALLOWED);
-  }
-  if((perms & (FILE__READ)) != 0){
-		prov_update_version(cprov);
-    record_edge(ED_READ, iprov, cprov, FLOW_ALLOWED);
-  }
-	if((perms & (FILE__EXECUTE)) != 0){
-		prov_update_version(cprov);
-    record_edge(ED_EXEC, iprov, cprov, FLOW_ALLOWED);
-  }
+	
   return 0;
 }
 

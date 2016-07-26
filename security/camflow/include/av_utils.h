@@ -1,6 +1,6 @@
 /*
 *
-* /security/provenance/exports.c
+* security/camflow/include/av_utils.c
 *
 * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
 *
@@ -11,6 +11,9 @@
 * published by the Free Software Foundation.
 *
 */
+
+#ifndef _AV_UTILS_PROVENANCE_H
+#define _AV_UTILS_PROVENANCE_H
 
 // we depend on security/selinux/av_permssion.h
 #include "av_permissions.h"
@@ -38,3 +41,5 @@ static inline uint32_t file_mask_to_perms(int mode, int mask){
 
   return av;
 }
+
+#endif
