@@ -17,8 +17,11 @@
 #include <linux/ifc.h>
 #include <linux/delay.h>
 #include <linux/camflow.h>
-#include <linux/provenance.h>
 #include <linux/list.h>
+
+#include "camflow_utils.h"
+#include "ifc.h"
+#include "provenance.h"
 
 static bool ifc_fs_is_initialised=false;
 

@@ -13,4 +13,5 @@
 */
 
 #include <linux/camflow.h>
-#include <linux/ifc.h>
+
+#include "ifc.h"

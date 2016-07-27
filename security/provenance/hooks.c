@@ -11,9 +11,6 @@
 * published by the Free Software Foundation.
 *
 */
-
-#include <linux/provenance.h>
-#include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
@@ -25,6 +22,8 @@
 #include <linux/file.h>
 
 #include "av_utils.h"
+#include "provenance.h"
+#include "ifc.h"
 
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
@@ -174,7 +173,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
   memcpy(iprov->inode_info.sb_uuid, sprov->sb_info.uuid, 16*sizeof(uint8_t));
 
 	alloc_camflow(inode, GFP_KERNEL);
-  inode_set_provenance(inode, (void**)&iprov);
+  inode_set_provenance(inode, iprov);
 
 #ifdef CONFIG_SECURITY_IFC
 	ifc = inode_get_ifc(inode);

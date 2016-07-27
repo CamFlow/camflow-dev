@@ -14,8 +14,9 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/provenance.h>
 #include <linux/debugfs.h>
+
+#include "provenance.h"
 
 #define PROV_BASE_NAME "provenance"
 #define LONG_PROV_BASE_NAME "long_provenance"

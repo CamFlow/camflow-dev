@@ -12,9 +12,7 @@
 *
 */
 
-#include <linux/provenance.h>
 #include <linux/camflow.h>
-#include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
@@ -22,6 +20,9 @@
 #include <linux/binfmts.h>
 #include <linux/random.h>
 #include <linux/xattr.h>
+
+#include "ifc.h"
+#include "provenance.h"
 
 struct kmem_cache *ifc_cache=NULL;
 
@@ -143,7 +144,7 @@ static int ifc_inode_alloc_security(struct inode *inode)
     return -ENOMEM;
   }
   alloc_camflow(inode, GFP_KERNEL);
-  inode_set_ifc(inode, (void**)&ifc);
+  inode_set_ifc(inode, ifc);
   return 0;
 }
 

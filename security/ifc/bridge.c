@@ -13,10 +13,11 @@
 */
 
 #include <linux/kmod.h>
-#include <linux/ifc.h>
 #include <linux/sched.h>
 #include <net/net_namespace.h>
 #include <net/netlink.h>
+
+#include "ifc.h"
 
 int prepare_bridge_usher(struct subprocess_info *info, struct cred *new){
   pid_t parent_pid = (*((pid_t*)info->data));

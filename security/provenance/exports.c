@@ -13,4 +13,5 @@
 */
 
 #include <linux/camflow.h>
-#include <linux/provenance.h>
+
+#include "provenance.h"

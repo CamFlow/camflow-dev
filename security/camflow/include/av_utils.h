@@ -1,6 +1,6 @@
 /*
 *
-* security/camflow/include/av_utils.c
+* security/camflow/include/av_utils.h
 *
 * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
 *

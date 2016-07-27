@@ -14,7 +14,9 @@
 
 #include <linux/security.h>
 #include <linux/camflow.h>
-#include <linux/provenance.h>
+
+#include "provenance.h"
+#include "camflow_utils.h"
 
 #define TMPBUFLEN	12
 #define DEFAULT_PROPAGATE_DEPTH 1
