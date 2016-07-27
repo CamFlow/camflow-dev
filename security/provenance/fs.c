@@ -77,9 +77,9 @@ static ssize_t prov_write_enable(struct file *file, const char __user *buf,
   new_value=tmp;
   if(new_value!=prov_enabled){
     if(new_value)
-      prov_print("Enabling provenance capture");
+      printk(KERN_INFO "Provenance: enabling provenance capture");
     else
-      prov_print("Disabling provenance capture");
+      printk(KERN_INFO "Provenance: disabling provenance capture");
     prov_enabled=new_value;
   }
   length=count;
@@ -138,9 +138,9 @@ static ssize_t prov_write_all(struct file *file, const char __user *buf,
   new_value=tmp;
   if(new_value!=prov_all){
     if(new_value)
-      prov_print("Enabling all capture");
+      printk(KERN_INFO "Provenance: enabling all capture");
     else
-      prov_print("Disabling all capture");
+      printk(KERN_INFO "Provenance: disabling all capture");
     prov_all=new_value;
   }
   length=count;
