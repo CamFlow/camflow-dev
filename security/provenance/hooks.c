@@ -216,9 +216,15 @@ static inline void record_node_name(prov_msg_t* node, char* name){
 
 static inline void record_inode_name(struct inode *inode){
 	prov_msg_t* iprov = inode_get_provenance(inode);
-	struct dentry* dentry = d_find_alias(inode);
+	struct dentry* dentry;
 	char *buffer;
 	char *ptr;
+
+	// it is a directory and we don't track it
+	if(is_inode_dir(inode) && !prov_track_dir)
+		return;
+
+	dentry = d_find_alias(inode);
 
 	if(!dentry) // we did not find a dentry, not sure if it should ever happen
 		return;
@@ -229,6 +235,7 @@ static inline void record_inode_name(struct inode *inode){
 		record_node_name(iprov, ptr);
 		kfree(buffer);
 	}
+	dput(dentry);
 }
 
 static inline void record_task_name(struct task_struct *task){
@@ -288,6 +295,10 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if(unlikely(IS_PRIVATE(inode)))
 		return 0;
 
+	// it is a directory and we don't track it
+	if(is_inode_dir(inode) && !prov_track_dir)
+		return 0;
+
 	iprov = inode_get_provenance(inode);
   if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
@@ -300,7 +311,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	}
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
-	if(is_inode_dir(inode) && prov_track_dir){
+	if(is_inode_dir(inode)){
 		if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
 			record_inode_name(inode);
 			record_task_name(current);

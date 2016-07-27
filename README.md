@@ -15,6 +15,7 @@ The source code for the provenance and IFC userspace libraries are available [he
 ### v0.1.3
 
 ```
+- Allow to exclude directory from provenance capture.
 - Added a string to the disclosed provenance node data structure.
 - Provided provenance tracking depth setting (how far tracked flag is propagated).
 - Add pseudo file for a process to request to be provenance-tracked.

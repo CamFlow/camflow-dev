@@ -36,18 +36,6 @@ void provenance_mark_as_opaque(const char* name){
   }
 }
 
-static inline void __provenance_init_fs(void){
-  // TODO fix this not working
-	provenance_mark_as_opaque(PROV_ENABLE_FILE);
-	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
-	provenance_mark_as_opaque(PROV_TRACKED_FILE);
-	provenance_mark_as_opaque(PROV_NODE_FILE);
-	provenance_mark_as_opaque(PROV_EDGE_FILE);
-	provenance_mark_as_opaque(PROV_SELF_FILE);
-	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
-}
-
 static ssize_t prov_write_enable(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
@@ -350,8 +338,6 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	uint32_t* tmp = (uint32_t*)buf;
-
-	__provenance_init_fs();
 
 	if(count < sizeof(uint32_t))
 	{
