@@ -28,7 +28,7 @@
 #define PROV_EDGE_FILE             "/sys/kernel/security/provenance/edge"
 #define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
 #define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
-#define PROV_TRACK_DIR             "/sys/kernel/security/provenance/dir"
+#define PROV_TRACK_DIR_FILE        "/sys/kernel/security/provenance/dir"
 
 #define MSG_STR           0
 #define MSG_EDGE          1

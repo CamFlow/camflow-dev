@@ -72,7 +72,6 @@ static int __init relay_prov_init(void)
   }
 
   printk(KERN_INFO "Provenance module started!\n");
-  prov_print("Provenance capture started.");
   return 0;
 }
 

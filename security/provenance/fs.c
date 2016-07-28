@@ -297,10 +297,25 @@ static const struct file_operations prov_self_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static inline void __init_opaque(void){
+	provenance_mark_as_opaque(PROV_ENABLE_FILE);
+	provenance_mark_as_opaque(PROV_ALL_FILE);
+	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
+	provenance_mark_as_opaque(PROV_TRACKED_FILE);
+	provenance_mark_as_opaque(PROV_NODE_FILE);
+	provenance_mark_as_opaque(PROV_EDGE_FILE);
+	provenance_mark_as_opaque(PROV_SELF_FILE);
+	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
+	provenance_mark_as_opaque(PROV_TRACK_DIR_FILE);
+}
+
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	uint32_t* tmp = (uint32_t*)buf;
+
+	// ideally should be decoupled from set machine id
+	__init_opaque();
 
 	if(__kuid_val(current_euid())!=0) // only allowed for root
     return -EPERM;
@@ -323,9 +338,6 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	uint32_t* tmp = (uint32_t*)buf;
-
-  provenance_mark_as_opaque(PROV_NODE_FILE);
-  printk(KERN_INFO "Provenance: %s marked as opaque.", PROV_NODE_FILE);
 
 	if(count < sizeof(uint32_t))
 	{
