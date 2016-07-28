@@ -1,7 +1,5 @@
 /*
 *
-* security/camflow/include/av_utils.h
-*
 * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
 *
 * Copyright (C) 2016 Harvard University

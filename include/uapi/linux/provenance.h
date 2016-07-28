@@ -1,7 +1,5 @@
 /*
 *
-* /linux/provenance.h
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge

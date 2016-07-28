@@ -1,7 +1,5 @@
 /*
 *
-* /linux/security/provenance/fs.c
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
@@ -22,19 +20,6 @@
 #define DEFAULT_PROPAGATE_DEPTH 1
 
 bool prov_enabled=false;
-
-void provenance_mark_as_opaque(const char* name){
-  struct inode* in;
-  prov_msg_t* prov;
-
-  in = file_name_to_inode(name);
-  if(!in){
-    printk(KERN_ERR "Provenance: could not find %s file.", name);
-  }else{
-    prov = inode_get_provenance(in);
-    node_kern(prov).opaque=NODE_OPAQUE;
-  }
-}
 
 static ssize_t prov_write_enable(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
@@ -338,6 +323,9 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	uint32_t* tmp = (uint32_t*)buf;
+
+  provenance_mark_as_opaque(PROV_NODE_FILE);
+  printk(KERN_INFO "Provenance: %s marked as opaque.", PROV_NODE_FILE);
 
 	if(count < sizeof(uint32_t))
 	{

@@ -1,7 +1,5 @@
 /*
 *
-* /linux/ifc.h
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2016 University of Cambridge

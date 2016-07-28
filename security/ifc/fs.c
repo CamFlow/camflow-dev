@@ -1,7 +1,5 @@
 /*
 *
-* /linux/security/ifc/fs.c
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge

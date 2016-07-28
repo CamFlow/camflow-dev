@@ -1,7 +1,5 @@
 /*
 *
-* /linux/include/linux/provenance.h
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
@@ -21,10 +19,13 @@
 #include <linux/bug.h>
 #include <linux/relay.h>
 #include <linux/socket.h>
+#include <linux/camflow.h>
 #include <uapi/linux/ifc.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/camflow.h>
+
+#include "camflow_utils.h"
 
 #define ASSIGN_NODE_ID 0
 
@@ -228,6 +229,22 @@ static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context
   free_long_provenance(ifc_prov);
 }
 #endif
+
+static inline void provenance_mark_as_opaque(const char* name){
+  struct inode* in;
+  prov_msg_t* prov;
+
+  in = file_name_to_inode(name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", name);
+  }else{
+    prov = inode_get_provenance(in);
+    if(prov){
+      printk(KERN_ERR "Provenance: prov was ready.");
+      node_kern(prov).opaque=NODE_OPAQUE;
+    }
+  }
+}
 
 #endif
 #endif /* _LINUX_PROVENANCE_H */
