@@ -153,7 +153,6 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-	prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov = alloc_provenance(MSG_INODE, GFP_KERNEL);
   prov_msg_t* sprov;
 #ifdef CONFIG_SECURITY_IFC
@@ -180,11 +179,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 		prov_record_ifc(iprov, &ifc->context);
 	}
 #endif
-
-	if(is_inode_dir(inode) && !prov_track_dir) // we ignore directory
-		return 0;
-
-	record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED); /* creating inode != creating the file */
   return 0;
 }
 
@@ -271,6 +265,43 @@ static inline void record_task_name(struct task_struct *task){
 }
 
 /*
+* Check permission to create a regular file.
+* @dir contains inode structure of the parent of the new file.
+* @dentry contains the dentry structure for the file to be created.
+* @mode contains the file mode of the file to be created.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
+{
+	prov_msg_t* cprov = current_provenance();
+	prov_msg_t* iprov;
+
+	// it is a directory and we don't track it
+	if(!prov_track_dir)
+		return 0;
+
+	iprov = inode_get_provenance(dir);
+	if(!iprov){ // alloc provenance if none there
+    provenance_inode_alloc_security(dir);
+		iprov = inode_get_provenance(dir);
+  }
+
+	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
+    return 0;
+	}
+
+	prov_copy_inode_mode(iprov, dir);
+
+	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
+		record_inode_name(dir);
+		record_task_name(current);
+	}
+
+	record_edge(ED_CREATE, cprov, iprov, FLOW_ALLOWED);
+	return 0;
+}
+
+/*
 * Check permission before accessing an inode.  This hook is called by the
 * existing Linux permission function, so a security module can use it to
 * provide additional checking for existing Linux permission checks.
@@ -302,11 +333,12 @@ static int provenance_inode_permission(struct inode *inode, int mask)
     provenance_inode_alloc_security(inode);
 		iprov = inode_get_provenance(inode);
   }
-	prov_copy_inode_mode(iprov, inode);
 
 	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
     return 0;
 	}
+
+	prov_copy_inode_mode(iprov, inode);
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
@@ -441,6 +473,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
     provenance_inode_alloc_security(inode);
 		iprov = inode_get_provenance(inode);
   }
+	prov_copy_inode_mode(iprov, inode);
 
 	prov_update_version(cprov);
 	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
@@ -1007,25 +1040,38 @@ static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *dat
 }
 
 static struct security_hook_list provenance_hooks[] = {
+	/* task related hooks */
   LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
   LSM_HOOK_INIT(cred_free, provenance_cred_free),
   LSM_HOOK_INIT(cred_prepare, provenance_cred_prepare),
   LSM_HOOK_INIT(cred_transfer, provenance_cred_transfer),
   LSM_HOOK_INIT(task_fix_setuid, provenance_task_fix_setuid),
+
+	/* inode related hooks */
   LSM_HOOK_INIT(inode_alloc_security, provenance_inode_alloc_security),
+  LSM_HOOK_INIT(inode_create, provenance_inode_create),
   LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
   LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
+  LSM_HOOK_INIT(inode_link, provenance_inode_link),
+
+	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
   LSM_HOOK_INIT(mmap_file, provenance_mmap_file),
   LSM_HOOK_INIT(file_ioctl, provenance_file_ioctl),
-  LSM_HOOK_INIT(inode_link, provenance_inode_link),
+	LSM_HOOK_INIT(file_open, provenance_file_open),
+
+	/* msg related hooks */
 	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
 	LSM_HOOK_INIT(msg_msg_free_security, provenance_msg_msg_free_security),
   LSM_HOOK_INIT(msg_queue_msgsnd, provenance_msg_queue_msgsnd),
   LSM_HOOK_INIT(msg_queue_msgrcv, provenance_msg_queue_msgrcv),
+
+	/* shared memory related hooks */
   LSM_HOOK_INIT(shm_alloc_security, provenance_shm_alloc_security),
   LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
   LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
+
+	/* socket related hooks */
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
   LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
   LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
@@ -1037,13 +1083,16 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
   LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
   LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
+
+	/* exec related hooks */
   LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
   LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
 	LSM_HOOK_INIT(bprm_committed_creds, provenance_bprm_committed_creds),
+
+	/* file system related hooks */
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
   LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
-  LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount),
-	LSM_HOOK_INIT(file_open, provenance_file_open)
+  LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
 };
 #ifndef CONFIG_SECURITY_IFC
 struct kmem_cache *camflow_cache=NULL;
