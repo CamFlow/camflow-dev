@@ -30,21 +30,28 @@
 #define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
 #define PROV_TRACK_DIR_FILE        "/sys/kernel/security/provenance/dir"
 
-#define MSG_STR           0
-#define MSG_EDGE          1
-#define MSG_TASK          2
-#define MSG_INODE         3
-#define MSG_MSG           4
-#define MSG_SHM           5
-#define MSG_SOCK          6
-#define MSG_ADDR          7
-#define MSG_SB            8
-#define MSG_FILE_NAME     9
-#define MSG_IFC           10
-#define MSG_DISC_ENTITY   11
-#define MSG_DISC_ACTIVITY 12
-#define MSG_DISC_AGENT    13
-#define MSG_DISC_NODE     14
+#define MSG_STR               0x00000001UL
+#define MSG_EDGE              0x00000002UL
+#define MSG_TASK              0x00000004UL
+#define MSG_INODE_UNKNOWN     0x00000008UL
+#define MSG_INODE_LINK        0x00000010UL
+#define MSG_INODE_FILE        0x00000020UL
+#define MSG_INODE_DIRECTORY   0x00000040UL
+#define MSG_INODE_CHAR        0x00000080UL
+#define MSG_INODE_BLOCK       0x00000100UL
+#define MSG_INODE_FIFO        0x00000200UL
+#define MSG_INODE_SOCKET      0x00000400UL
+#define MSG_MSG               0x00000800UL
+#define MSG_SHM               0x00001000UL
+#define MSG_SOCK              0x00002000UL
+#define MSG_ADDR              0x00004000UL
+#define MSG_SB                0x00008000UL
+#define MSG_FILE_NAME         0x00010000UL
+#define MSG_IFC               0x00020000UL
+#define MSG_DISC_ENTITY       0x00040000UL
+#define MSG_DISC_ACTIVITY     0x00080000UL
+#define MSG_DISC_AGENT        0x00100000UL
+#define MSG_DISC_NODE         0x00200000UL
 
 #define ED_READ             0
 #define ED_WRITE            1
@@ -90,12 +97,13 @@
 
 #define STR_MAX_SIZE      128
 
+#define node_kern(prov) ((prov)->node_info.node_kern)
 #define prov_type(prov) (prov)->node_info.identifier.node_id.type
 #define node_identifier(node) (node)->node_info.identifier.node_id
 #define edge_identifier(edge) (edge)->edge_info.identifier.edge_id
 
 struct node_identifier{
-  uint8_t  type;
+  uint32_t type;
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
@@ -103,7 +111,7 @@ struct node_identifier{
 };
 
 struct edge_identifier{
-  uint8_t  type;
+  uint32_t  type;
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
@@ -131,7 +139,7 @@ struct msg_struct{
 
 struct edge_struct{
   prov_identifier_t identifier;
-  uint8_t type;
+  uint32_t type;
   uint8_t allowed;
   prov_identifier_t snd;
   prov_identifier_t rcv;

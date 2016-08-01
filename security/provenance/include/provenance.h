@@ -22,17 +22,15 @@
 #include <linux/camflow.h>
 #include <uapi/linux/ifc.h>
 #include <uapi/linux/mman.h>
-#include <uapi/linux/provenance.h>
 #include <uapi/linux/camflow.h>
+#include <uapi/linux/provenance.h>
+#include <uapi/linux/stat.h>
 
 #include "camflow_utils.h"
+#include "provenance_filter.h"
 
 #define ASSIGN_NODE_ID 0
 
-#define node_kern(prov) ((prov)->node_info.node_kern)
-#define provenance_is_opaque(node) (node_kern(node).opaque == NODE_OPAQUE)
-#define provenance_is_tracked(node) (prov_all || node_kern(node).tracked == NODE_TRACKED)
-#define provenance_is_name_recorded(node) (node_kern(node).name_recorded == NAME_RECORDED)
 #define prov_next_edgeid() ((uint64_t)atomic64_inc_return(&prov_edge_id))
 #define prov_next_nodeid() ((uint64_t)atomic64_inc_return(&prov_node_id))
 #define free_provenance(prov) kmem_cache_free(provenance_cache, prov)
@@ -42,9 +40,6 @@ extern atomic64_t prov_edge_id;
 extern atomic64_t prov_node_id;
 extern struct rchan *prov_chan;
 extern struct rchan *long_prov_chan;
-extern bool prov_enabled;
-extern bool prov_all;
-extern bool prov_track_dir;
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
@@ -55,7 +50,7 @@ static inline struct prov_msg_t* prov_from_pid(pid_t pid){
   return __task_cred(dest)->provenance;
 }
 
-static inline prov_msg_t* alloc_provenance(uint8_t ntype, gfp_t gfp)
+static inline prov_msg_t* alloc_provenance(uint32_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
@@ -79,7 +74,7 @@ static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   node_identifier(node).machine_id=prov_machine_id;
 }
 
-static inline long_prov_msg_t* alloc_long_provenance(uint8_t ntype, gfp_t gfp)
+static inline long_prov_msg_t* alloc_long_provenance(uint32_t ntype, gfp_t gfp)
 {
   long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
   if(!prov){
@@ -132,30 +127,25 @@ static inline int prov_print(const char *fmt, ...)
   return length;
 }
 
-static inline void record_node(prov_msg_t* prov){
-  if(!prov_enabled) // capture is not enabled, ignore
+static inline void record_node(prov_msg_t* node){
+  if(filter_node(node)){
     return;
+  }
 
-  node_kern(prov).recorded=NODE_RECORDED;
-  prov_write(prov);
+  node_kern(node).recorded=NODE_RECORDED;
+  prov_write(node);
 }
 
 static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
-static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline void record_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t edge;
 
-  if(unlikely(!prov_enabled)) // capture is not enabled, ignore
+  if(filter_edge(type, from, to, allowed)){
     return;
-  // don't record if to or from are opaque
-  if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) )
-    return;
-
-  // ignore if not tracked
-  if(!provenance_is_tracked(from) && !provenance_is_tracked(to))
-    return;
+  }
 
   /* propagate tracked */
   if(node_kern(from).propagate > 0 && node_kern(from).tracked){
@@ -184,7 +174,7 @@ static inline void record_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, u
   prov_write(&edge);
 }
 
-static inline void long_record_edge(uint8_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline void long_record_edge(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t edge;
 
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
@@ -246,5 +236,26 @@ static inline void provenance_mark_as_opaque(const char* name){
   }
 }
 
+static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
+  uint32_t type = MSG_INODE_UNKNOWN;
+  iprov->inode_info.mode=inode->i_mode;
+
+  if(S_ISBLK(inode->i_mode)){
+    type=MSG_INODE_BLOCK;
+  }else if(S_ISCHR(inode->i_mode)){
+    type=MSG_INODE_CHAR;
+  }else if(S_ISDIR(inode->i_mode)){
+    type=MSG_INODE_DIRECTORY;
+  }else if(S_ISFIFO(inode->i_mode)){
+    type=MSG_INODE_FIFO;
+  }else if(S_ISLNK(inode->i_mode)){
+    type=MSG_INODE_LINK;
+  }else if(S_ISREG(inode->i_mode)){
+    type=MSG_INODE_FILE;
+  }else if(S_ISSOCK(inode->i_mode)){
+    type=MSG_INODE_SOCKET;
+  }
+  node_identifier(iprov).type=type;
+}
 #endif
 #endif /* _LINUX_PROVENANCE_H */

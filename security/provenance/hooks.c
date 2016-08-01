@@ -153,7 +153,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-  prov_msg_t* iprov = alloc_provenance(MSG_INODE, GFP_KERNEL);
+  prov_msg_t* iprov = alloc_provenance(MSG_INODE_UNKNOWN, GFP_KERNEL);
   prov_msg_t* sprov;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct *ifc=NULL;
@@ -978,12 +978,12 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
  }
 
 /*
-*      Tidy up after the installation of the new security attributes of a
-*      process being transformed by an execve operation.  The new credentials
-*      have, by this point, been set to @current->cred.  @bprm points to the
-*      linux_binprm structure.  This hook is a good place to perform state
-*      changes on the process such as clearing out non-inheritable signal
-*      state.  This is called immediately after commit_creds().
+* Tidy up after the installation of the new security attributes of a
+* process being transformed by an execve operation.  The new credentials
+* have, by this point, been set to @current->cred.  @bprm points to the
+* linux_binprm structure.  This hook is a good place to perform state
+* changes on the process such as clearing out non-inheritable signal
+* state.  This is called immediately after commit_creds().
 */
 static void provenance_bprm_committed_creds(struct linux_binprm *bprm)
 {
