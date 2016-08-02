@@ -28,7 +28,8 @@
 #define PROV_EDGE_FILE             "/sys/kernel/security/provenance/edge"
 #define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
 #define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
-#define PROV_TRACK_DIR_FILE        "/sys/kernel/security/provenance/dir"
+#define PROV_NODE_FILTER_FILE      "/sys/kernel/security/provenance/node_filter"
+#define PROV_EDGE_FILTER_FILE      "/sys/kernel/security/provenance/edge_filter"
 
 #define MSG_STR               0x00000001UL
 #define MSG_EDGE              0x00000002UL
@@ -53,29 +54,33 @@
 #define MSG_DISC_AGENT        0x00100000UL
 #define MSG_DISC_NODE         0x00200000UL
 
-#define ED_READ             0
-#define ED_WRITE            1
-#define ED_CREATE           2
-#define ED_PASS             3
-#define ED_CHANGE           4
-#define ED_MMAP             5
-#define ED_ATTACH           6
-#define ED_ASSOCIATE        7
-#define ED_BIND             8
-#define ED_CONNECT          9
-#define ED_LISTEN           10
-#define ED_ACCEPT           11
-#define ED_OPEN             12
-#define ED_PARENT           13
-#define ED_VERSION          14
-#define ED_LINK             15
-#define ED_NAMED            16
-#define ED_IFC              17
-#define ED_EXEC             18
-#define ED_FORK             19
-#define ED_UNKNOWN          20
-#define ED_VERSION_PROCESS  21
-#define ED_SEARCH           22
+#define DEFAULT_NODE_FILTER   (MSG_INODE_DIRECTORY|MSG_INODE_UNKNOWN)
+
+#define ED_READ               0x00000001UL
+#define ED_WRITE              0x00000002UL
+#define ED_CREATE             0x00000004UL
+#define ED_PASS               0x00000008UL
+#define ED_CHANGE             0x00000010UL
+#define ED_MMAP               0x00000020UL
+#define ED_ATTACH             0x00000040UL
+#define ED_ASSOCIATE          0x00000080UL
+#define ED_BIND               0x00000100UL
+#define ED_CONNECT            0x00000200UL
+#define ED_LISTEN             0x00000400UL
+#define ED_ACCEPT             0x00000800UL
+#define ED_OPEN               0x00001000UL
+#define ED_PARENT             0x00002000UL
+#define ED_VERSION            0x00004000UL
+#define ED_LINK               0x00008000UL
+#define ED_NAMED              0x00010000UL
+#define ED_IFC                0x00020000UL
+#define ED_EXEC               0x00040000UL
+#define ED_FORK               0x00080000UL
+#define ED_UNKNOWN            0x00100000UL
+#define ED_VERSION_PROCESS    0x00200000UL
+#define ED_SEARCH             0x00400000UL
+
+#define DEFAULT_EDGE_FILTER   0
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -244,5 +249,10 @@ typedef union long_msg{
   struct ifc_context_struct   ifc_info;
   struct disc_node_struct     disc_node_info;
 } long_prov_msg_t;
+
+struct prov_filter{
+  uint32_t filter;
+  uint8_t add;
+};
 
 #endif

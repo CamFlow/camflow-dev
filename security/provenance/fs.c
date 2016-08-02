@@ -19,6 +19,20 @@
 #define TMPBUFLEN	12
 #define DEFAULT_PROPAGATE_DEPTH 1
 
+
+static inline void __init_opaque(void){
+	provenance_mark_as_opaque(PROV_ENABLE_FILE);
+	provenance_mark_as_opaque(PROV_ALL_FILE);
+	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
+	provenance_mark_as_opaque(PROV_TRACKED_FILE);
+	provenance_mark_as_opaque(PROV_NODE_FILE);
+	provenance_mark_as_opaque(PROV_EDGE_FILE);
+	provenance_mark_as_opaque(PROV_SELF_FILE);
+	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
+	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_EDGE_FILTER_FILE);
+}
+
 bool prov_enabled=false;
 
 static ssize_t prov_write_enable(struct file *file, const char __user *buf,
@@ -297,18 +311,6 @@ static const struct file_operations prov_self_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-static inline void __init_opaque(void){
-	provenance_mark_as_opaque(PROV_ENABLE_FILE);
-	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
-	provenance_mark_as_opaque(PROV_TRACKED_FILE);
-	provenance_mark_as_opaque(PROV_NODE_FILE);
-	provenance_mark_as_opaque(PROV_EDGE_FILE);
-	provenance_mark_as_opaque(PROV_SELF_FILE);
-	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
-	provenance_mark_as_opaque(PROV_TRACK_DIR_FILE);
-}
-
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
@@ -337,18 +339,16 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	uint32_t* tmp = (uint32_t*)buf;
-
 	if(count < sizeof(uint32_t))
 	{
 		return -ENOMEM;
 	}
 
-	if(copy_to_user(tmp, &prov_machine_id, sizeof(uint32_t)))
+	if(copy_to_user(buf, &prov_machine_id, sizeof(uint32_t)))
 	{
 		return -EAGAIN;
 	}
-	return count; // write only
+	return count;
 }
 
 static const struct file_operations prov_machine_id_ops = {
@@ -408,60 +408,95 @@ static const struct file_operations prov_tracked_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-bool prov_track_dir=false;
+uint32_t prov_node_filter = DEFAULT_NODE_FILTER;
 
-static ssize_t prov_write_track_dir(struct file *file, const char __user *buf,
+static ssize_t prov_write_node_filter(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-  char* page = NULL;
-  ssize_t length;
-  bool new_value;
-  int tmp;
+  struct prov_filter* filter;
 
-  /* no partial write */
-  if(*ppos > 0)
-    return -EINVAL;
-
-  if(__kuid_val(current_euid())!=0)
+	if(__kuid_val(current_euid())!=0){
     return -EPERM;
+	}
 
-  page = (char *)get_zeroed_page(GFP_KERNEL);
-  if (!page)
+	if(count < sizeof(struct prov_filter)){
     return -ENOMEM;
-
-  length=-EFAULT;
-	if (copy_from_user(page, buf, count))
-		goto out;
-
-  length = -EINVAL;
-  if (sscanf(page, "%d", &tmp) != 1)
-		goto out;
-
-  new_value=tmp;
-  if(new_value!=prov_track_dir){
-    prov_track_dir=new_value;
   }
-  length=count;
-out:
-  free_page((unsigned long)page);
-  return length;
+
+	filter = (struct prov_filter*)buf;
+
+	if(filter->add!=0){
+		prov_node_filter|=filter->filter;
+	}else{
+		prov_node_filter&=~(filter->filter);
+	}
+	return count;
 }
 
-static ssize_t prov_read_track_dir(struct file *filp, char __user *buf,
+static ssize_t prov_read_node_filter(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	char tmpbuf[TMPBUFLEN];
-	ssize_t length;
-  int tmp = prov_track_dir;
+	if(count < sizeof(uint32_t)){
+    return -ENOMEM;
+  }
 
-	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
-	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
+	if(copy_to_user(buf, &prov_node_filter, sizeof(uint32_t)))
+	{
+		return -EAGAIN;
+	}
+	return count;
 }
 
-static const struct file_operations prov_track_dir_ops = {
-	.write		= prov_write_track_dir,
-  .read     = prov_read_track_dir,
+static const struct file_operations prov_node_filter_ops = {
+	.write		= prov_write_node_filter,
+  .read     = prov_read_node_filter,
+	.llseek		= generic_file_llseek,
+};
+
+uint32_t prov_edge_filter = DEFAULT_EDGE_FILTER;
+
+static ssize_t prov_write_edge_filter(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+  struct prov_filter* filter;
+
+	if(__kuid_val(current_euid())!=0){
+    return -EPERM;
+	}
+
+	if(count < sizeof(struct prov_filter)){
+    return -ENOMEM;
+  }
+
+	filter = (struct prov_filter*)buf;
+
+	if(filter->add!=0){
+		prov_edge_filter|=filter->filter;
+	}else{
+		prov_edge_filter&=~(filter->filter);
+	}
+	return count;
+}
+
+static ssize_t prov_read_edge_filter(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	if(count < sizeof(uint32_t)){
+    return -ENOMEM;
+  }
+
+	if(copy_to_user(buf, &prov_edge_filter, sizeof(uint32_t)))
+	{
+		return -EAGAIN;
+	}
+	return count;
+}
+
+static const struct file_operations prov_edge_filter_ops = {
+	.write		= prov_write_edge_filter,
+  .read     = prov_read_edge_filter,
 	.llseek		= generic_file_llseek,
 };
 
@@ -479,7 +514,8 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
 	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
 	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
-	 securityfs_create_file("dir", 0644, prov_dir, NULL, &prov_track_dir_ops);
+	 securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
+	 securityfs_create_file("edge_filter", 0644, prov_dir, NULL, &prov_edge_filter_ops);
    return 0;
 }
 

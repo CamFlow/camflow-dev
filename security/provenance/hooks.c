@@ -142,8 +142,6 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
   return 0;
 }
 
-#define prov_copy_inode_mode(iprov, inode) iprov->inode_info.mode=inode->i_mode
-
 /*
 * Allocate and attach a security structure to @inode->i_security.  The
 * i_security field is initialized to NULL when the inode structure is
@@ -212,9 +210,9 @@ static inline void record_inode_name(struct inode *inode){
 	char *buffer;
 	char *ptr;
 
-	// it is a directory and we don't track it
-	if(is_inode_dir(inode) && !prov_track_dir)
+	if(filter_node(iprov)){
 		return;
+	}
 
 	dentry = d_find_alias(inode);
 
@@ -243,13 +241,17 @@ static inline void record_task_name(struct task_struct *task){
 
 	tprov = cred->provenance;
 
+	if(filter_node(tprov)){
+		goto finished;
+	}
+
 	// name already recorded
 	if(provenance_is_name_recorded(tprov))
-		return;
+		goto finished;
 
 	mm = get_task_mm(task);
 	if (!mm)
- 		return;
+ 		goto finished;
 	exe_file = get_mm_exe_file(mm);
 	mmput(mm);
 
@@ -261,6 +263,7 @@ static inline void record_task_name(struct task_struct *task){
 		kfree(buffer);
 	}
 
+finished:
 	put_cred(cred);
 }
 
@@ -276,21 +279,16 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	prov_msg_t* cprov = current_provenance();
 	prov_msg_t* iprov;
 
-	// it is a directory and we don't track it
-	if(!prov_track_dir)
-		return 0;
-
 	iprov = inode_get_provenance(dir);
 	if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
 		iprov = inode_get_provenance(dir);
   }
-
-	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
-    return 0;
-	}
-
 	prov_copy_inode_mode(iprov, dir);
+
+	if(filter_node(iprov)){
+		return 0;
+	}
 
 	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
 		record_inode_name(dir);
@@ -324,21 +322,16 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if(unlikely(IS_PRIVATE(inode)))
 		return 0;
 
-	// it is a directory and we don't track it
-	if(is_inode_dir(inode) && !prov_track_dir)
-		return 0;
-
 	iprov = inode_get_provenance(inode);
   if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
 		iprov = inode_get_provenance(inode);
   }
-
-	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
-    return 0;
-	}
-
 	prov_copy_inode_mode(iprov, inode);
+
+	if(filter_node(iprov) || filter_node(cprov)){
+		return 0;
+	}
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
@@ -466,14 +459,15 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	struct inode *inode = file_inode(file);
 	prov_msg_t* iprov = inode_get_provenance(inode);
 
-	if(is_inode_dir(inode) && !prov_track_dir) // we ignore directory
-		return 0;
-
 	if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
 		iprov = inode_get_provenance(inode);
   }
 	prov_copy_inode_mode(iprov, inode);
+
+	if(filter_node(iprov)){
+		return 0;
+	}
 
 	prov_update_version(cprov);
 	record_edge(ED_OPEN, iprov, cprov, FLOW_ALLOWED);
@@ -1094,6 +1088,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
   LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
 };
+
 #ifndef CONFIG_SECURITY_IFC
 struct kmem_cache *camflow_cache=NULL;
 #endif

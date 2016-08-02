@@ -20,7 +20,10 @@
 
 extern bool prov_enabled;
 extern bool prov_all;
-extern bool prov_track_dir;
+
+#define HIT_FILTER(filter, data) ( (filter&data) != 0 )
+
+extern uint32_t prov_node_filter;
 
 /* return either or not the node should be filtered out */
 static inline bool filter_node(prov_msg_t* node){
@@ -32,12 +35,24 @@ static inline bool filter_node(prov_msg_t* node){
     return true;
   }
 
+  // we hit an element of the black list ignore
+  if( HIT_FILTER(prov_node_filter, node_identifier(node).type) ){
+    return true;
+  }
+
   return false;
 }
 
+extern uint32_t prov_edge_filter;
+
 /* return either or not the edge should be filtered out */
-static inline bool filter_edge(uint8_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
-  // if one of the node should not appear in the record, ignore the edge
+static inline bool filter_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  // we hit an element of the black list ignore
+  if( HIT_FILTER(prov_edge_filter, type) ){
+    return true;
+  }
+
+  // one of the node should not appear in the record, ignore the edge
   if(filter_node(to) || filter_node(from)){
     return true;
   }
