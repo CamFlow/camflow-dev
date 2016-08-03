@@ -156,10 +156,10 @@ static inline void record_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, 
     }
   }
 
-  if(!(node_kern(from).recorded == NODE_RECORDED) )
+  if( !porvenance_is_recorded(from) )
     record_node(from);
 
-  if(!(node_kern(to).recorded == NODE_RECORDED) )
+  if( !porvenance_is_recorded(to) )
     record_node(to);
 
 
@@ -183,7 +183,7 @@ static inline void long_record_edge(uint32_t type, long_prov_msg_t* from, prov_m
   if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) )
     return;
 
-  if(!(node_kern(from).recorded == NODE_RECORDED) )
+  if( !porvenance_is_recorded(from) )
     record_node(to);
 
   prov_type((&edge))=MSG_EDGE;

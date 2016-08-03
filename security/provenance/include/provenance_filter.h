@@ -17,6 +17,7 @@
 #define provenance_is_opaque(node) (node_kern(node).opaque == NODE_OPAQUE)
 #define provenance_is_tracked(node) (prov_all || node_kern(node).tracked == NODE_TRACKED)
 #define provenance_is_name_recorded(node) (node_kern(node).name_recorded == NAME_RECORDED)
+#define porvenance_is_recorded(node) (node_kern(node).recorded == NODE_RECORDED)
 
 extern bool prov_enabled;
 extern bool prov_all;
@@ -47,6 +48,14 @@ extern uint32_t prov_edge_filter;
 
 /* return either or not the edge should be filtered out */
 static inline bool filter_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_edge_filter, ED_DISALLOWED)){
+    return true;
+  }
+
+  if(allowed==FLOW_ALLOWED && HIT_FILTER(prov_edge_filter, ED_ALLOWED)){
+    return true;
+  }
+
   // we hit an element of the black list ignore
   if( HIT_FILTER(prov_edge_filter, type) ){
     return true;
@@ -58,7 +67,7 @@ static inline bool filter_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, 
   }
 
   // ignore if none of the node are tracked and we are not capturing everything
-  if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all){
+  if(!(provenance_is_tracked(from)|porvenance_is_recorded(from)) && !(provenance_is_tracked(to)|porvenance_is_recorded(to)) && !prov_all){
     return true;
   }
 

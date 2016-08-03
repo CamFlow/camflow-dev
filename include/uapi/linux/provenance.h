@@ -79,6 +79,8 @@
 #define ED_UNKNOWN            0x00100000UL
 #define ED_VERSION_PROCESS    0x00200000UL
 #define ED_SEARCH             0x00400000UL
+#define ED_ALLOWED            0x00800000UL
+#define ED_DISALLOWED         0x01000000UL
 
 #define DEFAULT_EDGE_FILTER   0
 
