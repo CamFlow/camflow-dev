@@ -67,7 +67,7 @@ static inline bool filter_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, 
   }
 
   // ignore if none of the node are tracked and we are not capturing everything
-  if(!(provenance_is_tracked(from)|porvenance_is_recorded(from)) && !(provenance_is_tracked(to)|porvenance_is_recorded(to)) && !prov_all){
+  if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all){
     return true;
   }
 
