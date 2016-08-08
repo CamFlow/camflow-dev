@@ -7,9 +7,21 @@ The source code for the provenance and IFC userspace libraries are available [he
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.1.3           | 4.4.6          | 08/08/2016 |
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.1.3
+
+```
+- Provide facility to filter nodes and edges in kernel.
+- Added a string to the disclosed provenance node data structure.
+- Provided provenance tracking depth setting (how far tracked flag is propagated).
+- Add pseudo file for a process to request to be provenance-tracked.
+- Modified provenance internal data structure and working to align with W3C Prov model.
+- IFC and Provenance LSM are now part of the default configuration.
+```
 
 ### v0.1.2
 

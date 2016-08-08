@@ -1,5 +1,5 @@
 kernel-version=4.4.6
-lsm-version=0.1.2
+lsm-version=0.1.3
 arch=x86_64
 
 all: config compile
@@ -41,7 +41,9 @@ compile_kernel:
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
+	cd ./build/camflow-provenance-lib && $(MAKE) clean
 	cd ./build/camflow-provenance-lib && $(MAKE) all
+	cd ./build/camflow-ifc-lib && $(MAKE) clean
 	cd ./build/camflow-ifc-lib && $(MAKE) all
 	cd ./build/camflow-config && $(MAKE) all
 

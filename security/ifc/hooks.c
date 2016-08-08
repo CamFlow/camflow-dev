@@ -1,7 +1,5 @@
 /*
 *
-* /linux/security/ifc/hooks.c
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
@@ -12,9 +10,7 @@
 *
 */
 
-#include <linux/provenance.h>
 #include <linux/camflow.h>
-#include <linux/ifc.h>
 #include <linux/slab.h>
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
@@ -22,6 +18,9 @@
 #include <linux/binfmts.h>
 #include <linux/random.h>
 #include <linux/xattr.h>
+
+#include "ifc.h"
+#include "provenance.h"
 
 struct kmem_cache *ifc_cache=NULL;
 
@@ -143,7 +142,7 @@ static int ifc_inode_alloc_security(struct inode *inode)
     return -ENOMEM;
   }
   alloc_camflow(inode, GFP_KERNEL);
-  inode_set_ifc(inode, (void**)&ifc);
+  inode_set_ifc(inode, ifc);
   return 0;
 }
 
@@ -212,7 +211,7 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     // process -> inode
     if(!ifc_can_flow(&cifc->context, &ifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_DATA, p_prov, i_prov, FLOW_DISALLOWED);
+      record_edge(ED_WRITE, p_prov, i_prov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -221,7 +220,7 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     // inode -> process
     if(!ifc_can_flow(&ifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_DATA, i_prov, p_prov, FLOW_DISALLOWED);
+      record_edge(ED_READ, i_prov, p_prov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -303,7 +302,7 @@ static int ifc_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int 
 #ifdef CONFIG_SECURITY_PROVENANCE
     p_prov=current_provenance();
     m_prov=msg->provenance;
-    record_edge(ED_DATA, p_prov, m_prov, FLOW_DISALLOWED);
+    record_edge(ED_WRITE, p_prov, m_prov, FLOW_DISALLOWED);
 #endif
     return -EPERM;
   }
@@ -338,7 +337,7 @@ static int ifc_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *msg,
 #ifdef CONFIG_SECURITY_PROVENANCE
     p_prov = target->cred->provenance;
     m_prov = msg->provenance;
-    record_edge(ED_DATA, m_prov, p_prov, FLOW_DISALLOWED);
+    record_edge(ED_READ, m_prov, p_prov, FLOW_DISALLOWED);
 #endif
     return -EPERM;
   }
@@ -490,6 +489,12 @@ static int ifc_bprm_set_creds(struct linux_binprm *bprm){
   struct ifc_struct* old_ifc = current_ifc();
   struct ifc_struct* new_ifc = bprm->cred->ifc;
   struct ifc_struct* file_ifc = inode_get_ifc(inode);
+
+  if(!old_ifc){
+    if(ifc_is_labelled(&old_ifc->context)){
+      printk(KERN_INFO "bprm_set_creds.\n");
+    }
+  }
 
   if(!old_ifc && !file_ifc && !new_ifc){
     if(ifc_is_labelled(&file_ifc->context)){

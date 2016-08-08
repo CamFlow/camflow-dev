@@ -1,7 +1,5 @@
 /*
 *
-* /linux/security/provenance/provenance.c
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
@@ -14,8 +12,9 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/provenance.h>
 #include <linux/debugfs.h>
+
+#include "provenance.h"
 
 #define PROV_BASE_NAME "provenance"
 #define LONG_PROV_BASE_NAME "long_provenance"
@@ -23,7 +22,7 @@
 /* global variable, extern in provenance.h */
  struct rchan *prov_chan=NULL;
  struct rchan *long_prov_chan=NULL;
- atomic64_t prov_evt_count=ATOMIC64_INIT(0);
+ atomic64_t prov_edge_id=ATOMIC64_INIT(0);
  atomic64_t prov_node_id=ATOMIC64_INIT(0);
 
 /*

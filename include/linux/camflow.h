@@ -1,7 +1,5 @@
 /*
 *
-* /linux/include/linux/ifc.h
-*
 * Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
 *
 * Copyright (C) 2016 University of Cambridge
@@ -15,8 +13,8 @@
 #ifndef _LINUX_CAMFLOW_HEAD_H
 #define _LINUX_CAMFLOW_HEAD_H
 
+#include <linux/security.h>
 #include <linux/fs.h>
-#include <linux/namei.h>
 
 // cause softlockup if both pointer directly added to inode
 // no time to figure out why, work around
@@ -26,12 +24,11 @@ struct camflow_i_ptr{
 };
 
 extern struct kmem_cache *camflow_cache;
-
-static inline void alloc_camflow(struct inode *inode, gfp_t gfp)
-{
-  if(!inode->i_camflow)
-    inode->i_camflow = kmem_cache_zalloc(camflow_cache, gfp);
-}
+#define alloc_camflow(inode, gfp) if(!inode->i_camflow) inode->i_camflow = kmem_cache_zalloc(camflow_cache, gfp);
+#define inode_get_provenance(inode) ((prov_msg_t*)((struct camflow_i_ptr*)inode->i_camflow)->provenance)
+#define inode_set_provenance(inode, v) ((struct camflow_i_ptr*)inode->i_camflow)->provenance=v
+#define inode_get_ifc(inode) ((struct ifc_struct*)((struct camflow_i_ptr*)inode->i_camflow)->ifc)
+#define inode_set_ifc(inode, v) ((struct camflow_i_ptr*)inode->i_camflow)->ifc=v
 
 // free only if both ptr have been freed
 static inline void free_camflow(struct inode *inode){
@@ -45,44 +42,5 @@ static inline void free_camflow(struct inode *inode){
   }
 }
 
-static inline void* inode_get_provenance(const struct inode *inode){
-  struct camflow_i_ptr* camflow = inode->i_camflow;
-  return camflow->provenance;
-}
-
-static inline void inode_set_provenance(const struct inode *inode, void** provenance){
-  struct camflow_i_ptr* camflow = inode->i_camflow;
-  if(provenance==NULL){
-    camflow->provenance=NULL;
-  }else{
-    camflow->provenance=(*provenance);
-  }
-}
-
-static inline void* inode_get_ifc(const struct inode *inode){
-  struct camflow_i_ptr* camflow = inode->i_camflow;
-  return camflow->ifc;
-}
-
-static inline void inode_set_ifc(const struct inode *inode, void** ifc){
-  struct camflow_i_ptr* camflow = inode->i_camflow;
-  if(ifc==NULL){
-    camflow->ifc=NULL;
-  }else{
-    camflow->ifc=(*ifc);
-  }
-}
-
-static inline struct inode* file_name_to_inode(const char* name){
-  struct path path;
-  struct inode* inode;
-  if(kern_path(name, LOOKUP_FOLLOW, &path)){
-    printk(KERN_ERR "CamFlow: Failed file look up (%s).", name);
-    return NULL;
-  }
-  inode = path.dentry->d_inode;
-  path_put(&path);
-  return inode;
-}
 
 #endif
