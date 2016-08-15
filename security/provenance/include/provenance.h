@@ -230,7 +230,6 @@ static inline void provenance_mark_as_opaque(const char* name){
   }else{
     prov = inode_get_provenance(in);
     if(prov){
-      printk(KERN_ERR "Provenance: prov was ready.");
       node_kern(prov).opaque=NODE_OPAQUE;
     }
   }
