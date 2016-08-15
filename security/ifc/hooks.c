@@ -779,8 +779,10 @@ void __init ifc_add_hooks(void){
   camflow_cache = kmem_cache_create("camflow_i_ptr",
 					    sizeof(struct camflow_i_ptr),
 					    0, SLAB_PANIC, NULL);
+
   cred_init_security();
   security_add_hooks(ifc_hooks, ARRAY_SIZE(ifc_hooks));
+
   printk(KERN_INFO "IFC Camflow %s\n", CAMFLOW_VERSION_STR);
   printk(KERN_INFO "IFC hooks ready.\n");
 }

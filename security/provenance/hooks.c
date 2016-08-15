@@ -1093,17 +1093,18 @@ static struct security_hook_list provenance_hooks[] = {
 struct kmem_cache *camflow_cache=NULL;
 #endif
 
-uint32_t prov_machine_id=1; /* TODO get a proper id somehow */
+uint32_t prov_machine_id=1; /* TODO get a proper id somehow, now set from userspace */
 uint32_t prov_boot_id=0;
 void __init provenance_add_hooks(void){
-	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
-	get_random_bytes(&prov_boot_id, sizeof(uint32_t));
+	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);
+
   long_provenance_cache = kmem_cache_create("long_provenance_struct",
 					    sizeof(long_prov_msg_t),
 					    0, SLAB_PANIC, NULL);
+
 #ifndef CONFIG_SECURITY_IFC
 	camflow_cache = kmem_cache_create("camflow_i_ptr",
 							sizeof(struct camflow_i_ptr),
@@ -1112,5 +1113,7 @@ void __init provenance_add_hooks(void){
   cred_init_provenance();
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
+
+	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
 	printk(KERN_INFO "Provenance hooks ready.\n");
 }
