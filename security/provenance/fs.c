@@ -26,11 +26,11 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
 	provenance_mark_as_opaque(PROV_TRACKED_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
-	provenance_mark_as_opaque(PROV_EDGE_FILE);
+	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_EDGE_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
 }
 
 bool prov_enabled=false;
@@ -253,32 +253,32 @@ static const struct file_operations prov_node_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-static ssize_t prov_write_edge(struct file *file, const char __user *buf,
+static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	prov_msg_t edge;
+	prov_msg_t relation;
 
-	if(count < sizeof(struct edge_struct))
+	if(count < sizeof(struct relation_struct))
 	{
 		return -ENOMEM;
 	}
-	if(copy_from_user(&edge, buf, sizeof(struct edge_struct))){
+	if(copy_from_user(&relation, buf, sizeof(struct relation_struct))){
 		return -ENOMEM;
 	}
-	prov_type((&edge)) = MSG_EDGE;
-	prov_write(&edge);
+	prov_type((&relation)) = MSG_RELATION;
+	prov_write(&relation);
 	return count;
 }
 
-static ssize_t prov_read_edge(struct file *filp, char __user *buf,
+static ssize_t prov_read_relation(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	return -EPERM; // write only
 }
 
-static const struct file_operations prov_edge_ops = {
-	.write		= prov_write_edge,
-  .read     = prov_read_edge,
+static const struct file_operations prov_relation_ops = {
+	.write		= prov_write_relation,
+  .read     = prov_read_relation,
 	.llseek		= generic_file_llseek,
 };
 
@@ -454,9 +454,9 @@ static const struct file_operations prov_node_filter_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-uint32_t prov_edge_filter = DEFAULT_EDGE_FILTER;
+uint32_t prov_relation_filter = DEFAULT_RELATION_FILTER;
 
-static ssize_t prov_write_edge_filter(struct file *file, const char __user *buf,
+static ssize_t prov_write_relation_filter(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
@@ -473,30 +473,30 @@ static ssize_t prov_write_edge_filter(struct file *file, const char __user *buf,
 	filter = (struct prov_filter*)buf;
 
 	if(filter->add!=0){
-		prov_edge_filter|=filter->filter;
+		prov_relation_filter|=filter->filter;
 	}else{
-		prov_edge_filter&=~(filter->filter);
+		prov_relation_filter&=~(filter->filter);
 	}
 	return count;
 }
 
-static ssize_t prov_read_edge_filter(struct file *filp, char __user *buf,
+static ssize_t prov_read_relation_filter(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	if(count < sizeof(uint32_t)){
     return -ENOMEM;
   }
 
-	if(copy_to_user(buf, &prov_edge_filter, sizeof(uint32_t)))
+	if(copy_to_user(buf, &prov_relation_filter, sizeof(uint32_t)))
 	{
 		return -EAGAIN;
 	}
 	return count;
 }
 
-static const struct file_operations prov_edge_filter_ops = {
-	.write		= prov_write_edge_filter,
-  .read     = prov_read_edge_filter,
+static const struct file_operations prov_relation_filter_ops = {
+	.write		= prov_write_relation_filter,
+  .read     = prov_read_relation_filter,
 	.llseek		= generic_file_llseek,
 };
 
@@ -511,11 +511,11 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
 	 securityfs_create_file("tracked", 0666, prov_dir, NULL, &prov_tracked_ops);
 	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
-	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
+	 securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
 	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
 	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
 	 securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
-	 securityfs_create_file("edge_filter", 0644, prov_dir, NULL, &prov_edge_filter_ops);
+	 securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
    return 0;
 }
 

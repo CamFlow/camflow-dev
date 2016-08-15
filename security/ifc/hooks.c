@@ -211,7 +211,7 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     // process -> inode
     if(!ifc_can_flow(&cifc->context, &ifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_WRITE, p_prov, i_prov, FLOW_DISALLOWED);
+      record_relation(RL_WRITE, p_prov, i_prov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -220,7 +220,7 @@ static int ifc_inode_permission(struct inode *inode, int mask)
     // inode -> process
     if(!ifc_can_flow(&ifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_READ, i_prov, p_prov, FLOW_DISALLOWED);
+      record_relation(RL_READ, i_prov, p_prov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -302,7 +302,7 @@ static int ifc_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int 
 #ifdef CONFIG_SECURITY_PROVENANCE
     p_prov=current_provenance();
     m_prov=msg->provenance;
-    record_edge(ED_WRITE, p_prov, m_prov, FLOW_DISALLOWED);
+    record_relation(RL_WRITE, p_prov, m_prov, FLOW_DISALLOWED);
 #endif
     return -EPERM;
   }
@@ -337,7 +337,7 @@ static int ifc_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *msg,
 #ifdef CONFIG_SECURITY_PROVENANCE
     p_prov = target->cred->provenance;
     m_prov = msg->provenance;
-    record_edge(ED_READ, m_prov, p_prov, FLOW_DISALLOWED);
+    record_relation(RL_READ, m_prov, p_prov, FLOW_DISALLOWED);
 #endif
     return -EPERM;
   }
@@ -382,7 +382,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
   if((prot & PROT_WRITE) != 0){
     if(!ifc_can_flow(&cifc->context, &iifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_MMAP, cprov, iprov, FLOW_DISALLOWED);
+      record_relation(RL_MMAP, cprov, iprov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -392,7 +392,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
     // we assume write imply read
     if(!ifc_can_flow(&iifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_MMAP, iprov, cprov, FLOW_DISALLOWED);
+      record_relation(RL_MMAP, iprov, cprov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -454,15 +454,15 @@ static int ifc_shm_shmat(struct shmid_kernel *shp,
   if(shmflg & SHM_RDONLY){
     if(!ifc_can_flow(&sifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_ATTACH, sprov, cprov, FLOW_DISALLOWED);
+      record_relation(RL_ATTACH, sprov, cprov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
   }else{
     if(!ifc_can_flow(&sifc->context, &cifc->context) || !ifc_can_flow(&cifc->context, &sifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_edge(ED_ATTACH, sprov, cprov, FLOW_DISALLOWED);
-      record_edge(ED_ATTACH, cprov, sprov, FLOW_DISALLOWED);
+      record_relation(RL_ATTACH, sprov, cprov, FLOW_DISALLOWED);
+      record_relation(RL_ATTACH, cprov, sprov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }

@@ -22,7 +22,7 @@
 /* global variable, extern in provenance.h */
  struct rchan *prov_chan=NULL;
  struct rchan *long_prov_chan=NULL;
- atomic64_t prov_edge_id=ATOMIC64_INIT(0);
+ atomic64_t prov_relation_id=ATOMIC64_INIT(0);
  atomic64_t prov_node_id=ATOMIC64_INIT(0);
 
 /*

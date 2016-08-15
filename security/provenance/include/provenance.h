@@ -31,12 +31,12 @@
 
 #define ASSIGN_NODE_ID 0
 
-#define prov_next_edgeid() ((uint64_t)atomic64_inc_return(&prov_edge_id))
-#define prov_next_nodeid() ((uint64_t)atomic64_inc_return(&prov_node_id))
+#define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
+#define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
 #define free_provenance(prov) kmem_cache_free(provenance_cache, prov)
 #define free_long_provenance(prov) kmem_cache_free(long_provenance_cache, prov)
 
-extern atomic64_t prov_edge_id;
+extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct rchan *prov_chan;
 extern struct rchan *long_prov_chan;
@@ -66,7 +66,7 @@ extern uint32_t prov_boot_id;
 
 static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   if(nid==ASSIGN_NODE_ID){
-    node_identifier(node).id=prov_next_nodeid();
+    node_identifier(node).id=prov_next_node_id();
   }else{
     node_identifier(node).id=nid;
   }
@@ -102,7 +102,7 @@ static inline void long_prov_write(long_prov_msg_t* msg){
     return;
   }
   /* create a new node to containe the info */
-  node_identifier(msg).id=prov_next_nodeid();
+  node_identifier(msg).id=prov_next_node_id();
   node_identifier(msg).boot_id=prov_boot_id;
   node_identifier(msg).machine_id=prov_machine_id;
   relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
@@ -140,10 +140,10 @@ static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* sr
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
-static inline void record_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
-  prov_msg_t edge;
+static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  prov_msg_t relation;
 
-  if(filter_edge(type, from, to, allowed)){
+  if(filter_relation(type, from, to, allowed)){
     return;
   }
 
@@ -163,19 +163,19 @@ static inline void record_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, 
     record_node(to);
 
 
-  prov_type((&edge))=MSG_EDGE;
-  edge_identifier((&edge)).id = prov_next_edgeid();
-  edge_identifier((&edge)).boot_id = prov_boot_id;
-  edge_identifier((&edge)).machine_id = prov_machine_id;
-  edge.edge_info.type=type;
-  edge.edge_info.allowed=allowed;
-  copy_node_info(&edge.edge_info.snd, &from->node_info.identifier);
-  copy_node_info(&edge.edge_info.rcv, &to->node_info.identifier);
-  prov_write(&edge);
+  prov_type((&relation))=MSG_RELATION;
+  relation_identifier((&relation)).id = prov_next_relation_id();
+  relation_identifier((&relation)).boot_id = prov_boot_id;
+  relation_identifier((&relation)).machine_id = prov_machine_id;
+  relation.relation_info.type=type;
+  relation.relation_info.allowed=allowed;
+  copy_node_info(&relation.relation_info.snd, &from->node_info.identifier);
+  copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
+  prov_write(&relation);
 }
 
-static inline void long_record_edge(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
-  prov_msg_t edge;
+static inline void long_record_relation(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  prov_msg_t relation;
 
   if(unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
@@ -186,15 +186,15 @@ static inline void long_record_edge(uint32_t type, long_prov_msg_t* from, prov_m
   if( !porvenance_is_recorded(from) )
     record_node(to);
 
-  prov_type((&edge))=MSG_EDGE;
-  edge_identifier((&edge)).id = prov_next_edgeid();
-  edge_identifier((&edge)).boot_id = prov_boot_id;
-  edge_identifier((&edge)).machine_id = prov_machine_id;
-  edge.edge_info.type=type;
-  edge.edge_info.allowed=allowed;
-  copy_node_info(&edge.edge_info.snd, &from->node_info.identifier);
-  copy_node_info(&edge.edge_info.rcv, &to->node_info.identifier);
-  prov_write(&edge);
+  prov_type((&relation))=MSG_RELATION;
+  relation_identifier((&relation)).id = prov_next_relation_id();
+  relation_identifier((&relation)).boot_id = prov_boot_id;
+  relation_identifier((&relation)).machine_id = prov_machine_id;
+  relation.relation_info.type=type;
+  relation.relation_info.allowed=allowed;
+  copy_node_info(&relation.relation_info.snd, &from->node_info.identifier);
+  copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
+  prov_write(&relation);
 }
 
 static inline void prov_update_version(prov_msg_t* prov){
@@ -203,9 +203,9 @@ static inline void prov_update_version(prov_msg_t* prov){
   node_identifier(prov).version++;
   node_kern(prov).recorded = NODE_UNRECORDED;
   if(node_identifier(prov).type == MSG_TASK)
-    record_edge(ED_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
+    record_relation(RL_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
   else
-    record_edge(ED_VERSION, &old_prov, prov, FLOW_ALLOWED);
+    record_relation(RL_VERSION, &old_prov, prov, FLOW_ALLOWED);
 }
 
 #ifdef CONFIG_SECURITY_IFC
@@ -215,7 +215,7 @@ static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context
   ifc_prov = alloc_long_provenance(MSG_IFC, GFP_KERNEL);
   memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
   long_prov_write(ifc_prov);
-  // TODO connect via edge to entity/activity
+  // TODO connect via relation to entity/activity
   free_long_provenance(ifc_prov);
 }
 #endif
