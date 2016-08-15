@@ -31,6 +31,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.4
 
 ```
+- Edge renamed relation to align with W3C PROV model.
 - Update to kernel version 4.4.16.
 ```
 
