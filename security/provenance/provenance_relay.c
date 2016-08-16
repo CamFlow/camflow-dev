@@ -56,16 +56,20 @@ static struct rchan_callbacks relay_callbacks =
         .remove_buf_file = remove_buf_file_handler,
 };
 
+#define PROV_ELEMENT_IN_SUBBUF      8
+#define LONG_PROV_ELEMENT_IN_SUBBUF 2
+#define PROV_NB_SUBBUF              64
+
 static int __init relay_prov_init(void)
 {
   printk(KERN_INFO "Provenance init.\n");
-  prov_chan = relay_open(PROV_BASE_NAME, NULL, 128*sizeof(prov_msg_t), 4, &relay_callbacks, NULL);
+  prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_ELEMENT_IN_SUBBUF*sizeof(prov_msg_t), PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(prov_chan==NULL){
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
 
-  long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, 32*sizeof(long_prov_msg_t), 4, &relay_callbacks, NULL);
+  long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, LONG_PROV_ELEMENT_IN_SUBBUF*sizeof(long_prov_msg_t), PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(long_prov_chan==NULL){
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
