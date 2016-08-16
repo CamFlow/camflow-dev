@@ -32,6 +32,7 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
+	provenance_mark_as_opaque(PROV_FILE_FILE);
 }
 
 bool prov_enabled=false;
@@ -527,6 +528,81 @@ static const struct file_operations prov_flush_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static ssize_t prov_write_file(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+	struct prov_file_config *msg;
+  struct inode* in;
+  prov_msg_t* prov;
+  int rv = -EINVAL;
+
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
+
+  if(count < sizeof(struct prov_file_config)){
+    printk(KERN_INFO "Provenance: Too short.");
+    return -EINVAL;
+  }
+
+  msg = (struct prov_file_config*)buf;
+
+  in = file_name_to_inode(msg->name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
+    return -EINVAL;
+  }
+  prov = inode_get_provenance(in);
+
+	if(((msg->op) & PROV_SET_TRACKED)!=0){
+		node_kern(prov).tracked=msg->prov.node_kern.tracked;
+	}
+
+	if(((msg->op) & PROV_SET_OPAQUE)!=0){
+		node_kern(prov).opaque=msg->prov.node_kern.opaque;
+	}
+
+	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
+		node_kern(prov).propagate=msg->prov.node_kern.propagate;
+	}
+
+  return rv;
+}
+
+static ssize_t prov_read_file(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+  struct prov_file_config *msg;
+  struct inode* in;
+  prov_msg_t* prov;
+
+  if(count < sizeof(struct prov_file_config)){
+    printk(KERN_INFO "Provenance: Too short.");
+    return -EINVAL;
+  }
+
+  msg = (struct prov_file_config*)buf;
+  in = file_name_to_inode(msg->name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
+    return -EINVAL;
+  }
+
+  prov = inode_get_provenance(in);
+  if(copy_to_user(&msg->prov, &prov->inode_info, sizeof(struct inode_prov_struct))){
+    printk(KERN_INFO "Provenance: error copying.");
+    return -ENOMEM;
+  }
+
+  return sizeof(struct prov_file_config);
+}
+
+static const struct file_operations prov_file_ops = {
+	.write		= prov_write_file,
+  .read     = prov_read_file,
+	.llseek		= generic_file_llseek,
+};
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -544,6 +620,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
 	 securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
 	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
+	 securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
    return 0;
 }
 

@@ -31,6 +31,7 @@
 #define PROV_NODE_FILTER_FILE      "/sys/kernel/security/provenance/node_filter"
 #define PROV_RELATION_FILTER_FILE  "/sys/kernel/security/provenance/relation_filter"
 #define PROV_FLUSH_FILE            "/sys/kernel/security/provenance/flush"
+#define PROV_FILE_FILE             "/sys/kernel/security/provenance/file"
 
 #define MSG_STR               0x00000001UL
 #define MSG_RELATION          0x00000002UL
@@ -119,7 +120,7 @@ struct node_identifier{
 };
 
 struct relation_identifier{
-  uint32_t  type;
+  uint32_t type;
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
@@ -202,7 +203,7 @@ struct sock_struct{
 
 typedef union prov_msg{
   struct msg_struct           msg_info;
-  struct relation_struct          relation_info;
+  struct relation_struct      relation_info;
   struct node_struct          node_info;
   struct task_prov_struct     task_info;
   struct inode_prov_struct    inode_info;
@@ -256,6 +257,16 @@ typedef union long_msg{
 struct prov_filter{
   uint32_t filter;
   uint8_t add;
+};
+
+#define PROV_SET_TRACKED		  1
+#define PROV_SET_OPAQUE 		  2
+#define PROV_SET_PROPAGATE 		4
+
+struct prov_file_config{
+  char name[PATH_MAX];
+  struct inode_prov_struct prov;
+  uint8_t op; // on write
 };
 
 #endif
