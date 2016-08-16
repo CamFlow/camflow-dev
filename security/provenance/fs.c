@@ -31,6 +31,7 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_FLUSH_FILE);
 }
 
 bool prov_enabled=false;
@@ -225,6 +226,9 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
 	  copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
+		node_identifier(node).id=prov_next_node_id();
+	  node_identifier(node).boot_id=prov_boot_id;
+	  node_identifier(node).machine_id=prov_machine_id;
 		long_prov_write(node);
 	}else{ // the node is not of disclosed type
 		count = -EINVAL;
@@ -500,6 +504,29 @@ static const struct file_operations prov_relation_filter_ops = {
 	.llseek		= generic_file_llseek,
 };
 
+static ssize_t prov_write_flush(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+	if(__kuid_val(current_euid())!=0) // only allowed for root
+    return -EPERM;
+
+  prov_flush();
+	return 0;
+}
+
+static ssize_t prov_read_flush(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	return -EPERM; // nothing to read
+}
+
+static const struct file_operations prov_flush_ops = {
+	.write		= prov_write_flush,
+  .read     = prov_read_flush,
+	.llseek		= generic_file_llseek,
+};
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -516,6 +543,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
 	 securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
 	 securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
+	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
    return 0;
 }
 

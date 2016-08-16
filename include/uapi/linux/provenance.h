@@ -30,6 +30,7 @@
 #define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
 #define PROV_NODE_FILTER_FILE      "/sys/kernel/security/provenance/node_filter"
 #define PROV_RELATION_FILTER_FILE  "/sys/kernel/security/provenance/relation_filter"
+#define PROV_FLUSH_FILE            "/sys/kernel/security/provenance/flush"
 
 #define MSG_STR               0x00000001UL
 #define MSG_RELATION          0x00000002UL

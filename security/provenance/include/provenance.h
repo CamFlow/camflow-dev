@@ -17,7 +17,6 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/bug.h>
-#include <linux/relay.h>
 #include <linux/socket.h>
 #include <linux/camflow.h>
 #include <uapi/linux/ifc.h>
@@ -28,6 +27,7 @@
 
 #include "camflow_utils.h"
 #include "provenance_filter.h"
+#include "provenance_relay.h"
 
 #define ASSIGN_NODE_ID 0
 
@@ -38,8 +38,6 @@
 
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
-extern struct rchan *prov_chan;
-extern struct rchan *long_prov_chan;
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
@@ -80,32 +78,12 @@ static inline long_prov_msg_t* alloc_long_provenance(uint32_t ntype, gfp_t gfp)
   if(!prov){
     return NULL;
   }
-
   prov_type(prov)=ntype;
-  return prov;
-}
-
-static inline void prov_write(prov_msg_t* msg)
-{
-  if(prov_chan==NULL) // not set yet
-  {
-    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
-    return;
-  }
-  relay_write(prov_chan, msg, sizeof(prov_msg_t));
-}
-
-static inline void long_prov_write(long_prov_msg_t* msg){
-  if(long_prov_chan==NULL) // not set yet
-  {
-    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
-    return;
-  }
   /* create a new node to containe the info */
-  node_identifier(msg).id=prov_next_node_id();
-  node_identifier(msg).boot_id=prov_boot_id;
-  node_identifier(msg).machine_id=prov_machine_id;
-  relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
+  node_identifier(prov).id=prov_next_node_id();
+  node_identifier(prov).boot_id=prov_boot_id;
+  node_identifier(prov).machine_id=prov_machine_id;
+  return prov;
 }
 
 static inline int prov_print(const char *fmt, ...)
