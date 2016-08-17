@@ -535,13 +535,14 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	struct prov_file_config *msg;
   struct inode* in;
   prov_msg_t* prov;
-  int rv = -EINVAL;
+
+	printk(KERN_INFO "Provenance: write file.");
 
   if(__kuid_val(current_euid())!=0)
     return -EPERM;
 
   if(count < sizeof(struct prov_file_config)){
-    printk(KERN_INFO "Provenance: Too short.");
+    printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
 
@@ -566,7 +567,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 		node_kern(prov).propagate=msg->prov.node_kern.propagate;
 	}
 
-  return rv;
+  return sizeof(struct prov_file_config);
 }
 
 static ssize_t prov_read_file(struct file *filp, char __user *buf,
@@ -576,8 +577,10 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
   struct inode* in;
   prov_msg_t* prov;
 
+	printk(KERN_INFO "Provenance: read file.");
+
   if(count < sizeof(struct prov_file_config)){
-    printk(KERN_INFO "Provenance: Too short.");
+    printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
 
@@ -590,7 +593,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 
   prov = inode_get_provenance(in);
   if(copy_to_user(&msg->prov, &prov->inode_info, sizeof(struct inode_prov_struct))){
-    printk(KERN_INFO "Provenance: error copying.");
+    printk(KERN_ERR "Provenance: error copying.");
     return -ENOMEM;
   }
 
