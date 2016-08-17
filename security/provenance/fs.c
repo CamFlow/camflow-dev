@@ -536,8 +536,6 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
   struct inode* in;
   prov_msg_t* prov;
 
-	printk(KERN_INFO "Provenance: write file.");
-
   if(__kuid_val(current_euid())!=0)
     return -EPERM;
 
@@ -576,8 +574,6 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
   struct prov_file_config *msg;
   struct inode* in;
   prov_msg_t* prov;
-
-	printk(KERN_INFO "Provenance: read file.");
 
   if(count < sizeof(struct prov_file_config)){
     printk(KERN_ERR "Provenance: Too short.");
