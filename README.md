@@ -22,7 +22,7 @@ make install # patience, sudo password will be ask during instalation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.4           | 4.4.16         | N/A        |
+| 0.1.4           | 4.4.16         | 18/08/2016 |
 | 0.1.3           | 4.4.6          | 08/08/2016 |
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
@@ -31,6 +31,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.4
 
 ```
+- Add pseudofile to manipulate file provenance settings.
 - Add pseudofile to flush relay buffer.
 - Edge renamed relation to align with W3C PROV model.
 - Update to kernel version 4.4.16.
