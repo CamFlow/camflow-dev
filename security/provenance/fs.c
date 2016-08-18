@@ -26,11 +26,13 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
 	provenance_mark_as_opaque(PROV_TRACKED_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
-	provenance_mark_as_opaque(PROV_EDGE_FILE);
+	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_EDGE_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_FLUSH_FILE);
+	provenance_mark_as_opaque(PROV_FILE_FILE);
 }
 
 bool prov_enabled=false;
@@ -225,6 +227,9 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
 	  copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
+		node_identifier(node).id=prov_next_node_id();
+	  node_identifier(node).boot_id=prov_boot_id;
+	  node_identifier(node).machine_id=prov_machine_id;
 		long_prov_write(node);
 	}else{ // the node is not of disclosed type
 		count = -EINVAL;
@@ -253,32 +258,32 @@ static const struct file_operations prov_node_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-static ssize_t prov_write_edge(struct file *file, const char __user *buf,
+static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	prov_msg_t edge;
+	prov_msg_t relation;
 
-	if(count < sizeof(struct edge_struct))
+	if(count < sizeof(struct relation_struct))
 	{
 		return -ENOMEM;
 	}
-	if(copy_from_user(&edge, buf, sizeof(struct edge_struct))){
+	if(copy_from_user(&relation, buf, sizeof(struct relation_struct))){
 		return -ENOMEM;
 	}
-	prov_type((&edge)) = MSG_EDGE;
-	prov_write(&edge);
+	prov_type((&relation)) = MSG_RELATION;
+	prov_write(&relation);
 	return count;
 }
 
-static ssize_t prov_read_edge(struct file *filp, char __user *buf,
+static ssize_t prov_read_relation(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	return -EPERM; // write only
 }
 
-static const struct file_operations prov_edge_ops = {
-	.write		= prov_write_edge,
-  .read     = prov_read_edge,
+static const struct file_operations prov_relation_ops = {
+	.write		= prov_write_relation,
+  .read     = prov_read_relation,
 	.llseek		= generic_file_llseek,
 };
 
@@ -454,9 +459,9 @@ static const struct file_operations prov_node_filter_ops = {
 	.llseek		= generic_file_llseek,
 };
 
-uint32_t prov_edge_filter = DEFAULT_EDGE_FILTER;
+uint32_t prov_relation_filter = DEFAULT_RELATION_FILTER;
 
-static ssize_t prov_write_edge_filter(struct file *file, const char __user *buf,
+static ssize_t prov_write_relation_filter(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
@@ -473,30 +478,127 @@ static ssize_t prov_write_edge_filter(struct file *file, const char __user *buf,
 	filter = (struct prov_filter*)buf;
 
 	if(filter->add!=0){
-		prov_edge_filter|=filter->filter;
+		prov_relation_filter|=filter->filter;
 	}else{
-		prov_edge_filter&=~(filter->filter);
+		prov_relation_filter&=~(filter->filter);
 	}
 	return count;
 }
 
-static ssize_t prov_read_edge_filter(struct file *filp, char __user *buf,
+static ssize_t prov_read_relation_filter(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	if(count < sizeof(uint32_t)){
     return -ENOMEM;
   }
 
-	if(copy_to_user(buf, &prov_edge_filter, sizeof(uint32_t)))
+	if(copy_to_user(buf, &prov_relation_filter, sizeof(uint32_t)))
 	{
 		return -EAGAIN;
 	}
 	return count;
 }
 
-static const struct file_operations prov_edge_filter_ops = {
-	.write		= prov_write_edge_filter,
-  .read     = prov_read_edge_filter,
+static const struct file_operations prov_relation_filter_ops = {
+	.write		= prov_write_relation_filter,
+  .read     = prov_read_relation_filter,
+	.llseek		= generic_file_llseek,
+};
+
+static ssize_t prov_write_flush(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+	if(__kuid_val(current_euid())!=0) // only allowed for root
+    return -EPERM;
+
+  prov_flush();
+	return 0;
+}
+
+static ssize_t prov_read_flush(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	return -EPERM; // nothing to read
+}
+
+static const struct file_operations prov_flush_ops = {
+	.write		= prov_write_flush,
+  .read     = prov_read_flush,
+	.llseek		= generic_file_llseek,
+};
+
+static ssize_t prov_write_file(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+
+{
+	struct prov_file_config *msg;
+  struct inode* in;
+  prov_msg_t* prov;
+
+  if(__kuid_val(current_euid())!=0)
+    return -EPERM;
+
+  if(count < sizeof(struct prov_file_config)){
+    printk(KERN_ERR "Provenance: Too short.");
+    return -EINVAL;
+  }
+
+  msg = (struct prov_file_config*)buf;
+
+  in = file_name_to_inode(msg->name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
+    return -EINVAL;
+  }
+  prov = inode_get_provenance(in);
+
+	if(((msg->op) & PROV_SET_TRACKED)!=0){
+		node_kern(prov).tracked=msg->prov.node_kern.tracked;
+	}
+
+	if(((msg->op) & PROV_SET_OPAQUE)!=0){
+		node_kern(prov).opaque=msg->prov.node_kern.opaque;
+	}
+
+	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
+		node_kern(prov).propagate=msg->prov.node_kern.propagate;
+	}
+
+  return sizeof(struct prov_file_config);
+}
+
+static ssize_t prov_read_file(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+  struct prov_file_config *msg;
+  struct inode* in;
+  prov_msg_t* prov;
+
+  if(count < sizeof(struct prov_file_config)){
+    printk(KERN_ERR "Provenance: Too short.");
+    return -EINVAL;
+  }
+
+  msg = (struct prov_file_config*)buf;
+  in = file_name_to_inode(msg->name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
+    return -EINVAL;
+  }
+
+  prov = inode_get_provenance(in);
+  if(copy_to_user(&msg->prov, &prov->inode_info, sizeof(struct inode_prov_struct))){
+    printk(KERN_ERR "Provenance: error copying.");
+    return -ENOMEM;
+  }
+
+  return sizeof(struct prov_file_config);
+}
+
+static const struct file_operations prov_file_ops = {
+	.write		= prov_write_file,
+  .read     = prov_read_file,
 	.llseek		= generic_file_llseek,
 };
 
@@ -511,11 +613,13 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
 	 securityfs_create_file("tracked", 0666, prov_dir, NULL, &prov_tracked_ops);
 	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
-	 securityfs_create_file("edge", 0666, prov_dir, NULL, &prov_edge_ops);
+	 securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
 	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
 	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
 	 securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
-	 securityfs_create_file("edge_filter", 0644, prov_dir, NULL, &prov_edge_filter_ops);
+	 securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
+	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
+	 securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
    return 0;
 }
 

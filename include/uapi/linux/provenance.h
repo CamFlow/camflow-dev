@@ -25,14 +25,16 @@
 #define PROV_OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
 #define PROV_TRACKED_FILE          "/sys/kernel/security/provenance/tracked"
 #define PROV_NODE_FILE             "/sys/kernel/security/provenance/node"
-#define PROV_EDGE_FILE             "/sys/kernel/security/provenance/edge"
+#define PROV_RELATION_FILE         "/sys/kernel/security/provenance/relation"
 #define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
 #define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
 #define PROV_NODE_FILTER_FILE      "/sys/kernel/security/provenance/node_filter"
-#define PROV_EDGE_FILTER_FILE      "/sys/kernel/security/provenance/edge_filter"
+#define PROV_RELATION_FILTER_FILE  "/sys/kernel/security/provenance/relation_filter"
+#define PROV_FLUSH_FILE            "/sys/kernel/security/provenance/flush"
+#define PROV_FILE_FILE             "/sys/kernel/security/provenance/file"
 
 #define MSG_STR               0x00000001UL
-#define MSG_EDGE              0x00000002UL
+#define MSG_RELATION          0x00000002UL
 #define MSG_TASK              0x00000004UL
 #define MSG_INODE_UNKNOWN     0x00000008UL
 #define MSG_INODE_LINK        0x00000010UL
@@ -56,33 +58,33 @@
 
 #define DEFAULT_NODE_FILTER   (MSG_INODE_DIRECTORY|MSG_INODE_UNKNOWN)
 
-#define ED_READ               0x00000001UL
-#define ED_WRITE              0x00000002UL
-#define ED_CREATE             0x00000004UL
-#define ED_PASS               0x00000008UL
-#define ED_CHANGE             0x00000010UL
-#define ED_MMAP               0x00000020UL
-#define ED_ATTACH             0x00000040UL
-#define ED_ASSOCIATE          0x00000080UL
-#define ED_BIND               0x00000100UL
-#define ED_CONNECT            0x00000200UL
-#define ED_LISTEN             0x00000400UL
-#define ED_ACCEPT             0x00000800UL
-#define ED_OPEN               0x00001000UL
-#define ED_PARENT             0x00002000UL
-#define ED_VERSION            0x00004000UL
-#define ED_LINK               0x00008000UL
-#define ED_NAMED              0x00010000UL
-#define ED_IFC                0x00020000UL
-#define ED_EXEC               0x00040000UL
-#define ED_FORK               0x00080000UL
-#define ED_UNKNOWN            0x00100000UL
-#define ED_VERSION_PROCESS    0x00200000UL
-#define ED_SEARCH             0x00400000UL
-#define ED_ALLOWED            0x00800000UL
-#define ED_DISALLOWED         0x01000000UL
+#define RL_READ               0x00000001UL
+#define RL_WRITE              0x00000002UL
+#define RL_CREATE             0x00000004UL
+#define RL_PASS               0x00000008UL
+#define RL_CHANGE             0x00000010UL
+#define RL_MMAP               0x00000020UL
+#define RL_ATTACH             0x00000040UL
+#define RL_ASSOCIATE          0x00000080UL
+#define RL_BIND               0x00000100UL
+#define RL_CONNECT            0x00000200UL
+#define RL_LISTEN             0x00000400UL
+#define RL_ACCEPT             0x00000800UL
+#define RL_OPEN               0x00001000UL
+#define RL_PARENT             0x00002000UL
+#define RL_VERSION            0x00004000UL
+#define RL_LINK               0x00008000UL
+#define RL_NAMED              0x00010000UL
+#define RL_IFC                0x00020000UL
+#define RL_EXEC               0x00040000UL
+#define RL_FORK               0x00080000UL
+#define RL_UNKNOWN            0x00100000UL
+#define RL_VERSION_PROCESS    0x00200000UL
+#define RL_SEARCH             0x00400000UL
+#define RL_ALLOWED            0x00800000UL
+#define RL_DISALLOWED         0x01000000UL
 
-#define DEFAULT_EDGE_FILTER   0
+#define DEFAULT_RELATION_FILTER   0
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -107,7 +109,7 @@
 #define node_kern(prov) ((prov)->node_info.node_kern)
 #define prov_type(prov) (prov)->node_info.identifier.node_id.type
 #define node_identifier(node) (node)->node_info.identifier.node_id
-#define edge_identifier(edge) (edge)->edge_info.identifier.edge_id
+#define relation_identifier(relation) (relation)->relation_info.identifier.relation_id
 
 struct node_identifier{
   uint32_t type;
@@ -117,8 +119,8 @@ struct node_identifier{
   uint32_t version;
 };
 
-struct edge_identifier{
-  uint32_t  type;
+struct relation_identifier{
+  uint32_t type;
   uint64_t id;
   uint32_t boot_id;
   uint32_t machine_id;
@@ -128,7 +130,7 @@ struct edge_identifier{
 
 typedef union prov_identifier{
   struct node_identifier node_id;
-  struct edge_identifier edge_id;
+  struct relation_identifier relation_id;
   uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
@@ -144,7 +146,7 @@ struct msg_struct{
   prov_identifier_t identifier;
 };
 
-struct edge_struct{
+struct relation_struct{
   prov_identifier_t identifier;
   uint32_t type;
   uint8_t allowed;
@@ -201,7 +203,7 @@ struct sock_struct{
 
 typedef union prov_msg{
   struct msg_struct           msg_info;
-  struct edge_struct          edge_info;
+  struct relation_struct      relation_info;
   struct node_struct          node_info;
   struct task_prov_struct     task_info;
   struct inode_prov_struct    inode_info;
@@ -255,6 +257,16 @@ typedef union long_msg{
 struct prov_filter{
   uint32_t filter;
   uint8_t add;
+};
+
+#define PROV_SET_TRACKED		  1
+#define PROV_SET_OPAQUE 		  2
+#define PROV_SET_PROPAGATE 		4
+
+struct prov_file_config{
+  char name[PATH_MAX];
+  struct inode_prov_struct prov;
+  uint8_t op; // on write
 };
 
 #endif

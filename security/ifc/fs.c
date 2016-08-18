@@ -502,13 +502,14 @@ static ssize_t ifc_read_file(struct file *filp, char __user *buf,
   if(!in){
     printk(KERN_ERR "IFC: could not find %s file.", msg->name);
     return -EINVAL;
-  }else{
-    ifc = inode_get_ifc(in);
-    if(copy_to_user(&msg->context, &ifc->context, sizeof(struct ifc_context))){
-      printk(KERN_INFO "IFC: error copying.");
-      return -ENOMEM;
-    }
   }
+  
+  ifc = inode_get_ifc(in);
+  if(copy_to_user(&msg->context, &ifc->context, sizeof(struct ifc_context))){
+    printk(KERN_INFO "IFC: error copying.");
+    return -ENOMEM;
+  }
+
   return sizeof(struct ifc_file_config);
 }
 

@@ -1,8 +1,8 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
 *
-* Copyright (C) 2015 University of Cambridge
+* Copyright (C) 2016 Harvard University
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
@@ -44,24 +44,24 @@ static inline bool filter_node(prov_msg_t* node){
   return false;
 }
 
-extern uint32_t prov_edge_filter;
+extern uint32_t prov_relation_filter;
 
-/* return either or not the edge should be filtered out */
-static inline bool filter_edge(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
-  if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_edge_filter, ED_DISALLOWED)){
+/* return either or not the relation should be filtered out */
+static inline bool filter_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED)){
     return true;
   }
 
-  if(allowed==FLOW_ALLOWED && HIT_FILTER(prov_edge_filter, ED_ALLOWED)){
+  if(allowed==FLOW_ALLOWED && HIT_FILTER(prov_relation_filter, RL_ALLOWED)){
     return true;
   }
 
   // we hit an element of the black list ignore
-  if( HIT_FILTER(prov_edge_filter, type) ){
+  if( HIT_FILTER(prov_relation_filter, type) ){
     return true;
   }
 
-  // one of the node should not appear in the record, ignore the edge
+  // one of the node should not appear in the record, ignore the relation
   if(filter_node(to) || filter_node(from)){
     return true;
   }
