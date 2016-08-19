@@ -33,6 +33,9 @@
 #define PROV_FLUSH_FILE            "/sys/kernel/security/provenance/flush"
 #define PROV_FILE_FILE             "/sys/kernel/security/provenance/file"
 
+#define PROV_RELAY_NAME             "/sys/kernel/debug/provenance"
+#define PROV_LONG_RELAY_NAME        "/sys/kernel/debug/long_provenance"
+
 #define MSG_STR               0x00000001UL
 #define MSG_RELATION          0x00000002UL
 #define MSG_TASK              0x00000004UL
