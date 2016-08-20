@@ -32,6 +32,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.5
 
 ```
+- Fix issues with tracking exec.
 - Update to kernel version 4.4.18
 ```
 
@@ -93,6 +94,7 @@ make install # patience, sudo password will be ask during instalation
 
 ### 0.2.0
 
+* Clean-up code.
 * IFC tags and provenance data persistence across reboot.
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
 * Look at [NetLabel](https://www.kernel.org/doc/Documentation/netlabel/introduction.txt), [XFRM](http://man7.org/linux/man-pages/man8/ip-xfrm.8.html) and [IPSEC](http://kernelspec.blogspot.co.uk/2014/10/ipsec-implementation-in-linux-kernel.html) for labelled packet (may or may not do what we want).

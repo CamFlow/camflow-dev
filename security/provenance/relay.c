@@ -58,8 +58,8 @@ static struct rchan_callbacks relay_callbacks =
 
 /* VALUE WHERE CHOSEN RANDOMLY, TODO select value that makes sense */
 
-#define PROV_ELEMENT_IN_SUBBUF      8
-#define LONG_PROV_ELEMENT_IN_SUBBUF 2
+#define PROV_ELEMENT_IN_SUBBUF      64
+#define LONG_PROV_ELEMENT_IN_SUBBUF 8
 #define PROV_NB_SUBBUF              64
 
 static int __init relay_prov_init(void)
