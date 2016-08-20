@@ -129,7 +129,7 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
   if(node_kern(from).propagate > 0 && node_kern(from).tracked){
     node_kern(to).tracked = NODE_TRACKED; // receiving node become tracked
     // update receiving propagation depth
-    if(node_kern(from).propagate - 1 > node_kern(to).propagate){
+    if(node_kern(from).propagate > node_kern(to).propagate){
       node_kern(to).propagate = node_kern(from).propagate - 1;
     }
   }
