@@ -36,6 +36,8 @@
 #define PROV_RELAY_NAME             "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME        "/sys/kernel/debug/long_provenance"
 
+#define PROVENANCE_DEFAULT_PROPAGATE_DEPTH   1
+
 #define MSG_STR               0x00000001UL
 #define MSG_RELATION          0x00000002UL
 #define MSG_TASK              0x00000004UL

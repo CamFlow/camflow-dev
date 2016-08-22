@@ -45,7 +45,6 @@ compile_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) all
 	cd ./build/camflow-ifc-lib && $(MAKE) clean
 	cd ./build/camflow-ifc-lib && $(MAKE) all
-	cd ./build/camflow-config && $(MAKE) all
 
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -57,9 +56,10 @@ install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
 
 install_us:
-	cd ./build/camflow-config && $(MAKE) install
 	cd ./build/camflow-provenance-lib && $(MAKE) install
 	cd ./build/camflow-ifc-lib && $(MAKE) install
+	cd ./build/camflow-config && $(MAKE) all
+	cd ./build/camflow-config && $(MAKE) install
 
 clean: clean_kernel clean_us
 

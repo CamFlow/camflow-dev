@@ -32,6 +32,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.5
 
 ```
+- Task inherit property from the file they execute (tracking and opaque).
 - Fix issues with tracking exec.
 - Update to kernel version 4.4.18
 ```

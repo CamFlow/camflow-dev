@@ -17,8 +17,6 @@
 #include "camflow_utils.h"
 
 #define TMPBUFLEN	12
-#define DEFAULT_PROPAGATE_DEPTH 1
-
 
 static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_ENABLE_FILE);
@@ -388,7 +386,7 @@ static ssize_t prov_write_tracked(struct file *file, const char __user *buf,
 		goto out;
 
 	node_kern(cprov).tracked=tmp;
-	node_kern(cprov).propagate=DEFAULT_PROPAGATE_DEPTH;
+	node_kern(cprov).propagate=PROVENANCE_DEFAULT_PROPAGATE_DEPTH;
   length=count;
 out:
   free_page((unsigned long)page);

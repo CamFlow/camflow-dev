@@ -102,6 +102,41 @@ finished:
 	put_cred(cred);
 }
 
+static inline void task_config_from_file(struct task_struct *task){
+	const struct cred *cred = get_task_cred(task);
+	struct mm_struct *mm;
+ 	struct file *exe_file;
+	struct inode *inode;
+	prov_msg_t* tprov;
+	prov_msg_t* iprov;
+
+	if(!cred)
+		return;
+
+	tprov = cred->provenance;
+
+	mm = get_task_mm(task);
+	if (!mm)
+ 		goto finished;
+	exe_file = get_mm_exe_file(mm);
+	mmput(mm);
+
+	if(exe_file){
+		inode = file_inode(exe_file);
+		iprov = inode_get_provenance(inode);
+		if(node_kern(iprov).tracked == NODE_TRACKED){
+			node_kern(tprov).tracked = NODE_TRACKED;
+			node_kern(tprov).propagate = node_kern(iprov).propagate-1;
+		}
+		if(node_kern(iprov).opaque == NODE_OPAQUE){
+			node_kern(tprov).opaque = NODE_OPAQUE;
+		}
+	}
+
+finished:
+	put_cred(cred);
+}
+
 /*
  * initialise the security for the init task
  */
@@ -167,6 +202,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
     return -ENOMEM;
   }
   set_node_id(prov, ASSIGN_NODE_ID);
+	task_config_from_file(current);
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
 
@@ -955,7 +991,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 	prov_msg_t* iprov = inode_get_provenance(inode);
 	prov_msg_t* nprov;
   if(!bprm->cred->provenance){
-		provenance_cred_prepare(bprm->cred, current_cred(), GFP_KERNEL);
+		provenance_cred_alloc_blank(bprm->cred, GFP_KERNEL);
   }
 	nprov = bprm->cred->provenance;
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED);
@@ -975,9 +1011,8 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    prov_msg_t* nprov = bprm->cred->provenance;
    struct inode *inode = file_inode(bprm->file);
    prov_msg_t* iprov = inode_get_provenance(inode);
-   record_relation(RL_CREATE, cprov, nprov, FLOW_ALLOWED);
-   record_relation(RL_CREATE, iprov, nprov, FLOW_ALLOWED);
-	 //
+   record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED);
+   record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED);
  }
 
 /*
