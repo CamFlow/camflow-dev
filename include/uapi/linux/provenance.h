@@ -68,7 +68,7 @@
 #define RL_CREATE             0x00000004UL
 #define RL_PASS               0x00000008UL
 #define RL_CHANGE             0x00000010UL
-#define RL_MMAP               0x00000020UL
+#define RL_MMAP_WRITE         0x00000020UL
 #define RL_ATTACH             0x00000040UL
 #define RL_ASSOCIATE          0x00000080UL
 #define RL_BIND               0x00000100UL
@@ -88,6 +88,8 @@
 #define RL_SEARCH             0x00400000UL
 #define RL_ALLOWED            0x00800000UL
 #define RL_DISALLOWED         0x01000000UL
+#define RL_MMAP_READ          0x02000000UL
+#define RL_MMAP_EXEC          0x04000000UL
 
 #define DEFAULT_RELATION_FILTER   0
 

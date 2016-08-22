@@ -537,14 +537,18 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   inode = file_inode(file);
   iprov = inode_get_provenance(inode);
 
-  prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
-
-  if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
-    record_relation(RL_MMAP, cprov, iprov, FLOW_ALLOWED);
+  if((prot & (PROT_WRITE)) != 0){
+		prov_update_version(iprov);
+    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
-  if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
-    // we assume write imply read
-    record_relation(RL_MMAP, iprov, cprov, FLOW_ALLOWED);
+  if((prot & (PROT_READ)) != 0){
+		prov_update_version(cprov);
+    record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED);
+  }
+
+	if((prot & (PROT_EXEC)) != 0){
+		prov_update_version(cprov);
+    record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
 }
