@@ -126,13 +126,9 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
   }
 
   /* propagate tracked */
-    if(node_kern(from).propagate > 0 && node_kern(from).tracked){
-      node_kern(to).tracked = NODE_TRACKED; // receiving node become tracked
-      // update receiving propagation depth
-      if(node_kern(from).propagate > node_kern(to).propagate){
-        node_kern(to).propagate = node_kern(from).propagate - 1;
-      }
-    }
+  if( !filter_propagate_relation(type, from, to, allowed) ){ // it is not filtered
+    node_kern(to).tracked = NODE_TRACKED; // receiving node become tracked
+  }
 
   if( !porvenance_is_recorded(from) )
     record_node(from);

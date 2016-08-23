@@ -25,9 +25,13 @@ extern bool prov_all;
 #define HIT_FILTER(filter, data) ( (filter&data) != 0 )
 
 extern uint32_t prov_node_filter;
+extern uint32_t prov_propagate_node_filter;
+
+#define filter_node(node) __filter_node(prov_node_filter, node)
+#define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool filter_node(prov_msg_t* node){
+static inline bool __filter_node(uint32_t filter, prov_msg_t* node){
   if(!prov_enabled){
     return true;
   }
@@ -37,7 +41,7 @@ static inline bool filter_node(prov_msg_t* node){
   }
 
   // we hit an element of the black list ignore
-  if( HIT_FILTER(prov_node_filter, node_identifier(node).type) ){
+  if( HIT_FILTER(filter, node_identifier(node).type) ){
     return true;
   }
 
@@ -45,9 +49,15 @@ static inline bool filter_node(prov_msg_t* node){
 }
 
 extern uint32_t prov_relation_filter;
+extern uint32_t prov_propagate_relation_filter;
 
 /* return either or not the relation should be filtered out */
 static inline bool filter_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  // ignore if none of the node are tracked and we are not capturing everything
+  if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all){
+    return true;
+  }
+
   if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED)){
     return true;
   }
@@ -66,8 +76,31 @@ static inline bool filter_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
     return true;
   }
 
-  // ignore if none of the node are tracked and we are not capturing everything
-  if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all){
+  return false;
+}
+
+/* return either or not tracking should propagate */
+static inline bool filter_propagate_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  // the origin is not tracked
+  if( !provenance_is_tracked(from) ){
+    return true;
+  }
+
+  if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_DISALLOWED)){
+    return true;
+  }
+
+  if(allowed==FLOW_ALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_ALLOWED)){
+    return true;
+  }
+
+  // the relation does not allow tracking propagation
+  if( HIT_FILTER(prov_propagate_relation_filter, type) ){
+    return true;
+  }
+
+  // the tracking should not propagate to the destination
+  if( filter_propagate_node(to) ){
     return true;
   }
 

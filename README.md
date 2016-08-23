@@ -32,6 +32,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.5
 
 ```
+- Rework provenance tracking propagation.
 - More detailed mmap provenance recording.
 - Task inherit property from the file they execute (tracking and opaque).
 - Fix issues with tracking exec.
@@ -73,12 +74,12 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.1
 
 ```
-- Update kernel from version 4.2.8 to version 4.4.6.
 - Reduce number of file name and address recorded, limit to tracked entities.
 - Obfuscate tag value, to avoid side channel through created tags.
 - Correct a bug that allowed the same tag to be added several times on files.
 - Name of files should now be properly recorded.
 - Security context recorded in audit.
+- Update kernel from version 4.2.8 to version 4.4.6.
 ```
 
 ### v0.1.0
@@ -89,7 +90,7 @@ make install # patience, sudo password will be ask during instalation
 
 ## Plan
 
-### 0.1.5
+### 0.1.6
 
 * look at some form of automated testing.
 * support for Raspberry Pi / ARM

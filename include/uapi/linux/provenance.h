@@ -20,23 +20,23 @@
 #include <uapi/linux/limits.h>
 #endif
 
-#define PROV_ENABLE_FILE           "/sys/kernel/security/provenance/enable"
-#define PROV_ALL_FILE              "/sys/kernel/security/provenance/all"
-#define PROV_OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
-#define PROV_TRACKED_FILE          "/sys/kernel/security/provenance/tracked"
-#define PROV_NODE_FILE             "/sys/kernel/security/provenance/node"
-#define PROV_RELATION_FILE         "/sys/kernel/security/provenance/relation"
-#define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
-#define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
-#define PROV_NODE_FILTER_FILE      "/sys/kernel/security/provenance/node_filter"
-#define PROV_RELATION_FILTER_FILE  "/sys/kernel/security/provenance/relation_filter"
-#define PROV_FLUSH_FILE            "/sys/kernel/security/provenance/flush"
-#define PROV_FILE_FILE             "/sys/kernel/security/provenance/file"
+#define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
+#define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
+#define PROV_OPAQUE_FILE                      "/sys/kernel/security/provenance/opaque"
+#define PROV_TRACKED_FILE                     "/sys/kernel/security/provenance/tracked"
+#define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"
+#define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
+#define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
+#define PROV_MACHINE_ID_FILE                  "/sys/kernel/security/provenance/machine_id"
+#define PROV_NODE_FILTER_FILE                 "/sys/kernel/security/provenance/node_filter"
+#define PROV_RELATION_FILTER_FILE             "/sys/kernel/security/provenance/relation_filter"
+#define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
+#define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
+#define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
+#define PROV_FILE_FILE                        "/sys/kernel/security/provenance/file"
 
-#define PROV_RELAY_NAME             "/sys/kernel/debug/provenance"
-#define PROV_LONG_RELAY_NAME        "/sys/kernel/debug/long_provenance"
-
-#define PROVENANCE_DEFAULT_PROPAGATE_DEPTH   1
+#define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
+#define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
 
 #define MSG_STR               0x00000001UL
 #define MSG_RELATION          0x00000002UL
@@ -60,8 +60,6 @@
 #define MSG_DISC_ACTIVITY     0x00080000UL
 #define MSG_DISC_AGENT        0x00100000UL
 #define MSG_DISC_NODE         0x00200000UL
-
-#define DEFAULT_NODE_FILTER   (MSG_INODE_DIRECTORY|MSG_INODE_UNKNOWN)
 
 #define RL_READ               0x00000001UL
 #define RL_WRITE              0x00000002UL
@@ -90,8 +88,6 @@
 #define RL_DISALLOWED         0x01000000UL
 #define RL_MMAP_READ          0x02000000UL
 #define RL_MMAP_EXEC          0x04000000UL
-
-#define DEFAULT_RELATION_FILTER   0
 
 #define FLOW_DISALLOWED   0
 #define FLOW_ALLOWED      1
@@ -146,7 +142,6 @@ struct node_kern{
   uint8_t name_recorded;
   uint8_t tracked;
   uint8_t opaque;
-  uint8_t propagate;
 };
 
 struct msg_struct{
@@ -268,7 +263,6 @@ struct prov_filter{
 
 #define PROV_SET_TRACKED		  1
 #define PROV_SET_OPAQUE 		  2
-#define PROV_SET_PROPAGATE 		4
 
 struct prov_file_config{
   char name[PATH_MAX];

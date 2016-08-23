@@ -126,7 +126,6 @@ static inline void task_config_from_file(struct task_struct *task){
 		iprov = inode_get_provenance(inode);
 		if(node_kern(iprov).tracked == NODE_TRACKED){
 			node_kern(tprov).tracked = NODE_TRACKED;
-			node_kern(tprov).propagate = node_kern(iprov).propagate-1;
 		}
 		if(node_kern(iprov).opaque == NODE_OPAQUE){
 			node_kern(tprov).opaque = NODE_OPAQUE;
