@@ -41,6 +41,7 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_ALL_FILE);
 	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
 	provenance_mark_as_opaque(PROV_TRACKED_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
@@ -294,6 +295,10 @@ declare_write_kern_byte_fcn(prov_write_opaque, opaque);
 declare_read_kern_byte_fcn(prov_read_opaque, opaque);
 declare_file_operations(prov_opaque_ops, prov_write_opaque, prov_read_opaque);
 
+declare_write_kern_byte_fcn(prov_write_propagate, propagate);
+declare_read_kern_byte_fcn(prov_read_propagate, propagate);
+declare_file_operations(prov_propagate_ops, prov_write_propagate, prov_read_propagate);
+
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 				 size_t count, uint32_t* filter){
 	struct prov_filter* setting;
@@ -403,6 +408,10 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 		node_kern(prov).opaque=msg->prov.node_kern.opaque;
 	}
 
+	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
+		node_kern(prov).propagate=msg->prov.node_kern.propagate;
+	}
+
   return sizeof(struct prov_file_config);
 }
 
@@ -446,6 +455,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
 	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
 	 securityfs_create_file("tracked", 0666, prov_dir, NULL, &prov_tracked_ops);
+	 securityfs_create_file("propagate", 0666, prov_dir, NULL, &prov_tracked_ops);
 	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
 	 securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
 	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);

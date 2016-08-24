@@ -14,10 +14,11 @@
 
 #include <uapi/linux/provenance.h>
 
-#define provenance_is_opaque(node) (node_kern(node).opaque == NODE_OPAQUE)
-#define provenance_is_tracked(node) (prov_all || node_kern(node).tracked == NODE_TRACKED)
-#define provenance_is_name_recorded(node) (node_kern(node).name_recorded == NAME_RECORDED)
-#define porvenance_is_recorded(node) (node_kern(node).recorded == NODE_RECORDED)
+#define provenance_is_opaque(node)        ( node_kern(node).opaque == NODE_OPAQUE )
+#define provenance_is_tracked(node)       ( prov_all || node_kern(node).tracked == NODE_TRACKED )
+#define provenance_propagate(node)          ( node_kern(from).propagate == NODE_PROPAGATE )
+#define provenance_is_name_recorded(node) ( node_kern(node).name_recorded == NAME_RECORDED )
+#define porvenance_is_recorded(node)      ( node_kern(node).recorded == NODE_RECORDED )
 
 extern bool prov_enabled;
 extern bool prov_all;
@@ -81,6 +82,11 @@ static inline bool filter_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
 
 /* return either or not tracking should propagate */
 static inline bool filter_propagate_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  // the origin does not propagate tracking
+  if( !provenance_propagate(from) ){
+    return true;
+  }
+
   // the origin is not tracked
   if( !provenance_is_tracked(from) ){
     return true;

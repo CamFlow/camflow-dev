@@ -130,6 +130,9 @@ static inline void task_config_from_file(struct task_struct *task){
 		if(node_kern(iprov).opaque == NODE_OPAQUE){
 			node_kern(tprov).opaque = NODE_OPAQUE;
 		}
+		if(node_kern(iprov).propagate == NODE_PROPAGATE){
+			node_kern(tprov).propagate = NODE_PROPAGATE;
+		}
 	}
 
 finished:
