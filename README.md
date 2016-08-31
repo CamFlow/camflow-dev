@@ -22,7 +22,7 @@ make install # patience, sudo password will be ask during instalation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.5           | 4.4.18         | N/A        |
+| 0.1.5           | 4.4.19         | N/A        |
 | 0.1.4           | 4.4.16         | 18/08/2016 |
 | 0.1.3           | 4.4.6          | 08/08/2016 |
 | 0.1.2           | 4.4.6          | 26/05/2016 |
@@ -37,7 +37,7 @@ make install # patience, sudo password will be ask during instalation
 - More detailed mmap provenance recording.
 - Task inherit property from the file they execute (tracking and opaque).
 - Fix issues with tracking exec.
-- Update to kernel version 4.4.18
+- Update to kernel version 4.4.19
 ```
 
 
