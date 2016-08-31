@@ -308,28 +308,22 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
 		if((perms & (DIR__WRITE)) != 0){
-			prov_update_version(iprov);
 	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
 	  }
 	  if((perms & (DIR__READ)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
 	  }
 		if((perms & (DIR__SEARCH)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}else{
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-			prov_update_version(iprov);
 	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
 	  }
 	  if((perms & (FILE__READ)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
 	  }
 		if((perms & (FILE__EXECUTE)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_EXEC, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}
@@ -349,39 +343,39 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
-	/*
 	prov_msg_t* cprov = current_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
-  long_prov_msg_t* link_prov;
+	char *buffer;
+	char *ptr;
 
-  if(!inode_get_provenance(dir)){ // alloc provenance if none there
+	iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
+		iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
   }
 
-  if(!inode_get_provenance(old_dentry->d_inode)){ // alloc provenance if none there
+	if(filter_node(iprov)){ // this node should not be recorded
+		return 0;
+	}
+
+	dprov = inode_get_provenance(dir);
+  if(!dprov){ // alloc provenance if none there
     provenance_inode_alloc_security(old_dentry->d_inode);
+		dprov = inode_get_provenance(dir);
   }
 
-  dprov = inode_get_provenance(dir); // directory
-  iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
+  if( provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov) ){
+		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
+		ptr = dentry_path_raw(new_dentry, buffer, PATH_MAX);
+		record_node_name(iprov, ptr);
+		kfree(buffer);
 
-  // writing to the directory
-  record_relation(RL_DATA, cprov, dprov, FLOW_ALLOWED);
-  record_relation(RL_DATA, cprov, iprov, FLOW_ALLOWED);
-
-  if(prov_enabled && (provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov))){
-    link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
-    link_prov->link_info.length = new_dentry->d_name.len;
-    memcpy(link_prov->link_info.name, new_dentry->d_name.name, new_dentry->d_name.len);
-		copy_node_info(&link_prov->link_info.dir, &dprov->inode_info.node_info);
-		copy_node_info(&link_prov->link_info.task, &cprov->task_info.node_info);
-		copy_node_info(&link_prov->link_info.inode, &iprov->task_info.node_info);
-    long_prov_write(link_prov);
-    free_long_provenance(link_prov);
+		// record edges
+	  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
+	  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
+	  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
   }
-	TODO link new file name node as alternative
-	*/
   return 0;
 }
 
@@ -431,7 +425,6 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 		return 0;
 	}
 
-	prov_update_version(cprov);
 	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
 }
@@ -461,16 +454,13 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 
 	record_names(current, cprov, inode, iprov);
   if((prot & (PROT_WRITE)) != 0){
-		prov_update_version(iprov);
     record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
   if((prot & (PROT_READ)) != 0){
-		prov_update_version(cprov);
     record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED);
   }
 
 	if((prot & (PROT_EXEC)) != 0){
-		prov_update_version(cprov);
     record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
@@ -495,14 +485,11 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
-	//provenance_record_file_name(file);
 
   iprov = inode_get_provenance(inode);
 
 	// both way exchange
-	prov_update_version(iprov);
   record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
-	prov_update_version(cprov);
   record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
 
   return 0;

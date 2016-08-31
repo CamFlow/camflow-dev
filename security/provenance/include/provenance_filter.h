@@ -113,4 +113,12 @@ static inline bool filter_propagate_relation(uint32_t type, prov_msg_t* from, pr
   return false;
 }
 
+static inline bool should_update_node(uint32_t relation_type, prov_msg_t* to){
+  uint32_t filter=RL_VERSION_PROCESS|RL_VERSION|RL_NAMED;
+  if(HIT_FILTER(filter, relation_type)){ // not update if relation is of above type
+    return false;
+  }
+  return true;
+}
+
 #endif

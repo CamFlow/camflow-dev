@@ -32,6 +32,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.5
 
 ```
+- Nodes updated only when relations are recorded.
 - Rework provenance tracking propagation.
 - More detailed mmap provenance recording.
 - Task inherit property from the file they execute (tracking and opaque).

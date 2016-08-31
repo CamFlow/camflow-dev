@@ -56,7 +56,7 @@ static struct rchan_callbacks relay_callbacks =
         .remove_buf_file = remove_buf_file_handler,
 };
 
-/* VALUE WHERE CHOSEN RANDOMLY, TODO select value that makes sense */
+/* VALUE WERE CHOSEN RANDOMLY, TODO select value that makes sense */
 
 #define PROV_ELEMENT_IN_SUBBUF      64
 #define LONG_PROV_ELEMENT_IN_SUBBUF 8
