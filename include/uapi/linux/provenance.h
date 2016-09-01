@@ -111,9 +111,6 @@
 #define INODE_LINKED        1
 #define INODE_UNLINKED      0
 
-#define NEED_UPDATE         1
-#define DO_NOT_NEED_UPDATE  0
-
 #define STR_MAX_SIZE        128
 
 #define node_kern(prov) ((prov)->node_info.node_kern)
@@ -150,7 +147,6 @@ struct node_kern{
   uint8_t tracked;
   uint8_t opaque;
   uint8_t propagate;
-  uint8_t need_update;
 };
 
 struct msg_struct{

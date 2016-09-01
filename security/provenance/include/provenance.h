@@ -148,10 +148,6 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
     prov_update_version(to);
   }
 
-  if(!HIT_FILTER(type, UPDATE_FILTER)){
-    node_kern(from).need_update=NEED_UPDATE;
-  }
-
   if( !porvenance_is_recorded(from) ){
     record_node(from);
   }
