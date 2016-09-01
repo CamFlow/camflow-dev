@@ -148,11 +148,17 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
     prov_update_version(to);
   }
 
-  if( !porvenance_is_recorded(from) )
-    record_node(from);
+  if(!HIT_FILTER(type, UPDATE_FILTER)){
+    node_kern(from).need_update=NEED_UPDATE;
+  }
 
-  if( !porvenance_is_recorded(to) )
+  if( !porvenance_is_recorded(from) ){
+    record_node(from);
+  }
+
+  if( !porvenance_is_recorded(to) ){
     record_node(to);
+  }
 
   prov_type((&relation))=MSG_RELATION;
   relation_identifier((&relation)).id = prov_next_relation_id();
