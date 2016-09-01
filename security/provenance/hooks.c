@@ -147,6 +147,10 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	if(provenance_is_tracked(old_prov)){
 		record_task_name(current);
 		record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
+		node_kern(prov).tracked = NODE_TRACKED; // receiving node become tracked
+	}
+	if( provenance_propagate(old_prov) ){
+		node_kern(prov).propagate = NODE_PROPAGATE;
 	}
   new->provenance = prov;
   return 0;
