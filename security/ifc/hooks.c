@@ -382,7 +382,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
   if((prot & PROT_WRITE) != 0){
     if(!ifc_can_flow(&cifc->context, &iifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_relation(RL_MMAP, cprov, iprov, FLOW_DISALLOWED);
+      record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }
@@ -392,7 +392,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
     // we assume write imply read
     if(!ifc_can_flow(&iifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_relation(RL_MMAP, iprov, cprov, FLOW_DISALLOWED);
+      record_relation(RL_MMAP_READ, iprov, cprov, FLOW_DISALLOWED);
 #endif
       return -EPERM;
     }

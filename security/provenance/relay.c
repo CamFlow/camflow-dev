@@ -56,8 +56,10 @@ static struct rchan_callbacks relay_callbacks =
         .remove_buf_file = remove_buf_file_handler,
 };
 
-#define PROV_ELEMENT_IN_SUBBUF      8
-#define LONG_PROV_ELEMENT_IN_SUBBUF 2
+/* VALUE WERE CHOSEN RANDOMLY, TODO select value that makes sense */
+
+#define PROV_ELEMENT_IN_SUBBUF      64
+#define LONG_PROV_ELEMENT_IN_SUBBUF 8
 #define PROV_NB_SUBBUF              64
 
 static int __init relay_prov_init(void)

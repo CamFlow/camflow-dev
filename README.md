@@ -22,7 +22,7 @@ make install # patience, sudo password will be ask during instalation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.5           | 4.4.18         | N/A        |
+| 0.1.5           | 4.4.19         | N/A        |
 | 0.1.4           | 4.4.16         | 18/08/2016 |
 | 0.1.3           | 4.4.6          | 08/08/2016 |
 | 0.1.2           | 4.4.6          | 26/05/2016 |
@@ -32,7 +32,12 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.5
 
 ```
-- Update to kernel version 4.4.18
+- Nodes updated only when relations are recorded.
+- Rework provenance tracking propagation.
+- More detailed mmap provenance recording.
+- Task inherit property from the file they execute (tracking and opaque).
+- Fix issues with tracking exec.
+- Update to kernel version 4.4.19
 ```
 
 
@@ -70,12 +75,12 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.1
 
 ```
-- Update kernel from version 4.2.8 to version 4.4.6.
 - Reduce number of file name and address recorded, limit to tracked entities.
 - Obfuscate tag value, to avoid side channel through created tags.
 - Correct a bug that allowed the same tag to be added several times on files.
 - Name of files should now be properly recorded.
 - Security context recorded in audit.
+- Update kernel from version 4.2.8 to version 4.4.6.
 ```
 
 ### v0.1.0
@@ -86,13 +91,14 @@ make install # patience, sudo password will be ask during instalation
 
 ## Plan
 
-### 0.1.5
+### 0.1.6
 
 * look at some form of automated testing.
 * support for Raspberry Pi / ARM
 
 ### 0.2.0
 
+* Clean-up code.
 * IFC tags and provenance data persistence across reboot.
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
 * Look at [NetLabel](https://www.kernel.org/doc/Documentation/netlabel/introduction.txt), [XFRM](http://man7.org/linux/man-pages/man8/ip-xfrm.8.html) and [IPSEC](http://kernelspec.blogspot.co.uk/2014/10/ipsec-implementation-in-linux-kernel.html) for labelled packet (may or may not do what we want).

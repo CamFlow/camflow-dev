@@ -118,6 +118,19 @@ static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* sr
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
+static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed);
+
+static inline void prov_update_version(prov_msg_t* prov){
+  prov_msg_t old_prov;
+  memcpy(&old_prov, prov, sizeof(prov_msg_t));
+  node_identifier(prov).version++;
+  node_kern(prov).recorded = NODE_UNRECORDED;
+  if(node_identifier(prov).type == MSG_TASK)
+    record_relation(RL_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
+  else
+    record_relation(RL_VERSION, &old_prov, prov, FLOW_ALLOWED);
+}
+
 static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t relation;
 
@@ -126,20 +139,22 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
   }
 
   /* propagate tracked */
-  if(node_kern(from).propagate > 0 && node_kern(from).tracked){
+  if( !filter_propagate_relation(type, from, to, allowed) ){ // it is not filtered
     node_kern(to).tracked = NODE_TRACKED; // receiving node become tracked
-    // update receiving propagation depth
-    if(node_kern(from).propagate - 1 > node_kern(to).propagate){
-      node_kern(to).propagate = node_kern(from).propagate - 1;
-    }
+    node_kern(to).propagate = NODE_PROPAGATE; // continue to propagate
   }
 
-  if( !porvenance_is_recorded(from) )
+  if(should_update_node(type, to)){ // it is none of the above types
+    prov_update_version(to);
+  }
+
+  if( !porvenance_is_recorded(from) ){
     record_node(from);
+  }
 
-  if( !porvenance_is_recorded(to) )
+  if( !porvenance_is_recorded(to) ){
     record_node(to);
-
+  }
 
   prov_type((&relation))=MSG_RELATION;
   relation_identifier((&relation)).id = prov_next_relation_id();
@@ -173,17 +188,6 @@ static inline void long_record_relation(uint32_t type, long_prov_msg_t* from, pr
   copy_node_info(&relation.relation_info.snd, &from->node_info.identifier);
   copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
   prov_write(&relation);
-}
-
-static inline void prov_update_version(prov_msg_t* prov){
-  prov_msg_t old_prov;
-  memcpy(&old_prov, prov, sizeof(prov_msg_t));
-  node_identifier(prov).version++;
-  node_kern(prov).recorded = NODE_UNRECORDED;
-  if(node_identifier(prov).type == MSG_TASK)
-    record_relation(RL_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
-  else
-    record_relation(RL_VERSION, &old_prov, prov, FLOW_ALLOWED);
 }
 
 #ifdef CONFIG_SECURITY_IFC

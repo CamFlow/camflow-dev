@@ -21,6 +21,7 @@
 
 #include "av_utils.h"
 #include "provenance.h"
+#include "provenance_name.h"
 #include "ifc.h"
 
 struct kmem_cache *provenance_cache=NULL;
@@ -28,6 +29,43 @@ struct kmem_cache *long_provenance_cache=NULL;
 
 #define current_pid() (current->pid)
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
+
+static inline void task_config_from_file(struct task_struct *task){
+	const struct cred *cred = get_task_cred(task);
+	struct mm_struct *mm;
+ 	struct file *exe_file;
+	struct inode *inode;
+	prov_msg_t* tprov;
+	prov_msg_t* iprov;
+
+	if(!cred)
+		return;
+
+	tprov = cred->provenance;
+
+	mm = get_task_mm(task);
+	if (!mm)
+ 		goto finished;
+	exe_file = get_mm_exe_file(mm);
+	mmput(mm);
+
+	if(exe_file){
+		inode = file_inode(exe_file);
+		iprov = inode_get_provenance(inode);
+		if(node_kern(iprov).tracked == NODE_TRACKED){
+			node_kern(tprov).tracked = NODE_TRACKED;
+		}
+		if(node_kern(iprov).opaque == NODE_OPAQUE){
+			node_kern(tprov).opaque = NODE_OPAQUE;
+		}
+		if(node_kern(iprov).propagate == NODE_PROPAGATE){
+			node_kern(tprov).propagate = NODE_PROPAGATE;
+		}
+	}
+
+finished:
+	put_cred(cred);
+}
 
 /*
  * initialise the security for the init task
@@ -94,6 +132,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
     return -ENOMEM;
   }
   set_node_id(prov, ASSIGN_NODE_ID);
+	task_config_from_file(current);
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
 
@@ -105,7 +144,14 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	}
 #endif
 
-  record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
+	if(provenance_is_tracked(old_prov)){
+		record_task_name(current);
+		record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
+		node_kern(prov).tracked = NODE_TRACKED; // receiving node become tracked
+	}
+	if( provenance_propagate(old_prov) ){
+		node_kern(prov).propagate = NODE_PROPAGATE;
+	}
   new->provenance = prov;
   return 0;
 }
@@ -188,83 +234,11 @@ static int provenance_inode_alloc_security(struct inode *inode)
 static void provenance_inode_free_security(struct inode *inode)
 {
   prov_msg_t* prov = inode_get_provenance(inode);
-  if(!prov)
+  if(!prov){
     free_provenance(prov);
+	}
 	inode_set_provenance(inode, NULL);
 	free_camflow(inode);
-}
-
-static inline void record_node_name(prov_msg_t* node, char* name){
-	long_prov_msg_t *fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-	long_prov_write(fname_prov);
-	long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
-	free_long_provenance(fname_prov);
-	node_kern(node).name_recorded=NAME_RECORDED;
-}
-
-static inline void record_inode_name(struct inode *inode){
-	prov_msg_t* iprov = inode_get_provenance(inode);
-	struct dentry* dentry;
-	char *buffer;
-	char *ptr;
-
-	if(filter_node(iprov)){
-		return;
-	}
-
-	dentry = d_find_alias(inode);
-
-	if(!dentry) // we did not find a dentry, not sure if it should ever happen
-		return;
-
-	if( !provenance_is_name_recorded(iprov) ){
-		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
-		ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-		record_node_name(iprov, ptr);
-		kfree(buffer);
-	}
-	dput(dentry);
-}
-
-static inline void record_task_name(struct task_struct *task){
-	const struct cred *cred = get_task_cred(task);
-	prov_msg_t* tprov;
-	struct mm_struct *mm;
- 	struct file *exe_file;
-	char *ptr = NULL;
-	char *buffer;
-
-	if(!cred)
-		return;
-
-	tprov = cred->provenance;
-
-	if(filter_node(tprov)){
-		goto finished;
-	}
-
-	// name already recorded
-	if(provenance_is_name_recorded(tprov))
-		goto finished;
-
-	mm = get_task_mm(task);
-	if (!mm)
- 		goto finished;
-	exe_file = get_mm_exe_file(mm);
-	mmput(mm);
-
-	if(exe_file){
-		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
-		ptr = file_path(exe_file, buffer, PATH_MAX);
-		fput(exe_file);
-		record_node_name(tprov, ptr);
-		kfree(buffer);
-	}
-
-finished:
-	put_cred(cred);
 }
 
 /*
@@ -333,41 +307,27 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		return 0;
 	}
 
+	record_names(current, cprov, inode, iprov);
+
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
-		if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
-			record_inode_name(inode);
-			record_task_name(current);
-		}
-
 		if((perms & (DIR__WRITE)) != 0){
-			prov_update_version(iprov);
 	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
 	  }
 	  if((perms & (DIR__READ)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
 	  }
 		if((perms & (DIR__SEARCH)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}else{
-		if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
-			record_inode_name(inode);
-			record_task_name(current);
-		}
-
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-			prov_update_version(iprov);
 	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
 	  }
 	  if((perms & (FILE__READ)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
 	  }
 		if((perms & (FILE__EXECUTE)) != 0){
-			prov_update_version(cprov);
 	    record_relation(RL_EXEC, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}
@@ -387,39 +347,39 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
-	/*
 	prov_msg_t* cprov = current_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
-  long_prov_msg_t* link_prov;
+	char *buffer;
+	char *ptr;
 
-  if(!inode_get_provenance(dir)){ // alloc provenance if none there
+	iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
     provenance_inode_alloc_security(dir);
+		iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
   }
 
-  if(!inode_get_provenance(old_dentry->d_inode)){ // alloc provenance if none there
+	if(filter_node(iprov)){ // this node should not be recorded
+		return 0;
+	}
+
+	dprov = inode_get_provenance(dir);
+  if(!dprov){ // alloc provenance if none there
     provenance_inode_alloc_security(old_dentry->d_inode);
+		dprov = inode_get_provenance(dir);
   }
 
-  dprov = inode_get_provenance(dir); // directory
-  iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
+  if( provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov) ){
+		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
+		ptr = dentry_path_raw(new_dentry, buffer, PATH_MAX);
+		record_node_name(iprov, ptr);
+		kfree(buffer);
 
-  // writing to the directory
-  record_relation(RL_DATA, cprov, dprov, FLOW_ALLOWED);
-  record_relation(RL_DATA, cprov, iprov, FLOW_ALLOWED);
-
-  if(prov_enabled && (provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov))){
-    link_prov = alloc_long_provenance(MSG_LINK, GFP_KERNEL);
-    link_prov->link_info.length = new_dentry->d_name.len;
-    memcpy(link_prov->link_info.name, new_dentry->d_name.name, new_dentry->d_name.len);
-		copy_node_info(&link_prov->link_info.dir, &dprov->inode_info.node_info);
-		copy_node_info(&link_prov->link_info.task, &cprov->task_info.node_info);
-		copy_node_info(&link_prov->link_info.inode, &iprov->task_info.node_info);
-    long_prov_write(link_prov);
-    free_long_provenance(link_prov);
+		// record edges
+	  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
+	  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
+	  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
   }
-	TODO link new file name node as alternative
-	*/
   return 0;
 }
 
@@ -469,7 +429,6 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 		return 0;
 	}
 
-	prov_update_version(cprov);
 	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
 }
@@ -497,14 +456,16 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   inode = file_inode(file);
   iprov = inode_get_provenance(inode);
 
-  prot &= (PROT_EXEC|PROT_READ|PROT_WRITE);
-
-  if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
-    record_relation(RL_MMAP, cprov, iprov, FLOW_ALLOWED);
+	record_names(current, cprov, inode, iprov);
+  if((prot & (PROT_WRITE)) != 0){
+    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
-  if((prot & (PROT_READ|PROT_EXEC|PROT_WRITE)) != 0){
-    // we assume write imply read
-    record_relation(RL_MMAP, iprov, cprov, FLOW_ALLOWED);
+  if((prot & (PROT_READ)) != 0){
+    record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED);
+  }
+
+	if((prot & (PROT_EXEC)) != 0){
+    record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED);
   }
   return 0;
 }
@@ -528,14 +489,11 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   if(!inode_get_provenance(inode)){ // alloc provenance if none there
     provenance_inode_alloc_security(inode);
   }
-	//provenance_record_file_name(file);
 
   iprov = inode_get_provenance(inode);
 
 	// both way exchange
-	prov_update_version(iprov);
   record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
-	prov_update_version(cprov);
   record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
 
   return 0;
@@ -947,9 +905,14 @@ static int provenance_unix_may_send(struct socket *sock,
 * Return 0 if the hook is successful and permission is granted.
 */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm){
+	struct inode *inode = file_inode(bprm->file);
+	prov_msg_t* iprov = inode_get_provenance(inode);
+	prov_msg_t* nprov;
   if(!bprm->cred->provenance){
-    return provenance_cred_alloc_blank(bprm->cred, GFP_KERNEL);
+		provenance_cred_alloc_blank(bprm->cred, GFP_KERNEL);
   }
+	nprov = bprm->cred->provenance;
+	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -966,9 +929,8 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
    prov_msg_t* nprov = bprm->cred->provenance;
    struct inode *inode = file_inode(bprm->file);
    prov_msg_t* iprov = inode_get_provenance(inode);
-   record_relation(RL_CREATE, cprov, nprov, FLOW_ALLOWED);
-   record_relation(RL_CREATE, iprov, nprov, FLOW_ALLOWED);
-	 //
+   record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED);
+   record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED);
  }
 
 /*

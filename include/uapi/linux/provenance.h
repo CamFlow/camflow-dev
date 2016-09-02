@@ -20,18 +20,24 @@
 #include <uapi/linux/limits.h>
 #endif
 
-#define PROV_ENABLE_FILE           "/sys/kernel/security/provenance/enable"
-#define PROV_ALL_FILE              "/sys/kernel/security/provenance/all"
-#define PROV_OPAQUE_FILE           "/sys/kernel/security/provenance/opaque"
-#define PROV_TRACKED_FILE          "/sys/kernel/security/provenance/tracked"
-#define PROV_NODE_FILE             "/sys/kernel/security/provenance/node"
-#define PROV_RELATION_FILE         "/sys/kernel/security/provenance/relation"
-#define PROV_SELF_FILE             "/sys/kernel/security/provenance/self"
-#define PROV_MACHINE_ID_FILE       "/sys/kernel/security/provenance/machine_id"
-#define PROV_NODE_FILTER_FILE      "/sys/kernel/security/provenance/node_filter"
-#define PROV_RELATION_FILTER_FILE  "/sys/kernel/security/provenance/relation_filter"
-#define PROV_FLUSH_FILE            "/sys/kernel/security/provenance/flush"
-#define PROV_FILE_FILE             "/sys/kernel/security/provenance/file"
+#define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
+#define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
+#define PROV_OPAQUE_FILE                      "/sys/kernel/security/provenance/opaque"
+#define PROV_TRACKED_FILE                     "/sys/kernel/security/provenance/tracked"
+#define PROV_PROPAGATE_FILE                   "/sys/kernel/security/provenance/propagate"
+#define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"
+#define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
+#define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
+#define PROV_MACHINE_ID_FILE                  "/sys/kernel/security/provenance/machine_id"
+#define PROV_NODE_FILTER_FILE                 "/sys/kernel/security/provenance/node_filter"
+#define PROV_RELATION_FILTER_FILE             "/sys/kernel/security/provenance/relation_filter"
+#define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
+#define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
+#define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
+#define PROV_FILE_FILE                        "/sys/kernel/security/provenance/file"
+
+#define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
+#define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
 
 #define MSG_STR               0x00000001UL
 #define MSG_RELATION          0x00000002UL
@@ -56,14 +62,12 @@
 #define MSG_DISC_AGENT        0x00100000UL
 #define MSG_DISC_NODE         0x00200000UL
 
-#define DEFAULT_NODE_FILTER   (MSG_INODE_DIRECTORY|MSG_INODE_UNKNOWN)
-
 #define RL_READ               0x00000001UL
 #define RL_WRITE              0x00000002UL
 #define RL_CREATE             0x00000004UL
 #define RL_PASS               0x00000008UL
 #define RL_CHANGE             0x00000010UL
-#define RL_MMAP               0x00000020UL
+#define RL_MMAP_WRITE         0x00000020UL
 #define RL_ATTACH             0x00000040UL
 #define RL_ASSOCIATE          0x00000080UL
 #define RL_BIND               0x00000100UL
@@ -83,28 +87,31 @@
 #define RL_SEARCH             0x00400000UL
 #define RL_ALLOWED            0x00800000UL
 #define RL_DISALLOWED         0x01000000UL
+#define RL_MMAP_READ          0x02000000UL
+#define RL_MMAP_EXEC          0x04000000UL
 
-#define DEFAULT_RELATION_FILTER   0
+#define FLOW_ALLOWED        1
+#define FLOW_DISALLOWED     0
 
-#define FLOW_DISALLOWED   0
-#define FLOW_ALLOWED      1
+#define NODE_TRACKED        1
+#define NODE_NOT_TRACKED    0
 
-#define NODE_TRACKED      1
-#define NODE_NOT_TRACKED  0
+#define NODE_PROPAGATE      1
+#define NODE_NOT_PROPAGATE  0
 
-#define NODE_RECORDED     1
-#define NODE_UNRECORDED   0
+#define NODE_RECORDED       1
+#define NODE_UNRECORDED     0
 
-#define NAME_RECORDED     1
-#define NAME_UNRECORDED   0
+#define NAME_RECORDED       1
+#define NAME_UNRECORDED     0
 
-#define NODE_OPAQUE       1
-#define NODE_NOT_OPAQUE   0
+#define NODE_OPAQUE         1
+#define NODE_NOT_OPAQUE     0
 
-#define INODE_LINKED      1
-#define INODE_UNLINKED    0
+#define INODE_LINKED        1
+#define INODE_UNLINKED      0
 
-#define STR_MAX_SIZE      128
+#define STR_MAX_SIZE        128
 
 #define node_kern(prov) ((prov)->node_info.node_kern)
 #define prov_type(prov) (prov)->node_info.identifier.node_id.type
@@ -261,7 +268,7 @@ struct prov_filter{
 
 #define PROV_SET_TRACKED		  1
 #define PROV_SET_OPAQUE 		  2
-#define PROV_SET_PROPAGATE 		4
+#define PROV_SET_PROPAGATE    3
 
 struct prov_file_config{
   char name[PATH_MAX];
