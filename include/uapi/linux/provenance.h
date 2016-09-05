@@ -141,6 +141,8 @@ typedef union prov_identifier{
   uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
+// TODO use a single byte
+// TODO add taint tracking
 struct node_kern{
   uint8_t recorded;
   uint8_t name_recorded;

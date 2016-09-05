@@ -42,5 +42,10 @@ static inline void free_camflow(struct inode *inode){
   }
 }
 
+int provenance_inode_init_security(struct inode *inode, struct inode *dir,
+				       const struct qstr *qstr,
+				       const char **name,
+				       void **value, size_t *len);
+
 
 #endif

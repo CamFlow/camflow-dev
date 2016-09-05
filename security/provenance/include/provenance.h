@@ -93,7 +93,7 @@ static inline int prov_print(const char *fmt, ...)
   va_list args;
   va_start(args, fmt);
 
-  msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+  msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t),  GFP_NOFS);
 
   /* set message type */
   prov_type(msg)=MSG_STR;
