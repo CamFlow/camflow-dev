@@ -709,7 +709,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-	
+
 	// both way exchange
   record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
   record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
@@ -1198,22 +1198,21 @@ static void provenance_sb_free_security(struct super_block *sb)
   sb->s_provenance=NULL;
 }
 
+/*
 static void provenance_release_secctx(char *secdata, u32 seclen)
 {
 	kfree(secdata);
 }
 
-/*
- *	called with inode->i_mutex locked
- */
+
+// called with inode->i_mutex locked
 static int provenance_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen)
 {
 	return provenance_inode_setsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, ctxlen, 0);
 }
 
-/*
- *	called with inode->i_mutex locked
- */
+
+// called with inode->i_mutex locked
 static int provenance_inode_setsecctx(struct dentry *dentry, void *ctx, u32 ctxlen)
 {
 	return __vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, ctx, ctxlen, XATTR_CREATE);
@@ -1228,6 +1227,7 @@ static int provenance_inode_getsecctx(struct inode *inode, void **ctx, u32 *ctxl
 	*ctxlen = len;
 	return 0;
 }
+*/
 
 static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *data)
 {
@@ -1262,10 +1262,10 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(inode_setsecurity, provenance_inode_setsecurity),
 	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
 	/* secctx */
-	LSM_HOOK_INIT(release_secctx, provenance_release_secctx),
+	/*LSM_HOOK_INIT(release_secctx, provenance_release_secctx),
 	LSM_HOOK_INIT(inode_setsecctx, provenance_inode_setsecctx),
 	LSM_HOOK_INIT(inode_getsecctx, provenance_inode_getsecctx),
-	LSM_HOOK_INIT(inode_notifysecctx, provenance_inode_notifysecctx),
+	LSM_HOOK_INIT(inode_notifysecctx, provenance_inode_notifysecctx),*/
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
