@@ -20,6 +20,59 @@
 #include <uapi/linux/limits.h>
 #endif
 
+#define GOLDEN_RATIO_64 0x61C8864680B583EBull
+static inline uint32_t prov_hash(uint64_t val){
+  return (val * GOLDEN_RATIO_64) >> (64-8);
+}
+
+#define PROV_K_HASH 7
+#define PROV_M_BITS 256
+#define PROV_N_BYTES (PROV_M_BITS/8)
+#define PROV_BYTE_INDEX(a) (a/8)
+#define PROV_BIT_INDEX(a) (a%8)
+
+static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val){
+  uint8_t i;
+  uint32_t pos;
+  for(i=0; i < PROV_K_HASH; i++){
+    pos= prov_hash(val+i) % PROV_M_BITS;
+    bloom[PROV_BYTE_INDEX(pos)] |= 1 << PROV_BIT_INDEX(pos);
+  }
+}
+
+static inline bool prov_bloom_in(uint8_t bloom[PROV_N_BYTES], uint64_t val){
+    uint8_t i;
+    uint8_t tmp[PROV_N_BYTES];
+
+    memset(tmp, 0, PROV_N_BYTES);
+    prov_bloom_add(tmp, val);
+    for(i=0; i<PROV_N_BYTES; i++){
+        if( (bloom[i]&tmp[i]) != tmp[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+/* merge src into dest (dest=dest U src) */
+static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], uint8_t src[PROV_N_BYTES]){
+    uint8_t i;
+    for(i=0; i<PROV_N_BYTES; i++){
+        dest[i] |= src[i];
+    }
+}
+
+/* element in src belong to dest */
+static inline bool prov_bloom_match(uint8_t super[PROV_N_BYTES], uint8_t set[PROV_N_BYTES]){
+    uint8_t i;
+    for(i=0; i<PROV_N_BYTES; i++){
+        if((super[i]&set[i]) != set[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
 #define PROV_OPAQUE_FILE                      "/sys/kernel/security/provenance/opaque"
@@ -152,7 +205,7 @@ struct node_kern{
   uint8_t tracked;
   uint8_t opaque;
   uint8_t propagate;
-  uint8_t initialized;
+  uint8_t taint[PROV_N_BYTES];
 };
 
 struct msg_struct{
