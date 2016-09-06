@@ -88,7 +88,7 @@ static void cred_init_provenance(void)
 /* inodes security attribute must be inilitialised before first use */
 static inline int inode_do_init_with_dentry(struct inode* inode, struct dentry *opt_dentry)
 {
-	prov_msg_t* iprov = inode_get_provenance(inode);
+	/*prov_msg_t* iprov = inode_get_provenance(inode);
 	struct dentry *dentry;
 	unsigned char* buffer;
 	size_t len;
@@ -111,7 +111,7 @@ static inline int inode_do_init_with_dentry(struct inode* inode, struct dentry *
 		goto out;
 	}
 
-	/* get size for buffer */
+	// get size for buffer
 		rc = inode->i_op->getxattr(dentry, XATTR_NAME_PROVENANCE, NULL, 0);
 		if(rc < 0){
 			dput(dentry);
@@ -150,7 +150,8 @@ release_dentry:
 out:
 	prov_copy_inode_mode(iprov, inode);
 	node_kern(iprov).initialized=NODE_INITIALIZED;
-	return rc;
+	return rc;*/
+	return 0;
 }
 
 
