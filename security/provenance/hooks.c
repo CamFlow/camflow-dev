@@ -360,8 +360,7 @@ int provenance_inode_init_security(struct inode *inode, struct inode *dir,
 	if (value && len) {
 		iprov = inode_provenance(inode);
 		if(!iprov){ // alloc provenance if none there
-	    provenance_inode_alloc_security(inode);
-			iprov = inode_get_provenance(inode);
+	    return -ENOMEM;
 	  }
 		val = (prov_msg_t*)kzalloc(sizeof(prov_msg_t), GFP_NOFS);
 		if (!val){
@@ -480,8 +479,7 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 
 	iprov = inode_provenance(dir);
 	if(!iprov){ // alloc provenance if none there
-    provenance_inode_alloc_security(dir);
-		iprov = inode_get_provenance(dir);
+    return -ENOMEM;
   }
 	prov_copy_inode_mode(iprov, dir);
 
@@ -523,8 +521,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 	iprov = inode_provenance(inode);
   if(!iprov){ // alloc provenance if none there
-    provenance_inode_alloc_security(inode);
-		iprov = inode_get_provenance(inode);
+    return -ENOMEM;
   }
 	prov_copy_inode_mode(iprov, inode);
 
@@ -580,8 +577,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 
 	iprov = inode_provenance(old_dentry->d_inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
-    provenance_inode_alloc_security(dir);
-		iprov = inode_get_provenance(old_dentry->d_inode); // inode pointed by dentry
+    return -ENOMEM;
   }
 
 	if(filter_node(iprov)){ // this node should not be recorded
@@ -590,8 +586,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 
 	dprov = inode_provenance(dir);
   if(!dprov){ // alloc provenance if none there
-    provenance_inode_alloc_security(old_dentry->d_inode);
-		dprov = inode_get_provenance(dir);
+    return -ENOMEM;
   }
 
   if( provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov) ){
@@ -645,8 +640,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	prov_msg_t* iprov = inode_provenance(inode);
 
 	if(!iprov){ // alloc provenance if none there
-    provenance_inode_alloc_security(inode);
-		iprov = inode_get_provenance(inode);
+    return -ENOMEM;
   }
 	prov_copy_inode_mode(iprov, inode);
 
@@ -713,12 +707,9 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
 
 	iprov = inode_provenance(inode);
   if(!iprov){ // alloc provenance if none there
-    provenance_inode_alloc_security(inode);
-		iprov = inode_get_provenance(inode);
+    return -ENOMEM;
   }
-
-
-
+	
 	// both way exchange
   record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
   record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
