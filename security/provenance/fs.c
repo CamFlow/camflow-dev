@@ -278,25 +278,25 @@ static inline ssize_t __read_kern_byte(struct file *filp, char __user *buf,
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
 }
 
-#define declare_write_kern_byte_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos){\
+#define declare_write_kern_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos){\
 		prov_msg_t* cprov = current_provenance();\
 		return __write_kern_byte(file, buf, count, ppos, &(node_kern(cprov).flag));\
 	}
-#define declare_read_kern_byte_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos){\
+#define declare_read_kern_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos){\
 		prov_msg_t* cprov = current_provenance();\
 		return __read_kern_byte(filp, buf, count, ppos, node_kern(cprov).flag);\
 	}
 
-declare_write_kern_byte_fcn(prov_write_tracked, tracked);
-declare_read_kern_byte_fcn(prov_read_tracked, tracked);
+declare_write_kern_flag_fcn(prov_write_tracked, tracked);
+declare_read_kern_flag_fcn(prov_read_tracked, tracked);
 declare_file_operations(prov_tracked_ops, prov_write_tracked, prov_read_tracked);
 
-declare_write_kern_byte_fcn(prov_write_opaque, opaque);
-declare_read_kern_byte_fcn(prov_read_opaque, opaque);
+declare_write_kern_flag_fcn(prov_write_opaque, opaque);
+declare_read_kern_flag_fcn(prov_read_opaque, opaque);
 declare_file_operations(prov_opaque_ops, prov_write_opaque, prov_read_opaque);
 
-declare_write_kern_byte_fcn(prov_write_propagate, propagate);
-declare_read_kern_byte_fcn(prov_read_propagate, propagate);
+declare_write_kern_flag_fcn(prov_write_propagate, propagate);
+declare_read_kern_flag_fcn(prov_read_propagate, propagate);
 declare_file_operations(prov_propagate_ops, prov_write_propagate, prov_read_propagate);
 
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
