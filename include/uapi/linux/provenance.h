@@ -102,6 +102,9 @@
 #define NODE_RECORDED       1
 #define NODE_UNRECORDED     0
 
+#define NODE_INITIALIZED     1
+#define NODE_NOT_INITIALIZED 0
+
 #define NAME_RECORDED       1
 #define NAME_UNRECORDED     0
 
@@ -149,6 +152,7 @@ struct node_kern{
   uint8_t tracked;
   uint8_t opaque;
   uint8_t propagate;
+  uint8_t initialized;
 };
 
 struct msg_struct{
