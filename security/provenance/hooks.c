@@ -1269,6 +1269,7 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(inode_getsecurity, provenance_inode_getsecurity),
 	LSM_HOOK_INIT(inode_setsecurity, provenance_inode_setsecurity),
 	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
+	/* secctx */
 	LSM_HOOK_INIT(release_secctx, provenance_release_secctx),
 	LSM_HOOK_INIT(inode_setsecctx, provenance_inode_setsecctx),
 	LSM_HOOK_INIT(inode_getsecctx, provenance_inode_getsecctx),
