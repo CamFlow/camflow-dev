@@ -33,7 +33,8 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.6
 
 ```
--
+- Added taint tracking support.
+- Replace byte sized flag, by bit sized one.
 ```
 
 ### v0.1.5

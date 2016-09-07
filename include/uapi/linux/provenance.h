@@ -40,7 +40,7 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val){
   }
 }
 
-static inline bool prov_bloom_in(uint8_t bloom[PROV_N_BYTES], uint64_t val){
+static inline bool prov_bloom_in(const uint8_t bloom[PROV_N_BYTES], uint64_t val){
     uint8_t i;
     uint8_t tmp[PROV_N_BYTES];
 
@@ -55,7 +55,7 @@ static inline bool prov_bloom_in(uint8_t bloom[PROV_N_BYTES], uint64_t val){
 }
 
 /* merge src into dest (dest=dest U src) */
-static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], uint8_t src[PROV_N_BYTES]){
+static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], const uint8_t src[PROV_N_BYTES]){
     uint8_t i;
     for(i=0; i<PROV_N_BYTES; i++){
         dest[i] |= src[i];
@@ -63,7 +63,7 @@ static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], uint8_t src[PROV
 }
 
 /* element in src belong to dest */
-static inline bool prov_bloom_match(uint8_t super[PROV_N_BYTES], uint8_t set[PROV_N_BYTES]){
+static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES]){
     uint8_t i;
     for(i=0; i<PROV_N_BYTES; i++){
         if((super[i]&set[i]) != set[i]){
@@ -71,6 +71,16 @@ static inline bool prov_bloom_match(uint8_t super[PROV_N_BYTES], uint8_t set[PRO
         }
     }
     return true;
+}
+
+static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
+  uint8_t i;
+  for(i=0; i<PROV_N_BYTES; i++){
+      if( bloom[i] != 0 ){
+          return false;
+      }
+  }
+  return true;
 }
 
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
@@ -150,9 +160,10 @@ static inline bool prov_bloom_match(uint8_t super[PROV_N_BYTES], uint8_t set[PRO
 
 #define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
 #define prov_id_buffer(prov) ((prov)->node_info.identifier.buffer)
-#define node_kern(prov) ((prov)->node_info.node_kern)
+#define node_kern(node) ((node)->node_info.kern_info)
 #define node_identifier(node) ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
+#define relation_kern(relation) ((relation)->relation_info.kern_info)
 
 struct node_identifier{
   uint32_t type;
@@ -206,17 +217,19 @@ typedef union prov_identifier{
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
 #define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
 
-struct node_kern{
+struct kern_info{
   uint8_t taint[PROV_N_BYTES];
   uint8_t flag;
 };
 
 struct msg_struct{
   prov_identifier_t identifier;
+  struct kern_info kern_info;
 };
 
 struct relation_struct{
   prov_identifier_t identifier;
+  struct kern_info kern_info;
   uint32_t type;
   uint8_t allowed;
   prov_identifier_t snd;
@@ -225,19 +238,19 @@ struct relation_struct{
 
 struct node_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
 };
 
 struct task_prov_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
@@ -246,19 +259,19 @@ struct inode_prov_struct{
 
 struct msg_msg_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   long type;
 };
 
 struct shm_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   uint16_t mode;
 };
 
 struct sock_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
@@ -266,7 +279,7 @@ struct sock_struct{
 
 struct sb_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   uint8_t uuid[16];
 };
 
@@ -307,7 +320,7 @@ struct ifc_context_struct{
 
 struct disc_node_struct{
   prov_identifier_t identifier;
-  struct node_kern node_kern;
+  struct kern_info kern_info;
   size_t length;
   char content[PATH_MAX];
   prov_identifier_t parent;
