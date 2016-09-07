@@ -146,33 +146,13 @@ static inline bool prov_bloom_match(uint8_t super[PROV_N_BYTES], uint8_t set[PRO
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
 
-#define NODE_TRACKED        1
-#define NODE_NOT_TRACKED    0
-
-#define NODE_PROPAGATE      1
-#define NODE_NOT_PROPAGATE  0
-
-#define NODE_RECORDED       1
-#define NODE_UNRECORDED     0
-
-#define NODE_INITIALIZED     1
-#define NODE_NOT_INITIALIZED 0
-
-#define NAME_RECORDED       1
-#define NAME_UNRECORDED     0
-
-#define NODE_OPAQUE         1
-#define NODE_NOT_OPAQUE     0
-
-#define INODE_LINKED        1
-#define INODE_UNLINKED      0
-
 #define STR_MAX_SIZE        128
 
+#define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
+#define prov_id_buffer(prov) ((prov)->node_info.identifier.buffer)
 #define node_kern(prov) ((prov)->node_info.node_kern)
-#define prov_type(prov) (prov)->node_info.identifier.node_id.type
-#define node_identifier(node) (node)->node_info.identifier.node_id
-#define relation_identifier(relation) (relation)->relation_info.identifier.relation_id
+#define node_identifier(node) ((node)->node_info.identifier.node_id)
+#define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
 
 struct node_identifier{
   uint32_t type;
@@ -197,15 +177,38 @@ typedef union prov_identifier{
   uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
-// TODO use a single byte
-// TODO add taint tracking
+#define prov_set_flag(node, nbit) (node_kern(node).flag) |= 1 << nbit
+#define prov_clear_flag(node, nbit) (node_kern(node).flag) &= ~(1 << nbit)
+#define prov_check_flag(node, nbit) (((node_kern(node).flag) & (1 << nbit)) == (1 << nbit))
+
+#define RECORDED_BIT 0
+#define set_recorded(node)                  prov_set_flag(node, RECORDED_BIT)
+#define clear_recorded(node)                prov_clear_flag(node, RECORDED_BIT)
+#define provenance_is_recorded(node)        prov_check_flag(node, RECORDED_BIT)
+
+#define NAME_RECORDED_BIT 1
+#define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
+#define clear__name_recorded(node)          prov_clear_flag(node, NAME_RECORDED_BIT)
+#define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
+
+#define TRACKED_BIT 2
+#define set_tracked(node)                   prov_set_flag(node, TRACKED_BIT)
+#define clear_tracked(node)                 prov_clear_flag(node, TRACKED_BIT)
+#define provenance_is_tracked(node)         prov_check_flag(node, TRACKED_BIT)
+
+#define OPAQUE_BIT 3
+#define set_opaque(node)                    prov_set_flag(node, OPAQUE_BIT)
+#define clear_opaque(node)                  prov_clear_flag(node, OPAQUE_BIT)
+#define provenance_is_opaque(node)          prov_check_flag(node, OPAQUE_BIT)
+
+#define PROPAGATE_BIT 4
+#define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
+#define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
+#define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
+
 struct node_kern{
-  uint8_t recorded;
-  uint8_t name_recorded;
-  uint8_t tracked;
-  uint8_t opaque;
-  uint8_t propagate;
   uint8_t taint[PROV_N_BYTES];
+  uint8_t flag;
 };
 
 struct msg_struct{
@@ -241,12 +244,6 @@ struct inode_prov_struct{
   uint8_t sb_uuid[16];
 };
 
-struct sb_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
-  uint8_t uuid[16];
-};
-
 struct msg_msg_struct{
   prov_identifier_t identifier;
   struct node_kern node_kern;
@@ -265,6 +262,12 @@ struct sock_struct{
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
+};
+
+struct sb_struct{
+  prov_identifier_t identifier;
+  struct node_kern node_kern;
+  uint8_t uuid[16];
 };
 
 typedef union prov_msg{
@@ -331,7 +334,7 @@ struct prov_filter{
 
 struct prov_file_config{
   char name[PATH_MAX];
-  struct inode_prov_struct prov;
+  prov_msg_t prov;
   uint8_t op; // on write
 };
 

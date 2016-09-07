@@ -130,9 +130,9 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
     prov_update_version(cprov);
     prov_record_ifc(cprov, &cifc->context);
     if(ifc_is_labelled(&cifc->context)){
-      cprov->node_info.node_kern.tracked=NODE_TRACKED;
+      set_tracked(cprov);
     }else{
-      cprov->node_info.node_kern.tracked=NODE_NOT_TRACKED;
+      clear_tracked(cprov);
     }
 #endif
 
@@ -473,9 +473,9 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   prov_update_version(prov);
   prov_record_ifc(prov, &ifc->context);
   if(ifc_is_labelled(&ifc->context)){
-    prov->node_info.node_kern.tracked=NODE_TRACKED;
+    set_tracked(prov);
   }else{
-    prov->node_info.node_kern.tracked=NODE_NOT_TRACKED;
+    clear_tracked(prov);
   }
 #endif
 
@@ -503,7 +503,7 @@ static ssize_t ifc_read_file(struct file *filp, char __user *buf,
     printk(KERN_ERR "IFC: could not find %s file.", msg->name);
     return -EINVAL;
   }
-  
+
   ifc = inode_get_ifc(in);
   if(copy_to_user(&msg->context, &ifc->context, sizeof(struct ifc_context))){
     printk(KERN_INFO "IFC: error copying.");

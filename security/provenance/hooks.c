@@ -54,14 +54,14 @@ static inline void task_config_from_file(struct task_struct *task){
 	if(exe_file){
 		inode = file_inode(exe_file);
 		iprov = inode_provenance(inode);
-		if(node_kern(iprov).tracked == NODE_TRACKED){
-			node_kern(tprov).tracked = NODE_TRACKED;
+		if(provenance_is_tracked(iprov)){
+			set_tracked(tprov);
 		}
-		if(node_kern(iprov).opaque == NODE_OPAQUE){
-			node_kern(tprov).opaque = NODE_OPAQUE;
+		if(provenance_is_opaque(iprov)){
+			set_opaque(tprov);
 		}
-		if(node_kern(iprov).propagate == NODE_PROPAGATE){
-			node_kern(tprov).propagate = NODE_PROPAGATE;
+		if(provenance_propagate(iprov)){
+			set_propagate(tprov);
 		}
 	}
 
@@ -221,7 +221,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 #ifdef CONFIG_SECURITY_IFC
 	new_ifc = new->ifc;
 	if(ifc_is_labelled(&new_ifc->context)){
-		node_kern(prov).tracked=NODE_TRACKED;
+		set_tracked(prov);
 		prov_record_ifc(prov, &new_ifc->context);
 	}
 #endif
@@ -229,10 +229,10 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	if(provenance_is_tracked(old_prov)){
 		record_task_name(current);
 		record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
-		node_kern(prov).tracked = NODE_TRACKED; // receiving node become tracked
+		set_tracked(prov); // receiving node become tracked
 	}
 	if( provenance_propagate(old_prov) ){
-		node_kern(prov).propagate = NODE_PROPAGATE;
+		set_propagate(prov);
 	}
   new->provenance = prov;
   return 0;
@@ -301,7 +301,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 #ifdef CONFIG_SECURITY_IFC
 	ifc = inode_get_ifc(inode);
 	if(ifc_is_labelled(&ifc->context)){
-		node_kern(iprov).tracked=NODE_TRACKED;
+		set_tracked(iprov);
 		prov_record_ifc(iprov, &ifc->context);
 	}
 #endif
@@ -744,7 +744,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 #ifdef CONFIG_SECURITY_IFC
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
-			node_kern(mprov).tracked=NODE_TRACKED;
+			set_tracked(mprov);
 			prov_record_ifc(mprov, &ifc->context);
 		}
 	}
@@ -829,7 +829,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 #ifdef CONFIG_SECURITY_IFC
 	if(!ifc){
 		if(ifc_is_labelled(&ifc->context)){
-			node_kern(sprov).tracked=NODE_TRACKED;
+			set_tracked(sprov);
 			prov_record_ifc(sprov, &ifc->context);
 		}
 	}
@@ -953,7 +953,7 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 	  long_prov_write(addr_info);
 		long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
 	  free_long_provenance(addr_info);
-		node_kern(skprov).name_recorded=NAME_RECORDED;
+		set_name_recorded(skprov);
 	}
 }
 

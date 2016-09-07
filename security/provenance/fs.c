@@ -236,10 +236,11 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 
 declare_file_operations(prov_self_ops, no_write, prov_read_self);
 
-static inline ssize_t __write_kern_byte(struct file *file, const char __user *buf,
-				 size_t count, loff_t *ppos, uint8_t *flag)
+static inline ssize_t __write_kern_flag(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos, uint8_t flag)
 
 {
+	prov_msg_t* cprov = current_provenance();
   char* page = NULL;
   ssize_t length;
   int tmp;
@@ -260,43 +261,52 @@ static inline ssize_t __write_kern_byte(struct file *file, const char __user *bu
   if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
-	(*flag)=tmp;
+	if(tmp==1){
+		prov_set_flag(cprov, flag);
+	}else{
+		prov_clear_flag(cprov, flag);
+	}
   length=count;
 out:
   free_page((unsigned long)page);
   return length;
 }
 
-static inline ssize_t __read_kern_byte(struct file *filp, char __user *buf,
+static inline ssize_t __read_kern_flag(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos, uint8_t flag)
 {
+	prov_msg_t* cprov = current_provenance();
 	char tmpbuf[TMPBUFLEN];
 	ssize_t length;
-  int tmp = flag;
+	int tmp;
+	if(prov_check_flag(cprov, flag)){
+		tmp = 1;
+	}else{
+		tmp = 0;
+	}
+
 
 	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
 }
 
 #define declare_write_kern_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos){\
-		prov_msg_t* cprov = current_provenance();\
-		return __write_kern_byte(file, buf, count, ppos, &(node_kern(cprov).flag));\
+		return __write_kern_flag(file, buf, count, ppos, flag);\
 	}
 #define declare_read_kern_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos){\
-		prov_msg_t* cprov = current_provenance();\
-		return __read_kern_byte(filp, buf, count, ppos, node_kern(cprov).flag);\
+		return __read_kern_flag(filp, buf, count, ppos, flag);\
 	}
 
-declare_write_kern_flag_fcn(prov_write_tracked, tracked);
-declare_read_kern_flag_fcn(prov_read_tracked, tracked);
+declare_write_kern_flag_fcn(prov_write_tracked, TRACKED_BIT);
+declare_read_kern_flag_fcn(prov_read_tracked, TRACKED_BIT);
 declare_file_operations(prov_tracked_ops, prov_write_tracked, prov_read_tracked);
 
-declare_write_kern_flag_fcn(prov_write_opaque, opaque);
-declare_read_kern_flag_fcn(prov_read_opaque, opaque);
+declare_write_kern_flag_fcn(prov_write_opaque, OPAQUE_BIT);
+declare_read_kern_flag_fcn(prov_read_opaque, OPAQUE_BIT);
 declare_file_operations(prov_opaque_ops, prov_write_opaque, prov_read_opaque);
 
-declare_write_kern_flag_fcn(prov_write_propagate, propagate);
-declare_read_kern_flag_fcn(prov_read_propagate, propagate);
+declare_write_kern_flag_fcn(prov_write_propagate, PROPAGATE_BIT);
+declare_read_kern_flag_fcn(prov_read_propagate, PROPAGATE_BIT);
 declare_file_operations(prov_propagate_ops, prov_write_propagate, prov_read_propagate);
 
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
@@ -401,16 +411,30 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
   prov = inode_get_provenance(in);
 
 	if(((msg->op) & PROV_SET_TRACKED)!=0){
-		node_kern(prov).tracked=msg->prov.node_kern.tracked;
+		if(provenance_is_tracked(&(msg->prov))){
+			set_tracked(prov);
+		}else{
+			clear_tracked(prov);
+		}
 	}
 
 	if(((msg->op) & PROV_SET_OPAQUE)!=0){
-		node_kern(prov).opaque=msg->prov.node_kern.opaque;
+		if(provenance_is_opaque(&(msg->prov))){
+			set_opaque(prov);
+		}else{
+			clear_opaque(prov);
+		}
 	}
 
 	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
-		node_kern(prov).propagate=msg->prov.node_kern.propagate;
+		if(provenance_propagate(&(msg->prov))){
+			set_propagate(prov);
+		}else{
+			clear_propagate(prov);
+		}
 	}
+	printk(KERN_INFO "Parameter: %0X", node_kern(&(msg->prov)).flag);
+	printk(KERN_INFO "Flag: %0X", node_kern(prov).flag);
 
   return sizeof(struct prov_file_config);
 }
@@ -435,7 +459,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
   }
 
   prov = inode_get_provenance(in);
-  if(copy_to_user(&msg->prov, &prov->inode_info, sizeof(struct inode_prov_struct))){
+  if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
     printk(KERN_ERR "Provenance: error copying.");
     return -ENOMEM;
   }

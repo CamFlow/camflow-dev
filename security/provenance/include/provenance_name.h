@@ -27,7 +27,7 @@ static inline void record_node_name(prov_msg_t* node, char* name){
 	long_prov_write(fname_prov);
 	long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
 	free_long_provenance(fname_prov);
-	node_kern(node).name_recorded=NAME_RECORDED;
+	set_name_recorded(node);
 }
 
 static inline void record_inode_name(struct inode *inode){

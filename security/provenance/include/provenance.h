@@ -110,7 +110,7 @@ static inline void record_node(prov_msg_t* node){
     return;
   }
 
-  node_kern(node).recorded=NODE_RECORDED;
+  set_recorded(node);
   prov_write(node);
 }
 
@@ -124,7 +124,7 @@ static inline void prov_update_version(prov_msg_t* prov){
   prov_msg_t old_prov;
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
-  node_kern(prov).recorded = NODE_UNRECORDED;
+  clear_recorded(prov);
   if(node_identifier(prov).type == MSG_TASK)
     record_relation(RL_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
   else
@@ -140,19 +140,19 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
 
   /* propagate tracked */
   if( !filter_propagate_relation(type, from, to, allowed) ){ // it is not filtered
-    node_kern(to).tracked = NODE_TRACKED; // receiving node become tracked
-    node_kern(to).propagate = NODE_PROPAGATE; // continue to propagate
+    set_tracked(to);// receiving node become tracked
+    set_propagate(to); // continue to propagate
   }
 
   if(should_update_node(type, to)){ // it is none of the above types
     prov_update_version(to);
   }
 
-  if( !porvenance_is_recorded(from) ){
+  if( !provenance_is_recorded(from) ){
     record_node(from);
   }
 
-  if( !porvenance_is_recorded(to) ){
+  if( !provenance_is_recorded(to) ){
     record_node(to);
   }
 
@@ -176,7 +176,7 @@ static inline void long_record_relation(uint32_t type, long_prov_msg_t* from, pr
   if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) )
     return;
 
-  if( !porvenance_is_recorded(from) )
+  if( !provenance_is_recorded(from) )
     record_node(to);
 
   prov_type((&relation))=MSG_RELATION;
@@ -212,7 +212,7 @@ static inline void provenance_mark_as_opaque(const char* name){
   }else{
     prov = inode_get_provenance(in);
     if(prov){
-      node_kern(prov).opaque=NODE_OPAQUE;
+      set_opaque(prov);
     }
   }
 }
