@@ -433,8 +433,10 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 			clear_propagate(prov);
 		}
 	}
-	printk(KERN_INFO "Parameter: %0X", node_kern(&(msg->prov)).flag);
-	printk(KERN_INFO "Flag: %0X", node_kern(prov).flag);
+
+	if(((msg->op) & PROV_SET_TAINT)!=0){
+		prov_bloom_merge(node_kern(prov).taint, node_kern(&(msg->prov)).taint);
+	}
 
   return sizeof(struct prov_file_config);
 }

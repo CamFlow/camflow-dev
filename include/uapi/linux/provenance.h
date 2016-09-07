@@ -341,9 +341,10 @@ struct prov_filter{
   uint8_t add;
 };
 
-#define PROV_SET_TRACKED		  1
-#define PROV_SET_OPAQUE 		  2
-#define PROV_SET_PROPAGATE    3
+#define PROV_SET_TRACKED		  0x01
+#define PROV_SET_OPAQUE 		  0x02
+#define PROV_SET_PROPAGATE    0x04
+#define PROV_SET_TAINT        0x08
 
 struct prov_file_config{
   char name[PATH_MAX];
