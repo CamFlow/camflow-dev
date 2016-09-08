@@ -24,24 +24,21 @@
 		.llseek		= generic_file_llseek,\
 	}
 
-	static ssize_t no_read(struct file *filp, char __user *buf,
-					size_t count, loff_t *ppos)
-	{
-		return -EPERM; // write only
-	}
+static ssize_t no_read(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	return -EPERM; // write only
+}
 
-	static ssize_t no_write(struct file *file, const char __user *buf,
-					 size_t count, loff_t *ppos)
-	{
-		return -EPERM; // read only
-	}
+/*static ssize_t no_write(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	return -EPERM; // read only
+}*/ // not used anymore
 
 static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_ENABLE_FILE);
 	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_OPAQUE_FILE);
-	provenance_mark_as_opaque(PROV_TRACKED_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
@@ -217,6 +214,50 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
+static ssize_t prov_write_self(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	struct prov_self_config *msg;
+  prov_msg_t* prov = current_provenance();
+
+  if(count < sizeof(struct prov_self_config)){
+    printk(KERN_ERR "Provenance: Too short.");
+    return -EINVAL;
+  }
+
+  msg = (struct prov_self_config*)buf;
+
+	if(((msg->op) & PROV_SET_TRACKED)!=0){
+		if(provenance_is_tracked(&(msg->prov))){
+			set_tracked(prov);
+		}else{
+			clear_tracked(prov);
+		}
+	}
+
+	if(((msg->op) & PROV_SET_OPAQUE)!=0){
+		if(provenance_is_opaque(&(msg->prov))){
+			set_opaque(prov);
+		}else{
+			clear_opaque(prov);
+		}
+	}
+
+	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
+		if(provenance_propagate(&(msg->prov))){
+			set_propagate(prov);
+		}else{
+			clear_propagate(prov);
+		}
+	}
+
+	if(((msg->op) & PROV_SET_TAINT)!=0){
+		prov_bloom_merge(node_kern(prov).taint, node_kern(&(msg->prov)).taint);
+	}
+
+  return sizeof(struct prov_self_config);
+}
+
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
@@ -234,80 +275,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	return count; // write only
 }
 
-declare_file_operations(prov_self_ops, no_write, prov_read_self);
-
-static inline ssize_t __write_kern_flag(struct file *file, const char __user *buf,
-				 size_t count, loff_t *ppos, uint8_t flag)
-
-{
-	prov_msg_t* cprov = current_provenance();
-  char* page = NULL;
-  ssize_t length;
-  int tmp;
-
-  /* no partial write */
-  if(*ppos > 0)
-    return -EINVAL;
-
-  page = (char *)get_zeroed_page(GFP_KERNEL);
-  if (!page)
-    return -ENOMEM;
-
-  length=-EFAULT;
-	if (copy_from_user(page, buf, count))
-		goto out;
-
-  length = -EINVAL;
-  if (sscanf(page, "%d", &tmp) != 1)
-		goto out;
-
-	if(tmp==1){
-		prov_set_flag(cprov, flag);
-	}else{
-		prov_clear_flag(cprov, flag);
-	}
-  length=count;
-out:
-  free_page((unsigned long)page);
-  return length;
-}
-
-static inline ssize_t __read_kern_flag(struct file *filp, char __user *buf,
-				size_t count, loff_t *ppos, uint8_t flag)
-{
-	prov_msg_t* cprov = current_provenance();
-	char tmpbuf[TMPBUFLEN];
-	ssize_t length;
-	int tmp;
-	if(prov_check_flag(cprov, flag)){
-		tmp = 1;
-	}else{
-		tmp = 0;
-	}
-
-
-	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
-	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
-}
-
-#define declare_write_kern_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos){\
-		return __write_kern_flag(file, buf, count, ppos, flag);\
-	}
-#define declare_read_kern_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos){\
-		return __read_kern_flag(filp, buf, count, ppos, flag);\
-	}
-
-declare_write_kern_flag_fcn(prov_write_tracked, TRACKED_BIT);
-declare_read_kern_flag_fcn(prov_read_tracked, TRACKED_BIT);
-declare_file_operations(prov_tracked_ops, prov_write_tracked, prov_read_tracked);
-
-declare_write_kern_flag_fcn(prov_write_opaque, OPAQUE_BIT);
-declare_read_kern_flag_fcn(prov_read_opaque, OPAQUE_BIT);
-declare_file_operations(prov_opaque_ops, prov_write_opaque, prov_read_opaque);
-
-declare_write_kern_flag_fcn(prov_write_propagate, PROPAGATE_BIT);
-declare_read_kern_flag_fcn(prov_read_propagate, PROPAGATE_BIT);
-declare_file_operations(prov_propagate_ops, prov_write_propagate, prov_read_propagate);
+declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
 
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 				 size_t count, uint32_t* filter){
@@ -387,7 +355,6 @@ declare_file_operations(prov_flush_ops, prov_write_flush, no_read);
 
 static ssize_t prov_write_file(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
-
 {
 	struct prov_file_config *msg;
   struct inode* in;
@@ -479,12 +446,9 @@ static int __init init_prov_fs(void)
 
    securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
 	 securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
-	 securityfs_create_file("opaque", 0644, prov_dir, NULL, &prov_opaque_ops);
-	 securityfs_create_file("tracked", 0666, prov_dir, NULL, &prov_tracked_ops);
-	 securityfs_create_file("propagate", 0666, prov_dir, NULL, &prov_tracked_ops);
 	 securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
 	 securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
-	 securityfs_create_file("self", 0444, prov_dir, NULL, &prov_self_ops);
+	 securityfs_create_file("self", 0666, prov_dir, NULL, &prov_self_ops);
 	 securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
 	 securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
 	 securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);

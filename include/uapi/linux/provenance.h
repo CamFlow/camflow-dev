@@ -85,9 +85,6 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
-#define PROV_OPAQUE_FILE                      "/sys/kernel/security/provenance/opaque"
-#define PROV_TRACKED_FILE                     "/sys/kernel/security/provenance/tracked"
-#define PROV_PROPAGATE_FILE                   "/sys/kernel/security/provenance/propagate"
 #define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"
 #define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
 #define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
@@ -349,7 +346,12 @@ struct prov_filter{
 struct prov_file_config{
   char name[PATH_MAX];
   prov_msg_t prov;
-  uint8_t op; // on write
+  uint8_t op;
+};
+
+struct prov_self_config{
+  prov_msg_t prov;
+  uint8_t op;
 };
 
 #endif
