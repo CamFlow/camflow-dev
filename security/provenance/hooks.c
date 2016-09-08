@@ -161,8 +161,17 @@ static inline int inode_do_init(struct inode* inode)
 }
 
 static inline prov_msg_t* inode_provenance(struct inode* inode){
-	inode_do_init(inode);
-	return inode_get_provenance(inode);
+	prov_msg_t* iprov = inode_get_provenance(inode);
+	prov_copy_inode_mode(iprov, inode);
+	record_inode_name(inode);
+	//inode_do_init(inode);
+	return iprov;
+}
+
+static inline prov_msg_t* task_provenance( void ){
+	prov_msg_t* cprov = current_provenance();
+	record_task_name(current);
+	return cprov;
 }
 
 /*
@@ -227,12 +236,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 #endif
 
 	if(provenance_is_tracked(old_prov)){
-		record_task_name(current);
 		record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
-		set_tracked(prov); // receiving node become tracked
-	}
-	if( provenance_propagate(old_prov) ){
-		set_propagate(prov);
 	}
   new->provenance = prov;
   return 0;
@@ -474,10 +478,9 @@ static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size
 */
 static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
-	prov_msg_t* cprov = current_provenance();
-	prov_msg_t* iprov;
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov = inode_provenance(dir);
 
-	iprov = inode_provenance(dir);
 	if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
@@ -485,11 +488,6 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 
 	if(filter_node(iprov)){
 		return 0;
-	}
-
-	if(provenance_is_tracked(iprov) || provenance_is_tracked(cprov)){
-		record_inode_name(dir);
-		record_task_name(current);
 	}
 
 	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED);
@@ -509,7 +507,7 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
-  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* cprov = task_provenance();
   prov_msg_t* iprov;
 	uint32_t perms;
 
@@ -523,13 +521,10 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-	prov_copy_inode_mode(iprov, inode);
 
 	if(filter_node(iprov) || filter_node(cprov)){
 		return 0;
 	}
-
-	record_names(current, cprov, inode, iprov);
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
@@ -569,7 +564,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
-	prov_msg_t* cprov = current_provenance();
+	prov_msg_t* cprov = task_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
 	char *buffer;
@@ -635,7 +630,7 @@ static int provenance_file_permission(struct file *file, int mask)
 */
 static int provenance_file_open(struct file *file, const struct cred *cred)
 {
-	prov_msg_t* cprov = current_provenance();
+	prov_msg_t* cprov = task_provenance();
 	struct inode *inode = file_inode(file);
 	prov_msg_t* iprov = inode_provenance(inode);
 
@@ -663,7 +658,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 */
 static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsigned long prot, unsigned long flags)
 {
-  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* cprov = task_provenance();
   prov_msg_t* iprov;
   struct inode *inode;
 
@@ -675,7 +670,6 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   inode = file_inode(file);
   iprov = inode_provenance(inode);
 
-	record_names(current, cprov, inode, iprov);
   if((prot & (PROT_WRITE)) != 0){
     record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED);
   }
@@ -701,7 +695,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 */
 static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* cprov = task_provenance();
   prov_msg_t* iprov;
   struct inode *inode = file_inode(file);
 
@@ -728,7 +722,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
 */
 static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
-  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* cprov = task_provenance();
   prov_msg_t* mprov;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct* ifc= msg->ifc;
@@ -775,7 +769,7 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
 */
 static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int msqflg)
 {
-  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* cprov = task_provenance();
   prov_msg_t* mprov = msg->provenance;
 
   record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED);
@@ -814,7 +808,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 */
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
-	prov_msg_t* cprov = current_provenance();
+	prov_msg_t* cprov = task_provenance();
   prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_KERNEL);
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct* ifc= shp->shm_perm.ifc;
@@ -863,7 +857,7 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
 static int provenance_shm_shmat(struct shmid_kernel *shp,
 			     char __user *shmaddr, int shmflg)
 {
-  prov_msg_t* cprov = current_provenance();
+  prov_msg_t* cprov = task_provenance();
 	prov_msg_t* sprov = shp->shm_perm.provenance;
 
   if(!sprov)
@@ -921,7 +915,7 @@ static void provenance_sk_free_security(struct sock *sk)
 static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
-  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov  = inode_provenance(SOCK_INODE(sock));
   prov_msg_t* skprov = NULL;
 
@@ -968,7 +962,7 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 */
 static int provenance_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* cprov  = task_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
   if(provenance_is_opaque(cprov))
@@ -993,7 +987,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 */
 static int provenance_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* cprov  = task_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
   if(provenance_is_opaque(cprov))
@@ -1016,7 +1010,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 */
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
-  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* cprov  = task_provenance();
   prov_msg_t* skprov = sock->sk->sk_provenance;
 
   record_relation(RL_LISTEN, cprov, skprov, FLOW_ALLOWED);
@@ -1060,7 +1054,7 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 */
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
-  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* cprov  = task_provenance();
   prov_msg_t* skprov = inode_provenance(SOCK_INODE(sock));
   prov_msg_t* nskprov = inode_provenance(SOCK_INODE(newsock));
   record_relation(RL_CREATE, skprov, nskprov, FLOW_ALLOWED);
@@ -1080,7 +1074,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					      struct sock *other,
 					      struct sock *newsk)
 {
-  prov_msg_t* cprov  = current_provenance();
+  prov_msg_t* cprov  = task_provenance();
   prov_msg_t* skprov = sock->sk_provenance;
   prov_msg_t* nskprov = newsk->sk_provenance;
   prov_msg_t* okprov = other->sk_provenance;
@@ -1143,7 +1137,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 * state.  This is called immediately after commit_creds().
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
-   prov_msg_t* cprov  = current_provenance();
+   prov_msg_t* cprov  = task_provenance();
    prov_msg_t* nprov = bprm->cred->provenance;
    struct inode *inode = file_inode(bprm->file);
    prov_msg_t* iprov = inode_provenance(inode);
@@ -1166,10 +1160,6 @@ static void provenance_bprm_committed_creds(struct linux_binprm *bprm)
 	* As far security modules are concerned exec is finished. We can look at comm
 	* to get the process "name".
 	*/
-	prov_msg_t* cprov  = current_provenance();
-	if(!provenance_is_name_recorded(cprov) && provenance_is_tracked(cprov)){
-		record_task_name(current);
-	}
 }
 
 /*

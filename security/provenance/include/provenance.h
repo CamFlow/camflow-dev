@@ -125,10 +125,11 @@ static inline void prov_update_version(prov_msg_t* prov){
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
-  if(node_identifier(prov).type == MSG_TASK)
+  if(node_identifier(prov).type == MSG_TASK){
     record_relation(RL_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
-  else
+  }else{
     record_relation(RL_VERSION, &old_prov, prov, FLOW_ALLOWED);
+  }
 }
 
 static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
@@ -173,14 +174,17 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
 static inline void long_record_relation(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t relation;
 
-  if(unlikely(!prov_enabled)) // capture is not enabled, ignore
+  if(unlikely(!prov_enabled)){ // capture is not enabled, ignore
     return;
+  }
   // don't record if to or from are opaque
-  if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) )
+  if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) ){
     return;
+  }
 
-  if( !provenance_is_recorded(from) )
+  if( !provenance_is_recorded(to) ){
     record_node(to);
+  }
 
   prov_type((&relation))=MSG_RELATION;
   relation_identifier((&relation)).id = prov_next_relation_id();

@@ -15,11 +15,6 @@
 #include <linux/file.h>
 #include <uapi/linux/provenance.h>
 
-#define record_names(task, tprov, inode, iprov) 	if(provenance_is_tracked(tprov) || provenance_is_tracked(iprov)){ \
-																										record_task_name(task);\
-																										record_inode_name(inode);\
-																									}
-
 static inline void record_node_name(prov_msg_t* node, char* name){
 	long_prov_msg_t *fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
@@ -35,6 +30,10 @@ static inline void record_inode_name(struct inode *inode){
 	struct dentry* dentry;
 	char *buffer;
 	char *ptr;
+
+	if(!provenance_is_tracked(iprov)){
+		return;
+	}
 
 	if(filter_node(iprov)){
 		return;
@@ -62,22 +61,29 @@ static inline void record_task_name(struct task_struct *task){
 	char *ptr = NULL;
 	char *buffer;
 
-	if(!cred)
+	if(!cred){
 		return;
+	}
 
 	tprov = cred->provenance;
+
+	if(!provenance_is_tracked(tprov)){
+		goto finished;
+	}
 
 	if(filter_node(tprov)){
 		goto finished;
 	}
 
 	// name already recorded
-	if(provenance_is_name_recorded(tprov))
+	if(provenance_is_name_recorded(tprov)){
 		goto finished;
+	}
 
 	mm = get_task_mm(task);
-	if (!mm)
+	if (!mm){
  		goto finished;
+	}
 	exe_file = get_mm_exe_file(mm);
 	mmput(mm);
 
