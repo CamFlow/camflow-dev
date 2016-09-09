@@ -40,18 +40,23 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val){
   }
 }
 
-static inline bool prov_bloom_in(const uint8_t bloom[PROV_N_BYTES], uint64_t val){
+/* element in set belong to super */
+static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES]){
     uint8_t i;
-    uint8_t tmp[PROV_N_BYTES];
-
-    memset(tmp, 0, PROV_N_BYTES);
-    prov_bloom_add(tmp, val);
     for(i=0; i<PROV_N_BYTES; i++){
-        if( (bloom[i]&tmp[i]) != tmp[i]){
+        if((super[i]&set[i]) != set[i]){
             return false;
         }
     }
     return true;
+}
+
+static inline bool prov_bloom_in(const uint8_t bloom[PROV_N_BYTES], uint64_t val){
+    uint8_t tmp[PROV_N_BYTES];
+
+    memset(tmp, 0, PROV_N_BYTES);
+    prov_bloom_add(tmp, val);
+    return prov_bloom_match(bloom, tmp);
 }
 
 /* merge src into dest (dest=dest U src) */
@@ -62,16 +67,6 @@ static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], const uint8_t sr
     }
 }
 
-/* element in src belong to dest */
-static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES]){
-    uint8_t i;
-    for(i=0; i<PROV_N_BYTES; i++){
-        if((super[i]&set[i]) != set[i]){
-            return false;
-        }
-    }
-    return true;
-}
 
 static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
   uint8_t i;
