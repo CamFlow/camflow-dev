@@ -149,8 +149,8 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
   if( !filter_propagate_relation(type, from, to, allowed) ){ // it is not filtered
     set_tracked(to);// receiving node become tracked
     set_propagate(to); // continue to propagate
-    prov_bloom_merge(node_kern(to).taint, node_kern(from).taint);
-    prov_bloom_merge(relation_kern(&relation).taint, node_kern(from).taint);
+    prov_bloom_merge(prov_taint(to), prov_taint(from));
+    prov_bloom_merge(prov_taint(&relation), prov_taint(from));
   }
 
   if(should_update_node(type, to)){ // it is none of the above types

@@ -252,7 +252,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	}
 
 	if(((msg->op) & PROV_SET_TAINT)!=0){
-		prov_bloom_merge(node_kern(prov).taint, node_kern(&(msg->prov)).taint);
+		prov_bloom_merge(prov_taint(prov), prov_taint(&(msg->prov)));
 	}
 
   return sizeof(struct prov_self_config);
@@ -402,7 +402,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	}
 
 	if(((msg->op) & PROV_SET_TAINT)!=0){
-		prov_bloom_merge(node_kern(prov).taint, node_kern(&(msg->prov)).taint);
+		prov_bloom_merge(prov_taint(prov), prov_taint(&(msg->prov)));
 	}
 
   return sizeof(struct prov_file_config);

@@ -157,10 +157,10 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 
 #define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
 #define prov_id_buffer(prov) ((prov)->node_info.identifier.buffer)
-#define node_kern(node) ((node)->node_info.kern_info)
 #define node_identifier(node) ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
-#define relation_kern(relation) ((relation)->relation_info.kern_info)
+#define prov_flag(prov) ((prov)->msg_info.flag)
+#define prov_taint(prov) ((prov)->msg_info.taint)
 
 struct node_identifier{
   uint32_t type;
@@ -185,9 +185,9 @@ typedef union prov_identifier{
   uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
-#define prov_set_flag(node, nbit) (node_kern(node).flag) |= 1 << nbit
-#define prov_clear_flag(node, nbit) (node_kern(node).flag) &= ~(1 << nbit)
-#define prov_check_flag(node, nbit) (((node_kern(node).flag) & (1 << nbit)) == (1 << nbit))
+#define prov_set_flag(node, nbit) prov_flag(node) |= 1 << nbit
+#define prov_clear_flag(node, nbit) prov_flag(node) &= ~(1 << nbit)
+#define prov_check_flag(node, nbit) ((prov_flag(node) & (1 << nbit)) == (1 << nbit))
 
 #define RECORDED_BIT 0
 #define set_recorded(node)                  prov_set_flag(node, RECORDED_BIT)
@@ -214,19 +214,14 @@ typedef union prov_identifier{
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
 #define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
 
-struct kern_info{
-  uint8_t taint[PROV_N_BYTES];
-  uint8_t flag;
-};
+#define basic_elements prov_identifier_t identifier; uint8_t taint[PROV_N_BYTES]; uint8_t flag
 
 struct msg_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
 };
 
 struct relation_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   uint32_t type;
   uint8_t allowed;
   prov_identifier_t snd;
@@ -234,20 +229,17 @@ struct relation_struct{
 };
 
 struct node_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
 };
 
 struct task_prov_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
@@ -255,28 +247,24 @@ struct inode_prov_struct{
 };
 
 struct msg_msg_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   long type;
 };
 
 struct shm_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   uint16_t mode;
 };
 
 struct sock_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
 };
 
 struct sb_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   uint8_t uuid[16];
 };
 
@@ -293,35 +281,30 @@ typedef union prov_msg{
 } prov_msg_t;
 
 struct str_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   char str[PATH_MAX];
   size_t length;
 };
 
 struct file_name_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   char name[PATH_MAX];
   size_t length;
 };
 
 struct address_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   struct sockaddr addr;
   size_t length;
 };
 
 struct ifc_context_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   struct ifc_context context;
 };
 
 struct disc_node_struct{
-  prov_identifier_t identifier;
-  struct kern_info kern_info;
+  basic_elements;
   size_t length;
   char content[PATH_MAX];
   prov_identifier_t parent;
