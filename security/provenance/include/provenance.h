@@ -114,6 +114,11 @@ static inline void record_node(prov_msg_t* node){
   prov_write(node);
 }
 
+static inline void long_record_node(long_prov_msg_t* node){
+  set_recorded(node);
+  long_prov_write(node);
+}
+
 static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
@@ -178,8 +183,12 @@ static inline void long_record_relation(uint32_t type, long_prov_msg_t* from, pr
     return;
   }
   // don't record if to or from are opaque
-  if( unlikely(provenance_is_opaque(from) || provenance_is_opaque(to)) ){
+  if( unlikely(provenance_is_opaque(to)) ){
     return;
+  }
+
+  if( !provenance_is_recorded(from) ){
+    long_record_node(from);
   }
 
   if( !provenance_is_recorded(to) ){

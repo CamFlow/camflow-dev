@@ -294,24 +294,28 @@ typedef union prov_msg{
 
 struct str_struct{
   prov_identifier_t identifier;
-  size_t length;
+  struct kern_info kern_info;
   char str[PATH_MAX];
+  size_t length;
 };
 
 struct file_name_struct{
   prov_identifier_t identifier;
-  size_t length;
+  struct kern_info kern_info;
   char name[PATH_MAX];
+  size_t length;
 };
 
 struct address_struct{
   prov_identifier_t identifier;
+  struct kern_info kern_info;
   struct sockaddr addr;
   size_t length;
 };
 
 struct ifc_context_struct{
   prov_identifier_t identifier;
+  struct kern_info kern_info;
   struct ifc_context context;
 };
 

@@ -163,15 +163,18 @@ static inline int inode_do_init(struct inode* inode)
 static inline prov_msg_t* inode_provenance(struct inode* inode){
 	prov_msg_t* iprov = inode_get_provenance(inode);
 	prov_copy_inode_mode(iprov, inode);
-	record_inode_name(inode);
-	//inode_do_init(inode);
+	if( provenance_is_recorded(iprov) ){ // the node has been recorded we need its name
+		record_inode_name(inode, iprov);
+	}
 	return iprov;
 }
 
 static inline prov_msg_t* task_provenance( void ){
-	prov_msg_t* cprov = current_provenance();
-	record_task_name(current);
-	return cprov;
+	prov_msg_t* tprov = current_provenance();
+	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
+		record_task_name(current, tprov);
+	}
+	return tprov;
 }
 
 /*
@@ -944,7 +947,6 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
 	  addr_info->address_info.length=addrlen;
 	  memcpy(&(addr_info->address_info.addr), address, addrlen);
-	  long_prov_write(addr_info);
 		long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
 	  free_long_provenance(addr_info);
 		set_name_recorded(skprov);
