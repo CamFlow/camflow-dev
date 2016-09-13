@@ -435,10 +435,6 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
 
   change = (struct ifc_file_change*)buf;
 
-  if(!ifc_tag_valid(change->tag)){
-    return -EINVAL;
-  }
-
   in = file_name_to_inode(change->name);
   if(!in){
     printk(KERN_ERR "IFC: could not find %s file.", change->name);
@@ -446,6 +442,14 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   }
   ifc = inode_get_ifc(in);
 
+  if(change->op==IFC_ADD_TRUSTED){ // mark the file as trusted
+   ifc->context.trusted=IFC_TRUSTED;
+   return 0;
+  }
+
+  if(!ifc_tag_valid(change->tag)){
+    return -EINVAL;
+  }
 
   if(change->op==IFC_ADD_TAG){
     switch(change->tag_type){
@@ -456,7 +460,7 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
         rv=ifc_add_tag_no_check(&ifc->context, IFC_INTEGRITY, change->tag);
         break;
     }
-  }else{
+  }else if(change->op==IFC_REMOVE_TAG){
     switch(change->tag_type){
       case IFC_SECRECY:
         rv=ifc_remove_tag_no_check(&ifc->context, IFC_SECRECY, change->tag);

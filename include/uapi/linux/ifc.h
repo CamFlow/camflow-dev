@@ -31,6 +31,7 @@
 #define IFC_REMOVE_TAG      2
 #define IFC_ADD_BRIDGE      3
 #define IFC_START_BRIDGE    4
+#define IFC_ADD_TRUSTED     5
 
 #define IFC_TRUSTED         1
 #define IFC_UNTRUSTED       0
