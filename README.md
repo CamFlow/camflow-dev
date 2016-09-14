@@ -33,7 +33,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.6
 
 ```
-- Add API to mark files as trusted.
+- Add API to mark files as trusted (IFC).
 - Merge several pseudo files interface into a single one.
 - Added taint tracking support.
 - Replace byte sized flag, by bit sized one.
