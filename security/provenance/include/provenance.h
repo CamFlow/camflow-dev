@@ -35,12 +35,10 @@
 #define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
 #define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
 #define free_provenance(prov) kmem_cache_free(provenance_cache, prov)
-#define free_long_provenance(prov) kmem_cache_free(long_provenance_cache, prov)
 
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
-extern struct kmem_cache *long_provenance_cache;
 
 static inline struct prov_msg_t* prov_from_pid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
@@ -73,39 +71,6 @@ static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   node_identifier(node).machine_id=prov_machine_id;
 }
 
-static inline long_prov_msg_t* alloc_long_provenance(uint32_t ntype, gfp_t gfp)
-{
-  long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
-  if(!prov){
-    return NULL;
-  }
-  prov_type(prov)=ntype;
-  /* create a new node to containe the info */
-  node_identifier(prov).id=prov_next_node_id();
-  node_identifier(prov).boot_id=prov_boot_id;
-  node_identifier(prov).machine_id=prov_machine_id;
-  return prov;
-}
-
-static inline int prov_print(const char *fmt, ...)
-{
-  long_prov_msg_t* msg;
-  int length;
-  va_list args;
-  va_start(args, fmt);
-
-  msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t),  GFP_NOFS);
-
-  /* set message type */
-  prov_type(msg)=MSG_STR;
-  msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
-  long_prov_write(msg);
-  va_end(args);
-  length = msg->str_info.length;
-  kfree(msg);
-  return length;
-}
-
 static inline void record_node(prov_msg_t* node){
   if(filter_node(node)){
     return;
@@ -113,11 +78,6 @@ static inline void record_node(prov_msg_t* node){
 
   set_recorded(node);
   prov_write(node);
-}
-
-static inline void long_record_node(long_prov_msg_t* node){
-  set_recorded(node);
-  long_prov_write(node);
 }
 
 static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){
@@ -176,48 +136,6 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
   copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
   prov_write(&relation);
 }
-
-static inline void long_record_relation(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
-  prov_msg_t relation;
-
-  if(unlikely(!prov_enabled)){ // capture is not enabled, ignore
-    return;
-  }
-  // don't record if to or from are opaque
-  if( unlikely(provenance_is_opaque(to)) ){
-    return;
-  }
-
-  if( !provenance_is_recorded(from) ){
-    long_record_node(from);
-  }
-
-  if( !provenance_is_recorded(to) ){
-    record_node(to);
-  }
-
-  prov_type((&relation))=MSG_RELATION;
-  relation_identifier((&relation)).id = prov_next_relation_id();
-  relation_identifier((&relation)).boot_id = prov_boot_id;
-  relation_identifier((&relation)).machine_id = prov_machine_id;
-  relation.relation_info.type=type;
-  relation.relation_info.allowed=allowed;
-  copy_node_info(&relation.relation_info.snd, &from->node_info.identifier);
-  copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
-  prov_write(&relation);
-}
-
-#ifdef CONFIG_SECURITY_IFC
-static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context){
-	long_prov_msg_t* ifc_prov = NULL;
-
-  ifc_prov = alloc_long_provenance(MSG_IFC, GFP_KERNEL);
-  memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
-  long_prov_write(ifc_prov);
-  // TODO connect via relation to entity/activity
-  free_long_provenance(ifc_prov);
-}
-#endif
 
 static inline void provenance_mark_as_opaque(const char* name){
   struct inode* in;

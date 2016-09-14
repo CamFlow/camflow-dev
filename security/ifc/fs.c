@@ -21,6 +21,7 @@
 #include "camflow_utils.h"
 #include "ifc.h"
 #include "provenance.h"
+#include "provenance_long.h"
 
 static bool ifc_fs_is_initialised=false;
 
