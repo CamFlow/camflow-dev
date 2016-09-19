@@ -6,7 +6,8 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation.
+* published by the Free Software Foundation; either version 2 of the License, or
+*	(at your option) any later version.
 *
 */
 
@@ -20,6 +21,7 @@
 #include "camflow_utils.h"
 #include "ifc.h"
 #include "provenance.h"
+#include "provenance_long.h"
 
 static bool ifc_fs_is_initialised=false;
 
@@ -130,9 +132,9 @@ static ssize_t ifc_write_self(struct file *file, const char __user *buf,
     prov_update_version(cprov);
     prov_record_ifc(cprov, &cifc->context);
     if(ifc_is_labelled(&cifc->context)){
-      cprov->node_info.node_kern.tracked=NODE_TRACKED;
+      set_tracked(cprov);
     }else{
-      cprov->node_info.node_kern.tracked=NODE_NOT_TRACKED;
+      clear_tracked(cprov);
     }
 #endif
 
@@ -435,10 +437,6 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
 
   change = (struct ifc_file_change*)buf;
 
-  if(!ifc_tag_valid(change->tag)){
-    return -EINVAL;
-  }
-
   in = file_name_to_inode(change->name);
   if(!in){
     printk(KERN_ERR "IFC: could not find %s file.", change->name);
@@ -446,6 +444,14 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   }
   ifc = inode_get_ifc(in);
 
+  if(change->op==IFC_ADD_TRUSTED){ // mark the file as trusted
+   ifc->context.trusted=IFC_TRUSTED;
+   return 0;
+  }
+
+  if(!ifc_tag_valid(change->tag)){
+    return -EINVAL;
+  }
 
   if(change->op==IFC_ADD_TAG){
     switch(change->tag_type){
@@ -456,7 +462,7 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
         rv=ifc_add_tag_no_check(&ifc->context, IFC_INTEGRITY, change->tag);
         break;
     }
-  }else{
+  }else if(change->op==IFC_REMOVE_TAG){
     switch(change->tag_type){
       case IFC_SECRECY:
         rv=ifc_remove_tag_no_check(&ifc->context, IFC_SECRECY, change->tag);
@@ -473,9 +479,9 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
   prov_update_version(prov);
   prov_record_ifc(prov, &ifc->context);
   if(ifc_is_labelled(&ifc->context)){
-    prov->node_info.node_kern.tracked=NODE_TRACKED;
+    set_tracked(prov);
   }else{
-    prov->node_info.node_kern.tracked=NODE_NOT_TRACKED;
+    clear_tracked(prov);
   }
 #endif
 
@@ -503,7 +509,7 @@ static ssize_t ifc_read_file(struct file *filp, char __user *buf,
     printk(KERN_ERR "IFC: could not find %s file.", msg->name);
     return -EINVAL;
   }
-  
+
   ifc = inode_get_ifc(in);
   if(copy_to_user(&msg->context, &ifc->context, sizeof(struct ifc_context))){
     printk(KERN_INFO "IFC: error copying.");

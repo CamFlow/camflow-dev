@@ -6,7 +6,8 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation.
+* published by the Free Software Foundation; either version 2 of the License, or
+*	(at your option) any later version.
 *
 */
 
@@ -200,11 +201,13 @@ static int ifc_inode_permission(struct inode *inode, int mask)
 #ifdef CONFIG_SECURITY_PROVENANCE
   i_prov=inode_get_provenance(inode);
   p_prov=current_provenance();
-  if(ifc_is_labelled(&cifc->context))
-    p_prov->node_info.node_kern.tracked=NODE_TRACKED;
+  if(ifc_is_labelled(&cifc->context)){
+    set_tracked(p_prov);
+  }
 
-  if(ifc_is_labelled(&ifc->context))
-    i_prov->node_info.node_kern.tracked=NODE_TRACKED;
+  if(ifc_is_labelled(&ifc->context)){
+    set_tracked(i_prov);
+  }
 #endif
 
   if((mask & (MAY_WRITE|MAY_APPEND)) != 0){

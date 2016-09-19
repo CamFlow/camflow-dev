@@ -6,7 +6,8 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation.
+* published by the Free Software Foundation; either version 2 of the License, or
+*	(at your option) any later version.
 *
 */
 #ifndef _UAPI_LINUX_CAMFLOW_H
@@ -17,7 +18,7 @@
 
 #define CAMFLOW_VERSION_MAJOR     0
 #define CAMFLOW_VERSION_MINOR     1
-#define CAMFLOW_VERSION_PATCH     5
+#define CAMFLOW_VERSION_PATCH     6
 #define CAMFLOW_VERSION_STR       "v"xstr(CAMFLOW_VERSION_MAJOR)"."xstr(CAMFLOW_VERSION_MINOR)"."xstr(CAMFLOW_VERSION_PATCH)
 
 

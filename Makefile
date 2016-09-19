@@ -1,5 +1,5 @@
-kernel-version=4.4.19
-lsm-version=0.1.5
+kernel-version=4.4.21
+lsm-version=0.1.6
 arch=x86_64
 
 all: config compile

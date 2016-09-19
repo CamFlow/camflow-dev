@@ -6,7 +6,8 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation.
+* published by the Free Software Foundation; either version 2 of the License, or
+*	(at your option) any later version.
 *
 */
 #ifndef _UAPI_LINUX_IFC_H
@@ -31,6 +32,7 @@
 #define IFC_REMOVE_TAG      2
 #define IFC_ADD_BRIDGE      3
 #define IFC_START_BRIDGE    4
+#define IFC_ADD_TRUSTED     5
 
 #define IFC_TRUSTED         1
 #define IFC_UNTRUSTED       0

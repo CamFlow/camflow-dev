@@ -6,7 +6,8 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation.
+* published by the Free Software Foundation; either version 2 of the License, or
+*	(at your option) any later version.
 *
 */
 #ifndef _UAPI_LINUX_PROVENANCE_H
@@ -20,11 +21,66 @@
 #include <uapi/linux/limits.h>
 #endif
 
+#define GOLDEN_RATIO_64 0x61C8864680B583EBull
+static inline uint32_t prov_hash(uint64_t val){
+  return (val * GOLDEN_RATIO_64) >> (64-8);
+}
+
+#define PROV_K_HASH 7
+#define PROV_M_BITS 256
+#define PROV_N_BYTES (PROV_M_BITS/8)
+#define PROV_BYTE_INDEX(a) (a/8)
+#define PROV_BIT_INDEX(a) (a%8)
+
+static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val){
+  uint8_t i;
+  uint32_t pos;
+  for(i=0; i < PROV_K_HASH; i++){
+    pos= prov_hash(val+i) % PROV_M_BITS;
+    bloom[PROV_BYTE_INDEX(pos)] |= 1 << PROV_BIT_INDEX(pos);
+  }
+}
+
+/* element in set belong to super */
+static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES]){
+    uint8_t i;
+    for(i=0; i<PROV_N_BYTES; i++){
+        if((super[i]&set[i]) != set[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+static inline bool prov_bloom_in(const uint8_t bloom[PROV_N_BYTES], uint64_t val){
+    uint8_t tmp[PROV_N_BYTES];
+
+    memset(tmp, 0, PROV_N_BYTES);
+    prov_bloom_add(tmp, val);
+    return prov_bloom_match(bloom, tmp);
+}
+
+/* merge src into dest (dest=dest U src) */
+static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], const uint8_t src[PROV_N_BYTES]){
+    uint8_t i;
+    for(i=0; i<PROV_N_BYTES; i++){
+        dest[i] |= src[i];
+    }
+}
+
+
+static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
+  uint8_t i;
+  for(i=0; i<PROV_N_BYTES; i++){
+      if( bloom[i] != 0 ){
+          return false;
+      }
+  }
+  return true;
+}
+
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
-#define PROV_OPAQUE_FILE                      "/sys/kernel/security/provenance/opaque"
-#define PROV_TRACKED_FILE                     "/sys/kernel/security/provenance/tracked"
-#define PROV_PROPAGATE_FILE                   "/sys/kernel/security/provenance/propagate"
 #define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"
 #define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
 #define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
@@ -93,30 +149,14 @@
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
 
-#define NODE_TRACKED        1
-#define NODE_NOT_TRACKED    0
-
-#define NODE_PROPAGATE      1
-#define NODE_NOT_PROPAGATE  0
-
-#define NODE_RECORDED       1
-#define NODE_UNRECORDED     0
-
-#define NAME_RECORDED       1
-#define NAME_UNRECORDED     0
-
-#define NODE_OPAQUE         1
-#define NODE_NOT_OPAQUE     0
-
-#define INODE_LINKED        1
-#define INODE_UNLINKED      0
-
 #define STR_MAX_SIZE        128
 
-#define node_kern(prov) ((prov)->node_info.node_kern)
-#define prov_type(prov) (prov)->node_info.identifier.node_id.type
-#define node_identifier(node) (node)->node_info.identifier.node_id
-#define relation_identifier(relation) (relation)->relation_info.identifier.relation_id
+#define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
+#define prov_id_buffer(prov) ((prov)->node_info.identifier.buffer)
+#define node_identifier(node) ((node)->node_info.identifier.node_id)
+#define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
+#define prov_flag(prov) ((prov)->msg_info.flag)
+#define prov_taint(prov) ((prov)->msg_info.taint)
 
 struct node_identifier{
   uint32_t type;
@@ -141,20 +181,43 @@ typedef union prov_identifier{
   uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
-struct node_kern{
-  uint8_t recorded;
-  uint8_t name_recorded;
-  uint8_t tracked;
-  uint8_t opaque;
-  uint8_t propagate;
-};
+#define prov_set_flag(node, nbit) prov_flag(node) |= 1 << nbit
+#define prov_clear_flag(node, nbit) prov_flag(node) &= ~(1 << nbit)
+#define prov_check_flag(node, nbit) ((prov_flag(node) & (1 << nbit)) == (1 << nbit))
+
+#define RECORDED_BIT 0
+#define set_recorded(node)                  prov_set_flag(node, RECORDED_BIT)
+#define clear_recorded(node)                prov_clear_flag(node, RECORDED_BIT)
+#define provenance_is_recorded(node)        prov_check_flag(node, RECORDED_BIT)
+
+#define NAME_RECORDED_BIT 1
+#define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
+#define clear__name_recorded(node)          prov_clear_flag(node, NAME_RECORDED_BIT)
+#define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
+
+#define TRACKED_BIT 2
+#define set_tracked(node)                   prov_set_flag(node, TRACKED_BIT)
+#define clear_tracked(node)                 prov_clear_flag(node, TRACKED_BIT)
+#define provenance_is_tracked(node)         prov_check_flag(node, TRACKED_BIT)
+
+#define OPAQUE_BIT 3
+#define set_opaque(node)                    prov_set_flag(node, OPAQUE_BIT)
+#define clear_opaque(node)                  prov_clear_flag(node, OPAQUE_BIT)
+#define provenance_is_opaque(node)          prov_check_flag(node, OPAQUE_BIT)
+
+#define PROPAGATE_BIT 4
+#define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
+#define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
+#define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
+
+#define basic_elements prov_identifier_t identifier; uint8_t taint[PROV_N_BYTES]; uint8_t flag
 
 struct msg_struct{
-  prov_identifier_t identifier;
+  basic_elements;
 };
 
 struct relation_struct{
-  prov_identifier_t identifier;
+  basic_elements;
   uint32_t type;
   uint8_t allowed;
   prov_identifier_t snd;
@@ -162,50 +225,43 @@ struct relation_struct{
 };
 
 struct node_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
 };
 
 struct task_prov_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
   uint8_t sb_uuid[16];
 };
 
-struct sb_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
-  uint8_t uuid[16];
-};
-
 struct msg_msg_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
   long type;
 };
 
 struct shm_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
   uint16_t mode;
 };
 
 struct sock_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
+};
+
+struct sb_struct{
+  basic_elements;
+  uint8_t uuid[16];
 };
 
 typedef union prov_msg{
@@ -221,31 +277,30 @@ typedef union prov_msg{
 } prov_msg_t;
 
 struct str_struct{
-  prov_identifier_t identifier;
-  size_t length;
+  basic_elements;
   char str[PATH_MAX];
+  size_t length;
 };
 
 struct file_name_struct{
-  prov_identifier_t identifier;
-  size_t length;
+  basic_elements;
   char name[PATH_MAX];
+  size_t length;
 };
 
 struct address_struct{
-  prov_identifier_t identifier;
+  basic_elements;
   struct sockaddr addr;
   size_t length;
 };
 
 struct ifc_context_struct{
-  prov_identifier_t identifier;
+  basic_elements;
   struct ifc_context context;
 };
 
 struct disc_node_struct{
-  prov_identifier_t identifier;
-  struct node_kern node_kern;
+  basic_elements;
   size_t length;
   char content[PATH_MAX];
   prov_identifier_t parent;
@@ -266,14 +321,20 @@ struct prov_filter{
   uint8_t add;
 };
 
-#define PROV_SET_TRACKED		  1
-#define PROV_SET_OPAQUE 		  2
-#define PROV_SET_PROPAGATE    3
+#define PROV_SET_TRACKED		  0x01
+#define PROV_SET_OPAQUE 		  0x02
+#define PROV_SET_PROPAGATE    0x04
+#define PROV_SET_TAINT        0x08
 
 struct prov_file_config{
   char name[PATH_MAX];
-  struct inode_prov_struct prov;
-  uint8_t op; // on write
+  prov_msg_t prov;
+  uint8_t op;
+};
+
+struct prov_self_config{
+  prov_msg_t prov;
+  uint8_t op;
 };
 
 #endif

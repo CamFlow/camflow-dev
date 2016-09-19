@@ -6,19 +6,14 @@
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation.
+* published by the Free Software Foundation; either version 2 of the License, or
+*	(at your option) any later version.
 *
 */
 #ifndef _LINUX_PROVENANCE_FILTER_H
 #define _LINUX_PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
-
-#define provenance_is_opaque(node)        ( node_kern(node).opaque == NODE_OPAQUE )
-#define provenance_is_tracked(node)       ( node_kern(node).tracked == NODE_TRACKED )
-#define provenance_propagate(node)          ( node_kern(node).propagate == NODE_PROPAGATE )
-#define provenance_is_name_recorded(node) ( node_kern(node).name_recorded == NAME_RECORDED )
-#define porvenance_is_recorded(node)      ( node_kern(node).recorded == NODE_RECORDED )
 
 extern bool prov_enabled;
 extern bool prov_all;

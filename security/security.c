@@ -20,6 +20,7 @@
 #include <linux/integrity.h>
 #include <linux/ima.h>
 #include <linux/evm.h>
+#include <linux/camflow.h>
 #include <linux/fsnotify.h>
 #include <linux/mman.h>
 #include <linux/mount.h>
@@ -27,7 +28,11 @@
 #include <linux/backing-dev.h>
 #include <net/flow.h>
 
+#ifdef CONFIG_SECURITY_PROVENANCE
+#define MAX_LSM_EVM_XATTR	3
+#else
 #define MAX_LSM_EVM_XATTR	2
+#endif
 
 /* Maximum number of letters for an LSM name string */
 #define SECURITY_NAME_MAX	10
@@ -69,8 +74,12 @@ int __init security_init(void)
 	/*
 	* Load IFC and Provenance module
 	*/
+#ifdef CONFIG_SECURITY_IFC
 	ifc_add_hooks();
+#endif
+#ifdef CONFIG_SECURITY_PROVENANCE
 	provenance_add_hooks();
+#endif
 
 	return 0;
 }
@@ -374,7 +383,11 @@ int security_inode_init_security(struct inode *inode, struct inode *dir,
 				 const initxattrs initxattrs, void *fs_data)
 {
 	struct xattr new_xattrs[MAX_LSM_EVM_XATTR + 1];
+#ifdef CONFIG_SECURITY_PROVENANCE
+	struct xattr *lsm_xattr, *evm_xattr, *provenance_xattr, *xattr;
+#else
 	struct xattr *lsm_xattr, *evm_xattr, *xattr;
+#endif
 	int ret;
 
 	if (unlikely(IS_PRIVATE(inode)))
@@ -396,6 +409,17 @@ int security_inode_init_security(struct inode *inode, struct inode *dir,
 	ret = evm_inode_init_security(inode, lsm_xattr, evm_xattr);
 	if (ret)
 		goto out;
+
+#ifdef CONFIG_SECURITY_PROVENANCE
+	provenance_xattr = evm_xattr + 1;
+	ret = provenance_inode_init_security(inode, dir, qstr,
+					&provenance_xattr->name,
+					&provenance_xattr->value,
+					&provenance_xattr->value_len);
+	if (ret)
+		goto out;
+#endif
+
 	ret = initxattrs(inode, new_xattrs, fs_data);
 out:
 	for (xattr = new_xattrs; xattr->value != NULL; xattr++)
@@ -703,20 +727,43 @@ int security_inode_killpriv(struct dentry *dentry)
 	return call_int_hook(inode_killpriv, 0, dentry);
 }
 
+/* updated from more recent kernel version */
 int security_inode_getsecurity(const struct inode *inode, const char *name, void **buffer, bool alloc)
 {
+	struct security_hook_list *hp;
+	int rc;
+
 	if (unlikely(IS_PRIVATE(inode)))
 		return -EOPNOTSUPP;
-	return call_int_hook(inode_getsecurity, -EOPNOTSUPP, inode, name,
-				buffer, alloc);
+	/*
+	 * Only one module will provide an attribute with a given name.
+	 */
+	list_for_each_entry(hp, &security_hook_heads.inode_getsecurity, list) {
+		rc = hp->hook.inode_getsecurity(inode, name, buffer, alloc);
+		if (rc != -EOPNOTSUPP)
+			return rc;
+	}
+	return -EOPNOTSUPP;
 }
 
+/* updated from more recent kernel version */
 int security_inode_setsecurity(struct inode *inode, const char *name, const void *value, size_t size, int flags)
 {
+	struct security_hook_list *hp;
+	int rc;
+
 	if (unlikely(IS_PRIVATE(inode)))
 		return -EOPNOTSUPP;
-	return call_int_hook(inode_setsecurity, -EOPNOTSUPP, inode, name,
-				value, size, flags);
+	/*
+	 * Only one module will provide an attribute with a given name.
+	 */
+	list_for_each_entry(hp, &security_hook_heads.inode_setsecurity, list) {
+		rc = hp->hook.inode_setsecurity(inode, name, value, size,
+								flags);
+		if (rc != -EOPNOTSUPP)
+			return rc;
+	}
+	return -EOPNOTSUPP;
 }
 
 int security_inode_listsecurity(struct inode *inode, char *buffer, size_t buffer_size)
