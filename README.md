@@ -31,6 +31,12 @@ make install # patience, sudo password will be ask during instalation
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.1.7
+
+```
+-
+```
+
 ### v0.1.6
 
 ```
@@ -38,7 +44,7 @@ make install # patience, sudo password will be ask during instalation
 - Merge several pseudo files interface into a single one.
 - Added taint tracking support.
 - Replace byte sized flag, by bit sized one.
-- Update to kernel version 4.4.20.
+- Update to kernel version 4.4.21.
 ```
 
 ### v0.1.5
