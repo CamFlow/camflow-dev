@@ -63,7 +63,6 @@ static struct rchan_callbacks relay_callbacks =
 
 static int __init relay_prov_init(void)
 {
-  printk(KERN_INFO "Provenance init.\n");
   prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(prov_chan==NULL){
     printk(KERN_ERR "Provenance: relay_open failure\n");
@@ -76,7 +75,7 @@ static int __init relay_prov_init(void)
     return 0;
   }
 
-  printk(KERN_INFO "Provenance module started!\n");
+  printk(KERN_INFO "Provenance relay ready.\n");
   return 0;
 }
 

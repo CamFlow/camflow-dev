@@ -440,7 +440,7 @@ declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
-
+	 
    prov_dir = securityfs_create_dir("provenance", NULL);
 
    securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
@@ -455,6 +455,9 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
 	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
 	 securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
+
+	 printk(KERN_INFO "Provenance fs ready.\n");
+
    return 0;
 }
 
