@@ -34,7 +34,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.7
 
 ```
--
+- More sensible settings for relay buffer.
 - Update to kernel version 4.4.22.
 ```
 
