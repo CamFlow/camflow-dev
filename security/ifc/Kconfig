@@ -1,5 +1,5 @@
 config SECURITY_IFC
-         bool "IFC"
+         bool "CamFlow - IFC"
          depends on SECURITY
          select SECURITYFS
          select CRYPTO_BLOWFISH_X86_64
