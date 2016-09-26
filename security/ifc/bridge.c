@@ -150,7 +150,7 @@ int __init ifc_bridge_init(void)
     printk(KERN_ERR "IFC: Cannot create bridge netlink socket.");
     return -ENOMEM;
   }
-  printk(KERN_INFO "IFC: bridge ready.");
+  printk(KERN_INFO "IFC bridge ready.");
   return 0;
 }
 
