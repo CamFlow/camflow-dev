@@ -136,7 +136,6 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	{
 		return -EAGAIN;
 	}
-	printk(KERN_INFO "Provenance: machine_id set to %u.", prov_machine_id);
 
 	return count; // read only
 }
@@ -297,7 +296,6 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	}else{
 		(*filter)&=~(setting->filter);
 	}
-	printk(KERN_INFO "Provenance: updated filter %X with %X.", (*filter), setting->filter);
 	return count;
 }
 
