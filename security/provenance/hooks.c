@@ -22,6 +22,7 @@
 
 #include "av_utils.h"
 #include "provenance.h"
+#include "provenance_net.h"
 #include "provenance_long.h"
 #include "ifc.h"
 
@@ -920,17 +921,17 @@ static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* iprov  = inode_provenance(SOCK_INODE(sock));
+  prov_msg_t* iprov  = socket_inode_provenance(sock);
   prov_msg_t* skprov = NULL;
 
   if(kern){
     return 0;
   }
 
-  if(!sock->sk->sk_provenance){
+  if(!socket_sk_provenance(sock)){
 		provenance_sk_alloc_security(sock->sk, family, GFP_KERNEL);
 	}
-  skprov = sock->sk->sk_provenance;
+  skprov = socket_sk_provenance(sock);
   skprov->sock_info.type = type;
   skprov->sock_info.family = family;
   skprov->sock_info.protocol = protocol;
@@ -941,7 +942,7 @@ static int provenance_socket_post_create(struct socket *sock, int family,
 }
 
 static inline void provenance_record_address(struct socket *sock, struct sockaddr *address, int addrlen){
-	prov_msg_t* skprov = sock->sk->sk_provenance;
+	prov_msg_t* skprov = socket_sk_provenance(sock);
 	long_prov_msg_t* addr_info = NULL;
 
 	if(!provenance_is_name_recorded(skprov) && provenance_is_tracked(skprov)){
@@ -966,7 +967,7 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 static int provenance_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* skprov = socket_sk_provenance(sock);
 
   if(provenance_is_opaque(cprov))
     return 0;
@@ -991,7 +992,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 static int provenance_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* skprov = socket_sk_provenance(sock);
 
   if(provenance_is_opaque(cprov))
     return 0;
@@ -1014,7 +1015,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* skprov = socket_sk_provenance(sock);
 
   record_relation(RL_LISTEN, cprov, skprov, FLOW_ALLOWED);
   return 0;
@@ -1058,8 +1059,8 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = inode_provenance(SOCK_INODE(sock));
-  prov_msg_t* nskprov = inode_provenance(SOCK_INODE(newsock));
+  prov_msg_t* skprov = socket_inode_provenance(sock);
+  prov_msg_t* nskprov = socket_inode_provenance(newsock);
   record_relation(RL_CREATE, skprov, nskprov, FLOW_ALLOWED);
   record_relation(RL_ACCEPT, nskprov, cprov, FLOW_ALLOWED);
   return 0;
@@ -1078,9 +1079,9 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					      struct sock *newsk)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk_provenance;
-  prov_msg_t* nskprov = newsk->sk_provenance;
-  prov_msg_t* okprov = other->sk_provenance;
+  prov_msg_t* skprov = sk_provenance(sock);
+  prov_msg_t* nskprov = sk_provenance(newsk);
+  prov_msg_t* okprov = sk_provenance(other);
 
   record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
   record_relation(RL_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
@@ -1098,8 +1099,8 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 					struct socket *other)
 {
-  prov_msg_t* skprov = sock->sk->sk_provenance;
-  prov_msg_t* okprov = other->sk->sk_provenance;
+  prov_msg_t* skprov = socket_sk_provenance(sock);
+  prov_msg_t* okprov = socket_sk_provenance(other);
 
   record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);
   return 0;
