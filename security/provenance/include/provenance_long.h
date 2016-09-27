@@ -16,6 +16,8 @@
 #include <linux/file.h>
 #include <uapi/linux/provenance.h>
 
+#include "provenance_net.h"
+
 #define free_long_provenance(prov) kmem_cache_free(long_provenance_cache, prov)
 extern struct kmem_cache *long_provenance_cache;
 
@@ -177,6 +179,20 @@ static inline void record_task_name(struct task_struct *task, prov_msg_t* tprov)
 
 finished:
 	put_cred(cred);
+}
+
+static inline void provenance_record_address(struct socket *sock, struct sockaddr *address, int addrlen){
+	prov_msg_t* skprov = socket_inode_provenance(sock);
+	long_prov_msg_t* addr_info = NULL;
+
+	if(!provenance_is_name_recorded(skprov) && provenance_is_tracked(skprov)){
+	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
+	  addr_info->address_info.length=addrlen;
+	  memcpy(&(addr_info->address_info.addr), address, addrlen);
+		long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
+	  free_long_provenance(addr_info);
+		set_name_recorded(skprov);
+	}
 }
 
 #endif
