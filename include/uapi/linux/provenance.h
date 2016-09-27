@@ -149,8 +149,6 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
 
-#define STR_MAX_SIZE        128
-
 #define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
 #define prov_id_buffer(prov) ((prov)->node_info.identifier.buffer)
 #define node_identifier(node) ((node)->node_info.identifier.node_id)
