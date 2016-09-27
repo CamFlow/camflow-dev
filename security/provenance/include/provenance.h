@@ -151,27 +151,5 @@ static inline void provenance_mark_as_opaque(const char* name){
     }
   }
 }
-
-static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
-  uint32_t type = MSG_INODE_UNKNOWN;
-  iprov->inode_info.mode=inode->i_mode;
-
-  if(S_ISBLK(inode->i_mode)){
-    type=MSG_INODE_BLOCK;
-  }else if(S_ISCHR(inode->i_mode)){
-    type=MSG_INODE_CHAR;
-  }else if(S_ISDIR(inode->i_mode)){
-    type=MSG_INODE_DIRECTORY;
-  }else if(S_ISFIFO(inode->i_mode)){
-    type=MSG_INODE_FIFO;
-  }else if(S_ISLNK(inode->i_mode)){
-    type=MSG_INODE_LINK;
-  }else if(S_ISREG(inode->i_mode)){
-    type=MSG_INODE_FILE;
-  }else if(S_ISSOCK(inode->i_mode)){
-    type=MSG_INODE_SOCKET;
-  }
-  node_identifier(iprov).type=type;
-}
 #endif
 #endif /* _LINUX_PROVENANCE_H */

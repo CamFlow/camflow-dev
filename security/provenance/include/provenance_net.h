@@ -11,9 +11,12 @@
 *
 */
 #ifndef CONFIG_SECURITY_PROVENANCE_NET
+
+#include <net/sock.h>
+
 #include "provenance.h"
 
-#define socket_inode_provenance(socket) (inode_provenance(SOCK_INODE(sock)))
+#define socket_inode_provenance(socket) (inode_get_provenance(SOCK_INODE(socket)))
 #define sk_provenance(sk) (sk->sk_provenance)
 #define socket_sk_provenance(socket) (sk_provenance(socket->sk))
 #define sk_inode_provenance(sk) (socket_inode_provenance(sk->sk_socket))
