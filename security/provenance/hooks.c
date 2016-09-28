@@ -1043,7 +1043,6 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-	prov_msg_t* cprov  = task_provenance();
 	prov_msg_t* iprov;
   prov_msg_t pckprov;
 	uint16_t family = sk->sk_family;
@@ -1052,11 +1051,12 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return 0;
 	}
 
-	if(provenance_is_tracked(cprov)){
+	iprov = sk_inode_provenance(sk);
+	if(iprov==NULL){ // we could not get the provenance, we give up
+		return 0;
+	}
+	if(provenance_is_tracked(iprov)){
     iprov = sk_inode_provenance(sk);
-		if(iprov==NULL){ // we could not get the provenance, we give up
-      return NF_ACCEPT;
-    }
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_pck_to_inode(&pckprov, iprov);
   }
