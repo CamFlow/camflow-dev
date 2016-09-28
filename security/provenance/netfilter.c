@@ -132,7 +132,7 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
     printk(KERN_INFO "Provenance out packet.\n");
     iprov = sk_inode_provenance(skb->sk);
     provenance_parse_skb_ipv4(skb, &pckprov);
-    record_pck_to_inode(&pckprov, iprov);
+    record_inode_to_pck(iprov, &pckprov);
   }
   return NF_ACCEPT;
 }

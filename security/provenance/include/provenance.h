@@ -163,6 +163,28 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   prov_write(&relation);
 }
 
+static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
+  prov_msg_t relation;
+
+  memset(&relation, 0, sizeof(prov_msg_t));
+
+  if( !provenance_is_recorded(inode) ){
+    record_node(inode);
+  }
+
+  prov_write(pck);
+
+  prov_type((&relation))=MSG_RELATION;
+  relation_identifier((&relation)).id = prov_next_relation_id();
+  relation_identifier((&relation)).boot_id = prov_boot_id;
+  relation_identifier((&relation)).machine_id = prov_machine_id;
+  relation.relation_info.type=RL_READ;
+  relation.relation_info.allowed=FLOW_ALLOWED;
+  copy_node_info(&relation.relation_info.snd, &inode->node_info.identifier);
+  copy_node_info(&relation.relation_info.rcv, &pck->node_info.identifier);
+  prov_write(&relation);
+}
+
 static inline void provenance_mark_as_opaque(const char* name){
   struct inode* in;
   prov_msg_t* prov;
