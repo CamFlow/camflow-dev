@@ -24,10 +24,33 @@
 
 #include "provenance.h"
 
-#define socket_inode_provenance(socket) (inode_get_provenance(SOCK_INODE(socket)))
-#define sk_provenance(sk) (sk->sk_provenance)
-#define socket_sk_provenance(socket) (sk_provenance(socket->sk))
-#define sk_inode_provenance(sk) (socket_inode_provenance(sk->sk_socket))
+static inline prov_msg_t* socket_inode_provenance(struct socket *sock){
+  struct inode *inode = SOCK_INODE(sock);
+  if(inode==NULL){
+    return NULL;
+  }
+  return inode_get_provenance(inode);
+}
+
+static inline prov_msg_t* sk_inode_provenance(struct sock *sk){
+  struct socket *sock = sk->sk_socket;
+  if(sock==NULL){
+    return NULL;
+  }
+  return socket_inode_provenance(sock);
+}
+
+static inline prov_msg_t* sk_provenance(struct sock *sk){
+  return sk->sk_provenance;
+}
+
+static inline prov_msg_t* socket_sk_provenance(struct socket *sock){
+  struct sock *sk = sock->sk;
+  if(sk==NULL){
+    return NULL;
+  }
+  return sk_provenance(sk);
+}
 
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t* prov){
   struct packet_identifier* id = &packet_identifier(prov); // we are going fo fill this
