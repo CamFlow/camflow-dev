@@ -1034,6 +1034,34 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 }
 
 /*
+* Check permissions on incoming network packets.  This hook is distinct
+* from Netfilter's IP input hooks since it is the first time that the
+* incoming sk_buff @skb has been associated with a particular socket, @sk.
+* Must not sleep inside this hook because some callers hold spinlocks.
+* @sk contains the sock (not socket) associated with the incoming sk_buff.
+* @skb contains the incoming network data.
+*/
+static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
+{
+	prov_msg_t* cprov  = task_provenance();
+	prov_msg_t* iprov;
+  prov_msg_t pckprov;
+	uint16_t family = sk->sk_family;
+
+	if(family!=PF_INET){ // we only handle IPv4 for now
+		return 0;
+	}
+
+	if(provenance_is_tracked(cprov)){
+    printk(KERN_INFO "Provenance out packet.\n");
+    iprov = sk_inode_provenance(sk);
+    provenance_parse_skb_ipv4(skb, &pckprov);
+    record_pck_to_inode(&pckprov, iprov);
+  }
+	return 0;
+}
+
+/*
 * Check permissions before establishing a Unix domain stream connection
 * between @sock and @other.
 * @sock contains the sock structure.
@@ -1255,6 +1283,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
   LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
   LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
+  LSM_HOOK_INIT(socket_sock_rcv_skb, provenance_socket_sock_rcv_skb),
   LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
   LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
 

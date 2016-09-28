@@ -11,6 +11,7 @@
 *
 */
 #ifndef CONFIG_SECURITY_PROVENANCE_INODE
+#define CONFIG_SECURITY_PROVENANCE_INODE
 #include <linux/file.h>
 
 #include "provenance_long.h" // for record_inode_name
