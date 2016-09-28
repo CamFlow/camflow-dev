@@ -34,6 +34,7 @@ make install # patience, sudo password will be ask during instalation
 ### v0.1.7
 
 ```
+- Recording IPv4 incoming and outgoing packets.
 - More sensible settings for relay buffer.
 - Update to kernel version 4.4.22.
 ```
