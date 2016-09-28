@@ -117,6 +117,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define MSG_DISC_ACTIVITY     0x00080000UL
 #define MSG_DISC_AGENT        0x00100000UL
 #define MSG_DISC_NODE         0x00200000UL
+#define MSG_PACKET            0x00400000UL
 
 #define RL_READ               0x00000001UL
 #define RL_WRITE              0x00000002UL
@@ -153,6 +154,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define prov_id_buffer(prov) ((prov)->node_info.identifier.buffer)
 #define node_identifier(node) ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
+#define packet_identifier(packet) ((packet)->pck_info.identifier.packet_id)
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
 
@@ -171,11 +173,23 @@ struct relation_identifier{
   uint32_t machine_id;
 };
 
+struct packet_identifier{
+  uint32_t type;
+  uint16_t id;
+  uint32_t snd_ip;
+  uint32_t rcv_ip;
+  uint16_t snd_port;
+  uint16_t rcv_port;
+  uint8_t protocol;
+  uint32_t seq;
+};
+
 #define PROV_IDENTIFIER_BUFFER_LENGTH sizeof(struct node_identifier)
 
 typedef union prov_identifier{
   struct node_identifier node_id;
   struct relation_identifier relation_id;
+  struct packet_identifier packet_id;
   uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 } prov_identifier_t;
 
@@ -262,6 +276,11 @@ struct sb_struct{
   uint8_t uuid[16];
 };
 
+struct pck_struct{
+  basic_elements;
+  uint16_t length;
+};
+
 typedef union prov_msg{
   struct msg_struct           msg_info;
   struct relation_struct      relation_info;
@@ -272,6 +291,7 @@ typedef union prov_msg{
   struct shm_struct           shm_info;
   struct sock_struct          sock_info;
   struct sb_struct            sb_info;
+  struct pck_struct           pck_info;
 } prov_msg_t;
 
 struct str_struct{
