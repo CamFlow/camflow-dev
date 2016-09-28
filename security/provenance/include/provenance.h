@@ -137,6 +137,7 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
   prov_write(&relation);
 }
 
+// incoming packet
 static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   prov_msg_t relation;
 
@@ -163,6 +164,7 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   prov_write(&relation);
 }
 
+// outgoing packet
 static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
   prov_msg_t relation;
 
