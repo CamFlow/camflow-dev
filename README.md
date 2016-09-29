@@ -34,6 +34,7 @@ make install # patience, sudo password will be asked during instalation
 ### v0.1.7
 
 ```
+- Config change: by default IFC is not set.
 - Recording IPv4 incoming and outgoing packets.
 - More sensible settings for relay buffer.
 - Update to kernel version 4.4.22.
