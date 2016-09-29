@@ -989,6 +989,24 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 }
 
 /*
+* Check permission before accepting a new connection.  Note that the new
+* socket, @newsock, has been created and some information copied to it,
+* but the accept operation has not actually been performed.
+* @sock contains the listening socket structure.
+* @newsock contains the newly created server socket for connection.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
+{
+  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* skprov = socket_inode_provenance(sock);
+  prov_msg_t* nskprov = socket_inode_provenance(newsock);
+  record_relation(RL_CREATE, skprov, nskprov, FLOW_ALLOWED);
+  record_relation(RL_ACCEPT, nskprov, cprov, FLOW_ALLOWED);
+  return 0;
+}
+
+/*
 * Check permission before transmitting a message to another socket.
 * @sock contains the socket structure.
 * @msg contains the message to be transmitted.
@@ -1013,24 +1031,6 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 				  int size, int flags)
 {
 	return provenance_inode_permission(SOCK_INODE(sock), MAY_READ);
-}
-
-/*
-* Check permission before accepting a new connection.  Note that the new
-* socket, @newsock, has been created and some information copied to it,
-* but the accept operation has not actually been performed.
-* @sock contains the listening socket structure.
-* @newsock contains the newly created server socket for connection.
-* Return 0 if permission is granted.
-*/
-static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
-{
-  prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = socket_inode_provenance(sock);
-  prov_msg_t* nskprov = socket_inode_provenance(newsock);
-  record_relation(RL_CREATE, skprov, nskprov, FLOW_ALLOWED);
-  record_relation(RL_ACCEPT, nskprov, cprov, FLOW_ALLOWED);
-  return 0;
 }
 
 /*
@@ -1282,9 +1282,9 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
   LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
   LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
+  LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
   LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
   LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
-  LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
   LSM_HOOK_INIT(socket_sock_rcv_skb, provenance_socket_sock_rcv_skb),
   LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
   LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),

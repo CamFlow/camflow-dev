@@ -17,6 +17,7 @@
 #include <linux/limits.h>
 #include <linux/ifc.h>
 #else
+#include <linux/socket.h>
 #include <uapi/linux/ifc.h>
 #include <uapi/linux/limits.h>
 #endif

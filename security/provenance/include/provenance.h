@@ -101,6 +101,10 @@ static inline void prov_update_version(prov_msg_t* prov){
 static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t relation;
 
+  if( unlikely(from==NULL || to==NULL) ){ // should not occur
+    return;
+  }
+
   if(filter_relation(type, from, to, allowed)){
     return;
   }
@@ -141,6 +145,10 @@ static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
 static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   prov_msg_t relation;
 
+  if( unlikely(pck==NULL || inode==NULL) ){ // should not occur
+    return;
+  }
+
   memset(&relation, 0, sizeof(prov_msg_t));
 
   if(should_update_node(RL_WRITE, inode)){
@@ -167,6 +175,10 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
 // outgoing packet
 static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
   prov_msg_t relation;
+
+  if( unlikely(pck==NULL || inode==NULL) ){ // should not occur
+    return;
+  }
 
   memset(&relation, 0, sizeof(prov_msg_t));
 
