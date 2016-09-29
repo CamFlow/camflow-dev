@@ -24,6 +24,10 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
   prov_msg_t* iprov;
   prov_msg_t pckprov;
 
+  if(cprov==NULL){  // we could not get the provenance, we give up
+    return NF_ACCEPT;
+  }
+
   if(provenance_is_tracked(cprov)){
     iprov = sk_inode_provenance(skb->sk);
     if(iprov==NULL){  // we could not get the provenance, we give up
