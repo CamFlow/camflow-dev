@@ -1043,6 +1043,7 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
+	prov_msg_t* cprov  = task_provenance();
 	prov_msg_t* iprov;
   prov_msg_t pckprov;
 	uint16_t family = sk->sk_family;
@@ -1059,6 +1060,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
     iprov = sk_inode_provenance(sk);
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_pck_to_inode(&pckprov, iprov);
+		record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
   }
 	return 0;
 }
