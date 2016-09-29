@@ -53,7 +53,7 @@ static inline prov_msg_t* socket_sk_provenance(struct socket *sock){
 }
 
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t* prov){
-  struct packet_identifier* id = &packet_identifier(prov); // we are going fo fill this
+  struct packet_identifier* id;
   int offset, ihlen;
 	struct iphdr _iph, *ih;
   struct tcphdr _tcph, *th;
@@ -69,6 +69,9 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
   if(ihlen < sizeof(_iph)){
     return -EINVAL;
   }
+
+  memset(prov, 0, sizeof(prov_msg_t));
+  id = &packet_identifier(prov); // we are going fo fill this
 
   id->type = MSG_PACKET;
   // collect IP element of prov identifier
