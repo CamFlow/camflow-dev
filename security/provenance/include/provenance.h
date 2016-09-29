@@ -157,7 +157,7 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   relation_identifier((&relation)).id = prov_next_relation_id();
   relation_identifier((&relation)).boot_id = prov_boot_id;
   relation_identifier((&relation)).machine_id = prov_machine_id;
-  relation.relation_info.type=RL_WRITE;
+  relation.relation_info.type=RL_RCV;
   relation.relation_info.allowed=FLOW_ALLOWED;
   copy_node_info(&relation.relation_info.snd, &pck->node_info.identifier);
   copy_node_info(&relation.relation_info.rcv, &inode->node_info.identifier);
@@ -180,7 +180,7 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
   relation_identifier((&relation)).id = prov_next_relation_id();
   relation_identifier((&relation)).boot_id = prov_boot_id;
   relation_identifier((&relation)).machine_id = prov_machine_id;
-  relation.relation_info.type=RL_READ;
+  relation.relation_info.type=RL_SND;
   relation.relation_info.allowed=FLOW_ALLOWED;
   copy_node_info(&relation.relation_info.snd, &inode->node_info.identifier);
   copy_node_info(&relation.relation_info.rcv, &pck->node_info.identifier);

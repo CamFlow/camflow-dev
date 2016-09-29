@@ -146,6 +146,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_DISALLOWED         0x01000000UL
 #define RL_MMAP_READ          0x02000000UL
 #define RL_MMAP_EXEC          0x04000000UL
+#define RL_SND                0x08000000UL
+#define RL_RCV                0x10000000UL
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
