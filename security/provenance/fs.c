@@ -15,6 +15,7 @@
 #include <linux/camflow.h>
 
 #include "provenance.h"
+#include "provenance_inode.h"
 #include "camflow_utils.h"
 
 #define TMPBUFLEN	12

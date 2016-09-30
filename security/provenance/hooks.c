@@ -1028,7 +1028,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if(iprov==NULL){ // we could not get the provenance, we give up
 		return 0;
 	}
-	if(provenance_is_tracked(iprov)){
+	if(provenance_is_tracked(cprov)){ // otherwise anything doing NS end-up tracked
     iprov = sk_inode_provenance(sk);
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_pck_to_inode(&pckprov, iprov);
