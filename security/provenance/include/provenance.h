@@ -75,21 +75,6 @@ static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* sr
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
-static inline void provenance_mark_as_opaque(const char* name){
-  struct inode* in;
-  prov_msg_t* prov;
-
-  in = file_name_to_inode(name);
-  if(!in){
-    printk(KERN_ERR "Provenance: could not find %s file.", name);
-  }else{
-    prov = inode_get_provenance(in);
-    if(prov){
-      set_opaque(prov);
-    }
-  }
-}
-
 static inline void __w_record_node(prov_msg_t* node){
   if(filter_node(node) || provenance_is_recorded(node)){ // filtered or already recorded
     return;

@@ -38,6 +38,21 @@ static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
   node_identifier(iprov).type=type;
 }
 
+static inline void provenance_mark_as_opaque(const char* name){
+  struct inode* in;
+  prov_msg_t* prov;
+
+  in = file_name_to_inode(name);
+  if(!in){
+    printk(KERN_ERR "Provenance: could not find %s file.", name);
+  }else{
+    prov = inode_get_provenance(in);
+    if(prov){
+      set_opaque(prov);
+    }
+  }
+}
+
 static inline prov_msg_t* inode_provenance(struct inode* inode){
 	prov_msg_t* iprov = inode_get_provenance(inode);
 	prov_copy_inode_mode(iprov, inode);
