@@ -75,7 +75,7 @@ static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* sr
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
-static inline void __w_record_node(prov_msg_t* node){
+static inline void __record_node(prov_msg_t* node){
   if(filter_node(node) || provenance_is_recorded(node)){ // filtered or already recorded
     return;
   }
@@ -84,7 +84,7 @@ static inline void __w_record_node(prov_msg_t* node){
   prov_write(node);
 }
 
-static inline void __r_record_relation(uint32_t type,
+static inline void __record_relation(uint32_t type,
                                       prov_msg_t* from,
                                       prov_msg_t* to,
                                       prov_msg_t* relation,
@@ -100,7 +100,7 @@ static inline void __r_record_relation(uint32_t type,
   prov_write(relation);
 }
 
-static inline void __w_update_version(uint32_t type, prov_msg_t* prov){
+static inline void __update_version(uint32_t type, prov_msg_t* prov){
   prov_msg_t old_prov;
   prov_msg_t relation;
 
@@ -112,16 +112,16 @@ static inline void __w_update_version(uint32_t type, prov_msg_t* prov){
   node_identifier(prov).version++;
   clear_recorded(prov);
   if(node_identifier(prov).type == MSG_TASK){
-    __r_record_relation(RL_VERSION_PROCESS, &old_prov, prov, &relation, FLOW_ALLOWED);
+    __record_relation(RL_VERSION_PROCESS, &old_prov, prov, &relation, FLOW_ALLOWED);
   }else{
-    __r_record_relation(RL_VERSION, &old_prov, prov, &relation, FLOW_ALLOWED);
+    __record_relation(RL_VERSION, &old_prov, prov, &relation, FLOW_ALLOWED);
   }
 
 out:
   return;
 }
 
-static inline void __w_propagate(uint32_t type,
+static inline void __propagate(uint32_t type,
                             prov_msg_t* from,
                             prov_msg_t* to,
                             prov_msg_t* relation,
@@ -158,12 +158,12 @@ static inline void record_relation(uint32_t type,
   }
 
   if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all ){
-    return true;
+    return;
   }
 
   // one of the node should not appear in the record, ignore the relation
   if(filter_node(from) || filter_node(to)){
-    return true;
+    return;
   }
 
   // should the relation appear
@@ -171,11 +171,11 @@ static inline void record_relation(uint32_t type,
     goto out;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
-  __w_record_node(from);
-  __w_propagate(type, from, to, &relation, allowed);
-  __w_update_version(type, to);
-  __w_record_node(to);
-  __r_record_relation(type, from, to, &relation, allowed);
+  __record_node(from);
+  __propagate(type, from, to, &relation, allowed);
+  __update_version(type, to);
+  __record_node(to);
+  __record_relation(type, from, to, &relation, allowed);
 out:
   return;
 }
@@ -202,9 +202,9 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   }
   memset(&relation, 0, sizeof(prov_msg_t));
   prov_write(pck);
-  __w_update_version(RL_RCV, inode);
-  __w_record_node(inode);
-  __r_record_relation(RL_RCV, pck, inode, &relation, FLOW_ALLOWED);
+  __update_version(RL_RCV, inode);
+  __record_node(inode);
+  __record_relation(RL_RCV, pck, inode, &relation, FLOW_ALLOWED);
 out:
   return;
 }
@@ -229,9 +229,9 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
     goto out;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
-  __w_record_node(inode);
+  __record_node(inode);
   prov_write(pck);
-  __r_record_relation(RL_RCV, inode, pck, &relation, FLOW_ALLOWED);
+  __record_relation(RL_RCV, inode, pck, &relation, FLOW_ALLOWED);
 out:
   return;
 }

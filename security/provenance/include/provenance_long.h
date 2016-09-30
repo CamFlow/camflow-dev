@@ -38,7 +38,7 @@ static inline long_prov_msg_t* alloc_long_provenance(uint32_t ntype, gfp_t gfp)
   return prov;
 }
 
-static inline void __w_long_record_node(long_prov_msg_t* node){
+static inline void __long_record_node(long_prov_msg_t* node){
   if(provenance_is_recorded(node) ){
     return;
   }
@@ -46,7 +46,7 @@ static inline void __w_long_record_node(long_prov_msg_t* node){
   long_prov_write(node);
 }
 
-static inline void __w_long_record_relation(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline void __long_record_relation(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t relation;
 
   if(unlikely(!prov_enabled)){ // capture is not enabled, ignore
@@ -56,8 +56,8 @@ static inline void __w_long_record_relation(uint32_t type, long_prov_msg_t* from
   if( unlikely(provenance_is_opaque(to)) ){
     return;
   }
-  __w_long_record_node(from);
-  __w_record_node(to);
+  __long_record_node(from);
+  __record_node(to);
 
   prov_type((&relation))=MSG_RELATION;
   relation_identifier((&relation)).id = prov_next_relation_id();
@@ -101,12 +101,12 @@ static inline int prov_print(const char *fmt, ...)
   return length;
 }
 
-static inline void __w_record_node_name(prov_msg_t* node, char* name){
+static inline void __record_node_name(prov_msg_t* node, char* name){
 	long_prov_msg_t *fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
 
-	__w_long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
+	__long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
 	set_name_recorded(node);
 	free_long_provenance(fname_prov);
 }
@@ -121,7 +121,7 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, prov_msg
 
   buffer = (char*)kzalloc(PATH_MAX, GFP_NOFS);
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-	__w_record_node_name(iprov, ptr);
+	__record_node_name(iprov, ptr);
 	kfree(buffer);
 }
 
@@ -176,7 +176,7 @@ static inline void record_task_name(struct task_struct *task, prov_msg_t* tprov)
 		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
-		__w_record_node_name(tprov, ptr);
+		__record_node_name(tprov, ptr);
 		kfree(buffer);
 	}
 
@@ -199,7 +199,7 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
   addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
   addr_info->address_info.length=addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
-	__w_long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
+	__long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
   free_long_provenance(addr_info);
 	set_name_recorded(skprov);
 }
