@@ -27,7 +27,7 @@ extern uint32_t prov_propagate_node_filter;
 #define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool __filter_node(uint32_t filter, prov_msg_t* node){
+static inline bool __filter_node(uint32_t filter, const prov_msg_t* node){
   if(!prov_enabled){
     return true;
   }
@@ -48,7 +48,7 @@ extern uint32_t prov_relation_filter;
 extern uint32_t prov_propagate_relation_filter;
 
 /* return either or not the relation should be filtered out */
-static inline bool filter_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline bool filter_relation(uint32_t type, const prov_msg_t* from, const prov_msg_t* to, uint8_t allowed){
   // ignore if none of the node are tracked and we are not capturing everything
   if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all){
     return true;
@@ -76,7 +76,7 @@ static inline bool filter_relation(uint32_t type, prov_msg_t* from, prov_msg_t* 
 }
 
 /* return either or not tracking should propagate */
-static inline bool filter_propagate_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline bool filter_propagate_relation(uint32_t type, const prov_msg_t* from, const prov_msg_t* to, uint8_t allowed){
   // the origin does not propagate tracking
   if( !provenance_propagate(from) ){
     return true;
@@ -109,11 +109,11 @@ static inline bool filter_propagate_relation(uint32_t type, prov_msg_t* from, pr
 }
 
 #define UPDATE_FILTER (RL_VERSION_PROCESS|RL_VERSION|RL_NAMED)
-static inline bool should_update_node(uint32_t relation_type, prov_msg_t* to){
+static inline bool filter_update_node(uint32_t relation_type, prov_msg_t* to){
   if( HIT_FILTER(relation_type, UPDATE_FILTER) ){ // not update if relation is of above type
-    return false;
+    return true;
   }
-  return true;
+  return false;
 }
 
 #endif

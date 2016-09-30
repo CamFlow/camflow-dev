@@ -41,9 +41,7 @@ static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
 static inline prov_msg_t* inode_provenance(struct inode* inode){
 	prov_msg_t* iprov = inode_get_provenance(inode);
 	prov_copy_inode_mode(iprov, inode);
-	if( provenance_is_recorded(iprov) ){ // the node has been recorded we need its name
-		record_inode_name(inode, iprov);
-	}
+	record_inode_name(inode, iprov);
 	return iprov;
 }
 #endif

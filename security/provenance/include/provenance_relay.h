@@ -21,7 +21,7 @@ extern struct rchan *long_prov_chan;
 
 static inline void prov_write(prov_msg_t* msg)
 {
-  if(prov_chan==NULL) // not set yet
+  if(unlikely(prov_chan==NULL)) // not set yet
   {
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;
@@ -30,7 +30,7 @@ static inline void prov_write(prov_msg_t* msg)
 }
 
 static inline void long_prov_write(long_prov_msg_t* msg){
-  if(long_prov_chan==NULL) // not set yet
+  if(unlikely(long_prov_chan==NULL)) // not set yet
   {
     printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
     return;

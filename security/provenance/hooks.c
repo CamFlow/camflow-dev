@@ -82,7 +82,7 @@ static void cred_init_provenance(void)
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
-
+	set_opaque(prov);
 	cred->provenance = prov;
 }
 
@@ -230,9 +230,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	}
 #endif
 
-	if(provenance_is_tracked(old_prov)){
-		record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
-	}
+	record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
   new->provenance = prov;
   return 0;
 }
@@ -479,11 +477,6 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-	prov_copy_inode_mode(iprov, dir);
-
-	if(filter_node(iprov)){
-		return 0;
-	}
 
 	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED);
 	return 0;
@@ -509,17 +502,14 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if(!mask)
 		return 0;
 
-	if(unlikely(IS_PRIVATE(inode)))
-		return 0;
-
-	iprov = inode_provenance(inode);
-  if(!iprov){ // alloc provenance if none there
-    return -ENOMEM;
-  }
-
-	if(filter_node(iprov) || filter_node(cprov)){
+	if(unlikely(IS_PRIVATE(inode))){
 		return 0;
 	}
+
+	iprov = inode_provenance(inode);
+  if(iprov==NULL){ // alloc provenance if none there
+    return -ENOMEM;
+  }
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
@@ -562,34 +552,21 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 	prov_msg_t* cprov = task_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
-	char *buffer;
-	char *ptr;
 
 	iprov = inode_provenance(old_dentry->d_inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
 
-	if(filter_node(iprov)){ // this node should not be recorded
-		return 0;
-	}
-
 	dprov = inode_provenance(dir);
   if(!dprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-
-  if( provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov) ){
-		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
-		ptr = dentry_path_raw(new_dentry, buffer, PATH_MAX);
-		record_node_name(iprov, ptr);
-		kfree(buffer);
-
-		// record edges
-	  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
-	  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
-	  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
-  }
+	// record edges
+  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
+  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
+  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
+	record_inode_name_from_dentry(new_dentry, iprov);
   return 0;
 }
 
@@ -632,11 +609,6 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-	prov_copy_inode_mode(iprov, inode);
-
-	if(filter_node(iprov)){
-		return 0;
-	}
 
 	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
@@ -695,7 +667,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   struct inode *inode = file_inode(file);
 
 	iprov = inode_provenance(inode);
-  if(!iprov){ // alloc provenance if none there
+  if(!iprov){
     return -ENOMEM;
   }
 
@@ -942,7 +914,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
   if(!skprov)
     return -ENOMEM;
 
-	provenance_record_address(sock, address, addrlen);
+	provenance_record_address(skprov, address, addrlen);
 	record_relation(RL_BIND, cprov, skprov, FLOW_ALLOWED);
 
   return 0;
@@ -967,7 +939,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   if(!skprov)
     return -ENOMEM;
 
-	provenance_record_address(sock, address, addrlen);
+	provenance_record_address(skprov, address, addrlen);
 	record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
 
   return 0;
