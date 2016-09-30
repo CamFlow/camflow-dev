@@ -127,7 +127,15 @@ static inline void __w_propagate(uint32_t type,
                             prov_msg_t* relation,
                             uint8_t allowed){
 
-  if( filter_propagate_relation(type, from, to, allowed) ){ // it is filtered
+  if(!provenance_propagate(from)){
+    goto out;
+  }
+
+  if( filter_propagate_node(to) ){
+    goto out;
+  }
+
+  if( filter_propagate_relation(type, allowed) ){ // it is filtered
     goto out;
   }
 
@@ -149,7 +157,17 @@ static inline void record_relation(uint32_t type,
     return;
   }
 
-  if(filter_relation(type, from, to, allowed)){
+  if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all ){
+    return true;
+  }
+
+  // one of the node should not appear in the record, ignore the relation
+  if(filter_node(from) || filter_node(to)){
+    return true;
+  }
+
+  // should the relation appear
+  if(filter_relation(type, allowed)){
     goto out;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
@@ -170,7 +188,16 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
     return;
   }
 
-  if(filter_relation(RL_RCV, pck, inode, FLOW_ALLOWED)){
+  if(!provenance_is_tracked(inode) && !prov_all){
+    goto out;
+  }
+
+  // one of the node should not appear in the record, ignore the relation
+  if(filter_node(pck) || filter_node(inode)){
+    goto out;
+  }
+
+  if(filter_relation(RL_RCV, FLOW_ALLOWED)){
     goto out;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
@@ -190,7 +217,15 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
     return;
   }
 
-  if(filter_relation(RL_SND, inode, pck, FLOW_ALLOWED)){
+  if(!provenance_is_tracked(inode) && !prov_all){
+    goto out;
+  }
+
+  if(filter_node(pck) || filter_node(inode)){
+    goto out;
+  }
+
+  if(filter_relation(RL_SND, FLOW_ALLOWED)){
     goto out;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
