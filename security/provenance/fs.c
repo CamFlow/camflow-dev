@@ -271,7 +271,6 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	if(copy_to_user(tmp, cprov, sizeof(prov_msg_t))){
 		return -EAGAIN;
 	}
-	record_node(cprov); // record self
 	return count; // write only
 }
 
@@ -440,7 +439,7 @@ declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
-	 
+
    prov_dir = securityfs_create_dir("provenance", NULL);
 
    securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
