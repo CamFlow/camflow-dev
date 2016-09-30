@@ -231,7 +231,7 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(inode);
   prov_write(pck);
-  __record_relation(RL_RCV, inode, pck, &relation, FLOW_ALLOWED);
+  __record_relation(RL_SND, inode, pck, &relation, FLOW_ALLOWED);
 out:
   return;
 }

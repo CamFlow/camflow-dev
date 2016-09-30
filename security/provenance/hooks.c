@@ -32,6 +32,7 @@ struct kmem_cache *long_provenance_cache=NULL;
 
 #define current_pid() (current->pid)
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
+#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 
 static inline void task_config_from_file(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
@@ -521,6 +522,13 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	  }
 		if((perms & (DIR__SEARCH)) != 0){
 	    record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED);
+	  }
+	}else if(is_inode_socket(inode)){
+		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
+	    record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED);
+	  }
+	  if((perms & (FILE__READ)) != 0){
+	    record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}else{
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
@@ -1028,11 +1036,12 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if(iprov==NULL){ // we could not get the provenance, we give up
 		return 0;
 	}
-	if(provenance_is_tracked(cprov)){ // otherwise anything doing NS end-up tracked
-    iprov = sk_inode_provenance(sk);
+	if(provenance_is_tracked(iprov)){
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_pck_to_inode(&pckprov, iprov);
-		record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
+		if(provenance_is_tracked(cprov)){
+			record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
+		}
   }
 	return 0;
 }
