@@ -853,11 +853,10 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 */
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
-  prov_msg_t* skprov = alloc_provenance(MSG_SOCK, priority);
+  prov_msg_t* skprov = task_provenance();
 
   if(!skprov)
     return -ENOMEM;
-  set_node_id(skprov, ASSIGN_NODE_ID);
 
   sk->sk_provenance=skprov;
   return 0;
@@ -866,11 +865,11 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 /*
 * Deallocate security structure.
 */
-static void provenance_sk_free_security(struct sock *sk)
+/*static void provenance_sk_free_security(struct sock *sk)
 {
 	free_provenance(sk->sk_provenance);
 	sk->sk_provenance = NULL;
-}
+}*/
 
 /*
 * This hook allows a module to update or allocate a per-socket security
@@ -1023,7 +1022,7 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-	prov_msg_t* cprov  = task_provenance();
+	prov_msg_t* cprov  = sk->sk_provenance;
 	prov_msg_t* iprov;
   prov_msg_t pckprov;
 	uint16_t family = sk->sk_family;
@@ -1260,7 +1259,7 @@ static struct security_hook_list provenance_hooks[] = {
 
 	/* socket related hooks */
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
+  //LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
   LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
   LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
   LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
