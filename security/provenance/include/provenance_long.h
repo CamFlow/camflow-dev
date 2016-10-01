@@ -58,16 +58,8 @@ static inline void __long_record_relation(uint32_t type, long_prov_msg_t* from, 
   }
   __long_record_node(from);
   __record_node(to);
-
-  prov_type((&relation))=MSG_RELATION;
-  relation_identifier((&relation)).id = prov_next_relation_id();
-  relation_identifier((&relation)).boot_id = prov_boot_id;
-  relation_identifier((&relation)).machine_id = prov_machine_id;
-  relation.relation_info.type=type;
-  relation.relation_info.allowed=allowed;
-  copy_node_info(&relation.relation_info.snd, &from->node_info.identifier);
-  copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
-  prov_write(&relation);
+  memset(&relation, 0, sizeof(prov_msg_t));
+  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed);
 }
 
 #ifdef CONFIG_SECURITY_IFC

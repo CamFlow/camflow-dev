@@ -85,8 +85,8 @@ static inline void __record_node(prov_msg_t* node){
 }
 
 static inline void __record_relation(uint32_t type,
-                                      prov_msg_t* from,
-                                      prov_msg_t* to,
+                                      prov_identifier_t* from,
+                                      prov_identifier_t* to,
                                       prov_msg_t* relation,
                                       uint8_t allowed){
   prov_type(relation)=MSG_RELATION;
@@ -95,8 +95,8 @@ static inline void __record_relation(uint32_t type,
   relation_identifier(relation).machine_id = prov_machine_id;
   relation->relation_info.type=type;
   relation->relation_info.allowed=allowed;
-  copy_node_info(&relation->relation_info.snd, &from->node_info.identifier);
-  copy_node_info(&relation->relation_info.rcv, &to->node_info.identifier);
+  copy_node_info(&relation->relation_info.snd, from);
+  copy_node_info(&relation->relation_info.rcv, to);
   prov_write(relation);
 }
 
@@ -112,9 +112,9 @@ static inline void __update_version(uint32_t type, prov_msg_t* prov){
   node_identifier(prov).version++;
   clear_recorded(prov);
   if(node_identifier(prov).type == MSG_TASK){
-    __record_relation(RL_VERSION_PROCESS, &old_prov, prov, &relation, FLOW_ALLOWED);
+    __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED);
   }else{
-    __record_relation(RL_VERSION, &old_prov, prov, &relation, FLOW_ALLOWED);
+    __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED);
   }
 
 out:
@@ -175,7 +175,7 @@ static inline void record_relation(uint32_t type,
   __propagate(type, from, to, &relation, allowed);
   __update_version(type, to);
   __record_node(to);
-  __record_relation(type, from, to, &relation, allowed);
+  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed);
 out:
   return;
 }
@@ -204,7 +204,7 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   prov_write(pck);
   __update_version(RL_RCV, inode);
   __record_node(inode);
-  __record_relation(RL_RCV, pck, inode, &relation, FLOW_ALLOWED);
+  __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED);
 out:
   return;
 }
@@ -231,7 +231,7 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(inode);
   prov_write(pck);
-  __record_relation(RL_SND, inode, pck, &relation, FLOW_ALLOWED);
+  __record_relation(RL_SND, &(inode->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED);
 out:
   return;
 }
