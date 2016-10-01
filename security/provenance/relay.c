@@ -61,19 +61,29 @@ static struct rchan_callbacks relay_callbacks =
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP)*sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
 
+DEFINE_SPINLOCK(prov_chan_lock);
+DEFINE_SPINLOCK(long_prov_chan_lock);
+
 static int __init relay_prov_init(void)
 {
+  unsigned long flags;
+  spin_lock_irqsave(&prov_chan_lock, flags);
   prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(prov_chan==NULL){
+    spin_unlock_irqrestore(&prov_chan_lock, flags);
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
 
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
   long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(long_prov_chan==NULL){
+    spin_unlock_irqrestore(&long_prov_chan_lock, flags);
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 
   printk(KERN_INFO "Provenance relay ready.\n");
   return 0;
