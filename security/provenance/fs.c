@@ -174,7 +174,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto exit;
 	}
 	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
-	  copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
+		__record_node(cprov);
+		copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
 		node_identifier(node).id=prov_next_node_id();
 	  node_identifier(node).boot_id=prov_boot_id;
 	  node_identifier(node).machine_id=prov_machine_id;
