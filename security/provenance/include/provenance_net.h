@@ -96,6 +96,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
 
       id->snd_port = th->source;
       id->rcv_port = th->dest;
+      id->seq = th->seq;
       break;
     case IPPROTO_UDP:
       if (ntohs(ih->frag_off) & IP_OFFSET){
