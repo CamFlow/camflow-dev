@@ -22,7 +22,7 @@ make install # patience, sudo password will be asked during instalation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.7           | 4.4.22         | N/A        |
+| 0.1.7           | 4.4.23         | N/A        |
 | 0.1.6           | 4.4.21         | 19/09/2016 |
 | 0.1.5           | 4.4.19         | 02/09/2016 |
 | 0.1.4           | 4.4.16         | 18/08/2016 |
@@ -37,7 +37,7 @@ make install # patience, sudo password will be asked during instalation
 - Config change: by default IFC is not set.
 - Recording IPv4 incoming and outgoing packets.
 - More sensible settings for relay buffer.
-- Update to kernel version 4.4.22.
+- Update to kernel version 4.4.23.
 ```
 
 ### v0.1.6
