@@ -139,7 +139,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_NAMED              0x00010000UL
 #define RL_IFC                0x00020000UL
 #define RL_EXEC               0x00040000UL
-#define RL_FORK               0x00080000UL
+#define RL_CLONE              0x00080000UL
 #define RL_UNKNOWN            0x00100000UL
 #define RL_VERSION_PROCESS    0x00200000UL
 #define RL_SEARCH             0x00400000UL
