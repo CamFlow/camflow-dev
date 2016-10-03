@@ -231,7 +231,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	}
 #endif
 
-	record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
+	record_relation(RL_CLONE, old_prov, prov, FLOW_ALLOWED);
   new->provenance = prov;
   return 0;
 }
