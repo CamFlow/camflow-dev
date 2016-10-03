@@ -81,6 +81,9 @@ static inline void __record_node(prov_msg_t* node){
   }
 
   set_recorded(node);
+  if(unlikely(node_identifier(node).machine_id!=prov_machine_id)){
+    node_identifier(node).machine_id=prov_machine_id;
+  }
   prov_write(node);
 }
 
