@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
 *
@@ -71,107 +71,172 @@ static inline void set_node_id(prov_msg_t* node, uint64_t nid){
   node_identifier(node).machine_id=prov_machine_id;
 }
 
-static inline void record_node(prov_msg_t* node){
-  if(filter_node(node)){
-    return;
-  }
-
-  set_recorded(node);
-  prov_write(node);
-}
-
 static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
-static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed);
+static inline void __record_node(prov_msg_t* node){
+  if(filter_node(node) || provenance_is_recorded(node)){ // filtered or already recorded
+    return;
+  }
 
-static inline void prov_update_version(prov_msg_t* prov){
+  set_recorded(node);
+  if(unlikely(node_identifier(node).machine_id!=prov_machine_id)){
+    node_identifier(node).machine_id=prov_machine_id;
+  }
+  prov_write(node);
+}
+
+static inline void __record_relation(uint32_t type,
+                                      prov_identifier_t* from,
+                                      prov_identifier_t* to,
+                                      prov_msg_t* relation,
+                                      uint8_t allowed){
+  prov_type(relation)=MSG_RELATION;
+  relation_identifier(relation).id = prov_next_relation_id();
+  relation_identifier(relation).boot_id = prov_boot_id;
+  relation_identifier(relation).machine_id = prov_machine_id;
+  relation->relation_info.type=type;
+  relation->relation_info.allowed=allowed;
+  copy_node_info(&relation->relation_info.snd, from);
+  copy_node_info(&relation->relation_info.rcv, to);
+  prov_write(relation);
+}
+
+static inline void __update_version(uint32_t type, prov_msg_t* prov){
   prov_msg_t old_prov;
+  prov_msg_t relation;
+
+  if(filter_update_node(type, prov)){ // the relation is filtered out
+    goto out;
+  }
+
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
   if(node_identifier(prov).type == MSG_TASK){
-    record_relation(RL_VERSION_PROCESS, &old_prov, prov, FLOW_ALLOWED);
+    __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED);
   }else{
-    record_relation(RL_VERSION, &old_prov, prov, FLOW_ALLOWED);
+    __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED);
   }
+
+out:
+  return;
 }
 
-static inline void record_relation(uint32_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline void __propagate(uint32_t type,
+                            prov_msg_t* from,
+                            prov_msg_t* to,
+                            prov_msg_t* relation,
+                            uint8_t allowed){
+
+  if(!provenance_propagate(from)){
+    goto out;
+  }
+
+  if( filter_propagate_node(to) ){
+    goto out;
+  }
+
+  if( filter_propagate_relation(type, allowed) ){ // it is filtered
+    goto out;
+  }
+
+  set_tracked(to);// receiving node become tracked
+  set_propagate(to); // continue to propagate
+  prov_bloom_merge(prov_taint(to), prov_taint(from));
+  prov_bloom_merge(prov_taint(relation), prov_taint(from));
+out:
+  return;
+}
+
+static inline void record_relation(uint32_t type,
+                                    prov_msg_t* from,
+                                    prov_msg_t* to,
+                                    uint8_t allowed){
   prov_msg_t relation;
 
-  if(filter_relation(type, from, to, allowed)){
+  if( unlikely(from==NULL || to==NULL) ){ // should not occur
     return;
   }
 
+  if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all ){
+    return;
+  }
+
+  // one of the node should not appear in the record, ignore the relation
+  if(filter_node(from) || filter_node(to)){
+    return;
+  }
+
+  // should the relation appear
+  if(filter_relation(type, allowed)){
+    goto out;
+  }
   memset(&relation, 0, sizeof(prov_msg_t));
-  /* propagate tracked */
-  if( !filter_propagate_relation(type, from, to, allowed) ){ // it is not filtered
-    set_tracked(to);// receiving node become tracked
-    set_propagate(to); // continue to propagate
-    prov_bloom_merge(prov_taint(to), prov_taint(from));
-    prov_bloom_merge(prov_taint(&relation), prov_taint(from));
-  }
-
-  if(should_update_node(type, to)){ // it is none of the above types
-    prov_update_version(to);
-  }
-
-  if( !provenance_is_recorded(from) ){
-    record_node(from);
-  }
-
-  if( !provenance_is_recorded(to) ){
-    record_node(to);
-  }
-
-  prov_type((&relation))=MSG_RELATION;
-  relation_identifier((&relation)).id = prov_next_relation_id();
-  relation_identifier((&relation)).boot_id = prov_boot_id;
-  relation_identifier((&relation)).machine_id = prov_machine_id;
-  relation.relation_info.type=type;
-  relation.relation_info.allowed=allowed;
-  copy_node_info(&relation.relation_info.snd, &from->node_info.identifier);
-  copy_node_info(&relation.relation_info.rcv, &to->node_info.identifier);
-  prov_write(&relation);
+  __record_node(from);
+  __propagate(type, from, to, &relation, allowed);
+  __update_version(type, to);
+  __record_node(to);
+  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed);
+out:
+  return;
 }
 
-static inline void provenance_mark_as_opaque(const char* name){
-  struct inode* in;
-  prov_msg_t* prov;
+// incoming packet
+static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
+  prov_msg_t relation;
 
-  in = file_name_to_inode(name);
-  if(!in){
-    printk(KERN_ERR "Provenance: could not find %s file.", name);
-  }else{
-    prov = inode_get_provenance(in);
-    if(prov){
-      set_opaque(prov);
-    }
+  if( unlikely(pck==NULL || inode==NULL) ){ // should not occur
+    return;
   }
+
+  if(!provenance_is_tracked(inode) && !prov_all){
+    goto out;
+  }
+
+  // one of the node should not appear in the record, ignore the relation
+  if(filter_node(pck) || filter_node(inode)){
+    goto out;
+  }
+
+  if(filter_relation(RL_RCV, FLOW_ALLOWED)){
+    goto out;
+  }
+  memset(&relation, 0, sizeof(prov_msg_t));
+  prov_write(pck);
+  __update_version(RL_RCV, inode);
+  __record_node(inode);
+  __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED);
+out:
+  return;
 }
 
-static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
-  uint32_t type = MSG_INODE_UNKNOWN;
-  iprov->inode_info.mode=inode->i_mode;
+// outgoing packet
+static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
+  prov_msg_t relation;
 
-  if(S_ISBLK(inode->i_mode)){
-    type=MSG_INODE_BLOCK;
-  }else if(S_ISCHR(inode->i_mode)){
-    type=MSG_INODE_CHAR;
-  }else if(S_ISDIR(inode->i_mode)){
-    type=MSG_INODE_DIRECTORY;
-  }else if(S_ISFIFO(inode->i_mode)){
-    type=MSG_INODE_FIFO;
-  }else if(S_ISLNK(inode->i_mode)){
-    type=MSG_INODE_LINK;
-  }else if(S_ISREG(inode->i_mode)){
-    type=MSG_INODE_FILE;
-  }else if(S_ISSOCK(inode->i_mode)){
-    type=MSG_INODE_SOCKET;
+  if( unlikely(pck==NULL || inode==NULL) ){ // should not occur
+    return;
   }
-  node_identifier(iprov).type=type;
+
+  if(!provenance_is_tracked(inode) && !prov_all){
+    goto out;
+  }
+
+  if(filter_node(pck) || filter_node(inode)){
+    goto out;
+  }
+
+  if(filter_relation(RL_SND, FLOW_ALLOWED)){
+    goto out;
+  }
+  memset(&relation, 0, sizeof(prov_msg_t));
+  __record_node(inode);
+  prov_write(pck);
+  __record_relation(RL_SND, &(inode->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED);
+out:
+  return;
 }
 #endif
 #endif /* _LINUX_PROVENANCE_H */

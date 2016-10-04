@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
 *
@@ -15,6 +15,7 @@
 #include <linux/camflow.h>
 
 #include "provenance.h"
+#include "provenance_inode.h"
 #include "camflow_utils.h"
 
 #define TMPBUFLEN	12
@@ -136,7 +137,6 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	{
 		return -EAGAIN;
 	}
-	printk(KERN_INFO "Provenance: machine_id set to %u.", prov_machine_id);
 
 	return count; // read only
 }
@@ -174,7 +174,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto exit;
 	}
 	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
-	  copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
+		__record_node(cprov);
+		copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
 		node_identifier(node).id=prov_next_node_id();
 	  node_identifier(node).boot_id=prov_boot_id;
 	  node_identifier(node).machine_id=prov_machine_id;
@@ -272,7 +273,6 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	if(copy_to_user(tmp, cprov, sizeof(prov_msg_t))){
 		return -EAGAIN;
 	}
-	record_node(cprov); // record self
 	return count; // write only
 }
 
@@ -297,7 +297,6 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	}else{
 		(*filter)&=~(setting->filter);
 	}
-	printk(KERN_INFO "Provenance: updated filter %X with %X.", (*filter), setting->filter);
 	return count;
 }
 
@@ -457,6 +456,9 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
 	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
 	 securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
+
+	 printk(KERN_INFO "Provenance fs ready.\n");
+
    return 0;
 }
 

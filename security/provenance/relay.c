@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
 *
@@ -57,28 +57,35 @@ static struct rchan_callbacks relay_callbacks =
         .remove_buf_file = remove_buf_file_handler,
 };
 
-/* VALUE WERE CHOSEN RANDOMLY, TODO select value that makes sense */
+#define PROV_RELAY_BUFF_EXP         22 // 4MB
+#define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP)*sizeof(uint8_t))
+#define PROV_NB_SUBBUF              32
 
-#define PROV_ELEMENT_IN_SUBBUF      64
-#define LONG_PROV_ELEMENT_IN_SUBBUF 8
-#define PROV_NB_SUBBUF              64
+DEFINE_SPINLOCK(prov_chan_lock);
+DEFINE_SPINLOCK(long_prov_chan_lock);
 
 static int __init relay_prov_init(void)
 {
-  printk(KERN_INFO "Provenance init.\n");
-  prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_ELEMENT_IN_SUBBUF*sizeof(prov_msg_t), PROV_NB_SUBBUF, &relay_callbacks, NULL);
+  unsigned long flags;
+  spin_lock_irqsave(&prov_chan_lock, flags);
+  prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(prov_chan==NULL){
+    spin_unlock_irqrestore(&prov_chan_lock, flags);
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
 
-  long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, LONG_PROV_ELEMENT_IN_SUBBUF*sizeof(long_prov_msg_t), PROV_NB_SUBBUF, &relay_callbacks, NULL);
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
+  long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
   if(long_prov_chan==NULL){
+    spin_unlock_irqrestore(&long_prov_chan_lock, flags);
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 
-  printk(KERN_INFO "Provenance module started!\n");
+  printk(KERN_INFO "Provenance relay ready.\n");
   return 0;
 }
 

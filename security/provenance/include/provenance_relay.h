@@ -14,34 +14,50 @@
 #define _LINUX_PROVENANCE_RELAY_H
 
 #include <linux/relay.h>
+#include <linux/spinlock.h>
+
 #include "provenance_filter.h"
 
 extern struct rchan *prov_chan;
-extern struct rchan *long_prov_chan;
+extern spinlock_t prov_chan_lock;
 
 static inline void prov_write(prov_msg_t* msg)
 {
-  if(prov_chan==NULL) // not set yet
+  unsigned long flags;
+  spin_lock_irqsave(&prov_chan_lock, flags);
+  if(unlikely(prov_chan==NULL)) // not set yet
   {
-    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
-    return;
+    // TODO deal with record before relay is ready
+  }else{
+    relay_write(prov_chan, msg, sizeof(prov_msg_t));
   }
-  relay_write(prov_chan, msg, sizeof(prov_msg_t));
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
 }
 
+extern struct rchan *long_prov_chan;
+extern spinlock_t long_prov_chan_lock;
+
 static inline void long_prov_write(long_prov_msg_t* msg){
-  if(long_prov_chan==NULL) // not set yet
+  unsigned long flags;
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
+  if(unlikely(long_prov_chan==NULL)) // not set yet
   {
-    printk(KERN_ERR "Provenance: trying to write before nchan ready\n");
-    return;
+    // TODO deal with record before relay is ready
+  }else{
+    relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
   }
-  relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 }
 
 /* force sub-buffer switch */
 static inline void prov_flush( void ){
+  unsigned long flags;
+  spin_lock_irqsave(&prov_chan_lock, flags);
   relay_flush(prov_chan);
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
   relay_flush(long_prov_chan);
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 }
 
 #endif

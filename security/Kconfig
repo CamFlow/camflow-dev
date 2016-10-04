@@ -155,10 +155,10 @@ choice
 		bool "AppArmor" if SECURITY_APPARMOR=y
 
 	config DEFAULT_SECURITY_PROVENANCE
-		bool "Provenance" if SECURITY_PROVENANCE=y
+		bool "CamFlow - Provenance" if SECURITY_PROVENANCE=y
 
 	config DEFAULT_SECURITY_IFC
-		bool "IFC" if SECURITY_IFC=y
+		bool "CamFlow - IFC" if SECURITY_IFC=y
 
 	config DEFAULT_SECURITY_DAC
 		bool "Unix Discretionary Access Controls"

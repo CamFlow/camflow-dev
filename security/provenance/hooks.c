@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
 *
@@ -22,6 +22,8 @@
 
 #include "av_utils.h"
 #include "provenance.h"
+#include "provenance_net.h"
+#include "provenance_inode.h"
 #include "provenance_long.h"
 #include "ifc.h"
 
@@ -30,8 +32,7 @@ struct kmem_cache *long_provenance_cache=NULL;
 
 #define current_pid() (current->pid)
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
-
-static inline prov_msg_t* inode_provenance(struct inode* inode);
+#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 
 static inline void task_config_from_file(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
@@ -82,7 +83,7 @@ static void cred_init_provenance(void)
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
-
+	set_opaque(prov);
 	cred->provenance = prov;
 }
 
@@ -161,15 +162,6 @@ static inline int inode_do_init(struct inode* inode)
 	return inode_do_init_with_dentry(inode, NULL);
 }
 
-static inline prov_msg_t* inode_provenance(struct inode* inode){
-	prov_msg_t* iprov = inode_get_provenance(inode);
-	prov_copy_inode_mode(iprov, inode);
-	if( provenance_is_recorded(iprov) ){ // the node has been recorded we need its name
-		record_inode_name(inode, iprov);
-	}
-	return iprov;
-}
-
 static inline prov_msg_t* task_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
@@ -239,9 +231,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	}
 #endif
 
-	if(provenance_is_tracked(old_prov)){
-		record_relation(RL_FORK, old_prov, prov, FLOW_ALLOWED);
-	}
+	record_relation(RL_CLONE, old_prov, prov, FLOW_ALLOWED);
   new->provenance = prov;
   return 0;
 }
@@ -488,11 +478,6 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-	prov_copy_inode_mode(iprov, dir);
-
-	if(filter_node(iprov)){
-		return 0;
-	}
 
 	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED);
 	return 0;
@@ -518,17 +503,14 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if(!mask)
 		return 0;
 
-	if(unlikely(IS_PRIVATE(inode)))
-		return 0;
-
-	iprov = inode_provenance(inode);
-  if(!iprov){ // alloc provenance if none there
-    return -ENOMEM;
-  }
-
-	if(filter_node(iprov) || filter_node(cprov)){
+	if(unlikely(IS_PRIVATE(inode))){
 		return 0;
 	}
+
+	iprov = inode_provenance(inode);
+  if(iprov==NULL){ // alloc provenance if none there
+    return -ENOMEM;
+  }
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
@@ -540,6 +522,13 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	  }
 		if((perms & (DIR__SEARCH)) != 0){
 	    record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED);
+	  }
+	}else if(is_inode_socket(inode)){
+		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
+	    record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED);
+	  }
+	  if((perms & (FILE__READ)) != 0){
+	    record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED);
 	  }
 	}else{
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
@@ -571,34 +560,21 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 	prov_msg_t* cprov = task_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
-	char *buffer;
-	char *ptr;
 
 	iprov = inode_provenance(old_dentry->d_inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
 
-	if(filter_node(iprov)){ // this node should not be recorded
-		return 0;
-	}
-
 	dprov = inode_provenance(dir);
   if(!dprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-
-  if( provenance_is_tracked(iprov) || provenance_is_tracked(dprov) || provenance_is_tracked(cprov) ){
-		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
-		ptr = dentry_path_raw(new_dentry, buffer, PATH_MAX);
-		record_node_name(iprov, ptr);
-		kfree(buffer);
-
-		// record edges
-	  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
-	  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
-	  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
-  }
+	// record edges
+  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
+  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
+  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
+	record_inode_name_from_dentry(new_dentry, iprov);
   return 0;
 }
 
@@ -641,11 +617,6 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	if(!iprov){ // alloc provenance if none there
     return -ENOMEM;
   }
-	prov_copy_inode_mode(iprov, inode);
-
-	if(filter_node(iprov)){
-		return 0;
-	}
 
 	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED);
 	return 0;
@@ -704,7 +675,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   struct inode *inode = file_inode(file);
 
 	iprov = inode_provenance(inode);
-  if(!iprov){ // alloc provenance if none there
+  if(!iprov){
     return -ENOMEM;
   }
 
@@ -882,11 +853,10 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 */
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
-  prov_msg_t* skprov = alloc_provenance(MSG_SOCK, priority);
+  prov_msg_t* skprov = task_provenance();
 
   if(!skprov)
     return -ENOMEM;
-  set_node_id(skprov, ASSIGN_NODE_ID);
 
   sk->sk_provenance=skprov;
   return 0;
@@ -895,11 +865,11 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 /*
 * Deallocate security structure.
 */
-static void provenance_sk_free_security(struct sock *sk)
+/*static void provenance_sk_free_security(struct sock *sk)
 {
 	free_provenance(sk->sk_provenance);
 	sk->sk_provenance = NULL;
-}
+}*/
 
 /*
 * This hook allows a module to update or allocate a per-socket security
@@ -920,38 +890,15 @@ static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* iprov  = inode_provenance(SOCK_INODE(sock));
-  prov_msg_t* skprov = NULL;
+  prov_msg_t* iprov = socket_inode_provenance(sock);
 
   if(kern){
     return 0;
   }
 
-  if(!sock->sk->sk_provenance){
-		provenance_sk_alloc_security(sock->sk, family, GFP_KERNEL);
-	}
-  skprov = sock->sk->sk_provenance;
-  skprov->sock_info.type = type;
-  skprov->sock_info.family = family;
-  skprov->sock_info.protocol = protocol;
-  record_relation(RL_CREATE, cprov, skprov, FLOW_ALLOWED);
-  record_relation(RL_ASSOCIATE, skprov, iprov, FLOW_ALLOWED);
+  record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED);
 
   return 0;
-}
-
-static inline void provenance_record_address(struct socket *sock, struct sockaddr *address, int addrlen){
-	prov_msg_t* skprov = sock->sk->sk_provenance;
-	long_prov_msg_t* addr_info = NULL;
-
-	if(!provenance_is_name_recorded(skprov) && provenance_is_tracked(skprov)){
-	  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
-	  addr_info->address_info.length=addrlen;
-	  memcpy(&(addr_info->address_info.addr), address, addrlen);
-		long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
-	  free_long_provenance(addr_info);
-		set_name_recorded(skprov);
-	}
 }
 
 /*
@@ -966,16 +913,16 @@ static inline void provenance_record_address(struct socket *sock, struct sockadd
 static int provenance_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* iprov = socket_inode_provenance(sock);
 
   if(provenance_is_opaque(cprov))
     return 0;
 
-  if(!skprov)
+  if(!iprov)
     return -ENOMEM;
 
-	provenance_record_address(sock, address, addrlen);
-	record_relation(RL_BIND, cprov, skprov, FLOW_ALLOWED);
+	provenance_record_address(iprov, address, addrlen);
+	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED);
 
   return 0;
 }
@@ -991,16 +938,16 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 static int provenance_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* iprov = socket_inode_provenance(sock);
 
   if(provenance_is_opaque(cprov))
     return 0;
 
-  if(!skprov)
+  if(!iprov)
     return -ENOMEM;
 
-	provenance_record_address(sock, address, addrlen);
-	record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
+	provenance_record_address(iprov, address, addrlen);
+	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED);
 
   return 0;
 }
@@ -1014,9 +961,27 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
   prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk->sk_provenance;
+  prov_msg_t* iprov = socket_inode_provenance(sock);
 
-  record_relation(RL_LISTEN, cprov, skprov, FLOW_ALLOWED);
+  record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED);
+  return 0;
+}
+
+/*
+* Check permission before accepting a new connection.  Note that the new
+* socket, @newsock, has been created and some information copied to it,
+* but the accept operation has not actually been performed.
+* @sock contains the listening socket structure.
+* @newsock contains the newly created server socket for connection.
+* Return 0 if permission is granted.
+*/
+static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
+{
+  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* iprov = socket_inode_provenance(sock);
+  prov_msg_t* niprov = socket_inode_provenance(newsock);
+  record_relation(RL_CREATE, iprov, niprov, FLOW_ALLOWED);
+  record_relation(RL_ACCEPT, niprov, cprov, FLOW_ALLOWED);
   return 0;
 }
 
@@ -1048,21 +1013,36 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 }
 
 /*
-* Check permission before accepting a new connection.  Note that the new
-* socket, @newsock, has been created and some information copied to it,
-* but the accept operation has not actually been performed.
-* @sock contains the listening socket structure.
-* @newsock contains the newly created server socket for connection.
-* Return 0 if permission is granted.
+* Check permissions on incoming network packets.  This hook is distinct
+* from Netfilter's IP input hooks since it is the first time that the
+* incoming sk_buff @skb has been associated with a particular socket, @sk.
+* Must not sleep inside this hook because some callers hold spinlocks.
+* @sk contains the sock (not socket) associated with the incoming sk_buff.
+* @skb contains the incoming network data.
 */
-static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
+static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-  prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = inode_provenance(SOCK_INODE(sock));
-  prov_msg_t* nskprov = inode_provenance(SOCK_INODE(newsock));
-  record_relation(RL_CREATE, skprov, nskprov, FLOW_ALLOWED);
-  record_relation(RL_ACCEPT, nskprov, cprov, FLOW_ALLOWED);
-  return 0;
+	prov_msg_t* cprov  = sk->sk_provenance;
+	prov_msg_t* iprov;
+  prov_msg_t pckprov;
+	uint16_t family = sk->sk_family;
+
+	if(family!=PF_INET){ // we only handle IPv4 for now
+		return 0;
+	}
+
+	iprov = sk_inode_provenance(sk);
+	if(iprov==NULL){ // we could not get the provenance, we give up
+		return 0;
+	}
+	if(provenance_is_tracked(iprov)){
+    provenance_parse_skb_ipv4(skb, &pckprov);
+    record_pck_to_inode(&pckprov, iprov);
+		if(provenance_is_tracked(cprov)){
+			record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED);
+		}
+  }
+	return 0;
 }
 
 /*
@@ -1077,14 +1057,14 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					      struct sock *other,
 					      struct sock *newsk)
 {
-  prov_msg_t* cprov  = task_provenance();
-  prov_msg_t* skprov = sock->sk_provenance;
-  prov_msg_t* nskprov = newsk->sk_provenance;
-  prov_msg_t* okprov = other->sk_provenance;
+  /*prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* skprov = sk_provenance(sock);
+  prov_msg_t* nskprov = sk_provenance(newsk);
+  prov_msg_t* okprov = sk_provenance(other);
 
   record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
   record_relation(RL_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
-  record_relation(RL_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);
+  record_relation(RL_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);*/
   return 0;
 }
 
@@ -1098,10 +1078,10 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 					struct socket *other)
 {
-  prov_msg_t* skprov = sock->sk->sk_provenance;
-  prov_msg_t* okprov = other->sk->sk_provenance;
+  /*prov_msg_t* skprov = socket_inode_provenance(sock);
+  prov_msg_t* okprov = socket_inode_provenance(other);
 
-  record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);
+  record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);*/
   return 0;
 }
 
@@ -1279,14 +1259,15 @@ static struct security_hook_list provenance_hooks[] = {
 
 	/* socket related hooks */
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-  LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
+  //LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
   LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
   LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
   LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
   LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
+  LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
   LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
   LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
-  LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
+  LSM_HOOK_INIT(socket_sock_rcv_skb, provenance_socket_sock_rcv_skb),
   LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
   LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
 

@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2016 University of Cambridge
 *
@@ -17,6 +17,9 @@
 #include <linux/security.h>
 #include <linux/fs.h>
 
+#include <uapi/linux/provenance.h>
+#include <uapi/linux/ifc.h>
+
 // cause softlockup if both pointer directly added to inode
 // no time to figure out why, work around
 struct camflow_i_ptr{
@@ -25,11 +28,41 @@ struct camflow_i_ptr{
 };
 
 extern struct kmem_cache *camflow_cache;
-#define alloc_camflow(inode, gfp) if(!inode->i_camflow) inode->i_camflow = kmem_cache_zalloc(camflow_cache, gfp);
-#define inode_get_provenance(inode) ((prov_msg_t*)((struct camflow_i_ptr*)inode->i_camflow)->provenance)
-#define inode_set_provenance(inode, v) ((struct camflow_i_ptr*)inode->i_camflow)->provenance=v
-#define inode_get_ifc(inode) ((struct ifc_struct*)((struct camflow_i_ptr*)inode->i_camflow)->ifc)
-#define inode_set_ifc(inode, v) ((struct camflow_i_ptr*)inode->i_camflow)->ifc=v
+
+static inline void alloc_camflow(struct inode *inode, gfp_t priority){
+  if(!inode->i_camflow){ // if not already set
+    inode->i_camflow = kmem_cache_zalloc(camflow_cache, priority);
+  }
+}
+
+static inline prov_msg_t* inode_get_provenance(const struct inode *inode){
+  if(inode->i_camflow == NULL){
+    return NULL;
+  }
+  return ((prov_msg_t*)((struct camflow_i_ptr*)inode->i_camflow)->provenance);
+}
+
+static inline void inode_set_provenance(struct inode *inode, prov_msg_t *v){
+  if(inode->i_camflow == NULL){
+    return;
+  }
+  ((struct camflow_i_ptr*)inode->i_camflow)->provenance=v;
+}
+
+
+static inline struct ifc_struct* inode_get_ifc(const struct inode *inode){
+  if(inode->i_camflow == NULL){
+    return NULL;
+  }
+  return ((struct ifc_struct*)((struct camflow_i_ptr*)inode->i_camflow)->ifc);
+}
+
+static inline void inode_set_ifc(struct inode *inode, struct ifc_struct *v){
+  if(inode->i_camflow == NULL){
+    return;
+  }
+  ((struct camflow_i_ptr*)inode->i_camflow)->ifc=v;
+}
 
 // free only if both ptr have been freed
 static inline void free_camflow(struct inode *inode){
@@ -47,6 +80,4 @@ int provenance_inode_init_security(struct inode *inode, struct inode *dir,
 				       const struct qstr *qstr,
 				       const char **name,
 				       void **value, size_t *len);
-
-
 #endif
