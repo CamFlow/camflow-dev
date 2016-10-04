@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2016 University of Cambridge
 *
@@ -150,7 +150,7 @@ int __init ifc_bridge_init(void)
     printk(KERN_ERR "IFC: Cannot create bridge netlink socket.");
     return -ENOMEM;
   }
-  printk(KERN_INFO "IFC: bridge ready.");
+  printk(KERN_INFO "IFC bridge ready.");
   return 0;
 }
 

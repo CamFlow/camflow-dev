@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2016 University of Cambridge
 *
@@ -18,7 +18,7 @@
 
 #define CAMFLOW_VERSION_MAJOR     0
 #define CAMFLOW_VERSION_MINOR     1
-#define CAMFLOW_VERSION_PATCH     6
+#define CAMFLOW_VERSION_PATCH     7
 #define CAMFLOW_VERSION_STR       "v"xstr(CAMFLOW_VERSION_MAJOR)"."xstr(CAMFLOW_VERSION_MINOR)"."xstr(CAMFLOW_VERSION_PATCH)
 
 

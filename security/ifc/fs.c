@@ -1,6 +1,6 @@
 /*
 *
-* Author: Thomas Pasquier <tfjmp2@cam.ac.uk>
+* Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
 *
 * Copyright (C) 2015 University of Cambridge
 *
@@ -557,6 +557,7 @@ static int __init init_ifc_fs(void)
   printk(KERN_INFO "IFC: activivating provenance capture.");
   prov_enabled = true;
 #endif
+  printk(KERN_INFO "IFC fs ready.\n");
   return 0;
 }
 
