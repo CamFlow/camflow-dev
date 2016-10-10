@@ -219,42 +219,50 @@ declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	struct prov_self_config *msg;
+	struct prov_self_config msg;
   prov_msg_t* prov = current_provenance();
+	prov_msg_t* setting;
+	uint8_t op;
 
   if(count < sizeof(struct prov_self_config)){
     printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
+	if( copy_from_user(&msg, buf, sizeof(struct prov_self_config)) ){
+		return -ENOMEM;
+	}
 
-  msg = (struct prov_self_config*)buf;
+	setting = &(msg.prov);
+	op = msg.op;
 
-	if(((msg->op) & PROV_SET_TRACKED)!=0){
-		if(provenance_is_tracked(&(msg->prov))){
+	if( (op & PROV_SET_TRACKED)!=0 ){
+		if( provenance_is_tracked(setting) ){
+			printk(KERN_INFO "Provenance: tracked\n");
 			set_tracked(prov);
 		}else{
+			printk(KERN_INFO "Provenance: untracked\n");
 			clear_tracked(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_OPAQUE)!=0){
-		if(provenance_is_opaque(&(msg->prov))){
+	if( (op & PROV_SET_OPAQUE)!=0 ){
+		if( provenance_is_opaque(setting) ){
 			set_opaque(prov);
 		}else{
 			clear_opaque(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
-		if(provenance_propagate(&(msg->prov))){
+	if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( provenance_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_TAINT)!=0){
-		prov_bloom_merge(prov_taint(prov), prov_taint(&(msg->prov)));
+	if( (op & PROV_SET_TAINT)!=0 ){
+		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
 
   return sizeof(struct prov_self_config);

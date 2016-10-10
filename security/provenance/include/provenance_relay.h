@@ -15,6 +15,7 @@
 
 #include <linux/relay.h>
 #include <linux/spinlock.h>
+#include <linux/jiffies.h>
 
 #include "provenance_filter.h"
 
@@ -29,6 +30,7 @@ static inline void prov_write(prov_msg_t* msg)
   {
     // TODO deal with record before relay is ready
   }else{
+    prov_jiffies(msg) = get_jiffies_64();
     relay_write(prov_chan, msg, sizeof(prov_msg_t));
   }
   spin_unlock_irqrestore(&prov_chan_lock, flags);
@@ -44,6 +46,7 @@ static inline void long_prov_write(long_prov_msg_t* msg){
   {
     // TODO deal with record before relay is ready
   }else{
+    prov_jiffies(msg) = get_jiffies_64();
     relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
   }
   spin_unlock_irqrestore(&long_prov_chan_lock, flags);
