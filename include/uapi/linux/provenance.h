@@ -160,6 +160,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define packet_identifier(packet) ((packet)->pck_info.identifier.packet_id)
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
+#define prov_jiffies(prov) ((prov)->msg_info.jiffies)
 
 struct node_identifier{
   uint32_t type;
@@ -225,7 +226,7 @@ typedef union prov_identifier{
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
 #define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
 
-#define basic_elements prov_identifier_t identifier; uint8_t taint[PROV_N_BYTES]; uint8_t flag
+#define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct{
   basic_elements;
