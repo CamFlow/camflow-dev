@@ -15,7 +15,7 @@ Do not hesitate to fork the repository or to report bugs.
 make prepare
 make config # select relevant modules in security
 make compile # patience, sudo password will be asked during compilation
-make install # patience, sudo password will be asked during instalation
+make install # patience, sudo password will be asked during installation
  ```
 
 ## Version
