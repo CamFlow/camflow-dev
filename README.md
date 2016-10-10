@@ -35,7 +35,8 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.8
 
 ```
--
+- Record jiffies for every events (nodes, relationships).
+- Update to kernel version 4.4.24.
 ```
 
 ### v0.1.7
