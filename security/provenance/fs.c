@@ -367,6 +367,8 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	struct prov_file_config *msg;
   struct inode* in;
   prov_msg_t* prov;
+	prov_msg_t* setting;
+	uint8_t op;
 
   if(__kuid_val(current_euid())!=0)
     return -EPERM;
@@ -383,34 +385,36 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
     printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
     return -EINVAL;
   }
+	op = msg->op;
+	setting = &msg->prov;
   prov = inode_get_provenance(in);
 
-	if(((msg->op) & PROV_SET_TRACKED)!=0){
-		if(provenance_is_tracked(&(msg->prov))){
+	if( (op & PROV_SET_TRACKED)!=0 ){
+		if( provenance_is_tracked(setting) ){
 			set_tracked(prov);
 		}else{
 			clear_tracked(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_OPAQUE)!=0){
-		if(provenance_is_opaque(&(msg->prov))){
+	if( (op & PROV_SET_OPAQUE)!=0 ){
+		if( provenance_is_opaque(setting) ){
 			set_opaque(prov);
 		}else{
 			clear_opaque(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
-		if(provenance_propagate(&(msg->prov))){
+	if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( provenance_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_TAINT)!=0){
-		prov_bloom_merge(prov_taint(prov), prov_taint(&(msg->prov)));
+	if( (op & PROV_SET_TAINT)!=0 ){
+		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
 
   return sizeof(struct prov_file_config);
