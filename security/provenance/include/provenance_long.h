@@ -59,7 +59,7 @@ static inline void __long_record_relation(uint32_t type, long_prov_msg_t* from, 
   __long_record_node(from);
   __record_node(to);
   memset(&relation, 0, sizeof(prov_msg_t));
-  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed);
+  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
 }
 
 #ifdef CONFIG_SECURITY_IFC

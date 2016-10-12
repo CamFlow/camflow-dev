@@ -25,6 +25,7 @@
 #include <uapi/linux/camflow.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/stat.h>
+#include <linux/fs.h>
 
 #include "camflow_utils.h"
 #include "provenance_filter.h"
@@ -91,7 +92,8 @@ static inline void __record_relation(uint32_t type,
                                       prov_identifier_t* from,
                                       prov_identifier_t* to,
                                       prov_msg_t* relation,
-                                      uint8_t allowed){
+                                      uint8_t allowed,
+                                      struct file *file){
   prov_type(relation)=MSG_RELATION;
   relation_identifier(relation).id = prov_next_relation_id();
   relation_identifier(relation).boot_id = prov_boot_id;
@@ -100,6 +102,12 @@ static inline void __record_relation(uint32_t type,
   relation->relation_info.allowed=allowed;
   copy_node_info(&relation->relation_info.snd, from);
   copy_node_info(&relation->relation_info.rcv, to);
+  if(file!=NULL){
+    relation->relation_info.set = FILE_INFO_SET;
+    mutex_lock(&(file->f_pos_lock));
+  	relation->relation_info.offset = file->f_pos;
+  	mutex_unlock(&(file->f_pos_lock));
+  }
   prov_write(relation);
 }
 
@@ -115,9 +123,9 @@ static inline void __update_version(uint32_t type, prov_msg_t* prov){
   node_identifier(prov).version++;
   clear_recorded(prov);
   if(node_identifier(prov).type == MSG_TASK){
-    __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED);
+    __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   }else{
-    __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED);
+    __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   }
 
 out:
@@ -153,7 +161,8 @@ out:
 static inline void record_relation(uint32_t type,
                                     prov_msg_t* from,
                                     prov_msg_t* to,
-                                    uint8_t allowed){
+                                    uint8_t allowed,
+                                    struct file *file){
   prov_msg_t relation;
 
   if( unlikely(from==NULL || to==NULL) ){ // should not occur
@@ -178,7 +187,7 @@ static inline void record_relation(uint32_t type,
   __propagate(type, from, to, &relation, allowed);
   __update_version(type, to);
   __record_node(to);
-  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed);
+  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, file);
 out:
   return;
 }
@@ -207,7 +216,7 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   prov_write(pck);
   __update_version(RL_RCV, inode);
   __record_node(inode);
-  __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED);
+  __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 out:
   return;
 }
@@ -234,7 +243,7 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(inode);
   prov_write(pck);
-  __record_relation(RL_SND, &(inode->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED);
+  __record_relation(RL_SND, &(inode->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 out:
   return;
 }
