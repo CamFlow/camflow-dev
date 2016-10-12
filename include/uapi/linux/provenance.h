@@ -232,12 +232,16 @@ struct msg_struct{
   basic_elements;
 };
 
+#define FILE_INFO_SET 0x01
+
 struct relation_struct{
   basic_elements;
   uint32_t type;
   uint8_t allowed;
   prov_identifier_t snd;
   prov_identifier_t rcv;
+  uint8_t set;
+  int64_t offset;
 };
 
 struct node_struct{
