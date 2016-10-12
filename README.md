@@ -121,7 +121,7 @@ make install # patience, sudo password will be asked during installation
 
 ## Plan
 
-### 0.1.8
+### 0.1.9
 
 * look at some form of automated testing.
 * support for Raspberry Pi / ARM
