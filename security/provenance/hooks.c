@@ -323,148 +323,6 @@ static void provenance_inode_free_security(struct inode *inode)
 }
 
 /*
-* Obtain the security attribute name suffix and value to set on a newly
-* created inode and set up the incore security field for the new inode.
-* This hook is called by the fs code as part of the inode creation
-* transaction and provides for atomic labeling of the inode, unlike
-* the post_create/mkdir/... hooks called by the VFS.  The hook function
-* is expected to allocate the name and value via kmalloc, with the caller
-* being responsible for calling kfree after using them.
-* If the security module does not use security attributes or does
-* not wish to put a security attribute on this particular inode,
-* then it should return -EOPNOTSUPP to skip this processing.
-* @inode contains the inode structure of the newly created inode.
-* @dir contains the inode structure of the parent directory.
-* @qstr contains the last path component of the new object
-* @name will be set to the allocated name suffix (e.g. selinux).
-* @value will be set to the allocated attribute value.
-* @len will be set to the length of the value.
-* Returns 0 if @name and @value have been successfully set,
-* -EOPNOTSUPP if no security attribute is needed, or
-* -ENOMEM on memory allocation failure.
-*/
-/* TODO as far as I can tell the security xattr don't stack, we had to modify
-security.c instead, need to follow kernel update */
-int provenance_inode_init_security(struct inode *inode, struct inode *dir,
-				       const struct qstr *qstr,
-				       const char **name,
-				       void **value, size_t *len)
-{
-	prov_msg_t *iprov, *val;
-
-	if (name){
-		*name = XATTR_PROVENANCE_SUFFIX;
-	}
-
-	if (value && len) {
-		iprov = inode_provenance(inode);
-		if(!iprov){ // alloc provenance if none there
-	    return -ENOMEM;
-	  }
-		val = (prov_msg_t*)kzalloc(sizeof(prov_msg_t), GFP_NOFS);
-		if (!val){
-			return -ENOMEM;
-		}
-		memcpy(val, iprov, sizeof(prov_msg_t));
-		*value=val;
-		*len=sizeof(prov_msg_t);
-	}
-
-	return 0;
-}
-EXPORT_SYMBOL(provenance_inode_init_security);
-
-/*
-* Retrieve a copy of the extended attribute representation of the
-* security label associated with @name for @inode via @buffer.  Note that
-* @name is the remainder of the attribute name after the security prefix
-* has been removed. @alloc is used to specify of the call should return a
-* value via the buffer or just the value length Return size of buffer on
-* success.
-*/
-static int provenance_inode_getsecurity(const struct inode *inode, const char *name, void **buffer, bool alloc)
-{
-	prov_msg_t *iprov, *val;
-
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX)){
-		return -EOPNOTSUPP;
-	}
-	if(!alloc){ // we just return the length
-		return sizeof(prov_msg_t);
-	}
-
-	iprov = inode_get_provenance(inode);
-	if(!iprov){ // alloc provenance if none there
-		return -ENOMEM; // TODO check most appropriate error
-	}
-	val = (prov_msg_t*)kzalloc(sizeof(prov_msg_t), GFP_NOFS);
-	if (!val){
-		return -ENOMEM;
-	}
-	memcpy(val, iprov, sizeof(prov_msg_t));
-	*buffer=val;
-	return sizeof(prov_msg_t);
-}
-
-/*
-* Set the security label associated with @name for @inode from the
-* extended attribute value @value.  @size indicates the size of the
-* @value in bytes.  @flags may be XATTR_CREATE, XATTR_REPLACE, or 0.
-* Note that @name is the remainder of the attribute name after the
-* security. prefix has been removed.
-* Return 0 on success.
-*/
-static int provenance_inode_setsecurity(struct inode *inode, const char *name,
-				     const void *value, size_t size, int flags)
-{
-	prov_msg_t *iprov = inode_get_provenance(inode);
-
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX)){
-		return -EOPNOTSUPP;
-	}
-
-	if (!value || !size){
-		return -EACCES;
-	}
-
-	if( size < sizeof(prov_msg_t) ){
-		return -ENOMEM;
-	}
-
-	memcpy(iprov, value, sizeof(prov_msg_t));
-
-	return 0;
-}
-
-
-/*
-* Copy the extended attribute names for the security labels
-* associated with @inode into @buffer.  The maximum size of @buffer
-* is specified by @buffer_size.  @buffer may be NULL to request
-* the size of the buffer required.
-* Returns number of bytes used/required on success.
-*/
-#define XATTR_NAME_PROVENANCE_LEN (sizeof(XATTR_NAME_PROVENANCE))
-/* The list is the set of (null-terminated) names, one after the other. */
-/* code inspired from http://lxr.free-electrons.com/source/net/socket.c?v=4.4#L491 */
-static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t size)
-{
-	size_t len=XATTR_NAME_PROVENANCE_LEN;
-
-	if(buffer==NULL){
-		return len;
-	}
-
-	if( size < len ){ // no space for one more element
-		return -ERANGE;
-	}
-	if(buffer){
-		memcpy(buffer, XATTR_NAME_PROVENANCE, XATTR_NAME_PROVENANCE_LEN);
- 	}
-	return len;
-}
-
-/*
 * Check permission to create a regular file.
 * @dir contains inode structure of the parent of the new file.
 * @dentry contains the dentry structure for the file to be created.
@@ -901,15 +759,6 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 }
 
 /*
-* Deallocate security structure.
-*/
-/*static void provenance_sk_free_security(struct sock *sk)
-{
-	free_provenance(sk->sk_provenance);
-	sk->sk_provenance = NULL;
-}*/
-
-/*
 * This hook allows a module to update or allocate a per-socket security
 * structure. Note that the security field was not added directly to the
 * socket structure, but rather, the socket security information is stored
@@ -1209,37 +1058,6 @@ static void provenance_sb_free_security(struct super_block *sb)
   sb->s_provenance=NULL;
 }
 
-/*
-static void provenance_release_secctx(char *secdata, u32 seclen)
-{
-	kfree(secdata);
-}
-
-
-// called with inode->i_mutex locked
-static int provenance_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen)
-{
-	return provenance_inode_setsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, ctxlen, 0);
-}
-
-
-// called with inode->i_mutex locked
-static int provenance_inode_setsecctx(struct dentry *dentry, void *ctx, u32 ctxlen)
-{
-	return __vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, ctx, ctxlen, XATTR_CREATE);
-}
-
-static int provenance_inode_getsecctx(struct inode *inode, void **ctx, u32 *ctxlen)
-{
-	int len = 0;
-	len = provenance_inode_getsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, true);
-	if (len < 0)
-		return len;
-	*ctxlen = len;
-	return 0;
-}
-*/
-
 static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *data)
 {
   int i;
@@ -1269,14 +1087,6 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
   LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
   LSM_HOOK_INIT(inode_link, provenance_inode_link),
-	LSM_HOOK_INIT(inode_getsecurity, provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_setsecurity, provenance_inode_setsecurity),
-	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
-	/* secctx */
-	/*LSM_HOOK_INIT(release_secctx, provenance_release_secctx),
-	LSM_HOOK_INIT(inode_setsecctx, provenance_inode_setsecctx),
-	LSM_HOOK_INIT(inode_getsecctx, provenance_inode_getsecctx),
-	LSM_HOOK_INIT(inode_notifysecctx, provenance_inode_notifysecctx),*/
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
@@ -1297,7 +1107,6 @@ static struct security_hook_list provenance_hooks[] = {
 
 	/* socket related hooks */
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-  //LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
   LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
   LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
   LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
