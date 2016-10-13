@@ -243,10 +243,8 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
-			printk(KERN_INFO "Provenance: tracked\n");
 			set_tracked(prov);
 		}else{
-			printk(KERN_INFO "Provenance: untracked\n");
 			clear_tracked(prov);
 		}
 	}
@@ -387,7 +385,6 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
     return -EPERM;
 
   if(count < sizeof(struct prov_file_config)){
-    printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
 
@@ -442,7 +439,6 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 	int rtn=sizeof(struct prov_file_config);
 
   if(count < sizeof(struct prov_file_config)){
-    printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
 
@@ -455,7 +451,6 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 
   prov = inode_provenance(in);
   if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
-    printk(KERN_ERR "Provenance: error copying.");
     rtn = -ENOMEM;
 		goto out; // a bit superfluous, but would avoid error if code changes
   }

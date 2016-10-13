@@ -26,10 +26,12 @@
 
 static inline prov_msg_t* socket_inode_provenance(struct socket *sock){
   struct inode *inode = SOCK_INODE(sock);
+  prov_msg_t* iprov = __raw_inode_provenance(inode);
   if(inode==NULL){
     return NULL;
   }
-  return inode_get_provenance(inode);
+  lock_node(iprov);
+  return iprov;
 }
 
 static inline prov_msg_t* sk_inode_provenance(struct sock *sk){

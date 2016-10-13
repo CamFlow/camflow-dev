@@ -19,6 +19,8 @@
 #include "provenance_long.h" // for record_task_name
 #include "provenance_inode.h"
 
+#define current_pid() (current->pid)
+
 static inline prov_msg_t* task_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	lock_node(tprov);

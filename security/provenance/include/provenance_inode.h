@@ -16,6 +16,10 @@
 
 #include "provenance_long.h" // for record_inode_name
 
+#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
+#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
+#define is_inode_file(inode) S_ISREG(inode->i_mode)
+
 static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
   uint32_t type = MSG_INODE_UNKNOWN;
   iprov->inode_info.mode=inode->i_mode;
@@ -46,7 +50,7 @@ static inline void provenance_mark_as_opaque(const char* name){
   if(!in){
     printk(KERN_ERR "Provenance: could not find %s file.", name);
   }else{
-    prov = inode_get_provenance(in);
+    prov = __raw_inode_provenance(in);
     if(prov){
       set_opaque(prov);
     }
@@ -54,13 +58,15 @@ static inline void provenance_mark_as_opaque(const char* name){
 }
 
 static inline prov_msg_t* inode_provenance(struct inode* inode){
-	prov_msg_t* iprov = inode_get_provenance(inode);
+	prov_msg_t* iprov = __raw_inode_provenance(inode);
   if(unlikely(iprov==NULL)){
     return NULL;
   }
   lock_node(iprov);
 	prov_copy_inode_mode(iprov, inode);
-	record_inode_name(inode, iprov);
+  if(is_inode_dir(inode) || is_inode_file(inode)){
+	   record_inode_name(inode, iprov);
+   }
 	return iprov;
 }
 #endif

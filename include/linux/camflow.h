@@ -35,7 +35,7 @@ static inline void alloc_camflow(struct inode *inode, gfp_t priority){
   }
 }
 
-static inline prov_msg_t* inode_get_provenance(const struct inode *inode){
+static inline prov_msg_t* __raw_inode_provenance(const struct inode *inode){
   if(inode->i_camflow == NULL){
     return NULL;
   }

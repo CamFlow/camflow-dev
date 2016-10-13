@@ -199,7 +199,7 @@ static int ifc_inode_permission(struct inode *inode, int mask)
   }
 
 #ifdef CONFIG_SECURITY_PROVENANCE
-  i_prov=inode_get_provenance(inode);
+  i_prov=__raw_inode_provenance(inode);
   p_prov=current_provenance();
   if(ifc_is_labelled(&cifc->context)){
     set_tracked(p_prov);
@@ -377,7 +377,7 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
   iifc = inode_get_ifc(inode);
 
 #ifdef CONFIG_SECURITY_PROVENANCE
-  iprov = inode_get_provenance(inode);
+  iprov = __raw_inode_provenance(inode);
 #endif
 
   prot &= (PROT_READ|PROT_WRITE);

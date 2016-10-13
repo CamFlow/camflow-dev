@@ -475,7 +475,7 @@ static ssize_t ifc_write_file(struct file *file, const char __user *buf,
 
 #ifdef CONFIG_SECURITY_PROVENANCE
   // mark as tracked depending of the label state
-  prov = inode_get_provenance(in);
+  prov = __raw_inode_provenance(in);
   prov_update_version(prov);
   prov_record_ifc(prov, &ifc->context);
   if(ifc_is_labelled(&ifc->context)){
