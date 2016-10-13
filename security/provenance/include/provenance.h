@@ -53,6 +53,12 @@ static inline struct prov_msg_t* prov_from_pid(pid_t pid){
 #define unlock_node(n) mutex_unlock(get_mutex(n))
 #define init_mutex_node(n) mutex_init(get_mutex(n))
 
+static inline void put_prov(prov_msg_t* n){
+  if(likely(n!=NULL)){
+    unlock_node(n);
+  }
+}
+
 static inline prov_msg_t* alloc_provenance(uint32_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
