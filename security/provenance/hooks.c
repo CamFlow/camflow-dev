@@ -910,7 +910,7 @@ out:
 */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-	prov_msg_t* cprov  = sk->sk_provenance;
+	prov_msg_t* cprov = sk_provenance(sk);
 	prov_msg_t* iprov;
   prov_msg_t pckprov;
 	uint16_t family = sk->sk_family;
@@ -933,6 +933,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
   }
 out:
 	put_prov(iprov);
+	put_prov(cprov);
 	return rtn;
 }
 
@@ -991,18 +992,22 @@ static int provenance_unix_may_send(struct socket *sock,
 * Return 0 if the hook is successful and permission is granted.
 */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm){
+	prov_msg_t* nprov = bprm_provenance(bprm);
 	struct inode *inode = file_inode(bprm->file);
 	prov_msg_t* iprov = inode_provenance(inode);
-	prov_msg_t* nprov;
+	int rtn=0;
 
-  if(!bprm->cred->provenance){
-		provenance_cred_alloc_blank(bprm->cred, GFP_KERNEL);
+  if(!nprov){
+		rtn = -ENOMEM;
+		goto out;
   }
-	nprov = bprm->cred->provenance;
+
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 
+out:
 	put_prov(iprov);
-  return 0;
+	put_prov(nprov);
+  return rtn;
 }
 
 /*
@@ -1015,32 +1020,16 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
 	prov_msg_t* cprov  = task_provenance();
-	prov_msg_t* nprov = bprm->cred->provenance;
+	prov_msg_t* nprov = bprm_provenance(bprm);
 	struct inode *inode = file_inode(bprm->file);
 	prov_msg_t* iprov = inode_provenance(inode);
 
 	record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED, NULL);
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 	put_prov(iprov);
+	put_prov(nprov);
 	put_prov(cprov);
  }
-
-/*
-* Tidy up after the installation of the new security attributes of a
-* process being transformed by an execve operation.  The new credentials
-* have, by this point, been set to @current->cred.  @bprm points to the
-* linux_binprm structure.  This hook is a good place to perform state
-* changes on the process such as clearing out non-inheritable signal
-* state.  This is called immediately after commit_creds().
-*/
-static void provenance_bprm_committed_creds(struct linux_binprm *bprm)
-{
-	/*
-	* this will be called after setupnewexec (which among other things set comm).
-	* As far security modules are concerned exec is finished. We can look at comm
-	* to get the process "name".
-	*/
-}
 
 /*
 * Allocate and attach a security structure to the sb->s_security field.
@@ -1131,7 +1120,6 @@ static struct security_hook_list provenance_hooks[] = {
 	/* exec related hooks */
   LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
   LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
-	LSM_HOOK_INIT(bprm_committed_creds, provenance_bprm_committed_creds),
 
 	/* file system related hooks */
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
