@@ -17,26 +17,29 @@
 
 #include "provenance.h"
 #include "provenance_net.h"
+#include "provenance_task.h"
 
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
-  prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov;
+  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* iprov = NULL;
   prov_msg_t pckprov;
 
   if(cprov==NULL){  // we could not get the provenance, we give up
-    return NF_ACCEPT;
+    goto out;
   }
 
   if(provenance_is_tracked(cprov)){
     iprov = sk_inode_provenance(skb->sk);
     if(iprov==NULL){  // we could not get the provenance, we give up
-      return NF_ACCEPT;
+      goto out;
     }
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_inode_to_pck(iprov, &pckprov);
-    put_prov(iprov);
   }
+out:
+  put_prov(iprov);
+  put_prov(cprov);
   return NF_ACCEPT;
 }
 
