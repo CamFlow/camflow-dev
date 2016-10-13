@@ -30,7 +30,6 @@ static inline prov_msg_t* socket_inode_provenance(struct socket *sock){
   if(inode==NULL){
     return NULL;
   }
-  lock_node(iprov);
   return iprov;
 }
 
@@ -44,7 +43,6 @@ static inline prov_msg_t* sk_inode_provenance(struct sock *sk){
 
 static inline prov_msg_t* sk_provenance(struct sock *sk){
   prov_msg_t* prov = sk->sk_provenance;
-  lock_node(prov);
   return prov;
 }
 

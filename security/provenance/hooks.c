@@ -723,7 +723,6 @@ static int provenance_socket_post_create(struct socket *sock, int family,
   record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
 	put_prov(cprov);
   return 0;
 }
@@ -756,7 +755,6 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
 	put_prov(cprov);
   return rtn;
 }
@@ -788,7 +786,6 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
 	put_prov(cprov);
   return 0;
 }
@@ -812,7 +809,6 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
   record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
 	put_prov(cprov);
   return 0;
 }
@@ -834,8 +830,6 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
   record_relation(RL_CREATE, iprov, niprov, FLOW_ALLOWED, NULL);
   record_relation(RL_ACCEPT, niprov, cprov, FLOW_ALLOWED, NULL);
 
-	put_prov(niprov);
-	put_prov(iprov);
 	put_prov(cprov);
   return 0;
 }
@@ -862,7 +856,6 @@ static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 	record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
 	put_prov(cprov);
 	return rtn;
 }
@@ -890,7 +883,6 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 	record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
 	put_prov(cprov);
 	return rtn;
 }
@@ -911,6 +903,10 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	uint16_t family = sk->sk_family;
 	int rtn=0;
 
+	if(cprov==NULL){
+		goto out;
+	}
+
 	if(family!=PF_INET){ // we only handle IPv4 for now
 		goto out;
 	}
@@ -927,8 +923,6 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		}
   }
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return rtn;
 }
 
