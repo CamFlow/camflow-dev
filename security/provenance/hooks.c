@@ -31,11 +31,6 @@
 struct kmem_cache *provenance_cache=NULL;
 struct kmem_cache *long_provenance_cache=NULL;
 
-#define current_pid() (current->pid)
-#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
-#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
-#define is_inode_file(inode) S_ISREG(inode->i_mode)
-
 /*
  * initialise the security for the init task
  */
@@ -195,7 +190,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 */
 static void provenance_inode_free_security(struct inode *inode)
 {
-  prov_msg_t* prov = inode_get_provenance(inode);
+  prov_msg_t* prov = __raw_inode_provenance(inode);
   if(!prov){
     free_provenance(prov);
 	}
