@@ -14,6 +14,7 @@
 #define CONFIG_SECURITY_PROVENANCE_TASK
 
 #include <linux/cred.h>
+#include <linux/binfmts.h>
 
 #include "provenance_long.h" // for record_task_name
 #include "provenance_inode.h"
@@ -25,6 +26,12 @@ static inline prov_msg_t* task_provenance( void ){
 		record_task_name(current, tprov);
 	}
 	return tprov;
+}
+
+static inline prov_msg_t* bprm_provenance( struct linux_binprm *bprm ){
+	prov_msg_t* prov = bprm->cred->provenance;
+	lock_node(prov);
+	return prov;
 }
 
 static inline void task_config_from_file(struct task_struct *task){
