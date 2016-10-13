@@ -249,7 +249,7 @@ union provmutex{
 #ifdef __KERNEL__
   struct mutex l;
 #endif
-  uint8_t placeholder[50];
+  uint8_t placeholder[70];
 };
 
 struct node_struct{
