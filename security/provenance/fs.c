@@ -387,7 +387,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
   }
 	op = msg->op;
 	setting = &msg->prov;
-  prov = inode_get_provenance(in);
+  prov = inode_provenance(in);
 
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
@@ -416,7 +416,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	if( (op & PROV_SET_TAINT)!=0 ){
 		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
-
+	put_prov(prov);
   return sizeof(struct prov_file_config);
 }
 
@@ -426,6 +426,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
   struct prov_file_config *msg;
   struct inode* in;
   prov_msg_t* prov;
+	int rtn=sizeof(struct prov_file_config);
 
   if(count < sizeof(struct prov_file_config)){
     printk(KERN_ERR "Provenance: Too short.");
@@ -439,13 +440,15 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
     return -EINVAL;
   }
 
-  prov = inode_get_provenance(in);
+  prov = inode_provenance(in);
   if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
     printk(KERN_ERR "Provenance: error copying.");
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out; // a bit superfluous, but would avoid error if code changes
   }
-
-  return sizeof(struct prov_file_config);
+out:
+	put_prov(prov);
+  return rtn;
 }
 
 declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);

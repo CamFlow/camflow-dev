@@ -55,6 +55,10 @@ static inline void provenance_mark_as_opaque(const char* name){
 
 static inline prov_msg_t* inode_provenance(struct inode* inode){
 	prov_msg_t* iprov = inode_get_provenance(inode);
+  if(unlikely(iprov==NULL)){
+    return NULL;
+  }
+  lock_node(iprov);
 	prov_copy_inode_mode(iprov, inode);
 	record_inode_name(inode, iprov);
 	return iprov;
