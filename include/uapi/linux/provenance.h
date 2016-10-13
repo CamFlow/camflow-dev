@@ -20,6 +20,7 @@
 #include <linux/socket.h>
 #include <uapi/linux/ifc.h>
 #include <uapi/linux/limits.h>
+#include <linux/mutex.h>
 #endif
 
 #define GOLDEN_RATIO_64 0x61C8864680B583EBull
@@ -244,18 +245,28 @@ struct relation_struct{
   int64_t offset;
 };
 
+union provmutex{
+#ifdef __KERNEL__
+  struct mutex l;
+#endif
+  uint8_t placeholder[50];
+};
+
 struct node_struct{
   basic_elements;
+  union provmutex lprov;
 };
 
 struct task_prov_struct{
   basic_elements;
+  union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
   basic_elements;
+  union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
@@ -264,16 +275,19 @@ struct inode_prov_struct{
 
 struct msg_msg_struct{
   basic_elements;
+  union provmutex lprov;
   long type;
 };
 
 struct shm_struct{
   basic_elements;
+  union provmutex lprov;
   uint16_t mode;
 };
 
 struct sock_struct{
   basic_elements;
+  union provmutex lprov;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
@@ -281,11 +295,13 @@ struct sock_struct{
 
 struct sb_struct{
   basic_elements;
+  union provmutex lprov;
   uint8_t uuid[16];
 };
 
 struct pck_struct{
   basic_elements;
+  union provmutex lprov;
   uint16_t length;
 };
 
