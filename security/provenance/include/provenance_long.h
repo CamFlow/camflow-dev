@@ -83,7 +83,7 @@ static inline int prov_print(const char *fmt, ...)
 static inline void __record_node_name(prov_msg_t* node, char* name){
 	long_prov_msg_t* fname_prov;
 
-  fname_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+  fname_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
   __init_long_provenance(MSG_FILE_NAME, fname_prov);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
@@ -176,7 +176,7 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
     return;
   }
 
-  addr_info = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+  addr_info = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
   __init_long_provenance(MSG_ADDR, addr_info);
   addr_info->address_info.length=addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
