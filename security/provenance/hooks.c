@@ -28,9 +28,6 @@
 #include "provenance_long.h"
 #include "ifc.h"
 
-struct kmem_cache *provenance_cache=NULL;
-struct kmem_cache *long_provenance_cache=NULL;
-
 /*
  * initialise the security for the init task
  */
@@ -1120,16 +1117,14 @@ static struct security_hook_list provenance_hooks[] = {
 struct kmem_cache *camflow_cache=NULL;
 #endif
 
-uint32_t prov_machine_id=1; /* TODO get a proper id somehow, now set from userspace */
+struct kmem_cache *provenance_cache=NULL;
+
+uint32_t prov_machine_id=1; /* TODO get a proper id somehow, for now set from userspace */
 uint32_t prov_boot_id=0;
 void __init provenance_add_hooks(void){
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
-					    0, SLAB_PANIC, NULL);
-
-  long_provenance_cache = kmem_cache_create("long_provenance_struct",
-					    sizeof(long_prov_msg_t),
 					    0, SLAB_PANIC, NULL);
 
 #ifndef CONFIG_SECURITY_IFC
