@@ -188,7 +188,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if(copy_to_user((void*)buf, node, sizeof(struct disc_node_struct))){
+	if(copy_to_user((void*)buf, &node, sizeof(struct disc_node_struct))){
 		count = -ENOMEM;
 		goto out;
 	}
