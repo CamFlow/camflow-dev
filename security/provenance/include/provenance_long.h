@@ -81,13 +81,14 @@ static inline int prov_print(const char *fmt, ...)
 }
 
 static inline void __record_node_name(prov_msg_t* node, char* name){
-	long_prov_msg_t fname_prov;
+	long_prov_msg_t* fname_prov;
 
-  memset(&fname_prov, 0, sizeof(long_prov_msg_t));
-  __init_long_provenance(MSG_FILE_NAME, &fname_prov);
-	strlcpy(fname_prov.file_name_info.name, name, PATH_MAX);
-	fname_prov.file_name_info.length=strlen(fname_prov.file_name_info.name);
-	__long_record_relation(RL_NAMED, &fname_prov, node, FLOW_ALLOWED);
+  fname_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+  __init_long_provenance(MSG_FILE_NAME, fname_prov);
+	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
+	__long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
+  kfree(fname_prov);
 	set_name_recorded(node);
 }
 
@@ -165,7 +166,7 @@ out:
 }
 
 static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr *address, int addrlen){
-	long_prov_msg_t addr_info;
+	long_prov_msg_t* addr_info;
 
   if( !provenance_is_recorded(skprov) ){
     return;
@@ -175,11 +176,12 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
     return;
   }
 
-  memset(&addr_info, 0, sizeof(long_prov_msg_t));
-  __init_long_provenance(MSG_ADDR, &addr_info);
-  addr_info.address_info.length=addrlen;
-  memcpy(&(addr_info.address_info.addr), address, addrlen);
-	__long_record_relation(RL_NAMED, &addr_info, skprov, FLOW_ALLOWED);
+  addr_info = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+  __init_long_provenance(MSG_ADDR, addr_info);
+  addr_info->address_info.length=addrlen;
+  memcpy(&(addr_info->address_info.addr), address, addrlen);
+	__long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
+  kfree(addr_info);
 	set_name_recorded(skprov);
 }
 
