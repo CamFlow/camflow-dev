@@ -120,6 +120,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define MSG_DISC_AGENT        0x00100000UL
 #define MSG_DISC_NODE         0x00200000UL
 #define MSG_PACKET            0x00400000UL
+#define MSG_INODE_MMAP        0x00800000UL
 
 #define RL_READ               0x00000001UL
 #define RL_WRITE              0x00000002UL

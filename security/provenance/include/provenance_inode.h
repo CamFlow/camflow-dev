@@ -90,7 +90,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
     return NULL;
   }
 
-  prov = alloc_provenance(MSG_INODE_FILE, GFP_KERNEL);
+  prov = alloc_provenance(MSG_INODE_MMAP, GFP_KERNEL);
 
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->inode_info.uid = iprov->inode_info.uid;
