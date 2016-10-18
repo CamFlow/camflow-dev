@@ -185,4 +185,38 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
 	set_name_recorded(skprov);
 }
 
+static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //used for private MMAP
+  prov_msg_t* prov;
+  prov_msg_t relation;
+
+  if( unlikely(iprov==NULL || cprov==NULL) ){ // should not occur
+    return NULL;
+  }
+
+  if(!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all ){
+    return NULL;
+  }
+
+  if( filter_node(iprov) ){
+    return NULL;
+  }
+
+  if(filter_relation(RL_CREATE, FLOW_ALLOWED)) {
+    return NULL;
+  }
+
+  prov = alloc_provenance(MSG_INODE_FILE, GFP_KERNEL);
+
+  set_node_id(prov, ASSIGN_NODE_ID);
+  prov->inode_info.uid = iprov->inode_info.uid;
+  prov->inode_info.gid = iprov->inode_info.gid;
+  memcpy(prov->inode_info.sb_uuid, iprov->sb_info.uuid, 16*sizeof(uint8_t));
+  prov->inode_info.mode = iprov->inode_info.mode;
+  __record_node(iprov);
+  __propagate(RL_CREATE, iprov, prov, &relation, FLOW_ALLOWED);
+  __record_node(prov);
+  __record_relation(RL_CREATE, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+  return prov;
+}
+
 #endif
