@@ -95,7 +95,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->inode_info.uid = iprov->inode_info.uid;
   prov->inode_info.gid = iprov->inode_info.gid;
-  memcpy(prov->inode_info.sb_uuid, iprov->inode_info.uuid, 16*sizeof(uint8_t));
+  memcpy(prov->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16*sizeof(uint8_t));
   prov->inode_info.mode = iprov->inode_info.mode;
   __record_node(iprov);
   __propagate(RL_CREATE, iprov, prov, &relation, FLOW_ALLOWED);
