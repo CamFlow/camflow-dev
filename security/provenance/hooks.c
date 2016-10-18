@@ -255,30 +255,30 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
 		if((perms & (DIR__WRITE)) != 0){
-	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	  }
 	  if((perms & (DIR__READ)) != 0){
-	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 		if((perms & (DIR__SEARCH)) != 0){
-	    record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 	}else if(is_inode_socket(inode)){
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-	    record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	  }
 	  if((perms & (FILE__READ)) != 0){
-	    record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 	}else{
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	  }
 	  if((perms & (FILE__READ)) != 0){
-	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 		if((perms & (FILE__EXECUTE)) != 0){
-	    record_relation(RL_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
+	    record_relation(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 	}
 
