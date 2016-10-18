@@ -35,6 +35,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.8
 
 ```
+- Refine relation types in inode permission hooks.
 - Deal with concurrency issues.
 - Recording offset information.
 - Record jiffies for every events (nodes, relationships).
