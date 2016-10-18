@@ -433,6 +433,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 {
   prov_msg_t* cprov = task_provenance();
   prov_msg_t* iprov = NULL;
+	prov_msg_t* bprov = NULL;
   struct inode *inode;
 	int rtn=0;
 
@@ -443,17 +444,34 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 
   inode = file_inode(file);
   iprov = inode_provenance(inode);
+	if( (flags & (MAP_SHARED) ) !=  0){
+	  if((prot & (PROT_WRITE)) != 0){
+	    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
+	  }
+	  if((prot & (PROT_READ)) != 0){
+	    record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
+	  }
 
-  if((prot & (PROT_WRITE)) != 0){
-    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
-  }
-  if((prot & (PROT_READ)) != 0){
-    record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, NULL);
-  }
+		if((prot & (PROT_EXEC)) != 0){
+	    record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+	  }
+	}else{
+		bprov = branch_mmap(iprov, cprov);
+		if(bprov==NULL){
+			goto out;
+		}
+		if((prot & (PROT_WRITE)) != 0){
+	    record_relation(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
+	  }
+	  if((prot & (PROT_READ)) != 0){
+	    record_relation(RL_MMAP_READ, bprov, cprov, FLOW_ALLOWED, file);
+	  }
 
-	if((prot & (PROT_EXEC)) != 0){
-    record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
-  }
+		if((prot & (PROT_EXEC)) != 0){
+	    record_relation(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
+	  }
+		free_provenance(bprov);
+	}
 
 out:
 	put_prov(iprov);
