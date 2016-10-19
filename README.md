@@ -124,12 +124,12 @@ make install # patience, sudo password will be asked during installation
 
 ## Plan
 
-### 0.1.9
+### 0.1.X
 
 * look at some form of automated testing.
 * support for Raspberry Pi / ARM
 
-### 0.2.0
+### 0.2.X
 
 * Clean-up code.
 * IFC tags and provenance data persistence across reboot.
