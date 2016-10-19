@@ -24,52 +24,9 @@
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_inode.h"
+#include "provenance_task.h"
 #include "provenance_long.h"
 #include "ifc.h"
-
-struct kmem_cache *provenance_cache=NULL;
-struct kmem_cache *long_provenance_cache=NULL;
-
-#define current_pid() (current->pid)
-#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
-#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
-
-static inline void task_config_from_file(struct task_struct *task){
-	const struct cred *cred = get_task_cred(task);
-	struct mm_struct *mm;
- 	struct file *exe_file;
-	struct inode *inode;
-	prov_msg_t* tprov;
-	prov_msg_t* iprov;
-
-	if(!cred)
-		return;
-
-	tprov = cred->provenance;
-
-	mm = get_task_mm(task);
-	if (!mm)
- 		goto finished;
-	exe_file = get_mm_exe_file(mm);
-	mmput(mm);
-
-	if(exe_file){
-		inode = file_inode(exe_file);
-		iprov = inode_provenance(inode);
-		if(provenance_is_tracked(iprov)){
-			set_tracked(tprov);
-		}
-		if(provenance_is_opaque(iprov)){
-			set_opaque(tprov);
-		}
-		if(provenance_propagate(iprov)){
-			set_propagate(tprov);
-		}
-	}
-
-finished:
-	put_cred(cred);
-}
 
 /*
  * initialise the security for the init task
@@ -85,89 +42,6 @@ static void cred_init_provenance(void)
   prov->task_info.gid=__kgid_val(cred->egid);
 	set_opaque(prov);
 	cred->provenance = prov;
-}
-
-/* inodes security attribute must be inilitialised before first use */
-static inline int inode_do_init_with_dentry(struct inode* inode, struct dentry *opt_dentry)
-{
-	/*prov_msg_t* iprov = inode_get_provenance(inode);
-	struct dentry *dentry;
-	unsigned char* buffer;
-	size_t len;
-	int rc = 0;
-
-	if(node_kern(iprov).initialized==NODE_INITIALIZED){
-		goto out;
-	}
-
-	if(!inode->i_op->getxattr) {
-		goto out;
-	}
-
-	if(opt_dentry){
-		dentry=dget(opt_dentry);
-	}else{
-		dentry=d_find_alias(inode);
-	}
-	if(!dentry){ // may happen, nothing wrong
-		goto out;
-	}
-
-	// get size for buffer
-		rc = inode->i_op->getxattr(dentry, XATTR_NAME_PROVENANCE, NULL, 0);
-		if(rc < 0){
-			dput(dentry);
-			if(rc==-ENODATA){
-				rc=0;
-			}
-			goto release_dentry;
-		}
-		len=rc;
-
-		if(len!=sizeof(prov_msg_t)){
-			printk(KERN_INFO "Provenance: xattr wrong size.\n");
-			goto release_dentry;
-		}
-
-		buffer = kzalloc(len, GFP_NOFS);
-		if(!buffer){
-			rc=-ENOMEM;
-			goto release_dentry;
-		}
-		rc = inode->i_op->getxattr(dentry, XATTR_NAME_PROVENANCE, buffer, len);
-		if(rc<0){
-			if(rc==-ENODATA){ // no xattr were saved, that's ok
-				rc = 0;
-			}else{
-				printk(KERN_INFO "Provenance: error while reading xattr %d.\n", rc);
-			}
-			goto free_buffer;
-		}
-		memcpy(iprov, buffer, sizeof(prov_msg_t));
-
-free_buffer:
-	kfree(buffer);
-release_dentry:
-	dput(dentry);
-out:
-	prov_copy_inode_mode(iprov, inode);
-	node_kern(iprov).initialized=NODE_INITIALIZED;
-	return rc;*/
-	return 0;
-}
-
-
-static inline int inode_do_init(struct inode* inode)
-{
-	return inode_do_init_with_dentry(inode, NULL);
-}
-
-static inline prov_msg_t* task_provenance( void ){
-	prov_msg_t* tprov = current_provenance();
-	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
-		record_task_name(current, tprov);
-	}
-	return tprov;
 }
 
 /*
@@ -231,7 +105,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	}
 #endif
 
-	record_relation(RL_CLONE, old_prov, prov, FLOW_ALLOWED);
+	record_relation(RL_CLONE, old_prov, prov, FLOW_ALLOWED, NULL);
   new->provenance = prov;
   return 0;
 }
@@ -264,7 +138,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
   prov_msg_t *old_prov = old->provenance;
 	prov_msg_t *prov = new->provenance;
 
-  record_relation(RL_CHANGE, old_prov, prov, FLOW_ALLOWED);
+  record_relation(RL_CHANGE, old_prov, prov, FLOW_ALLOWED, NULL);
   return 0;
 }
 
@@ -313,154 +187,12 @@ static int provenance_inode_alloc_security(struct inode *inode)
 */
 static void provenance_inode_free_security(struct inode *inode)
 {
-  prov_msg_t* prov = inode_get_provenance(inode);
+  prov_msg_t* prov = __raw_inode_provenance(inode);
   if(!prov){
     free_provenance(prov);
 	}
 	inode_set_provenance(inode, NULL);
 	free_camflow(inode);
-}
-
-/*
-* Obtain the security attribute name suffix and value to set on a newly
-* created inode and set up the incore security field for the new inode.
-* This hook is called by the fs code as part of the inode creation
-* transaction and provides for atomic labeling of the inode, unlike
-* the post_create/mkdir/... hooks called by the VFS.  The hook function
-* is expected to allocate the name and value via kmalloc, with the caller
-* being responsible for calling kfree after using them.
-* If the security module does not use security attributes or does
-* not wish to put a security attribute on this particular inode,
-* then it should return -EOPNOTSUPP to skip this processing.
-* @inode contains the inode structure of the newly created inode.
-* @dir contains the inode structure of the parent directory.
-* @qstr contains the last path component of the new object
-* @name will be set to the allocated name suffix (e.g. selinux).
-* @value will be set to the allocated attribute value.
-* @len will be set to the length of the value.
-* Returns 0 if @name and @value have been successfully set,
-* -EOPNOTSUPP if no security attribute is needed, or
-* -ENOMEM on memory allocation failure.
-*/
-/* TODO as far as I can tell the security xattr don't stack, we had to modify
-security.c instead, need to follow kernel update */
-int provenance_inode_init_security(struct inode *inode, struct inode *dir,
-				       const struct qstr *qstr,
-				       const char **name,
-				       void **value, size_t *len)
-{
-	prov_msg_t *iprov, *val;
-
-	if (name){
-		*name = XATTR_PROVENANCE_SUFFIX;
-	}
-
-	if (value && len) {
-		iprov = inode_provenance(inode);
-		if(!iprov){ // alloc provenance if none there
-	    return -ENOMEM;
-	  }
-		val = (prov_msg_t*)kzalloc(sizeof(prov_msg_t), GFP_NOFS);
-		if (!val){
-			return -ENOMEM;
-		}
-		memcpy(val, iprov, sizeof(prov_msg_t));
-		*value=val;
-		*len=sizeof(prov_msg_t);
-	}
-
-	return 0;
-}
-EXPORT_SYMBOL(provenance_inode_init_security);
-
-/*
-* Retrieve a copy of the extended attribute representation of the
-* security label associated with @name for @inode via @buffer.  Note that
-* @name is the remainder of the attribute name after the security prefix
-* has been removed. @alloc is used to specify of the call should return a
-* value via the buffer or just the value length Return size of buffer on
-* success.
-*/
-static int provenance_inode_getsecurity(const struct inode *inode, const char *name, void **buffer, bool alloc)
-{
-	prov_msg_t *iprov, *val;
-
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX)){
-		return -EOPNOTSUPP;
-	}
-	if(!alloc){ // we just return the length
-		return sizeof(prov_msg_t);
-	}
-
-	iprov = inode_get_provenance(inode);
-	if(!iprov){ // alloc provenance if none there
-		return -ENOMEM; // TODO check most appropriate error
-	}
-	val = (prov_msg_t*)kzalloc(sizeof(prov_msg_t), GFP_NOFS);
-	if (!val){
-		return -ENOMEM;
-	}
-	memcpy(val, iprov, sizeof(prov_msg_t));
-	*buffer=val;
-	return sizeof(prov_msg_t);
-}
-
-/*
-* Set the security label associated with @name for @inode from the
-* extended attribute value @value.  @size indicates the size of the
-* @value in bytes.  @flags may be XATTR_CREATE, XATTR_REPLACE, or 0.
-* Note that @name is the remainder of the attribute name after the
-* security. prefix has been removed.
-* Return 0 on success.
-*/
-static int provenance_inode_setsecurity(struct inode *inode, const char *name,
-				     const void *value, size_t size, int flags)
-{
-	prov_msg_t *iprov = inode_get_provenance(inode);
-
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX)){
-		return -EOPNOTSUPP;
-	}
-
-	if (!value || !size){
-		return -EACCES;
-	}
-
-	if( size < sizeof(prov_msg_t) ){
-		return -ENOMEM;
-	}
-
-	memcpy(iprov, value, sizeof(prov_msg_t));
-
-	return 0;
-}
-
-
-/*
-* Copy the extended attribute names for the security labels
-* associated with @inode into @buffer.  The maximum size of @buffer
-* is specified by @buffer_size.  @buffer may be NULL to request
-* the size of the buffer required.
-* Returns number of bytes used/required on success.
-*/
-#define XATTR_NAME_PROVENANCE_LEN (sizeof(XATTR_NAME_PROVENANCE))
-/* The list is the set of (null-terminated) names, one after the other. */
-/* code inspired from http://lxr.free-electrons.com/source/net/socket.c?v=4.4#L491 */
-static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t size)
-{
-	size_t len=XATTR_NAME_PROVENANCE_LEN;
-
-	if(buffer==NULL){
-		return len;
-	}
-
-	if( size < len ){ // no space for one more element
-		return -ERANGE;
-	}
-	if(buffer){
-		memcpy(buffer, XATTR_NAME_PROVENANCE, XATTR_NAME_PROVENANCE_LEN);
- 	}
-	return len;
 }
 
 /*
@@ -474,13 +206,18 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 {
 	prov_msg_t* cprov = task_provenance();
 	prov_msg_t* iprov = inode_provenance(dir);
+	int rtn=0;
 
 	if(!iprov){ // alloc provenance if none there
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out;
   }
 
-	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED);
-	return 0;
+	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+	return rtn;
 }
 
 /*
@@ -499,49 +236,55 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   prov_msg_t* cprov = task_provenance();
   prov_msg_t* iprov;
 	uint32_t perms;
+	int rtn=0;
 
-	if(!mask)
-		return 0;
+	if(!mask){
+		goto out;
+	}
 
 	if(unlikely(IS_PRIVATE(inode))){
-		return 0;
+		goto out;
 	}
 
 	iprov = inode_provenance(inode);
   if(iprov==NULL){ // alloc provenance if none there
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out;
   }
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	if(is_inode_dir(inode)){
 		if((perms & (DIR__WRITE)) != 0){
-	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	  }
 	  if((perms & (DIR__READ)) != 0){
-	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 		if((perms & (DIR__SEARCH)) != 0){
-	    record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 	}else if(is_inode_socket(inode)){
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-	    record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	  }
 	  if((perms & (FILE__READ)) != 0){
-	    record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 	}else{
 		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
-	    record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	  }
 	  if((perms & (FILE__READ)) != 0){
-	    record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 		if((perms & (FILE__EXECUTE)) != 0){
-	    record_relation(RL_EXEC, iprov, cprov, FLOW_ALLOWED);
+	    record_relation(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
 	  }
 	}
 
+out:
+	put_prov(iprov);
+	put_prov(cprov);
   return 0;
 }
 
@@ -560,22 +303,29 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 	prov_msg_t* cprov = task_provenance();
   prov_msg_t* dprov;
   prov_msg_t* iprov;
+	int rtn=0;
 
 	iprov = inode_provenance(old_dentry->d_inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out;
   }
 
 	dprov = inode_provenance(dir);
   if(!dprov){ // alloc provenance if none there
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out;
   }
 	// record edges
-  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED);
-  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED);
-  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED);
+  record_relation(RL_LINK, cprov, dprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_LINK, cprov, iprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED, NULL);
 	record_inode_name_from_dentry(new_dentry, iprov);
-  return 0;
+out:
+	put_prov(dprov);
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
 }
 
 /*
@@ -598,9 +348,52 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 */
 static int provenance_file_permission(struct file *file, int mask)
 {
+	prov_msg_t* cprov = task_provenance();
+  prov_msg_t* iprov;
   struct inode *inode = file_inode(file);
-  provenance_inode_permission(inode, mask);
-  return 0;
+	uint32_t perms;
+	int rtn=0;
+
+	iprov = inode_provenance(inode);
+	if(iprov==NULL){ // alloc provenance if none there
+		rtn = -ENOMEM;
+		goto out;
+	}
+
+	perms = file_mask_to_perms(inode->i_mode, mask);
+	if(is_inode_dir(inode)){
+		if((perms & (DIR__WRITE)) != 0){
+			record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, file);
+		}
+		if((perms & (DIR__READ)) != 0){
+			record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
+		}
+		if((perms & (DIR__SEARCH)) != 0){
+			record_relation(RL_SEARCH, iprov, cprov, FLOW_ALLOWED, file);
+		}
+	}else if(is_inode_socket(inode)){
+		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
+			record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED, file);
+		}
+		if((perms & (FILE__READ)) != 0){
+			record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, file);
+		}
+	}else{
+		if((perms & (FILE__WRITE|FILE__APPEND)) != 0){
+			record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, file);
+		}
+		if((perms & (FILE__READ)) != 0){
+			record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
+		}
+		if((perms & (FILE__EXECUTE)) != 0){
+	    record_relation(RL_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+	  }
+	}
+
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
 }
 
 /*
@@ -613,13 +406,18 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	prov_msg_t* cprov = task_provenance();
 	struct inode *inode = file_inode(file);
 	prov_msg_t* iprov = inode_provenance(inode);
+	int rtn=0;
 
 	if(!iprov){ // alloc provenance if none there
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out;
   }
+	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED, file);
 
-	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED);
-	return 0;
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+	return rtn;
 }
 
 /*
@@ -634,28 +432,51 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsigned long prot, unsigned long flags)
 {
   prov_msg_t* cprov = task_provenance();
-  prov_msg_t* iprov;
+  prov_msg_t* iprov = NULL;
+	prov_msg_t* bprov = NULL;
   struct inode *inode;
+	int rtn=0;
 
-  if(file==NULL){ // what to do for NULL?
-    return 0;
+  if(unlikely(file==NULL)){
+    goto out;
   }
 	//provenance_record_file_name(file);
 
   inode = file_inode(file);
   iprov = inode_provenance(inode);
+	if( (flags & (MAP_SHARED) ) !=  0){
+	  if((prot & (PROT_WRITE)) != 0){
+	    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
+	  }
+	  if((prot & (PROT_READ)) != 0){
+	    record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
+	  }
 
-  if((prot & (PROT_WRITE)) != 0){
-    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED);
-  }
-  if((prot & (PROT_READ)) != 0){
-    record_relation(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED);
-  }
+		if((prot & (PROT_EXEC)) != 0){
+	    record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+	  }
+	}else{
+		bprov = branch_mmap(iprov, cprov);
+		if(bprov==NULL){
+			goto out;
+		}
+		if((prot & (PROT_WRITE)) != 0){
+	    record_relation(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
+	  }
+	  if((prot & (PROT_READ)) != 0){
+	    record_relation(RL_MMAP_READ, bprov, cprov, FLOW_ALLOWED, file);
+	  }
 
-	if((prot & (PROT_EXEC)) != 0){
-    record_relation(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED);
-  }
-  return 0;
+		if((prot & (PROT_EXEC)) != 0){
+	    record_relation(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
+	  }
+		free_provenance(bprov);
+	}
+
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
 }
 
 /*
@@ -673,17 +494,22 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   prov_msg_t* cprov = task_provenance();
   prov_msg_t* iprov;
   struct inode *inode = file_inode(file);
+	int rtn=0;
 
 	iprov = inode_provenance(inode);
   if(!iprov){
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out;
   }
 
 	// both way exchange
-  record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED);
-  record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED);
+  record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 
-  return 0;
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
 }
 
 /* msg */
@@ -699,14 +525,17 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
   prov_msg_t* cprov = task_provenance();
   prov_msg_t* mprov;
+	int rtn=0;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct* ifc= msg->ifc;
 #endif
   /* alloc new prov struct with generated id */
   mprov = alloc_provenance(MSG_MSG, GFP_KERNEL);
 
-  if(!mprov)
-    return -ENOMEM;
+  if(!mprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
 
   set_node_id(mprov, ASSIGN_NODE_ID);
   mprov->msg_msg_info.type=msg->m_type;
@@ -719,8 +548,10 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	}
 #endif
   msg->provenance = mprov;
-  record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED);
-  return 0;
+  record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
+out:
+	put_prov(cprov);
+  return rtn;
 }
 
 /*
@@ -747,7 +578,8 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
   prov_msg_t* cprov = task_provenance();
   prov_msg_t* mprov = msg->provenance;
 
-  record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED);
+  record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
+	put_prov(cprov);
   return 0;
 }
 
@@ -770,7 +602,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
   prov_msg_t* cprov = target->cred->provenance;
   prov_msg_t* mprov = msg->provenance;
 
-  record_relation(RL_READ, mprov, cprov, FLOW_ALLOWED);
+  record_relation(RL_READ, mprov, cprov, FLOW_ALLOWED, NULL);
   return 0;
 }
 
@@ -785,12 +617,15 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	prov_msg_t* cprov = task_provenance();
   prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_KERNEL);
+	int rtn=0;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct* ifc= shp->shm_perm.ifc;
 #endif
 
-  if(!sprov)
-    return -ENOMEM;
+  if(!sprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
 
   set_node_id(sprov, ASSIGN_NODE_ID);
   sprov->shm_info.mode=shp->shm_perm.mode;
@@ -805,9 +640,11 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 #endif
 
   shp->shm_perm.provenance=sprov;
-  record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED);
-  record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED);
-	return 0;
+  record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
+out:
+	put_prov(cprov);
+	return rtn;
 }
 
 /*
@@ -834,17 +671,23 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 {
   prov_msg_t* cprov = task_provenance();
 	prov_msg_t* sprov = shp->shm_perm.provenance;
+	int rtn=0;
 
-  if(!sprov)
-    return -ENOMEM;
+  if(!sprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
 
   if(shmflg & SHM_RDONLY){
-    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED);
+    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
   }else{
-    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED);
-    record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED);
+    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
   }
-	return 0;
+
+out:
+	put_prov(cprov);
+	return rtn;
 }
 
 /*
@@ -854,22 +697,19 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
   prov_msg_t* skprov = task_provenance();
+	int rtn=0;
 
-  if(!skprov)
-    return -ENOMEM;
+  if(!skprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
 
   sk->sk_provenance=skprov;
+
+out:
+	put_prov(skprov);
   return 0;
 }
-
-/*
-* Deallocate security structure.
-*/
-/*static void provenance_sk_free_security(struct sock *sk)
-{
-	free_provenance(sk->sk_provenance);
-	sk->sk_provenance = NULL;
-}*/
 
 /*
 * This hook allows a module to update or allocate a per-socket security
@@ -893,11 +733,12 @@ static int provenance_socket_post_create(struct socket *sock, int family,
   prov_msg_t* iprov = socket_inode_provenance(sock);
 
   if(kern){
-    return 0;
+    goto out;
   }
+  record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
 
-  record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED);
-
+out:
+	put_prov(cprov);
   return 0;
 }
 
@@ -914,17 +755,23 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	int rtn = 0;
 
-  if(provenance_is_opaque(cprov))
-    return 0;
+  if(!iprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
 
-  if(!iprov)
-    return -ENOMEM;
+  if(provenance_is_opaque(cprov)){
+    goto out;
+	}
 
 	provenance_record_address(iprov, address, addrlen);
-	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED);
+	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
 
-  return 0;
+out:
+	put_prov(cprov);
+  return rtn;
 }
 
 /*
@@ -939,16 +786,22 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	int rtn=0;
 
-  if(provenance_is_opaque(cprov))
-    return 0;
+	if(!iprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
 
-  if(!iprov)
-    return -ENOMEM;
+  if(provenance_is_opaque(cprov)){
+    goto out;
+	}
 
 	provenance_record_address(iprov, address, addrlen);
-	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED);
+	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
 
+out:
+	put_prov(cprov);
   return 0;
 }
 
@@ -962,8 +815,16 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	int rtn=0;
 
-  record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED);
+	if(!iprov){
+    rtn = -ENOMEM;
+		goto out;
+	}
+  record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED, NULL);
+
+out:
+	put_prov(cprov);
   return 0;
 }
 
@@ -980,8 +841,11 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
   prov_msg_t* niprov = socket_inode_provenance(newsock);
-  record_relation(RL_CREATE, iprov, niprov, FLOW_ALLOWED);
-  record_relation(RL_ACCEPT, niprov, cprov, FLOW_ALLOWED);
+
+  record_relation(RL_CREATE, iprov, niprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_ACCEPT, niprov, cprov, FLOW_ALLOWED, NULL);
+
+	put_prov(cprov);
   return 0;
 }
 
@@ -995,7 +859,20 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 				  int size)
 {
-	return provenance_inode_permission(SOCK_INODE(sock), MAY_WRITE);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov = socket_inode_provenance(sock);
+	int rtn=0;
+
+	if(iprov==NULL){
+		rtn = -ENOMEM;
+		goto out;
+	}
+
+	record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED, NULL);
+
+out:
+	put_prov(cprov);
+	return rtn;
 }
 
 /*
@@ -1009,7 +886,20 @@ static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 				  int size, int flags)
 {
-	return provenance_inode_permission(SOCK_INODE(sock), MAY_READ);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov = socket_inode_provenance(sock);
+	int rtn=0;
+
+	if(iprov==NULL){
+		rtn = -ENOMEM;
+		goto out;
+	}
+
+	record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
+
+out:
+	put_prov(cprov);
+	return rtn;
 }
 
 /*
@@ -1022,27 +912,33 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-	prov_msg_t* cprov  = sk->sk_provenance;
+	prov_msg_t* cprov = sk_provenance(sk);
 	prov_msg_t* iprov;
   prov_msg_t pckprov;
 	uint16_t family = sk->sk_family;
+	int rtn=0;
+
+	if(cprov==NULL){
+		goto out;
+	}
 
 	if(family!=PF_INET){ // we only handle IPv4 for now
-		return 0;
+		goto out;
 	}
 
 	iprov = sk_inode_provenance(sk);
 	if(iprov==NULL){ // we could not get the provenance, we give up
-		return 0;
+		goto out;
 	}
 	if(provenance_is_tracked(iprov)){
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_pck_to_inode(&pckprov, iprov);
 		if(provenance_is_tracked(cprov)){
-			record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED);
+			record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
 		}
   }
-	return 0;
+out:
+	return rtn;
 }
 
 /*
@@ -1100,15 +996,22 @@ static int provenance_unix_may_send(struct socket *sock,
 * Return 0 if the hook is successful and permission is granted.
 */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm){
+	prov_msg_t* nprov = bprm_provenance(bprm);
 	struct inode *inode = file_inode(bprm->file);
 	prov_msg_t* iprov = inode_provenance(inode);
-	prov_msg_t* nprov;
-  if(!bprm->cred->provenance){
-		provenance_cred_alloc_blank(bprm->cred, GFP_KERNEL);
+	int rtn=0;
+
+  if(!nprov){
+		rtn = -ENOMEM;
+		goto out;
   }
-	nprov = bprm->cred->provenance;
-	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED);
-  return 0;
+
+	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
+
+out:
+	put_prov(iprov);
+	put_prov(nprov);
+  return rtn;
 }
 
 /*
@@ -1120,30 +1023,17 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 * state.  This is called immediately after commit_creds().
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
-   prov_msg_t* cprov  = task_provenance();
-   prov_msg_t* nprov = bprm->cred->provenance;
-   struct inode *inode = file_inode(bprm->file);
-   prov_msg_t* iprov = inode_provenance(inode);
-   record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED);
-   record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED);
- }
+	prov_msg_t* cprov  = task_provenance();
+	prov_msg_t* nprov = bprm_provenance(bprm);
+	struct inode *inode = file_inode(bprm->file);
+	prov_msg_t* iprov = inode_provenance(inode);
 
-/*
-* Tidy up after the installation of the new security attributes of a
-* process being transformed by an execve operation.  The new credentials
-* have, by this point, been set to @current->cred.  @bprm points to the
-* linux_binprm structure.  This hook is a good place to perform state
-* changes on the process such as clearing out non-inheritable signal
-* state.  This is called immediately after commit_creds().
-*/
-static void provenance_bprm_committed_creds(struct linux_binprm *bprm)
-{
-	/*
-	* this will be called after setupnewexec (which among other things set comm).
-	* As far security modules are concerned exec is finished. We can look at comm
-	* to get the process "name".
-	*/
-}
+	record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
+	put_prov(iprov);
+	put_prov(nprov);
+	put_prov(cprov);
+ }
 
 /*
 * Allocate and attach a security structure to the sb->s_security field.
@@ -1170,37 +1060,6 @@ static void provenance_sb_free_security(struct super_block *sb)
   free_provenance(sb->s_provenance);
   sb->s_provenance=NULL;
 }
-
-/*
-static void provenance_release_secctx(char *secdata, u32 seclen)
-{
-	kfree(secdata);
-}
-
-
-// called with inode->i_mutex locked
-static int provenance_inode_notifysecctx(struct inode *inode, void *ctx, u32 ctxlen)
-{
-	return provenance_inode_setsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, ctxlen, 0);
-}
-
-
-// called with inode->i_mutex locked
-static int provenance_inode_setsecctx(struct dentry *dentry, void *ctx, u32 ctxlen)
-{
-	return __vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, ctx, ctxlen, XATTR_CREATE);
-}
-
-static int provenance_inode_getsecctx(struct inode *inode, void **ctx, u32 *ctxlen)
-{
-	int len = 0;
-	len = provenance_inode_getsecurity(inode, XATTR_PROVENANCE_SUFFIX, ctx, true);
-	if (len < 0)
-		return len;
-	*ctxlen = len;
-	return 0;
-}
-*/
 
 static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *data)
 {
@@ -1231,14 +1090,6 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
   LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
   LSM_HOOK_INIT(inode_link, provenance_inode_link),
-	LSM_HOOK_INIT(inode_getsecurity, provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_setsecurity, provenance_inode_setsecurity),
-	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
-	/* secctx */
-	/*LSM_HOOK_INIT(release_secctx, provenance_release_secctx),
-	LSM_HOOK_INIT(inode_setsecctx, provenance_inode_setsecctx),
-	LSM_HOOK_INIT(inode_getsecctx, provenance_inode_getsecctx),
-	LSM_HOOK_INIT(inode_notifysecctx, provenance_inode_notifysecctx),*/
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
@@ -1259,7 +1110,6 @@ static struct security_hook_list provenance_hooks[] = {
 
 	/* socket related hooks */
   LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-  //LSM_HOOK_INIT(sk_free_security, provenance_sk_free_security),
   LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
   LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
   LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
@@ -1274,7 +1124,6 @@ static struct security_hook_list provenance_hooks[] = {
 	/* exec related hooks */
   LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
   LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
-	LSM_HOOK_INIT(bprm_committed_creds, provenance_bprm_committed_creds),
 
 	/* file system related hooks */
   LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
@@ -1286,16 +1135,14 @@ static struct security_hook_list provenance_hooks[] = {
 struct kmem_cache *camflow_cache=NULL;
 #endif
 
-uint32_t prov_machine_id=1; /* TODO get a proper id somehow, now set from userspace */
+struct kmem_cache *provenance_cache=NULL;
+
+uint32_t prov_machine_id=1; /* TODO get a proper id somehow, for now set from userspace */
 uint32_t prov_boot_id=0;
 void __init provenance_add_hooks(void){
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
-					    0, SLAB_PANIC, NULL);
-
-  long_provenance_cache = kmem_cache_create("long_provenance_struct",
-					    sizeof(long_prov_msg_t),
 					    0, SLAB_PANIC, NULL);
 
 #ifndef CONFIG_SECURITY_IFC

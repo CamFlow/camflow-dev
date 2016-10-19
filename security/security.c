@@ -383,11 +383,7 @@ int security_inode_init_security(struct inode *inode, struct inode *dir,
 				 const initxattrs initxattrs, void *fs_data)
 {
 	struct xattr new_xattrs[MAX_LSM_EVM_XATTR + 1];
-#ifdef CONFIG_SECURITY_PROVENANCE
-	struct xattr *lsm_xattr, *evm_xattr, *provenance_xattr, *xattr;
-#else
 	struct xattr *lsm_xattr, *evm_xattr, *xattr;
-#endif
 	int ret;
 
 	if (unlikely(IS_PRIVATE(inode)))
@@ -409,16 +405,6 @@ int security_inode_init_security(struct inode *inode, struct inode *dir,
 	ret = evm_inode_init_security(inode, lsm_xattr, evm_xattr);
 	if (ret)
 		goto out;
-
-#ifdef CONFIG_SECURITY_PROVENANCE
-	provenance_xattr = evm_xattr + 1;
-	ret = provenance_inode_init_security(inode, dir, qstr,
-					&provenance_xattr->name,
-					&provenance_xattr->value,
-					&provenance_xattr->value_len);
-	if (ret)
-		goto out;
-#endif
 
 	ret = initxattrs(inode, new_xattrs, fs_data);
 out:

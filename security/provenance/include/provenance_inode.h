@@ -16,6 +16,10 @@
 
 #include "provenance_long.h" // for record_inode_name
 
+#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
+#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
+#define is_inode_file(inode) S_ISREG(inode->i_mode)
+
 static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
   uint32_t type = MSG_INODE_UNKNOWN;
   iprov->inode_info.mode=inode->i_mode;
@@ -46,7 +50,7 @@ static inline void provenance_mark_as_opaque(const char* name){
   if(!in){
     printk(KERN_ERR "Provenance: could not find %s file.", name);
   }else{
-    prov = inode_get_provenance(in);
+    prov = __raw_inode_provenance(in);
     if(prov){
       set_opaque(prov);
     }
@@ -54,9 +58,49 @@ static inline void provenance_mark_as_opaque(const char* name){
 }
 
 static inline prov_msg_t* inode_provenance(struct inode* inode){
-	prov_msg_t* iprov = inode_get_provenance(inode);
+	prov_msg_t* iprov = __raw_inode_provenance(inode);
+  if(unlikely(iprov==NULL)){
+    return NULL;
+  }
+  lock_node(iprov);
 	prov_copy_inode_mode(iprov, inode);
-	record_inode_name(inode, iprov);
+  if(is_inode_dir(inode) || is_inode_file(inode)){
+	   record_inode_name(inode, iprov);
+   }
 	return iprov;
+}
+
+static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //used for private MMAP
+  prov_msg_t* prov;
+  prov_msg_t relation;
+
+  if( unlikely(iprov==NULL || cprov==NULL) ){ // should not occur
+    return NULL;
+  }
+
+  if(!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all ){
+    return NULL;
+  }
+
+  if( filter_node(iprov) ){
+    return NULL;
+  }
+
+  if(filter_relation(RL_CREATE, FLOW_ALLOWED)) {
+    return NULL;
+  }
+
+  prov = alloc_provenance(MSG_INODE_MMAP, GFP_KERNEL);
+
+  set_node_id(prov, ASSIGN_NODE_ID);
+  prov->inode_info.uid = iprov->inode_info.uid;
+  prov->inode_info.gid = iprov->inode_info.gid;
+  memcpy(prov->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16*sizeof(uint8_t));
+  prov->inode_info.mode = iprov->inode_info.mode;
+  __record_node(iprov);
+  __propagate(RL_CREATE, iprov, prov, &relation, FLOW_ALLOWED);
+  __record_node(prov);
+  __record_relation(RL_CREATE, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+  return prov;
 }
 #endif
