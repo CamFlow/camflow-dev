@@ -22,7 +22,7 @@ make install # patience, sudo password will be asked during installation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.8           | 4.4.25         | N/A        |
+| 0.1.8           | 4.4.25         | 19/10/2016 |
 | 0.1.7           | 4.4.23         | 04/10/2016 |
 | 0.1.6           | 4.4.21         | 19/09/2016 |
 | 0.1.5           | 4.4.19         | 02/09/2016 |
