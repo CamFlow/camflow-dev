@@ -15,13 +15,14 @@ Do not hesitate to fork the repository or to report bugs.
 make prepare
 make config # select relevant modules in security
 make compile # patience, sudo password will be asked during compilation
-make install # patience, sudo password will be asked during instalation
+make install # patience, sudo password will be asked during installation
  ```
 
 ## Version
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.1.8           | 4.4.25         | 19/10/2016 |
 | 0.1.7           | 4.4.23         | 04/10/2016 |
 | 0.1.6           | 4.4.21         | 19/09/2016 |
 | 0.1.5           | 4.4.19         | 02/09/2016 |
@@ -30,6 +31,17 @@ make install # patience, sudo password will be asked during instalation
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.1.8
+
+```
+- Properly deal with MMAP_SHARED and MMAP_PRIVATE.
+- Refine relation types in inode permission hooks.
+- Deal with concurrency issues.
+- Recording offset information.
+- Record jiffies for every events (nodes, relationships).
+- Update to kernel version 4.4.25.
+```
 
 ### v0.1.7
 
@@ -112,12 +124,12 @@ make install # patience, sudo password will be asked during instalation
 
 ## Plan
 
-### 0.1.8
+### 0.1.X
 
 * look at some form of automated testing.
 * support for Raspberry Pi / ARM
 
-### 0.2.0
+### 0.2.X
 
 * Clean-up code.
 * IFC tags and provenance data persistence across reboot.

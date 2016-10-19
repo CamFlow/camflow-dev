@@ -20,6 +20,7 @@
 #include <linux/socket.h>
 #include <uapi/linux/ifc.h>
 #include <uapi/linux/limits.h>
+#include <linux/mutex.h>
 #endif
 
 #define GOLDEN_RATIO_64 0x61C8864680B583EBull
@@ -119,6 +120,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define MSG_DISC_AGENT        0x00100000UL
 #define MSG_DISC_NODE         0x00200000UL
 #define MSG_PACKET            0x00400000UL
+#define MSG_INODE_MMAP        0x00800000UL
 
 #define RL_READ               0x00000001UL
 #define RL_WRITE              0x00000002UL
@@ -149,6 +151,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_MMAP_EXEC          0x04000000UL
 #define RL_SND                0x08000000UL
 #define RL_RCV                0x10000000UL
+#define RL_PERM_READ          0x20000000UL
+#define RL_PERM_WRITE         0x40000000UL
+#define RL_PERM_EXEC          0x80000000UL
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -160,6 +165,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define packet_identifier(packet) ((packet)->pck_info.identifier.packet_id)
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
+#define prov_jiffies(prov) ((prov)->msg_info.jiffies)
 
 struct node_identifier{
   uint32_t type;
@@ -225,11 +231,13 @@ typedef union prov_identifier{
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
 #define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
 
-#define basic_elements prov_identifier_t identifier; uint8_t taint[PROV_N_BYTES]; uint8_t flag
+#define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct{
   basic_elements;
 };
+
+#define FILE_INFO_SET 0x01
 
 struct relation_struct{
   basic_elements;
@@ -237,20 +245,32 @@ struct relation_struct{
   uint8_t allowed;
   prov_identifier_t snd;
   prov_identifier_t rcv;
+  uint8_t set;
+  int64_t offset;
+};
+
+union provmutex{
+#ifdef __KERNEL__
+  struct mutex l;
+#endif
+  uint8_t placeholder[70];
 };
 
 struct node_struct{
   basic_elements;
+  union provmutex lprov;
 };
 
 struct task_prov_struct{
   basic_elements;
+  union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
 };
 
 struct inode_prov_struct{
   basic_elements;
+  union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
@@ -259,16 +279,19 @@ struct inode_prov_struct{
 
 struct msg_msg_struct{
   basic_elements;
+  union provmutex lprov;
   long type;
 };
 
 struct shm_struct{
   basic_elements;
+  union provmutex lprov;
   uint16_t mode;
 };
 
 struct sock_struct{
   basic_elements;
+  union provmutex lprov;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
@@ -276,11 +299,13 @@ struct sock_struct{
 
 struct sb_struct{
   basic_elements;
+  union provmutex lprov;
   uint8_t uuid[16];
 };
 
 struct pck_struct{
   basic_elements;
+  union provmutex lprov;
   uint16_t length;
 };
 

@@ -16,6 +16,7 @@
 
 #include "provenance.h"
 #include "provenance_inode.h"
+#include "provenance_task.h"
 #include "camflow_utils.h"
 
 #define TMPBUFLEN	12
@@ -162,16 +163,18 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	prov_msg_t* cprov = current_provenance();
+	prov_msg_t* cprov = task_provenance();
 	long_prov_msg_t* node;
 
-	if(count < sizeof(struct disc_node_struct))
-		return -ENOMEM;
+	if(count < sizeof(struct disc_node_struct)){
+		count = -ENOMEM;
+		goto out;
+	}
 
-	node = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+	node = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
 	if(copy_from_user(node, buf, sizeof(struct disc_node_struct))){
 		count = -ENOMEM;
-		goto exit;
+		goto out;
 	}
 	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
 		__record_node(cprov);
@@ -182,15 +185,16 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		long_prov_write(node);
 	}else{ // the node is not of disclosed type
 		count = -EINVAL;
-		goto exit;
+		goto out;
 	}
 
-	if(copy_to_user((void*)buf, node, sizeof(struct disc_node_struct))){
+	if(copy_to_user((void*)buf, &node, sizeof(struct disc_node_struct))){
 		count = -ENOMEM;
-		goto exit;
+		goto out;
 	}
 
-exit:
+out:
+	put_prov(cprov);
 	kfree(node);
 	return count;
 }
@@ -219,60 +223,75 @@ declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	struct prov_self_config *msg;
-  prov_msg_t* prov = current_provenance();
+	struct prov_self_config msg;
+  prov_msg_t* prov = task_provenance();
+	prov_msg_t* setting;
+	uint8_t op;
+	int rtn=sizeof(struct prov_self_config);
 
   if(count < sizeof(struct prov_self_config)){
-    printk(KERN_ERR "Provenance: Too short.");
-    return -EINVAL;
+    rtn = -EINVAL;
+		goto out;
   }
+	if( copy_from_user(&msg, buf, sizeof(struct prov_self_config)) ){
+		rtn = -ENOMEM;
+		goto out;
+	}
 
-  msg = (struct prov_self_config*)buf;
+	setting = &(msg.prov);
+	op = msg.op;
 
-	if(((msg->op) & PROV_SET_TRACKED)!=0){
-		if(provenance_is_tracked(&(msg->prov))){
+	if( (op & PROV_SET_TRACKED)!=0 ){
+		if( provenance_is_tracked(setting) ){
 			set_tracked(prov);
 		}else{
 			clear_tracked(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_OPAQUE)!=0){
-		if(provenance_is_opaque(&(msg->prov))){
+	if( (op & PROV_SET_OPAQUE)!=0 ){
+		if( provenance_is_opaque(setting) ){
 			set_opaque(prov);
 		}else{
 			clear_opaque(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
-		if(provenance_propagate(&(msg->prov))){
+	if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( provenance_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_TAINT)!=0){
-		prov_bloom_merge(prov_taint(prov), prov_taint(&(msg->prov)));
+	if( (op & PROV_SET_TAINT)!=0 ){
+		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
 
-  return sizeof(struct prov_self_config);
+out:
+	put_prov(prov);
+  return rtn;
 }
 
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	prov_msg_t* tmp = (prov_msg_t*)buf;
-	prov_msg_t* cprov = current_provenance();
+	prov_msg_t* cprov = task_provenance();
 
 	if(count < sizeof(struct task_prov_struct))
 	{
-		return -ENOMEM;
+		count = -ENOMEM;
+		goto out;
 	}
 	if(copy_to_user(tmp, cprov, sizeof(prov_msg_t))){
-		return -EAGAIN;
+		count = -EAGAIN;
+		goto out;
 	}
+
+out:
+	put_prov(cprov);
 	return count; // write only
 }
 
@@ -359,12 +378,13 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	struct prov_file_config *msg;
   struct inode* in;
   prov_msg_t* prov;
+	prov_msg_t* setting;
+	uint8_t op;
 
   if(__kuid_val(current_euid())!=0)
     return -EPERM;
 
   if(count < sizeof(struct prov_file_config)){
-    printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
 
@@ -375,36 +395,38 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
     printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
     return -EINVAL;
   }
-  prov = inode_get_provenance(in);
+	op = msg->op;
+	setting = &msg->prov;
+  prov = inode_provenance(in);
 
-	if(((msg->op) & PROV_SET_TRACKED)!=0){
-		if(provenance_is_tracked(&(msg->prov))){
+	if( (op & PROV_SET_TRACKED)!=0 ){
+		if( provenance_is_tracked(setting) ){
 			set_tracked(prov);
 		}else{
 			clear_tracked(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_OPAQUE)!=0){
-		if(provenance_is_opaque(&(msg->prov))){
+	if( (op & PROV_SET_OPAQUE)!=0 ){
+		if( provenance_is_opaque(setting) ){
 			set_opaque(prov);
 		}else{
 			clear_opaque(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_PROPAGATE)!=0){
-		if(provenance_propagate(&(msg->prov))){
+	if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( provenance_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
 		}
 	}
 
-	if(((msg->op) & PROV_SET_TAINT)!=0){
-		prov_bloom_merge(prov_taint(prov), prov_taint(&(msg->prov)));
+	if( (op & PROV_SET_TAINT)!=0 ){
+		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
-
+	put_prov(prov);
   return sizeof(struct prov_file_config);
 }
 
@@ -414,9 +436,9 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
   struct prov_file_config *msg;
   struct inode* in;
   prov_msg_t* prov;
+	int rtn=sizeof(struct prov_file_config);
 
   if(count < sizeof(struct prov_file_config)){
-    printk(KERN_ERR "Provenance: Too short.");
     return -EINVAL;
   }
 
@@ -427,13 +449,14 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
     return -EINVAL;
   }
 
-  prov = inode_get_provenance(in);
+  prov = inode_provenance(in);
   if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
-    printk(KERN_ERR "Provenance: error copying.");
-    return -ENOMEM;
+    rtn = -ENOMEM;
+		goto out; // a bit superfluous, but would avoid error if code changes
   }
-
-  return sizeof(struct prov_file_config);
+out:
+	put_prov(prov);
+  return rtn;
 }
 
 declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);

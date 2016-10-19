@@ -26,10 +26,11 @@
 
 static inline prov_msg_t* socket_inode_provenance(struct socket *sock){
   struct inode *inode = SOCK_INODE(sock);
+  prov_msg_t* iprov = __raw_inode_provenance(inode);
   if(inode==NULL){
     return NULL;
   }
-  return inode_get_provenance(inode);
+  return iprov;
 }
 
 static inline prov_msg_t* sk_inode_provenance(struct sock *sk){
@@ -41,15 +42,8 @@ static inline prov_msg_t* sk_inode_provenance(struct sock *sk){
 }
 
 static inline prov_msg_t* sk_provenance(struct sock *sk){
-  return sk->sk_provenance;
-}
-
-static inline prov_msg_t* socket_sk_provenance(struct socket *sock){
-  struct sock *sk = sock->sk;
-  if(sk==NULL){
-    return NULL;
-  }
-  return sk_provenance(sk);
+  prov_msg_t* prov = sk->sk_provenance;
+  return prov;
 }
 
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t* prov){

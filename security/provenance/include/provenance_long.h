@@ -18,24 +18,14 @@
 
 #include "provenance_net.h"
 
-#define free_long_provenance(prov) kmem_cache_free(long_provenance_cache, prov)
-extern struct kmem_cache *long_provenance_cache;
-
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static inline long_prov_msg_t* alloc_long_provenance(uint32_t ntype, gfp_t gfp)
-{
-  long_prov_msg_t* prov =  kmem_cache_zalloc(long_provenance_cache, gfp);
-  if(!prov){
-    return NULL;
-  }
+static inline void __init_long_provenance(uint32_t ntype, long_prov_msg_t* prov){
   prov_type(prov)=ntype;
-  /* create a new node to containe the info */
   node_identifier(prov).id=prov_next_node_id();
   node_identifier(prov).boot_id=prov_boot_id;
   node_identifier(prov).machine_id=prov_machine_id;
-  return prov;
 }
 
 static inline void __long_record_node(long_prov_msg_t* node){
@@ -59,48 +49,47 @@ static inline void __long_record_relation(uint32_t type, long_prov_msg_t* from, 
   __long_record_node(from);
   __record_node(to);
   memset(&relation, 0, sizeof(prov_msg_t));
-  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed);
+  __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
 }
 
 #ifdef CONFIG_SECURITY_IFC
 static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context){
-	long_prov_msg_t* ifc_prov = NULL;
+	long_prov_msg_t ifc_prov;
 
-  ifc_prov = alloc_long_provenance(MSG_IFC, GFP_KERNEL);
+  memset(&ifc_prov, 0, sizeof(long_prov_msg_t));
+  __init_long_provenance(MSG_IFC, &ifc_prov);
   memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
-  long_prov_write(ifc_prov);
+  long_prov_write(&ifc_prov);
   // TODO connect via relation to entity/activity
-  free_long_provenance(ifc_prov);
 }
 #endif
 
 static inline int prov_print(const char *fmt, ...)
 {
-  long_prov_msg_t* msg;
+  long_prov_msg_t msg;
   int length;
   va_list args;
   va_start(args, fmt);
 
-  msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t),  GFP_NOFS);
-
   /* set message type */
-  prov_type(msg)=MSG_STR;
-  msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
-  long_prov_write(msg);
+  __init_long_provenance(MSG_STR, &msg);
+  msg.str_info.length = vscnprintf(msg.str_info.str, 4096, fmt, args);
+  long_prov_write(&msg);
   va_end(args);
-  length = msg->str_info.length;
-  kfree(msg);
+  length = msg.str_info.length;
   return length;
 }
 
 static inline void __record_node_name(prov_msg_t* node, char* name){
-	long_prov_msg_t *fname_prov = alloc_long_provenance(MSG_FILE_NAME, GFP_KERNEL);
+	long_prov_msg_t* fname_prov;
+
+  fname_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
+  __init_long_provenance(MSG_FILE_NAME, fname_prov);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-
 	__long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
+  kfree(fname_prov);
 	set_name_recorded(node);
-	free_long_provenance(fname_prov);
 }
 
 static inline void record_inode_name_from_dentry(struct dentry *dentry, prov_msg_t* iprov){
@@ -177,7 +166,7 @@ out:
 }
 
 static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr *address, int addrlen){
-	long_prov_msg_t* addr_info = NULL;
+	long_prov_msg_t* addr_info;
 
   if( !provenance_is_recorded(skprov) ){
     return;
@@ -187,12 +176,12 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
     return;
   }
 
-
-  addr_info = alloc_long_provenance(MSG_ADDR, GFP_KERNEL);
+  addr_info = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
+  __init_long_provenance(MSG_ADDR, addr_info);
   addr_info->address_info.length=addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
 	__long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
-  free_long_provenance(addr_info);
+  kfree(addr_info);
 	set_name_recorded(skprov);
 }
 
