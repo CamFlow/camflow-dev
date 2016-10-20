@@ -36,7 +36,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.9
 
 ```
--
+- Record pid and vpid for task.
 ```
 
 ### v0.1.8
