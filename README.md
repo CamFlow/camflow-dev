@@ -36,6 +36,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.9
 
 ```
+- Fix a deadlock bug.
 - Record pid and vpid for task.
 - Update to kernel version 4.4.26.
 ```
