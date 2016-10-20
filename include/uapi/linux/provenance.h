@@ -266,6 +266,8 @@ struct task_prov_struct{
   union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
+  uint32_t pid;
+  uint32_t vpid;
 };
 
 struct inode_prov_struct{
