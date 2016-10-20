@@ -115,9 +115,7 @@ static inline void __record_relation(uint32_t type,
   copy_node_info(&relation->relation_info.rcv, to);
   if(file!=NULL){
     relation->relation_info.set = FILE_INFO_SET;
-    mutex_lock(&(file->f_pos_lock));
   	relation->relation_info.offset = file->f_pos;
-  	mutex_unlock(&(file->f_pos_lock));
   }
   prov_write(relation);
 }
