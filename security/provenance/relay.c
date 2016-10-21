@@ -57,12 +57,33 @@ static struct rchan_callbacks relay_callbacks =
         .remove_buf_file = remove_buf_file_handler,
 };
 
-#define PROV_RELAY_BUFF_EXP         22 // 4MB
-#define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP)*sizeof(uint8_t))
-#define PROV_NB_SUBBUF              32
-
 DEFINE_SPINLOCK(prov_chan_lock);
 DEFINE_SPINLOCK(long_prov_chan_lock);
+
+static void write_boot_buffer( void ){
+  unsigned long flags;
+  spin_lock_irqsave(&prov_chan_lock, flags);
+  if(likely(boot_buffer!=NULL && prov_chan!=NULL)){
+    if( boot_buffer->nb_entry > 0){
+      relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry*sizeof(prov_msg_t));
+    }
+    kfree(boot_buffer);
+  }else{
+    printk(KERN_ERR "Provenance: boot buffer was not allocated\n");
+  }
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
+
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
+  if(likely(long_boot_buffer!=NULL && long_prov_chan!=NULL)){
+    if( long_boot_buffer->nb_entry > 0){
+      relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry*sizeof(long_prov_msg_t));
+    }
+    kfree(long_boot_buffer);
+  }else{
+    printk(KERN_ERR "Provenance: long boot buffer was not allocated\n");
+  }
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
+}
 
 static int __init relay_prov_init(void)
 {
@@ -84,6 +105,9 @@ static int __init relay_prov_init(void)
     return 0;
   }
   spin_unlock_irqrestore(&long_prov_chan_lock, flags);
+
+	// relay buffer are ready, we can write down the boot buffer
+	write_boot_buffer();
 
   printk(KERN_INFO "Provenance relay ready.\n");
   return 0;
