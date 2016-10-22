@@ -42,12 +42,16 @@ extern spinlock_t prov_chan_lock;
 static inline void prov_write(prov_msg_t* msg)
 {
   unsigned long flags;
+
   spin_lock_irqsave(&prov_chan_lock, flags);
   prov_jiffies(msg) = get_jiffies_64();
-  if(unlikely(prov_chan==NULL)) // not set yet
+  if( unlikely(prov_chan==NULL) ) // not set yet
   {
-    if( boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE ){
-      memcpy(&boot_buffer->buffer[boot_buffer->nb_entry++], msg, sizeof(prov_msg_t));
+    if( likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE) ){
+      memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(prov_msg_t));
+      boot_buffer->nb_entry++;
+    }else{
+      printk(KERN_ERR "Provenance: boot buffer is full.\n");
     }
   }else{
     relay_write(prov_chan, msg, sizeof(prov_msg_t));
@@ -62,12 +66,15 @@ extern spinlock_t long_prov_chan_lock;
 
 static inline void long_prov_write(long_prov_msg_t* msg){
   unsigned long flags;
+
   spin_lock_irqsave(&long_prov_chan_lock, flags);
   prov_jiffies(msg) = get_jiffies_64();
-  if(unlikely(long_prov_chan==NULL)) // not set yet
+  if( unlikely(long_prov_chan==NULL) ) // not set yet
   {
-    if( long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE ){
+    if( likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE) ){
       memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(long_prov_msg_t));
+    }else{
+      printk(KERN_ERR "Provenance: long boot buffer is full.\n");
     }
   }else{
     relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));

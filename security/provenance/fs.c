@@ -108,12 +108,12 @@ static ssize_t __read_flag(struct file *filp, char __user *buf,
 		return __read_flag(filp, buf, count, ppos, flag);\
 	}
 
-bool prov_enabled=false;
+bool prov_enabled=true;
 declare_write_flag_fcn(prov_write_enable, prov_enabled);
 declare_read_flag_fcn(prov_read_enable, prov_enabled);
 declare_file_operations(prov_enable_ops, prov_write_enable, prov_read_enable);
 
-bool prov_all=false;
+bool prov_all=true;
 declare_write_flag_fcn(prov_write_all, prov_all);
 declare_read_flag_fcn(prov_read_all, prov_all);
 declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
