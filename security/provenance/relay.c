@@ -61,7 +61,6 @@ DEFINE_SPINLOCK(prov_chan_lock);
 DEFINE_SPINLOCK(long_prov_chan_lock);
 
 static void write_boot_buffer( void ){
-  unsigned long flags;
   if(likely(boot_buffer!=NULL && prov_chan!=NULL)){
     if( boot_buffer->nb_entry > 0){
       relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry*sizeof(prov_msg_t));
