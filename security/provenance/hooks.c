@@ -1139,6 +1139,10 @@ struct kmem_cache *provenance_cache=NULL;
 
 uint32_t prov_machine_id=1; /* TODO get a proper id somehow, for now set from userspace */
 uint32_t prov_boot_id=0;
+
+struct prov_boot_buffer*       boot_buffer=NULL;
+struct prov_long_boot_buffer*  long_boot_buffer=NULL;
+
 void __init provenance_add_hooks(void){
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
@@ -1151,6 +1155,17 @@ void __init provenance_add_hooks(void){
 							0, SLAB_PANIC, NULL);
 #endif
   cred_init_provenance();
+
+	/* init relay buffers, to deal with provenance before FS is ready */
+	boot_buffer = (struct prov_boot_buffer*)kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
+	if(unlikely(boot_buffer==NULL)){
+		printk(KERN_ERR "Provenance: could not allocate boot_buffer\n");
+	}
+	long_boot_buffer = (struct prov_long_boot_buffer*)kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
+	if(unlikely(long_boot_buffer==NULL)){
+		printk(KERN_ERR "Provenance: could not allocate long_boot_buffer\n");
+	}
+
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
 

@@ -15,6 +15,7 @@
 
 #include <linux/cred.h>
 #include <linux/binfmts.h>
+#include <linux/sched.h>
 
 #include "provenance_long.h" // for record_task_name
 #include "provenance_inode.h"
@@ -24,6 +25,12 @@
 static inline prov_msg_t* task_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	lock_node(tprov);
+	if(unlikely(tprov->task_info.pid == 0)){
+		tprov->task_info.pid = task_pid_nr(current);
+	}
+	if(unlikely(tprov->task_info.vpid == 0)){
+		tprov->task_info.vpid = task_pid_vnr(current);
+	}
 	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
 		record_task_name(current, tprov);
 	}
