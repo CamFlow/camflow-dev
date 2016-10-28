@@ -36,7 +36,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.9
 
 ```
-- Record whole-provenance at boot if option set in kernel config.
+- Record whole-provenance at boot if option set in kernel config (off by default).
 - Fix a deadlock bug.
 - Record pid and vpid for task.
 - Update to kernel version 4.4.28.
