@@ -489,4 +489,4 @@ static int __init init_prov_fs(void)
    return 0;
 }
 
-late_initcall_sync(init_prov_fs);
+core_initcall(init_prov_fs);
