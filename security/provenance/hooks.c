@@ -34,7 +34,7 @@
 static void cred_init_provenance(void)
 {
 	struct cred *cred = (struct cred *) current->real_cred;
-	prov_msg_t *prov = alloc_provenance(MSG_TASK, GFP_KERNEL);
+	prov_msg_t *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
   set_node_id(prov, ASSIGN_NODE_ID);
@@ -52,7 +52,7 @@ static void cred_init_provenance(void)
 */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
-  prov_msg_t* prov  = alloc_provenance(MSG_TASK, gfp);
+  prov_msg_t* prov  = alloc_provenance(ACT_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
@@ -84,7 +84,7 @@ static void provenance_cred_free(struct cred *cred)
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
   prov_msg_t* old_prov = old->provenance;
-  prov_msg_t* prov = alloc_provenance(MSG_TASK, gfp);
+  prov_msg_t* prov = alloc_provenance(ACT_TASK, gfp);
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct *new_ifc;
 #endif
@@ -151,7 +151,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-  prov_msg_t* iprov = alloc_provenance(MSG_INODE_UNKNOWN, GFP_KERNEL);
+  prov_msg_t* iprov = alloc_provenance(ENT_INODE_UNKNOWN, GFP_KERNEL);
   prov_msg_t* sprov;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct *ifc=NULL;
@@ -530,7 +530,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	struct ifc_struct* ifc= msg->ifc;
 #endif
   /* alloc new prov struct with generated id */
-  mprov = alloc_provenance(MSG_MSG, GFP_KERNEL);
+  mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
   if(!mprov){
     rtn = -ENOMEM;
@@ -616,7 +616,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	prov_msg_t* cprov = task_provenance();
-  prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_KERNEL);
+  prov_msg_t* sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 	int rtn=0;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct* ifc= shp->shm_perm.ifc;
@@ -640,8 +640,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 #endif
 
   shp->shm_perm.provenance=sprov;
-  record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
-  record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_WRITE, sprov, cprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_READ, cprov, sprov, FLOW_ALLOWED, NULL);
 out:
 	put_prov(cprov);
 	return rtn;
@@ -679,10 +679,10 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 	}
 
   if(shmflg & SHM_RDONLY){
-    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
   }else{
-    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
-    record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_WRITE, cprov, sprov, FLOW_ALLOWED, NULL);
   }
 
 out:
@@ -1044,7 +1044,7 @@ out:
 */
 static int provenance_sb_alloc_security(struct super_block *sb)
 {
-  prov_msg_t* sbprov  = alloc_provenance(MSG_SB, GFP_KERNEL);
+  prov_msg_t* sbprov  = alloc_provenance(ENT_SBLCK, GFP_KERNEL);
   if(!sbprov)
     return -ENOMEM;
   sb->s_provenance = sbprov;

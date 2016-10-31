@@ -59,7 +59,7 @@ static inline void put_prov(prov_msg_t* n){
   }
 }
 
-static inline prov_msg_t* alloc_provenance(uint32_t ntype, gfp_t gfp)
+static inline prov_msg_t* alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
@@ -99,17 +99,16 @@ static inline void __record_node(prov_msg_t* node){
   prov_write(node);
 }
 
-static inline void __record_relation(uint32_t type,
+static inline void __record_relation(uint64_t type,
                                       prov_identifier_t* from,
                                       prov_identifier_t* to,
                                       prov_msg_t* relation,
                                       uint8_t allowed,
                                       struct file *file){
-  prov_type(relation)=MSG_RELATION;
+  prov_type(relation)=type;
   relation_identifier(relation).id = prov_next_relation_id();
   relation_identifier(relation).boot_id = prov_boot_id;
   relation_identifier(relation).machine_id = prov_machine_id;
-  relation->relation_info.type=type;
   relation->relation_info.allowed=allowed;
   copy_node_info(&relation->relation_info.snd, from);
   copy_node_info(&relation->relation_info.rcv, to);
@@ -120,7 +119,7 @@ static inline void __record_relation(uint32_t type,
   prov_write(relation);
 }
 
-static inline void __update_version(uint32_t type, prov_msg_t* prov){
+static inline void __update_version(uint64_t type, prov_msg_t* prov){
   prov_msg_t old_prov;
   prov_msg_t relation;
 
@@ -131,7 +130,7 @@ static inline void __update_version(uint32_t type, prov_msg_t* prov){
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
-  if(node_identifier(prov).type == MSG_TASK){
+  if(node_identifier(prov).type == ACT_TASK){
     __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   }else{
     __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
@@ -141,7 +140,7 @@ out:
   return;
 }
 
-static inline void __propagate(uint32_t type,
+static inline void __propagate(uint64_t type,
                             prov_msg_t* from,
                             prov_msg_t* to,
                             prov_msg_t* relation,
@@ -167,7 +166,7 @@ out:
   return;
 }
 
-static inline void record_relation(uint32_t type,
+static inline void record_relation(uint64_t type,
                                     prov_msg_t* from,
                                     prov_msg_t* to,
                                     uint8_t allowed,
