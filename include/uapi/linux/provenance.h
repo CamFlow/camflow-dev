@@ -93,6 +93,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
 #define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
 #define PROV_FILE_FILE                        "/sys/kernel/security/provenance/file"
+#define PROV_PROCESS_FILE                     "/sys/kernel/security/provenance/process"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -408,6 +409,12 @@ struct prov_file_config{
 struct prov_self_config{
   prov_msg_t prov;
   uint8_t op;
+};
+
+struct prov_process_config{
+  prov_msg_t prov;
+  uint8_t op;
+  uint32_t vpid;
 };
 
 #endif

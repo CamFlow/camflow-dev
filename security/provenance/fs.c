@@ -52,6 +52,7 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_PROPAGATE_RELATION_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
 	provenance_mark_as_opaque(PROV_FILE_FILE);
+	provenance_mark_as_opaque(PROV_PROCESS_FILE);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -464,6 +465,91 @@ out:
 
 declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);
 
+static ssize_t prov_write_process(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	struct prov_process_config *msg;
+	prov_msg_t* prov;
+	prov_msg_t* setting;
+	uint8_t op;
+
+	if(__kuid_val(current_euid())!=0)
+    return -EPERM;
+
+  if(count < sizeof(struct prov_process_config)){
+    return -EINVAL;
+  }
+
+  msg = (struct prov_process_config*)buf;
+
+	setting = &(msg->prov);
+	op = msg->op;
+
+	prov = prov_from_vpid(msg->vpid);
+	if(prov==NULL){
+		return -EINVAL;
+	}
+
+	if( (op & PROV_SET_TRACKED)!=0 ){
+		if( provenance_is_tracked(setting) ){
+			set_tracked(prov);
+		}else{
+			clear_tracked(prov);
+		}
+	}
+
+	if( (op & PROV_SET_OPAQUE)!=0 ){
+		if( provenance_is_opaque(setting) ){
+			set_opaque(prov);
+		}else{
+			clear_opaque(prov);
+		}
+	}
+
+	if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( provenance_propagate(setting) ){
+			set_propagate(prov);
+		}else{
+			clear_propagate(prov);
+		}
+	}
+
+	if( (op & PROV_SET_TAINT)!=0 ){
+		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
+	}
+	put_prov(prov);
+  return sizeof(struct prov_process_config);
+}
+
+static ssize_t prov_read_process(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	struct prov_process_config *msg;
+  prov_msg_t* prov;
+	int rtn=sizeof(struct prov_process_config);
+
+  if(count < sizeof(struct prov_process_config)){
+    return -EINVAL;
+  }
+
+  msg = (struct prov_process_config*)buf;
+
+	prov = prov_from_vpid(msg->vpid);
+	if(prov==NULL){
+		return -EINVAL;
+	}
+
+	if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
+    rtn = -ENOMEM;
+		goto out; // a bit superfluous, but would avoid error if code changes
+  }
+out:
+	put_prov(prov);
+  return rtn;
+}
+
+declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -482,6 +568,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
 	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
 	 securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
+	 securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
 
 	 printk(KERN_INFO "Provenance fs ready.\n");
 

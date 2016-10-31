@@ -41,13 +41,6 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
-static inline struct prov_msg_t* prov_from_vpid(pid_t pid){
-  struct task_struct *dest = find_task_by_vpid(pid);
-  if(!dest)
-    return NULL;
-  return __task_cred(dest)->provenance;
-}
-
 #define get_mutex(n) &(n->node_info.lprov.l)
 #define lock_node(n) mutex_lock(get_mutex(n))
 #define unlock_node(n) mutex_unlock(get_mutex(n))
