@@ -146,8 +146,9 @@ make install # patience, sudo password will be asked during installation
 
 ### 0.1.X
 
+* generalise access denial recording.
 * look at some form of automated testing.
-* support for Raspberry Pi / ARM
+* support for Raspberry Pi / ARM.
 
 ### 0.2.X
 
