@@ -38,6 +38,7 @@ make install # patience, sudo password will be asked during installation
 
 ```
 - Reworked relation and node types: 64 bits, W3C type + CamFlow subtype.
+- Fixed issue when activating both IFC and Provenance.
 - Change module load priority.
 ```
 
