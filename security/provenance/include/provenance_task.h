@@ -37,6 +37,22 @@ static inline prov_msg_t* task_provenance( void ){
 	return tprov;
 }
 
+static inline prov_msg_t* prov_from_vpid(pid_t pid){
+	prov_msg_t* tprov;
+
+	struct task_struct *dest = find_task_by_vpid(pid);
+	if(!dest){
+    return NULL;
+	}
+
+	tprov = __task_cred(dest)->provenance;
+	if(!tprov){
+		return NULL;
+	}
+	lock_node(tprov);
+	return tprov;
+}
+
 static inline prov_msg_t* bprm_provenance( struct linux_binprm *bprm ){
 	prov_msg_t* prov = bprm->cred->provenance;
 	lock_node(prov);
