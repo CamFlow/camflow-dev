@@ -41,7 +41,7 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
-static inline struct prov_msg_t* prov_from_pid(pid_t pid){
+static inline struct prov_msg_t* prov_from_vpid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
   if(!dest)
     return NULL;
