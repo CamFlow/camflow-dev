@@ -21,7 +21,7 @@
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static inline void __init_long_provenance(uint32_t ntype, long_prov_msg_t* prov){
+static inline void __init_long_provenance(uint64_t ntype, long_prov_msg_t* prov){
   prov_type(prov)=ntype;
   node_identifier(prov).id=prov_next_node_id();
   node_identifier(prov).boot_id=prov_boot_id;
@@ -36,7 +36,7 @@ static inline void __long_record_node(long_prov_msg_t* node){
   long_prov_write(node);
 }
 
-static inline void __long_record_relation(uint32_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+static inline void __long_record_relation(uint64_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
   prov_msg_t relation;
 
   if(unlikely(!prov_enabled)){ // capture is not enabled, ignore
@@ -54,29 +54,30 @@ static inline void __long_record_relation(uint32_t type, long_prov_msg_t* from, 
 
 #ifdef CONFIG_SECURITY_IFC
 static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context){
-	long_prov_msg_t ifc_prov;
+  long_prov_msg_t* ifc_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
 
-  memset(&ifc_prov, 0, sizeof(long_prov_msg_t));
-  __init_long_provenance(MSG_IFC, &ifc_prov);
+  __init_long_provenance(ENT_IFC, ifc_prov);
   memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
-  long_prov_write(&ifc_prov);
+  long_prov_write(ifc_prov);
+  kfree(ifc_prov);
   // TODO connect via relation to entity/activity
 }
 #endif
 
 static inline int prov_print(const char *fmt, ...)
 {
-  long_prov_msg_t msg;
+  long_prov_msg_t* msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
   int length;
   va_list args;
   va_start(args, fmt);
 
   /* set message type */
-  __init_long_provenance(MSG_STR, &msg);
-  msg.str_info.length = vscnprintf(msg.str_info.str, 4096, fmt, args);
-  long_prov_write(&msg);
+  __init_long_provenance(ENT_STR, msg);
+  msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
+  long_prov_write(msg);
   va_end(args);
-  length = msg.str_info.length;
+  length = msg->str_info.length;
+  kfree(msg);
   return length;
 }
 
@@ -84,7 +85,7 @@ static inline void __record_node_name(prov_msg_t* node, char* name){
 	long_prov_msg_t* fname_prov;
 
   fname_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
-  __init_long_provenance(MSG_FILE_NAME, fname_prov);
+  __init_long_provenance(ENT_FILE_NAME, fname_prov);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
 	__long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
@@ -177,7 +178,7 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
   }
 
   addr_info = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
-  __init_long_provenance(MSG_ADDR, addr_info);
+  __init_long_provenance(ENT_ADDR, addr_info);
   addr_info->address_info.length=addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
 	__long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);

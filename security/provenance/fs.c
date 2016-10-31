@@ -180,7 +180,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		count = -ENOMEM;
 		goto out;
 	}
-	if(prov_type(node)==MSG_DISC_ENTITY || prov_type(node)==MSG_DISC_ACTIVITY || prov_type(node)==MSG_DISC_AGENT){
+	if(prov_type(node)==ENT_DISC || prov_type(node)==ACT_DISC || prov_type(node)==AGT_DISC){
 		__record_node(cprov);
 		copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
 		node_identifier(node).id=prov_next_node_id();
@@ -217,7 +217,6 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 	if(copy_from_user(&relation, buf, sizeof(struct relation_struct))){
 		return -ENOMEM;
 	}
-	prov_type((&relation)) = MSG_RELATION;
 	prov_write(&relation);
 	return count;
 }
@@ -302,7 +301,7 @@ out:
 declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
 
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
-				 size_t count, uint32_t* filter){
+				 size_t count, uint64_t* filter){
 	struct prov_filter* setting;
 
 	if(__kuid_val(current_euid())!=0){
@@ -316,20 +315,20 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	setting = (struct prov_filter*)buf;
 
 	if(setting->add!=0){
-		(*filter)|=setting->filter;
+		(*filter)|=setting->filter&setting->mask;
 	}else{
-		(*filter)&=~(setting->filter);
+		(*filter)&=~(setting->filter&setting->mask);
 	}
 	return count;
 }
 
 static inline ssize_t __read_filter(struct file *filp, char __user *buf,
-				size_t count, uint32_t filter){
-	if(count < sizeof(uint32_t)){
+				size_t count, uint64_t filter){
+	if(count < sizeof(uint64_t)){
 	  return -ENOMEM;
 	}
 
-	if(copy_to_user(buf, &filter, sizeof(uint32_t)))
+	if(copy_to_user(buf, &filter, sizeof(uint64_t)))
 	{
 		return -EAGAIN;
 	}
@@ -343,22 +342,22 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 		return __read_filter(filp, buf, count, filter);\
 	}
 
-uint32_t prov_node_filter;
+uint64_t prov_node_filter;
 declare_write_filter_fcn(prov_write_node_filter, prov_node_filter);
 declare_reader_filter_fcn(prov_read_node_filter, prov_node_filter);
 declare_file_operations(prov_node_filter_ops, prov_write_node_filter, prov_read_node_filter);
 
-uint32_t prov_relation_filter = 0;
+uint64_t prov_relation_filter = 0;
 declare_write_filter_fcn(prov_write_relation_filter, prov_relation_filter);
 declare_reader_filter_fcn(prov_read_relation_filter, prov_relation_filter);
 declare_file_operations(prov_relation_filter_ops, prov_write_relation_filter, prov_read_relation_filter);
 
-uint32_t prov_propagate_node_filter = 0;
+uint64_t prov_propagate_node_filter = 0;
 declare_write_filter_fcn(prov_write_propagate_node_filter, prov_propagate_node_filter);
 declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_propagate_node_filter);
 declare_file_operations(prov_propagate_node_filter_ops, prov_write_propagate_node_filter, prov_read_propagate_node_filter);
 
-uint32_t prov_propagate_relation_filter = 0;
+uint64_t prov_propagate_relation_filter = 0;
 declare_write_filter_fcn(prov_write_propagate_relation_filter, prov_propagate_relation_filter);
 declare_reader_filter_fcn(prov_read_propagate_relation_filter, prov_propagate_relation_filter);
 declare_file_operations(prov_propagate_relation_filter_ops, prov_write_propagate_relation_filter, prov_read_propagate_relation_filter);

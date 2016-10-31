@@ -67,7 +67,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
   memset(prov, 0, sizeof(prov_msg_t));
   id = &packet_identifier(prov); // we are going fo fill this
 
-  id->type = MSG_PACKET;
+  id->type = ENT_PACKET;
   // collect IP element of prov identifier
   id->id = ih->id;
   id->snd_ip = ih->saddr;

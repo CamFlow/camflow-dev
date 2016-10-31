@@ -37,6 +37,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.10
 
 ```
+- Reworked relation and node types: 64 bits, W3C type + CamFlow subtype.
 - Change module load priority.
 ```
 

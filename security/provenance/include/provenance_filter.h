@@ -20,14 +20,14 @@ extern bool prov_all;
 
 #define HIT_FILTER(filter, data) ( (filter&data) != 0 )
 
-extern uint32_t prov_node_filter;
-extern uint32_t prov_propagate_node_filter;
+extern uint64_t prov_node_filter;
+extern uint64_t prov_propagate_node_filter;
 
 #define filter_node(node) __filter_node(prov_node_filter, node)
 #define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool __filter_node(uint32_t filter, const prov_msg_t* node){
+static inline bool __filter_node(uint64_t filter, const prov_msg_t* node){
   if(!prov_enabled){
     return true;
   }
@@ -44,19 +44,19 @@ static inline bool __filter_node(uint32_t filter, const prov_msg_t* node){
   return false;
 }
 
-#define UPDATE_FILTER (RL_VERSION_PROCESS|RL_VERSION|RL_NAMED)
-static inline bool filter_update_node(uint32_t relation_type, prov_msg_t* to){
+#define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS)|SUBTYPE(RL_VERSION)|SUBTYPE(RL_NAMED))
+static inline bool filter_update_node(uint64_t relation_type, prov_msg_t* to){
   if( HIT_FILTER(relation_type, UPDATE_FILTER) ){ // not update if relation is of above type
     return true;
   }
   return false;
 }
 
-extern uint32_t prov_relation_filter;
-extern uint32_t prov_propagate_relation_filter;
+extern uint64_t prov_relation_filter;
+extern uint64_t prov_propagate_relation_filter;
 
 /* return either or not the relation should be filtered out */
-static inline bool filter_relation(uint32_t type, uint8_t allowed){
+static inline bool filter_relation(uint64_t type, uint8_t allowed){
   if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED)){
     return true;
   }
@@ -74,7 +74,7 @@ static inline bool filter_relation(uint32_t type, uint8_t allowed){
 }
 
 /* return either or not tracking should propagate */
-static inline bool filter_propagate_relation(uint32_t type, uint8_t allowed){
+static inline bool filter_propagate_relation(uint64_t type, uint8_t allowed){
   if(allowed==FLOW_DISALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_DISALLOWED)){
     return true;
   }
