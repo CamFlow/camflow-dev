@@ -378,7 +378,7 @@ static inline void print_context(struct ifc_context* context){
   print_label(&context->integrity);
 }
 
-static inline struct ifc_struct* ifc_from_pid(pid_t pid){
+static inline struct ifc_struct* ifc_from_vpid(pid_t pid){
   struct task_struct *dest = find_task_by_vpid(pid);
   if(!dest)
     return NULL;
