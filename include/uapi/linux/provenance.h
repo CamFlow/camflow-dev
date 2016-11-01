@@ -132,7 +132,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000020ULL)
 #define RL_CONNECT            (RL_GENERATED | 0x0000000000000040ULL)
 #define RL_LISTEN             (RL_GENERATED | 0x0000000000000080ULL)
-#define RL_BIND             (RL_GENERATED | 0x0000000000000100ULL)
+#define RL_BIND               (RL_GENERATED | 0x0000000000000100ULL)
 #define RL_SND                (RL_GENERATED | 0x0000000000000200ULL)
 #define RL_LINK               (RL_GENERATED | 0x0000000000000400ULL)
 /* USED SUBTYPES */
