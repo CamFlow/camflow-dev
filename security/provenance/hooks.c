@@ -682,7 +682,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
     record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
   }else{
     record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
-    record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_WRITE, cprov, sprov, FLOW_ALLOWED, NULL);
   }
 
 out:
