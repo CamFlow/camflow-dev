@@ -37,7 +37,8 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.10
 
 ```
-- Fix direction of socket bind.
+- Fix type of socket bind.
+- Fix direction of socket accept.
 - Add pseudo file interface to read/write provenance tracking option from PID.
 - ifc_from_pid -> ifc_from_vpid and prov_from_pid -> prov_from_vpid (name change for clarity).
 - Reworked relation and node types: 64 bits, W3C type + CamFlow subtype.
