@@ -682,7 +682,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
     record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
   }else{
     record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
-    record_relation(RL_WRITE, cprov, sprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
   }
 
 out:
@@ -767,7 +767,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	}
 
 	provenance_record_address(iprov, address, addrlen);
-	record_relation(RL_BIND, iprov, cprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
 	put_prov(cprov);

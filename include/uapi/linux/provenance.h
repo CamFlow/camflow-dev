@@ -132,7 +132,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000020ULL)
 #define RL_CONNECT            (RL_GENERATED | 0x0000000000000040ULL)
 #define RL_LISTEN             (RL_GENERATED | 0x0000000000000080ULL)
-#define RL_ACCEPT             (RL_GENERATED | 0x0000000000000100ULL)
+#define RL_BIND             (RL_GENERATED | 0x0000000000000100ULL)
 #define RL_SND                (RL_GENERATED | 0x0000000000000200ULL)
 #define RL_LINK               (RL_GENERATED | 0x0000000000000400ULL)
 /* USED SUBTYPES */
@@ -142,7 +142,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_EXEC               (RL_USED      | 0x0000000000004000ULL)
 #define RL_MMAP_EXEC          (RL_USED      | 0x0000000000008000ULL)
 #define RL_PERM_EXEC          (RL_USED      | 0x0000000000010000ULL)
-#define RL_BIND               (RL_USED      | 0x0000000000020000ULL)
+#define RL_ACCEPT             (RL_USED      | 0x0000000000020000ULL)
 #define RL_RCV                (RL_USED      | 0x0000000000040000ULL)
 #define RL_OPEN               (RL_USED      | 0x0000000000080000ULL)
 #define RL_SEARCH             (RL_USED      | 0x0000000000100000ULL)
