@@ -767,7 +767,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	}
 
 	provenance_record_address(iprov, address, addrlen);
-	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_BIND, iprov, cprov, FLOW_ALLOWED, NULL);
 
 out:
 	put_prov(cprov);
