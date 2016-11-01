@@ -22,7 +22,7 @@ make install # patience, sudo password will be asked during installation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.10          | 4.4.28         | N/A        |
+| 0.1.10          | 4.4.30         | N/A        |
 | 0.1.9           | 4.4.28         | 28/10/2016 |
 | 0.1.8           | 4.4.25         | 19/10/2016 |
 | 0.1.7           | 4.4.23         | 04/10/2016 |
@@ -44,6 +44,7 @@ make install # patience, sudo password will be asked during installation
 - Reworked relation and node types: 64 bits, W3C type + CamFlow subtype.
 - Fixed issue when activating both IFC and Provenance.
 - Change module load priority.
+- Update to kernel version 4.4.30.
 ```
 
 ### v0.1.9
