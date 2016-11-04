@@ -37,6 +37,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.10
 
 ```
+- Add API to track socket on bind and connect.
 - Fix type of socket bind.
 - Fix direction of socket accept.
 - Add pseudo file interface to read/write provenance tracking option from PID.

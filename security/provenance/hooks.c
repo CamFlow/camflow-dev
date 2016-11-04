@@ -755,6 +755,8 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	struct sockaddr_in* ipv4_addr;
+	uint8_t op;
 	int rtn = 0;
 
   if(!iprov){
@@ -764,6 +766,20 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
   if(provenance_is_opaque(cprov)){
     goto out;
+	}
+
+	/* should we start tracking this socket */
+	if(address->sa_family==AF_INET){
+		ipv4_addr = (struct sockaddr_in*)address;
+		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		if( (op & PROV_SET_TRACKED)!=0 ){
+			set_tracked(iprov);
+			set_tracked(cprov);
+		}
+		if( (op & PROV_SET_PROPAGATE)!=0 ){
+			set_propagate(iprov);
+			set_propagate(cprov);
+		}
 	}
 
 	provenance_record_address(iprov, address, addrlen);
@@ -786,6 +802,8 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	struct sockaddr_in* ipv4_addr;
+	uint8_t op;
 	int rtn=0;
 
 	if(!iprov){
@@ -796,6 +814,21 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   if(provenance_is_opaque(cprov)){
     goto out;
 	}
+
+	/* should we start tracking this socket */
+	if(address->sa_family==AF_INET){
+		ipv4_addr = (struct sockaddr_in*)address;
+		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		if( (op & PROV_SET_TRACKED)!=0 ){
+			set_tracked(iprov);
+			set_tracked(cprov);
+		}
+		if( (op & PROV_SET_PROPAGATE)!=0 ){
+			set_propagate(iprov);
+			set_propagate(cprov);
+		}
+	}
+
 
 	provenance_record_address(iprov, address, addrlen);
 	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
@@ -1143,7 +1176,13 @@ uint32_t prov_boot_id=0;
 struct prov_boot_buffer*       boot_buffer=NULL;
 struct prov_long_boot_buffer*  long_boot_buffer=NULL;
 
+struct ipv4_filters ingress_ipv4filters;
+struct ipv4_filters egress_ipv4filters;
+
 void __init provenance_add_hooks(void){
+	INIT_LIST_HEAD(&ingress_ipv4filters.list);
+	INIT_LIST_HEAD(&egress_ipv4filters.list);
+
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),

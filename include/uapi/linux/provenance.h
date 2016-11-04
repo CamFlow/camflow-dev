@@ -94,6 +94,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
 #define PROV_FILE_FILE                        "/sys/kernel/security/provenance/file"
 #define PROV_PROCESS_FILE                     "/sys/kernel/security/provenance/process"
+#define PROV_IPV4_INGRESS_FILE                "/sys/kernel/security/provenance/ipv4_ingress"
+#define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -415,6 +417,14 @@ struct prov_process_config{
   prov_msg_t prov;
   uint8_t op;
   uint32_t vpid;
+};
+
+struct prov_ipv4_filter{
+  uint32_t ip;
+  uint32_t mask;
+  uint16_t port;
+  uint8_t op;
+  uint64_t taint;
 };
 
 #endif
