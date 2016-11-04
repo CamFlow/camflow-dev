@@ -53,6 +53,8 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
 	provenance_mark_as_opaque(PROV_FILE_FILE);
 	provenance_mark_as_opaque(PROV_PROCESS_FILE);
+	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
+	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -550,6 +552,69 @@ out:
 
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
+static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
+				 size_t count, struct ipv4_filters *filters){
+	struct prov_ipv4_filter *input;
+	struct ipv4_filters	*f;
+
+	if(__kuid_val(current_euid())!=0){
+	 return -EPERM;
+	}
+
+	if(count < sizeof(struct prov_ipv4_filter)){
+	 return -ENOMEM;
+	}
+
+	input = (struct prov_ipv4_filter*)buf;
+	f = (struct ipv4_filters*)kmalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
+	if(copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
+	{
+		return -EAGAIN;
+	}
+	f->filter.ip = f->filter.ip&f->filter.mask;
+	list_add_tail(&(f->list), &filters->list);
+	return sizeof(struct prov_ipv4_filter);
+}
+
+static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
+				size_t count, struct ipv4_filters *filters){
+	struct ipv4_filters* tmp;
+	size_t pos=0;
+
+	if(count < sizeof(struct prov_ipv4_filter) ){
+	  return -ENOMEM;
+	}
+
+  list_for_each_entry(tmp, &(filters->list), list){
+		if( count < pos + sizeof(struct prov_ipv4_filter) ){
+		  return -ENOMEM;
+		}
+
+		if( copy_to_user(buf+pos, &(tmp->filter), sizeof(struct prov_ipv4_filter)) )
+		{
+			return -EAGAIN;
+		}
+		pos += sizeof(struct prov_ipv4_filter);
+	}
+
+	return pos;
+}
+
+#define declare_write_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name ( struct file *file, const char __user *buf,size_t count, loff_t *ppos ){\
+		return __write_ipv4_filter(file, buf, count, &filter);\
+	}
+#define declare_reader_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos) { \
+		return __read_ipv4_filter(filp, buf, count, &filter);\
+	}
+
+declare_write_ipv4_filter_fcn(prov_write_ipv4_ingress_filter, ingress_ipv4filters);
+declare_reader_ipv4_filter_fcn(prov_read_ipv4_ingress_filter, ingress_ipv4filters);
+declare_file_operations(prov_ipv4_ingress_filter_ops, prov_write_ipv4_ingress_filter, prov_read_ipv4_ingress_filter);
+
+declare_write_ipv4_filter_fcn(prov_write_ipv4_egress_filter, egress_ipv4filters);
+declare_reader_ipv4_filter_fcn(prov_read_ipv4_egress_filter, egress_ipv4filters);
+declare_file_operations(prov_ipv4_egress_filter_ops, prov_write_ipv4_egress_filter, prov_read_ipv4_egress_filter);
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -569,6 +634,8 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
 	 securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
 	 securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
+	 securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
+	 securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
 
 	 printk(KERN_INFO "Provenance fs ready.\n");
 
