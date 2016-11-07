@@ -82,7 +82,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
     return NULL;
   }
 
-  if( filter_node(iprov) ){
+  if( filter_node(iprov) || filter_node(cprov)){
     return NULL;
   }
 
