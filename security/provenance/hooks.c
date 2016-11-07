@@ -40,7 +40,6 @@ static void cred_init_provenance(void)
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
-	set_opaque(prov);
 	cred->provenance = prov;
 }
 
