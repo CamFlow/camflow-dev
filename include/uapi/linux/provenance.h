@@ -257,7 +257,7 @@ typedef union prov_identifier{
 #define PROPAGATE_BIT 4
 #define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
-#define provenance_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
+#define provenance_does_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
 
 #define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 

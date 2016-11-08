@@ -87,7 +87,7 @@ static inline void task_config_from_file(struct task_struct *task){
 		if(provenance_is_opaque(iprov)){
 			set_opaque(tprov);
 		}
-		if(provenance_propagate(iprov)){
+		if(provenance_does_propagate(iprov)){
 			set_propagate(tprov);
 		}
 		put_prov(iprov);

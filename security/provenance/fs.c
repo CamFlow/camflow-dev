@@ -264,7 +264,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	}
 
 	if( (op & PROV_SET_PROPAGATE)!=0 ){
-		if( provenance_propagate(setting) ){
+		if( provenance_does_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
@@ -422,7 +422,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	}
 
 	if( (op & PROV_SET_PROPAGATE)!=0 ){
-		if( provenance_propagate(setting) ){
+		if( provenance_does_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
@@ -509,7 +509,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	}
 
 	if( (op & PROV_SET_PROPAGATE)!=0 ){
-		if( provenance_propagate(setting) ){
+		if( provenance_does_propagate(setting) ){
 			set_propagate(prov);
 		}else{
 			clear_propagate(prov);
