@@ -98,6 +98,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
   memcpy(prov->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16*sizeof(uint8_t));
   prov->inode_info.mode = iprov->inode_info.mode;
   __record_node(iprov);
+  memset(&relation, 0, sizeof(prov_msg_t));
   __propagate(RL_CREATE, iprov, prov, &relation, FLOW_ALLOWED);
   __record_node(prov);
   __record_relation(RL_CREATE, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
