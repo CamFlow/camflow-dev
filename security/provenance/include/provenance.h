@@ -120,9 +120,11 @@ static inline void __update_version(uint64_t type, prov_msg_t* prov){
     goto out;
   }
 
+  memset(&relation, 0, sizeof(prov_msg_t));
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
+  __record_node(prov);
   if(node_identifier(prov).type == ACT_TASK){
     __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   }else{
