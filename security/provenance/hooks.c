@@ -1037,6 +1037,11 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 		rtn = -ENOMEM;
 		goto out;
   }
+	
+	if(provenance_is_opaque(iprov)){
+		set_opaque(nprov);
+		goto out;
+	}
 
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 
