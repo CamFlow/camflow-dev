@@ -207,12 +207,12 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	prov_msg_t* iprov = inode_provenance(dir);
 	int rtn=0;
 
-	if(!iprov){ // alloc provenance if none there
+	if(!iprov){
     rtn = -ENOMEM;
 		goto out;
   }
 
-	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
 	put_prov(iprov);
 	put_prov(cprov);
