@@ -37,6 +37,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.10
 
 ```
+- Fix bug when recording version.
 - Fix issue with private MMAP and opaque process.
 - Add API to track socket on bind and connect.
 - Fix type of socket bind.
