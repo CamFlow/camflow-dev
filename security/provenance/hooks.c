@@ -1037,7 +1037,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 		rtn = -ENOMEM;
 		goto out;
   }
-	
+
 	if(provenance_is_opaque(iprov)){
 		set_opaque(nprov);
 		goto out;
@@ -1052,12 +1052,14 @@ out:
 }
 
 /*
-* Tidy up after the installation of the new security attributes of a
-* process being transformed by an execve operation.  The new credentials
-* have, by this point, been set to @current->cred.  @bprm points to the
-* linux_binprm structure.  This hook is a good place to perform state
-* changes on the process such as clearing out non-inheritable signal
-* state.  This is called immediately after commit_creds().
+* Prepare to install the new security attributes of a process being
+* transformed by an execve operation, based on the old credentials
+* pointed to by @current->cred and the information set in @bprm->cred by
+* the bprm_set_creds hook.  @bprm points to the linux_binprm structure.
+* This hook is a good place to perform state changes on the process such
+* as closing open file descriptors to which access will no longer be
+* granted when the attributes are changed.  This is called immediately
+* before commit_creds().
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
 	prov_msg_t* cprov  = task_provenance();
