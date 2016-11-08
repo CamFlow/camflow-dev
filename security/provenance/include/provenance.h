@@ -141,7 +141,7 @@ static inline void __propagate(uint64_t type,
                             prov_msg_t* relation,
                             uint8_t allowed){
 
-  if(!provenance_propagate(from)){
+  if(!provenance_does_propagate(from)){
     goto out;
   }
 
@@ -149,7 +149,7 @@ static inline void __propagate(uint64_t type,
     goto out;
   }
 
-  if( filter_propagate_relation(type, allowed) ){ // it is filtered
+  if( filter_propagate_relation(type, allowed) ){ // is it filtered
     goto out;
   }
 
@@ -189,7 +189,6 @@ static inline void record_relation(uint64_t type,
   __record_node(from);
   __propagate(type, from, to, &relation, allowed);
   __update_version(type, to);
-  __record_node(to);
   __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, file);
 out:
   return;
@@ -218,7 +217,6 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   memset(&relation, 0, sizeof(prov_msg_t));
   prov_write(pck);
   __update_version(RL_RCV, inode);
-  __record_node(inode);
   __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 out:
   return;
