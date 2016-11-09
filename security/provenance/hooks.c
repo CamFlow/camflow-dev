@@ -1067,8 +1067,15 @@ out:
 	struct inode *inode = file_inode(bprm->file);
 	prov_msg_t* iprov = inode_provenance(inode);
 
+	if(provenance_is_opaque(iprov)){
+		set_opaque(nprov);
+		goto out;
+	}
+
 	record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED, NULL);
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
+
+out:
 	put_prov(iprov);
 	put_prov(nprov);
 	put_prov(cprov);
