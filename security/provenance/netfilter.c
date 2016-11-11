@@ -71,5 +71,5 @@ static int __init provenance_nf_init(void)
 
   return 0;
 }
-__initcall(provenance_nf_init);
+module_init(provenance_nf_init);
 #endif

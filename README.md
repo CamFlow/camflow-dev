@@ -22,6 +22,7 @@ make install # patience, sudo password will be asked during installation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.1.10          | 4.4.31         | 11/11/2016 |
 | 0.1.9           | 4.4.28         | 28/10/2016 |
 | 0.1.8           | 4.4.25         | 19/10/2016 |
 | 0.1.7           | 4.4.23         | 04/10/2016 |
@@ -32,6 +33,22 @@ make install # patience, sudo password will be asked during installation
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.1.10
+
+```
+- Fix bug when recording version.
+- Fix issue with private MMAP and opaque process.
+- Add API to track socket on bind and connect.
+- Fix type of socket bind.
+- Fix direction of socket accept.
+- Add pseudo file interface to read/write provenance tracking option from PID.
+- ifc_from_pid -> ifc_from_vpid and prov_from_pid -> prov_from_vpid (name change for clarity).
+- Reworked relation and node types: 64 bits, W3C type + CamFlow subtype.
+- Fixed issue when activating both IFC and Provenance.
+- Change module load priority.
+- Update to kernel version 4.4.31.
+```
 
 ### v0.1.9
 
@@ -136,8 +153,9 @@ make install # patience, sudo password will be asked during installation
 
 ### 0.1.X
 
+* generalise access denial recording.
 * look at some form of automated testing.
-* support for Raspberry Pi / ARM
+* support for Raspberry Pi / ARM.
 
 ### 0.2.X
 

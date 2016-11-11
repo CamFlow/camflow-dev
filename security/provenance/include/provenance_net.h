@@ -67,7 +67,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
   memset(prov, 0, sizeof(prov_msg_t));
   id = &packet_identifier(prov); // we are going fo fill this
 
-  id->type = MSG_PACKET;
+  id->type = ENT_PACKET;
   // collect IP element of prov identifier
   id->id = ih->id;
   id->snd_ip = ih->saddr;
@@ -124,6 +124,30 @@ static inline prov_msg_t* skb_inode_prov(struct sk_buff *skb){
   }
 
   return sk_inode_provenance(sk);
+}
+
+struct ipv4_filters{
+  struct list_head list;
+  struct prov_ipv4_filter filter;
+};
+
+extern struct ipv4_filters ingress_ipv4filters;
+extern struct ipv4_filters egress_ipv4filters;
+
+#define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
+#define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
+
+static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters* filters, uint32_t ip, uint32_t port){
+  struct ipv4_filters* tmp;
+
+  list_for_each_entry(tmp, &(filters->list), list){
+    if( (tmp->filter.mask&ip) == (tmp->filter.mask&tmp->filter.ip) ){ // ip match filter
+      if(tmp->filter.port==0 || tmp->filter.port==port){ // any port or match
+        return tmp->filter.op;
+      }
+    }
+  }
+  return 0; // do nothing
 }
 
 #endif
