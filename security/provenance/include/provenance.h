@@ -41,13 +41,6 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
-static inline struct prov_msg_t* prov_from_pid(pid_t pid){
-  struct task_struct *dest = find_task_by_vpid(pid);
-  if(!dest)
-    return NULL;
-  return __task_cred(dest)->provenance;
-}
-
 #define get_mutex(n) &(n->node_info.lprov.l)
 #define lock_node(n) mutex_lock(get_mutex(n))
 #define unlock_node(n) mutex_unlock(get_mutex(n))
@@ -59,7 +52,7 @@ static inline void put_prov(prov_msg_t* n){
   }
 }
 
-static inline prov_msg_t* alloc_provenance(uint32_t ntype, gfp_t gfp)
+static inline prov_msg_t* alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
@@ -99,17 +92,16 @@ static inline void __record_node(prov_msg_t* node){
   prov_write(node);
 }
 
-static inline void __record_relation(uint32_t type,
+static inline void __record_relation(uint64_t type,
                                       prov_identifier_t* from,
                                       prov_identifier_t* to,
                                       prov_msg_t* relation,
                                       uint8_t allowed,
                                       struct file *file){
-  prov_type(relation)=MSG_RELATION;
+  prov_type(relation)=type;
   relation_identifier(relation).id = prov_next_relation_id();
   relation_identifier(relation).boot_id = prov_boot_id;
   relation_identifier(relation).machine_id = prov_machine_id;
-  relation->relation_info.type=type;
   relation->relation_info.allowed=allowed;
   copy_node_info(&relation->relation_info.snd, from);
   copy_node_info(&relation->relation_info.rcv, to);
@@ -120,7 +112,7 @@ static inline void __record_relation(uint32_t type,
   prov_write(relation);
 }
 
-static inline void __update_version(uint32_t type, prov_msg_t* prov){
+static inline void __update_version(uint64_t type, prov_msg_t* prov){
   prov_msg_t old_prov;
   prov_msg_t relation;
 
@@ -128,10 +120,12 @@ static inline void __update_version(uint32_t type, prov_msg_t* prov){
     goto out;
   }
 
+  memset(&relation, 0, sizeof(prov_msg_t));
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
-  if(node_identifier(prov).type == MSG_TASK){
+  __record_node(prov);
+  if(node_identifier(prov).type == ACT_TASK){
     __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   }else{
     __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
@@ -141,13 +135,13 @@ out:
   return;
 }
 
-static inline void __propagate(uint32_t type,
+static inline void __propagate(uint64_t type,
                             prov_msg_t* from,
                             prov_msg_t* to,
                             prov_msg_t* relation,
                             uint8_t allowed){
 
-  if(!provenance_propagate(from)){
+  if(!provenance_does_propagate(from)){
     goto out;
   }
 
@@ -155,19 +149,21 @@ static inline void __propagate(uint32_t type,
     goto out;
   }
 
-  if( filter_propagate_relation(type, allowed) ){ // it is filtered
+  if( filter_propagate_relation(type, allowed) ){ // is it filtered
     goto out;
   }
 
   set_tracked(to);// receiving node become tracked
   set_propagate(to); // continue to propagate
-  prov_bloom_merge(prov_taint(to), prov_taint(from));
-  prov_bloom_merge(prov_taint(relation), prov_taint(from));
+  if(!prov_bloom_empty(prov_taint(from))){
+    prov_bloom_merge(prov_taint(to), prov_taint(from));
+    prov_bloom_merge(prov_taint(relation), prov_taint(from));
+  }
 out:
   return;
 }
 
-static inline void record_relation(uint32_t type,
+static inline void record_relation(uint64_t type,
                                     prov_msg_t* from,
                                     prov_msg_t* to,
                                     uint8_t allowed,
@@ -195,7 +191,6 @@ static inline void record_relation(uint32_t type,
   __record_node(from);
   __propagate(type, from, to, &relation, allowed);
   __update_version(type, to);
-  __record_node(to);
   __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, file);
 out:
   return;
@@ -224,7 +219,6 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   memset(&relation, 0, sizeof(prov_msg_t));
   prov_write(pck);
   __update_version(RL_RCV, inode);
-  __record_node(inode);
   __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 out:
   return;

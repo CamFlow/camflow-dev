@@ -34,13 +34,12 @@
 static void cred_init_provenance(void)
 {
 	struct cred *cred = (struct cred *) current->real_cred;
-	prov_msg_t *prov = alloc_provenance(MSG_TASK, GFP_KERNEL);
+	prov_msg_t *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->task_info.uid=__kuid_val(cred->euid);
   prov->task_info.gid=__kgid_val(cred->egid);
-	set_opaque(prov);
 	cred->provenance = prov;
 }
 
@@ -52,7 +51,7 @@ static void cred_init_provenance(void)
 */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
-  prov_msg_t* prov  = alloc_provenance(MSG_TASK, gfp);
+  prov_msg_t* prov  = alloc_provenance(ACT_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
@@ -84,7 +83,7 @@ static void provenance_cred_free(struct cred *cred)
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
   prov_msg_t* old_prov = old->provenance;
-  prov_msg_t* prov = alloc_provenance(MSG_TASK, gfp);
+  prov_msg_t* prov = alloc_provenance(ACT_TASK, gfp);
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct *new_ifc;
 #endif
@@ -151,7 +150,7 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-  prov_msg_t* iprov = alloc_provenance(MSG_INODE_UNKNOWN, GFP_KERNEL);
+  prov_msg_t* iprov = alloc_provenance(ENT_INODE_UNKNOWN, GFP_KERNEL);
   prov_msg_t* sprov;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct *ifc=NULL;
@@ -208,12 +207,12 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	prov_msg_t* iprov = inode_provenance(dir);
 	int rtn=0;
 
-	if(!iprov){ // alloc provenance if none there
+	if(!iprov){
     rtn = -ENOMEM;
 		goto out;
   }
 
-	record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
 	put_prov(iprov);
 	put_prov(cprov);
@@ -530,7 +529,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	struct ifc_struct* ifc= msg->ifc;
 #endif
   /* alloc new prov struct with generated id */
-  mprov = alloc_provenance(MSG_MSG, GFP_KERNEL);
+  mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
   if(!mprov){
     rtn = -ENOMEM;
@@ -616,7 +615,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	prov_msg_t* cprov = task_provenance();
-  prov_msg_t* sprov = alloc_provenance(MSG_SHM, GFP_KERNEL);
+  prov_msg_t* sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 	int rtn=0;
 #ifdef CONFIG_SECURITY_IFC
 	struct ifc_struct* ifc= shp->shm_perm.ifc;
@@ -640,8 +639,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 #endif
 
   shp->shm_perm.provenance=sprov;
-  record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
-  record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_WRITE, sprov, cprov, FLOW_ALLOWED, NULL);
+  record_relation(RL_READ, cprov, sprov, FLOW_ALLOWED, NULL);
 out:
 	put_prov(cprov);
 	return rtn;
@@ -679,10 +678,10 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 	}
 
   if(shmflg & SHM_RDONLY){
-    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
   }else{
-    record_relation(RL_ATTACH, sprov, cprov, FLOW_ALLOWED, NULL);
-    record_relation(RL_ATTACH, cprov, sprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
+    record_relation(RL_WRITE, cprov, sprov, FLOW_ALLOWED, NULL);
   }
 
 out:
@@ -755,6 +754,8 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	struct sockaddr_in* ipv4_addr;
+	uint8_t op;
 	int rtn = 0;
 
   if(!iprov){
@@ -764,6 +765,20 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
   if(provenance_is_opaque(cprov)){
     goto out;
+	}
+
+	/* should we start tracking this socket */
+	if(address->sa_family==AF_INET){
+		ipv4_addr = (struct sockaddr_in*)address;
+		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		if( (op & PROV_SET_TRACKED)!=0 ){
+			set_tracked(iprov);
+			set_tracked(cprov);
+		}
+		if( (op & PROV_SET_PROPAGATE)!=0 ){
+			set_propagate(iprov);
+			set_propagate(cprov);
+		}
 	}
 
 	provenance_record_address(iprov, address, addrlen);
@@ -786,6 +801,8 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 {
   prov_msg_t* cprov  = task_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
+	struct sockaddr_in* ipv4_addr;
+	uint8_t op;
 	int rtn=0;
 
 	if(!iprov){
@@ -796,6 +813,21 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
   if(provenance_is_opaque(cprov)){
     goto out;
 	}
+
+	/* should we start tracking this socket */
+	if(address->sa_family==AF_INET){
+		ipv4_addr = (struct sockaddr_in*)address;
+		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		if( (op & PROV_SET_TRACKED)!=0 ){
+			set_tracked(iprov);
+			set_tracked(cprov);
+		}
+		if( (op & PROV_SET_PROPAGATE)!=0 ){
+			set_propagate(iprov);
+			set_propagate(cprov);
+		}
+	}
+
 
 	provenance_record_address(iprov, address, addrlen);
 	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
@@ -1006,6 +1038,11 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 		goto out;
   }
 
+	if(provenance_is_opaque(iprov)){
+		set_opaque(nprov);
+		goto out;
+	}
+
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 
 out:
@@ -1015,12 +1052,14 @@ out:
 }
 
 /*
-* Tidy up after the installation of the new security attributes of a
-* process being transformed by an execve operation.  The new credentials
-* have, by this point, been set to @current->cred.  @bprm points to the
-* linux_binprm structure.  This hook is a good place to perform state
-* changes on the process such as clearing out non-inheritable signal
-* state.  This is called immediately after commit_creds().
+* Prepare to install the new security attributes of a process being
+* transformed by an execve operation, based on the old credentials
+* pointed to by @current->cred and the information set in @bprm->cred by
+* the bprm_set_creds hook.  @bprm points to the linux_binprm structure.
+* This hook is a good place to perform state changes on the process such
+* as closing open file descriptors to which access will no longer be
+* granted when the attributes are changed.  This is called immediately
+* before commit_creds().
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
 	prov_msg_t* cprov  = task_provenance();
@@ -1028,8 +1067,15 @@ out:
 	struct inode *inode = file_inode(bprm->file);
 	prov_msg_t* iprov = inode_provenance(inode);
 
+	if(provenance_is_opaque(iprov)){
+		set_opaque(nprov);
+		goto out;
+	}
+
 	record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED, NULL);
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
+
+out:
 	put_prov(iprov);
 	put_prov(nprov);
 	put_prov(cprov);
@@ -1044,7 +1090,7 @@ out:
 */
 static int provenance_sb_alloc_security(struct super_block *sb)
 {
-  prov_msg_t* sbprov  = alloc_provenance(MSG_SB, GFP_KERNEL);
+  prov_msg_t* sbprov  = alloc_provenance(ENT_SBLCK, GFP_KERNEL);
   if(!sbprov)
     return -ENOMEM;
   sb->s_provenance = sbprov;
@@ -1143,7 +1189,13 @@ uint32_t prov_boot_id=0;
 struct prov_boot_buffer*       boot_buffer=NULL;
 struct prov_long_boot_buffer*  long_boot_buffer=NULL;
 
+struct ipv4_filters ingress_ipv4filters;
+struct ipv4_filters egress_ipv4filters;
+
 void __init provenance_add_hooks(void){
+	INIT_LIST_HEAD(&ingress_ipv4filters.list);
+	INIT_LIST_HEAD(&egress_ipv4filters.list);
+
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),

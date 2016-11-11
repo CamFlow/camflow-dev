@@ -21,23 +21,23 @@
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
 static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
-  uint32_t type = MSG_INODE_UNKNOWN;
+  uint64_t type = ENT_INODE_UNKNOWN;
   iprov->inode_info.mode=inode->i_mode;
 
   if(S_ISBLK(inode->i_mode)){
-    type=MSG_INODE_BLOCK;
+    type=ENT_INODE_BLOCK;
   }else if(S_ISCHR(inode->i_mode)){
-    type=MSG_INODE_CHAR;
+    type=ENT_INODE_CHAR;
   }else if(S_ISDIR(inode->i_mode)){
-    type=MSG_INODE_DIRECTORY;
+    type=ENT_INODE_DIRECTORY;
   }else if(S_ISFIFO(inode->i_mode)){
-    type=MSG_INODE_FIFO;
+    type=ENT_INODE_FIFO;
   }else if(S_ISLNK(inode->i_mode)){
-    type=MSG_INODE_LINK;
+    type=ENT_INODE_LINK;
   }else if(S_ISREG(inode->i_mode)){
-    type=MSG_INODE_FILE;
+    type=ENT_INODE_FILE;
   }else if(S_ISSOCK(inode->i_mode)){
-    type=MSG_INODE_SOCKET;
+    type=ENT_INODE_SOCKET;
   }
   node_identifier(iprov).type=type;
 }
@@ -82,7 +82,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
     return NULL;
   }
 
-  if( filter_node(iprov) ){
+  if( filter_node(iprov) || filter_node(cprov)){
     return NULL;
   }
 
@@ -90,7 +90,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
     return NULL;
   }
 
-  prov = alloc_provenance(MSG_INODE_MMAP, GFP_KERNEL);
+  prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
 
   set_node_id(prov, ASSIGN_NODE_ID);
   prov->inode_info.uid = iprov->inode_info.uid;
@@ -98,6 +98,7 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
   memcpy(prov->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16*sizeof(uint8_t));
   prov->inode_info.mode = iprov->inode_info.mode;
   __record_node(iprov);
+  memset(&relation, 0, sizeof(prov_msg_t));
   __propagate(RL_CREATE, iprov, prov, &relation, FLOW_ALLOWED);
   __record_node(prov);
   __record_relation(RL_CREATE, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
