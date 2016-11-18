@@ -38,7 +38,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.11
 
 ```
-- 
+- Fix more orphaned edge cases.
 ```
 
 ### v0.1.10
