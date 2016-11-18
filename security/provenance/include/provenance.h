@@ -124,7 +124,6 @@ static inline void __update_version(uint64_t type, prov_msg_t* prov){
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
-  __record_node(prov);
   if(node_identifier(prov).type == ACT_TASK){
     __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   }else{
@@ -190,7 +189,9 @@ static inline void record_relation(uint64_t type,
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(from);
   __propagate(type, from, to, &relation, allowed);
+  __record_node(to);
   __update_version(type, to);
+  __record_node(to);
   __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, file);
 out:
   return;
@@ -218,7 +219,9 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
   }
   memset(&relation, 0, sizeof(prov_msg_t));
   prov_write(pck);
+  __record_node(inode);
   __update_version(RL_RCV, inode);
+  __record_node(inode);
   __record_relation(RL_RCV, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 out:
   return;
