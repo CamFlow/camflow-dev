@@ -446,12 +446,12 @@ struct sock {
 	int			sk_write_pending;
 #ifdef CONFIG_SECURITY
 	void			*sk_security;
-#endif
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void			*sk_provenance;
 #endif
 #ifdef CONFIG_SECURITY_IFC
 	void			*sk_ifc;
+#endif
 #endif
 	__u32			sk_mark;
 #ifdef CONFIG_CGROUP_NET_CLASSID
@@ -1433,6 +1433,16 @@ static inline void sk_mem_uncharge(struct sock *sk, int size)
 	if (!sk_has_account(sk))
 		return;
 	sk->sk_forward_alloc += size;
+
+	/* Avoid a possible overflow.
+	 * TCP send queues can make this happen, if sk_mem_reclaim()
+	 * is not called and more than 2 GBytes are released at once.
+	 *
+	 * If we reach 2 MBytes, reclaim 1 MBytes right now, there is
+	 * no need to hold that much forward allocation anyway.
+	 */
+	if (unlikely(sk->sk_forward_alloc >= 1 << 21))
+		__sk_mem_reclaim(sk, 1 << 20);
 }
 
 static inline void sk_wmem_free_skb(struct sock *sk, struct sk_buff *skb)
