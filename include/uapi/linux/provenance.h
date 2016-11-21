@@ -419,6 +419,13 @@ struct prov_process_config{
   uint32_t vpid;
 };
 
+#define PROV_NET_TRACKED		  0x01
+#define PROV_NET_OPAQUE 		  0x02
+#define PROV_NET_PROPAGATE    0x04
+#define PROV_NET_TAINT        0x08
+#define PROV_NET_RECORD       0x10
+#define PROV_NET_DELETE       0x20 // to actually delete a filter from the list
+
 struct prov_ipv4_filter{
   uint32_t ip;
   uint32_t mask;

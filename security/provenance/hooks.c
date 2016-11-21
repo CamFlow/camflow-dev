@@ -771,11 +771,11 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	if(address->sa_family==AF_INET){
 		ipv4_addr = (struct sockaddr_in*)address;
 		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		if( (op & PROV_SET_TRACKED)!=0 ){
+		if( (op & PROV_NET_TRACKED)!=0 ){
 			set_tracked(iprov);
 			set_tracked(cprov);
 		}
-		if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( (op & PROV_NET_PROPAGATE)!=0 ){
 			set_propagate(iprov);
 			set_propagate(cprov);
 		}
@@ -818,11 +818,11 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 	if(address->sa_family==AF_INET){
 		ipv4_addr = (struct sockaddr_in*)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		if( (op & PROV_SET_TRACKED)!=0 ){
+		if( (op & PROV_NET_TRACKED)!=0 ){
 			set_tracked(iprov);
 			set_tracked(cprov);
 		}
-		if( (op & PROV_SET_PROPAGATE)!=0 ){
+		if( (op & PROV_NET_PROPAGATE)!=0 ){
 			set_propagate(iprov);
 			set_propagate(cprov);
 		}
