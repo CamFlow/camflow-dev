@@ -328,6 +328,20 @@ out:
 }
 
 /*
+* Check for permission to rename a file or directory.
+* @old_dir contains the inode structure for parent of the old link.
+* @old_dentry contains the dentry structure of the old link.
+* @new_dir contains the inode structure for parent of the new link.
+* @new_dentry contains the dentry structure of the new link.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_rename(struct inode *old_dir, struct dentry *old_dentry,
+				struct inode *new_dir, struct dentry *new_dentry)
+{
+	return provenance_inode_link(old_dentry, new_dir, new_dentry);
+}
+
+/*
 * Check file permissions before accessing an open file.  This hook is
 * called by various operations that read or write files.  A security
 * module can use this hook to perform additional checking on these
@@ -1136,6 +1150,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
   LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
   LSM_HOOK_INIT(inode_link, provenance_inode_link),
+  LSM_HOOK_INIT(inode_rename, provenance_inode_rename),
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
