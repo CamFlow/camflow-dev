@@ -554,7 +554,6 @@ declare_file_operations(prov_process_ops, prov_write_process, prov_read_process)
 
 static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 				 size_t count, struct ipv4_filters *filters){
-	struct prov_ipv4_filter *input;
 	struct ipv4_filters	*f;
 
 	if(__kuid_val(current_euid())!=0){
@@ -565,18 +564,17 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 	 return -ENOMEM;
 	}
 
-	input = (struct prov_ipv4_filter*)buf;
-	f = (struct ipv4_filters*)kmalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
+	f = (struct ipv4_filters*)kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if(copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
 	{
 		return -EAGAIN;
 	}
 	f->filter.ip = f->filter.ip&f->filter.mask;
 
-	if(f->filter.op!=PROV_NET_DELETE){ // we are not trying to delete something
+	if((f->filter.op&PROV_NET_DELETE)!=PROV_NET_DELETE){ // we are not trying to delete something
 		list_add_tail(&(f->list), &filters->list);
 	} else{
-		// TODO
+		prov_ipv4_delete(filters, f);
 	}
 	return sizeof(struct prov_ipv4_filter);
 }
