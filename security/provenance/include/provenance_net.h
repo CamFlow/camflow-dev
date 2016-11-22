@@ -150,4 +150,21 @@ static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters* filters, uint32_t i
   return 0; // do nothing
 }
 
+static inline uint8_t prov_ipv4_delete(struct ipv4_filters* filters, struct ipv4_filters	*f){
+  struct list_head *pos, *q;
+  struct ipv4_filters* tmp;
+
+  list_for_each_safe(pos, q, &(filters->list)){
+    tmp= list_entry(pos, struct ipv4_filters, list);
+    if(tmp->filter.mask==f->filter.mask &&
+        tmp->filter.ip == f->filter.ip &&
+        tmp->filter.port == f->filter.port){
+      list_del(pos);
+      kfree(tmp);
+      return 0; // you should only get one
+    }
+  }
+  return 0; // do nothing
+}
+
 #endif

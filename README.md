@@ -38,6 +38,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.11
 
 ```
+- Can now delete IP filter entry.
 - Fix more orphaned edge cases.
 - Update to kernel version 4.4.34.
 ```
