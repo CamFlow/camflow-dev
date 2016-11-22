@@ -572,7 +572,7 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 	f->filter.ip = f->filter.ip&f->filter.mask;
 
 	if((f->filter.op&PROV_NET_DELETE)!=PROV_NET_DELETE){ // we are not trying to delete something
-		list_add_tail(&(f->list), &filters->list);
+		prov_ipv4_add_or_update(filters, f);
 	} else{
 		prov_ipv4_delete(filters, f);
 	}
