@@ -38,6 +38,8 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.11
 
 ```
+- Add inode_setattr and inode_getattr hook.
+- Add inode_rename hook.
 - If IP filter is already present update operation rather than duplicating the entry.
 - Can now delete IP filter entry.
 - Fix more orphaned edge cases.
