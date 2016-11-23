@@ -304,7 +304,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   prov_msg_t* iprov;
 	int rtn=0;
 
-	iprov = inode_provenance(old_dentry->d_inode); // inode pointed by dentry
+	iprov = inode_provenance(d_backing_inode(old_dentry)); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -357,7 +357,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	prov_msg_t* iattrprov;
 	int rtn=0;
 
-	iprov = inode_provenance(dentry->d_inode); // inode pointed by dentry
+	iprov = inode_provenance(d_backing_inode(dentry)); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
