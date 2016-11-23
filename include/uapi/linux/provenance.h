@@ -137,22 +137,25 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_BIND               (RL_GENERATED | 0x0000000000000100ULL)
 #define RL_SND                (RL_GENERATED | 0x0000000000000200ULL)
 #define RL_LINK               (RL_GENERATED | 0x0000000000000400ULL)
+#define RL_SETATTR            (RL_GENERATED | 0x0000000000000800ULL)
 /* USED SUBTYPES */
-#define RL_READ               (RL_USED      | 0x0000000000000800ULL)
-#define RL_MMAP_READ          (RL_USED      | 0x0000000000001000ULL)
-#define RL_PERM_READ          (RL_USED      | 0x0000000000002000ULL)
-#define RL_EXEC               (RL_USED      | 0x0000000000004000ULL)
-#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000008000ULL)
-#define RL_PERM_EXEC          (RL_USED      | 0x0000000000010000ULL)
-#define RL_ACCEPT             (RL_USED      | 0x0000000000020000ULL)
-#define RL_RCV                (RL_USED      | 0x0000000000040000ULL)
-#define RL_OPEN               (RL_USED      | 0x0000000000080000ULL)
-#define RL_SEARCH             (RL_USED      | 0x0000000000100000ULL)
+#define RL_READ               (RL_USED      | 0x0000000000001000ULL)
+#define RL_MMAP_READ          (RL_USED      | 0x0000000000002000ULL)
+#define RL_PERM_READ          (RL_USED      | 0x0000000000004000ULL)
+#define RL_EXEC               (RL_USED      | 0x0000000000008000ULL)
+#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000010000ULL)
+#define RL_PERM_EXEC          (RL_USED      | 0x0000000000020000ULL)
+#define RL_ACCEPT             (RL_USED      | 0x0000000000040000ULL)
+#define RL_RCV                (RL_USED      | 0x0000000000080000ULL)
+#define RL_OPEN               (RL_USED      | 0x0000000000100000ULL)
+#define RL_SEARCH             (RL_USED      | 0x0000000000200000ULL)
+#define RL_GETATTR            (RL_GENERATED | 0x0000000000400000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000000000200000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000000400000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000000000800000ULL)
-#define RL_IFC                (RL_INFORMED  | 0x0000000001000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000000000800000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000001000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000000002000000ULL)
+#define RL_IFC                (RL_INFORMED  | 0x0000000004000000ULL)
+
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
 #define ACT_DISC              (DM_ACTIVITY  | 0x0000000000000002ULL)
@@ -179,6 +182,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define ENT_PACKET            (DM_ENTITY    | 0x0000000000100000ULL)
 #define ENT_IFC               (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000400000ULL)
+#define ENT_IATTR             (DM_ENTITY    | 0x0000000000800000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -306,6 +310,19 @@ struct inode_prov_struct{
   uint8_t sb_uuid[16];
 };
 
+struct iattr_prov_struct{
+  basic_elements;
+  union provmutex lprov;
+  uint32_t valid;
+  uint16_t mode;
+  uint32_t uid;
+  uint32_t gid;
+  int64_t size;
+  int64_t atime;
+  int64_t ctime;
+  int64_t mtime;
+};
+
 struct msg_msg_struct{
   basic_elements;
   union provmutex lprov;
@@ -349,6 +366,7 @@ typedef union prov_msg{
   struct sock_struct          sock_info;
   struct sb_struct            sb_info;
   struct pck_struct           pck_info;
+  struct iattr_prov_struct    iattr_info;
 } prov_msg_t;
 
 struct str_struct{

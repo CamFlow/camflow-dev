@@ -342,6 +342,68 @@ static int provenance_inode_rename(struct inode *old_dir, struct dentry *old_den
 }
 
 /*
+* Check permission before setting file attributes.  Note that the kernel
+* call to notify_change is performed from several locations, whenever
+* file attributes change (such as when a file is truncated, chown/chmod
+* operations, transferring disk quotas, etc).
+* @dentry contains the dentry structure for the file.
+* @attr is the iattr structure containing the new file attributes.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
+{
+	prov_msg_t* cprov = task_provenance();
+  prov_msg_t* iprov;
+	prov_msg_t* iattrprov;
+	int rtn=0;
+
+	iprov = inode_provenance(dentry->d_inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+    rtn = -ENOMEM;
+		goto out;
+  }
+	// alloc and assign id to attribute
+	iattrprov = alloc_provenance(ENT_IATTR, GFP_KERNEL);
+	set_node_id(iattrprov, ASSIGN_NODE_ID);
+
+	iattrprov->iattr_info.valid = iattr->ia_valid;
+	iattrprov->iattr_info.mode = iattr->ia_mode;
+	iattrprov->iattr_info.uid = __kuid_val(iattr->ia_uid);
+	iattrprov->iattr_info.gid = __kgid_val(iattr->ia_gid);
+	iattrprov->iattr_info.size = iattr->ia_size;
+	iattrprov->iattr_info.atime = iattr->ia_atime.tv_sec;
+	iattrprov->iattr_info.mtime = iattr->ia_mtime.tv_sec;
+	iattrprov->iattr_info.ctime = iattr->ia_ctime.tv_sec;
+
+	record_relation(RL_SETATTR, cprov, iattrprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_SETATTR, iattrprov, iprov, FLOW_ALLOWED, NULL);
+	free_provenance(iattrprov);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
+}
+
+int provenance_inode_getattr(const struct path *path){
+	struct inode *inode = d_backing_inode(path->dentry);
+	prov_msg_t* cprov = task_provenance();
+  prov_msg_t* iprov;
+	int rtn=0;
+
+	iprov = inode_provenance(inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+    rtn = -ENOMEM;
+		goto out;
+  }
+
+	record_relation(RL_GETATTR, iprov, cprov, FLOW_ALLOWED, NULL);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
+}
+
+/*
 * Check file permissions before accessing an open file.  This hook is
 * called by various operations that read or write files.  A security
 * module can use this hook to perform additional checking on these
@@ -1151,6 +1213,8 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
   LSM_HOOK_INIT(inode_link, provenance_inode_link),
   LSM_HOOK_INIT(inode_rename, provenance_inode_rename),
+  LSM_HOOK_INIT(inode_setattr, provenance_inode_setattr),
+  LSM_HOOK_INIT(inode_getattr, provenance_inode_getattr),
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
