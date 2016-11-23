@@ -384,6 +384,11 @@ out:
   return rtn;
 }
 
+/*
+* Check permission before obtaining file attributes.
+* @path contains the path structure for the file.
+* Return 0 if permission is granted.
+*/
 int provenance_inode_getattr(const struct path *path){
 	struct inode *inode = d_backing_inode(path->dentry);
 	prov_msg_t* cprov = task_provenance();
@@ -397,6 +402,31 @@ int provenance_inode_getattr(const struct path *path){
   }
 
 	record_relation(RL_GETATTR, iprov, cprov, FLOW_ALLOWED, NULL);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+  return rtn;
+}
+
+/*
+* Check the permission to read the symbolic link.
+* @dentry contains the dentry structure for the file link.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_readlink(struct dentry *dentry)
+{
+	struct inode *inode = d_backing_inode(dentry);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov;
+	int rtn = 0;
+
+	iprov = inode_provenance(inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+    rtn = -ENOMEM;
+		goto out;
+  }
+
+	record_relation(RL_READLINK, iprov, cprov, FLOW_ALLOWED, NULL);
 out:
 	put_prov(iprov);
 	put_prov(cprov);
@@ -1215,6 +1245,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(inode_rename, provenance_inode_rename),
   LSM_HOOK_INIT(inode_setattr, provenance_inode_setattr),
   LSM_HOOK_INIT(inode_getattr, provenance_inode_getattr),
+  LSM_HOOK_INIT(inode_readlink, provenance_inode_readlink),
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
