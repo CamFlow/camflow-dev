@@ -149,7 +149,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_RCV                (RL_USED      | 0x0000000000080000ULL)
 #define RL_OPEN               (RL_USED      | 0x0000000000100000ULL)
 #define RL_SEARCH             (RL_USED      | 0x0000000000200000ULL)
-#define RL_GETATTR            (RL_GENERATED | 0x0000000000400000ULL)
+#define RL_GETATTR            (RL_USED      | 0x0000000000400000ULL)
 /* INFORMED SUBTYPES */
 #define RL_CLONE              (RL_INFORMED  | 0x0000000000800000ULL)
 #define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000001000000ULL)
@@ -261,7 +261,7 @@ typedef union prov_identifier{
 #define PROPAGATE_BIT 4
 #define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
-#define provenance_does_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
+#define provenance_does_propagate(node)     prov_check_flag(node, PROPAGATE_BIT)
 
 #define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 
