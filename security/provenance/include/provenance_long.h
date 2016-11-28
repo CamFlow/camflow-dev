@@ -21,11 +21,13 @@
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static inline void __init_long_provenance(uint64_t ntype, long_prov_msg_t* prov){
-  prov_type(prov)=ntype;
-  node_identifier(prov).id=prov_next_node_id();
-  node_identifier(prov).boot_id=prov_boot_id;
-  node_identifier(prov).machine_id=prov_machine_id;
+static long_prov_msg_t* alloc_long_provenance(uint64_t ntype, gfp_t priority){
+  long_prov_msg_t* tmp = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), priority);
+  prov_type(tmp)=ntype;
+  node_identifier(tmp).id=prov_next_node_id();
+  node_identifier(tmp).boot_id=prov_boot_id;
+  node_identifier(tmp).machine_id=prov_machine_id;
+  return tmp;
 }
 
 static inline void __long_record_node(long_prov_msg_t* node){
@@ -54,9 +56,7 @@ static inline void __long_record_relation(uint64_t type, long_prov_msg_t* from, 
 
 #ifdef CONFIG_SECURITY_IFC
 static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context){
-  long_prov_msg_t* ifc_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
-
-  __init_long_provenance(ENT_IFC, ifc_prov);
+  long_prov_msg_t* ifc_prov = alloc_long_provenance(ENT_IFC, GFP_KERNEL);
   memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
   long_prov_write(ifc_prov);
   kfree(ifc_prov);
@@ -66,13 +66,11 @@ static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context
 
 static inline int prov_print(const char *fmt, ...)
 {
-  long_prov_msg_t* msg = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
+  long_prov_msg_t* msg = alloc_long_provenance(ENT_STR, GFP_KERNEL); // revert back to cache if causes performance issue
   int length;
   va_list args;
   va_start(args, fmt);
 
-  /* set message type */
-  __init_long_provenance(ENT_STR, msg);
   msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
   long_prov_write(msg);
   va_end(args);
@@ -84,8 +82,7 @@ static inline int prov_print(const char *fmt, ...)
 static inline void __record_node_name(prov_msg_t* node, char* name){
 	long_prov_msg_t* fname_prov;
 
-  fname_prov = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
-  __init_long_provenance(ENT_FILE_NAME, fname_prov);
+  fname_prov = alloc_long_provenance(ENT_FILE_NAME, GFP_KERNEL);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
 	__long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
@@ -177,8 +174,7 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
     return;
   }
 
-  addr_info = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
-  __init_long_provenance(ENT_ADDR, addr_info);
+  addr_info = alloc_long_provenance(ENT_ADDR, GFP_KERNEL);
   addr_info->address_info.length=addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
 	__long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
@@ -186,4 +182,46 @@ static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr
 	set_name_recorded(skprov);
 }
 
+static inline void record_write_xattr(uint64_t type,
+                                      prov_msg_t* iprov,
+                                      prov_msg_t *cprov,
+                                      const char* name,
+                                      const void* value,
+                                      size_t size,
+                                      int flags,
+                                      uint8_t allowed){
+  long_prov_msg_t* xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
+  prov_msg_t relation;
+  memset(&relation, 0, sizeof(prov_msg_t));
+  memcpy(xattr->xattr_info.name, name, 255);
+
+  if(value!=NULL){
+    if(size < PROV_XATTR_VALUE_SIZE){
+      xattr->xattr_info.size = size;
+      memcpy(xattr->xattr_info.value, value, size);
+    }else{
+      xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
+      memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
+    }
+    xattr->xattr_info.flags = flags;
+  }
+
+  __record_node(cprov);
+  __record_relation(type, &(cprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
+  __update_version(type, iprov);
+  __long_record_relation(type, xattr, iprov, allowed);
+  kfree(xattr);
+}
+
+static inline void record_read_xattr(uint64_t type, prov_msg_t* cprov, prov_msg_t *iprov, const char* name, uint8_t allowed){
+  long_prov_msg_t* xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
+  prov_msg_t relation;
+  memset(&relation, 0, sizeof(prov_msg_t));
+  memcpy(xattr->xattr_info.name, name, 255);
+  __record_node(iprov);
+  __record_relation(type, &(iprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
+  __update_version(type, cprov);
+  __long_record_relation(type, xattr, cprov, allowed);
+  kfree(xattr);
+}
 #endif

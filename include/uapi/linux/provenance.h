@@ -138,24 +138,28 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_SND                (RL_GENERATED | 0x0000000000000200ULL)
 #define RL_LINK               (RL_GENERATED | 0x0000000000000400ULL)
 #define RL_SETATTR            (RL_GENERATED | 0x0000000000000800ULL)
+#define RL_SETXATTR           (RL_GENERATED | 0x0000000000001000ULL)
+#define RL_RMVXATTR           (RL_GENERATED | 0x0000000000002000ULL)
 /* USED SUBTYPES */
-#define RL_READ               (RL_USED      | 0x0000000000001000ULL)
-#define RL_MMAP_READ          (RL_USED      | 0x0000000000002000ULL)
-#define RL_PERM_READ          (RL_USED      | 0x0000000000004000ULL)
-#define RL_EXEC               (RL_USED      | 0x0000000000008000ULL)
-#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000010000ULL)
-#define RL_PERM_EXEC          (RL_USED      | 0x0000000000020000ULL)
-#define RL_ACCEPT             (RL_USED      | 0x0000000000040000ULL)
-#define RL_RCV                (RL_USED      | 0x0000000000080000ULL)
-#define RL_OPEN               (RL_USED      | 0x0000000000100000ULL)
-#define RL_SEARCH             (RL_USED      | 0x0000000000200000ULL)
-#define RL_GETATTR            (RL_USED      | 0x0000000000400000ULL)
-#define RL_READLINK           (RL_USED      | 0x0000000000800000ULL)
+#define RL_READ               (RL_USED      | 0x0000000000004000ULL)
+#define RL_MMAP_READ          (RL_USED      | 0x0000000000008000ULL)
+#define RL_PERM_READ          (RL_USED      | 0x0000000000010000ULL)
+#define RL_EXEC               (RL_USED      | 0x0000000000020000ULL)
+#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000040000ULL)
+#define RL_PERM_EXEC          (RL_USED      | 0x0000000000080000ULL)
+#define RL_ACCEPT             (RL_USED      | 0x0000000000100000ULL)
+#define RL_RCV                (RL_USED      | 0x0000000000200000ULL)
+#define RL_OPEN               (RL_USED      | 0x0000000000400000ULL)
+#define RL_SEARCH             (RL_USED      | 0x0000000000800000ULL)
+#define RL_GETATTR            (RL_USED      | 0x0000000001000000ULL)
+#define RL_READLINK           (RL_USED      | 0x0000000002000000ULL)
+#define RL_GETXATTR           (RL_GENERATED | 0x0000000004000000ULL)
+#define RL_LSTXATTR           (RL_GENERATED | 0x0000000008000000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000000001000000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000002000000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000000004000000ULL)
-#define RL_IFC                (RL_INFORMED  | 0x0000000008000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000000010000000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000020000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000000040000000ULL)
+#define RL_IFC                (RL_INFORMED  | 0x0000000080000000ULL)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
@@ -184,6 +188,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define ENT_IFC               (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000400000ULL)
 #define ENT_IATTR             (DM_ENTITY    | 0x0000000000800000ULL)
+#define ENT_XATTR             (DM_ENTITY    | 0x0000000001000000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -393,6 +398,16 @@ struct ifc_context_struct{
   struct ifc_context context;
 };
 
+#define PROV_XATTR_NAME_SIZE    256
+#define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
+struct xattr_struct{
+  basic_elements;
+  char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
+  int32_t flags;
+  uint8_t value[PROV_XATTR_VALUE_SIZE];
+  size_t size;
+};
+
 struct disc_node_struct{
   basic_elements;
   size_t length;
@@ -408,6 +423,7 @@ typedef union long_msg{
   struct address_struct       address_info;
   struct ifc_context_struct   ifc_info;
   struct disc_node_struct     disc_node_info;
+  struct xattr_struct         xattr_info;
 } long_prov_msg_t;
 
 struct prov_filter{

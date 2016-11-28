@@ -434,6 +434,103 @@ out:
 }
 
 /*
+* Update inode security field after successful setxattr operation.
+* @value identified by @name for @dentry.
+*/
+static void provenance_inode_post_setxattr(struct dentry *dentry, const char *name,
+					const void *value, size_t size, int flags)
+{
+	struct inode *inode = d_backing_inode(dentry);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov = inode_provenance(inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+		goto out;
+  }
+
+	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+	return;
+}
+
+/*
+* Check permission before obtaining the extended attributes
+* identified by @name for @dentry.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
+{
+	struct inode *inode = d_backing_inode(dentry);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov;
+	int rtn = 0;
+
+	iprov = inode_provenance(inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+    rtn = -ENOMEM;
+		goto out;
+  }
+
+	record_read_xattr(RL_GETXATTR, cprov, iprov, name, FLOW_ALLOWED);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+	return rtn;
+}
+
+/*
+* Check permission before obtaining the list of extended attribute
+* names for @dentry.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_listxattr(struct dentry *dentry)
+{
+	struct inode *inode = d_backing_inode(dentry);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov;
+	int rtn = 0;
+
+	iprov = inode_provenance(inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+    rtn = -ENOMEM;
+		goto out;
+  }
+
+	record_relation(RL_LSTXATTR, iprov, cprov, FLOW_ALLOWED, NULL);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+	return rtn;
+}
+
+/*
+* Check permission before removing the extended attribute
+* identified by @name for @dentry.
+* Return 0 if permission is granted.
+*/
+static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
+{
+	struct inode *inode = d_backing_inode(dentry);
+	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* iprov;
+	int rtn=0;
+
+	iprov = inode_provenance(inode); // inode pointed by dentry
+  if(!iprov){ // alloc provenance if none there
+    rtn = -ENOMEM;
+		goto out;
+  }
+
+	record_write_xattr(RL_SETXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
+out:
+	put_prov(iprov);
+	put_prov(cprov);
+	return rtn;
+}
+
+
+/*
 * Check file permissions before accessing an open file.  This hook is
 * called by various operations that read or write files.  A security
 * module can use this hook to perform additional checking on these
@@ -889,7 +986,6 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
 	provenance_record_address(iprov, address, addrlen);
 	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
-
 out:
 	put_prov(cprov);
   return rtn;
@@ -937,7 +1033,6 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 
 	provenance_record_address(iprov, address, addrlen);
 	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
-
 out:
 	put_prov(cprov);
   return 0;
@@ -959,8 +1054,8 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
     rtn = -ENOMEM;
 		goto out;
 	}
-  record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED, NULL);
 
+  record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
 	put_prov(cprov);
   return 0;
@@ -1007,7 +1102,6 @@ static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 	}
 
 	record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED, NULL);
-
 out:
 	put_prov(cprov);
 	return rtn;
@@ -1034,7 +1128,6 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 	}
 
 	record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
-
 out:
 	put_prov(cprov);
 	return rtn;
@@ -1246,6 +1339,10 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(inode_setattr, provenance_inode_setattr),
   LSM_HOOK_INIT(inode_getattr, provenance_inode_getattr),
   LSM_HOOK_INIT(inode_readlink, provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_post_setxattr, provenance_inode_post_setxattr),
+	LSM_HOOK_INIT(inode_getxattr, provenance_inode_getxattr),
+	LSM_HOOK_INIT(inode_listxattr, provenance_inode_listxattr),
+	LSM_HOOK_INIT(inode_removexattr, provenance_inode_removexattr),
 
 	/* file related hooks */
   LSM_HOOK_INIT(file_permission, provenance_file_permission),
