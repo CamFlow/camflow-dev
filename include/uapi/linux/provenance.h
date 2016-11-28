@@ -400,7 +400,7 @@ struct ifc_context_struct{
 
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
-struct xattr_struct{
+struct xattr_prov_struct{
   basic_elements;
   char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
   int32_t flags;
@@ -423,7 +423,7 @@ typedef union long_msg{
   struct address_struct       address_info;
   struct ifc_context_struct   ifc_info;
   struct disc_node_struct     disc_node_info;
-  struct xattr_struct         xattr_info;
+  struct xattr_prov_struct    xattr_info;
 } long_prov_msg_t;
 
 struct prov_filter{
