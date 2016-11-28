@@ -193,7 +193,9 @@ static inline void record_write_xattr(uint64_t type,
   long_prov_msg_t* xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
   prov_msg_t relation;
   memset(&relation, 0, sizeof(prov_msg_t));
-  memcpy(xattr->xattr_info.name, name, 255);
+
+  memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE-1);
+  xattr->xattr_info.name[PROV_XATTR_NAME_SIZE-1]='\0';
 
   if(value!=NULL){
     if(size < PROV_XATTR_VALUE_SIZE){
@@ -217,7 +219,10 @@ static inline void record_read_xattr(uint64_t type, prov_msg_t* cprov, prov_msg_
   long_prov_msg_t* xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
   prov_msg_t relation;
   memset(&relation, 0, sizeof(prov_msg_t));
-  memcpy(xattr->xattr_info.name, name, 255);
+  
+  memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE-1);
+  xattr->xattr_info.name[PROV_XATTR_NAME_SIZE-1]='\0';
+
   __record_node(iprov);
   __record_relation(type, &(iprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
   __update_version(type, cprov);
