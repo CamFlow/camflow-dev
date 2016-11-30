@@ -447,6 +447,16 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 		goto out;
   }
 
+	// one of the node is opaque
+	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
+		goto out;
+	}
+
+	// none of the node is tracked
+	if(!provenance_is_tracked(cprov) && !provenance_is_tracked(iprov)){
+		goto out;
+	}
+
 	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
 out:
 	put_prov(iprov);
@@ -471,6 +481,16 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
     rtn = -ENOMEM;
 		goto out;
   }
+
+	// one of the node is opaque
+	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
+		goto out;
+	}
+
+	// none of the node is tracked
+	if(!provenance_is_tracked(cprov) && !provenance_is_tracked(iprov)){
+		goto out;
+	}
 
 	record_read_xattr(RL_GETXATTR, cprov, iprov, name, FLOW_ALLOWED);
 out:
@@ -522,7 +542,17 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
   }
 
-	record_write_xattr(RL_SETXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
+	// one of the node is opaque
+	if(provenance_is_opaque(cprov) || provenance_is_opaque(iprov)){
+		goto out;
+	}
+
+	// none of the node is tracked
+	if(!provenance_is_tracked(cprov) && !provenance_is_tracked(iprov)){
+		goto out;
+	}
+
+	record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
 out:
 	put_prov(iprov);
 	put_prov(cprov);
