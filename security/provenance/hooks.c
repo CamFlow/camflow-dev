@@ -1301,7 +1301,7 @@ out:
 		goto out;
 	}
 
-	record_relation(RL_EXEC, cprov, nprov, FLOW_ALLOWED, NULL);
+	record_relation(RL_EXEC_PROCESS, cprov, nprov, FLOW_ALLOWED, NULL);
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 
 out:
