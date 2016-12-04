@@ -99,9 +99,9 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
   prov->inode_info.mode = iprov->inode_info.mode;
   __record_node(iprov);
   memset(&relation, 0, sizeof(prov_msg_t));
-  __propagate(RL_CREATE, iprov, prov, &relation, FLOW_ALLOWED);
+  __propagate(RL_MMAP, iprov, prov, &relation, FLOW_ALLOWED);
   __record_node(prov);
-  __record_relation(RL_CREATE, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+  __record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   return prov;
 }
 #endif
