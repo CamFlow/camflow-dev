@@ -38,6 +38,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.11
 
 ```
+- Separate named relation for entities and activities.
 - Add RL_MMAP relation used to connect inodes to private mmap nodes.
 - Separate exec relation into inode -> process (RL_EXEC), and process -> process (RL_EXEC_PROCESS)
 - Add inode_post_sexattr, inode_getxattr, inode_listxattr, and inode_removexattr hooks.

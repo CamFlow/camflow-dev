@@ -85,7 +85,11 @@ static inline void __record_node_name(prov_msg_t* node, char* name){
   fname_prov = alloc_long_provenance(ENT_FILE_NAME, GFP_KERNEL);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-	__long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
+  if(prov_type(node) == ACT_TASK){
+	   __long_record_relation(RL_NAMED_PROCESS, fname_prov, node, FLOW_ALLOWED);
+  }else{
+    __long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
+  }
   kfree(fname_prov);
 	set_name_recorded(node);
 }
@@ -219,7 +223,7 @@ static inline void record_read_xattr(uint64_t type, prov_msg_t* cprov, prov_msg_
   long_prov_msg_t* xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
   prov_msg_t relation;
   memset(&relation, 0, sizeof(prov_msg_t));
-  
+
   memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE-1);
   xattr->xattr_info.name[PROV_XATTR_NAME_SIZE-1]='\0';
 
