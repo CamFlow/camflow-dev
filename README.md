@@ -22,6 +22,7 @@ make install # patience, sudo password will be asked during installation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.1.11          | 4.4.36         | 05/12/2016 |
 | 0.1.10          | 4.4.31         | 11/11/2016 |
 | 0.1.9           | 4.4.28         | 28/10/2016 |
 | 0.1.8           | 4.4.25         | 19/10/2016 |
@@ -33,6 +34,22 @@ make install # patience, sudo password will be asked during installation
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.1.11
+
+```
+- Separate named relation for entities and activities.
+- Add RL_MMAP relation used to connect inodes to private mmap nodes.
+- Separate exec relation into inode -> process (RL_EXEC), and process -> process (RL_EXEC_PROCESS)
+- Add inode_post_sexattr, inode_getxattr, inode_listxattr, and inode_removexattr hooks.
+- Add readlink hook.
+- Add inode_setattr and inode_getattr hooks.
+- Add inode_rename hook.
+- If IP filter is already present update operation rather than duplicating the entry.
+- Can now delete IP filter entry.
+- Fix more orphaned edge cases.
+- Update to kernel version 4.4.36.
+```
 
 ### v0.1.10
 
