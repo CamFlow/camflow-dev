@@ -379,25 +379,36 @@ static int ifc_mmap_file(struct file *file, unsigned long reqprot, unsigned long
 #ifdef CONFIG_SECURITY_PROVENANCE
   iprov = __raw_inode_provenance(inode);
 #endif
-
   prot &= (PROT_READ|PROT_WRITE);
-  //if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
-  if((prot & PROT_WRITE) != 0){
-    if(!ifc_can_flow(&cifc->context, &iifc->context)){
+  if( (flags & (MAP_SHARED) ) !=  0){
+    //if((prot & (PROT_WRITE|PROT_EXEC)) != 0){
+    if((prot & PROT_WRITE) != 0){
+      if(!ifc_can_flow(&cifc->context, &iifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_DISALLOWED, file);
+        record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_DISALLOWED, file);
 #endif
-      return -EPERM;
+        return -EPERM;
+      }
     }
-  }
 
-  if((prot & (PROT_READ|PROT_WRITE)) != 0){
-    // we assume write imply read
-    if(!ifc_can_flow(&iifc->context, &cifc->context)){
+    if((prot & (PROT_READ|PROT_WRITE)) != 0){
+      // we assume write imply read
+      if(!ifc_can_flow(&iifc->context, &cifc->context)){
 #ifdef CONFIG_SECURITY_PROVENANCE
-      record_relation(RL_MMAP_READ, iprov, cprov, FLOW_DISALLOWED, file);
+        record_relation(RL_MMAP_READ, iprov, cprov, FLOW_DISALLOWED, file);
 #endif
-      return -EPERM;
+        return -EPERM;
+      }
+    }
+  }else{
+    if((prot & (PROT_READ|PROT_WRITE)) != 0){
+      // we assume write imply read
+      if(!ifc_can_flow(&iifc->context, &cifc->context)){
+#ifdef CONFIG_SECURITY_PROVENANCE
+        record_relation(RL_MMAP_READ, iprov, cprov, FLOW_DISALLOWED, file);
+#endif
+        return -EPERM;
+      }
     }
   }
   return 0;

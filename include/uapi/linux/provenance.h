@@ -127,32 +127,43 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 /* DERIVED SUBTYPES */
 #define RL_NAMED              (RL_DERIVED   | 0x0000000000000001ULL)
 #define RL_VERSION            (RL_DERIVED   | 0x0000000000000002ULL)
+#define RL_MMAP               (RL_DERIVED   | 0x0000000000000004ULL)
 /* GENERATED SUBTYPES */
-#define RL_CREATE             (RL_GENERATED | 0x0000000000000004ULL)
-#define RL_WRITE              (RL_GENERATED | 0x0000000000000008ULL)
-#define RL_PERM_WRITE         (RL_GENERATED | 0x0000000000000010ULL)
-#define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000020ULL)
-#define RL_CONNECT            (RL_GENERATED | 0x0000000000000040ULL)
-#define RL_LISTEN             (RL_GENERATED | 0x0000000000000080ULL)
-#define RL_BIND               (RL_GENERATED | 0x0000000000000100ULL)
-#define RL_SND                (RL_GENERATED | 0x0000000000000200ULL)
-#define RL_LINK               (RL_GENERATED | 0x0000000000000400ULL)
+#define RL_CREATE             (RL_GENERATED | 0x0000000000000008ULL)
+#define RL_WRITE              (RL_GENERATED | 0x0000000000000010ULL)
+#define RL_PERM_WRITE         (RL_GENERATED | 0x0000000000000020ULL)
+#define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000040ULL)
+#define RL_CONNECT            (RL_GENERATED | 0x0000000000000080ULL)
+#define RL_LISTEN             (RL_GENERATED | 0x0000000000000100ULL)
+#define RL_BIND               (RL_GENERATED | 0x0000000000000200ULL)
+#define RL_SND                (RL_GENERATED | 0x0000000000000400ULL)
+#define RL_LINK               (RL_GENERATED | 0x0000000000000800ULL)
+#define RL_SETATTR            (RL_GENERATED | 0x0000000000001000ULL)
+#define RL_SETXATTR           (RL_GENERATED | 0x0000000000002000ULL)
+#define RL_RMVXATTR           (RL_GENERATED | 0x0000000000004000ULL)
 /* USED SUBTYPES */
-#define RL_READ               (RL_USED      | 0x0000000000000800ULL)
-#define RL_MMAP_READ          (RL_USED      | 0x0000000000001000ULL)
-#define RL_PERM_READ          (RL_USED      | 0x0000000000002000ULL)
-#define RL_EXEC               (RL_USED      | 0x0000000000004000ULL)
-#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000008000ULL)
-#define RL_PERM_EXEC          (RL_USED      | 0x0000000000010000ULL)
-#define RL_ACCEPT             (RL_USED      | 0x0000000000020000ULL)
-#define RL_RCV                (RL_USED      | 0x0000000000040000ULL)
-#define RL_OPEN               (RL_USED      | 0x0000000000080000ULL)
-#define RL_SEARCH             (RL_USED      | 0x0000000000100000ULL)
+#define RL_READ               (RL_USED      | 0x0000000000008000ULL)
+#define RL_MMAP_READ          (RL_USED      | 0x0000000000010000ULL)
+#define RL_PERM_READ          (RL_USED      | 0x0000000000020000ULL)
+#define RL_EXEC               (RL_USED      | 0x0000000000040000ULL)
+#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000080000ULL)
+#define RL_PERM_EXEC          (RL_USED      | 0x0000000000100000ULL)
+#define RL_ACCEPT             (RL_USED      | 0x0000000000200000ULL)
+#define RL_RCV                (RL_USED      | 0x0000000000400000ULL)
+#define RL_OPEN               (RL_USED      | 0x0000000000800000ULL)
+#define RL_SEARCH             (RL_USED      | 0x0000000001000000ULL)
+#define RL_GETATTR            (RL_USED      | 0x0000000002000000ULL)
+#define RL_READLINK           (RL_USED      | 0x0000000004000000ULL)
+#define RL_GETXATTR           (RL_USED      | 0x0000000008000000ULL)
+#define RL_LSTXATTR           (RL_USED      | 0x0000000010000000ULL)
+#define RL_NAMED_PROCESS      (RL_USED      | 0x0000000020000000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000000000200000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000000400000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000000000800000ULL)
-#define RL_IFC                (RL_INFORMED  | 0x0000000001000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000000040000000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000080000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000000100000000ULL)
+#define RL_IFC                (RL_INFORMED  | 0x0000000200000000ULL)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000000400000000ULL)
+
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
 #define ACT_DISC              (DM_ACTIVITY  | 0x0000000000000002ULL)
@@ -179,6 +190,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define ENT_PACKET            (DM_ENTITY    | 0x0000000000100000ULL)
 #define ENT_IFC               (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000400000ULL)
+#define ENT_IATTR             (DM_ENTITY    | 0x0000000000800000ULL)
+#define ENT_XATTR             (DM_ENTITY    | 0x0000000001000000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -257,7 +270,7 @@ typedef union prov_identifier{
 #define PROPAGATE_BIT 4
 #define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
-#define provenance_does_propagate(node)          prov_check_flag(node, PROPAGATE_BIT)
+#define provenance_does_propagate(node)     prov_check_flag(node, PROPAGATE_BIT)
 
 #define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 
@@ -306,6 +319,19 @@ struct inode_prov_struct{
   uint8_t sb_uuid[16];
 };
 
+struct iattr_prov_struct{
+  basic_elements;
+  union provmutex lprov;
+  uint32_t valid;
+  uint16_t mode;
+  uint32_t uid;
+  uint32_t gid;
+  int64_t size;
+  int64_t atime;
+  int64_t ctime;
+  int64_t mtime;
+};
+
 struct msg_msg_struct{
   basic_elements;
   union provmutex lprov;
@@ -349,6 +375,7 @@ typedef union prov_msg{
   struct sock_struct          sock_info;
   struct sb_struct            sb_info;
   struct pck_struct           pck_info;
+  struct iattr_prov_struct    iattr_info;
 } prov_msg_t;
 
 struct str_struct{
@@ -374,6 +401,16 @@ struct ifc_context_struct{
   struct ifc_context context;
 };
 
+#define PROV_XATTR_NAME_SIZE    256
+#define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
+struct xattr_prov_struct{
+  basic_elements;
+  char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
+  int32_t flags;
+  uint8_t value[PROV_XATTR_VALUE_SIZE];
+  size_t size;
+};
+
 struct disc_node_struct{
   basic_elements;
   size_t length;
@@ -389,6 +426,7 @@ typedef union long_msg{
   struct address_struct       address_info;
   struct ifc_context_struct   ifc_info;
   struct disc_node_struct     disc_node_info;
+  struct xattr_prov_struct    xattr_info;
 } long_prov_msg_t;
 
 struct prov_filter{
@@ -418,6 +456,13 @@ struct prov_process_config{
   uint8_t op;
   uint32_t vpid;
 };
+
+#define PROV_NET_TRACKED		  0x01
+#define PROV_NET_OPAQUE 		  0x02
+#define PROV_NET_PROPAGATE    0x04
+#define PROV_NET_TAINT        0x08
+#define PROV_NET_RECORD       0x10
+#define PROV_NET_DELETE       0x20 // to actually delete a filter from the list
 
 struct prov_ipv4_filter{
   uint32_t ip;
