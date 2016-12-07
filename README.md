@@ -39,7 +39,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.12
 
 ```
--
+- Use the correct relation type for relationships between packets and sockets.
 ```
 
 ### v0.1.11
