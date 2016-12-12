@@ -184,6 +184,7 @@ make install # patience, sudo password will be asked during installation
 
 ### 0.2.X
 
+* Switch to 4.9 once confirmed it is LTS.
 * Clean-up code.
 * IFC tags and provenance data persistence across reboot.
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
