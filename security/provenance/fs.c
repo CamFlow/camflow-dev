@@ -171,7 +171,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 
 {
 	prov_msg_t* cprov = task_provenance();
-	long_prov_msg_t* node;
+	long_prov_msg_t* node = NULL;
 
 	if(count < sizeof(struct disc_node_struct)){
 		count = -ENOMEM;
@@ -195,14 +195,16 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if(copy_to_user((void*)buf, &node, sizeof(struct disc_node_struct))){
+	if(copy_to_user((void*)buf, &node, count)){
 		count = -ENOMEM;
 		goto out;
 	}
 
 out:
 	put_prov(cprov);
-	kfree(node);
+	if(node!=NULL){
+		kfree(node);
+	}
 	return count;
 }
 
