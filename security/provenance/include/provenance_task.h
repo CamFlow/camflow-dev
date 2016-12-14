@@ -21,15 +21,20 @@
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
+#define current_cid() (current->nsproxy->cgroup_ns->ns.inum)
 
 static inline prov_msg_t* task_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
+	uint32_t cid = current_cid();
 	lock_node(tprov);
 	if(unlikely(tprov->task_info.pid == 0)){
 		tprov->task_info.pid = task_pid_nr(current);
 	}
 	if(unlikely(tprov->task_info.vpid == 0)){
 		tprov->task_info.vpid = task_pid_vnr(current);
+	}
+	if(unlikely(tprov->task_info.cid != cid)){
+		tprov->task_info.cid = cid;
 	}
 	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
 		record_task_name(current, tprov);

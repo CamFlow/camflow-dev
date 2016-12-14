@@ -22,7 +22,7 @@ make install # patience, sudo password will be asked during installation
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.1.12          | 4.4.38         | N/A        |
+| 0.2.0           | 4.9            | N/A        |
 | 0.1.11          | 4.4.36         | 05/12/2016 |
 | 0.1.10          | 4.4.31         | 11/11/2016 |
 | 0.1.9           | 4.4.28         | 28/10/2016 |
@@ -39,8 +39,9 @@ make install # patience, sudo password will be asked during installation
 ### v0.1.12
 
 ```
+- Identify containers via "cid" (current_cid() << (current->nsproxy->cgroup_ns->ns.inum)).
 - Use the correct relation type for relationships between packets and sockets.
-- Update to kernel version 4.4.38.
+- Update to kernel version 4.9.
 ```
 
 ### v0.1.11
