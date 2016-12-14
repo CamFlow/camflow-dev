@@ -233,7 +233,7 @@ out:
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
   prov_msg_t* cprov = task_provenance();
-  prov_msg_t* iprov;
+  prov_msg_t* iprov = NULL;
 	uint32_t perms;
 	int rtn=0;
 
@@ -300,7 +300,7 @@ out:
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
 	prov_msg_t* cprov = task_provenance();
-  prov_msg_t* dprov;
+  prov_msg_t* dprov = NULL;
   prov_msg_t* iprov;
 	int rtn=0;
 
