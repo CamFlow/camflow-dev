@@ -3,7 +3,7 @@ config SECURITY_PROVENANCE
          depends on SECURITY
          select RELAY
          select SECURITYFS
-         default n
+         default y
          help
           This selects CamFlow provenance modules. It captures provenance through
           a Linux Security Module.

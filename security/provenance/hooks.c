@@ -162,7 +162,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
   iprov->inode_info.uid=__kuid_val(inode->i_uid);
   iprov->inode_info.gid=__kgid_val(inode->i_gid);
-  prov_copy_inode_mode(iprov, inode);
+  prov_read_inode_type(iprov, inode);
+	iprov->inode_info.mode=inode->i_mode;
   sprov = inode->i_sb->s_provenance;
   memcpy(iprov->inode_info.sb_uuid, sprov->sb_info.uuid, 16*sizeof(uint8_t));
 
@@ -232,7 +233,7 @@ out:
 */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
-  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov = NULL;
 	uint32_t perms;
 	int rtn=0;
@@ -245,7 +246,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		goto out;
 	}
 
-	iprov = inode_provenance(inode);
+	iprov = __raw_inode_provenance(inode);
   if(iprov==NULL){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -282,8 +283,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	}
 
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return 0;
 }
 

@@ -36,9 +36,10 @@ make install # patience, sudo password will be asked during installation
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-### v0.1.12
+### v0.2.0
 
 ```
+- Fix "sleeping function called from invalid context" when d_find_alias was called in provenance_inode_permission. 
 - Identify containers via "cid" (current_cid() << (current->nsproxy->cgroup_ns->ns.inum)).
 - Use the correct relation type for relationships between packets and sockets.
 - Update to kernel version 4.9.

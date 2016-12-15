@@ -47,10 +47,9 @@ extern struct kmem_cache *provenance_cache;
 #define init_mutex_node(n) mutex_init(get_mutex(n))
 
 static inline void put_prov(prov_msg_t* n){
-  if(unlikely(n==NULL)){
-    return;
+  if(likely(n!=NULL)){
+    unlock_node(n);
   }
-  unlock_node(n);
 }
 
 static inline prov_msg_t* alloc_provenance(uint64_t ntype, gfp_t gfp)
