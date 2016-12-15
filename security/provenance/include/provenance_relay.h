@@ -37,13 +37,13 @@ struct prov_long_boot_buffer{
 
 extern struct prov_boot_buffer* boot_buffer;
 extern struct rchan *prov_chan;
-//extern spinlock_t prov_chan_lock;
+extern spinlock_t prov_chan_lock;
 
 static inline void prov_write(prov_msg_t* msg)
 {
-  //unsigned long flags;
+  unsigned long flags;
 
-  //spin_lock_irqsave(&prov_chan_lock, flags);
+  spin_lock_irqsave(&prov_chan_lock, flags);
   prov_jiffies(msg) = get_jiffies_64();
   if( unlikely(prov_chan==NULL) ) // not set yet
   {
@@ -56,18 +56,18 @@ static inline void prov_write(prov_msg_t* msg)
   }else{
     relay_write(prov_chan, msg, sizeof(prov_msg_t));
   }
-  //spin_unlock_irqrestore(&prov_chan_lock, flags);
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
 }
 
 
 extern struct prov_long_boot_buffer* long_boot_buffer;
 extern struct rchan *long_prov_chan;
-//extern spinlock_t long_prov_chan_lock;
+extern spinlock_t long_prov_chan_lock;
 
 static inline void long_prov_write(long_prov_msg_t* msg){
-  //unsigned long flags;
+  unsigned long flags;
 
-  //spin_lock_irqsave(&long_prov_chan_lock, flags);
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
   prov_jiffies(msg) = get_jiffies_64();
   if( unlikely(long_prov_chan==NULL) ) // not set yet
   {
@@ -79,18 +79,18 @@ static inline void long_prov_write(long_prov_msg_t* msg){
   }else{
     relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
   }
-  //spin_unlock_irqrestore(&long_prov_chan_lock, flags);
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 }
 
 /* force sub-buffer switch */
 static inline void prov_flush( void ){
-  //unsigned long flags;
-  //spin_lock_irqsave(&prov_chan_lock, flags);
+  unsigned long flags;
+  spin_lock_irqsave(&prov_chan_lock, flags);
   relay_flush(prov_chan);
-  //spin_unlock_irqrestore(&prov_chan_lock, flags);
-  //spin_lock_irqsave(&long_prov_chan_lock, flags);
+  spin_unlock_irqrestore(&prov_chan_lock, flags);
+  spin_lock_irqsave(&long_prov_chan_lock, flags);
   relay_flush(long_prov_chan);
-  //spin_unlock_irqrestore(&long_prov_chan_lock, flags);
+  spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 }
 
 #endif
