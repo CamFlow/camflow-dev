@@ -900,7 +900,7 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
 static int provenance_shm_shmat(struct shmid_kernel *shp,
 			     char __user *shmaddr, int shmflg)
 {
-  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* cprov = current_provenance();
 	prov_msg_t* sprov = shp->shm_perm.provenance;
 	int rtn=0;
 
@@ -917,7 +917,6 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
   }
 
 out:
-	put_prov(cprov);
 	return rtn;
 }
 
