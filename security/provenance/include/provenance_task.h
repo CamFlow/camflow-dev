@@ -21,7 +21,21 @@
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
-#define current_cid() (current->nsproxy->cgroup_ns->ns.inum)
+static inline uint32_t current_cid( void ){
+	uint32_t cid = 0;
+	struct cgroup_namespace* cns;
+	task_lock(current);
+	if(current->nsproxy!=NULL){
+		cns = current->nsproxy->cgroup_ns;
+		if(cns!=NULL){
+			get_cgroup_ns(cns);
+			cid = cns->ns.inum;
+			put_cgroup_ns(cns);
+		}
+	}
+	task_unlock(current);
+	return cid;
+}
 
 static inline prov_msg_t* task_provenance( void ){
 	prov_msg_t* tprov = current_provenance();

@@ -20,10 +20,8 @@
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
-static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
+static inline void prov_read_inode_type(prov_msg_t* iprov, struct inode *inode){
   uint64_t type = ENT_INODE_UNKNOWN;
-  iprov->inode_info.mode=inode->i_mode;
-
   if(S_ISBLK(inode->i_mode)){
     type=ENT_INODE_BLOCK;
   }else if(S_ISCHR(inode->i_mode)){
@@ -39,7 +37,7 @@ static inline void prov_copy_inode_mode(prov_msg_t* iprov, struct inode *inode){
   }else if(S_ISSOCK(inode->i_mode)){
     type=ENT_INODE_SOCKET;
   }
-  node_identifier(iprov).type=type;
+  prov_type(iprov)=type;
 }
 
 static inline void provenance_mark_as_opaque(const char* name){
@@ -57,16 +55,27 @@ static inline void provenance_mark_as_opaque(const char* name){
   }
 }
 
-static inline prov_msg_t* inode_provenance(struct inode* inode){
-	prov_msg_t* iprov = __raw_inode_provenance(inode);
+static inline prov_msg_t* inode_provenance_no_name(struct inode* inode){
+  prov_msg_t* iprov = __raw_inode_provenance(inode);
   if(unlikely(iprov==NULL)){
     return NULL;
   }
   lock_node(iprov);
-	prov_copy_inode_mode(iprov, inode);
+  if( unlikely(prov_type(iprov)==ENT_INODE_UNKNOWN) ){
+	   prov_read_inode_type(iprov, inode);
+  }
+  iprov->inode_info.mode=inode->i_mode;
+  return iprov;
+}
+
+static inline prov_msg_t* inode_provenance(struct inode* inode){
+  prov_msg_t* iprov = inode_provenance_no_name(inode);
+  if(unlikely(iprov==NULL)){
+    return NULL;
+  }
   if(is_inode_dir(inode) || is_inode_file(inode)){
-	   record_inode_name(inode, iprov);
-   }
+    record_inode_name(inode, iprov);
+  }
 	return iprov;
 }
 
