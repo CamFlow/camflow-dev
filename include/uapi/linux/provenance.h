@@ -295,7 +295,7 @@ union provmutex{
 #ifdef __KERNEL__
   struct mutex l;
 #endif
-  uint8_t placeholder[70];
+  uint8_t placeholder[160]; // larger to fit kernel debug settings, that sucks need to change how that's implemented
 };
 
 struct node_struct{
@@ -308,9 +308,9 @@ struct task_prov_struct{
   union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
-  uint32_t cid;
   uint32_t pid;
   uint32_t vpid;
+  uint32_t cid;
 };
 
 struct inode_prov_struct{
