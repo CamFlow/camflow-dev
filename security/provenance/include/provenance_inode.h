@@ -61,7 +61,7 @@ static inline prov_msg_t* inode_provenance_no_name(struct inode* inode){
   if(unlikely(iprov==NULL)){
     return NULL;
   }
-  lock_node(iprov);
+  lock_node(iprov, PROVENANCE_MUTEX_INODE);
   prov_read_inode_type(iprov, inode);
   return iprov;
 }
