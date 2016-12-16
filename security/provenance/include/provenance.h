@@ -41,8 +41,14 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
+enum provenance_mutex_lock_class {
+  PROVENANCE_MUTEX_TASK,
+  PROVENANCE_MUTEX_INODE,
+  PROVENANCE_MUTEX_BPRM,
+};
+
 #define get_mutex(n) &(n->node_info.lprov.l)
-#define lock_node(n) mutex_lock(get_mutex(n))
+#define lock_node(n, class) mutex_lock_nested(get_mutex(n), class)
 #define unlock_node(n) mutex_unlock(get_mutex(n))
 #define init_mutex_node(n) mutex_init(get_mutex(n))
 
