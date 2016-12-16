@@ -142,9 +142,6 @@ struct cred {
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void 		*provenance; /* subjective LSM provenance */
 #endif
-#ifdef CONFIG_SECURITY_IFC
-	void 		*ifc; /* subjective LSM ifc */
-#endif
 #endif
 	struct user_struct *user;	/* real user ID subscription */
 	struct user_namespace *user_ns; /* user_ns the caps and keyrings are relative to. */
@@ -370,7 +367,6 @@ static inline void put_cred(const struct cred *_cred)
 #define current_user()		(current_cred_xxx(user))
 #define current_security()	(current_cred_xxx(security))
 #define current_provenance()	(current_cred_xxx(provenance))
-#define current_ifc()	(current_cred_xxx(ifc))
 
 extern struct user_namespace init_user_ns;
 #ifdef CONFIG_USER_NS

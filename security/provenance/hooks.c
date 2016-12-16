@@ -26,7 +26,6 @@
 #include "provenance_inode.h"
 #include "provenance_task.h"
 #include "provenance_long.h"
-#include "ifc.h"
 
 /*
  * initialise the security for the init task
@@ -84,9 +83,6 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 {
   prov_msg_t* old_prov = old->provenance;
   prov_msg_t* prov = alloc_provenance(ACT_TASK, gfp);
-#ifdef CONFIG_SECURITY_IFC
-	struct ifc_struct *new_ifc;
-#endif
 
   if(!prov){
     return -ENOMEM;
@@ -95,14 +91,6 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	task_config_from_file(current);
   prov->task_info.uid=__kuid_val(new->euid);
   prov->task_info.gid=__kgid_val(new->egid);
-
-#ifdef CONFIG_SECURITY_IFC
-	new_ifc = new->ifc;
-	if(ifc_is_labelled(&new_ifc->context)){
-		set_tracked(prov);
-		prov_record_ifc(prov, &new_ifc->context);
-	}
-#endif
 
 	record_relation(RL_CLONE, old_prov, prov, FLOW_ALLOWED, NULL);
   new->provenance = prov;
@@ -152,9 +140,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 {
   prov_msg_t* iprov = alloc_provenance(ENT_INODE_UNKNOWN, GFP_KERNEL);
   prov_msg_t* sprov;
-#ifdef CONFIG_SECURITY_IFC
-	struct ifc_struct *ifc=NULL;
-#endif
 
   if(unlikely(!iprov))
     return -ENOMEM;
@@ -170,13 +155,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	alloc_camflow(inode, GFP_KERNEL);
   inode_set_provenance(inode, iprov);
 
-#ifdef CONFIG_SECURITY_IFC
-	ifc = inode_get_ifc(inode);
-	if(ifc_is_labelled(&ifc->context)){
-		set_tracked(iprov);
-		prov_record_ifc(iprov, &ifc->context);
-	}
-#endif
   return 0;
 }
 
@@ -757,9 +735,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   prov_msg_t* cprov = task_provenance();
   prov_msg_t* mprov;
 	int rtn=0;
-#ifdef CONFIG_SECURITY_IFC
-	struct ifc_struct* ifc= msg->ifc;
-#endif
+
   /* alloc new prov struct with generated id */
   mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
@@ -770,14 +746,6 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 
   set_node_id(mprov, ASSIGN_NODE_ID);
   mprov->msg_msg_info.type=msg->m_type;
-#ifdef CONFIG_SECURITY_IFC
-	if(!ifc){
-		if(ifc_is_labelled(&ifc->context)){
-			set_tracked(mprov);
-			prov_record_ifc(mprov, &ifc->context);
-		}
-	}
-#endif
   msg->provenance = mprov;
   record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
 out:
@@ -849,9 +817,6 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	prov_msg_t* cprov = task_provenance();
   prov_msg_t* sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 	int rtn=0;
-#ifdef CONFIG_SECURITY_IFC
-	struct ifc_struct* ifc= shp->shm_perm.ifc;
-#endif
 
   if(!sprov){
     rtn = -ENOMEM;
@@ -860,16 +825,6 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 
   set_node_id(sprov, ASSIGN_NODE_ID);
   sprov->shm_info.mode=shp->shm_perm.mode;
-
-#ifdef CONFIG_SECURITY_IFC
-	if(!ifc){
-		if(ifc_is_labelled(&ifc->context)){
-			set_tracked(sprov);
-			prov_record_ifc(sprov, &ifc->context);
-		}
-	}
-#endif
-
   shp->shm_perm.provenance=sprov;
   record_relation(RL_WRITE, sprov, cprov, FLOW_ALLOWED, NULL);
   record_relation(RL_READ, cprov, sprov, FLOW_ALLOWED, NULL);
@@ -1412,10 +1367,7 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
 };
 
-#ifndef CONFIG_SECURITY_IFC
 struct kmem_cache *camflow_cache=NULL;
-#endif
-
 struct kmem_cache *provenance_cache=NULL;
 
 uint32_t prov_machine_id=1; /* TODO get a proper id somehow, for now set from userspace */
@@ -1435,12 +1387,9 @@ void __init provenance_add_hooks(void){
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);
-
-#ifndef CONFIG_SECURITY_IFC
 	camflow_cache = kmem_cache_create("camflow_i_ptr",
 							sizeof(struct camflow_i_ptr),
 							0, SLAB_PANIC, NULL);
-#endif
   cred_init_provenance();
 
 	/* init relay buffers, to deal with provenance before FS is ready */

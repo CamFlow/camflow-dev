@@ -293,7 +293,6 @@ struct sock_common {
   *	@sk_send_head: front of stuff to transmit
   *	@sk_security: used by security modules
 	*	@sk_provenance: used by provenance modules
-	*	@sk_ifc: used by ifc modules
   *	@sk_mark: generic packet mark
   *	@sk_cgrp_data: cgroup data for this cgroup
   *	@sk_memcg: this socket's memory cgroup association
@@ -440,9 +439,6 @@ struct sock {
 	void			*sk_security;
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void			*sk_provenance;
-#endif
-#ifdef CONFIG_SECURITY_IFC
-	void			*sk_ifc;
 #endif
 #endif
 	struct sock_cgroup_data	sk_cgrp_data;

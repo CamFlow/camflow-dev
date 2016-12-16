@@ -61,7 +61,6 @@ int __init security_init(void)
 	 */
 	capability_add_hooks();
 	yama_add_hooks();
-	ifc_add_hooks();
 	loadpin_add_hooks();
 
 	/*

@@ -1,9 +1,0 @@
-config SECURITY_IFC
-         bool "CamFlow - IFC"
-         depends on SECURITY
-         select SECURITYFS
-         select CRYPTO_BLOWFISH_X86_64
-         default n
-         help
-          This selects IFC.
-          The IFC security module enforce DIFC.

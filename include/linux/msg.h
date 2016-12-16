@@ -14,9 +14,6 @@ struct msg_msg {
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void *provenance;
 #endif
-#ifdef CONFIG_SECURITY_IFC
-	void *ifc;
-#endif
 	/* the actual message follows immediately */
 };
 

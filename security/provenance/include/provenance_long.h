@@ -54,16 +54,6 @@ static inline void __long_record_relation(uint64_t type, long_prov_msg_t* from, 
   __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
 }
 
-#ifdef CONFIG_SECURITY_IFC
-static inline void prov_record_ifc(prov_msg_t* prov, struct ifc_context *context){
-  long_prov_msg_t* ifc_prov = alloc_long_provenance(ENT_IFC, GFP_KERNEL);
-  memcpy(&(ifc_prov->ifc_info.context), context, sizeof(struct ifc_context));
-  long_prov_write(ifc_prov);
-  kfree(ifc_prov);
-  // TODO connect via relation to entity/activity
-}
-#endif
-
 static inline int prov_print(const char *fmt, ...)
 {
   long_prov_msg_t* msg = alloc_long_provenance(ENT_STR, GFP_KERNEL); // revert back to cache if causes performance issue

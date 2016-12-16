@@ -20,7 +20,6 @@
 #include <linux/bug.h>
 #include <linux/socket.h>
 #include <linux/camflow.h>
-#include <uapi/linux/ifc.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/camflow.h>
 #include <uapi/linux/provenance.h>
