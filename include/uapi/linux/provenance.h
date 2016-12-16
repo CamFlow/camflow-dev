@@ -15,10 +15,8 @@
 
 #ifndef __KERNEL__
 #include <linux/limits.h>
-#include <linux/ifc.h>
 #else
 #include <linux/socket.h>
-#include <uapi/linux/ifc.h>
 #include <uapi/linux/limits.h>
 #include <linux/mutex.h>
 #endif
@@ -163,8 +161,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define RL_CLONE              (RL_INFORMED  | 0x0000000100000000ULL)
 #define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000200000000ULL)
 #define RL_CHANGE             (RL_INFORMED  | 0x0000000400000000ULL)
-#define RL_IFC                (RL_INFORMED  | 0x0000000800000000ULL)
-#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000001000000000ULL)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000000800000000ULL)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
@@ -190,10 +187,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define ENT_SBLCK             (DM_ENTITY    | 0x0000000000040000ULL)
 #define ENT_FILE_NAME         (DM_ENTITY    | 0x0000000000080000ULL)
 #define ENT_PACKET            (DM_ENTITY    | 0x0000000000100000ULL)
-#define ENT_IFC               (DM_ENTITY    | 0x0000000000200000ULL)
-#define ENT_DISC              (DM_ENTITY    | 0x0000000000400000ULL)
-#define ENT_IATTR             (DM_ENTITY    | 0x0000000000800000ULL)
-#define ENT_XATTR             (DM_ENTITY    | 0x0000000001000000ULL)
+#define ENT_DISC              (DM_ENTITY    | 0x0000000000200000ULL)
+#define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
+#define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -399,11 +395,6 @@ struct address_struct{
   size_t length;
 };
 
-struct ifc_context_struct{
-  basic_elements;
-  struct ifc_context context;
-};
-
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct{
@@ -427,7 +418,6 @@ typedef union long_msg{
   struct str_struct           str_info;
   struct file_name_struct     file_name_info;
   struct address_struct       address_info;
-  struct ifc_context_struct   ifc_info;
   struct disc_node_struct     disc_node_info;
   struct xattr_prov_struct    xattr_info;
 } long_prov_msg_t;

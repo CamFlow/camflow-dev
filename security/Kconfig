@@ -165,7 +165,6 @@ source security/apparmor/Kconfig
 source security/loadpin/Kconfig
 source security/yama/Kconfig
 source security/provenance/Kconfig
-source security/ifc/Kconfig
 
 source security/integrity/Kconfig
 

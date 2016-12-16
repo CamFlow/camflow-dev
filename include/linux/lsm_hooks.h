@@ -1933,11 +1933,6 @@ extern void __init provenance_add_hooks(void);
 #else
 static inline void __init provenance_add_hooks(void) { }
 #endif
-#ifdef CONFIG_SECURITY_IFC
-extern void __init ifc_add_hooks(void);
-#else
-static inline void __init ifc_add_hooks(void) { }
-#endif
 #ifdef CONFIG_SECURITY_LOADPIN
 void __init loadpin_add_hooks(void);
 #else

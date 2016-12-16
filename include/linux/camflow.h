@@ -18,13 +18,11 @@
 #include <linux/fs.h>
 
 #include <uapi/linux/provenance.h>
-#include <uapi/linux/ifc.h>
 
 // cause softlockup if both pointer directly added to inode
 // no time to figure out why, work around
 struct camflow_i_ptr{
   void* provenance;
-  void* ifc;
 };
 
 extern struct kmem_cache *camflow_cache;
@@ -49,27 +47,12 @@ static inline void inode_set_provenance(struct inode *inode, prov_msg_t *v){
   ((struct camflow_i_ptr*)inode->i_camflow)->provenance=v;
 }
 
-
-static inline struct ifc_struct* inode_get_ifc(const struct inode *inode){
-  if(inode->i_camflow == NULL){
-    return NULL;
-  }
-  return ((struct ifc_struct*)((struct camflow_i_ptr*)inode->i_camflow)->ifc);
-}
-
-static inline void inode_set_ifc(struct inode *inode, struct ifc_struct *v){
-  if(inode->i_camflow == NULL){
-    return;
-  }
-  ((struct camflow_i_ptr*)inode->i_camflow)->ifc=v;
-}
-
 // free only if both ptr have been freed
 static inline void free_camflow(struct inode *inode){
   struct camflow_i_ptr* camflow;
   if(!inode->i_camflow){
     camflow = inode->i_camflow;
-    if(camflow->provenance==NULL&&camflow->ifc==NULL){ // nothing left in the structure
+    if(camflow->provenance==NULL){ // nothing left in the structure
       kmem_cache_free(camflow_cache, camflow);
       inode->i_camflow = NULL;
     }
