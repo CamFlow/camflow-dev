@@ -26,7 +26,7 @@
 
 static inline prov_msg_t* socket_inode_provenance(struct socket *sock){
   struct inode *inode = SOCK_INODE(sock);
-  prov_msg_t* iprov = __raw_inode_provenance(inode);
+  prov_msg_t* iprov = inode->i_provenance;
   if(inode==NULL){
     return NULL;
   }

@@ -19,14 +19,12 @@
 #include <linux/types.h>
 #include <linux/bug.h>
 #include <linux/socket.h>
-#include <linux/camflow.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/camflow.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
 
-#include "camflow_utils.h"
 #include "provenance_filter.h"
 #include "provenance_relay.h"
 

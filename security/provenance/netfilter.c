@@ -13,8 +13,6 @@
 
 #if defined(CONFIG_NETFILTER)
 
-#include <linux/camflow.h>
-
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_task.h"

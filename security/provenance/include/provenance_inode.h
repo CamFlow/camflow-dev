@@ -13,12 +13,26 @@
 #ifndef CONFIG_SECURITY_PROVENANCE_INODE
 #define CONFIG_SECURITY_PROVENANCE_INODE
 #include <linux/file.h>
+#include <linux/fs.h>
+#include <linux/namei.h>
 
 #include "provenance_long.h" // for record_inode_name
 
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
+
+static inline struct inode* file_name_to_inode(const char* name){
+  struct path path;
+  struct inode* inode;
+  if(kern_path(name, LOOKUP_FOLLOW, &path)){
+    printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
+    return NULL;
+  }
+  inode = path.dentry->d_inode;
+  path_put(&path);
+  return inode;
+}
 
 static inline void prov_read_inode_type(prov_msg_t* iprov, struct inode *inode){
   uint64_t type = ENT_INODE_UNKNOWN;
@@ -49,7 +63,7 @@ static inline void provenance_mark_as_opaque(const char* name){
   if(!in){
     printk(KERN_ERR "Provenance: could not find %s file.", name);
   }else{
-    prov = __raw_inode_provenance(in);
+    prov = in->i_provenance;
     if(prov){
       set_opaque(prov);
     }
@@ -57,7 +71,7 @@ static inline void provenance_mark_as_opaque(const char* name){
 }
 
 static inline prov_msg_t* inode_provenance_no_name(struct inode* inode){
-  prov_msg_t* iprov = __raw_inode_provenance(inode);
+  prov_msg_t* iprov = inode->i_provenance;
   if(unlikely(iprov==NULL)){
     return NULL;
   }

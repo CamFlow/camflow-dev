@@ -12,12 +12,10 @@
 */
 
 #include <linux/security.h>
-#include <linux/camflow.h>
 
 #include "provenance.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"
-#include "camflow_utils.h"
 
 #define TMPBUFLEN	12
 

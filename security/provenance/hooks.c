@@ -17,7 +17,6 @@
 #include <linux/binfmts.h>
 #include <linux/random.h>
 #include <linux/xattr.h>
-#include <linux/camflow.h>
 #include <linux/file.h>
 
 #include "av_utils.h"
@@ -152,9 +151,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
   sprov = inode->i_sb->s_provenance;
   memcpy(iprov->inode_info.sb_uuid, sprov->sb_info.uuid, 16*sizeof(uint8_t));
 
-	alloc_camflow(inode, GFP_KERNEL);
-  inode_set_provenance(inode, iprov);
-
+	inode->i_provenance = iprov;
   return 0;
 }
 
@@ -165,12 +162,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
 */
 static void provenance_inode_free_security(struct inode *inode)
 {
-  prov_msg_t* prov = __raw_inode_provenance(inode);
-  if(!prov){
-    free_provenance(prov);
-	}
-	inode_set_provenance(inode, NULL);
-	free_camflow(inode);
+  free_provenance(inode->i_provenance);
+	inode->i_provenance = NULL;
 }
 
 /*
@@ -224,7 +217,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		goto out;
 	}
 
-	iprov = __raw_inode_provenance(inode);
+	iprov = inode->i_provenance;
   if(iprov==NULL){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -1367,7 +1360,6 @@ static struct security_hook_list provenance_hooks[] = {
   LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
 };
 
-struct kmem_cache *camflow_cache=NULL;
 struct kmem_cache *provenance_cache=NULL;
 
 uint32_t prov_machine_id=1; /* TODO get a proper id somehow, for now set from userspace */
@@ -1387,9 +1379,6 @@ void __init provenance_add_hooks(void){
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(prov_msg_t),
 					    0, SLAB_PANIC, NULL);
-	camflow_cache = kmem_cache_create("camflow_i_ptr",
-							sizeof(struct camflow_i_ptr),
-							0, SLAB_PANIC, NULL);
   cred_init_provenance();
 
 	/* init relay buffers, to deal with provenance before FS is ready */

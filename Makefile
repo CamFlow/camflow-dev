@@ -66,6 +66,10 @@ clean_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) clean
 	cd ./build/camflow-config && $(MAKE) clean
 
+delete_kernel:
+	cd ./build && rm -rf ./linux-$(kernel-version)
+	cd ./build && rm -f ./linux-$(kernel-version).tar.xz
+
 patch:
 	cd build && mkdir -p pristine
 	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine

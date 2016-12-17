@@ -39,6 +39,7 @@ make install # patience, sudo password will be asked during installation
 ### v0.2.0
 
 ```
+- Code cleanup.
 - Support for IFC on a temporary hold (manpower and priority reason), code remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc.
 - Fix "sleeping function called from invalid context" when d_find_alias was called in provenance_inode_permission.
 - Identify containers via "cid" (current_cid() << (current->nsproxy->cgroup_ns->ns.inum)).
