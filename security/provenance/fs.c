@@ -168,7 +168,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	long_prov_msg_t* node = NULL;
 
 	if(count < sizeof(struct disc_node_struct)){
@@ -230,7 +230,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	struct prov_self_config msg;
-  prov_msg_t* prov = task_provenance();
+  prov_msg_t* prov = ready_current_provenance();
 	prov_msg_t* setting;
 	uint8_t op;
 	int rtn=sizeof(struct prov_self_config);
@@ -284,7 +284,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	prov_msg_t* tmp = (prov_msg_t*)buf;
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 
 	if(count < sizeof(struct task_prov_struct))
 	{

@@ -175,7 +175,7 @@ static void provenance_inode_free_security(struct inode *inode)
 */
 static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov = inode_provenance(dir);
 	int rtn=0;
 
@@ -269,7 +269,7 @@ out:
 
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* dprov = NULL;
   prov_msg_t* iprov;
 	int rtn=0;
@@ -322,7 +322,7 @@ static int provenance_inode_rename(struct inode *old_dir, struct dentry *old_den
 */
 static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* iprov;
 	prov_msg_t* iattrprov;
 	int rtn=0;
@@ -361,7 +361,7 @@ out:
 */
 int provenance_inode_getattr(const struct path *path){
 	struct inode *inode = d_backing_inode(path->dentry);
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* iprov;
 	int rtn=0;
 
@@ -386,7 +386,7 @@ out:
 static int provenance_inode_readlink(struct dentry *dentry)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov;
 	int rtn = 0;
 
@@ -411,7 +411,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 					const void *value, size_t size, int flags)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov = inode_provenance(inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
 		goto out;
@@ -442,7 +442,7 @@ out:
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov;
 	int rtn = 0;
 
@@ -477,7 +477,7 @@ out:
 static int provenance_inode_listxattr(struct dentry *dentry)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov;
 	int rtn = 0;
 
@@ -502,7 +502,7 @@ out:
 static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov;
 	int rtn=0;
 
@@ -550,7 +550,7 @@ out:
 */
 static int provenance_file_permission(struct file *file, int mask)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* iprov;
   struct inode *inode = file_inode(file);
 	uint32_t perms;
@@ -605,7 +605,7 @@ out:
 */
 static int provenance_file_open(struct file *file, const struct cred *cred)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	struct inode *inode = file_inode(file);
 	prov_msg_t* iprov = inode_provenance(inode);
 	int rtn=0;
@@ -633,7 +633,7 @@ out:
 */
 static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsigned long prot, unsigned long flags)
 {
-  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* iprov = NULL;
 	prov_msg_t* bprov = NULL;
   struct inode *inode;
@@ -693,7 +693,7 @@ out:
 */
 static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* iprov;
   struct inode *inode = file_inode(file);
 	int rtn=0;
@@ -725,7 +725,7 @@ out:
 */
 static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
-  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* mprov;
 	int rtn=0;
 
@@ -767,7 +767,7 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
 */
 static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int msqflg)
 {
-  prov_msg_t* cprov = task_provenance();
+  prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* mprov = msg->provenance;
 
   record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
@@ -807,7 +807,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 */
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
   prov_msg_t* sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 	int rtn=0;
 
@@ -874,7 +874,7 @@ out:
 */
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
-  prov_msg_t* skprov = task_provenance();
+  prov_msg_t* skprov = ready_current_provenance();
 	int rtn=0;
 
   if(!skprov){
@@ -907,7 +907,7 @@ out:
 static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
-  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* cprov  = ready_current_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
 
   if(kern){
@@ -931,7 +931,7 @@ out:
 */
 static int provenance_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* cprov  = ready_current_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
 	struct sockaddr_in* ipv4_addr;
 	uint8_t op;
@@ -977,7 +977,7 @@ out:
 */
 static int provenance_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* cprov  = ready_current_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
 	struct sockaddr_in* ipv4_addr;
 	uint8_t op;
@@ -1022,7 +1022,7 @@ out:
 */
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
-  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* cprov  = ready_current_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
 	int rtn=0;
 
@@ -1047,7 +1047,7 @@ out:
 */
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
-  prov_msg_t* cprov  = task_provenance();
+  prov_msg_t* cprov  = ready_current_provenance();
   prov_msg_t* iprov = socket_inode_provenance(sock);
   prov_msg_t* niprov = socket_inode_provenance(newsock);
 
@@ -1068,7 +1068,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 				  int size)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov = socket_inode_provenance(sock);
 	int rtn=0;
 
@@ -1094,7 +1094,7 @@ out:
 static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 				  int size, int flags)
 {
-	prov_msg_t* cprov = task_provenance();
+	prov_msg_t* cprov = ready_current_provenance();
 	prov_msg_t* iprov = socket_inode_provenance(sock);
 	int rtn=0;
 
@@ -1160,7 +1160,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					      struct sock *other,
 					      struct sock *newsk)
 {
-  /*prov_msg_t* cprov  = task_provenance();
+  /*prov_msg_t* cprov  = ready_current_provenance();
   prov_msg_t* skprov = sk_provenance(sock);
   prov_msg_t* nskprov = sk_provenance(newsk);
   prov_msg_t* okprov = sk_provenance(other);
@@ -1237,7 +1237,7 @@ out:
 * before commit_creds().
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
-	prov_msg_t* cprov  = task_provenance();
+	prov_msg_t* cprov  = ready_current_provenance();
 	prov_msg_t* nprov = bprm_provenance(bprm);
 	struct inode *inode = file_inode(bprm->file);
 	prov_msg_t* iprov = inode_provenance(inode);

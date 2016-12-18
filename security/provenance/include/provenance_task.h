@@ -17,7 +17,7 @@
 #include <linux/binfmts.h>
 #include <linux/sched.h>
 
-#include "provenance_long.h" // for record_task_name
+#include "provenance_long.h"
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
@@ -37,7 +37,7 @@ static inline uint32_t current_cid( void ){
 	return cid;
 }
 
-static inline prov_msg_t* task_provenance( void ){
+static inline prov_msg_t* ready_current_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	uint32_t cid = current_cid();
 	lock_node(tprov, PROVENANCE_MUTEX_TASK);
@@ -50,7 +50,7 @@ static inline prov_msg_t* task_provenance( void ){
 	if(unlikely(tprov->task_info.cid != cid)){
 		tprov->task_info.cid = cid;
 	}
-	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
+	if( provenance_is_recorded(tprov) && !provenance_is_name_recorded(tprov) ){ // the node has been recorded we need its name
 		record_task_name(current, tprov);
 	}
 	return tprov;
