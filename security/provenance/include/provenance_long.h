@@ -120,15 +120,6 @@ static inline void record_task_name(struct task_struct *task, prov_msg_t* tprov)
 	char *buffer;
 	char *ptr;
 
-  if( !provenance_is_recorded(tprov) ){
-    return;
-  }
-
-	// name already recorded
-	if(provenance_is_name_recorded(tprov)){
-		return;
-	}
-
 	if(filter_node(tprov)){
 		return;
 	}
