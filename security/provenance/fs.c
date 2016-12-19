@@ -199,7 +199,6 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 out:
-	put_prov(cprov);
 	if(node!=NULL){
 		kfree(node);
 	}
@@ -276,7 +275,6 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	}
 
 out:
-	put_prov(prov);
   return rtn;
 }
 
@@ -297,7 +295,6 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	}
 
 out:
-	put_prov(cprov);
 	return count; // write only
 }
 
@@ -432,7 +429,6 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	if( (op & PROV_SET_TAINT)!=0 ){
 		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
-	put_prov(prov);
   return sizeof(struct prov_file_config);
 }
 
@@ -461,7 +457,6 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 		goto out; // a bit superfluous, but would avoid error if code changes
   }
 out:
-	put_prov(prov);
   return rtn;
 }
 
@@ -519,7 +514,6 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	if( (op & PROV_SET_TAINT)!=0 ){
 		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
 	}
-	put_prov(prov);
   return sizeof(struct prov_process_config);
 }
 
@@ -546,7 +540,6 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		goto out; // a bit superfluous, but would avoid error if code changes
   }
 out:
-	put_prov(prov);
   return rtn;
 }
 
