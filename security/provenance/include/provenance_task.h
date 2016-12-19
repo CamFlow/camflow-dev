@@ -69,11 +69,6 @@ static inline prov_msg_t* prov_from_vpid(pid_t pid){
 	return tprov;
 }
 
-static inline prov_msg_t* bprm_provenance( struct linux_binprm *bprm ){
-	prov_msg_t* prov = bprm->cred->provenance;
-	return prov;
-}
-
 static inline void task_config_from_file(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
 	struct mm_struct *mm;
