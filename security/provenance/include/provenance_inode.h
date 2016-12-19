@@ -70,7 +70,8 @@ static inline void provenance_mark_as_opaque(const char* name){
   }
 }
 
-static inline prov_msg_t* inode_provenance_no_name(struct inode* inode){
+static inline prov_msg_t* inode_provenance_no_name(struct inode* inode)
+{
   prov_msg_t* iprov = inode->i_provenance;
   if(unlikely(iprov==NULL)){
     return NULL;
@@ -79,7 +80,8 @@ static inline prov_msg_t* inode_provenance_no_name(struct inode* inode){
   return iprov;
 }
 
-static inline prov_msg_t* inode_provenance(struct inode* inode){
+static inline prov_msg_t* inode_provenance(struct inode* inode)
+{
   prov_msg_t* iprov = inode_provenance_no_name(inode);
   if(unlikely(iprov==NULL)){
     return NULL;
@@ -88,6 +90,24 @@ static inline prov_msg_t* inode_provenance(struct inode* inode){
     record_inode_name(inode, iprov);
   }
 	return iprov;
+}
+
+static inline prov_msg_t* dentry_provenance(struct dentry *dentry)
+{
+  struct inode *inode = d_backing_inode(dentry);
+  if(inode==NULL){
+    return NULL;
+  }
+  return inode_provenance(inode);
+}
+
+static inline prov_msg_t* file_provenance(struct file *file)
+{
+  struct inode *inode = file_inode(file);
+  if(inode==NULL){
+    return NULL;
+  }
+  return inode_provenance(inode);
 }
 
 static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //used for private MMAP

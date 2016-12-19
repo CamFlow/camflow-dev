@@ -272,7 +272,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   prov_msg_t* iprov;
 	int rtn=0;
 
-	iprov = inode_provenance(d_backing_inode(old_dentry)); // inode pointed by dentry
+	iprov = dentry_provenance(old_dentry);
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -322,7 +322,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	prov_msg_t* iattrprov;
 	int rtn=0;
 
-	iprov = inode_provenance(d_backing_inode(dentry)); // inode pointed by dentry
+	iprov = dentry_provenance(dentry);
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -353,12 +353,10 @@ out:
 * Return 0 if permission is granted.
 */
 int provenance_inode_getattr(const struct path *path){
-	struct inode *inode = d_backing_inode(path->dentry);
 	prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov;
+  prov_msg_t* iprov = dentry_provenance(path->dentry);
 	int rtn=0;
 
-	iprov = inode_provenance(inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -376,12 +374,10 @@ out:
 */
 static int provenance_inode_readlink(struct dentry *dentry)
 {
-	struct inode *inode = d_backing_inode(dentry);
 	prov_msg_t* cprov = current_provenance();
-	prov_msg_t* iprov;
+	prov_msg_t* iprov = dentry_provenance(dentry);
 	int rtn = 0;
 
-	iprov = inode_provenance(inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -399,9 +395,8 @@ out:
 static void provenance_inode_post_setxattr(struct dentry *dentry, const char *name,
 					const void *value, size_t size, int flags)
 {
-	struct inode *inode = d_backing_inode(dentry);
 	prov_msg_t* cprov = current_provenance();
-	prov_msg_t* iprov = inode_provenance(inode); // inode pointed by dentry
+	prov_msg_t* iprov = dentry_provenance(dentry);
   if(!iprov){ // alloc provenance if none there
 		goto out;
   }
@@ -428,12 +423,10 @@ out:
 */
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 {
-	struct inode *inode = d_backing_inode(dentry);
 	prov_msg_t* cprov = current_provenance();
-	prov_msg_t* iprov;
+	prov_msg_t* iprov = dentry_provenance(dentry);
 	int rtn = 0;
 
-	iprov = inode_provenance(inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -461,12 +454,10 @@ out:
 */
 static int provenance_inode_listxattr(struct dentry *dentry)
 {
-	struct inode *inode = d_backing_inode(dentry);
 	prov_msg_t* cprov = current_provenance();
-	prov_msg_t* iprov;
+	prov_msg_t* iprov = dentry_provenance(dentry);
 	int rtn = 0;
 
-	iprov = inode_provenance(inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -484,12 +475,10 @@ out:
 */
 static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 {
-	struct inode *inode = d_backing_inode(dentry);
 	prov_msg_t* cprov = current_provenance();
-	prov_msg_t* iprov;
+	prov_msg_t* iprov = dentry_provenance(dentry);
 	int rtn=0;
 
-	iprov = inode_provenance(inode); // inode pointed by dentry
   if(!iprov){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -532,12 +521,11 @@ out:
 static int provenance_file_permission(struct file *file, int mask)
 {
 	prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov;
-  struct inode *inode = file_inode(file);
+  prov_msg_t* iprov = file_provenance(file);
+	struct inode *inode = file_inode(file);
 	uint32_t perms;
 	int rtn=0;
 
-	iprov = inode_provenance(inode);
 	if(iprov==NULL){ // alloc provenance if none there
 		rtn = -ENOMEM;
 		goto out;
@@ -585,8 +573,7 @@ out:
 static int provenance_file_open(struct file *file, const struct cred *cred)
 {
 	prov_msg_t* cprov = current_provenance();
-	struct inode *inode = file_inode(file);
-	prov_msg_t* iprov = inode_provenance(inode);
+	prov_msg_t* iprov = file_provenance(file);
 	int rtn=0;
 
 	if(!iprov){ // alloc provenance if none there
@@ -613,16 +600,13 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   prov_msg_t* cprov = current_provenance();
   prov_msg_t* iprov = NULL;
 	prov_msg_t* bprov = NULL;
-  struct inode *inode;
 	int rtn=0;
 
   if(unlikely(file==NULL)){
     goto out;
   }
 	//provenance_record_file_name(file);
-
-  inode = file_inode(file);
-  iprov = inode_provenance(inode);
+  iprov = file_provenance(file);
 	if( (flags & (MAP_SHARED) ) !=  0){
 	  if((prot & (PROT_WRITE)) != 0){
 	    record_relation(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
@@ -669,11 +653,9 @@ out:
 static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
   prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov;
-  struct inode *inode = file_inode(file);
+  prov_msg_t* iprov = file_provenance(file);
 	int rtn=0;
 
-	iprov = inode_provenance(inode);
   if(!iprov){
     rtn = -ENOMEM;
 		goto out;
@@ -1166,8 +1148,7 @@ static int provenance_unix_may_send(struct socket *sock,
 */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 	prov_msg_t* nprov = bprm_provenance(bprm);
-	struct inode *inode = file_inode(bprm->file);
-	prov_msg_t* iprov = inode_provenance(inode);
+	prov_msg_t* iprov = file_provenance(bprm->file);
 	int rtn=0;
 
   if(!nprov){
@@ -1199,8 +1180,7 @@ out:
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
 	prov_msg_t* cprov  = current_provenance();
 	prov_msg_t* nprov = bprm_provenance(bprm);
-	struct inode *inode = file_inode(bprm->file);
-	prov_msg_t* iprov = inode_provenance(inode);
+	prov_msg_t* iprov = file_provenance(bprm->file);
 
 	if(provenance_is_opaque(iprov)){
 		set_opaque(nprov);
