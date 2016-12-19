@@ -37,7 +37,7 @@ static inline uint32_t current_cid( void ){
 	return cid;
 }
 
-static inline prov_msg_t* ready_current_provenance( void ){
+static inline void refresh_current_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	uint32_t cid = current_cid();
 	if(unlikely(tprov->task_info.pid == 0)){
@@ -52,7 +52,6 @@ static inline prov_msg_t* ready_current_provenance( void ){
 	if( provenance_is_recorded(tprov) && !provenance_is_name_recorded(tprov) ){ // the node has been recorded we need its name
 		record_task_name(current, tprov);
 	}
-	return tprov;
 }
 
 static inline prov_msg_t* prov_from_vpid(pid_t pid){

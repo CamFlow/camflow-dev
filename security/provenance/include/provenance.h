@@ -38,6 +38,11 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
+struct provenance {
+  prov_msg_t msg;
+  spinlock_t lock;
+};
+
 static inline prov_msg_t* alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
   prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
