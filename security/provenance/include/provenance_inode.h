@@ -92,11 +92,11 @@ static inline prov_msg_t* inode_provenance(struct inode* inode)
 	return iprov;
 }*/
 
-static inline prov_msg_t* inode_provenance(struct inode *inode){
+static inline struct provenance* inode_provenance(struct inode *inode){
   return inode->i_provenance;
 }
 
-static inline prov_msg_t* dentry_provenance(struct dentry *dentry)
+static inline struct provenance* dentry_provenance(struct dentry *dentry)
 {
   struct inode *inode = d_backing_inode(dentry);
   if(inode==NULL){
@@ -105,7 +105,7 @@ static inline prov_msg_t* dentry_provenance(struct dentry *dentry)
   return inode_provenance(inode);
 }
 
-static inline prov_msg_t* file_provenance(struct file *file)
+static inline struct provenance* file_provenance(struct file *file)
 {
   struct inode *inode = file_inode(file);
   if(inode==NULL){
@@ -114,8 +114,8 @@ static inline prov_msg_t* file_provenance(struct file *file)
   return inode_provenance(inode);
 }
 
-static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //used for private MMAP
-  prov_msg_t* prov;
+static inline struct provenance* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //used for private MMAP
+  struct provenance* prov;
   prov_msg_t relation;
 
   if( unlikely(iprov==NULL || cprov==NULL) ){ // should not occur
@@ -134,18 +134,17 @@ static inline prov_msg_t* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //u
     return NULL;
   }
 
-  prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
+  prov = alloc_provenance(ENT_INODE_MMAP, ASSIGN_NODE_ID, GFP_KERNEL);
 
-  set_node_id(prov, ASSIGN_NODE_ID);
-  prov->inode_info.uid = iprov->inode_info.uid;
-  prov->inode_info.gid = iprov->inode_info.gid;
-  memcpy(prov->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16*sizeof(uint8_t));
-  prov->inode_info.mode = iprov->inode_info.mode;
+  prov_msg(prov)->inode_info.uid = iprov->inode_info.uid;
+  prov_msg(prov)->inode_info.gid = iprov->inode_info.gid;
+  memcpy(prov_msg(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16*sizeof(uint8_t));
+  prov_msg(prov)->inode_info.mode = iprov->inode_info.mode;
   __record_node(iprov);
   memset(&relation, 0, sizeof(prov_msg_t));
-  __propagate(RL_MMAP, iprov, prov, &relation, FLOW_ALLOWED);
-  __record_node(prov);
-  __record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+  __propagate(RL_MMAP, iprov, prov_msg(prov), &relation, FLOW_ALLOWED);
+  __record_node(prov_msg(prov));
+  __record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
   return prov;
 }
 #endif

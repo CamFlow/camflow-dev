@@ -37,6 +37,7 @@ static inline uint32_t current_cid( void ){
 	return cid;
 }
 
+/*
 static inline void refresh_current_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	uint32_t cid = current_cid();
@@ -53,9 +54,10 @@ static inline void refresh_current_provenance( void ){
 		record_task_name(current, tprov);
 	}
 }
+*/
 
-static inline prov_msg_t* prov_from_vpid(pid_t pid){
-	prov_msg_t* tprov;
+static inline struct provenance* prov_from_vpid(pid_t pid){
+	struct provenance* tprov;
 
 	struct task_struct *dest = find_task_by_vpid(pid);
 	if(!dest){
@@ -69,6 +71,8 @@ static inline prov_msg_t* prov_from_vpid(pid_t pid){
 	return tprov;
 }
 
+
+/*
 static inline void task_config_from_file(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
 	struct mm_struct *mm;
@@ -105,4 +109,5 @@ static inline void task_config_from_file(struct task_struct *task){
 finished:
 	put_cred(cred);
 }
+*/
 #endif

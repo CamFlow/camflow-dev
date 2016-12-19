@@ -19,21 +19,21 @@
 
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
-  prov_msg_t* cprov = current_provenance();
-  prov_msg_t* iprov = NULL;
+  struct provenance* cprov = current_provenance();
+  struct provenance* iprov = NULL;
   prov_msg_t pckprov;
 
   if(cprov==NULL){  // we could not get the provenance, we give up
     goto out;
   }
 
-  if(provenance_is_tracked(cprov)){
+  if(provenance_is_tracked(prov_msg(cprov))){
     iprov = sk_inode_provenance(skb->sk);
     if(iprov==NULL){  // we could not get the provenance, we give up
       goto out;
     }
     provenance_parse_skb_ipv4(skb, &pckprov);
-    record_inode_to_pck(iprov, &pckprov);
+    record_inode_to_pck(prov_msg(iprov), &pckprov);
   }
 out:
   return NF_ACCEPT;
