@@ -40,7 +40,6 @@ static inline uint32_t current_cid( void ){
 static inline prov_msg_t* ready_current_provenance( void ){
 	prov_msg_t* tprov = current_provenance();
 	uint32_t cid = current_cid();
-	lock_node(tprov, PROVENANCE_MUTEX_TASK);
 	if(unlikely(tprov->task_info.pid == 0)){
 		tprov->task_info.pid = task_pid_nr(current);
 	}
@@ -68,13 +67,11 @@ static inline prov_msg_t* prov_from_vpid(pid_t pid){
 	if(!tprov){
 		return NULL;
 	}
-	lock_node(tprov, PROVENANCE_MUTEX_TASK);
 	return tprov;
 }
 
 static inline prov_msg_t* bprm_provenance( struct linux_binprm *bprm ){
 	prov_msg_t* prov = bprm->cred->provenance;
-	lock_node(prov, PROVENANCE_MUTEX_BPRM);
 	return prov;
 }
 
@@ -109,7 +106,6 @@ static inline void task_config_from_file(struct task_struct *task){
 		if(provenance_does_propagate(iprov)){
 			set_propagate(tprov);
 		}
-		put_prov(iprov);
 	}
 
 finished:

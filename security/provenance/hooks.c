@@ -186,8 +186,6 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 
 	record_relation(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -291,9 +289,6 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   record_relation(RL_LINK, dprov, iprov, FLOW_ALLOWED, NULL);
 	record_inode_name_from_dentry(new_dentry, iprov);
 out:
-	put_prov(dprov);
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -349,8 +344,6 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	record_relation(RL_SETATTR, iattrprov, iprov, FLOW_ALLOWED, NULL);
 	free_provenance(iattrprov);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -373,8 +366,6 @@ int provenance_inode_getattr(const struct path *path){
 
 	record_relation(RL_GETATTR, iprov, cprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -398,8 +389,6 @@ static int provenance_inode_readlink(struct dentry *dentry)
 
 	record_relation(RL_READLINK, iprov, cprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -429,8 +418,6 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 
 	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return;
 }
 
@@ -464,8 +451,6 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 
 	record_read_xattr(RL_GETXATTR, cprov, iprov, name, FLOW_ALLOWED);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -489,8 +474,6 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 
 	record_relation(RL_LSTXATTR, iprov, cprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -524,8 +507,6 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 
 	record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -593,8 +574,6 @@ static int provenance_file_permission(struct file *file, int mask)
 	}
 
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -617,8 +596,6 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	record_relation(RL_OPEN, iprov, cprov, FLOW_ALLOWED, file);
 
 out:
-	put_prov(iprov);
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -676,8 +653,6 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 	}
 
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -709,8 +684,6 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   record_relation(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
-	put_prov(cprov);
   return rtn;
 }
 
@@ -742,7 +715,6 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   msg->provenance = mprov;
   record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
   return rtn;
 }
 
@@ -771,7 +743,6 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *ms
   prov_msg_t* mprov = msg->provenance;
 
   record_relation(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
-	put_prov(cprov);
   return 0;
 }
 
@@ -822,7 +793,6 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
   record_relation(RL_WRITE, sprov, cprov, FLOW_ALLOWED, NULL);
   record_relation(RL_READ, cprov, sprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -885,7 +855,6 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
   sk->sk_provenance=skprov;
 
 out:
-	put_prov(skprov);
   return 0;
 }
 
@@ -916,7 +885,6 @@ static int provenance_socket_post_create(struct socket *sock, int family,
   record_relation(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(cprov);
   return 0;
 }
 
@@ -963,7 +931,6 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	provenance_record_address(iprov, address, addrlen);
 	record_relation(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
   return rtn;
 }
 
@@ -1010,7 +977,6 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 	provenance_record_address(iprov, address, addrlen);
 	record_relation(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
   return 0;
 }
 
@@ -1033,7 +999,6 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 
   record_relation(RL_LISTEN, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
   return 0;
 }
 
@@ -1054,7 +1019,6 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
   record_relation(RL_CREATE, iprov, niprov, FLOW_ALLOWED, NULL);
   record_relation(RL_ACCEPT, niprov, cprov, FLOW_ALLOWED, NULL);
 
-	put_prov(cprov);
   return 0;
 }
 
@@ -1079,7 +1043,6 @@ static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 
 	record_relation(RL_SND, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -1105,7 +1068,6 @@ static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 
 	record_relation(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
 out:
-	put_prov(cprov);
 	return rtn;
 }
 
@@ -1221,8 +1183,6 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
-	put_prov(nprov);
   return rtn;
 }
 
@@ -1251,9 +1211,7 @@ out:
 	record_relation(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 
 out:
-	put_prov(iprov);
-	put_prov(nprov);
-	put_prov(cprov);
+	return;
  }
 
 /*

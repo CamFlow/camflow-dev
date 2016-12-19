@@ -287,21 +287,12 @@ struct relation_struct{
   int64_t offset;
 };
 
-union provmutex{
-#ifdef __KERNEL__
-  struct mutex l;
-#endif
-  uint8_t placeholder[160]; // larger to fit kernel debug settings, that sucks need to change how that's implemented
-};
-
 struct node_struct{
   basic_elements;
-  union provmutex lprov;
 };
 
 struct task_prov_struct{
   basic_elements;
-  union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
   uint32_t pid;
@@ -311,7 +302,6 @@ struct task_prov_struct{
 
 struct inode_prov_struct{
   basic_elements;
-  union provmutex lprov;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
@@ -320,7 +310,6 @@ struct inode_prov_struct{
 
 struct iattr_prov_struct{
   basic_elements;
-  union provmutex lprov;
   uint32_t valid;
   uint16_t mode;
   uint32_t uid;
@@ -333,19 +322,16 @@ struct iattr_prov_struct{
 
 struct msg_msg_struct{
   basic_elements;
-  union provmutex lprov;
   long type;
 };
 
 struct shm_struct{
   basic_elements;
-  union provmutex lprov;
   uint16_t mode;
 };
 
 struct sock_struct{
   basic_elements;
-  union provmutex lprov;
   uint16_t type;
   uint16_t family;
   uint8_t protocol;
@@ -353,13 +339,11 @@ struct sock_struct{
 
 struct sb_struct{
   basic_elements;
-  union provmutex lprov;
   uint8_t uuid[16];
 };
 
 struct pck_struct{
   basic_elements;
-  union provmutex lprov;
   uint16_t length;
 };
 
