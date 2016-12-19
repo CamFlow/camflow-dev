@@ -168,7 +168,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	prov_msg_t* cprov = current_provenance();
+	struct provenance* cprov = current_provenance();
 	long_prov_msg_t* node = NULL;
 
 	if(count < sizeof(struct disc_node_struct)){
@@ -182,8 +182,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 	if(prov_type(node)==ENT_DISC || prov_type(node)==ACT_DISC || prov_type(node)==AGT_DISC){
-		__record_node(cprov);
-		copy_node_info(&node->disc_node_info.parent, &cprov->node_info.identifier);
+		__record_node(prov_msg(cprov));
+		copy_node_info(&node->disc_node_info.parent, &prov_msg(cprov)->node_info.identifier);
 		node_identifier(node).id=prov_next_node_id();
 	  node_identifier(node).boot_id=prov_boot_id;
 	  node_identifier(node).machine_id=prov_machine_id;
@@ -229,7 +229,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	struct prov_self_config msg;
-  prov_msg_t* prov = current_provenance();
+  struct provenance* prov = current_provenance();
 	prov_msg_t* setting;
 	uint8_t op;
 	int rtn=sizeof(struct prov_self_config);
@@ -248,30 +248,30 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
-			set_tracked(prov);
+			set_tracked(prov_msg(prov));
 		}else{
-			clear_tracked(prov);
+			clear_tracked(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_OPAQUE)!=0 ){
 		if( provenance_is_opaque(setting) ){
-			set_opaque(prov);
+			set_opaque(prov_msg(prov));
 		}else{
-			clear_opaque(prov);
+			clear_opaque(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_PROPAGATE)!=0 ){
 		if( provenance_does_propagate(setting) ){
-			set_propagate(prov);
+			set_propagate(prov_msg(prov));
 		}else{
-			clear_propagate(prov);
+			clear_propagate(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_TAINT)!=0 ){
-		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
+		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
 	}
 
 out:
@@ -281,15 +281,15 @@ out:
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
+	struct provenance *cprov = current_provenance();
 	prov_msg_t* tmp = (prov_msg_t*)buf;
-	prov_msg_t* cprov = current_provenance();
 
 	if(count < sizeof(struct task_prov_struct))
 	{
 		count = -ENOMEM;
 		goto out;
 	}
-	if(copy_to_user(tmp, cprov, sizeof(prov_msg_t))){
+	if(copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t))){
 		count = -EAGAIN;
 		goto out;
 	}
@@ -380,7 +380,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 {
 	struct prov_file_config *msg;
   struct inode* in;
-  prov_msg_t* prov;
+  struct provenance *prov;
 	prov_msg_t* setting;
 	uint8_t op;
 
@@ -404,30 +404,30 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
-			set_tracked(prov);
+			set_tracked(prov_msg(prov));
 		}else{
-			clear_tracked(prov);
+			clear_tracked(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_OPAQUE)!=0 ){
 		if( provenance_is_opaque(setting) ){
-			set_opaque(prov);
+			set_opaque(prov_msg(prov));
 		}else{
-			clear_opaque(prov);
+			clear_opaque(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_PROPAGATE)!=0 ){
 		if( provenance_does_propagate(setting) ){
-			set_propagate(prov);
+			set_propagate(prov_msg(prov));
 		}else{
-			clear_propagate(prov);
+			clear_propagate(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_TAINT)!=0 ){
-		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
+		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
 	}
   return sizeof(struct prov_file_config);
 }
@@ -437,7 +437,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 {
   struct prov_file_config *msg;
   struct inode* in;
-  prov_msg_t* prov;
+  struct provenance *prov;
 	int rtn=sizeof(struct prov_file_config);
 
   if(count < sizeof(struct prov_file_config)){
@@ -466,7 +466,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	struct prov_process_config *msg;
-	prov_msg_t* prov;
+	struct provenance *prov;
 	prov_msg_t* setting;
 	uint8_t op;
 
@@ -489,30 +489,30 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
-			set_tracked(prov);
+			set_tracked(prov_msg(prov));
 		}else{
-			clear_tracked(prov);
+			clear_tracked(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_OPAQUE)!=0 ){
 		if( provenance_is_opaque(setting) ){
-			set_opaque(prov);
+			set_opaque(prov_msg(prov));
 		}else{
-			clear_opaque(prov);
+			clear_opaque(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_PROPAGATE)!=0 ){
 		if( provenance_does_propagate(setting) ){
-			set_propagate(prov);
+			set_propagate(prov_msg(prov));
 		}else{
-			clear_propagate(prov);
+			clear_propagate(prov_msg(prov));
 		}
 	}
 
 	if( (op & PROV_SET_TAINT)!=0 ){
-		prov_bloom_merge( prov_taint(prov), prov_taint(setting) );
+		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
 	}
   return sizeof(struct prov_process_config);
 }
@@ -521,7 +521,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	struct prov_process_config *msg;
-  prov_msg_t* prov;
+  struct provenance* prov;
 	int rtn=sizeof(struct prov_process_config);
 
   if(count < sizeof(struct prov_process_config)){
@@ -535,7 +535,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		return -EINVAL;
 	}
 
-	if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
+	if(copy_to_user(&msg->prov, prov_msg(prov), sizeof(prov_msg_t))){
     rtn = -ENOMEM;
 		goto out; // a bit superfluous, but would avoid error if code changes
   }

@@ -28,11 +28,8 @@
 #include "provenance_filter.h"
 #include "provenance_relay.h"
 
-#define ASSIGN_NODE_ID 0
-
 #define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
 #define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
-#define free_provenance(prov) kmem_cache_free(provenance_cache, prov)
 
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
@@ -43,27 +40,31 @@ struct provenance {
   spinlock_t lock;
 };
 
-static inline prov_msg_t* alloc_provenance(uint64_t ntype, gfp_t gfp)
-{
-  prov_msg_t* prov =  kmem_cache_zalloc(provenance_cache, gfp);
-  if(!prov){
-    return NULL;
-  }
-  prov_type(prov)=ntype;
-  return prov;
-}
+#define prov_msg(provenance) (&(provenance->msg))
 
+#define ASSIGN_NODE_ID 0
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static inline void set_node_id(prov_msg_t* node, uint64_t nid){
-  if(nid==ASSIGN_NODE_ID){
-    node_identifier(node).id=prov_next_node_id();
-  }else{
-    node_identifier(node).id=nid;
+static inline struct provenance* alloc_provenance(uint64_t ntype, uint64_t nid, gfp_t gfp)
+{
+  struct provenance* prov =  kmem_cache_zalloc(provenance_cache, gfp);
+  if(!prov){
+    return NULL;
   }
-  node_identifier(node).boot_id=prov_boot_id;
-  node_identifier(node).machine_id=prov_machine_id;
+  prov_type(prov_msg(prov))=ntype;
+  if(nid==ASSIGN_NODE_ID){
+    node_identifier(prov_msg(prov)).id=prov_next_node_id();
+  }else{
+    node_identifier(prov_msg(prov)).id=nid;
+  }
+  node_identifier(prov_msg(prov)).boot_id=prov_boot_id;
+  node_identifier(prov_msg(prov)).machine_id=prov_machine_id;
+  return prov;
+}
+
+static inline void free_provenance(struct provenance *prov){
+  kmem_cache_free(provenance_cache, prov);
 }
 
 static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src){

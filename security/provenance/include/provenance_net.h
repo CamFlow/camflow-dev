@@ -24,16 +24,15 @@
 
 #include "provenance.h"
 
-static inline prov_msg_t* socket_inode_provenance(struct socket *sock){
-  struct inode *inode = SOCK_INODE(sock);
-  prov_msg_t* iprov = inode->i_provenance;
-  if(inode==NULL){
+static inline struct provenance* socket_inode_provenance(struct socket *sock){
+  struct provenance* iprov = SOCK_INODE(sock)->i_provenance;
+  if(iprov==NULL){
     return NULL;
   }
   return iprov;
 }
 
-static inline prov_msg_t* sk_inode_provenance(struct sock *sk){
+static inline struct provenance* sk_inode_provenance(struct sock *sk){
   struct socket *sock = sk->sk_socket;
   if(sock==NULL){
     return NULL;
@@ -41,8 +40,8 @@ static inline prov_msg_t* sk_inode_provenance(struct sock *sk){
   return socket_inode_provenance(sock);
 }
 
-static inline prov_msg_t* sk_provenance(struct sock *sk){
-  prov_msg_t* prov = sk->sk_provenance;
+static inline struct provenance* sk_provenance(struct sock *sk){
+  struct provenance* prov = sk->sk_provenance;
   return prov;
 }
 
@@ -110,20 +109,6 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
       break;
   }
   return 0;
-}
-
-static inline prov_msg_t* skb_inode_prov(struct sk_buff *skb){
-  struct sock *sk;
-  if(skb==NULL){
-    return NULL;
-  }
-
-  sk = skb->sk;
-  if(sk==NULL){
-    return NULL;
-  }
-
-  return sk_inode_provenance(sk);
 }
 
 struct ipv4_filters{
