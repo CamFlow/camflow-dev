@@ -215,7 +215,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		goto out;
 	}
 
-	iprov = inode->i_provenance;
+	iprov = inode_provenance(inode);
   if(iprov==NULL){ // alloc provenance if none there
     rtn = -ENOMEM;
 		goto out;
@@ -706,9 +706,8 @@ out:
 */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
-	prov_msg_t *prov = msg->provenance;
+	free_provenance(msg->provenance);
   msg->provenance=NULL;
-  free_provenance(prov);
 }
 
 /*
@@ -1147,7 +1146,7 @@ static int provenance_unix_may_send(struct socket *sock,
 * Return 0 if the hook is successful and permission is granted.
 */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm){
-	prov_msg_t* nprov = bprm_provenance(bprm);
+	prov_msg_t* nprov = bprm->cred->provenance;
 	prov_msg_t* iprov = file_provenance(bprm->file);
 	int rtn=0;
 
@@ -1179,7 +1178,7 @@ out:
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
 	prov_msg_t* cprov  = current_provenance();
-	prov_msg_t* nprov = bprm_provenance(bprm);
+	prov_msg_t* nprov = bprm->cred->provenance;
 	prov_msg_t* iprov = file_provenance(bprm->file);
 
 	if(provenance_is_opaque(iprov)){

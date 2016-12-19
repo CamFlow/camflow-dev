@@ -70,7 +70,7 @@ static inline void provenance_mark_as_opaque(const char* name){
   }
 }
 
-static inline prov_msg_t* inode_provenance_no_name(struct inode* inode)
+/*static inline prov_msg_t* inode_provenance_no_name(struct inode* inode)
 {
   prov_msg_t* iprov = inode->i_provenance;
   if(unlikely(iprov==NULL)){
@@ -90,6 +90,10 @@ static inline prov_msg_t* inode_provenance(struct inode* inode)
     record_inode_name(inode, iprov);
   }
 	return iprov;
+}*/
+
+static inline prov_msg_t* inode_provenance(struct inode *inode){
+  return inode->i_provenance;
 }
 
 static inline prov_msg_t* dentry_provenance(struct dentry *dentry)
