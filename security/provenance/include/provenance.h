@@ -35,12 +35,21 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
+enum{
+  PROVENANCE_LOCK_TASK,
+  PROVENANCE_LOCK_DIR,
+  PROVENANCE_LOCK_INODE,
+  PROVENANCE_LOCK_MSG,
+  PROVENANCE_LOCK_SHM,
+};
+
 struct provenance {
   prov_msg_t msg;
   spinlock_t lock;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
+#define prov_lock(provenance) (&(provenance->lock))
 
 #define ASSIGN_NODE_ID 0
 extern uint32_t prov_machine_id;
@@ -52,6 +61,7 @@ static inline struct provenance* alloc_provenance(uint64_t ntype, uint64_t nid, 
   if(!prov){
     return NULL;
   }
+  spin_lock_init(prov_lock(prov));
   prov_type(prov_msg(prov))=ntype;
   if(nid==ASSIGN_NODE_ID){
     node_identifier(prov_msg(prov)).id=prov_next_node_id();
