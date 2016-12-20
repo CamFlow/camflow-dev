@@ -145,7 +145,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
   prov_msg(iprov)->inode_info.uid=__kuid_val(inode->i_uid);
   prov_msg(iprov)->inode_info.gid=__kgid_val(inode->i_gid);
-  prov_read_inode_type(prov_msg(iprov), inode->i_mode);
+  record_inode_type(inode->i_mode, iprov);
   sprov = inode->i_sb->s_provenance;
   memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16*sizeof(uint8_t));
 
@@ -223,7 +223,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	prov_read_inode_type(prov_msg(iprov), inode->i_mode);
 	if(is_inode_dir(inode)){
 		if((perms & (DIR__WRITE)) != 0){
 	    record_relation(RL_PERM_WRITE, prov_msg(cprov), prov_msg(iprov), FLOW_ALLOWED, NULL);
