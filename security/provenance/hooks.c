@@ -1153,8 +1153,6 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if(iprov==NULL){ // we could not get the provenance, we give up
 		goto out;
 	}
-	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if(provenance_is_tracked(prov_msg(iprov))){
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_pck_to_inode(&pckprov, prov_msg(iprov));
@@ -1162,8 +1160,6 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 			record_relation(RL_RCV, prov_msg(iprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
 		}
   }
-	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(cprov));
 out:
 	return rtn;
 }
