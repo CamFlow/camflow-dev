@@ -37,24 +37,23 @@ static inline uint32_t current_cid( void ){
 	return cid;
 }
 
-/*
 static inline void refresh_current_provenance( void ){
-	prov_msg_t* tprov = current_provenance();
+	struct provenance *prov = current_provenance();
 	uint32_t cid = current_cid();
-	if(unlikely(tprov->task_info.pid == 0)){
-		tprov->task_info.pid = task_pid_nr(current);
+
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
+	if(unlikely(prov_msg(prov)->task_info.pid == 0)){
+		prov_msg(prov)->task_info.pid = task_pid_nr(current);
 	}
-	if(unlikely(tprov->task_info.vpid == 0)){
-		tprov->task_info.vpid = task_pid_vnr(current);
+	if(unlikely(prov_msg(prov)->task_info.vpid == 0)){
+		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
 	}
-	if(unlikely(tprov->task_info.cid != cid)){
-		tprov->task_info.cid = cid;
+	if(unlikely(prov_msg(prov)->task_info.cid != cid)){
+		prov_msg(prov)->task_info.cid = cid;
 	}
-	if( provenance_is_recorded(tprov) && !provenance_is_name_recorded(tprov) ){ // the node has been recorded we need its name
-		record_task_name(current, tprov);
-	}
+	spin_unlock(prov_lock(prov));
+	record_task_name(current, tprov);
 }
-*/
 
 static inline struct provenance* prov_from_vpid(pid_t pid){
 	struct provenance* tprov;
@@ -71,9 +70,8 @@ static inline struct provenance* prov_from_vpid(pid_t pid){
 	return tprov;
 }
 
-
 /*
-static inline void task_config_from_file(struct task_struct *task){
+static inline void current_config_from_file(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
 	struct mm_struct *mm;
  	struct file *exe_file;
