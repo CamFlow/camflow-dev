@@ -234,15 +234,12 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
   struct provenance* prov = current_provenance();
 	prov_msg_t* setting;
 	uint8_t op;
-	int rtn=sizeof(struct prov_self_config);
 
   if(count < sizeof(struct prov_self_config)){
-    rtn = -EINVAL;
-		goto out;
+    return -EINVAL;
   }
 	if( copy_from_user(&msg, buf, sizeof(struct prov_self_config)) ){
-		rtn = -ENOMEM;
-		goto out;
+		return -ENOMEM;
 	}
 
 	setting = &(msg.prov);
@@ -277,8 +274,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	}
 	spin_unlock(prov_lock(prov));
 
-out:
-  return rtn;
+  return sizeof(struct prov_self_config);;
 }
 
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
@@ -289,8 +285,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 
 	if(count < sizeof(struct task_prov_struct))
 	{
-		count = -ENOMEM;
-		goto out;
+		return -ENOMEM;
 	}
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	if(copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t))){
