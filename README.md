@@ -189,6 +189,7 @@ make install # patience, sudo password will be asked during installation
 ### 0.3.X
 
 * Switch to 4.9 once confirmed it is LTS.
+* Setting tracking via pid is "racy" (i.e. pid may be reassigned while parameter are being set).
 * Clean-up code.
 * IFC tags and provenance data persistence across reboot.
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
