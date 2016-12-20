@@ -182,8 +182,10 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 	if(prov_type(node)==ENT_DISC || prov_type(node)==ACT_DISC || prov_type(node)==AGT_DISC){
+		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		__record_node(prov_msg(cprov));
 		copy_node_info(&node->disc_node_info.parent, &prov_msg(cprov)->node_info.identifier);
+		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id=prov_next_node_id();
 	  node_identifier(node).boot_id=prov_boot_id;
 	  node_identifier(node).machine_id=prov_machine_id;
@@ -245,7 +247,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 
 	setting = &(msg.prov);
 	op = msg.op;
-
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
 			set_tracked(prov_msg(prov));
@@ -273,6 +275,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	if( (op & PROV_SET_TAINT)!=0 ){
 		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
 	}
+	spin_unlock(prov_lock(prov));
 
 out:
   return rtn;
@@ -289,11 +292,12 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 		count = -ENOMEM;
 		goto out;
 	}
+	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	if(copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t))){
 		count = -EAGAIN;
 		goto out;
 	}
-
+	spin_unlock(prov_lock(cprov));
 out:
 	return count; // write only
 }
@@ -401,7 +405,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	op = msg->op;
 	setting = &msg->prov;
   prov = inode_provenance(in);
-
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
 			set_tracked(prov_msg(prov));
@@ -429,6 +433,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	if( (op & PROV_SET_TAINT)!=0 ){
 		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
 	}
+	spin_unlock(prov_lock(prov));
   return sizeof(struct prov_file_config);
 }
 
@@ -452,10 +457,12 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
   }
 
   prov = inode_provenance(in);
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
   if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
     rtn = -ENOMEM;
 		goto out; // a bit superfluous, but would avoid error if code changes
   }
+	spin_unlock(prov_lock(prov));
 out:
   return rtn;
 }
@@ -486,7 +493,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	if(prov==NULL){
 		return -EINVAL;
 	}
-
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if( (op & PROV_SET_TRACKED)!=0 ){
 		if( provenance_is_tracked(setting) ){
 			set_tracked(prov_msg(prov));
@@ -514,6 +521,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	if( (op & PROV_SET_TAINT)!=0 ){
 		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
 	}
+	spin_unlock(prov_lock(prov));
   return sizeof(struct prov_process_config);
 }
 
@@ -534,11 +542,12 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if(prov==NULL){
 		return -EINVAL;
 	}
-
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if(copy_to_user(&msg->prov, prov_msg(prov), sizeof(prov_msg_t))){
     rtn = -ENOMEM;
 		goto out; // a bit superfluous, but would avoid error if code changes
   }
+	spin_unlock(prov_lock(prov));
 out:
   return rtn;
 }

@@ -26,8 +26,6 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
   if(cprov==NULL){  // we could not get the provenance, we give up
     goto out;
   }
-  spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
   if(provenance_is_tracked(prov_msg(cprov))){
     iprov = sk_inode_provenance(skb->sk);
     if(iprov==NULL){  // we could not get the provenance, we give up
@@ -36,8 +34,6 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
     provenance_parse_skb_ipv4(skb, &pckprov);
     record_inode_to_pck(prov_msg(iprov), &pckprov);
   }
-  spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(cprov));
 out:
   return NF_ACCEPT;
 }
