@@ -52,7 +52,7 @@ static inline void refresh_current_provenance( void ){
 		prov_msg(prov)->task_info.cid = cid;
 	}
 	spin_unlock(prov_lock(prov));
-	record_task_name(current, tprov);
+	record_task_name(current, prov);
 }
 
 static inline struct provenance* prov_from_vpid(pid_t pid){
@@ -68,6 +68,12 @@ static inline struct provenance* prov_from_vpid(pid_t pid){
 		return NULL;
 	}
 	return tprov;
+}
+
+static inline struct provenance *get_current_provenance( void )
+{
+	refresh_current_provenance();
+	return current_provenance();
 }
 
 /*

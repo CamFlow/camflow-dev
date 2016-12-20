@@ -173,7 +173,7 @@ static void provenance_inode_free_security(struct inode *inode)
 */
 static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = inode_provenance(dir);
 
 	if(!iprov){
@@ -201,7 +201,7 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
-  struct provenance* cprov = current_provenance();
+  struct provenance* cprov = get_current_provenance();
   struct provenance* iprov = NULL;
 	uint32_t perms;
 
@@ -217,8 +217,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   if(iprov==NULL){ // alloc provenance if none there
     return -ENOMEM;
   }
-
-
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
@@ -268,7 +266,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, struct dentry *new_dentry)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
   struct provenance* dprov = NULL;
   struct provenance* iprov;
 
@@ -319,7 +317,7 @@ static int provenance_inode_rename(struct inode *old_dir, struct dentry *old_den
 */
 static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
   struct provenance* iprov;
 	struct provenance* iattrprov;
 
@@ -354,7 +352,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 * Return 0 if permission is granted.
 */
 int provenance_inode_getattr(const struct path *path){
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
   struct provenance* iprov = dentry_provenance(path->dentry);
 
   if(!iprov){
@@ -376,7 +374,7 @@ int provenance_inode_getattr(const struct path *path){
 */
 static int provenance_inode_readlink(struct dentry *dentry)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = dentry_provenance(dentry);
 
   if(!iprov){
@@ -398,7 +396,7 @@ static int provenance_inode_readlink(struct dentry *dentry)
 static void provenance_inode_post_setxattr(struct dentry *dentry, const char *name,
 					const void *value, size_t size, int flags)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = dentry_provenance(dentry);
   if(!iprov){ // alloc provenance if none there
 		return;
@@ -429,7 +427,7 @@ out:
 */
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = dentry_provenance(dentry);
 	int rtn = 0;
 
@@ -462,7 +460,7 @@ out:
 */
 static int provenance_inode_listxattr(struct dentry *dentry)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = dentry_provenance(dentry);
 
   if(!iprov){ // alloc provenance if none there
@@ -484,7 +482,7 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 */
 static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = dentry_provenance(dentry);
 
   if(!iprov){ // alloc provenance if none there
@@ -531,7 +529,7 @@ out:
 */
 static int provenance_file_permission(struct file *file, int mask)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
   struct provenance* iprov = file_provenance(file);
 	struct inode *inode = file_inode(file);
 	uint32_t perms;
@@ -583,7 +581,7 @@ static int provenance_file_permission(struct file *file, int mask)
 */
 static int provenance_file_open(struct file *file, const struct cred *cred)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = file_provenance(file);
 
 	if(!iprov){ // alloc provenance if none there
@@ -608,7 +606,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 */
 static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsigned long prot, unsigned long flags)
 {
-  struct provenance* cprov = current_provenance();
+  struct provenance* cprov = get_current_provenance();
   struct provenance* iprov = NULL;
 	struct provenance* bprov = NULL;
 
@@ -666,7 +664,7 @@ out:
 */
 static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-  struct provenance* cprov = current_provenance();
+  struct provenance* cprov = get_current_provenance();
   struct provenance* iprov = file_provenance(file);
 
   if(!iprov){
@@ -692,7 +690,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
 */
 static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
-  struct provenance* cprov = current_provenance();
+  struct provenance* cprov = get_current_provenance();
   struct provenance* mprov;
 
   /* alloc new prov struct with generated id */
@@ -730,7 +728,7 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
 */
 static int provenance_msg_queue_msgsnd(struct msg_queue *msq, struct msg_msg *msg, int msqflg)
 {
-  struct provenance* cprov = current_provenance();
+  struct provenance* cprov = get_current_provenance();
   struct provenance* mprov = msg->provenance;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
@@ -775,7 +773,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 */
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
   struct provenance* sprov = alloc_provenance(ENT_SHM, ASSIGN_NODE_ID, GFP_KERNEL);
 
   if(!sprov){
@@ -813,7 +811,7 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
 static int provenance_shm_shmat(struct shmid_kernel *shp,
 			     char __user *shmaddr, int shmflg)
 {
-  struct provenance* cprov = current_provenance();
+  struct provenance* cprov = get_current_provenance();
 	struct provenance* sprov = shp->shm_perm.provenance;
 
   if(!sprov){
@@ -839,7 +837,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
 */
 static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t priority)
 {
-  struct provenance* skprov = current_provenance();
+  struct provenance* skprov = get_current_provenance();
   if(!skprov){
     return -ENOMEM;
 	}
@@ -865,7 +863,7 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 static int provenance_socket_post_create(struct socket *sock, int family,
 				      int type, int protocol, int kern)
 {
-  struct provenance* cprov  = current_provenance();
+  struct provenance* cprov  = get_current_provenance();
   struct provenance* iprov = socket_inode_provenance(sock);
 
   if(kern){
@@ -891,7 +889,7 @@ out:
 */
 static int provenance_socket_bind(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-  struct provenance* cprov  = current_provenance();
+  struct provenance* cprov  = get_current_provenance();
   struct provenance* iprov = socket_inode_provenance(sock);
 	struct sockaddr_in* ipv4_addr;
 	uint8_t op;
@@ -933,7 +931,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 */
 static int provenance_socket_connect(struct socket *sock, struct sockaddr *address, int addrlen)
 {
-  struct provenance* cprov  = current_provenance();
+  struct provenance* cprov  = get_current_provenance();
   struct provenance* iprov = socket_inode_provenance(sock);
 	struct sockaddr_in* ipv4_addr;
 	uint8_t op;
@@ -979,7 +977,7 @@ out:
 */
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
-  struct provenance* cprov  = current_provenance();
+  struct provenance* cprov  = get_current_provenance();
   struct provenance* iprov = socket_inode_provenance(sock);
 
 	if(!iprov){
@@ -1003,7 +1001,7 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 */
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
-  struct provenance* cprov  = current_provenance();
+  struct provenance* cprov  = get_current_provenance();
   struct provenance* iprov = socket_inode_provenance(sock);
   struct provenance* niprov = socket_inode_provenance(newsock);
 
@@ -1026,7 +1024,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 				  int size)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = socket_inode_provenance(sock);
 
 	if(iprov==NULL){
@@ -1051,7 +1049,7 @@ static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 				  int size, int flags)
 {
-	struct provenance* cprov = current_provenance();
+	struct provenance* cprov = get_current_provenance();
 	struct provenance* iprov = socket_inode_provenance(sock);
 
 	if(iprov==NULL){
@@ -1114,7 +1112,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					      struct sock *other,
 					      struct sock *newsk)
 {
-  /*struct provenance* cprov  = current_provenance();
+  /*struct provenance* cprov  = get_current_provenance();
   struct provenance* skprov = sk_provenance(sock);
   struct provenance* nskprov = sk_provenance(newsk);
   struct provenance* okprov = sk_provenance(other);
@@ -1185,7 +1183,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 * before commit_creds().
 */
  static void provenance_bprm_committing_creds(struct linux_binprm *bprm){
-	struct provenance* cprov  = current_provenance();
+	struct provenance* cprov  = get_current_provenance();
 	struct provenance* nprov = bprm->cred->provenance;
 	struct provenance* iprov = file_provenance(bprm->file);
 

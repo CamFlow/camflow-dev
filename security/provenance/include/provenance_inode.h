@@ -51,10 +51,10 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov){
   }else if(S_ISSOCK(mode)){
     type=ENT_INODE_SOCKET;
   }
-  spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
+  spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
   prov_msg(prov)->inode_info.mode=mode;
   prov_type(prov_msg(prov))=type;
-  spin_unlock(prov_lock(node));
+  spin_unlock(prov_lock(prov));
 }
 
 static inline void provenance_mark_as_opaque(const char* name){
@@ -75,7 +75,7 @@ static inline void provenance_mark_as_opaque(const char* name){
 static inline struct provenance* inode_provenance(struct inode *inode){
   struct provenance *prov = inode->i_provenance;
   record_inode_name(inode, prov);
-  record_inode_type(prov_msg_t* iprov, uint16_t mode)
+  record_inode_type(inode->i_mode, prov);
   return prov;
 }
 
