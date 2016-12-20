@@ -92,6 +92,9 @@ static inline void __record_node_name(struct provenance *node, char* name){
 static inline void record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov){
   char *buffer;
 	char *ptr;
+  if( provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)) ){
+		return;
+	}
   buffer = (char*)kzalloc(PATH_MAX, GFP_NOFS);
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
 	__record_node_name(prov, ptr);
