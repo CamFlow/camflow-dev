@@ -145,8 +145,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
   prov_msg(iprov)->inode_info.uid=__kuid_val(inode->i_uid);
   prov_msg(iprov)->inode_info.gid=__kgid_val(inode->i_gid);
-  prov_read_inode_type(prov_msg(iprov), inode);
-	prov_msg(iprov)->inode_info.mode=inode->i_mode;
+  prov_read_inode_type(prov_msg(iprov), inode->i_mode);
   sprov = inode->i_sb->s_provenance;
   memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16*sizeof(uint8_t));
 
@@ -219,9 +218,12 @@ static int provenance_inode_permission(struct inode *inode, int mask)
     return -ENOMEM;
   }
 
+
+
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	prov_read_inode_type(prov_msg(iprov), inode->i_mode);
 	if(is_inode_dir(inode)){
 		if((perms & (DIR__WRITE)) != 0){
 	    record_relation(RL_PERM_WRITE, prov_msg(cprov), prov_msg(iprov), FLOW_ALLOWED, NULL);
@@ -289,7 +291,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
 	spin_unlock(prov_lock(cprov));
-	record_inode_name_from_dentry(new_dentry, prov_msg(iprov));
+	record_inode_name_from_dentry(new_dentry, iprov);
   return 0;
 }
 
@@ -917,7 +919,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 		}
 	}
 
-	provenance_record_address(prov_msg(iprov), address, addrlen);
+	provenance_record_address(address, addrlen, iprov);
 	record_relation(RL_BIND, prov_msg(cprov), prov_msg(iprov), FLOW_ALLOWED, NULL);
   return 0;
 }
@@ -962,7 +964,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 	}
 
 
-	provenance_record_address(prov_msg(iprov), address, addrlen);
+	provenance_record_address(address, addrlen, iprov);
 	record_relation(RL_CONNECT, prov_msg(cprov), prov_msg(iprov), FLOW_ALLOWED, NULL);
 out:
 	spin_unlock(prov_lock(iprov));

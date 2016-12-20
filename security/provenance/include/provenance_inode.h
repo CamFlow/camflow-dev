@@ -34,22 +34,22 @@ static inline struct inode* file_name_to_inode(const char* name){
   return inode;
 }
 
-static inline void prov_read_inode_type(prov_msg_t* iprov, struct inode *inode){
+static inline void prov_read_inode_type(prov_msg_t* iprov, uint16_t mode){
   uint64_t type = ENT_INODE_UNKNOWN;
-  iprov->inode_info.mode=inode->i_mode;
-  if(S_ISBLK(inode->i_mode)){
+  iprov->inode_info.mode=mode;
+  if(S_ISBLK(mode)){
     type=ENT_INODE_BLOCK;
-  }else if(S_ISCHR(inode->i_mode)){
+  }else if(S_ISCHR(mode)){
     type=ENT_INODE_CHAR;
-  }else if(S_ISDIR(inode->i_mode)){
+  }else if(S_ISDIR(mode)){
     type=ENT_INODE_DIRECTORY;
-  }else if(S_ISFIFO(inode->i_mode)){
+  }else if(S_ISFIFO(mode)){
     type=ENT_INODE_FIFO;
-  }else if(S_ISLNK(inode->i_mode)){
+  }else if(S_ISLNK(mode)){
     type=ENT_INODE_LINK;
-  }else if(S_ISREG(inode->i_mode)){
+  }else if(S_ISREG(mode)){
     type=ENT_INODE_FILE;
-  }else if(S_ISSOCK(inode->i_mode)){
+  }else if(S_ISSOCK(mode)){
     type=ENT_INODE_SOCKET;
   }
   prov_type(iprov)=type;
@@ -70,30 +70,10 @@ static inline void provenance_mark_as_opaque(const char* name){
   }
 }
 
-/*static inline prov_msg_t* inode_provenance_no_name(struct inode* inode)
-{
-  prov_msg_t* iprov = inode->i_provenance;
-  if(unlikely(iprov==NULL)){
-    return NULL;
-  }
-  prov_read_inode_type(iprov, inode);
-  return iprov;
-}
-
-static inline prov_msg_t* inode_provenance(struct inode* inode)
-{
-  prov_msg_t* iprov = inode_provenance_no_name(inode);
-  if(unlikely(iprov==NULL)){
-    return NULL;
-  }
-  if(is_inode_dir(inode) || is_inode_file(inode)){
-    record_inode_name(inode, iprov);
-  }
-	return iprov;
-}*/
-
 static inline struct provenance* inode_provenance(struct inode *inode){
-  return inode->i_provenance;
+  struct provenance *prov = inode->i_provenance;
+  record_inode_name(inode, prov);
+  return prov;
 }
 
 static inline struct provenance* dentry_provenance(struct dentry *dentry)

@@ -69,39 +69,39 @@ static inline int prov_print(const char *fmt, ...)
   return length;
 }
 
-static inline void __record_node_name(prov_msg_t* node, char* name){
+static inline void __record_node_name(struct provenance *node, char* name){
 	long_prov_msg_t* fname_prov;
 
   fname_prov = alloc_long_provenance(ENT_FILE_NAME, GFP_KERNEL);
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length=strlen(fname_prov->file_name_info.name);
-  if(prov_type(node) == ACT_TASK){
-	   __long_record_relation(RL_NAMED_PROCESS, fname_prov, node, FLOW_ALLOWED);
+  if(prov_type(prov_msg(node)) == ACT_TASK){
+    spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
+    __long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_msg(node), FLOW_ALLOWED);
+    set_name_recorded(prov_msg(node));
+    spin_unlock(prov_lock(node));
   }else{
-    __long_record_relation(RL_NAMED, fname_prov, node, FLOW_ALLOWED);
+    spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
+    __long_record_relation(RL_NAMED, fname_prov, prov_msg(node), FLOW_ALLOWED);
+    set_name_recorded(prov_msg(node));
+    spin_unlock(prov_lock(node));
   }
   kfree(fname_prov);
-	set_name_recorded(node);
 }
 
-static inline void record_inode_name_from_dentry(struct dentry *dentry, prov_msg_t* iprov){
+static inline void record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov){
   char *buffer;
 	char *ptr;
-
-  if( !provenance_is_recorded(iprov) ){
-    return;
-  }
-
   buffer = (char*)kzalloc(PATH_MAX, GFP_NOFS);
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-	__record_node_name(iprov, ptr);
+	__record_node_name(prov, ptr);
 	kfree(buffer);
 }
 
-static inline void record_inode_name(struct inode *inode, prov_msg_t* iprov){
+static inline void record_inode_name(struct inode *inode, struct provenance *prov){
 	struct dentry* dentry;
 
-	if( provenance_is_name_recorded(iprov) ){
+	if( provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)) ){
 		return;
 	}
 	dentry = d_find_alias(inode);
@@ -109,18 +109,18 @@ static inline void record_inode_name(struct inode *inode, prov_msg_t* iprov){
 	if(!dentry){ // we did not find a dentry, not sure if it should ever happen
 		return;
 	}
-	record_inode_name_from_dentry(dentry, iprov);
+	record_inode_name_from_dentry(dentry, prov);
 	dput(dentry);
 }
 
-static inline void record_task_name(struct task_struct *task, prov_msg_t* tprov){
+static inline void record_task_name(struct task_struct *task, struct provenance *prov){
 	const struct cred *cred;
 	struct mm_struct *mm;
  	struct file *exe_file;
 	char *buffer;
 	char *ptr;
 
-	if(filter_node(tprov)){
+  if( provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)) ){
 		return;
 	}
 
@@ -140,7 +140,7 @@ static inline void record_task_name(struct task_struct *task, prov_msg_t* tprov)
 		buffer = (char*)kzalloc(PATH_MAX, GFP_KERNEL);
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
-		__record_node_name(tprov, ptr);
+		__record_node_name(prov, ptr);
 		kfree(buffer);
 	}
 
@@ -148,23 +148,19 @@ out:
 	put_cred(cred);
 }
 
-static inline void provenance_record_address(prov_msg_t* skprov, struct sockaddr *address, int addrlen){
+static inline void provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov){
 	long_prov_msg_t* addr_info;
 
-  if( !provenance_is_recorded(skprov) ){
-    return;
-  }
-
-	if(provenance_is_name_recorded(skprov)){
+  if( provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)) ){
     return;
   }
 
   addr_info = alloc_long_provenance(ENT_ADDR, GFP_KERNEL);
   addr_info->address_info.length=addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
-	__long_record_relation(RL_NAMED, addr_info, skprov, FLOW_ALLOWED);
+	__long_record_relation(RL_NAMED, addr_info, prov_msg(prov), FLOW_ALLOWED);
   kfree(addr_info);
-	set_name_recorded(skprov);
+	set_name_recorded(prov_msg(prov));
 }
 
 static inline void record_write_xattr(uint64_t type,
