@@ -19,7 +19,7 @@
 ### v0.2.0
 
 ```
-- Record inode and task secid (from "major" LSM).
+- Record inode and task secid and secctx (from "major" LSM).
 - Code cleanup.
 - Support for IFC on a temporary hold (manpower and priority reason), code
 remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc.
