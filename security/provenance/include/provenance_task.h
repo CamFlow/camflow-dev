@@ -51,6 +51,7 @@ static inline void refresh_current_provenance( void ){
 	if(unlikely(prov_msg(prov)->task_info.cid != cid)){
 		prov_msg(prov)->task_info.cid = cid;
 	}
+	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
 	spin_unlock(prov_lock(prov));
 	record_task_name(current, prov);
 }

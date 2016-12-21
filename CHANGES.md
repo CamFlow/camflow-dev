@@ -19,9 +19,12 @@
 ### v0.2.0
 
 ```
+- Record inode and task secid (from "major" LSM).
 - Code cleanup.
-- Support for IFC on a temporary hold (manpower and priority reason), code remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc.
-- Fix "sleeping function called from invalid context" when d_find_alias was called in provenance_inode_permission.
+- Support for IFC on a temporary hold (manpower and priority reason), code
+remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc.
+- Fix "sleeping function called from invalid context" when d_find_alias was
+ called in provenance_inode_permission.
 - Identify containers via "cid" (current_cid() << (current->nsproxy->cgroup_ns->ns.inum)).
 - Use the correct relation type for relationships between packets and sockets.
 - Update to kernel version 4.9.
