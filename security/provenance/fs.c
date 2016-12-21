@@ -31,11 +31,11 @@ static ssize_t no_read(struct file *filp, char __user *buf,
 	return -EPERM; // write only
 }
 
-/*static ssize_t no_write(struct file *file, const char __user *buf,
+static ssize_t no_write(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	return -EPERM; // read only
-}*/ // not used anymore
+}
 
 static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_ENABLE_FILE);
@@ -53,6 +53,7 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_PROCESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
+	provenance_mark_as_opaque(PROV_SECCTX);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -615,6 +616,38 @@ declare_write_ipv4_filter_fcn(prov_write_ipv4_egress_filter, egress_ipv4filters)
 declare_reader_ipv4_filter_fcn(prov_read_ipv4_egress_filter, egress_ipv4filters);
 declare_file_operations(prov_ipv4_egress_filter_ops, prov_write_ipv4_egress_filter, prov_read_ipv4_egress_filter);
 
+static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	char* ctx = NULL;
+	uint32_t len;
+	struct secinfo *data;
+	int rtn = 0;
+
+	if(count < sizeof(struct secinfo)){
+		return -ENOMEM;
+	}
+	data=(struct secinfo*)buf;
+
+	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
+	if(rtn<0){
+		goto out;
+	}
+	if(len<PATH_MAX){
+		if(copy_to_user(data->secctx, ctx, len)){
+			rtn = -ENOMEM;
+		}
+		data->secctx[len]='\0'; // maybe unecessary
+	}else{
+		rtn = -ENOMEM;
+	}
+	security_release_secctx(ctx, len); // security module dealloc
+out:
+	return rtn;
+}
+
+declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
+
 static int __init init_prov_fs(void)
 {
    struct dentry *prov_dir;
@@ -636,6 +669,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
 	 securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
 	 securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
+	 securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
 
 	 printk(KERN_INFO "Provenance fs ready.\n");
 
