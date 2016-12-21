@@ -298,6 +298,7 @@ struct task_prov_struct{
   uint32_t pid;
   uint32_t vpid;
   uint32_t cid;
+  uint32_t secid;
 };
 
 struct inode_prov_struct{
@@ -306,6 +307,7 @@ struct inode_prov_struct{
   uint32_t gid;
   uint16_t mode;
   uint8_t sb_uuid[16];
+  uint32_t secid;
 };
 
 struct iattr_prov_struct{
@@ -330,13 +332,6 @@ struct shm_struct{
   uint16_t mode;
 };
 
-struct sock_struct{
-  basic_elements;
-  uint16_t type;
-  uint16_t family;
-  uint8_t protocol;
-};
-
 struct sb_struct{
   basic_elements;
   uint8_t uuid[16];
@@ -355,7 +350,6 @@ typedef union prov_msg{
   struct inode_prov_struct    inode_info;
   struct msg_msg_struct       msg_msg_info;
   struct shm_struct           shm_info;
-  struct sock_struct          sock_info;
   struct sb_struct            sb_info;
   struct pck_struct           pck_info;
   struct iattr_prov_struct    iattr_info;
