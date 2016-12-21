@@ -76,6 +76,8 @@ static inline struct provenance* inode_provenance(struct inode *inode){
   struct provenance *prov = inode->i_provenance;
   record_inode_name(inode, prov);
   record_inode_type(inode->i_mode, prov);
+  prov_msg(prov)->inode_info.uid=__kuid_val(inode->i_uid);
+  prov_msg(prov)->inode_info.gid=__kgid_val(inode->i_gid);
   security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
   return prov;
 }
