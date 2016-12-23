@@ -19,6 +19,7 @@
 ### v0.2.0
 
 ```
+- Can target based on secctx.
 - Record inode and task secid and secctx (from "major" LSM).
 - Code cleanup.
 - Support for IFC on a temporary hold (manpower and priority reason), code
