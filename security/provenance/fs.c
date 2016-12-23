@@ -16,6 +16,7 @@
 #include "provenance.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"
+#include "provenance_secctx.h"
 
 #define TMPBUFLEN	12
 
@@ -638,6 +639,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 			rtn = -ENOMEM;
 		}
 		data->secctx[len]='\0'; // maybe unecessary
+		data->len=len;
 	}else{
 		rtn = -ENOMEM;
 	}
@@ -647,6 +649,56 @@ out:
 }
 
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
+
+static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	struct secctx_filters* s;
+
+	if(count < sizeof(struct secinfo)){
+		return -ENOMEM;
+	}
+
+	s = (struct secctx_filters*)kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
+	if(copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
+	{
+		return -EAGAIN;
+	}
+	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
+	if( (s->filter.op&PROV_SEC_DELETE)!=PROV_SEC_DELETE ){
+		prov_secctx_add_or_update(&secctx_filters, s);
+	} else {
+		prov_secctx_delete(&secctx_filters, s);
+	}
+	return 0;
+}
+
+static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	struct secctx_filters* tmp;
+  size_t pos=0;
+
+  if(count < sizeof(struct secinfo) ){
+ 	 return -ENOMEM;
+  }
+
+  list_for_each_entry(tmp, &(secctx_filters.list), list){
+ 	 if( count < pos + sizeof(struct secinfo) ){
+ 		 return -ENOMEM;
+ 	 }
+
+ 	 if( copy_to_user(buf+pos, &(tmp->filter), sizeof(struct secinfo)) )
+ 	 {
+ 		 return -EAGAIN;
+ 	 }
+ 	 pos += sizeof(struct secinfo);
+  }
+
+  return pos;
+}
+
+declare_file_operations(prov_secctx_filter_ops, prov_write_secctx_filter, prov_read_secctx_filter);
 
 static int __init init_prov_fs(void)
 {
@@ -670,6 +722,7 @@ static int __init init_prov_fs(void)
 	 securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
 	 securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
 	 securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
+	 securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
 
 	 printk(KERN_INFO "Provenance fs ready.\n");
 

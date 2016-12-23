@@ -17,6 +17,7 @@
 #include <linux/namei.h>
 
 #include "provenance_long.h" // for record_inode_name
+#include "provenance_secctx.h" // for record_inode_name
 
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
@@ -74,11 +75,22 @@ static inline void provenance_mark_as_opaque(const char* name){
 
 static inline struct provenance* inode_provenance(struct inode *inode){
   struct provenance *prov = inode->i_provenance;
+  uint8_t op;
+
   record_inode_name(inode, prov);
   record_inode_type(inode->i_mode, prov);
   prov_msg(prov)->inode_info.uid=__kuid_val(inode->i_uid);
   prov_msg(prov)->inode_info.gid=__kgid_val(inode->i_gid);
   security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
+  op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->inode_info.secid);
+	if(unlikely(op!=0)){
+		if( (op & PROV_SEC_TRACKED)!=0 ){
+			set_tracked(prov_msg(prov));
+		}
+		if( (op & PROV_SEC_PROPAGATE)!=0 ){
+			set_propagate(prov_msg(prov));
+		}
+	}
   return prov;
 }
 

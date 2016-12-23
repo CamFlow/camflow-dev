@@ -95,6 +95,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
 #define PROV_IPV4_INGRESS_FILE                "/sys/kernel/security/provenance/ipv4_ingress"
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
+#define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -444,9 +445,18 @@ struct prov_ipv4_filter{
   uint64_t taint;
 };
 
+#define PROV_SEC_TRACKED		  0x01
+#define PROV_SEC_OPAQUE 		  0x02
+#define PROV_SEC_PROPAGATE    0x04
+#define PROV_SEC_TAINT        0x08
+#define PROV_SEC_DELETE       0x10 // to actually delete a filter from the list
+
 struct secinfo{
   uint32_t secid;
   char secctx[PATH_MAX];
+  uint32_t len;
+  uint8_t op;
+  uint64_t taint;
 };
 
 #endif
