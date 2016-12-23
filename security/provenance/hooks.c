@@ -25,6 +25,7 @@
 #include "provenance_inode.h"
 #include "provenance_task.h"
 #include "provenance_long.h"
+#include "provenance_secctx.h"
 
 /*
  * initialise the security for the init task
@@ -1315,10 +1316,12 @@ struct prov_long_boot_buffer*  long_boot_buffer=NULL;
 
 struct ipv4_filters ingress_ipv4filters;
 struct ipv4_filters egress_ipv4filters;
+struct secctx_filters secctx_filters;
 
 void __init provenance_add_hooks(void){
 	INIT_LIST_HEAD(&ingress_ipv4filters.list);
 	INIT_LIST_HEAD(&egress_ipv4filters.list);
+	INIT_LIST_HEAD(&secctx_filters.list);
 
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",

@@ -18,6 +18,7 @@
 #include <linux/sched.h>
 
 #include "provenance_long.h"
+#include "provenance_secctx.h"
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
@@ -40,6 +41,7 @@ static inline uint32_t current_cid( void ){
 static inline void refresh_current_provenance( void ){
 	struct provenance *prov = current_provenance();
 	uint32_t cid = current_cid();
+	uint8_t op;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if(unlikely(prov_msg(prov)->task_info.pid == 0)){
@@ -52,6 +54,15 @@ static inline void refresh_current_provenance( void ){
 		prov_msg(prov)->task_info.cid = cid;
 	}
 	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
+	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->task_info.secid);
+	if(unlikely(op!=0)){
+		if( (op & PROV_SEC_TRACKED)!=0 ){
+			set_tracked(prov_msg(prov));
+		}
+		if( (op & PROV_SEC_PROPAGATE)!=0 ){
+			set_propagate(prov_msg(prov));
+		}
+	}
 	spin_unlock(prov_lock(prov));
 	record_task_name(current, prov);
 }
