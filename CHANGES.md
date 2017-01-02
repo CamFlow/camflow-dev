@@ -19,6 +19,7 @@
 ### v0.2.0
 
 ```
+- Replaced check for user 0, by check for capabilities.
 - Can target based on secctx.
 - Record inode and task secid and secctx (from "major" LSM).
 - Code cleanup.

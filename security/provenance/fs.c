@@ -70,7 +70,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
   if(*ppos > 0)
     return -EINVAL;
 
-  if(__kuid_val(current_euid())!=0)
+  if(!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
   page = (char *)get_zeroed_page(GFP_KERNEL);
@@ -133,7 +133,7 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	// ideally should be decoupled from set machine id
 	__init_opaque();
 
-	if(__kuid_val(current_euid())!=0) // only allowed for root
+	if(!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
 	if(count < sizeof(uint32_t))
@@ -305,7 +305,7 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 				 size_t count, uint64_t* filter){
 	struct prov_filter* setting;
 
-	if(__kuid_val(current_euid())!=0){
+	if(!capable(CAP_AUDIT_CONTROL)){
 	 return -EPERM;
 	}
 
@@ -367,7 +367,7 @@ static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	if(__kuid_val(current_euid())!=0) // only allowed for root
+	if(!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
   prov_flush();
@@ -385,7 +385,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	prov_msg_t* setting;
 	uint8_t op;
 
-  if(__kuid_val(current_euid())!=0)
+  if(!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
   if(count < sizeof(struct prov_file_config)){
@@ -474,7 +474,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	prov_msg_t* setting;
 	uint8_t op;
 
-	if(__kuid_val(current_euid())!=0)
+	if(!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
   if(count < sizeof(struct prov_process_config)){
@@ -555,7 +555,7 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 				 size_t count, struct ipv4_filters *filters){
 	struct ipv4_filters	*f;
 
-	if(__kuid_val(current_euid())!=0){
+	if(!capable(CAP_AUDIT_CONTROL)){
 	 return -EPERM;
 	}
 
