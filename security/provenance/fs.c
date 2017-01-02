@@ -173,6 +173,10 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	struct provenance* cprov = current_provenance();
 	long_prov_msg_t* node = NULL;
 
+	if(!capable(CAP_AUDIT_WRITE)){
+		return -EPERM;
+	}
+
 	if(count < sizeof(struct disc_node_struct)){
 		count = -ENOMEM;
 		goto out;
@@ -216,6 +220,9 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 {
 	prov_msg_t relation;
 
+	if(!capable(CAP_AUDIT_WRITE)){
+		return -EPERM;
+	}
 	if(count < sizeof(struct relation_struct))
 	{
 		return -ENOMEM;
