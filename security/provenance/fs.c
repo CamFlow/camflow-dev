@@ -55,6 +55,7 @@ static inline void __init_opaque(void){
 	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
 	provenance_mark_as_opaque(PROV_SECCTX);
+	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
