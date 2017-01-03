@@ -132,7 +132,7 @@ static inline struct provenance* branch_mmap(prov_msg_t* iprov, prov_msg_t* cpro
     return NULL;
   }
 
-  prov = alloc_provenance(ENT_INODE_MMAP, ASSIGN_NODE_ID, GFP_KERNEL);
+  prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
 
   prov_msg(prov)->inode_info.uid = iprov->inode_info.uid;
   prov_msg(prov)->inode_info.gid = iprov->inode_info.gid;
