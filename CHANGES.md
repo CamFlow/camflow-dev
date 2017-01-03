@@ -19,6 +19,7 @@
 ### v0.2.0
 
 ```
+- Fix cases of ID overlap.
 - Writing nodes or relation from user space requires capability: CAP_AUDIT_WRITE
 - Replaced check for user 0, by check for capability CAP_AUDIT_CONTROL.
 - Can target based on secctx.

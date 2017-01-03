@@ -55,7 +55,7 @@ struct provenance {
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static inline struct provenance* alloc_provenance(uint64_t ntype, uint64_t nid, gfp_t gfp)
+static inline struct provenance* alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
   struct provenance* prov =  kmem_cache_zalloc(provenance_cache, gfp);
   if(!prov){
@@ -63,11 +63,7 @@ static inline struct provenance* alloc_provenance(uint64_t ntype, uint64_t nid, 
   }
   spin_lock_init(prov_lock(prov));
   prov_type(prov_msg(prov))=ntype;
-  if(nid==ASSIGN_NODE_ID){
-    node_identifier(prov_msg(prov)).id=prov_next_node_id();
-  }else{
-    node_identifier(prov_msg(prov)).id=nid;
-  }
+  node_identifier(prov_msg(prov)).id=prov_next_node_id();
   node_identifier(prov_msg(prov)).boot_id=prov_boot_id;
   node_identifier(prov_msg(prov)).machine_id=prov_machine_id;
   return prov;

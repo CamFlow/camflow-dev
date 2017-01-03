@@ -33,7 +33,7 @@
 static void cred_init_provenance(void)
 {
 	struct cred *cred = (struct cred *) current->real_cred;
-	struct provenance *prov = alloc_provenance(ACT_TASK, ASSIGN_NODE_ID, GFP_KERNEL);
+	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
   prov_msg(prov)->task_info.uid=__kuid_val(cred->euid);
@@ -49,7 +49,7 @@ static void cred_init_provenance(void)
 */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
-  struct provenance* prov  = alloc_provenance(ACT_TASK, ASSIGN_NODE_ID, gfp);
+  struct provenance* prov  = alloc_provenance(ACT_TASK, gfp);
 
   if(!prov)
     return -ENOMEM;
@@ -80,7 +80,7 @@ static void provenance_cred_free(struct cred *cred)
 static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp_t gfp)
 {
   struct provenance* old_prov = old->provenance;
-  struct provenance* prov = alloc_provenance(ACT_TASK, ASSIGN_NODE_ID, gfp);
+  struct provenance* prov = alloc_provenance(ACT_TASK, gfp);
 
   if(!prov){
     return -ENOMEM;
@@ -138,14 +138,15 @@ static int provenance_task_fix_setuid(struct cred *new, const struct cred *old, 
 */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-  struct provenance* iprov = alloc_provenance(ENT_INODE_UNKNOWN, inode->i_ino, GFP_KERNEL);
+  struct provenance* iprov = alloc_provenance(ENT_INODE_UNKNOWN, GFP_KERNEL);
   struct provenance* sprov;
 
   if(unlikely(!iprov))
     return -ENOMEM;
 
-  prov_msg(iprov)->inode_info.uid=__kuid_val(inode->i_uid);
-  prov_msg(iprov)->inode_info.gid=__kgid_val(inode->i_gid);
+	prov_msg(iprov)->inode_info.ino = inode->i_ino;
+  prov_msg(iprov)->inode_info.uid = __kuid_val(inode->i_uid);
+  prov_msg(iprov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(iprov)->inode_info.secid));
   record_inode_type(inode->i_mode, iprov);
   sprov = inode->i_sb->s_provenance;
@@ -327,7 +328,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
   if(!iprov){
     return -ENOMEM;
   }
-	iattrprov = alloc_provenance(ENT_IATTR, ASSIGN_NODE_ID, GFP_KERNEL);
+	iattrprov = alloc_provenance(ENT_IATTR, GFP_KERNEL);
 
 	prov_msg(iattrprov)->iattr_info.valid = iattr->ia_valid;
 	prov_msg(iattrprov)->iattr_info.mode = iattr->ia_mode;
@@ -696,7 +697,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   struct provenance* mprov;
 
   /* alloc new prov struct with generated id */
-  mprov = alloc_provenance(ENT_MSG, ASSIGN_NODE_ID, GFP_KERNEL);
+  mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
   if(!mprov){
     return -ENOMEM;
@@ -776,7 +777,7 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *ms
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
 	struct provenance* cprov = get_current_provenance();
-  struct provenance* sprov = alloc_provenance(ENT_SHM, ASSIGN_NODE_ID, GFP_KERNEL);
+  struct provenance* sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 
   if(!sprov){
     return -ENOMEM;
@@ -1211,7 +1212,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm){
 */
 static int provenance_sb_alloc_security(struct super_block *sb)
 {
-  struct provenance* sbprov  = alloc_provenance(ENT_SBLCK, ASSIGN_NODE_ID, GFP_KERNEL);
+  struct provenance* sbprov  = alloc_provenance(ENT_SBLCK, GFP_KERNEL);
   if(!sbprov)
     return -ENOMEM;
   sb->s_provenance = sbprov;

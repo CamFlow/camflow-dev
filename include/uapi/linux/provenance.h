@@ -305,6 +305,7 @@ struct task_prov_struct{
 
 struct inode_prov_struct{
   basic_elements;
+  uint64_t ino;
   uint32_t uid;
   uint32_t gid;
   uint16_t mode;
