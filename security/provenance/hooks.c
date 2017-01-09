@@ -1317,6 +1317,7 @@ static struct security_hook_list provenance_hooks[] = {
 };
 
 struct kmem_cache *provenance_cache=NULL;
+struct kmem_cache *shast_cache=NULL;
 
 uint32_t prov_machine_id=1; /* TODO get a proper id somehow, for now set from userspace */
 uint32_t prov_boot_id=0;
@@ -1336,6 +1337,9 @@ void __init provenance_add_hooks(void){
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(struct provenance),
+					    0, SLAB_PANIC, NULL);
+	shast_cache = kmem_cache_create("shast_struct",
+					    sizeof(struct shast),
 					    0, SLAB_PANIC, NULL);
   cred_init_provenance();
 
