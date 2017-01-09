@@ -36,7 +36,7 @@ static inline uint8_t prov_secctx_delete(struct secctx_filters* filters, struct 
   struct secctx_filters* tmp;
 
   list_for_each_safe(pos, q, &(filters->list)){
-    tmp= list_entry(pos, struct secctx_filters, list);
+    tmp = list_entry(pos, struct secctx_filters, list);
     if(tmp->filter.secid == f->filter.secid){
       list_del(pos);
       kfree(tmp);
@@ -51,13 +51,13 @@ static inline uint8_t prov_secctx_add_or_update(struct secctx_filters* filters, 
   struct secctx_filters* tmp;
 
   list_for_each_safe(pos, q, &(filters->list)){
-    tmp= list_entry(pos, struct secctx_filters, list);
+    tmp = list_entry(pos, struct secctx_filters, list);
     if(tmp->filter.secid == f->filter.secid){
       tmp->filter.op = f->filter.op;
       return 0; // you should only get one
     }
   }
-  list_add_tail(&(f->list), &filters->list); // not already on the list, we add it
+  list_add_tail(&(f->list), &(filters->list)); // not already on the list, we add it
   return 0;
 }
 
