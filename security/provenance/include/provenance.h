@@ -43,9 +43,19 @@ enum{
   PROVENANCE_LOCK_SHM,
 };
 
+
+#define SHAST_READ  0
+#define SHAST_WRITE 1
+struct shast_struct{
+  struct list_head list;
+  struct provenance* prov;
+  uint8_t direction;
+};
+
 struct provenance {
   prov_msg_t msg;
   spinlock_t lock;
+  struct shast_struct shast;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -62,6 +72,7 @@ static inline struct provenance* alloc_provenance(uint64_t ntype, gfp_t gfp)
     return NULL;
   }
   spin_lock_init(prov_lock(prov));
+  INIT_LIST_HEAD(&(prov->shast.list));
   prov_type(prov_msg(prov))=ntype;
   node_identifier(prov_msg(prov)).id=prov_next_node_id();
   node_identifier(prov_msg(prov)).boot_id=prov_boot_id;
@@ -70,6 +81,15 @@ static inline struct provenance* alloc_provenance(uint64_t ntype, gfp_t gfp)
 }
 
 static inline void free_provenance(struct provenance *prov){
+  struct list_head *pos, *q;
+  struct shast_struct* tmp;
+  if(!list_empty(&(prov->shast.list))){
+    list_for_each_safe(pos, q, &(prov->shast.list)){
+      tmp = list_entry(pos, struct shast_struct, list);
+      list_del(pos);
+      kfree(tmp);
+    }
+  }
   kmem_cache_free(provenance_cache, prov);
 }
 
@@ -193,5 +213,55 @@ static inline void record_relation(uint64_t type,
 out:
   return;
 }
+
+static inline void flow_to_activity(uint64_t type,
+                                    struct provenance* from,
+                                    struct provenance* to,
+                                    uint8_t allowed,
+                                    struct file *file){
+  struct shast_struct* tmp;
+  record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+  list_for_each_entry(tmp, &(to->shast.list), list){
+    if(tmp->direction){
+      record_relation(RL_SH_WRITE, prov_msg(to), prov_msg(tmp->prov), allowed, file);
+    }
+  }
+}
+
+static inline void flow_from_activity(uint64_t type,
+                                    struct provenance* from,
+                                    struct provenance* to,
+                                    uint8_t allowed,
+                                    struct file *file){
+  struct shast_struct* tmp;
+  list_for_each_entry(tmp, &(from->shast.list), list){
+    record_relation(RL_SH_READ, prov_msg(tmp->prov), prov_msg(from), allowed, file);
+  }
+  record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+}
+
+static inline void flow_between_entities(uint64_t type,
+                                    struct provenance* from,
+                                    struct provenance* to,
+                                    uint8_t allowed,
+                                    struct file *file){
+  record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+}
+
+static inline void flow_between_activities(uint64_t type,
+                                    struct provenance* from,
+                                    struct provenance* to,
+                                    uint8_t allowed,
+                                    struct file *file){
+  record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+}
+
+static inline void shast_associate(struct provenance* activity, struct provenance* shast, uint8_t direction){
+  struct shast_struct* tmp = kzalloc(sizeof(struct shast_struct), GFP_NOFS);
+  tmp->direction=direction;
+  tmp->prov=shast;
+  list_add_tail(&(tmp->list), &(activity->shast.list));
+}
+
 #endif
 #endif /* _LINUX_PROVENANCE_H */
