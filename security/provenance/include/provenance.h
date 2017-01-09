@@ -258,7 +258,13 @@ static inline void flow_between_activities(uint64_t type,
 }
 
 static inline void shast_associate(struct provenance* activity, struct provenance* shast, uint8_t direction){
-  struct shast* tmp = kmem_cache_zalloc(shast_cache, GFP_ATOMIC);
+  struct shast* tmp;
+  list_for_each_entry(tmp, &(activity->shast.list), list){
+    if(node_identifier(prov_msg(shast)).id == node_identifier(prov_msg(tmp->prov)).id){
+      return;
+    }
+  }
+  tmp = kmem_cache_zalloc(shast_cache, GFP_ATOMIC);
   tmp->direction=direction;
   tmp->prov=shast;
   list_add_tail(&(tmp->list), &(activity->shast.list));
