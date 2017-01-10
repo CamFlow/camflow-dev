@@ -24,6 +24,7 @@
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
+#include <linux/mm.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
@@ -34,7 +35,6 @@
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
-extern struct kmem_cache *shast_cache;
 
 enum{
   PROVENANCE_LOCK_TASK,
@@ -44,19 +44,9 @@ enum{
   PROVENANCE_LOCK_SHM,
 };
 
-
-#define SHAST_READ  0
-#define SHAST_WRITE 1
-struct shast{
-  struct list_head list;
-  struct provenance* prov;
-  uint8_t direction;
-};
-
 struct provenance {
   prov_msg_t msg;
   spinlock_t lock;
-  struct shast shast;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -73,7 +63,6 @@ static inline struct provenance* alloc_provenance(uint64_t ntype, gfp_t gfp)
     return NULL;
   }
   spin_lock_init(prov_lock(prov));
-  INIT_LIST_HEAD(&(prov->shast.list));
   prov_type(prov_msg(prov))=ntype;
   node_identifier(prov_msg(prov)).id=prov_next_node_id();
   node_identifier(prov_msg(prov)).boot_id=prov_boot_id;
@@ -82,15 +71,6 @@ static inline struct provenance* alloc_provenance(uint64_t ntype, gfp_t gfp)
 }
 
 static inline void free_provenance(struct provenance *prov){
-  struct list_head *pos, *q;
-  struct shast* tmp;
-  if(!list_empty(&(prov->shast.list))){
-    list_for_each_safe(pos, q, &(prov->shast.list)){
-      tmp = list_entry(pos, struct shast, list);
-      list_del(pos);
-      kmem_cache_free(shast_cache, tmp);
-    }
-  }
   kmem_cache_free(provenance_cache, prov);
 }
 
@@ -215,29 +195,75 @@ out:
   return;
 }
 
+
+#define vm_write(flags)   ((flags & VM_WRITE)==VM_WRITE)
+#define vm_read(flags)    ((flags & VM_READ)==VM_READ)
+#define vm_exec(flags)    ((flags & VM_EXEC)==VM_EXEC)
+#define vm_mayshare(flags) ((flags & VM_MAYSHARE)==VM_MAYSHARE)
+#define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
+#define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
+
+// assume always current
 static inline void flow_to_activity(uint64_t type,
                                     struct provenance* from,
                                     struct provenance* to,
                                     uint8_t allowed,
                                     struct file *file){
-  struct shast* tmp;
+  struct mm_struct *mm = get_task_mm(current);
+  struct vm_area_struct *vma = mm->mmap;
+  struct file* mmapf;
+  vm_flags_t flags;
+  struct provenance * mmprov;
+
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
-  list_for_each_entry(tmp, &(to->shast.list), list){
-    if(tmp->direction){
-      record_relation(RL_SH_WRITE, prov_msg(to), prov_msg(tmp->prov), allowed, file);
+
+  if(allowed==FLOW_DISALLOWED){
+    return;
+  }
+
+  while(vma){ // we go through mmaped files
+    mmapf = vma->vm_file;
+    if(mmapf){
+      flags = vma->vm_flags;
+      // it is shared and we can write to it
+      if(vm_write_mayshare(flags)){
+        mmprov = file_inode(mmapf)->i_provenance;
+        record_relation(RL_SH_WRITE, prov_msg(to), prov_msg(mmprov), allowed, file);
+      }
     }
+    vma = vma->vm_next;
   }
 }
 
+// assume always current
 static inline void flow_from_activity(uint64_t type,
                                     struct provenance* from,
                                     struct provenance* to,
                                     uint8_t allowed,
                                     struct file *file){
-  struct shast* tmp;
-  list_for_each_entry(tmp, &(from->shast.list), list){
-    record_relation(RL_SH_READ, prov_msg(tmp->prov), prov_msg(from), allowed, file);
+  struct mm_struct *mm = get_task_mm(current);
+  struct vm_area_struct *vma = mm->mmap;
+  struct file* mmapf;
+  vm_flags_t flags;
+  struct provenance * mmprov;
+
+  if(allowed==FLOW_DISALLOWED){
+    goto out;
   }
+
+  while(vma){ // we go through mmaped files
+    mmapf = vma->vm_file;
+    if(mmapf){
+      flags = vma->vm_flags;
+      // it is shared and we can read from it
+      if( vm_read_exec_mayshare(flags) ){
+        mmprov = file_inode(mmapf)->i_provenance;
+        record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(from), allowed, file);
+      }
+    }
+    vma = vma->vm_next;
+  }
+out:
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
 }
 
@@ -255,19 +281,6 @@ static inline void flow_between_activities(uint64_t type,
                                     uint8_t allowed,
                                     struct file *file){
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
-}
-
-static inline void shast_associate(struct provenance* activity, struct provenance* shast, uint8_t direction){
-  struct shast* tmp;
-  list_for_each_entry(tmp, &(activity->shast.list), list){
-    if(node_identifier(prov_msg(shast)).id == node_identifier(prov_msg(tmp->prov)).id){
-      return;
-    }
-  }
-  tmp = kmem_cache_zalloc(shast_cache, GFP_ATOMIC);
-  tmp->direction=direction;
-  tmp->prov=shast;
-  list_add_tail(&(tmp->list), &(activity->shast.list));
 }
 
 #endif
