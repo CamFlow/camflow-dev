@@ -618,19 +618,20 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   }
 	//provenance_record_file_name(file);
   iprov = file_provenance(file);
-	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if( (flags & (MAP_SHARED) ) !=  0){
+		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
+		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	  if((prot & (PROT_WRITE)) != 0){
 	    flow_from_activity(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
 	  }
 	  if((prot & (PROT_READ)) != 0){
 	    flow_to_activity(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
 	  }
-
 		if((prot & (PROT_EXEC)) != 0){
 	    flow_to_activity(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
 	  }
+		spin_unlock(prov_lock(iprov));
+		spin_unlock(prov_lock(cprov));
 		if((prot & (PROT_WRITE)) != 0){
 			shast_associate(cprov, iprov, SHAST_WRITE);
 		}else{
@@ -639,8 +640,11 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 	}else{
 		bprov = branch_mmap(prov_msg(iprov), prov_msg(cprov));
 		if(bprov==NULL){
-			goto out;
+			return 0;
 		}
+		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
+		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+
 		if((prot & (PROT_WRITE)) != 0){
 	    flow_from_activity(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
 	  }
@@ -650,12 +654,10 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 		if((prot & (PROT_EXEC)) != 0){
 	    flow_to_activity(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
 	  }
+		spin_unlock(prov_lock(iprov));
+		spin_unlock(prov_lock(cprov));
 		free_provenance(bprov);
 	}
-
-out:
-	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(cprov));
   return 0;
 }
 
@@ -833,13 +835,13 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
     flow_to_activity(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
     flow_from_activity(RL_WRITE, cprov, sprov, FLOW_ALLOWED, NULL);
   }
+	spin_unlock(prov_lock(sprov));
+	spin_unlock(prov_lock(cprov));
 	if(shmflg & SHM_RDONLY){
 		shast_associate(cprov, sprov, SHAST_READ);
 	}else{
 		shast_associate(cprov, sprov, SHAST_WRITE);
 	}
-	spin_unlock(prov_lock(sprov));
-	spin_unlock(prov_lock(cprov));
 	return 0;
 }
 
