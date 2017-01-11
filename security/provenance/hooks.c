@@ -89,6 +89,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   prov_msg(prov)->task_info.uid=__kuid_val(new->euid);
   prov_msg(prov)->task_info.gid=__kgid_val(new->egid);
 	spin_lock_nested(prov_lock(old_prov), PROVENANCE_LOCK_TASK);
+	prov->has_mmap = old_prov->has_mmap;
 	flow_between_activities(RL_CLONE, old_prov, prov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(old_prov));
 	new->provenance = prov;
@@ -618,7 +619,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   }
 	//provenance_record_file_name(file);
   iprov = file_provenance(file);
-	if( vm_mayshare(flags) ){
+	if( (flags & MAP_TYPE) == MAP_SHARED ){
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		cprov->has_mmap = 1;
