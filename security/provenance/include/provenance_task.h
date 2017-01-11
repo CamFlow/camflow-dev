@@ -38,10 +38,52 @@ static inline uint32_t current_cid( void ){
 	return cid;
 }
 
+#define vm_write(flags)   ((flags & VM_WRITE)==VM_WRITE)
+#define vm_read(flags)    ((flags & VM_READ)==VM_READ)
+#define vm_exec(flags)    ((flags & VM_EXEC)==VM_EXEC)
+#define vm_mayshare(flags) ((flags & (VM_SHARED|VM_MAYSHARE) )!=0)
+#define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
+#define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
+
+
+static inline void current_update_shst( struct provenance *cprov ){
+	struct mm_struct *mm = get_task_mm(current);
+  struct vm_area_struct *vma;
+  struct file* mmapf;
+  vm_flags_t flags;
+  struct provenance * mmprov;
+
+	if(!mm){
+    return;
+  }
+	//while(!down_read_trylock(&mm->mmap_sem)); // we do not want to sleep
+	vma = mm->mmap;
+	while(vma){ // we go through mmaped files
+    mmapf = vma->vm_file;
+    if(mmapf){
+      flags = vma->vm_flags;
+      mmprov = file_inode(mmapf)->i_provenance;
+			if(mmprov){
+				if(vm_read_exec_mayshare(flags)){
+          record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
+				}
+      	if(vm_write_mayshare(flags)){
+          record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
+        }
+      }
+    }
+    vma = vma->vm_next;
+  }
+	//up_read(&mm->mmap_sem);
+	mmput_async(mm);
+}
+
+
 static inline void refresh_current_provenance( void ){
 	struct provenance *prov = current_provenance();
 	uint32_t cid = current_cid();
 	uint8_t op;
+	uint8_t update;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if(unlikely(prov_msg(prov)->task_info.pid == 0)){
@@ -63,7 +105,14 @@ static inline void refresh_current_provenance( void ){
 			set_propagate(prov_msg(prov));
 		}
 	}
+	if(prov->updt_mmap && prov->has_mmap){
+		update = 1;
+		prov->updt_mmap = 0;
+	}
 	spin_unlock(prov_lock(prov));
+	if(update){
+		current_update_shst(prov);
+	}
 	record_task_name(current, prov);
 }
 

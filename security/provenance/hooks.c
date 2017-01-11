@@ -594,7 +594,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_OPEN, iprov, cprov, FLOW_ALLOWED, file);
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(cprov));
+	spin_unlock(prov_lock(	cprov));
 	return 0;
 }
 
@@ -618,9 +618,10 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   }
 	//provenance_record_file_name(file);
   iprov = file_provenance(file);
-	if( (flags & (MAP_SHARED) ) !=  0){
+	if( vm_mayshare(flags) ){
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+		cprov->has_mmap = 1;
 	  if((prot & (PROT_WRITE)) != 0){
 	    flow_from_activity(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
 	  }
@@ -639,7 +640,6 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 		}
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-
 		if((prot & (PROT_WRITE)) != 0){
 	    flow_from_activity(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
 	  }
