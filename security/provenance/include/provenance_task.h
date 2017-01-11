@@ -66,12 +66,14 @@ static inline void current_update_shst( struct provenance *cprov ){
       mmprov = file_inode(mmapf)->i_provenance;
 			if(mmprov){
 				cprov->has_mmap=1;
+				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if(vm_read_exec_mayshare(flags)){
           record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
 				}
       	if(vm_write_mayshare(flags)){
           record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
         }
+				spin_unlock(prov_lock(mmprov));
       }
     }
     vma = vma->vm_next;
