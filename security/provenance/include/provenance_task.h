@@ -56,6 +56,7 @@ static inline void current_update_shst( struct provenance *cprov ){
 	if(!mm){
     return;
   }
+	cprov->has_mmap=0;
 	//while(!down_read_trylock(&mm->mmap_sem)); // we do not want to sleep
 	vma = mm->mmap;
 	while(vma){ // we go through mmaped files
@@ -64,6 +65,7 @@ static inline void current_update_shst( struct provenance *cprov ){
       flags = vma->vm_flags;
       mmprov = file_inode(mmapf)->i_provenance;
 			if(mmprov){
+				cprov->has_mmap=1;
 				if(vm_read_exec_mayshare(flags)){
           record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
 				}
@@ -83,7 +85,6 @@ static inline void refresh_current_provenance( void ){
 	struct provenance *prov = current_provenance();
 	uint32_t cid = current_cid();
 	uint8_t op;
-	uint8_t update;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if(unlikely(prov_msg(prov)->task_info.pid == 0)){
@@ -106,13 +107,10 @@ static inline void refresh_current_provenance( void ){
 		}
 	}
 	if(prov->updt_mmap && prov->has_mmap){
-		update = 1;
+		current_update_shst(prov);
 		prov->updt_mmap = 0;
 	}
 	spin_unlock(prov_lock(prov));
-	if(update){
-		current_update_shst(prov);
-	}
 	record_task_name(current, prov);
 }
 

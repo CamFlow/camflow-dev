@@ -162,6 +162,18 @@ out:
   return;
 }
 
+static inline bool is_filtered(uint64_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  // one of the node should not appear in the record, ignore the relation
+  if(filter_node(from) || filter_node(to)){
+    return true;
+  }
+  // should the relation appear
+  if(filter_relation(type, allowed)){
+    return true;
+  }
+  return false;
+}
+
 static inline void record_relation(uint64_t type,
                                     prov_msg_t* from,
                                     prov_msg_t* to,
@@ -169,23 +181,13 @@ static inline void record_relation(uint64_t type,
                                     struct file *file){
   prov_msg_t relation;
 
-  if( unlikely(from==NULL || to==NULL) ){ // should not occur
-    return;
-  }
-
   if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all ){
     return;
   }
-
-  // one of the node should not appear in the record, ignore the relation
-  if(filter_node(from) || filter_node(to)){
+  if( is_filtered(type, from, to, allowed) ){
     return;
   }
 
-  // should the relation appear
-  if(filter_relation(type, allowed)){
-    goto out;
-  }
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(from);
   __propagate(type, from, to, &relation, allowed);
@@ -193,8 +195,6 @@ static inline void record_relation(uint64_t type,
   __update_version(type, to);
   __record_node(to);
   __record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, file);
-out:
-  return;
 }
 
 static inline void flow_to_activity(uint64_t type,
@@ -203,7 +203,9 @@ static inline void flow_to_activity(uint64_t type,
                                     uint8_t allowed,
                                     struct file *file){
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
-  to->updt_mmap=1;
+  if(!is_filtered(type, prov_msg(from), prov_msg(to), allowed)){
+    to->updt_mmap=1;
+  }
 }
 
 static inline void flow_from_activity(uint64_t type,
