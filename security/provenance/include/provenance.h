@@ -47,6 +47,8 @@ enum{
 struct provenance {
   prov_msg_t msg;
   spinlock_t lock;
+  uint8_t updt_mmap;
+  uint8_t has_mmap;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -195,75 +197,20 @@ out:
   return;
 }
 
-
-#define vm_write(flags)   ((flags & VM_WRITE)==VM_WRITE)
-#define vm_read(flags)    ((flags & VM_READ)==VM_READ)
-#define vm_exec(flags)    ((flags & VM_EXEC)==VM_EXEC)
-#define vm_mayshare(flags) ((flags & VM_MAYSHARE)==VM_MAYSHARE)
-#define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
-#define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
-
-// assume always current
 static inline void flow_to_activity(uint64_t type,
                                     struct provenance* from,
                                     struct provenance* to,
                                     uint8_t allowed,
                                     struct file *file){
-  struct mm_struct *mm = get_task_mm(current);
-  struct vm_area_struct *vma = mm->mmap;
-  struct file* mmapf;
-  vm_flags_t flags;
-  struct provenance * mmprov;
-
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
-
-  if(allowed==FLOW_DISALLOWED){
-    return;
-  }
-
-  while(vma){ // we go through mmaped files
-    mmapf = vma->vm_file;
-    if(mmapf){
-      flags = vma->vm_flags;
-      // it is shared and we can write to it
-      if(vm_write_mayshare(flags)){
-        mmprov = file_inode(mmapf)->i_provenance;
-        record_relation(RL_SH_WRITE, prov_msg(to), prov_msg(mmprov), allowed, file);
-      }
-    }
-    vma = vma->vm_next;
-  }
+  to->updt_mmap=1;
 }
 
-// assume always current
 static inline void flow_from_activity(uint64_t type,
                                     struct provenance* from,
                                     struct provenance* to,
                                     uint8_t allowed,
                                     struct file *file){
-  struct mm_struct *mm = get_task_mm(current);
-  struct vm_area_struct *vma = mm->mmap;
-  struct file* mmapf;
-  vm_flags_t flags;
-  struct provenance * mmprov;
-
-  if(allowed==FLOW_DISALLOWED){
-    goto out;
-  }
-
-  while(vma){ // we go through mmaped files
-    mmapf = vma->vm_file;
-    if(mmapf){
-      flags = vma->vm_flags;
-      // it is shared and we can read from it
-      if( vm_read_exec_mayshare(flags) ){
-        mmprov = file_inode(mmapf)->i_provenance;
-        record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(from), allowed, file);
-      }
-    }
-    vma = vma->vm_next;
-  }
-out:
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
 }
 
