@@ -91,4 +91,16 @@ static inline bool filter_propagate_relation(uint64_t type, uint8_t allowed){
   return false;
 }
 
+static inline bool should_record_relation(uint64_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
+  // one of the node should not appear in the record, ignore the relation
+  if(filter_node(from) || filter_node(to)){
+    return false;
+  }
+  // should the relation appear
+  if(filter_relation(type, allowed)){
+    return false;
+  }
+  return true;
+}
+
 #endif

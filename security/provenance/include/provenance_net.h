@@ -181,13 +181,8 @@ static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
     goto out;
   }
 
-  // one of the node should not appear in the record, ignore the relation
-  if(filter_node(pck) || filter_node(inode)){
-    goto out;
-  }
-
-  if(filter_relation(RL_RCV_PACKET, FLOW_ALLOWED)){
-    goto out;
+  if( !should_record_relation(RL_RCV_PACKET, pck, inode, FLOW_ALLOWED) ){
+    return;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
   prov_write(pck);
@@ -211,12 +206,8 @@ static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
     goto out;
   }
 
-  if(filter_node(pck) || filter_node(inode)){
-    goto out;
-  }
-
-  if(filter_relation(RL_SND_PACKET, FLOW_ALLOWED)){
-    goto out;
+  if( !should_record_relation(RL_SND_PACKET, inode, pck, FLOW_ALLOWED) ){
+    return;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(inode);

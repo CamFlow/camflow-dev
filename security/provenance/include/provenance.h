@@ -162,18 +162,6 @@ out:
   return;
 }
 
-static inline bool is_filtered(uint64_t type, prov_msg_t* from, prov_msg_t* to, uint8_t allowed){
-  // one of the node should not appear in the record, ignore the relation
-  if(filter_node(from) || filter_node(to)){
-    return true;
-  }
-  // should the relation appear
-  if(filter_relation(type, allowed)){
-    return true;
-  }
-  return false;
-}
-
 static inline void record_relation(uint64_t type,
                                     prov_msg_t* from,
                                     prov_msg_t* to,
@@ -184,7 +172,7 @@ static inline void record_relation(uint64_t type,
   if(!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all ){
     return;
   }
-  if( is_filtered(type, from, to, allowed) ){
+  if( !should_record_relation(type, from, to, allowed) ){
     return;
   }
 
@@ -203,7 +191,7 @@ static inline void flow_to_activity(uint64_t type,
                                     uint8_t allowed,
                                     struct file *file){
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
-  if(!is_filtered(type, prov_msg(from), prov_msg(to), allowed)){
+  if(should_record_relation(type, prov_msg(from), prov_msg(to), allowed)){
     to->updt_mmap=1;
   }
 }
