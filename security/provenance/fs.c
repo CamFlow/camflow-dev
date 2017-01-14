@@ -38,7 +38,8 @@ static ssize_t no_write(struct file *file, const char __user *buf,
 	return -EPERM; // read only
 }
 
-static inline void __init_opaque(void){
+static inline void __init_opaque(void)
+{
 	provenance_mark_as_opaque(PROV_ENABLE_FILE);
 	provenance_mark_as_opaque(PROV_ALL_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
@@ -62,23 +63,23 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos, bool *flag)
 
 {
-  char* page = NULL;
+  char *page = NULL;
   ssize_t length;
   bool new_value;
   int tmp;
 
   /* no partial write */
-  if(*ppos > 0)
+  if (*ppos > 0)
     return -EINVAL;
 
-  if(!capable(CAP_AUDIT_CONTROL))
+  if (!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
   page = (char *)get_zeroed_page(GFP_KERNEL);
   if (!page)
     return -ENOMEM;
 
-  length=-EFAULT;
+  length =  -EFAULT;
 	if (copy_from_user(page, buf, count))
 		goto out;
 
@@ -86,9 +87,9 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
-  new_value=tmp;
-  (*flag)=new_value;
-  length=count;
+  new_value = tmp;
+  (*flag) = new_value;
+  length = count;
 out:
   free_page((unsigned long)page);
   return length;
@@ -105,22 +106,22 @@ static ssize_t __read_flag(struct file *filp, char __user *buf,
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
 }
 
-#define declare_write_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos){\
+#define declare_write_flag_fcn(fcn_name, flag) static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) {\
 		return __write_flag(file, buf, count, ppos, &flag);\
 	}
-#define declare_read_flag_fcn(fcn_name, flag) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos){\
+#define declare_read_flag_fcn(fcn_name, flag) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) {\
 		return __read_flag(filp, buf, count, ppos, flag);\
 	}
 
-bool prov_enabled=true;
+bool prov_enabled = true;
 declare_write_flag_fcn(prov_write_enable, prov_enabled);
 declare_read_flag_fcn(prov_read_enable, prov_enabled);
 declare_file_operations(prov_enable_ops, prov_write_enable, prov_read_enable);
 
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
-bool prov_all=true;
+bool prov_all = true;
 #else
-bool prov_all=false;
+bool prov_all = false;
 #endif
 declare_write_flag_fcn(prov_write_all, prov_all);
 declare_read_flag_fcn(prov_read_all, prov_all);
@@ -129,20 +130,20 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	uint32_t* tmp = (uint32_t*)buf;
+	uint32_t *tmp = (uint32_t *)buf;
 
 	// ideally should be decoupled from set machine id
 	__init_opaque();
 
-	if(!capable(CAP_AUDIT_CONTROL))
+	if (!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
-	if(count < sizeof(uint32_t))
+	if (count < sizeof(uint32_t))
 	{
 		return -ENOMEM;
 	}
 
-	if(copy_from_user(&prov_machine_id, tmp, sizeof(uint32_t)))
+	if (copy_from_user(&prov_machine_id, tmp, sizeof(uint32_t)))
 	{
 		return -EAGAIN;
 	}
@@ -153,12 +154,12 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	if(count < sizeof(uint32_t))
+	if (count < sizeof(uint32_t))
 	{
 		return -ENOMEM;
 	}
 
-	if(copy_to_user(buf, &prov_machine_id, sizeof(uint32_t)))
+	if (copy_to_user(buf, &prov_machine_id, sizeof(uint32_t)))
 	{
 		return -EAGAIN;
 	}
@@ -171,44 +172,44 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	struct provenance* cprov = current_provenance();
-	long_prov_msg_t* node = NULL;
+	struct provenance *cprov = current_provenance();
+	long_prov_msg_t *node = NULL;
 
-	if(!capable(CAP_AUDIT_WRITE)){
+	if (!capable(CAP_AUDIT_WRITE)) {
 		return -EPERM;
 	}
 
-	if(count < sizeof(struct disc_node_struct)){
+	if (count < sizeof(struct disc_node_struct)) {
 		count = -ENOMEM;
 		goto out;
 	}
 
-	node = (long_prov_msg_t*)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
-	if(copy_from_user(node, buf, sizeof(struct disc_node_struct))){
+	node = (long_prov_msg_t *)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
+	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
 		count = -ENOMEM;
 		goto out;
 	}
-	if(prov_type(node)==ENT_DISC || prov_type(node)==ACT_DISC || prov_type(node)==AGT_DISC){
+	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		__record_node(prov_msg(cprov));
 		copy_node_info(&node->disc_node_info.parent, &prov_msg(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));
-		node_identifier(node).id=prov_next_node_id();
-	  node_identifier(node).boot_id=prov_boot_id;
-	  node_identifier(node).machine_id=prov_machine_id;
+		node_identifier(node).id = prov_next_node_id();
+	  node_identifier(node).boot_id = prov_boot_id;
+	  node_identifier(node).machine_id = prov_machine_id;
 		long_prov_write(node);
-	}else{ // the node is not of disclosed type
+	} else{ // the node is not of disclosed type
 		count = -EINVAL;
 		goto out;
 	}
 
-	if(copy_to_user((void*)buf, &node, count)){
+	if (copy_to_user((void *)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
 
 out:
-	if(node!=NULL){
+	if (node != NULL) {
 		kfree(node);
 	}
 	return count;
@@ -221,14 +222,14 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 {
 	prov_msg_t relation;
 
-	if(!capable(CAP_AUDIT_WRITE)){
+	if (!capable(CAP_AUDIT_WRITE)) {
 		return -EPERM;
 	}
-	if(count < sizeof(struct relation_struct))
+	if (count < sizeof(struct relation_struct))
 	{
 		return -ENOMEM;
 	}
-	if(copy_from_user(&relation, buf, sizeof(struct relation_struct))){
+	if (copy_from_user(&relation, buf, sizeof(struct relation_struct))) {
 		return -ENOMEM;
 	}
 	prov_write(&relation);
@@ -241,64 +242,64 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	struct prov_self_config msg;
-  struct provenance* prov = current_provenance();
-	prov_msg_t* setting;
+  struct provenance *prov = current_provenance();
+	prov_msg_t *setting;
 	uint8_t op;
 
-  if(count < sizeof(struct prov_self_config)){
+  if (count < sizeof(struct prov_self_config)) {
     return -EINVAL;
   }
-	if( copy_from_user(&msg, buf, sizeof(struct prov_self_config)) ){
+	if (copy_from_user(&msg, buf, sizeof(struct prov_self_config))) {
 		return -ENOMEM;
 	}
 
 	setting = &(msg.prov);
 	op = msg.op;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if( (op & PROV_SET_TRACKED)!=0 ){
-		if( provenance_is_tracked(setting) ){
+	if ((op & PROV_SET_TRACKED) != 0) {
+		if (provenance_is_tracked(setting)) {
 			set_tracked(prov_msg(prov));
-		}else{
+		} else{
 			clear_tracked(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_OPAQUE)!=0 ){
-		if( provenance_is_opaque(setting) ){
+	if ((op & PROV_SET_OPAQUE) != 0) {
+		if (provenance_is_opaque(setting)) {
 			set_opaque(prov_msg(prov));
-		}else{
+		} else{
 			clear_opaque(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_PROPAGATE)!=0 ){
-		if( provenance_does_propagate(setting) ){
+	if ((op & PROV_SET_PROPAGATE) != 0) {
+		if (provenance_does_propagate(setting)) {
 			set_propagate(prov_msg(prov));
-		}else{
+		} else{
 			clear_propagate(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_TAINT)!=0 ){
-		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
+	if ((op & PROV_SET_TAINT) != 0) {
+		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
 	}
 	spin_unlock(prov_lock(prov));
 
-  return sizeof(struct prov_self_config);;
+  return sizeof(struct prov_self_config);
 }
 
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
-	prov_msg_t* tmp = (prov_msg_t*)buf;
+	prov_msg_t *tmp = (prov_msg_t *)buf;
 
-	if(count < sizeof(struct task_prov_struct))
+	if (count < sizeof(struct task_prov_struct))
 	{
 		return -ENOMEM;
 	}
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if(copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t))){
+	if (copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t))) {
 		count = -EAGAIN;
 		goto out;
 	}
@@ -310,44 +311,44 @@ out:
 declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
 
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
-				 size_t count, uint64_t* filter){
-	struct prov_filter* setting;
+				 size_t count, uint64_t *filter){
+	struct prov_filter *setting;
 
-	if(!capable(CAP_AUDIT_CONTROL)){
-	 return -EPERM;
+	if (!capable(CAP_AUDIT_CONTROL)) {
+	return -EPERM;
 	}
 
-	if(count < sizeof(struct prov_filter)){
-	 return -ENOMEM;
+	if (count < sizeof(struct prov_filter)) {
+	return -ENOMEM;
 	}
 
-	setting = (struct prov_filter*)buf;
+	setting = (struct prov_filter *)buf;
 
-	if(setting->add!=0){
-		(*filter)|=setting->filter&setting->mask;
-	}else{
-		(*filter)&=~(setting->filter&setting->mask);
+	if (setting->add != 0) {
+		(*filter) |= setting->filter&setting->mask;
+	} else{
+		(*filter) &=  ~(setting->filter&setting->mask);
 	}
 	return count;
 }
 
 static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 				size_t count, uint64_t filter){
-	if(count < sizeof(uint64_t)){
-	  return -ENOMEM;
+	if (count < sizeof(uint64_t)) {
+	return -ENOMEM;
 	}
 
-	if(copy_to_user(buf, &filter, sizeof(uint64_t)))
+	if (copy_to_user(buf, &filter, sizeof(uint64_t)))
 	{
 		return -EAGAIN;
 	}
 	return count;
 }
 
-#define declare_write_filter_fcn(fcn_name, filter) static ssize_t fcn_name ( struct file *file, const char __user *buf,size_t count, loff_t *ppos ){\
+#define declare_write_filter_fcn(fcn_name, filter) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos) {\
 		return __write_filter(file, buf, count, &filter);\
 	}
-#define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos) { \
+#define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) { \
 		return __read_filter(filp, buf, count, filter);\
 	}
 
@@ -356,17 +357,17 @@ declare_write_filter_fcn(prov_write_node_filter, prov_node_filter);
 declare_reader_filter_fcn(prov_read_node_filter, prov_node_filter);
 declare_file_operations(prov_node_filter_ops, prov_write_node_filter, prov_read_node_filter);
 
-uint64_t prov_relation_filter = 0;
+uint64_t prov_relation_filter;
 declare_write_filter_fcn(prov_write_relation_filter, prov_relation_filter);
 declare_reader_filter_fcn(prov_read_relation_filter, prov_relation_filter);
 declare_file_operations(prov_relation_filter_ops, prov_write_relation_filter, prov_read_relation_filter);
 
-uint64_t prov_propagate_node_filter = 0;
+uint64_t prov_propagate_node_filter;
 declare_write_filter_fcn(prov_write_propagate_node_filter, prov_propagate_node_filter);
 declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_propagate_node_filter);
 declare_file_operations(prov_propagate_node_filter_ops, prov_write_propagate_node_filter, prov_read_propagate_node_filter);
 
-uint64_t prov_propagate_relation_filter = 0;
+uint64_t prov_propagate_relation_filter;
 declare_write_filter_fcn(prov_write_propagate_relation_filter, prov_propagate_relation_filter);
 declare_reader_filter_fcn(prov_read_propagate_relation_filter, prov_propagate_relation_filter);
 declare_file_operations(prov_propagate_relation_filter_ops, prov_write_propagate_relation_filter, prov_read_propagate_relation_filter);
@@ -375,7 +376,7 @@ static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 
 {
-	if(!capable(CAP_AUDIT_CONTROL))
+	if (!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
   prov_flush();
@@ -388,22 +389,22 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	struct prov_file_config *msg;
-  struct inode* in;
+  struct inode *in;
   struct provenance *prov;
-	prov_msg_t* setting;
+	prov_msg_t *setting;
 	uint8_t op;
 
-  if(!capable(CAP_AUDIT_CONTROL))
+  if (!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
-  if(count < sizeof(struct prov_file_config)){
+  if (count < sizeof(struct prov_file_config)) {
     return -EINVAL;
   }
 
-  msg = (struct prov_file_config*)buf;
+  msg = (struct prov_file_config *)buf;
 
   in = file_name_to_inode(msg->name);
-  if(!in){
+  if (!in) {
     printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
     return -EINVAL;
   }
@@ -411,32 +412,32 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	setting = &msg->prov;
   prov = inode_provenance(in);
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if( (op & PROV_SET_TRACKED)!=0 ){
-		if( provenance_is_tracked(setting) ){
+	if ((op & PROV_SET_TRACKED) != 0) {
+		if (provenance_is_tracked(setting)) {
 			set_tracked(prov_msg(prov));
-		}else{
+		} else{
 			clear_tracked(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_OPAQUE)!=0 ){
-		if( provenance_is_opaque(setting) ){
+	if ((op & PROV_SET_OPAQUE) != 0) {
+		if (provenance_is_opaque(setting)) {
 			set_opaque(prov_msg(prov));
-		}else{
+		} else{
 			clear_opaque(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_PROPAGATE)!=0 ){
-		if( provenance_does_propagate(setting) ){
+	if ((op & PROV_SET_PROPAGATE) != 0) {
+		if (provenance_does_propagate(setting)) {
 			set_propagate(prov_msg(prov));
-		}else{
+		} else{
 			clear_propagate(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_TAINT)!=0 ){
-		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
+	if ((op & PROV_SET_TAINT) != 0) {
+		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
 	}
 	spin_unlock(prov_lock(prov));
   return sizeof(struct prov_file_config);
@@ -446,24 +447,24 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
   struct prov_file_config *msg;
-  struct inode* in;
+  struct inode *in;
   struct provenance *prov;
-	int rtn=sizeof(struct prov_file_config);
+	int rtn = sizeof(struct prov_file_config);
 
-  if(count < sizeof(struct prov_file_config)){
+  if (count < sizeof(struct prov_file_config)) {
     return -EINVAL;
   }
 
-  msg = (struct prov_file_config*)buf;
+  msg = (struct prov_file_config *)buf;
   in = file_name_to_inode(msg->name);
-  if(!in){
+  if (!in) {
     printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
     return -EINVAL;
   }
 
   prov = inode_provenance(in);
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-  if(copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))){
+  if (copy_to_user(&msg->prov, prov, sizeof(prov_msg_t))) {
     rtn = -ENOMEM;
 		goto out; // a bit superfluous, but would avoid error if code changes
   }
@@ -479,52 +480,52 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 {
 	struct prov_process_config *msg;
 	struct provenance *prov;
-	prov_msg_t* setting;
+	prov_msg_t *setting;
 	uint8_t op;
 
-	if(!capable(CAP_AUDIT_CONTROL))
+	if (!capable(CAP_AUDIT_CONTROL))
     return -EPERM;
 
-  if(count < sizeof(struct prov_process_config)){
+  if (count < sizeof(struct prov_process_config)) {
     return -EINVAL;
   }
 
-  msg = (struct prov_process_config*)buf;
+  msg = (struct prov_process_config *)buf;
 
 	setting = &(msg->prov);
 	op = msg->op;
 
 	prov = prov_from_vpid(msg->vpid);
-	if(prov==NULL){
+	if (prov == NULL) {
 		return -EINVAL;
 	}
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if( (op & PROV_SET_TRACKED)!=0 ){
-		if( provenance_is_tracked(setting) ){
+	if ((op & PROV_SET_TRACKED) != 0) {
+		if (provenance_is_tracked(setting)) {
 			set_tracked(prov_msg(prov));
-		}else{
+		} else{
 			clear_tracked(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_OPAQUE)!=0 ){
-		if( provenance_is_opaque(setting) ){
+	if ((op & PROV_SET_OPAQUE) != 0) {
+		if (provenance_is_opaque(setting)) {
 			set_opaque(prov_msg(prov));
-		}else{
+		} else{
 			clear_opaque(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_PROPAGATE)!=0 ){
-		if( provenance_does_propagate(setting) ){
+	if ((op & PROV_SET_PROPAGATE) != 0) {
+		if (provenance_does_propagate(setting)) {
 			set_propagate(prov_msg(prov));
-		}else{
+		} else{
 			clear_propagate(prov_msg(prov));
 		}
 	}
 
-	if( (op & PROV_SET_TAINT)!=0 ){
-		prov_bloom_merge( prov_taint(prov_msg(prov)), prov_taint(setting) );
+	if ((op & PROV_SET_TAINT) != 0) {
+		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
 	}
 	spin_unlock(prov_lock(prov));
   return sizeof(struct prov_process_config);
@@ -534,21 +535,21 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	struct prov_process_config *msg;
-  struct provenance* prov;
-	int rtn=sizeof(struct prov_process_config);
+  struct provenance *prov;
+	int rtn = sizeof(struct prov_process_config);
 
-  if(count < sizeof(struct prov_process_config)){
+  if (count < sizeof(struct prov_process_config)) {
     return -EINVAL;
   }
 
-  msg = (struct prov_process_config*)buf;
+  msg = (struct prov_process_config *)buf;
 
 	prov = prov_from_vpid(msg->vpid);
-	if(prov==NULL){
+	if (prov == NULL) {
 		return -EINVAL;
 	}
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if(copy_to_user(&msg->prov, prov_msg(prov), sizeof(prov_msg_t))){
+	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(prov_msg_t))) {
     rtn = -ENOMEM;
 		goto out; // a bit superfluous, but would avoid error if code changes
   }
@@ -563,22 +564,22 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 				 size_t count, struct ipv4_filters *filters){
 	struct ipv4_filters	*f;
 
-	if(!capable(CAP_AUDIT_CONTROL)){
-	 return -EPERM;
+	if (!capable(CAP_AUDIT_CONTROL)) {
+	return -EPERM;
 	}
 
-	if(count < sizeof(struct prov_ipv4_filter)){
-	 return -ENOMEM;
+	if (count < sizeof(struct prov_ipv4_filter)) {
+	return -ENOMEM;
 	}
 
-	f = (struct ipv4_filters*)kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
-	if(copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
+	f = (struct ipv4_filters *)kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
+	if (copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
 	{
 		return -EAGAIN;
 	}
 	f->filter.ip = f->filter.ip&f->filter.mask;
 
-	if((f->filter.op&PROV_NET_DELETE)!=PROV_NET_DELETE){ // we are not trying to delete something
+	if ((f->filter.op&PROV_NET_DELETE) != PROV_NET_DELETE) { // we are not trying to delete something
 		prov_ipv4_add_or_update(filters, f);
 	} else{
 		prov_ipv4_delete(filters, f);
@@ -588,19 +589,19 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 
 static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 				size_t count, struct ipv4_filters *filters){
-	struct ipv4_filters* tmp;
-	size_t pos=0;
+	struct ipv4_filters *tmp;
+	size_t pos = 0;
 
-	if(count < sizeof(struct prov_ipv4_filter) ){
-	  return -ENOMEM;
+	if (count < sizeof(struct prov_ipv4_filter)) {
+	return -ENOMEM;
 	}
 
-  list_for_each_entry(tmp, &(filters->list), list){
-		if( count < pos + sizeof(struct prov_ipv4_filter) ){
-		  return -ENOMEM;
+  list_for_each_entry(tmp, &(filters->list), list) {
+		if (count < pos + sizeof(struct prov_ipv4_filter)) {
+		return -ENOMEM;
 		}
 
-		if( copy_to_user(buf+pos, &(tmp->filter), sizeof(struct prov_ipv4_filter)) )
+		if (copy_to_user(buf+pos, &(tmp->filter), sizeof(struct prov_ipv4_filter)))
 		{
 			return -EAGAIN;
 		}
@@ -610,10 +611,10 @@ static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 	return pos;
 }
 
-#define declare_write_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name ( struct file *file, const char __user *buf,size_t count, loff_t *ppos ){\
+#define declare_write_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name (struct file *file, const char __user *buf, size_t count, loff_t *ppos) {\
 		return __write_ipv4_filter(file, buf, count, &filter);\
 	}
-#define declare_reader_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name (struct file *filp, char __user *buf, size_t count, loff_t *ppos) { \
+#define declare_reader_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) { \
 		return __read_ipv4_filter(filp, buf, count, &filter);\
 	}
 
@@ -628,27 +629,27 @@ declare_file_operations(prov_ipv4_egress_filter_ops, prov_write_ipv4_egress_filt
 static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	char* ctx = NULL;
+	char *ctx = NULL;
 	uint32_t len;
 	struct secinfo *data;
 	int rtn = 0;
 
-	if(count < sizeof(struct secinfo)){
+	if (count < sizeof(struct secinfo)) {
 		return -ENOMEM;
 	}
-	data=(struct secinfo*)buf;
+	data = (struct secinfo*)buf;
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
-	if(rtn<0){
+	if (rtn < 0) {
 		goto out;
 	}
-	if(len<PATH_MAX){
-		if(copy_to_user(data->secctx, ctx, len)){
+	if (len < PATH_MAX) {
+		if (copy_to_user(data->secctx, ctx, len)) {
 			rtn = -ENOMEM;
 		}
-		data->secctx[len]='\0'; // maybe unecessary
-		data->len=len;
-	}else{
+		data->secctx[len] = '\0'; // maybe unecessary
+		data->len = len;
+	} else{
 		rtn = -ENOMEM;
 	}
 	security_release_secctx(ctx, len); // security module dealloc
@@ -661,19 +662,19 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	struct secctx_filters* s;
+	struct secctx_filters *s;
 
-	if(count < sizeof(struct secinfo)){
+	if (count < sizeof(struct secinfo)) {
 		return -ENOMEM;
 	}
 
-	s = (struct secctx_filters*)kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
-	if(copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
+	s = (struct secctx_filters *)kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
+	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
 	{
 		return -EAGAIN;
 	}
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
-	if( (s->filter.op&PROV_SEC_DELETE)!=PROV_SEC_DELETE ){
+	if ((s->filter.op&PROV_SEC_DELETE) != PROV_SEC_DELETE) {
 		prov_secctx_add_or_update(&secctx_filters, s);
 	} else {
 		prov_secctx_delete(&secctx_filters, s);
@@ -684,23 +685,23 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	struct secctx_filters* tmp;
-  size_t pos=0;
+	struct secctx_filters *tmp;
+  size_t pos = 0;
 
-  if(count < sizeof(struct secinfo) ){
- 	 return -ENOMEM;
+  if (count < sizeof(struct secinfo)) {
+	 return -ENOMEM;
   }
 
-  list_for_each_entry(tmp, &(secctx_filters.list), list){
- 	 if( count < pos + sizeof(struct secinfo) ){
- 		 return -ENOMEM;
- 	 }
+  list_for_each_entry(tmp, &(secctx_filters.list), list) {
+	 if (count < pos + sizeof(struct secinfo)) {
+		 return -ENOMEM;
+	 }
 
- 	 if( copy_to_user(buf+pos, &(tmp->filter), sizeof(struct secinfo)) )
- 	 {
- 		 return -EAGAIN;
- 	 }
- 	 pos += sizeof(struct secinfo);
+	 if (copy_to_user(buf+pos, &(tmp->filter), sizeof(struct secinfo)))
+	 {
+		 return -EAGAIN;
+	 }
+	 pos += sizeof(struct secinfo);
   }
 
   return pos;
