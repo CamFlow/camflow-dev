@@ -24,29 +24,35 @@
 
 #include "provenance.h"
 
-static inline struct provenance* socket_inode_provenance(struct socket *sock){
-  struct provenance* iprov = SOCK_INODE(sock)->i_provenance;
-  if(iprov==NULL){
+static inline struct provenance* socket_inode_provenance(struct socket *sock)
+{
+  struct provenance *iprov = SOCK_INODE(sock)->i_provenance;
+
+  if (iprov == NULL) {
     return NULL;
   }
   return iprov;
 }
 
-static inline struct provenance* sk_inode_provenance(struct sock *sk){
+static inline struct provenance* sk_inode_provenance(struct sock *sk)
+{
   struct socket *sock = sk->sk_socket;
-  if(sock==NULL){
+
+  if (sock == NULL) {
     return NULL;
   }
   return socket_inode_provenance(sock);
 }
 
-static inline struct provenance* sk_provenance(struct sock *sk){
-  struct provenance* prov = sk->sk_provenance;
+static inline struct provenance* sk_provenance(struct sock *sk)
+{
+  struct provenance *prov = sk->sk_provenance;
   return prov;
 }
 
-static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t* prov){
-  struct packet_identifier* id;
+static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t* prov)
+{
+  struct packet_identifier *id;
   int offset, ihlen;
 	struct iphdr _iph, *ih;
   struct tcphdr _tcph, *th;
@@ -54,12 +60,12 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
 
   offset = skb_network_offset(skb);
   ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph); // we obtain the ip header
-  if(ih == NULL){
+  if (ih == NULL) {
     return -EINVAL;
   }
 
   ihlen = ih->ihl*4; // header size
-  if(ihlen < sizeof(_iph)){
+  if (ihlen < sizeof(_iph)) {
     return -EINVAL;
   }
 
@@ -75,16 +81,16 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
   prov->pck_info.length = ih->tot_len;
 
   // now we collect
-  switch(ih->protocol){
+  switch (ih->protocol) {
     case IPPROTO_TCP:
-      if (ntohs(ih->frag_off) & IP_OFFSET){
-        break;
+      if (ntohs(ih->frag_off) & IP_OFFSET) {
+	break;
       }
 
-      offset +=ihlen; //point to tcp packet
+      offset += ihlen; //point to tcp packet
       th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
-      if(th==NULL){
-        break;
+      if (th == NULL) {
+	break;
       }
 
       id->snd_port = th->source;
@@ -92,14 +98,14 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
       id->seq = th->seq;
       break;
     case IPPROTO_UDP:
-      if (ntohs(ih->frag_off) & IP_OFFSET){
-        break;
+      if (ntohs(ih->frag_off) & IP_OFFSET) {
+	break;
       }
 
-      offset +=ihlen; //point to tcp packet
+      offset += ihlen; //point to tcp packet
       uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
-      if(uh==NULL){
-        break;
+      if (uh == NULL) {
+	break;
       }
 
       id->snd_port = uh->source;
@@ -111,7 +117,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
   return 0;
 }
 
-struct ipv4_filters{
+struct ipv4_filters {
   struct list_head list;
   struct prov_ipv4_filter filter;
 };
@@ -122,28 +128,30 @@ extern struct ipv4_filters egress_ipv4filters;
 #define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 #define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
-static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters* filters, uint32_t ip, uint32_t port){
-  struct ipv4_filters* tmp;
+static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters* filters, uint32_t ip, uint32_t port)
+{
+  struct ipv4_filters *tmp;
 
-  list_for_each_entry(tmp, &(filters->list), list){
-    if( (tmp->filter.mask&ip) == (tmp->filter.mask&tmp->filter.ip) ){ // ip match filter
-      if(tmp->filter.port==0 || tmp->filter.port==port){ // any port or match
-        return tmp->filter.op;
+  list_for_each_entry(tmp, &(filters->list), list) {
+    if ((tmp->filter.mask&ip) == (tmp->filter.mask&tmp->filter.ip)) { // ip match filter
+      if (tmp->filter.port == 0 || tmp->filter.port == port) { // any port or match
+	return tmp->filter.op;
       }
     }
   }
   return 0; // do nothing
 }
 
-static inline uint8_t prov_ipv4_delete(struct ipv4_filters* filters, struct ipv4_filters	*f){
+static inline uint8_t prov_ipv4_delete(struct ipv4_filters* filters, struct ipv4_filters	*f)
+{
   struct list_head *pos, *q;
-  struct ipv4_filters* tmp;
+  struct ipv4_filters *tmp;
 
-  list_for_each_safe(pos, q, &(filters->list)){
-    tmp= list_entry(pos, struct ipv4_filters, list);
-    if(tmp->filter.mask==f->filter.mask &&
-        tmp->filter.ip == f->filter.ip &&
-        tmp->filter.port == f->filter.port){
+  list_for_each_safe(pos, q, &(filters->list)) {
+    tmp = list_entry(pos, struct ipv4_filters, list);
+    if (tmp->filter.mask == f->filter.mask &&
+	tmp->filter.ip == f->filter.ip &&
+	tmp->filter.port == f->filter.port){
       list_del(pos);
       kfree(tmp);
       return 0; // you should only get one
@@ -152,15 +160,16 @@ static inline uint8_t prov_ipv4_delete(struct ipv4_filters* filters, struct ipv4
   return 0; // do nothing
 }
 
-static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters* filters, struct ipv4_filters	*f){
+static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters* filters, struct ipv4_filters	*f)
+{
   struct list_head *pos, *q;
-  struct ipv4_filters* tmp;
+  struct ipv4_filters *tmp;
 
-  list_for_each_safe(pos, q, &(filters->list)){
-    tmp= list_entry(pos, struct ipv4_filters, list);
-    if(tmp->filter.mask==f->filter.mask &&
-        tmp->filter.ip == f->filter.ip &&
-        tmp->filter.port == f->filter.port){
+  list_for_each_safe(pos, q, &(filters->list)) {
+    tmp = list_entry(pos, struct ipv4_filters, list);
+    if (tmp->filter.mask == f->filter.mask &&
+	tmp->filter.ip == f->filter.ip &&
+	tmp->filter.port == f->filter.port){
       tmp->filter.op = f->filter.op;
       return 0; // you should only get one
     }
@@ -170,18 +179,19 @@ static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters* filters, stru
 }
 
 // incoming packet
-static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode){
+static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode)
+{
   prov_msg_t relation;
 
-  if( unlikely(pck==NULL || inode==NULL) ){ // should not occur
+  if (unlikely(pck == NULL || inode == NULL)) { // should not occur
     return;
   }
 
-  if(!provenance_is_tracked(inode) && !prov_all){
+  if (!provenance_is_tracked(inode) && !prov_all) {
     goto out;
   }
 
-  if( !should_record_relation(RL_RCV_PACKET, pck, inode, FLOW_ALLOWED) ){
+  if (!should_record_relation(RL_RCV_PACKET, pck, inode, FLOW_ALLOWED)) {
     return;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
@@ -195,18 +205,19 @@ out:
 }
 
 // outgoing packet
-static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck){
+static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck)
+{
   prov_msg_t relation;
 
-  if( unlikely(pck==NULL || inode==NULL) ){ // should not occur
+  if (unlikely(pck == NULL || inode == NULL)) { // should not occur
     return;
   }
 
-  if(!provenance_is_tracked(inode) && !prov_all){
+  if (!provenance_is_tracked(inode) && !prov_all) {
     goto out;
   }
 
-  if( !should_record_relation(RL_SND_PACKET, inode, pck, FLOW_ALLOWED) ){
+  if (!should_record_relation(RL_SND_PACKET, inode, pck, FLOW_ALLOWED)) {
     return;
   }
   memset(&relation, 0, sizeof(prov_msg_t));
