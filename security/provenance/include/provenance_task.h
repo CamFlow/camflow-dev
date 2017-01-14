@@ -22,13 +22,15 @@
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
-static inline uint32_t current_cid( void ){
+static inline uint32_t current_cid( void )
+{
 	uint32_t cid = 0;
-	struct cgroup_namespace* cns;
+	struct cgroup_namespace *cns;
+
 	task_lock(current);
-	if(current->nsproxy!=NULL){
+	if (current->nsproxy != NULL) {
 		cns = current->nsproxy->cgroup_ns;
-		if(cns!=NULL){
+		if (cns != NULL) {
 			get_cgroup_ns(cns);
 			cid = cns->ns.inum;
 			put_cgroup_ns(cns);
@@ -38,41 +40,42 @@ static inline uint32_t current_cid( void ){
 	return cid;
 }
 
-#define vm_write(flags)   ((flags & VM_WRITE)==VM_WRITE)
-#define vm_read(flags)    ((flags & VM_READ)==VM_READ)
-#define vm_exec(flags)    ((flags & VM_EXEC)==VM_EXEC)
-#define vm_mayshare(flags) ((flags & (VM_SHARED|VM_MAYSHARE) )!=0)
+#define vm_write(flags)   ((flags & VM_WRITE) == VM_WRITE)
+#define vm_read(flags)    ((flags & VM_READ) == VM_READ)
+#define vm_exec(flags)    ((flags & VM_EXEC) == VM_EXEC)
+#define vm_mayshare(flags) ((flags & (VM_SHARED|VM_MAYSHARE)) != 0)
 #define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
 
-static inline void current_update_shst( struct provenance *cprov ){
+static inline void current_update_shst( struct provenance *cprov )
+{
 	struct mm_struct *mm = get_task_mm(current);
   struct vm_area_struct *vma;
-  struct file* mmapf;
+  struct file *mmapf;
   vm_flags_t flags;
-  struct provenance * mmprov;
+  struct provenance *mmprov;
 
-	if(!mm){
+	if (!mm) {
     return;
   }
-	cprov->has_mmap=0;
+	cprov->has_mmap = 0;
 	//while(!down_read_trylock(&mm->mmap_sem)); // we do not want to sleep
 	vma = mm->mmap;
-	while(vma){ // we go through mmaped files
+	while (vma) { // we go through mmaped files
     mmapf = vma->vm_file;
-    if(mmapf){
+    if (mmapf) {
       flags = vma->vm_flags;
       mmprov = file_inode(mmapf)->i_provenance;
-			if(mmprov){
-				cprov->has_mmap=1;
+			if (mmprov) {
+				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
-				if(vm_read_exec_mayshare(flags)){
-          record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
+				if (vm_read_exec_mayshare(flags)) {
+	  record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
 				}
-      	if(vm_write_mayshare(flags)){
-          record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
-        }
+	if (vm_write_mayshare(flags)) {
+	  record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
+	}
 				spin_unlock(prov_lock(mmprov));
       }
     }
@@ -83,32 +86,33 @@ static inline void current_update_shst( struct provenance *cprov ){
 }
 
 
-static inline void refresh_current_provenance( void ){
+static inline void refresh_current_provenance( void )
+{
 	struct provenance *prov = current_provenance();
 	uint32_t cid = current_cid();
 	uint8_t op;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if(unlikely(prov_msg(prov)->task_info.pid == 0)){
+	if (unlikely(prov_msg(prov)->task_info.pid == 0)) {
 		prov_msg(prov)->task_info.pid = task_pid_nr(current);
 	}
-	if(unlikely(prov_msg(prov)->task_info.vpid == 0)){
+	if (unlikely(prov_msg(prov)->task_info.vpid == 0)) {
 		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
 	}
-	if(unlikely(prov_msg(prov)->task_info.cid != cid)){
+	if (unlikely(prov_msg(prov)->task_info.cid != cid)) {
 		prov_msg(prov)->task_info.cid = cid;
 	}
 	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
 	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->task_info.secid);
-	if(unlikely(op!=0)){
-		if( (op & PROV_SEC_TRACKED)!=0 ){
+	if (unlikely(op != 0)) {
+		if ((op & PROV_SEC_TRACKED) != 0) {
 			set_tracked(prov_msg(prov));
 		}
-		if( (op & PROV_SEC_PROPAGATE)!=0 ){
+		if ((op & PROV_SEC_PROPAGATE) != 0) {
 			set_propagate(prov_msg(prov));
 		}
 	}
-	if(prov->updt_mmap && prov->has_mmap){
+	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
 		prov->updt_mmap = 0;
 	}
@@ -116,22 +120,24 @@ static inline void refresh_current_provenance( void ){
 	record_task_name(current, prov);
 }
 
-static inline struct provenance* prov_from_vpid(pid_t pid){
-	struct provenance* tprov;
+static inline struct provenance* prov_from_vpid(pid_t pid)
+{
+	struct provenance *tprov;
 
 	struct task_struct *dest = find_task_by_vpid(pid);
-	if(!dest){
+
+	if (!dest) {
     return NULL;
 	}
 
 	tprov = __task_cred(dest)->provenance;
-	if(!tprov){
+	if (!tprov) {
 		return NULL;
 	}
 	return tprov;
 }
 
-static inline struct provenance *get_current_provenance( void )
+static inline struct provenance *get_current_provenance(void)
 {
 	refresh_current_provenance();
 	return current_provenance();
@@ -141,7 +147,7 @@ static inline struct provenance *get_current_provenance( void )
 static inline void current_config_from_file(struct task_struct *task){
 	const struct cred *cred = get_task_cred(task);
 	struct mm_struct *mm;
- 	struct file *exe_file;
+	struct file *exe_file;
 	struct inode *inode;
 	prov_msg_t* tprov;
 	prov_msg_t* iprov;
@@ -153,7 +159,7 @@ static inline void current_config_from_file(struct task_struct *task){
 
 	mm = get_task_mm(task);
 	if (!mm)
- 		goto finished;
+		goto finished;
 	exe_file = get_mm_exe_file(mm);
 	mmput(mm);
 
