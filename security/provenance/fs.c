@@ -83,7 +83,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 		goto out;
 
   length = -EINVAL;
-  if (sscanf(page, "%d", &tmp) != 1)
+	if (sscanf(page, "%d", &tmp) != 1)
 		goto out;
 
   new_value=tmp;
