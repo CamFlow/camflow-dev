@@ -66,7 +66,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	char *page = NULL;
 	ssize_t length;
 	bool new_value;
-	int tmp;
+	uint32_t tmp;
 
 	/* no partial write */
 	if (*ppos > 0)
@@ -83,8 +83,8 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (copy_from_user(page, buf, count))
 		goto out;
 
-  length = -EINVAL;
-	if (sscanf(page, "%d", &tmp) != 1)
+	length = kstrtouint(page, 2, &tmp);
+	if (length)
 		goto out;
 
   new_value = tmp;
