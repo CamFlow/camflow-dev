@@ -63,23 +63,23 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 				 size_t count, loff_t *ppos, bool *flag)
 
 {
-  char *page = NULL;
-  ssize_t length;
-  bool new_value;
-  int tmp;
+	char *page = NULL;
+	ssize_t length;
+	bool new_value;
+	int tmp;
 
-  /* no partial write */
-  if (*ppos > 0)
-    return -EINVAL;
+	/* no partial write */
+	if (*ppos > 0)
+		return -EINVAL;
 
-  if (!capable(CAP_AUDIT_CONTROL))
-    return -EPERM;
+	if (!capable(CAP_AUDIT_CONTROL))
+		return -EPERM;
 
-  page = (char *)get_zeroed_page(GFP_KERNEL);
-  if (!page)
-    return -ENOMEM;
+	page = (char *)get_zeroed_page(GFP_KERNEL);
+	if (!page)
+		return -ENOMEM;
 
-  length =  -EFAULT;
+	length =  -EFAULT;
 	if (copy_from_user(page, buf, count))
 		goto out;
 
