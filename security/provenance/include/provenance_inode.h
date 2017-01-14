@@ -23,10 +23,12 @@
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
-static inline struct inode* file_name_to_inode(const char* name){
+static inline struct inode* file_name_to_inode(const char* name)
+{
   struct path path;
-  struct inode* inode;
-  if(kern_path(name, LOOKUP_FOLLOW, &path)){
+  struct inode *inode;
+
+  if (kern_path(name, LOOKUP_FOLLOW, &path)) {
     printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
     return NULL;
   }
@@ -35,100 +37,108 @@ static inline struct inode* file_name_to_inode(const char* name){
   return inode;
 }
 
-static inline void record_inode_type(uint16_t mode, struct provenance *prov){
+static inline void record_inode_type(uint16_t mode, struct provenance *prov)
+{
   uint64_t type = ENT_INODE_UNKNOWN;
-  if(S_ISBLK(mode)){
-    type=ENT_INODE_BLOCK;
-  }else if(S_ISCHR(mode)){
-    type=ENT_INODE_CHAR;
-  }else if(S_ISDIR(mode)){
-    type=ENT_INODE_DIRECTORY;
-  }else if(S_ISFIFO(mode)){
-    type=ENT_INODE_FIFO;
-  }else if(S_ISLNK(mode)){
-    type=ENT_INODE_LINK;
-  }else if(S_ISREG(mode)){
-    type=ENT_INODE_FILE;
-  }else if(S_ISSOCK(mode)){
-    type=ENT_INODE_SOCKET;
+
+  if (S_ISBLK(mode)) {
+    type = ENT_INODE_BLOCK;
+  } else if (S_ISCHR(mode)) {
+    type = ENT_INODE_CHAR;
+  } else if (S_ISDIR(mode)) {
+    type = ENT_INODE_DIRECTORY;
+  } else if (S_ISFIFO(mode)) {
+    type = ENT_INODE_FIFO;
+  } else if (S_ISLNK(mode)) {
+    type = ENT_INODE_LINK;
+  } else if (S_ISREG(mode)) {
+    type = ENT_INODE_FILE;
+  } else if (S_ISSOCK(mode)) {
+    type = ENT_INODE_SOCKET;
   }
   spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-  prov_msg(prov)->inode_info.mode=mode;
-  prov_type(prov_msg(prov))=type;
+  prov_msg(prov)->inode_info.mode = mode;
+  prov_type(prov_msg(prov)) = type;
   spin_unlock(prov_lock(prov));
 }
 
-static inline void provenance_mark_as_opaque(const char* name){
-  struct inode* in;
-  prov_msg_t* prov;
+static inline void provenance_mark_as_opaque(const char* name)
+{
+  struct inode *in;
+  prov_msg_t *prov;
 
   in = file_name_to_inode(name);
-  if(!in){
+  if (!in) {
     printk(KERN_ERR "Provenance: could not find %s file.", name);
-  }else{
+  } else{
     prov = in->i_provenance;
-    if(prov){
+    if (prov) {
       set_opaque(prov);
     }
   }
 }
 
-static inline struct provenance* inode_provenance(struct inode *inode){
+static inline struct provenance* inode_provenance(struct inode *inode)
+{
   struct provenance *prov = inode->i_provenance;
   uint8_t op;
 
   record_inode_name(inode, prov);
   record_inode_type(inode->i_mode, prov);
-  prov_msg(prov)->inode_info.uid=__kuid_val(inode->i_uid);
-  prov_msg(prov)->inode_info.gid=__kgid_val(inode->i_gid);
+  prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
+  prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
   security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
   op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->inode_info.secid);
-	if(unlikely(op!=0)){
-		if( (op & PROV_SEC_TRACKED)!=0 ){
+	if (unlikely(op != 0)) {
+		if ((op & PROV_SEC_TRACKED) != 0) {
 			set_tracked(prov_msg(prov));
 		}
-		if( (op & PROV_SEC_PROPAGATE)!=0 ){
+		if ((op & PROV_SEC_PROPAGATE) != 0) {
 			set_propagate(prov_msg(prov));
 		}
 	}
   return prov;
 }
 
-static inline struct provenance* dentry_provenance(struct dentry *dentry)
+static inline struct provenance *dentry_provenance(struct dentry *dentry)
 {
   struct inode *inode = d_backing_inode(dentry);
-  if(inode==NULL){
+
+  if (inode == NULL) {
     return NULL;
   }
   return inode_provenance(inode);
 }
 
-static inline struct provenance* file_provenance(struct file *file)
+static inline struct provenance *file_provenance(struct file *file)
 {
   struct inode *inode = file_inode(file);
-  if(inode==NULL){
+
+  if (inode == NULL) {
     return NULL;
   }
   return inode_provenance(inode);
 }
 
-static inline struct provenance* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov){ //used for private MMAP
-  struct provenance* prov;
+static inline struct provenance* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov)
+{
+	//used for private MMAP
+  struct provenance *prov;
   prov_msg_t relation;
 
-  if( unlikely(iprov==NULL || cprov==NULL) ){ // should not occur
+  if (unlikely(iprov == NULL || cprov == NULL)) { // should not occur
     return NULL;
   }
 
-  if(!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all ){
+  if (!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all) {
     return NULL;
   }
 
-  if( filter_node(iprov) || filter_node(cprov)){
+  if (filter_node(iprov) || filter_node(cprov)) {
     return NULL;
   }
 
-  if(filter_relation(RL_CREATE, FLOW_ALLOWED)) {
+  if (filter_relation(RL_CREATE, FLOW_ALLOWED)) {
     return NULL;
   }
 
