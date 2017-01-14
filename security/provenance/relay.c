@@ -21,22 +21,22 @@
 #define LONG_PROV_BASE_NAME "long_provenance"
 
 /* global variable, extern in provenance.h */
- struct rchan *prov_chan=NULL;
- struct rchan *long_prov_chan=NULL;
- atomic64_t prov_relation_id=ATOMIC64_INIT(0);
- atomic64_t prov_node_id=ATOMIC64_INIT(0);
+ struct rchan *prov_chan = NULL;
+ struct rchan *long_prov_chan = NULL;
+ atomic64_t prov_relation_id = ATOMIC64_INIT(0);
+ atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
 /*
  * create_buf_file() callback.  Creates relay file in debugfs.
  */
 static struct dentry *create_buf_file_handler(const char *filename,
-                                                struct dentry *parent,
-                                                umode_t mode,
-                                                struct rchan_buf *buf,
-                                                int *is_global)
+						struct dentry *parent,
+						umode_t mode,
+						struct rchan_buf *buf,
+						int *is_global)
 {
-        return debugfs_create_file(filename, mode, parent, buf,
-	                           &relay_file_operations);
+	return debugfs_create_file(filename, mode, parent, buf,
+				   &relay_file_operations);
 }
 
 /*
@@ -44,40 +44,41 @@ static struct dentry *create_buf_file_handler(const char *filename,
  */
 static int remove_buf_file_handler(struct dentry *dentry)
 {
-        debugfs_remove(dentry);
-        return 0;
+	debugfs_remove(dentry);
+	return 0;
 }
 
 /*
  * relay interface callbacks
  */
-static struct rchan_callbacks relay_callbacks =
-{
-        .create_buf_file = create_buf_file_handler,
-        .remove_buf_file = remove_buf_file_handler,
+static struct rchan_callbacks relay_callbacks = {
+
+	.create_buf_file = create_buf_file_handler,
+	.remove_buf_file = remove_buf_file_handler,
 };
 
 DEFINE_SPINLOCK(prov_chan_lock);
 DEFINE_SPINLOCK(long_prov_chan_lock);
 
-static void write_boot_buffer( void ){
-  if(likely(boot_buffer!=NULL && prov_chan!=NULL)){
-    if( boot_buffer->nb_entry > 0){
+static void write_boot_buffer( void )
+{
+  if (likely(boot_buffer != NULL && prov_chan != NULL)) {
+    if (boot_buffer->nb_entry > 0) {
       relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry*sizeof(prov_msg_t));
     }
     kfree(boot_buffer);
     boot_buffer = NULL;
-  }else{
+  } else{
     printk(KERN_ERR "Provenance: boot buffer was not allocated\n");
   }
 
-  if(likely(long_boot_buffer!=NULL && long_prov_chan!=NULL)){
-    if( long_boot_buffer->nb_entry > 0){
+  if (likely(long_boot_buffer != NULL && long_prov_chan != NULL)) {
+    if (long_boot_buffer->nb_entry > 0) {
       relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry*sizeof(long_prov_msg_t));
     }
     kfree(long_boot_buffer);
     long_boot_buffer = NULL;
-  }else{
+  } else{
     printk(KERN_ERR "Provenance: long boot buffer was not allocated\n");
   }
 }
@@ -85,13 +86,13 @@ static void write_boot_buffer( void ){
 static int __init relay_prov_init(void)
 {
   prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-  if(prov_chan==NULL){
+  if (prov_chan == NULL) {
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
 
   long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-  if(long_prov_chan==NULL){
+  if (long_prov_chan == NULL) {
     printk(KERN_ERR "Provenance: relay_open failure\n");
     return 0;
   }
