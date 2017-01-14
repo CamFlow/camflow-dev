@@ -71,10 +71,13 @@ delete_kernel:
 
 test: copy_change
 	@echo "Running sparse, result in /tmp/sparse.txt"
-	cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
+	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
 	@echo "Running checkpatch, result in /tmp/checkpatch.txt"
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/*.c > /tmp/checkpatch.txt
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> /tmp/checkpatch.txt
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> /tmp/checkpatch.txt
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
+
 
 patch:
 	cd build && mkdir -p pristine
