@@ -1327,12 +1327,20 @@ struct prov_long_boot_buffer*  long_boot_buffer = NULL;
 struct ipv4_filters ingress_ipv4filters;
 struct ipv4_filters egress_ipv4filters;
 struct secctx_filters secctx_filters;
+bool prov_enabled;
+bool prov_all;
 
 void __init provenance_add_hooks(void)
 {
 	INIT_LIST_HEAD(&ingress_ipv4filters.list);
 	INIT_LIST_HEAD(&egress_ipv4filters.list);
 	INIT_LIST_HEAD(&secctx_filters.list);
+	prov_enabled = true;
+#ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
+	prov_all = true;
+#else
+	prov_all = false;
+#endif
 
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
