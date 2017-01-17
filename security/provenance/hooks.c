@@ -1318,11 +1318,11 @@ static struct security_hook_list provenance_hooks[] = {
 
 struct kmem_cache *provenance_cache;
 
-uint32_t prov_machine_id = 1; /* TODO get a proper id somehow, for now set from userspace */
-uint32_t prov_boot_id = 0;
+uint32_t prov_machine_id;
+uint32_t prov_boot_id;
 
-struct prov_boot_buffer*       boot_buffer;
-struct prov_long_boot_buffer*  long_boot_buffer;
+struct prov_boot_buffer 			*boot_buffer;
+struct prov_long_boot_buffer	*long_boot_buffer;
 
 struct ipv4_filters ingress_ipv4filters;
 struct ipv4_filters egress_ipv4filters;
@@ -1341,7 +1341,7 @@ void __init provenance_add_hooks(void)
 #else
 	prov_all = false;
 #endif
-
+	prov_machine_id = 1;
 	get_random_bytes(&prov_boot_id, sizeof(uint32_t)); // proper counter instead of random id?
   provenance_cache = kmem_cache_create("provenance_struct",
 					    sizeof(struct provenance),

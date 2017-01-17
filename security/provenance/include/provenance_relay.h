@@ -22,7 +22,7 @@
 #define PROV_RELAY_BUFF_EXP         22 // 4MB
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP)*sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
-#define PROV_INITIAL_BUFF_SIZE      1024*4
+#define PROV_INITIAL_BUFF_SIZE      (1024*4)
 #define PROV_INITIAL_LONG_BUFF_SIZE 256
 
 struct prov_boot_buffer {
@@ -45,8 +45,7 @@ static inline void prov_write(prov_msg_t *msg)
 
   spin_lock_irqsave(&prov_chan_lock, flags);
   prov_jiffies(msg) = get_jiffies_64();
-  if (unlikely(prov_chan == NULL)) // not set yet
-  {
+  if (unlikely(prov_chan == NULL)) {
     if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
       memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(prov_msg_t));
       boot_buffer->nb_entry++;
@@ -64,14 +63,13 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 extern struct rchan *long_prov_chan;
 extern spinlock_t long_prov_chan_lock;
 
-static inline void long_prov_write(long_prov_msg_t* msg)
+static inline void long_prov_write(long_prov_msg_t *msg)
 {
   unsigned long flags;
 
   spin_lock_irqsave(&long_prov_chan_lock, flags);
   prov_jiffies(msg) = get_jiffies_64();
-  if (unlikely(long_prov_chan == NULL)) // not set yet
-  {
+  if (unlikely(long_prov_chan == NULL)) {
     if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE)) {
       memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(long_prov_msg_t));
     } else{
@@ -84,7 +82,7 @@ static inline void long_prov_write(long_prov_msg_t* msg)
 }
 
 /* force sub-buffer switch */
-static inline void prov_flush( void )
+static inline void prov_flush(void)
 {
   unsigned long flags;
 

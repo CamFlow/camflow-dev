@@ -20,19 +20,18 @@ struct secctx_filters {
 
 extern struct secctx_filters secctx_filters;
 
-static inline uint8_t prov_secctx_whichOP(struct secctx_filters* filters, uint32_t secid)
+static inline uint8_t prov_secctx_whichOP(struct secctx_filters *filters, uint32_t secid)
 {
   struct secctx_filters *tmp;
 
   list_for_each_entry(tmp, &(filters->list), list) {
-    if (tmp->filter.secid == secid) { // ip match filter
+    if (tmp->filter.secid == secid)
       return tmp->filter.op;
-    }
   }
   return 0; // do nothing
 }
 
-static inline uint8_t prov_secctx_delete(struct secctx_filters* filters, struct secctx_filters	*f)
+static inline uint8_t prov_secctx_delete(struct secctx_filters *filters, struct secctx_filters	*f)
 {
   struct list_head *pos, *q;
   struct secctx_filters *tmp;
@@ -48,7 +47,7 @@ static inline uint8_t prov_secctx_delete(struct secctx_filters* filters, struct 
   return 0; // do nothing
 }
 
-static inline uint8_t prov_secctx_add_or_update(struct secctx_filters* filters, struct secctx_filters	*f)
+static inline uint8_t prov_secctx_add_or_update(struct secctx_filters *filters, struct secctx_filters	*f)
 {
   struct list_head *pos, *q;
   struct secctx_filters *tmp;

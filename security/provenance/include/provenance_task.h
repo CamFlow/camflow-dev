@@ -22,7 +22,7 @@
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
-static inline uint32_t current_cid( void )
+static inline uint32_t current_cid(void)
 {
 	uint32_t cid = 0;
 	struct cgroup_namespace *cns;
@@ -48,7 +48,7 @@ static inline uint32_t current_cid( void )
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
 
-static inline void current_update_shst( struct provenance *cprov )
+static inline void current_update_shst(struct provenance *cprov)
 {
 	struct mm_struct *mm = get_task_mm(current);
   struct vm_area_struct *vma;
@@ -86,7 +86,7 @@ static inline void current_update_shst( struct provenance *cprov )
 }
 
 
-static inline void refresh_current_provenance( void )
+static inline void refresh_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
 	uint32_t cid = current_cid();
@@ -120,7 +120,7 @@ static inline void refresh_current_provenance( void )
 	record_task_name(current, prov);
 }
 
-static inline struct provenance* prov_from_vpid(pid_t pid)
+static inline struct provenance *prov_from_vpid(pid_t pid)
 {
 	struct provenance *tprov;
 
