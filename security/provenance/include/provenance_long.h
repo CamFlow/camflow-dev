@@ -21,7 +21,7 @@
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static long_prov_msg_t* alloc_long_provenance(uint64_t ntype, gfp_t priority)
+static long_prov_msg_t *alloc_long_provenance(uint64_t ntype, gfp_t priority)
 {
   long_prov_msg_t *tmp = (long_prov_msg_t *)kzalloc(sizeof(long_prov_msg_t), priority);
 
@@ -32,7 +32,7 @@ static long_prov_msg_t* alloc_long_provenance(uint64_t ntype, gfp_t priority)
   return tmp;
 }
 
-static inline void __long_record_node(long_prov_msg_t* node)
+static inline void __long_record_node(long_prov_msg_t *node)
 {
   if (provenance_is_recorded(node)) {
     return;
@@ -41,7 +41,7 @@ static inline void __long_record_node(long_prov_msg_t* node)
   long_prov_write(node);
 }
 
-static inline void __long_record_relation(uint64_t type, long_prov_msg_t* from, prov_msg_t* to, uint8_t allowed)
+static inline void __long_record_relation(uint64_t type, long_prov_msg_t *from, prov_msg_t *to, uint8_t allowed)
 {
   prov_msg_t relation;
 
@@ -74,7 +74,7 @@ static inline int prov_print(const char *fmt, ...)
   return length;
 }
 
-static inline void __record_node_name(struct provenance *node, char* name)
+static inline void __record_node_name(struct provenance *node, char *name)
 {
 	long_prov_msg_t *fname_prov;
 
@@ -210,7 +210,7 @@ static inline void record_write_xattr(uint64_t type,
   kfree(xattr);
 }
 
-static inline void record_read_xattr(uint64_t type, prov_msg_t* cprov, prov_msg_t *iprov, const char* name, uint8_t allowed)
+static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_t *iprov, const char *name, uint8_t allowed)
 {
   long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
   prov_msg_t relation;

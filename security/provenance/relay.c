@@ -60,7 +60,7 @@ static struct rchan_callbacks relay_callbacks = {
 DEFINE_SPINLOCK(prov_chan_lock);
 DEFINE_SPINLOCK(long_prov_chan_lock);
 
-static void write_boot_buffer( void )
+static void write_boot_buffer(void)
 {
   if (likely(boot_buffer != NULL && prov_chan != NULL)) {
     if (boot_buffer->nb_entry > 0) {

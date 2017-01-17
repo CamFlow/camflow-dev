@@ -24,7 +24,7 @@
 
 #include "provenance.h"
 
-static inline struct provenance* socket_inode_provenance(struct socket *sock)
+static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
   struct provenance *iprov = SOCK_INODE(sock)->i_provenance;
 
@@ -34,7 +34,7 @@ static inline struct provenance* socket_inode_provenance(struct socket *sock)
   return iprov;
 }
 
-static inline struct provenance* sk_inode_provenance(struct sock *sk)
+static inline struct provenance *sk_inode_provenance(struct sock *sk)
 {
   struct socket *sock = sk->sk_socket;
 
@@ -44,13 +44,13 @@ static inline struct provenance* sk_inode_provenance(struct sock *sk)
   return socket_inode_provenance(sock);
 }
 
-static inline struct provenance* sk_provenance(struct sock *sk)
+static inline struct provenance *sk_provenance(struct sock *sk)
 {
   struct provenance *prov = sk->sk_provenance;
   return prov;
 }
 
-static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t* prov)
+static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t *prov)
 {
   struct packet_identifier *id;
   int offset, ihlen;
@@ -82,37 +82,29 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
 
   // now we collect
   switch (ih->protocol) {
-    case IPPROTO_TCP:
-      if (ntohs(ih->frag_off) & IP_OFFSET) {
-	break;
-      }
-
-      offset += ihlen; //point to tcp packet
-      th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
-      if (th == NULL) {
-	break;
-      }
-
-      id->snd_port = th->source;
-      id->rcv_port = th->dest;
-      id->seq = th->seq;
+  case IPPROTO_TCP:
+    if (ntohs(ih->frag_off) & IP_OFFSET)
+	   break;
+    offset += ihlen; //point to tcp packet
+    th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
+    if (th == NULL)
+     break;
+    id->snd_port = th->source;
+    id->rcv_port = th->dest;
+    id->seq = th->seq;
+    break;
+  case IPPROTO_UDP:
+    if (ntohs(ih->frag_off) & IP_OFFSET)
       break;
-    case IPPROTO_UDP:
-      if (ntohs(ih->frag_off) & IP_OFFSET) {
-	break;
-      }
-
-      offset += ihlen; //point to tcp packet
-      uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
-      if (uh == NULL) {
-	break;
-      }
-
-      id->snd_port = uh->source;
-      id->rcv_port = uh->dest;
-      break;
-    default:
-      break;
+    offset += ihlen; //point to tcp packet
+    uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
+    if (uh == NULL)
+     break;
+    id->snd_port = uh->source;
+    id->rcv_port = uh->dest;
+    break;
+  default:
+    break;
   }
   return 0;
 }
@@ -128,7 +120,7 @@ extern struct ipv4_filters egress_ipv4filters;
 #define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 #define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
-static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters* filters, uint32_t ip, uint32_t port)
+static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters *filters, uint32_t ip, uint32_t port)
 {
   struct ipv4_filters *tmp;
 
@@ -142,7 +134,7 @@ static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters* filters, uint32_t i
   return 0; // do nothing
 }
 
-static inline uint8_t prov_ipv4_delete(struct ipv4_filters* filters, struct ipv4_filters	*f)
+static inline uint8_t prov_ipv4_delete(struct ipv4_filters *filters, struct ipv4_filters *f)
 {
   struct list_head *pos, *q;
   struct ipv4_filters *tmp;
@@ -160,7 +152,7 @@ static inline uint8_t prov_ipv4_delete(struct ipv4_filters* filters, struct ipv4
   return 0; // do nothing
 }
 
-static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters* filters, struct ipv4_filters	*f)
+static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters *filters, struct ipv4_filters	*f)
 {
   struct list_head *pos, *q;
   struct ipv4_filters *tmp;
@@ -179,7 +171,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters* filters, stru
 }
 
 // incoming packet
-static inline void record_pck_to_inode(prov_msg_t* pck, prov_msg_t* inode)
+static inline void record_pck_to_inode(prov_msg_t *pck, prov_msg_t *inode)
 {
   prov_msg_t relation;
 
@@ -205,7 +197,7 @@ out:
 }
 
 // outgoing packet
-static inline void record_inode_to_pck(prov_msg_t* inode, prov_msg_t* pck)
+static inline void record_inode_to_pck(prov_msg_t *inode, prov_msg_t *pck)
 {
   prov_msg_t relation;
 

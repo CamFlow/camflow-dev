@@ -23,7 +23,7 @@
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
-static inline struct inode* file_name_to_inode(const char* name)
+static inline struct inode *file_name_to_inode(const char *name)
 {
   struct path path;
   struct inode *inode;
@@ -62,7 +62,7 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov)
   spin_unlock(prov_lock(prov));
 }
 
-static inline void provenance_mark_as_opaque(const char* name)
+static inline void provenance_mark_as_opaque(const char *name)
 {
   struct inode *in;
   prov_msg_t *prov;
@@ -78,7 +78,7 @@ static inline void provenance_mark_as_opaque(const char* name)
   }
 }
 
-static inline struct provenance* inode_provenance(struct inode *inode)
+static inline struct provenance *inode_provenance(struct inode *inode)
 {
   struct provenance *prov = inode->i_provenance;
   uint8_t op;
@@ -120,7 +120,7 @@ static inline struct provenance *file_provenance(struct file *file)
   return inode_provenance(inode);
 }
 
-static inline struct provenance* branch_mmap(prov_msg_t* iprov, prov_msg_t* cprov)
+static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cprov)
 {
 	//used for private MMAP
   struct provenance *prov;

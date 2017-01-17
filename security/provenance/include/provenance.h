@@ -78,12 +78,12 @@ static inline void free_provenance(struct provenance *prov)
   kmem_cache_free(provenance_cache, prov);
 }
 
-static inline void copy_node_info(prov_identifier_t* dest, prov_identifier_t* src)
+static inline void copy_node_info(prov_identifier_t *dest, prov_identifier_t *src)
 {
   memcpy(dest, src, sizeof(prov_identifier_t));
 }
 
-static inline void __record_node(prov_msg_t* node)
+static inline void __record_node(prov_msg_t *node)
 {
   if (filter_node(node) || provenance_is_recorded(node)) { // filtered or already recorded
     return;
@@ -116,7 +116,7 @@ static inline void __record_relation(uint64_t type,
   prov_write(relation);
 }
 
-static inline void __update_version(uint64_t type, prov_msg_t* prov)
+static inline void __update_version(uint64_t type, prov_msg_t *prov)
 {
   prov_msg_t old_prov;
   prov_msg_t relation;
