@@ -34,9 +34,8 @@ static long_prov_msg_t *alloc_long_provenance(uint64_t ntype, gfp_t priority)
 
 static inline void __long_record_node(long_prov_msg_t *node)
 {
-  if (provenance_is_recorded(node)) {
+  if (provenance_is_recorded(node))
     return;
-  }
   set_recorded(node);
   long_prov_write(node);
 }
@@ -45,13 +44,11 @@ static inline void __long_record_relation(uint64_t type, long_prov_msg_t *from, 
 {
   prov_msg_t relation;
 
-  if (unlikely(!prov_enabled)) { // capture is not enabled, ignore
+  if (unlikely(!prov_enabled)) // capture is not enabled, ignore
     return;
-  }
   // don't record if to or from are opaque
-  if (unlikely(provenance_is_opaque(to))) {
+  if (unlikely(provenance_is_opaque(to)))
     return;
-  }
   __long_record_node(from);
   __record_node(to);
   memset(&relation, 0, sizeof(prov_msg_t));
@@ -99,9 +96,8 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 {
   char *buffer;
 	char *ptr;
-  if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov))) {
+  if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
-	}
   buffer = (char *)kzalloc(PATH_MAX, GFP_NOFS);
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
 	__record_node_name(prov, ptr);
@@ -112,14 +108,11 @@ static inline void record_inode_name(struct inode *inode, struct provenance *pro
 {
 	struct dentry *dentry;
 
-	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov))) {
+	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
-	}
 	dentry = d_find_alias(inode);
-
-	if (!dentry) { // we did not find a dentry, not sure if it should ever happen
+	if (!dentry) // we did not find a dentry, not sure if it should ever happen
 		return;
-	}
 	record_inode_name_from_dentry(dentry, prov);
 	dput(dentry);
 }
@@ -132,22 +125,17 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	char *buffer;
 	char *ptr;
 
-  if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov))) {
+  if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
-	}
-
 	cred = get_task_cred(task);
-	if (!cred) {
+	if (!cred)
 		return;
-	}
-
 	mm = get_task_mm(task);
 	if (!mm) {
 		goto out;
 	}
 	exe_file = get_mm_exe_file(mm);
-	mmput(mm);
-
+	mmput_async(mm);
 	if (exe_file) {
 		buffer = (char *)kzalloc(PATH_MAX, GFP_KERNEL);
 		ptr = file_path(exe_file, buffer, PATH_MAX);
@@ -155,7 +143,6 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 		__record_node_name(prov, ptr);
 		kfree(buffer);
 	}
-
 out:
 	put_cred(cred);
 }
@@ -164,10 +151,8 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 {
 	long_prov_msg_t *addr_info;
 
-  if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov))) {
+  if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
     return;
-  }
-
   addr_info = alloc_long_provenance(ENT_ADDR, GFP_KERNEL);
   addr_info->address_info.length = addrlen;
   memcpy(&(addr_info->address_info.addr), address, addrlen);
@@ -188,10 +173,8 @@ static inline void record_write_xattr(uint64_t type,
   prov_msg_t relation;
 
   memset(&relation, 0, sizeof(prov_msg_t));
-
   memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE-1);
   xattr->xattr_info.name[PROV_XATTR_NAME_SIZE-1] = '\0';
-
   if (value != NULL) {
     if (size < PROV_XATTR_VALUE_SIZE) {
       xattr->xattr_info.size = size;
@@ -202,7 +185,6 @@ static inline void record_write_xattr(uint64_t type,
     }
     xattr->xattr_info.flags = flags;
   }
-
   __record_node(cprov);
   __record_relation(type, &(cprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
   __update_version(type, iprov);
@@ -216,10 +198,8 @@ static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_
   prov_msg_t relation;
 
   memset(&relation, 0, sizeof(prov_msg_t));
-
   memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE-1);
   xattr->xattr_info.name[PROV_XATTR_NAME_SIZE-1] = '\0';
-
   __record_node(iprov);
   __record_relation(type, &(iprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
   __update_version(type, cprov);

@@ -72,9 +72,8 @@ static inline void provenance_mark_as_opaque(const char *name)
     printk(KERN_ERR "Provenance: could not find %s file.", name);
   } else{
     prov = in->i_provenance;
-    if (prov) {
+    if (prov)
       set_opaque(prov);
-    }
   }
 }
 
@@ -90,12 +89,10 @@ static inline struct provenance *inode_provenance(struct inode *inode)
   security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
   op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->inode_info.secid);
 	if (unlikely(op != 0)) {
-		if ((op & PROV_SEC_TRACKED) != 0) {
+		if ((op & PROV_SEC_TRACKED) != 0)
 			set_tracked(prov_msg(prov));
-		}
-		if ((op & PROV_SEC_PROPAGATE) != 0) {
+		if ((op & PROV_SEC_PROPAGATE) != 0)
 			set_propagate(prov_msg(prov));
-		}
 	}
   return prov;
 }
@@ -103,10 +100,8 @@ static inline struct provenance *inode_provenance(struct inode *inode)
 static inline struct provenance *dentry_provenance(struct dentry *dentry)
 {
   struct inode *inode = d_backing_inode(dentry);
-
-  if (inode == NULL) {
+  if (inode == NULL)
     return NULL;
-  }
   return inode_provenance(inode);
 }
 
@@ -114,9 +109,8 @@ static inline struct provenance *file_provenance(struct file *file)
 {
   struct inode *inode = file_inode(file);
 
-  if (inode == NULL) {
+  if (inode == NULL)
     return NULL;
-  }
   return inode_provenance(inode);
 }
 
@@ -126,22 +120,12 @@ static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cpro
   struct provenance *prov;
   prov_msg_t relation;
 
-  if (unlikely(iprov == NULL || cprov == NULL)) { // should not occur
+  if (unlikely(iprov == NULL || cprov == NULL)) // should not occur
     return NULL;
-  }
-
-  if (!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all) {
+  if (!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all)
     return NULL;
-  }
-
-  if (filter_node(iprov) || filter_node(cprov)) {
+  if (!should_record_relation(RL_MMAP, cprov, iprov, FLOW_ALLOWED))
     return NULL;
-  }
-
-  if (filter_relation(RL_CREATE, FLOW_ALLOWED)) {
-    return NULL;
-  }
-
   prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
 
   prov_msg(prov)->inode_info.uid = iprov->inode_info.uid;

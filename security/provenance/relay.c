@@ -63,24 +63,20 @@ DEFINE_SPINLOCK(long_prov_chan_lock);
 static void write_boot_buffer(void)
 {
   if (likely(boot_buffer != NULL && prov_chan != NULL)) {
-    if (boot_buffer->nb_entry > 0) {
+    if (boot_buffer->nb_entry > 0)
       relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry*sizeof(prov_msg_t));
-    }
     kfree(boot_buffer);
     boot_buffer = NULL;
-  } else{
+  } else
     printk(KERN_ERR "Provenance: boot buffer was not allocated\n");
-  }
 
   if (likely(long_boot_buffer != NULL && long_prov_chan != NULL)) {
-    if (long_boot_buffer->nb_entry > 0) {
+    if (long_boot_buffer->nb_entry > 0)
       relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry*sizeof(long_prov_msg_t));
-    }
     kfree(long_boot_buffer);
     long_boot_buffer = NULL;
-  } else{
+  } else
     printk(KERN_ERR "Provenance: long boot buffer was not allocated\n");
-  }
 }
 
 static int __init relay_prov_init(void)

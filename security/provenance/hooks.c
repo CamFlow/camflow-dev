@@ -52,14 +52,14 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
   struct provenance *prov  = alloc_provenance(ACT_TASK, gfp);
 
-  if (!prov)
-    return -ENOMEM;
+if (!prov)
+  return -ENOMEM;
 
   prov_msg(prov)->task_info.uid = __kuid_val(cred->euid);
   prov_msg(prov)->task_info.gid = __kgid_val(cred->egid);
 
   cred->provenance = prov;
-  return 0;
+return 0;
 }
 
 /*
@@ -83,9 +83,8 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
   struct provenance *old_prov = old->provenance;
   struct provenance *prov = alloc_provenance(ACT_TASK, gfp);
 
-  if (!prov) {
-    return -ENOMEM;
-  }
+if (!prov)
+		return -ENOMEM;
 	//task_config_from_file(current);
   prov_msg(prov)->task_info.uid = __kuid_val(new->euid);
   prov_msg(prov)->task_info.gid = __kgid_val(new->egid);
@@ -94,7 +93,7 @@ static int provenance_cred_prepare(struct cred *new, const struct cred *old, gfp
 	flow_between_activities(RL_CLONE, old_prov, prov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(old_prov));
 	new->provenance = prov;
-  return 0;
+return 0;
 }
 
 /*
@@ -113,7 +112,7 @@ static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 /*
 * Update the module's state after setting one or more of the user
 * identity attributes of the current process.  The @flags parameter
-* indicates which of the set*uid system calls invoked this hook.  If
+* indicates which of the set*uid system calls invoked this hook.if
 * @new is the set of credentials that will be installed.  Modifications
 * should be made to this rather than to @current->cred.
 * @old is the set of credentials that are being replaces
@@ -143,19 +142,19 @@ static int provenance_inode_alloc_security(struct inode *inode)
   struct provenance *iprov = alloc_provenance(ENT_INODE_UNKNOWN, GFP_KERNEL);
   struct provenance *sprov;
 
-  if (unlikely(!iprov))
-    return -ENOMEM;
+if (unlikely(!iprov))
+  return -ENOMEM;
 
 	prov_msg(iprov)->inode_info.ino = inode->i_ino;
   prov_msg(iprov)->inode_info.uid = __kuid_val(inode->i_uid);
   prov_msg(iprov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(iprov)->inode_info.secid));
-  record_inode_type(inode->i_mode, iprov);
+record_inode_type(inode->i_mode, iprov);
   sprov = inode->i_sb->s_provenance;
   memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16*sizeof(uint8_t));
 
 	inode->i_provenance = iprov;
-  return 0;
+return 0;
 }
 
 /*
@@ -181,9 +180,8 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = inode_provenance(dir);
 
-	if (!iprov) {
-    return -ENOMEM;
-  }
+	if (!iprov)
+		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
@@ -210,53 +208,40 @@ static int provenance_inode_permission(struct inode *inode, int mask)
   struct provenance *iprov = NULL;
 	uint32_t perms;
 
-	if (!mask) {
+	if (!mask)
 		return 0;
-	}
-
-	if (unlikely(IS_PRIVATE(inode))) {
+	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
-	}
-
 	iprov = inode_provenance(inode);
-  if (iprov == NULL) { // alloc provenance if none there
-    return -ENOMEM;
-  }
+	if (iprov == NULL)
+		return -ENOMEM;
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (is_inode_dir(inode)) {
-		if ((perms & (DIR__WRITE)) != 0) {
+		if ((perms & (DIR__WRITE)) != 0)
 	    flow_from_activity(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
-	}
-	if ((perms & (DIR__READ)) != 0) {
+		if ((perms & (DIR__READ)) != 0)
 	    flow_to_activity(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
-	}
-		if ((perms & (DIR__SEARCH)) != 0) {
+		if ((perms & (DIR__SEARCH)) != 0)
 	    flow_to_activity(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
-	}
 	} else if (is_inode_socket(inode)) {
-		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0) {
+		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0)
 	    flow_from_activity(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
-	}
-	if ((perms & (FILE__READ)) != 0) {
+		if ((perms & (FILE__READ)) != 0)
 	    flow_to_activity(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
-	}
-	} else{
-		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0) {
-	    flow_from_activity(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
-	}
-	if ((perms & (FILE__READ)) != 0) {
-	    flow_to_activity(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
-	}
-		if ((perms & (FILE__EXECUTE)) != 0) {
-	    flow_to_activity(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
-	}
+	} else {
+		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0)
+			flow_from_activity(RL_PERM_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
+		if ((perms & (FILE__READ)) != 0)
+			flow_to_activity(RL_PERM_READ, iprov, cprov, FLOW_ALLOWED, NULL);
+		if ((perms & (FILE__EXECUTE)) != 0)
+			flow_to_activity(RL_PERM_EXEC, iprov, cprov, FLOW_ALLOWED, NULL);
 	}
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+return 0;
 }
 
 /*
@@ -276,14 +261,12 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
   struct provenance *iprov;
 
 	iprov = dentry_provenance(old_dentry);
-  if (!iprov) {
-    return -ENOMEM;
-  }
+if (!iprov)
+  return -ENOMEM;
 
 	dprov = inode_provenance(dir);
-  if (!dprov) {
-    return -ENOMEM;
-  }
+if (!dprov)
+  return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -294,7 +277,7 @@ static int provenance_inode_link(struct dentry *old_dentry, struct inode *dir, s
 	spin_unlock(prov_lock(dprov));
 	spin_unlock(prov_lock(cprov));
 	record_inode_name_from_dentry(new_dentry, iprov);
-  return 0;
+return 0;
 }
 
 /*
@@ -327,9 +310,8 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	struct provenance *iattrprov;
 
 	iprov = dentry_provenance(dentry);
-  if (!iprov) {
-    return -ENOMEM;
-  }
+if (!iprov)
+  return -ENOMEM;
 	iattrprov = alloc_provenance(ENT_IATTR, GFP_KERNEL);
 
 	prov_msg(iattrprov)->iattr_info.valid = iattr->ia_valid;
@@ -348,7 +330,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
 	free_provenance(iattrprov);
-  return 0;
+return 0;
 }
 
 /*
@@ -361,16 +343,15 @@ int provenance_inode_getattr(const struct path *path)
 	struct provenance *cprov = get_current_provenance();
   struct provenance *iprov = dentry_provenance(path->dentry);
 
-  if (!iprov) {
-    return -ENOMEM;
-  }
+	if (!iprov)
+		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_GETATTR, iprov, cprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -383,16 +364,15 @@ static int provenance_inode_readlink(struct dentry *dentry)
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = dentry_provenance(dentry);
 
-  if (!iprov) {
-    return -ENOMEM;
-  }
+	if (!iprov)
+		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_READLINK, iprov, cprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -404,21 +384,14 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 {
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = dentry_provenance(dentry);
-  if (!iprov) { // alloc provenance if none there
+	if (!iprov)
 		return;
-  }
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	// one of the node is opaque
-	if (provenance_is_opaque(prov_msg(cprov)) || provenance_is_opaque(prov_msg(iprov))) {
+	if (provenance_is_opaque(prov_msg(cprov)) || provenance_is_opaque(prov_msg(iprov)))
 		goto out;
-	}
-
-	// none of the node is tracked
-	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov))) {
+	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov)))
 		goto out;
-	}
-
 	record_write_xattr(RL_SETXATTR, prov_msg(iprov), prov_msg(cprov), name, value, size, flags, FLOW_ALLOWED);
 out:
 	spin_unlock(prov_lock(iprov));
@@ -437,21 +410,14 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 	struct provenance *iprov = dentry_provenance(dentry);
 	int rtn = 0;
 
-  if (!iprov) { // alloc provenance if none there
-    return -ENOMEM;
-  }
+	if (!iprov)
+		return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	// one of the node is opaque
-	if (provenance_is_opaque(prov_msg(cprov)) || provenance_is_opaque(prov_msg(iprov))) {
+	if (provenance_is_opaque(prov_msg(cprov)) || provenance_is_opaque(prov_msg(iprov)))
 		goto out;
-	}
-
-	// none of the node is tracked
-	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov))) {
+	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov)))
 		goto out;
-	}
-
 	record_read_xattr(RL_GETXATTR, prov_msg(cprov), prov_msg(iprov), name, FLOW_ALLOWED);
 out:
 	spin_unlock(prov_lock(iprov));
@@ -468,11 +434,8 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 {
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = dentry_provenance(dentry);
-
-  if (!iprov) { // alloc provenance if none there
-    return -ENOMEM;
-  }
-
+	if (!iprov)
+		return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_LSTXATTR, iprov, cprov, FLOW_ALLOWED, NULL);
@@ -491,22 +454,15 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = dentry_provenance(dentry);
 
-  if (!iprov) { // alloc provenance if none there
-    return -ENOMEM;
-  }
+	if (!iprov)
+		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	// one of the node is opaque
-	if (provenance_is_opaque(prov_msg(cprov)) || provenance_is_opaque(prov_msg(iprov))) {
+	if (provenance_is_opaque(prov_msg(cprov)) || provenance_is_opaque(prov_msg(iprov)))
 		goto out;
-	}
-
-	// none of the node is tracked
-	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov))) {
+	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov)))
 		goto out;
-	}
-
 	record_write_xattr(RL_RMVXATTR, prov_msg(iprov), prov_msg(cprov), name, NULL, 0, 0, FLOW_ALLOWED);
 out:
 	spin_unlock(prov_lock(iprov));
@@ -540,44 +496,35 @@ static int provenance_file_permission(struct file *file, int mask)
 	struct inode *inode = file_inode(file);
 	uint32_t perms;
 
-	if (iprov == NULL) { // alloc provenance if none there
+	if (iprov == NULL)
 		return -ENOMEM;
-	}
 
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (is_inode_dir(inode)) {
-		if ((perms & (DIR__WRITE)) != 0) {
+		if ((perms & (DIR__WRITE)) != 0)
 			flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, file);
-		}
-		if ((perms & (DIR__READ)) != 0) {
+		if ((perms & (DIR__READ)) != 0)
 			flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
-		}
-		if ((perms & (DIR__SEARCH)) != 0) {
+		if ((perms & (DIR__SEARCH)) != 0)
 			flow_to_activity(RL_SEARCH, iprov, cprov, FLOW_ALLOWED, file);
-		}
 	} else if (is_inode_socket(inode)) {
-		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0) {
+		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0)
 			flow_from_activity(RL_SND, cprov, iprov, FLOW_ALLOWED, file);
-		}
-		if ((perms & (FILE__READ)) != 0) {
+		if ((perms & (FILE__READ)) != 0)
 			flow_to_activity(RL_RCV, iprov, cprov, FLOW_ALLOWED, file);
-		}
 	} else{
-		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0) {
+		if ((perms & (FILE__WRITE|FILE__APPEND)) != 0)
 			flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, file);
-		}
-		if ((perms & (FILE__READ)) != 0) {
+		if ((perms & (FILE__READ)) != 0)
 			flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
-		}
-		if ((perms & (FILE__EXECUTE)) != 0) {
+		if ((perms & (FILE__EXECUTE)) != 0)
 	    flow_to_activity(RL_EXEC, iprov, cprov, FLOW_ALLOWED, file);
-	}
 	}
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -590,9 +537,8 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = file_provenance(file);
 
-	if (!iprov) { // alloc provenance if none there
-    return -ENOMEM;
-  }
+	if (!iprov)
+  	return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_OPEN, iprov, cprov, FLOW_ALLOWED, file);
@@ -616,47 +562,38 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
   struct provenance *iprov = NULL;
 	struct provenance *bprov = NULL;
 
-  if (unlikely(file == NULL)) {
-    return 0;
-  }
-	//provenance_record_file_name(file);
-  iprov = file_provenance(file);
+	if (unlikely(file == NULL))
+  	return 0;
+	iprov = file_provenance(file);
 	if ((flags & MAP_TYPE) == MAP_SHARED) {
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		cprov->has_mmap = 1;
-	if ((prot & (PROT_WRITE)) != 0) {
+		if ((prot & (PROT_WRITE)) != 0)
 	    flow_from_activity(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
-	}
-	if ((prot & (PROT_READ)) != 0) {
+		if ((prot & (PROT_READ)) != 0)
 	    flow_to_activity(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
-	}
-		if ((prot & (PROT_EXEC)) != 0) {
+		if ((prot & (PROT_EXEC)) != 0)
 	    flow_to_activity(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
-	}
 		spin_unlock(prov_lock(iprov));
 		spin_unlock(prov_lock(cprov));
 	} else{
 		bprov = branch_mmap(prov_msg(iprov), prov_msg(cprov));
-		if (bprov == NULL) {
+		if (bprov == NULL)
 			return 0;
-		}
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-		if ((prot & (PROT_WRITE)) != 0) {
+		if ((prot & (PROT_WRITE)) != 0)
 	    flow_from_activity(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
-	}
-	if ((prot & (PROT_READ)) != 0) {
+		if ((prot & (PROT_READ)) != 0)
 	    flow_to_activity(RL_MMAP_READ, bprov, cprov, FLOW_ALLOWED, file);
-	}
-		if ((prot & (PROT_EXEC)) != 0) {
+		if ((prot & (PROT_EXEC)) != 0)
 	    flow_to_activity(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
-	}
 		spin_unlock(prov_lock(iprov));
 		spin_unlock(prov_lock(cprov));
 		free_provenance(bprov);
 	}
-  return 0;
+	return 0;
 }
 
 /*
@@ -674,16 +611,15 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
   struct provenance *cprov = get_current_provenance();
   struct provenance *iprov = file_provenance(file);
 
-  if (!iprov) {
-    return -ENOMEM;
-  }
+	if (!iprov)
+		return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
   flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
   flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /* msg */
@@ -703,16 +639,14 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
   /* alloc new prov struct with generated id */
   mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
-  if (!mprov) {
-    return -ENOMEM;
-	}
-
+	if (!mprov)
+  	return -ENOMEM;
   prov_msg(mprov)->msg_msg_info.type = msg->m_type;
   msg->provenance = mprov;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
   flow_from_activity(RL_CREATE, cprov, mprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -783,10 +717,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	struct provenance *cprov = get_current_provenance();
   struct provenance *sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 
-  if (!sprov) {
-    return -ENOMEM;
-	}
-
+	if (!sprov)
+  	return -ENOMEM;
   prov_msg(sprov)->shm_info.mode = shp->shm_perm.mode;
   shp->shm_perm.provenance = sprov;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
@@ -821,15 +753,13 @@ static int provenance_shm_shmat(struct shmid_kernel *shp,
   struct provenance *cprov = get_current_provenance();
 	struct provenance *sprov = shp->shm_perm.provenance;
 
-  if (!sprov) {
-    return -ENOMEM;
-	}
-
+	if (!sprov)
+  	return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
-  if (shmflg & SHM_RDONLY) {
-    flow_to_activity(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
-  } else{
+	if (shmflg & SHM_RDONLY) {
+		flow_to_activity(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
+  }	else {
     flow_to_activity(RL_READ, sprov, cprov, FLOW_ALLOWED, NULL);
     flow_from_activity(RL_WRITE, cprov, sprov, FLOW_ALLOWED, NULL);
   }
@@ -846,11 +776,10 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 {
   struct provenance *skprov = get_current_provenance();
 
-  if (!skprov) {
-    return -ENOMEM;
-	}
+	if (!skprov)
+		return -ENOMEM;
   sk->sk_provenance = skprov;
-  return 0;
+	return 0;
 }
 
 /*
@@ -869,21 +798,19 @@ static int provenance_sk_alloc_security(struct sock *sk, int family, gfp_t prior
 * @kern set to 1 if a kernel socket.
 */
 static int provenance_socket_post_create(struct socket *sock, int family,
-				      int type, int protocol, int kern)
+				    int type, int protocol, int kern)
 {
   struct provenance *cprov  = get_current_provenance();
   struct provenance *iprov = socket_inode_provenance(sock);
 
-  if (kern) {
-    goto out;
-  }
+	if (kern)
+		return 0;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
   flow_from_activity(RL_CREATE, cprov, iprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-out:
-  return 0;
+	return 0;
 }
 
 /*
@@ -902,13 +829,11 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 	struct sockaddr_in *ipv4_addr;
 	uint8_t op;
 
-  if (!iprov) {
-    return -ENOMEM;
-	}
+	if (!iprov)
+		return -ENOMEM;
 
-  if (provenance_is_opaque(prov_msg(cprov))) {
-    return 0;
-	}
+	if (provenance_is_opaque(prov_msg(cprov)))
+		return 0;
 
 	/* should we start tracking this socket */
 	if (address->sa_family == AF_INET) {
@@ -926,7 +851,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
 	provenance_record_address(address, addrlen, iprov);
 	flow_from_activity(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
-  return 0;
+	return 0;
 }
 
 /*
@@ -944,15 +869,13 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 	struct sockaddr_in *ipv4_addr;
 	uint8_t op;
 
-	if (!iprov) {
-    return -ENOMEM;
-	}
+	if (!iprov)
+  	return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-  if (provenance_is_opaque(prov_msg(cprov))) {
-    goto out;
-	}
+	if (provenance_is_opaque(prov_msg(cprov)))
+		goto out;
 
 	/* should we start tracking this socket */
 	if (address->sa_family == AF_INET) {
@@ -974,7 +897,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -988,15 +911,14 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
   struct provenance *cprov  = get_current_provenance();
   struct provenance *iprov = socket_inode_provenance(sock);
 
-	if (!iprov) {
-    return -ENOMEM;
-	}
+	if (!iprov)
+		return -ENOMEM;
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
   flow_from_activity(RL_LISTEN, cprov, iprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -1019,7 +941,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
   flow_to_activity(RL_ACCEPT, niprov, cprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -1030,14 +952,13 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 * Return 0 if permission is granted.
 */
 static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
-				  int size)
+				int size)
 {
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 
-	if (iprov == NULL) {
+	if (iprov == NULL)
 		return -ENOMEM;
-	}
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_from_activity(RL_SND, cprov, iprov, FLOW_ALLOWED, NULL);
@@ -1055,14 +976,13 @@ static int provenance_socket_sendmsg(struct socket *sock, struct msghdr *msg,
 * Return 0 if permission is granted.
 */
 static int provenance_socket_recvmsg(struct socket *sock, struct msghdr *msg,
-				  int size, int flags)
+				int size, int flags)
 {
 	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 
-	if (iprov == NULL) {
+	if (iprov == NULL)
 		return -ENOMEM;
-	}
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
@@ -1086,24 +1006,19 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
   prov_msg_t pckprov;
 	uint16_t family = sk->sk_family;
 
-	if (cprov == NULL) {
+	if (cprov == NULL)
 		return 0;
-	}
-
-	if (family != PF_INET) { // we only handle IPv4 for now
+	if (family != PF_INET)
 		return 0;
-	}
-
 	iprov = sk_inode_provenance(sk);
-	if (iprov == NULL) { // we could not get the provenance, we give up
+	if (iprov == NULL)
 		return 0;
-	}
 	if (provenance_is_tracked(prov_msg(iprov))) {
     provenance_parse_skb_ipv4(skb, &pckprov);
-    record_pck_to_inode(&pckprov, prov_msg(iprov));
-		if (provenance_is_tracked(prov_msg(cprov))) {
+		record_pck_to_inode(&pckprov, prov_msg(iprov));
+
+		if (provenance_is_tracked(prov_msg(cprov)))
 			flow_to_activity(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
-		}
   }
 	return 0;
 }
@@ -1125,10 +1040,10 @@ static int provenance_unix_stream_connect(struct sock *sock,
   struct provenance* nskprov = sk_provenance(newsk);
   struct provenance* okprov = sk_provenance(other);
 
-  record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
-  record_relation(RL_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
-  record_relation(RL_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);*/
-  return 0;
+	record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
+	record_relation(RL_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
+	record_relation(RL_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);*/
+	return 0;
 }
 
 /*
@@ -1144,8 +1059,8 @@ static int provenance_unix_may_send(struct socket *sock,
   /*struct provenance* skprov = socket_inode_provenance(sock);
   struct provenance* okprov = socket_inode_provenance(other);
 
-  record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);*/
-  return 0;
+	record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);*/
+	return 0;
 }
 
 /* outdated description */
@@ -1156,7 +1071,7 @@ static int provenance_unix_may_send(struct socket *sock,
 * transitions between security domains).
 * This hook may be called multiple times during a single execve, e.g. for
 * interpreters.  The hook can tell whether it has already been called by
-* checking to see if @bprm->security is non-NULL.  If so, then the hook
+* checking to see if @bprm->security is non-NULL.if so, then the hook
 * may decide either to retain the security information saved earlier or
 * to replace it.
 * @bprm contains the linux_binprm structure.
@@ -1167,9 +1082,8 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *iprov = file_provenance(bprm->file);
 
-  if (!nprov) {
+	if (!nprov)
 		return -ENOMEM;
-  }
 
 	if (provenance_is_opaque(prov_msg(iprov))) {
 		set_opaque(prov_msg(nprov));
@@ -1178,7 +1092,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_to_activity(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
-  return 0;
+	return 0;
 }
 
 /*
@@ -1221,10 +1135,10 @@ static int provenance_sb_alloc_security(struct super_block *sb)
 {
   struct provenance *sbprov  = alloc_provenance(ENT_SBLCK, GFP_KERNEL);
 
-  if (!sbprov)
-    return -ENOMEM;
+	if (!sbprov)
+		return -ENOMEM;
   sb->s_provenance = sbprov;
-  return 0;
+	return 0;
 }
 
 /*
@@ -1239,7 +1153,7 @@ static void provenance_sb_free_security(struct super_block *sb)
 
 static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *data)
 {
-  int i;
+	int i;
   uint8_t c = 0;
   struct provenance *sbprov = sb->s_provenance;
 
@@ -1247,10 +1161,9 @@ static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *dat
     prov_msg(sbprov)->sb_info.uuid[i] = sb->s_uuid[i];
     c |= sb->s_uuid[i];
   }
-  if (c == 0) { // no uuid defined, generate random one
+	if (c == 0) // no uuid defined, generate random one
     get_random_bytes(prov_msg(sbprov)->sb_info.uuid, 16*sizeof(uint8_t));
-  }
-  return 0;
+	return 0;
 }
 
 static struct security_hook_list provenance_hooks[] = {
@@ -1350,13 +1263,11 @@ void __init provenance_add_hooks(void)
 
 	/* init relay buffers, to deal with provenance before FS is ready */
 	boot_buffer = (struct prov_boot_buffer *)kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
-	if (unlikely(boot_buffer == NULL)) {
+	if (unlikely(boot_buffer == NULL))
 		panic("Provenance: could not allocate boot_buffer.");
-	}
 	long_boot_buffer = (struct prov_long_boot_buffer *)kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
-	if (unlikely(long_boot_buffer == NULL)) {
+	if (unlikely(long_boot_buffer == NULL))
 		panic("Provenance: could not allocate long_boot_buffer.");
-	}
 
   /* register the provenance security hooks */
   security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));

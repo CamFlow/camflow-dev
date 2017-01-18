@@ -62,9 +62,8 @@ static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
   struct provenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
 
-  if (!prov) {
+  if (!prov)
     return NULL;
-  }
   spin_lock_init(prov_lock(prov));
   prov_type(prov_msg(prov)) = ntype;
   node_identifier(prov_msg(prov)).id = prov_next_node_id();
@@ -85,14 +84,12 @@ static inline void copy_node_info(prov_identifier_t *dest, prov_identifier_t *sr
 
 static inline void __record_node(prov_msg_t *node)
 {
-  if (filter_node(node) || provenance_is_recorded(node)) { // filtered or already recorded
+  if (filter_node(node) || provenance_is_recorded(node)) // filtered or already recorded
     return;
-  }
 
   set_recorded(node);
-  if (unlikely(node_identifier(node).machine_id != prov_machine_id)) {
+  if (unlikely(node_identifier(node).machine_id != prov_machine_id))
     node_identifier(node).machine_id = prov_machine_id;
-  }
   prov_write(node);
 }
 
@@ -111,7 +108,7 @@ static inline void __record_relation(uint64_t type,
   copy_node_info(&relation->relation_info.rcv, to);
   if (file != NULL) {
     relation->relation_info.set = FILE_INFO_SET;
-	relation->relation_info.offset = file->f_pos;
+    relation->relation_info.offset = file->f_pos;
   }
   prov_write(relation);
 }
@@ -121,22 +118,16 @@ static inline void __update_version(uint64_t type, prov_msg_t *prov)
   prov_msg_t old_prov;
   prov_msg_t relation;
 
-  if (filter_update_node(type, prov)) { // the relation is filtered out
-    goto out;
-  }
-
+  if (filter_update_node(type, prov))
+    return;
   memset(&relation, 0, sizeof(prov_msg_t));
   memcpy(&old_prov, prov, sizeof(prov_msg_t));
   node_identifier(prov).version++;
   clear_recorded(prov);
-  if (node_identifier(prov).type == ACT_TASK) {
+  if (node_identifier(prov).type == ACT_TASK)
     __record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-  } else{
+  else
     __record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-  }
-
-out:
-  return;
 }
 
 static inline void __propagate(uint64_t type,
@@ -145,26 +136,18 @@ static inline void __propagate(uint64_t type,
 			    prov_msg_t *relation,
 			    uint8_t allowed){
 
-  if (!provenance_does_propagate(from)) {
-    goto out;
-  }
-
-  if (filter_propagate_node(to)) {
-    goto out;
-  }
-
-  if (filter_propagate_relation(type, allowed)) { // is it filtered
-    goto out;
-  }
-
+  if (!provenance_does_propagate(from))
+    return;
+  if (filter_propagate_node(to))
+    return;
+  if (filter_propagate_relation(type, allowed)) // is it filtered
+    return;
   set_tracked(to);// receiving node become tracked
   set_propagate(to); // continue to propagate
   if (!prov_bloom_empty(prov_taint(from))) {
     prov_bloom_merge(prov_taint(to), prov_taint(from));
     prov_bloom_merge(prov_taint(relation), prov_taint(from));
   }
-out:
-  return;
 }
 
 static inline void record_relation(uint64_t type,
@@ -174,13 +157,10 @@ static inline void record_relation(uint64_t type,
 				    struct file *file){
   prov_msg_t relation;
 
-  if (!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all) {
+  if (!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all)
     return;
-  }
-  if (!should_record_relation(type, from, to, allowed)) {
+  if (!should_record_relation(type, from, to, allowed))
     return;
-  }
-
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(from);
   __propagate(type, from, to, &relation, allowed);
@@ -196,9 +176,8 @@ static inline void flow_to_activity(uint64_t type,
 				    uint8_t allowed,
 				    struct file *file){
   record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
-  if (should_record_relation(type, prov_msg(from), prov_msg(to), allowed)) {
+  if (should_record_relation(type, prov_msg(from), prov_msg(to), allowed))
     to->updt_mmap = 1;
-  }
 }
 
 static inline void flow_from_activity(uint64_t type,
