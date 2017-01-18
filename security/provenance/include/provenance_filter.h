@@ -29,28 +29,21 @@ extern uint64_t prov_propagate_node_filter;
 /* return either or not the node should be filtered out */
 static inline bool __filter_node(uint64_t filter, const prov_msg_t *node)
 {
-  if (!prov_enabled) {
+  if (!prov_enabled)
     return true;
-  }
-
-  if (provenance_is_opaque(node)) {
+  if (provenance_is_opaque(node))
     return true;
-  }
-
   // we hit an element of the black list ignore
-  if (HIT_FILTER(filter, node_identifier(node).type)) {
+  if (HIT_FILTER(filter, node_identifier(node).type))
     return true;
-  }
-
   return false;
 }
 
 #define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS)|SUBTYPE(RL_VERSION)|SUBTYPE(RL_NAMED))
 static inline bool filter_update_node(uint64_t relation_type, prov_msg_t *to)
 {
-  if (HIT_FILTER(relation_type, UPDATE_FILTER)) { // not update if relation is of above type
+  if (HIT_FILTER(relation_type, UPDATE_FILTER)) // not update if relation is of above type
     return true;
-  }
   return false;
 }
 
@@ -60,38 +53,26 @@ extern uint64_t prov_propagate_relation_filter;
 /* return either or not the relation should be filtered out */
 static inline bool filter_relation(uint64_t type, uint8_t allowed)
 {
-  if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED)) {
+  if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED))
     return true;
-  }
-
-  if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_relation_filter, RL_ALLOWED)) {
+  if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_relation_filter, RL_ALLOWED))
     return true;
-  }
-
   // we hit an element of the black list ignore
-  if (HIT_FILTER(prov_relation_filter, type)) {
+  if (HIT_FILTER(prov_relation_filter, type))
     return true;
-  }
-
   return false;
 }
 
 /* return either or not tracking should propagate */
 static inline bool filter_propagate_relation(uint64_t type, uint8_t allowed)
 {
-  if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_DISALLOWED)) {
+  if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_DISALLOWED))
     return true;
-  }
-
-  if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_ALLOWED)) {
+  if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_ALLOWED))
     return true;
-  }
-
   // the relation does not allow tracking propagation
-  if (HIT_FILTER(prov_propagate_relation_filter, type)) {
+  if (HIT_FILTER(prov_propagate_relation_filter, type))
     return true;
-  }
-
   return false;
 }
 

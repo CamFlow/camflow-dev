@@ -27,10 +27,6 @@
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
   struct provenance *iprov = SOCK_INODE(sock)->i_provenance;
-
-  if (iprov == NULL) {
-    return NULL;
-  }
   return iprov;
 }
 
@@ -38,9 +34,8 @@ static inline struct provenance *sk_inode_provenance(struct sock *sk)
 {
   struct socket *sock = sk->sk_socket;
 
-  if (sock == NULL) {
+  if (sock == NULL)
     return NULL;
-  }
   return socket_inode_provenance(sock);
 }
 
@@ -60,14 +55,12 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
 
   offset = skb_network_offset(skb);
   ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph); // we obtain the ip header
-  if (ih == NULL) {
+  if (ih == NULL)
     return -EINVAL;
-  }
 
   ihlen = ih->ihl*4; // header size
-  if (ihlen < sizeof(_iph)) {
+  if (ihlen < sizeof(_iph))
     return -EINVAL;
-  }
 
   memset(prov, 0, sizeof(prov_msg_t));
   id = &packet_identifier(prov); // we are going fo fill this
@@ -126,9 +119,8 @@ static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters *filters, uint32_t i
 
   list_for_each_entry(tmp, &(filters->list), list) {
     if ((tmp->filter.mask&ip) == (tmp->filter.mask&tmp->filter.ip)) { // ip match filter
-      if (tmp->filter.port == 0 || tmp->filter.port == port) { // any port or match
-	return tmp->filter.op;
-      }
+      if (tmp->filter.port == 0 || tmp->filter.port == port) // any port or match
+	       return tmp->filter.op;
     }
   }
   return 0; // do nothing
@@ -175,25 +167,18 @@ static inline void record_pck_to_inode(prov_msg_t *pck, prov_msg_t *inode)
 {
   prov_msg_t relation;
 
-  if (unlikely(pck == NULL || inode == NULL)) { // should not occur
+  if (unlikely(pck == NULL || inode == NULL)) // should not occur
     return;
-  }
-
-  if (!provenance_is_tracked(inode) && !prov_all) {
-    goto out;
-  }
-
-  if (!should_record_relation(RL_RCV_PACKET, pck, inode, FLOW_ALLOWED)) {
+  if (!provenance_is_tracked(inode) && !prov_all)
     return;
-  }
+  if (!should_record_relation(RL_RCV_PACKET, pck, inode, FLOW_ALLOWED))
+    return;
   memset(&relation, 0, sizeof(prov_msg_t));
   prov_write(pck);
   __record_node(inode);
   __update_version(RL_RCV_PACKET, inode);
   __record_node(inode);
   __record_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-out:
-  return;
 }
 
 // outgoing packet
@@ -201,23 +186,16 @@ static inline void record_inode_to_pck(prov_msg_t *inode, prov_msg_t *pck)
 {
   prov_msg_t relation;
 
-  if (unlikely(pck == NULL || inode == NULL)) { // should not occur
+  if (unlikely(pck == NULL || inode == NULL)) // should not occur
     return;
-  }
-
-  if (!provenance_is_tracked(inode) && !prov_all) {
-    goto out;
-  }
-
-  if (!should_record_relation(RL_SND_PACKET, inode, pck, FLOW_ALLOWED)) {
+  if (!provenance_is_tracked(inode) && !prov_all)
     return;
-  }
+  if (!should_record_relation(RL_SND_PACKET, inode, pck, FLOW_ALLOWED))
+    return;
   memset(&relation, 0, sizeof(prov_msg_t));
   __record_node(inode);
   prov_write(pck);
   __record_relation(RL_SND_PACKET, &(inode->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-out:
-  return;
 }
 
 #endif

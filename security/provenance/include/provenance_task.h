@@ -56,11 +56,9 @@ static inline void current_update_shst(struct provenance *cprov)
   vm_flags_t flags;
   struct provenance *mmprov;
 
-	if (!mm) {
+	if (!mm)
     return;
-  }
 	cprov->has_mmap = 0;
-	//while(!down_read_trylock(&mm->mmap_sem)); // we do not want to sleep
 	vma = mm->mmap;
 	while (vma) { // we go through mmaped files
     mmapf = vma->vm_file;
@@ -70,18 +68,15 @@ static inline void current_update_shst(struct provenance *cprov)
 			if (mmprov) {
 				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
-				if (vm_read_exec_mayshare(flags)) {
-	  record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
-				}
-	if (vm_write_mayshare(flags)) {
-	  record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
-	}
+				if (vm_read_exec_mayshare(flags))
+	  			record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
+				if (vm_write_mayshare(flags))
+	  			record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
 				spin_unlock(prov_lock(mmprov));
       }
     }
     vma = vma->vm_next;
   }
-	//up_read(&mm->mmap_sem);
 	mmput_async(mm);
 }
 
@@ -93,24 +88,19 @@ static inline void refresh_current_provenance(void)
 	uint8_t op;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (unlikely(prov_msg(prov)->task_info.pid == 0)) {
+	if (unlikely(prov_msg(prov)->task_info.pid == 0))
 		prov_msg(prov)->task_info.pid = task_pid_nr(current);
-	}
-	if (unlikely(prov_msg(prov)->task_info.vpid == 0)) {
+	if (unlikely(prov_msg(prov)->task_info.vpid == 0))
 		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
-	}
-	if (unlikely(prov_msg(prov)->task_info.cid != cid)) {
+	if (unlikely(prov_msg(prov)->task_info.cid != cid))
 		prov_msg(prov)->task_info.cid = cid;
-	}
 	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
 	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->task_info.secid);
 	if (unlikely(op != 0)) {
-		if ((op & PROV_SEC_TRACKED) != 0) {
+		if ((op & PROV_SEC_TRACKED) != 0)
 			set_tracked(prov_msg(prov));
-		}
-		if ((op & PROV_SEC_PROPAGATE) != 0) {
+		if ((op & PROV_SEC_PROPAGATE) != 0)
 			set_propagate(prov_msg(prov));
-		}
 	}
 	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
@@ -123,17 +113,14 @@ static inline void refresh_current_provenance(void)
 static inline struct provenance *prov_from_vpid(pid_t pid)
 {
 	struct provenance *tprov;
-
 	struct task_struct *dest = find_task_by_vpid(pid);
 
-	if (!dest) {
+	if (!dest)
     return NULL;
-	}
 
 	tprov = __task_cred(dest)->provenance;
-	if (!tprov) {
+	if (!tprov)
 		return NULL;
-	}
 	return tprov;
 }
 

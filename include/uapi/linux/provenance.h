@@ -45,9 +45,8 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val){
 static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES]){
     uint8_t i;
     for(i=0; i<PROV_N_BYTES; i++){
-        if((super[i]&set[i]) != set[i]){
+        if((super[i]&set[i]) != set[i])
             return false;
-        }
     }
     return true;
 }
@@ -72,9 +71,8 @@ static inline void prov_bloom_merge(uint8_t dest[PROV_N_BYTES], const uint8_t sr
 static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES]){
   uint8_t i;
   for(i=0; i<PROV_N_BYTES; i++){
-      if( bloom[i] != 0 ){
+      if( bloom[i] != 0 )
           return false;
-      }
   }
   return true;
 }

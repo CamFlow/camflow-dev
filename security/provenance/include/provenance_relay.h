@@ -49,12 +49,10 @@ static inline void prov_write(prov_msg_t *msg)
     if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
       memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(prov_msg_t));
       boot_buffer->nb_entry++;
-    } else{
+    } else
       printk(KERN_ERR "Provenance: boot buffer is full.\n");
-    }
-  } else{
+  } else
     relay_write(prov_chan, msg, sizeof(prov_msg_t));
-  }
   spin_unlock_irqrestore(&prov_chan_lock, flags);
 }
 
@@ -72,12 +70,10 @@ static inline void long_prov_write(long_prov_msg_t *msg)
   if (unlikely(long_prov_chan == NULL)) {
     if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE)) {
       memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(long_prov_msg_t));
-    } else{
+    } else
       printk(KERN_ERR "Provenance: long boot buffer is full.\n");
-    }
-  } else{
+  } else
     relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
-  }
   spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 }
 
