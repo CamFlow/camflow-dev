@@ -19,51 +19,51 @@
 
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
-  struct provenance *cprov = current_provenance();
-  struct provenance *iprov = NULL;
-  prov_msg_t pckprov;
+	struct provenance *cprov = current_provenance();
+	struct provenance *iprov = NULL;
+	prov_msg_t pckprov;
 
-  if (cprov == NULL)
-    return NF_ACCEPT;
+	if (cprov == NULL)
+		return NF_ACCEPT;
 
-  if (provenance_is_tracked(prov_msg(cprov))) {
-    iprov = sk_inode_provenance(skb->sk);
-    if (iprov == NULL)
-      return NF_ACCEPT;
-    provenance_parse_skb_ipv4(skb, &pckprov);
-    record_inode_to_pck(prov_msg(iprov), &pckprov);
-  }
-  return NF_ACCEPT;
+	if (provenance_is_tracked(prov_msg(cprov))) {
+		iprov = sk_inode_provenance(skb->sk);
+		if (iprov == NULL)
+			return NF_ACCEPT;
+		provenance_parse_skb_ipv4(skb, &pckprov);
+		record_inode_to_pck(prov_msg(iprov), &pckprov);
+	}
+	return NF_ACCEPT;
 }
 
 static unsigned int provenance_ipv4_out(void *priv,
 					struct sk_buff *skb,
 					const struct nf_hook_state *state)
 {
-  return __ipv4_out(skb);
+	return __ipv4_out(skb);
 }
 
 static struct nf_hook_ops provenance_nf_ops[] = {
-  {
-    .hook = provenance_ipv4_out,
-    .pf = NFPROTO_IPV4,
-    .hooknum = NF_INET_LOCAL_OUT,
-    .priority = NF_IP_PRI_LAST,
-  },
+	{
+		.hook = provenance_ipv4_out,
+		.pf = NFPROTO_IPV4,
+		.hooknum = NF_INET_LOCAL_OUT,
+		.priority = NF_IP_PRI_LAST,
+	},
 };
 
 // will initialise the hooks
 static int __init provenance_nf_init(void)
 {
-  int err;
+	int err;
 
-  err = nf_register_hooks(provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
-  if (err)
-    panic("Provenance: nf_register_hooks: error %d\n", err);
+	err = nf_register_hooks(provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
+	if (err)
+		panic("Provenance: nf_register_hooks: error %d\n", err);
 
-  printk(KERN_INFO "Provenance netfilter ready.\n");
+	printk(KERN_INFO "Provenance netfilter ready.\n");
 
-  return 0;
+	return 0;
 }
 module_init(provenance_nf_init);
 #endif
