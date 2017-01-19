@@ -22,9 +22,11 @@ extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 extern struct kmem_cache *long_provenance_cache;
 
-static long_prov_msg_t *alloc_long_provenance(uint64_t ntype, gfp_t gfp)
+static long_prov_msg_t *alloc_long_provenance(uint64_t ntype)
 {
-	long_prov_msg_t *tmp = kmem_cache_zalloc(long_provenance_cache, gfp);
+	long_prov_msg_t *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+	if(!tmp)
+		return NULL;
 
 	prov_type(tmp) = ntype;
 	node_identifier(tmp).id = prov_next_node_id();
@@ -58,12 +60,13 @@ static inline void __long_record_relation(uint64_t type, long_prov_msg_t *from, 
 
 static inline int prov_print(const char *fmt, ...)
 {
-	long_prov_msg_t *msg = alloc_long_provenance(ENT_STR, GFP_KERNEL); // revert back to cache if causes performance issue
+	long_prov_msg_t *msg = alloc_long_provenance(ENT_STR); // revert back to cache if causes performance issue
 	int length;
 	va_list args;
 
+	if(!msg)
+		return 0;
 	va_start(args, fmt);
-
 	msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
 	long_prov_write(msg);
 	va_end(args);
@@ -76,7 +79,11 @@ static inline void __record_node_name(struct provenance *node, char *name)
 {
 	long_prov_msg_t *fname_prov;
 
-	fname_prov = alloc_long_provenance(ENT_FILE_NAME, GFP_KERNEL);
+	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
+	if(!fname_prov){
+		printk(KERN_ERR "Provenance: recod name failed to allocate memory\n");
+		return;
+	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strlen(fname_prov->file_name_info.name);
 	if (prov_type(prov_msg(node)) == ACT_TASK) {
@@ -100,7 +107,12 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
-	buffer = kzalloc(PATH_MAX, GFP_NOFS);
+	// should not sleep
+	buffer = kmalloc_array(PATH_MAX, sizeof(char), GFP_ATOMIC);
+	if(!buffer){
+		printk(KERN_ERR "Provenance: could not allocate memory\n");
+		return;
+	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
 	__record_node_name(prov, ptr);
 	kfree(buffer);
@@ -138,7 +150,13 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
-		buffer = kzalloc(PATH_MAX, GFP_KERNEL);
+		// should not sleep
+		buffer = kmalloc_array(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		if(!buffer){
+			printk(KERN_ERR "Provenance: could not allocate memory\n");
+			fput(exe_file);
+			goto out;
+		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
 		__record_node_name(prov, ptr);
@@ -154,7 +172,9 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
-	addr_info = alloc_long_provenance(ENT_ADDR, GFP_KERNEL);
+	addr_info = alloc_long_provenance(ENT_ADDR);
+	if(!addr_info)
+		return;
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
 	__long_record_relation(RL_NAMED, addr_info, prov_msg(prov), FLOW_ALLOWED);
@@ -171,9 +191,11 @@ static inline void record_write_xattr(uint64_t type,
 				      int flags,
 				      uint8_t allowed)
 {
-	long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
+	long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR);
 	prov_msg_t relation;
 
+	if(!xattr)
+		return;
 	memset(&relation, 0, sizeof(prov_msg_t));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
@@ -196,9 +218,11 @@ static inline void record_write_xattr(uint64_t type,
 
 static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_t *iprov, const char *name, uint8_t allowed)
 {
-	long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR, GFP_KERNEL);
+	long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR);
 	prov_msg_t relation;
 
+	if(xattr)
+		return;
 	memset(&relation, 0, sizeof(prov_msg_t));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';

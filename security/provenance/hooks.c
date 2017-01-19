@@ -212,7 +212,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		return 0;
 	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
-	iprov = inode_provenance(inode);
+	iprov = inode->i_provenance;
 	if (iprov == NULL)
 		return -ENOMEM;
 
