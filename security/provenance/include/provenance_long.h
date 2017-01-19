@@ -23,7 +23,7 @@ extern uint32_t prov_boot_id;
 
 static long_prov_msg_t *alloc_long_provenance(uint64_t ntype, gfp_t priority)
 {
-  long_prov_msg_t *tmp = (long_prov_msg_t *)kzalloc(sizeof(long_prov_msg_t), priority);
+  long_prov_msg_t *tmp = kzalloc(sizeof(long_prov_msg_t), priority);
 
   prov_type(tmp) = ntype;
   node_identifier(tmp).id = prov_next_node_id();
@@ -98,7 +98,7 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 	char *ptr;
   if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
-  buffer = (char *)kzalloc(PATH_MAX, GFP_NOFS);
+  buffer = kzalloc(PATH_MAX, GFP_NOFS);
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
 	__record_node_name(prov, ptr);
 	kfree(buffer);
@@ -137,7 +137,7 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
-		buffer = (char *)kzalloc(PATH_MAX, GFP_KERNEL);
+		buffer = kzalloc(PATH_MAX, GFP_KERNEL);
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
 		__record_node_name(prov, ptr);

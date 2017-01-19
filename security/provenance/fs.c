@@ -172,7 +172,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = (long_prov_msg_t *)kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL); // revert back to cache if causes performance issue
+	node = kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
 		count = -ENOMEM;
 		goto out;
@@ -528,7 +528,7 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 	if (count < sizeof(struct prov_ipv4_filter))
 		return -ENOMEM;
 
-	f = (struct ipv4_filters *)kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
+	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if (copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
 		return -EAGAIN;
 	f->filter.ip = f->filter.ip&f->filter.mask;
@@ -617,7 +617,7 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
 
-	s = (struct secctx_filters *)kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
+	s = kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
 	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
 		return -EAGAIN;
 
