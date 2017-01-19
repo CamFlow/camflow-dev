@@ -43,7 +43,7 @@ static inline uint32_t current_cid(void)
 #define vm_write(flags)   ((flags & VM_WRITE) == VM_WRITE)
 #define vm_read(flags)    ((flags & VM_READ) == VM_READ)
 #define vm_exec(flags)    ((flags & VM_EXEC) == VM_EXEC)
-#define vm_mayshare(flags) ((flags & (VM_SHARED|VM_MAYSHARE)) != 0)
+#define vm_mayshare(flags) ((flags & (VM_SHARED | VM_MAYSHARE)) != 0)
 #define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
@@ -51,32 +51,32 @@ static inline uint32_t current_cid(void)
 static inline void current_update_shst(struct provenance *cprov)
 {
 	struct mm_struct *mm = get_task_mm(current);
-  struct vm_area_struct *vma;
-  struct file *mmapf;
-  vm_flags_t flags;
-  struct provenance *mmprov;
+	struct vm_area_struct *vma;
+	struct file *mmapf;
+	vm_flags_t flags;
+	struct provenance *mmprov;
 
 	if (!mm)
-    return;
+		return;
 	cprov->has_mmap = 0;
 	vma = mm->mmap;
 	while (vma) { // we go through mmaped files
-    mmapf = vma->vm_file;
-    if (mmapf) {
-      flags = vma->vm_flags;
-      mmprov = file_inode(mmapf)->i_provenance;
+		mmapf = vma->vm_file;
+		if (mmapf) {
+			flags = vma->vm_flags;
+			mmprov = file_inode(mmapf)->i_provenance;
 			if (mmprov) {
 				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
-	  			record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
+					record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
 				if (vm_write_mayshare(flags))
-	  			record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
+					record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
 				spin_unlock(prov_lock(mmprov));
-      }
-    }
-    vma = vma->vm_next;
-  }
+			}
+		}
+		vma = vma->vm_next;
+	}
 	mmput_async(mm);
 }
 
@@ -116,7 +116,7 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
 	struct task_struct *dest = find_task_by_vpid(pid);
 
 	if (!dest)
-    return NULL;
+		return NULL;
 
 	tprov = __task_cred(dest)->provenance;
 	if (!tprov)
@@ -131,41 +131,41 @@ static inline struct provenance *get_current_provenance(void)
 }
 
 /*
-static inline void current_config_from_file(struct task_struct *task){
-	const struct cred *cred = get_task_cred(task);
-	struct mm_struct *mm;
-	struct file *exe_file;
-	struct inode *inode;
-	prov_msg_t* tprov;
-	prov_msg_t* iprov;
+   static inline void current_config_from_file(struct task_struct *task){
+        const struct cred *cred = get_task_cred(task);
+        struct mm_struct *mm;
+        struct file *exe_file;
+        struct inode *inode;
+        prov_msg_t* tprov;
+        prov_msg_t* iprov;
 
-	if(!cred)
-		return;
+        if(!cred)
+                return;
 
-	tprov = cred->provenance;
+        tprov = cred->provenance;
 
-	mm = get_task_mm(task);
-	if (!mm)
-		goto finished;
-	exe_file = get_mm_exe_file(mm);
-	mmput(mm);
+        mm = get_task_mm(task);
+        if (!mm)
+                goto finished;
+        exe_file = get_mm_exe_file(mm);
+        mmput(mm);
 
-	if(exe_file){
-		inode = file_inode(exe_file);
-		iprov = inode_provenance(inode);
-		if(provenance_is_tracked(iprov)){
-			set_tracked(tprov);
-		}
-		if(provenance_is_opaque(iprov)){
-			set_opaque(tprov);
-		}
-		if(provenance_does_propagate(iprov)){
-			set_propagate(tprov);
-		}
-	}
+        if(exe_file){
+                inode = file_inode(exe_file);
+                iprov = inode_provenance(inode);
+                if(provenance_is_tracked(iprov)){
+                        set_tracked(tprov);
+                }
+                if(provenance_is_opaque(iprov)){
+                        set_opaque(tprov);
+                }
+                if(provenance_does_propagate(iprov)){
+                        set_propagate(tprov);
+                }
+        }
 
-finished:
-	put_cred(cred);
-}
-*/
+   finished:
+        put_cred(cred);
+   }
+ */
 #endif
