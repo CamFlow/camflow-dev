@@ -1262,10 +1262,10 @@ void __init provenance_add_hooks(void)
   cred_init_provenance();
 
 	/* init relay buffers, to deal with provenance before FS is ready */
-	boot_buffer = (struct prov_boot_buffer *)kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
+	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
 	if (unlikely(boot_buffer == NULL))
 		panic("Provenance: could not allocate boot_buffer.");
-	long_boot_buffer = (struct prov_long_boot_buffer *)kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
+	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
 	if (unlikely(long_boot_buffer == NULL))
 		panic("Provenance: could not allocate long_boot_buffer.");
 
