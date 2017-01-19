@@ -62,37 +62,29 @@ DEFINE_SPINLOCK(long_prov_chan_lock);
 
 static void write_boot_buffer(void)
 {
-	if (likely(boot_buffer != NULL && prov_chan != NULL)) {
-		if (boot_buffer->nb_entry > 0)
-			relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(prov_msg_t));
-		kfree(boot_buffer);
-		boot_buffer = NULL;
-	} else
-		printk(KERN_ERR "Provenance: boot buffer was not allocated\n");
+	if (boot_buffer->nb_entry > 0)
+		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(prov_msg_t));
+	kfree(boot_buffer);
+	boot_buffer = NULL;
 
-	if (likely(long_boot_buffer != NULL && long_prov_chan != NULL)) {
-		if (long_boot_buffer->nb_entry > 0)
-			relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(long_prov_msg_t));
-		kfree(long_boot_buffer);
-		long_boot_buffer = NULL;
-	} else
-		printk(KERN_ERR "Provenance: long boot buffer was not allocated\n");
+	if (long_boot_buffer->nb_entry > 0)
+		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(long_prov_msg_t));
+	kfree(long_boot_buffer);
+	long_boot_buffer = NULL;
 }
+
+bool relay_ready;
 
 static int __init relay_prov_init(void)
 {
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (prov_chan == NULL) {
-		printk(KERN_ERR "Provenance: relay_open failure\n");
-		return 0;
-	}
+	if (prov_chan == NULL)
+		panic("Provenance: relay_open failure\n");
 
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (long_prov_chan == NULL) {
-		printk(KERN_ERR "Provenance: relay_open failure\n");
-		return 0;
-	}
-
+	if (long_prov_chan == NULL)
+		panic("Provenance: relay_open failure\n");
+	relay_ready=true;
 	// relay buffer are ready, we can write down the boot buffer
 	write_boot_buffer();
 

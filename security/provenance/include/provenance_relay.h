@@ -25,6 +25,8 @@
 #define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
 #define PROV_INITIAL_LONG_BUFF_SIZE 256
 
+extern bool relay_ready;
+
 struct prov_boot_buffer {
 	prov_msg_t buffer[PROV_INITIAL_BUFF_SIZE];
 	uint32_t nb_entry;
@@ -45,7 +47,7 @@ static inline void prov_write(prov_msg_t *msg)
 
 	spin_lock_irqsave(&prov_chan_lock, flags);
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(prov_chan == NULL)) {
+	if (unlikely(!relay_ready)) {
 		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
 			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(prov_msg_t));
 			boot_buffer->nb_entry++;
@@ -67,7 +69,7 @@ static inline void long_prov_write(long_prov_msg_t *msg)
 
 	spin_lock_irqsave(&long_prov_chan_lock, flags);
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(long_prov_chan == NULL)) {
+	if (unlikely(!relay_ready)) {
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
 			memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(long_prov_msg_t));
 		else
