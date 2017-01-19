@@ -1261,8 +1261,6 @@ void __init provenance_add_hooks(void)
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);
-	cred_init_provenance();
-
 	/* init relay buffers, to deal with provenance before FS is ready */
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
 	if (unlikely(boot_buffer == NULL))
@@ -1271,9 +1269,10 @@ void __init provenance_add_hooks(void)
 	if (unlikely(long_boot_buffer == NULL))
 		panic("Provenance: could not allocate long_boot_buffer.");
 
+	relay_ready=false;
+	cred_init_provenance();
 	/* register the provenance security hooks */
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
-
 	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
 	printk(KERN_INFO "Provenance hooks ready.\n");
 }
