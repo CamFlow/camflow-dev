@@ -75,7 +75,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char*)get_zeroed_page(GFP_KERNEL);
+	page = (char *)get_zeroed_page(GFP_KERNEL);
 	if (!page)
 		return -ENOMEM;
 
@@ -126,7 +126,7 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t*)buf;
+	uint32_t *tmp = (uint32_t *)buf;
 
 	// ideally should be decoupled from set machine id
 	__init_opaque();
@@ -189,7 +189,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if (copy_to_user((void*)buf, &node, count)) {
+	if (copy_to_user((void *)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
@@ -271,7 +271,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
-	prov_msg_t *tmp = (prov_msg_t*)buf;
+	prov_msg_t *tmp = (prov_msg_t *)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
@@ -296,7 +296,7 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_filter))
 		return -ENOMEM;
 
-	setting = (struct prov_filter*)buf;
+	setting = (struct prov_filter *)buf;
 
 	if (setting->add != 0)
 		(*filter) |= setting->filter & setting->mask;
@@ -375,7 +375,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_file_config))
 		return -EINVAL;
 
-	msg = (struct prov_file_config*)buf;
+	msg = (struct prov_file_config *)buf;
 
 	in = file_name_to_inode(msg->name);
 	if (!in) {
@@ -424,7 +424,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_file_config))
 		return -EINVAL;
 
-	msg = (struct prov_file_config*)buf;
+	msg = (struct prov_file_config *)buf;
 	in = file_name_to_inode(msg->name);
 	if (!in) {
 		printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
@@ -455,7 +455,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config*)buf;
+	msg = (struct prov_process_config *)buf;
 
 	setting = &(msg->prov);
 	op = msg->op;
@@ -503,7 +503,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config*)buf;
+	msg = (struct prov_process_config *)buf;
 
 	prov = prov_from_vpid(msg->vpid);
 	if (prov == NULL)
@@ -590,7 +590,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
-	data = (struct secinfo*)buf;
+	data = (struct secinfo *)buf;
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)

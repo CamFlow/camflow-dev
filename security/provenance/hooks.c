@@ -32,7 +32,7 @@
  */
 static void cred_init_provenance(void)
 {
-	struct cred *cred = (struct cred*)current->real_cred;
+	struct cred *cred = (struct cred *)current->real_cred;
 	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 
 	if (!prov)
@@ -397,7 +397,6 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-	return;
 }
 
 /*
@@ -841,7 +840,7 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 
 	/* should we start tracking this socket */
 	if (address->sa_family == AF_INET) {
-		ipv4_addr = (struct sockaddr_in*)address;
+		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_NET_TRACKED) != 0) {
 			set_tracked(prov_msg(iprov));
@@ -883,7 +882,7 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 
 	/* should we start tracking this socket */
 	if (address->sa_family == AF_INET) {
-		ipv4_addr = (struct sockaddr_in*)address;
+		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_NET_TRACKED) != 0) {
 			set_tracked(prov_msg(iprov));
@@ -1125,7 +1124,6 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 	flow_to_activity(RL_EXEC, iprov, nprov, FLOW_ALLOWED, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
-	return;
 }
 
 /*
