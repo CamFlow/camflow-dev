@@ -19,6 +19,8 @@
 ### v0.2.0
 
 ```
+- Improve stability.
+- Add a makefile entry to run standard Linux kernel test on CamFlow.
 - Handle shared state in provenance graph.
 - Fix cases of ID overlap.
 - Writing nodes or relation from user space requires capability: CAP_AUDIT_WRITE

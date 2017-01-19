@@ -77,7 +77,8 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> /tmp/checkpatch.txt
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> /tmp/checkpatch.txt
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
-
+	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
+	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
 
 patch:
 	cd build && mkdir -p pristine
