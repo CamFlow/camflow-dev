@@ -32,7 +32,7 @@ remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc
  called in provenance_inode_permission.
 - Identify containers via "cid" (current_cid() << (current->nsproxy->cgroup_ns->ns.inum)).
 - Use the correct relation type for relationships between packets and sockets.
-- Update to kernel version 4.9.2.
+- Update to kernel version 4.9.4.
 ```
 
 ### v0.1.11
