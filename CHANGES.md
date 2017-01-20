@@ -175,6 +175,7 @@ remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc
 * generalise access denial recording.
 * look at some form of automated testing.
 * support for Raspberry Pi / ARM.
+* refactor userspace API.
 
 ### 0.3.X
 
