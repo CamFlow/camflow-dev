@@ -20,11 +20,10 @@
 
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
-extern struct kmem_cache *long_provenance_cache;
 
 static long_prov_msg_t *alloc_long_provenance(uint64_t ntype)
 {
-	long_prov_msg_t *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+	long_prov_msg_t *tmp = kzalloc(sizeof(long_prov_msg_t), GFP_ATOMIC);
 	if(!tmp)
 		return NULL;
 
@@ -71,7 +70,7 @@ static inline int prov_print(const char *fmt, ...)
 	long_prov_write(msg);
 	va_end(args);
 	length = msg->str_info.length;
-	kmem_cache_free(long_provenance_cache, msg);
+	kfree(msg);
 	return length;
 }
 
@@ -97,7 +96,7 @@ static inline void __record_node_name(struct provenance *node, char *name)
 		set_name_recorded(prov_msg(node));
 		spin_unlock(prov_lock(node));
 	}
-	kmem_cache_free(long_provenance_cache, fname_prov);
+	kfree(fname_prov);
 }
 
 static inline void record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
@@ -178,7 +177,7 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
 	__long_record_relation(RL_NAMED, addr_info, prov_msg(prov), FLOW_ALLOWED);
-	kmem_cache_free(long_provenance_cache, addr_info);
+	kfree(addr_info);
 	set_name_recorded(prov_msg(prov));
 }
 
@@ -213,7 +212,7 @@ static inline void record_write_xattr(uint64_t type,
 	__record_relation(type, &(cprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
 	__update_version(type, iprov);
 	__long_record_relation(type, xattr, iprov, allowed);
-	kmem_cache_free(long_provenance_cache, xattr);
+	kfree(xattr);
 }
 
 static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_t *iprov, const char *name, uint8_t allowed)
@@ -230,6 +229,6 @@ static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_
 	__record_relation(type, &(iprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
 	__update_version(type, cprov);
 	__long_record_relation(type, xattr, cprov, allowed);
-	kmem_cache_free(long_provenance_cache, xattr);
+	kfree(xattr);
 }
 #endif
