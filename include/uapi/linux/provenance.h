@@ -101,6 +101,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
+#define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -416,8 +417,8 @@ struct prov_filter {
 	uint8_t add;
 };
 
-#define PROV_SET_TRACKED                  0x01
-#define PROV_SET_OPAQUE           0x02
+#define PROV_SET_TRACKED      0x01
+#define PROV_SET_OPAQUE       0x02
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
 
@@ -438,8 +439,8 @@ struct prov_process_config {
 	uint32_t vpid;
 };
 
-#define PROV_NET_TRACKED                  0x01
-#define PROV_NET_OPAQUE           0x02
+#define PROV_NET_TRACKED      0x01
+#define PROV_NET_OPAQUE       0x02
 #define PROV_NET_PROPAGATE    0x04
 #define PROV_NET_TAINT        0x08
 #define PROV_NET_RECORD       0x10
@@ -453,8 +454,8 @@ struct prov_ipv4_filter {
 	uint64_t taint;
 };
 
-#define PROV_SEC_TRACKED                  0x01
-#define PROV_SEC_OPAQUE           0x02
+#define PROV_SEC_TRACKED      0x01
+#define PROV_SEC_OPAQUE       0x02
 #define PROV_SEC_PROPAGATE    0x04
 #define PROV_SEC_TAINT        0x08
 #define PROV_SEC_DELETE       0x10 // to actually delete a filter from the list
@@ -463,6 +464,18 @@ struct secinfo {
 	uint32_t secid;
 	char secctx[PATH_MAX];
 	uint32_t len;
+	uint8_t op;
+	uint64_t taint;
+};
+
+#define PROV_CGROUP_TRACKED      0x01
+#define PROV_CGROUP_OPAQUE       0x02
+#define PROV_CGROUP_PROPAGATE    0x04
+#define PROV_CGROUP_TAINT        0x08
+#define PROV_CGROUP_DELETE       0x10 // to actually delete a filter from the list
+
+struct cgroupinfo {
+	uint32_t cid;
 	uint8_t op;
 	uint64_t taint;
 };

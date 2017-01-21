@@ -26,6 +26,7 @@
 #include "provenance_task.h"
 #include "provenance_long.h"
 #include "provenance_secctx.h"
+#include "provenance_cgroup.h"
 
 /*
  * initialise the security for the init task
@@ -1242,6 +1243,7 @@ struct prov_long_boot_buffer    *long_boot_buffer;
 struct ipv4_filters ingress_ipv4filters;
 struct ipv4_filters egress_ipv4filters;
 struct secctx_filters secctx_filters;
+struct cgroup_filters cgroup_filters;
 bool prov_enabled;
 bool prov_all;
 
@@ -1250,6 +1252,7 @@ void __init provenance_add_hooks(void)
 	INIT_LIST_HEAD(&ingress_ipv4filters.list);
 	INIT_LIST_HEAD(&egress_ipv4filters.list);
 	INIT_LIST_HEAD(&secctx_filters.list);
+	INIT_LIST_HEAD(&cgroup_filters.list);
 	prov_enabled = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
 	prov_all = true;

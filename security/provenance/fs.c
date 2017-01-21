@@ -17,6 +17,7 @@
 #include "provenance_inode.h"
 #include "provenance_task.h"
 #include "provenance_secctx.h"
+#include "provenance_cgroup.h"
 
 #define TMPBUFLEN       12
 
@@ -57,6 +58,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
 	provenance_mark_as_opaque(PROV_SECCTX);
 	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
+	provenance_mark_as_opaque(PROV_CGROUP_FILTER);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -154,7 +156,6 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 
 	return count;
 }
-
 declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_machine_id);
 
 static ssize_t prov_write_node(struct file *file, const char __user *buf,
@@ -199,7 +200,6 @@ out:
 		kfree(node);
 	return count;
 }
-
 declare_file_operations(prov_node_ops, prov_write_node, no_read);
 
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
@@ -219,7 +219,6 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 	prov_write(&relation);
 	return count;
 }
-
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
@@ -282,7 +281,6 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
 }
-
 declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
 
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
@@ -357,7 +355,6 @@ static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 	prov_flush();
 	return 0;
 }
-
 declare_file_operations(prov_flush_ops, prov_write_flush, no_read);
 
 static ssize_t prov_write_file(struct file *file, const char __user *buf,
@@ -438,7 +435,6 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 	spin_unlock(prov_lock(prov));
 	return rtn;
 }
-
 declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);
 
 static ssize_t prov_write_process(struct file *file, const char __user *buf,
@@ -515,7 +511,6 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	spin_unlock(prov_lock(prov));
 	return rtn;
 }
-
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
 static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
@@ -608,7 +603,6 @@ out:
 	security_release_secctx(ctx, len); // security module dealloc
 	return rtn;
 }
-
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
 static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
@@ -650,15 +644,51 @@ static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
 	}
 	return pos;
 }
-
 declare_file_operations(prov_secctx_filter_ops, prov_write_secctx_filter, prov_read_secctx_filter);
+
+static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *buf,
+					size_t count, loff_t *ppos)
+{
+	struct cgroup_filters *s;
+
+	if (count < sizeof(struct cgroupinfo))
+		return -ENOMEM;
+
+	s = kzalloc(sizeof(struct cgroup_filters), GFP_KERNEL);
+	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
+		return -EAGAIN;
+	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
+		prov_cgroup_add_or_update(&cgroup_filters, s);
+	else
+		prov_cgroup_delete(&cgroup_filters, s);
+	return 0;
+}
+
+static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
+				       size_t count, loff_t *ppos)
+{
+	struct cgroup_filters *tmp;
+	size_t pos = 0;
+
+	if (count < sizeof(struct cgroupinfo))
+		return -ENOMEM;
+
+	list_for_each_entry(tmp, &(cgroup_filters.list), list) {
+		if (count < pos + sizeof(struct cgroupinfo))
+			return -ENOMEM;
+
+		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct cgroupinfo)))
+			return -EAGAIN;
+		pos += sizeof(struct cgroupinfo);
+	}
+	return pos;
+}
+declare_file_operations(prov_cgroup_filter_ops, prov_write_cgroup_filter, prov_read_cgroup_filter);
 
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
-
 	prov_dir = securityfs_create_dir("provenance", NULL);
-
 	securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
 	securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
 	securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
@@ -676,9 +706,8 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
 	securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
 	securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
-
+	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
 	printk(KERN_INFO "Provenance fs ready.\n");
-
 	return 0;
 }
 
