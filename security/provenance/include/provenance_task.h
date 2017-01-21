@@ -19,6 +19,7 @@
 
 #include "provenance_long.h"
 #include "provenance_secctx.h"
+#include "provenance_cgroup.h"
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
@@ -100,6 +101,13 @@ static inline void refresh_current_provenance(void)
 		if ((op & PROV_SEC_TRACKED) != 0)
 			set_tracked(prov_msg(prov));
 		if ((op & PROV_SEC_PROPAGATE) != 0)
+			set_propagate(prov_msg(prov));
+	}
+	op = prov_cgroup_whichOP(&cgroup_filters, prov_msg(prov)->task_info.cid);
+	if (unlikely(op != 0)) {
+		if ((op & PROV_CGROUP_TRACKED) != 0)
+			set_tracked(prov_msg(prov));
+		if ((op & PROV_CGROUP_PROPAGATE) != 0)
 			set_propagate(prov_msg(prov));
 	}
 	if (prov->updt_mmap && prov->has_mmap) {
