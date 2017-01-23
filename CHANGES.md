@@ -27,6 +27,7 @@
 - Replaced check for user 0, by check for capability CAP_AUDIT_CONTROL.
 - Can target based on secctx.
 - Can target based on cgroup.
+- Can now record IP packets content.
 - Record inode and task secid and secctx (from "major" LSM).
 - Code cleanup.
 - Support for IFC on a temporary hold (manpower and priority reason), code
