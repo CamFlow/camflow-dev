@@ -155,7 +155,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters *filters, stru
 		if (tmp->filter.mask == f->filter.mask &&
 		    tmp->filter.ip == f->filter.ip &&
 		    tmp->filter.port == f->filter.port) {
-			tmp->filter.op = f->filter.op;
+			tmp->filter.op |= f->filter.op;
 			return 0; // you should only get one
 		}
 	}
