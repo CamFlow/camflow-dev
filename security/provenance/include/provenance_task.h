@@ -1,15 +1,15 @@
 /*
-*
-* Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
-*
-* Copyright (C) 2016 Harvard University
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License version 2, as
-* published by the Free Software Foundation; either version 2 of the License, or
-*	(at your option) any later version.
-*
-*/
+ *
+ * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
+ *
+ * Copyright (C) 2016 Harvard University
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2, as
+ * published by the Free Software Foundation; either version 2 of the License, or
+ *	(at your option) any later version.
+ *
+ */
 #ifndef CONFIG_SECURITY_PROVENANCE_TASK
 #define CONFIG_SECURITY_PROVENANCE_TASK
 
@@ -17,83 +17,163 @@
 #include <linux/binfmts.h>
 #include <linux/sched.h>
 
-#include "provenance_long.h" // for record_task_name
+#include "provenance_long.h"
+#include "provenance_secctx.h"
+#include "provenance_cgroup.h"
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)
+static inline uint32_t current_cid(void)
+{
+	uint32_t cid = 0;
+	struct cgroup_namespace *cns;
 
-static inline prov_msg_t* task_provenance( void ){
-	prov_msg_t* tprov = current_provenance();
-	lock_node(tprov);
-	if(unlikely(tprov->task_info.pid == 0)){
-		tprov->task_info.pid = task_pid_nr(current);
+	task_lock(current);
+	if (current->nsproxy != NULL) {
+		cns = current->nsproxy->cgroup_ns;
+		if (cns != NULL) {
+			get_cgroup_ns(cns);
+			cid = cns->ns.inum;
+			put_cgroup_ns(cns);
+		}
 	}
-	if(unlikely(tprov->task_info.vpid == 0)){
-		tprov->task_info.vpid = task_pid_vnr(current);
-	}
-	if( provenance_is_recorded(tprov) ){ // the node has been recorded we need its name
-		record_task_name(current, tprov);
-	}
-	return tprov;
+	task_unlock(current);
+	return cid;
 }
 
-static inline prov_msg_t* prov_from_vpid(pid_t pid){
-	prov_msg_t* tprov;
+#define vm_write(flags)   ((flags & VM_WRITE) == VM_WRITE)
+#define vm_read(flags)    ((flags & VM_READ) == VM_READ)
+#define vm_exec(flags)    ((flags & VM_EXEC) == VM_EXEC)
+#define vm_mayshare(flags) ((flags & (VM_SHARED | VM_MAYSHARE)) != 0)
+#define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
+#define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
-	struct task_struct *dest = find_task_by_vpid(pid);
-	if(!dest){
-    return NULL;
+
+static inline void current_update_shst(struct provenance *cprov)
+{
+	struct mm_struct *mm = get_task_mm(current);
+	struct vm_area_struct *vma;
+	struct file *mmapf;
+	vm_flags_t flags;
+	struct provenance *mmprov;
+
+	if (!mm)
+		return;
+	cprov->has_mmap = 0;
+	vma = mm->mmap;
+	while (vma) { // we go through mmaped files
+		mmapf = vma->vm_file;
+		if (mmapf) {
+			flags = vma->vm_flags;
+			mmprov = file_inode(mmapf)->i_provenance;
+			if (mmprov) {
+				cprov->has_mmap = 1;
+				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
+				if (vm_read_exec_mayshare(flags))
+					record_relation(RL_SH_READ, prov_msg(mmprov), prov_msg(cprov), FLOW_ALLOWED, NULL);
+				if (vm_write_mayshare(flags))
+					record_relation(RL_SH_WRITE, prov_msg(cprov), prov_msg(mmprov), FLOW_ALLOWED, NULL);
+				spin_unlock(prov_lock(mmprov));
+			}
+		}
+		vma = vma->vm_next;
 	}
+	mmput_async(mm);
+}
+
+
+static inline void refresh_current_provenance(void)
+{
+	struct provenance *prov = current_provenance();
+	uint32_t cid = current_cid();
+	uint8_t op;
+
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
+	if (unlikely(prov_msg(prov)->task_info.pid == 0))
+		prov_msg(prov)->task_info.pid = task_pid_nr(current);
+	if (unlikely(prov_msg(prov)->task_info.vpid == 0))
+		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
+	if (unlikely(prov_msg(prov)->task_info.cid != cid))
+		prov_msg(prov)->task_info.cid = cid;
+	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
+	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->task_info.secid);
+	if (unlikely(op != 0)) {
+		if ((op & PROV_SEC_TRACKED) != 0)
+			set_tracked(prov_msg(prov));
+		if ((op & PROV_SEC_PROPAGATE) != 0)
+			set_propagate(prov_msg(prov));
+	}
+	op = prov_cgroup_whichOP(&cgroup_filters, prov_msg(prov)->task_info.cid);
+	if (unlikely(op != 0)) {
+		if ((op & PROV_CGROUP_TRACKED) != 0)
+			set_tracked(prov_msg(prov));
+		if ((op & PROV_CGROUP_PROPAGATE) != 0)
+			set_propagate(prov_msg(prov));
+	}
+	if (prov->updt_mmap && prov->has_mmap) {
+		current_update_shst(prov);
+		prov->updt_mmap = 0;
+	}
+	spin_unlock(prov_lock(prov));
+	record_task_name(current, prov);
+}
+
+static inline struct provenance *prov_from_vpid(pid_t pid)
+{
+	struct provenance *tprov;
+	struct task_struct *dest = find_task_by_vpid(pid);
+
+	if (!dest)
+		return NULL;
 
 	tprov = __task_cred(dest)->provenance;
-	if(!tprov){
+	if (!tprov)
 		return NULL;
-	}
-	lock_node(tprov);
 	return tprov;
 }
 
-static inline prov_msg_t* bprm_provenance( struct linux_binprm *bprm ){
-	prov_msg_t* prov = bprm->cred->provenance;
-	lock_node(prov);
-	return prov;
+static inline struct provenance *get_current_provenance(void)
+{
+	refresh_current_provenance();
+	return current_provenance();
 }
 
-static inline void task_config_from_file(struct task_struct *task){
-	const struct cred *cred = get_task_cred(task);
-	struct mm_struct *mm;
- 	struct file *exe_file;
-	struct inode *inode;
-	prov_msg_t* tprov;
-	prov_msg_t* iprov;
+/*
+   static inline void current_config_from_file(struct task_struct *task){
+        const struct cred *cred = get_task_cred(task);
+        struct mm_struct *mm;
+        struct file *exe_file;
+        struct inode *inode;
+        prov_msg_t* tprov;
+        prov_msg_t* iprov;
 
-	if(!cred)
-		return;
+        if(!cred)
+                return;
 
-	tprov = cred->provenance;
+        tprov = cred->provenance;
 
-	mm = get_task_mm(task);
-	if (!mm)
- 		goto finished;
-	exe_file = get_mm_exe_file(mm);
-	mmput(mm);
+        mm = get_task_mm(task);
+        if (!mm)
+                goto finished;
+        exe_file = get_mm_exe_file(mm);
+        mmput(mm);
 
-	if(exe_file){
-		inode = file_inode(exe_file);
-		iprov = inode_provenance(inode);
-		if(provenance_is_tracked(iprov)){
-			set_tracked(tprov);
-		}
-		if(provenance_is_opaque(iprov)){
-			set_opaque(tprov);
-		}
-		if(provenance_does_propagate(iprov)){
-			set_propagate(tprov);
-		}
-		put_prov(iprov);
-	}
+        if(exe_file){
+                inode = file_inode(exe_file);
+                iprov = inode_provenance(inode);
+                if(provenance_is_tracked(iprov)){
+                        set_tracked(tprov);
+                }
+                if(provenance_is_opaque(iprov)){
+                        set_opaque(tprov);
+                }
+                if(provenance_does_propagate(iprov)){
+                        set_propagate(tprov);
+                }
+        }
 
-finished:
-	put_cred(cred);
-}
+   finished:
+        put_cred(cred);
+   }
+ */
 #endif

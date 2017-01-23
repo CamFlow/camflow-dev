@@ -1,5 +1,5 @@
-kernel-version=4.4.36
-lsm-version=0.1.11
+kernel-version=4.9.5
+lsm-version=0.2.0
 arch=x86_64
 
 all: config compile
@@ -10,19 +10,18 @@ prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xvJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
 
-
 prepare_us:
 	mkdir -p build
 	cd ./build && git clone https://github.com/CamFlow/camflow-provenance-lib.git
 	cd ./build/camflow-provenance-lib && $(MAKE) prepare
-	cd ./build && git clone https://github.com/CamFlow/camflow-ifc-lib.git
-	cd ./build/camflow-ifc-lib && $(MAKE) prepare
 	cd ./build && git clone https://github.com/CamFlow/camflow-config.git
 	cd ./build/camflow-config && $(MAKE) prepare
 
-config:
+copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
 	cd ./build/linux-$(kernel-version) && cp -r ../../include .
+
+config: copy_change
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
@@ -31,20 +30,16 @@ config:
 
 compile: compile_security compile_kernel compile_us
 
-compile_security:
-	cd ./build/linux-$(kernel-version) && cp -r ../../security .
-	cd ./build/linux-$(kernel-version) && cp -r ../../include .
+compile_security: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) security
 
-compile_kernel:
+compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 	cd ./build/camflow-provenance-lib && $(MAKE) clean
 	cd ./build/camflow-provenance-lib && $(MAKE) all
-	cd ./build/camflow-ifc-lib && $(MAKE) clean
-	cd ./build/camflow-ifc-lib && $(MAKE) all
 
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -57,7 +52,6 @@ install_kernel:
 
 install_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) install
-	cd ./build/camflow-ifc-lib && $(MAKE) install
 	cd ./build/camflow-config && $(MAKE) all
 	cd ./build/camflow-config && $(MAKE) install
 
@@ -69,8 +63,22 @@ clean_kernel:
 
 clean_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) clean
-	cd ./build/camflow-ifc-lib && $(MAKE) clean
 	cd ./build/camflow-config && $(MAKE) clean
+
+delete_kernel:
+	cd ./build && rm -rf ./linux-$(kernel-version)
+	cd ./build && rm -f ./linux-$(kernel-version).tar.xz
+
+test: copy_change
+	@echo "Running sparse, result in /tmp/sparse.txt"
+	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
+	@echo "Running checkpatch, result in /tmp/checkpatch.txt"
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/*.c > /tmp/checkpatch.txt
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> /tmp/checkpatch.txt
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> /tmp/checkpatch.txt
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
+	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
+	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
 
 patch:
 	cd build && mkdir -p pristine
