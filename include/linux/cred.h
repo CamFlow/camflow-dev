@@ -26,15 +26,10 @@ struct inode;
 /*
  * COW Supplementary groups list
  */
-#define NGROUPS_SMALL		32
-#define NGROUPS_PER_BLOCK	((unsigned int)(PAGE_SIZE / sizeof(kgid_t)))
-
 struct group_info {
 	atomic_t	usage;
 	int		ngroups;
-	int		nblocks;
-	kgid_t		small_block[NGROUPS_SMALL];
-	kgid_t		*blocks[0];
+	kgid_t		gid[0];
 };
 
 /**
@@ -87,10 +82,6 @@ extern int set_current_groups(struct group_info *);
 extern void set_groups(struct cred *, struct group_info *);
 extern int groups_search(const struct group_info *, kgid_t);
 extern bool may_setgroups(void);
-
-/* access the groups "array" with this macro */
-#define GROUP_AT(gi, i) \
-	((gi)->blocks[(i) / NGROUPS_PER_BLOCK][(i) % NGROUPS_PER_BLOCK])
 
 /*
  * The security context of a task
@@ -148,12 +139,9 @@ struct cred {
 #endif
 #ifdef CONFIG_SECURITY
 	void		*security;	/* subjective LSM security */
-#endif
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void 		*provenance; /* subjective LSM provenance */
 #endif
-#ifdef CONFIG_SECURITY_IFC
-	void 		*ifc; /* subjective LSM ifc */
 #endif
 	struct user_struct *user;	/* real user ID subscription */
 	struct user_namespace *user_ns; /* user_ns the caps and keyrings are relative to. */
@@ -379,13 +367,15 @@ static inline void put_cred(const struct cred *_cred)
 #define current_user()		(current_cred_xxx(user))
 #define current_security()	(current_cred_xxx(security))
 #define current_provenance()	(current_cred_xxx(provenance))
-#define current_ifc()	(current_cred_xxx(ifc))
 
 extern struct user_namespace init_user_ns;
 #ifdef CONFIG_USER_NS
 #define current_user_ns()	(current_cred_xxx(user_ns))
 #else
-#define current_user_ns()	(&init_user_ns)
+static inline struct user_namespace *current_user_ns(void)
+{
+	return &init_user_ns;
+}
 #endif
 
 

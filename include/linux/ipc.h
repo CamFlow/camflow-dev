@@ -24,9 +24,6 @@ struct kern_ipc_perm
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void		*provenance;
 #endif
-#ifdef CONFIG_SECURITY_IFC
-	void		*ifc;
-#endif
 };
 
 #endif /* _LINUX_IPC_H */
