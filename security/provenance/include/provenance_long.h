@@ -231,4 +231,17 @@ static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_
 	__long_record_relation(type, xattr, cprov, allowed);
 	kfree(xattr);
 }
+
+static inline void record_packet_content(prov_msg_t *pck, const struct sk_buff *skb)
+{
+	long_prov_msg_t *cnt = alloc_long_provenance(ENT_PCKCNT);
+	cnt->pckcnt_info.length=skb_end_offset(skb);
+	if(cnt->pckcnt_info.length > PATH_MAX){
+		cnt->pckcnt_info.truncated=PROV_TRUNCATED;
+		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
+	}else
+		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
+	__long_record_node(cnt);
+	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+}
 #endif

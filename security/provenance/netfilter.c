@@ -32,6 +32,8 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 			return NF_ACCEPT;
 		provenance_parse_skb_ipv4(skb, &pckprov);
 		record_inode_to_pck(prov_msg(iprov), &pckprov);
+		if(provenance_records_packet(prov_msg(iprov)))
+			record_packet_content(&pckprov, skb);
 	}
 	return NF_ACCEPT;
 }

@@ -851,8 +851,9 @@ static int provenance_socket_bind(struct socket *sock, struct sockaddr *address,
 			set_propagate(prov_msg(iprov));
 			set_propagate(prov_msg(cprov));
 		}
+		if ((op & PROV_NET_RECORD) != 0)
+			set_record_packet(prov_msg(iprov));
 	}
-
 	provenance_record_address(address, addrlen, iprov);
 	flow_from_activity(RL_BIND, cprov, iprov, FLOW_ALLOWED, NULL);
 	return 0;
@@ -893,9 +894,9 @@ static int provenance_socket_connect(struct socket *sock, struct sockaddr *addre
 			set_propagate(prov_msg(iprov));
 			set_propagate(prov_msg(cprov));
 		}
+		if ((op & PROV_NET_RECORD) != 0)
+			set_record_packet(prov_msg(iprov));
 	}
-
-
 	provenance_record_address(address, addrlen, iprov);
 	flow_from_activity(RL_CONNECT, cprov, iprov, FLOW_ALLOWED, NULL);
 out:
@@ -1023,6 +1024,8 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 
 		if (provenance_is_tracked(prov_msg(cprov)))
 			flow_to_activity(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
+		if(provenance_records_packet(prov_msg(iprov)))
+			record_packet_content(&pckprov, skb);
 	}
 	return 0;
 }

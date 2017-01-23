@@ -200,6 +200,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
 #define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
+#define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -279,6 +280,11 @@ typedef union prov_identifier {
 #define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
 #define provenance_does_propagate(node)     prov_check_flag(node, PROPAGATE_BIT)
+
+#define RECORD_PACKET_BIT 5
+#define set_record_packet(node)							prov_set_flag(node, RECORD_PACKET_BIT)
+#define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
+#define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
 #define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 
@@ -384,6 +390,14 @@ struct address_struct {
 	size_t length;
 };
 
+#define PROV_TRUNCATED 1
+struct pckcnt_struct {
+	basic_elements;
+	uint8_t content[PATH_MAX];
+	size_t length;
+	uint8_t truncated;
+};
+
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
@@ -407,6 +421,7 @@ typedef union long_msg {
 	struct str_struct str_info;
 	struct file_name_struct file_name_info;
 	struct address_struct address_info;
+	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
 } long_prov_msg_t;
