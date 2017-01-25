@@ -381,7 +381,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	}
 	op = msg->op;
 	setting = &msg->prov;
-	prov = inode_provenance(in);
+	prov = in->i_provenance;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
@@ -428,7 +428,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 		return -EINVAL;
 	}
 
-	prov = inode_provenance(in);
+	prov = in->i_provenance;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
 	if (copy_to_user(&msg->prov, prov, sizeof(prov_msg_t)))
 		rtn = -ENOMEM;
