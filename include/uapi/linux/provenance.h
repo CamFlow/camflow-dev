@@ -102,6 +102,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
 #define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
+#define PROV_LOG_FILE                  				"/sys/kernel/security/provenance/log"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -167,11 +168,12 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define RL_GETXATTR           (RL_USED      | 0x0000000080000000ULL)
 #define RL_LSTXATTR           (RL_USED      | 0x0000000100000000ULL)
 #define RL_NAMED_PROCESS      (RL_USED      | 0x0000000200000000ULL)
+#define RL_SAID								(RL_USED      | 0x0000000400000000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000000400000000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000800000000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000001000000000ULL)
-#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000002000000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000000800000000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000001000000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000002000000000ULL)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000004000000000ULL)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
