@@ -61,6 +61,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
 	provenance_mark_as_opaque(PROV_CGROUP_FILTER);
 	provenance_mark_as_opaque(PROV_LOG_FILE);
+	provenance_mark_as_opaque(PROV_LOGP_FILE);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -699,6 +700,19 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_log_ops, prov_write_log, no_read);
 
+static ssize_t prov_write_logp(struct file *file, const char __user *buf,
+					size_t count, loff_t *ppos)
+{
+	struct provenance *cprov = current_provenance();
+
+	if (count <= 0 || count >= PATH_MAX)
+		return 0;
+	set_tracked(prov_msg(cprov));
+	set_propagate(prov_msg(cprov));
+	return record_log(prov_msg(cprov), buf, count);
+}
+declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
+
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
@@ -722,6 +736,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
 	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
+	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
 	printk(KERN_INFO "Provenance fs ready.\n");
 	return 0;
 }
