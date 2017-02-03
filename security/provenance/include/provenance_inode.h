@@ -76,13 +76,14 @@ static inline void provenance_mark_as_opaque(const char *name)
 	}
 }
 
-static inline struct provenance *inode_provenance(struct inode *inode)
+static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
 	uint8_t op;
 
 	record_inode_name(inode, prov);
-	record_inode_type(inode->i_mode, prov);
+	if(unlikely(prov_type(prov_msg(prov))==ENT_INODE_UNKNOWN))
+		record_inode_type(inode->i_mode, prov);
 	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
@@ -93,7 +94,6 @@ static inline struct provenance *inode_provenance(struct inode *inode)
 		if ((op & PROV_SEC_PROPAGATE) != 0)
 			set_propagate(prov_msg(prov));
 	}
-	return prov;
 }
 
 static inline struct provenance *dentry_provenance(struct dentry *dentry)
@@ -102,7 +102,7 @@ static inline struct provenance *dentry_provenance(struct dentry *dentry)
 
 	if (inode == NULL)
 		return NULL;
-	return inode_provenance(inode);
+	return inode->i_provenance;
 }
 
 static inline struct provenance *file_provenance(struct file *file)
@@ -111,7 +111,7 @@ static inline struct provenance *file_provenance(struct file *file)
 
 	if (inode == NULL)
 		return NULL;
-	return inode_provenance(inode);
+	return inode->i_provenance;
 }
 
 static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cprov)

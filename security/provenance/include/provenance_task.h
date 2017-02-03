@@ -93,8 +93,7 @@ static inline void refresh_current_provenance(void)
 		prov_msg(prov)->task_info.pid = task_pid_nr(current);
 	if (unlikely(prov_msg(prov)->task_info.vpid == 0))
 		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
-	if (unlikely(prov_msg(prov)->task_info.cid != cid))
-		prov_msg(prov)->task_info.cid = cid;
+	prov_msg(prov)->task_info.cid = cid;
 	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
 	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->task_info.secid);
 	if (unlikely(op != 0)) {
@@ -131,49 +130,4 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
 		return NULL;
 	return tprov;
 }
-
-static inline struct provenance *get_current_provenance(void)
-{
-	refresh_current_provenance();
-	return current_provenance();
-}
-
-/*
-   static inline void current_config_from_file(struct task_struct *task){
-        const struct cred *cred = get_task_cred(task);
-        struct mm_struct *mm;
-        struct file *exe_file;
-        struct inode *inode;
-        prov_msg_t* tprov;
-        prov_msg_t* iprov;
-
-        if(!cred)
-                return;
-
-        tprov = cred->provenance;
-
-        mm = get_task_mm(task);
-        if (!mm)
-                goto finished;
-        exe_file = get_mm_exe_file(mm);
-        mmput(mm);
-
-        if(exe_file){
-                inode = file_inode(exe_file);
-                iprov = inode_provenance(inode);
-                if(provenance_is_tracked(iprov)){
-                        set_tracked(tprov);
-                }
-                if(provenance_is_opaque(iprov)){
-                        set_opaque(tprov);
-                }
-                if(provenance_does_propagate(iprov)){
-                        set_propagate(tprov);
-                }
-        }
-
-   finished:
-        put_cred(cred);
-   }
- */
 #endif
