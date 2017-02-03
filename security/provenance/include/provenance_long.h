@@ -57,23 +57,6 @@ static inline void __long_record_relation(uint64_t type, long_prov_msg_t *from, 
 	__record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
 }
 
-static inline int prov_print(const char *fmt, ...)
-{
-	long_prov_msg_t *msg = alloc_long_provenance(ENT_STR); // revert back to cache if causes performance issue
-	int length;
-	va_list args;
-
-	if(!msg)
-		return 0;
-	va_start(args, fmt);
-	msg->str_info.length = vscnprintf(msg->str_info.str, 4096, fmt, args);
-	long_prov_write(msg);
-	va_end(args);
-	length = msg->str_info.length;
-	kfree(msg);
-	return length;
-}
-
 static inline void __record_node_name(struct provenance *node, char *name)
 {
 	long_prov_msg_t *fname_prov;
@@ -243,5 +226,20 @@ static inline void record_packet_content(prov_msg_t *pck, const struct sk_buff *
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
 	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+}
+
+static inline int record_log(prov_msg_t *cprov, const char __user *buf, size_t count){
+	long_prov_msg_t *str;
+
+	str = alloc_long_provenance(ENT_STR);
+	if(!str)
+		return -ENOMEM;
+	if (copy_from_user(str->str_info.str, buf, count))
+		return -EAGAIN;
+	str->str_info.str[count]='\0'; // make sure the string is null terminated
+	str->str_info.length=count;
+	__long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
+	kfree(str);
+	return count;
 }
 #endif
