@@ -85,9 +85,12 @@ static inline void current_update_shst(struct provenance *cprov)
 static inline void refresh_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
-	uint32_t cid = current_cid();
-	uint8_t op;
-
+	uint32_t cid;
+	// will not be recorded
+	if( provenance_is_opaque(prov_msg(prov)) )
+		return;
+	cid = current_cid();
+	record_task_name(current, prov);
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if (unlikely(prov_msg(prov)->task_info.pid == 0))
 		prov_msg(prov)->task_info.pid = task_pid_nr(current);
@@ -95,26 +98,11 @@ static inline void refresh_current_provenance(void)
 		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
 	prov_msg(prov)->task_info.cid = cid;
 	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
-	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->task_info.secid);
-	if (unlikely(op != 0)) {
-		if ((op & PROV_SEC_TRACKED) != 0)
-			set_tracked(prov_msg(prov));
-		if ((op & PROV_SEC_PROPAGATE) != 0)
-			set_propagate(prov_msg(prov));
-	}
-	op = prov_cgroup_whichOP(&cgroup_filters, prov_msg(prov)->task_info.cid);
-	if (unlikely(op != 0)) {
-		if ((op & PROV_CGROUP_TRACKED) != 0)
-			set_tracked(prov_msg(prov));
-		if ((op & PROV_CGROUP_PROPAGATE) != 0)
-			set_propagate(prov_msg(prov));
-	}
 	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
 		prov->updt_mmap = 0;
 	}
 	spin_unlock(prov_lock(prov));
-	record_task_name(current, prov);
 }
 
 static inline struct provenance *prov_from_vpid(pid_t pid)

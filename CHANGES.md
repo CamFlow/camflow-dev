@@ -21,6 +21,7 @@
 ### v0.2.2
 
 ```
+- change how certain target are applied internally.
 - application can be integrated to provenance by writing to a pseudo file.
 - Update to kernel version 4.9.8.
 ```
