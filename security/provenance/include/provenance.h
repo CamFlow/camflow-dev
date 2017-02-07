@@ -137,7 +137,6 @@ static inline void __propagate(uint64_t type,
 			       prov_msg_t *relation,
 			       uint8_t allowed)
 {
-
 	if (!provenance_does_propagate(from))
 		return;
 	if (filter_propagate_node(to))
@@ -159,6 +158,10 @@ static inline void record_relation(uint64_t type,
 				   struct file *file)
 {
 	prov_msg_t relation;
+
+	// check if the nodes match some capture options
+	apply_target(from);
+	apply_target(to);
 
 	if (!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all)
 		return;

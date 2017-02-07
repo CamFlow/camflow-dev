@@ -79,7 +79,10 @@ static inline void provenance_mark_as_opaque(const char *name)
 static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
-	uint8_t op;
+
+	// will not be recorded
+	if( provenance_is_opaque(prov_msg(prov)) )
+		return;
 
 	record_inode_name(inode, prov);
 	if(unlikely(prov_type(prov_msg(prov))==ENT_INODE_UNKNOWN))
@@ -87,13 +90,6 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
-	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->inode_info.secid);
-	if (unlikely(op != 0)) {
-		if ((op & PROV_SEC_TRACKED) != 0)
-			set_tracked(prov_msg(prov));
-		if ((op & PROV_SEC_PROPAGATE) != 0)
-			set_propagate(prov_msg(prov));
-	}
 }
 
 static inline struct provenance *dentry_provenance(struct dentry *dentry)
