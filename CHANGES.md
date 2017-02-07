@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.2.2           | 4.9.6          | N/A				|
+| 0.2.2           | 4.9.8          | N/A				|
 | 0.2.1           | 4.9.5          | 03/02/2017	|
 | 0.2.0           | 4.9.5          | 23/01/2017 |
 | 0.1.11          | 4.4.36         | 05/12/2016 |
@@ -22,7 +22,7 @@
 
 ```
 - application can be integrated to provenance by writing to a pseudo file.
-- Update to kernel version 4.9.6.
+- Update to kernel version 4.9.8.
 ```
 
 ### v0.2.1
