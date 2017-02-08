@@ -21,7 +21,7 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = NULL;
-	prov_msg_t pckprov;
+	union prov_msg pckprov;
 
 	if (cprov == NULL)
 		return NF_ACCEPT;

@@ -249,12 +249,12 @@ struct packet_identifier {
 
 #define PROV_IDENTIFIER_BUFFER_LENGTH sizeof(struct node_identifier)
 
-typedef union prov_identifier {
+union prov_identifier {
 	struct node_identifier node_id;
 	struct relation_identifier relation_id;
 	struct packet_identifier packet_id;
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
-} prov_identifier_t;
+};
 
 #define prov_set_flag(node, nbit) prov_flag(node) |= 1 << nbit
 #define prov_clear_flag(node, nbit) prov_flag(node) &= ~(1 << nbit)
@@ -290,7 +290,7 @@ typedef union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies;uint32_t secid;uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies;uint32_t secid;uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
@@ -301,8 +301,8 @@ struct msg_struct {
 struct relation_struct {
 	basic_elements;
 	uint8_t allowed;
-	prov_identifier_t snd;
-	prov_identifier_t rcv;
+	union prov_identifier snd;
+	union prov_identifier rcv;
 	uint8_t set;
 	int64_t offset;
 };
@@ -361,7 +361,7 @@ struct pck_struct {
 	uint16_t length;
 };
 
-typedef union prov_msg {
+union prov_msg {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
@@ -372,7 +372,7 @@ typedef union prov_msg {
 	struct sb_struct sb_info;
 	struct pck_struct pck_info;
 	struct iattr_prov_struct iattr_info;
-} prov_msg_t;
+};
 
 struct str_struct {
 	basic_elements;
@@ -414,10 +414,10 @@ struct disc_node_struct {
 	basic_elements;
 	size_t length;
 	char content[PATH_MAX];
-	prov_identifier_t parent;
+	union prov_identifier parent;
 };
 
-typedef union long_msg {
+union long_prov_msg {
 	struct msg_struct msg_info;
 	struct node_struct node_info;
 	struct str_struct str_info;
@@ -426,7 +426,7 @@ typedef union long_msg {
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
-} long_prov_msg_t;
+};
 
 struct prov_filter {
 	uint64_t filter;
@@ -441,17 +441,17 @@ struct prov_filter {
 
 struct prov_file_config {
 	char name[PATH_MAX];
-	prov_msg_t prov;
+	union prov_msg prov;
 	uint8_t op;
 };
 
 struct prov_self_config {
-	prov_msg_t prov;
+	union prov_msg prov;
 	uint8_t op;
 };
 
 struct prov_process_config {
-	prov_msg_t prov;
+	union prov_msg prov;
 	uint8_t op;
 	uint32_t vpid;
 };

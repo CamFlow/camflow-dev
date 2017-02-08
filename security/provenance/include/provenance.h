@@ -45,7 +45,7 @@ enum {
 };
 
 struct provenance {
-	prov_msg_t msg;
+	union prov_msg msg;
 	spinlock_t lock;
 	uint8_t updt_mmap;
 	uint8_t has_mmap;
@@ -77,12 +77,12 @@ static inline void free_provenance(struct provenance *prov)
 	kmem_cache_free(provenance_cache, prov);
 }
 
-static inline void copy_node_info(prov_identifier_t *dest, prov_identifier_t *src)
+static inline void copy_node_info(union prov_identifier *dest, union prov_identifier *src)
 {
-	memcpy(dest, src, sizeof(prov_identifier_t));
+	memcpy(dest, src, sizeof(union prov_identifier));
 }
 
-static inline void __record_node(prov_msg_t *node)
+static inline void __record_node(union prov_msg *node)
 {
 	if (filter_node(node) || provenance_is_recorded(node)) // filtered or already recorded
 		return;
@@ -94,9 +94,9 @@ static inline void __record_node(prov_msg_t *node)
 }
 
 static inline void __record_relation(uint64_t type,
-				     prov_identifier_t *from,
-				     prov_identifier_t *to,
-				     prov_msg_t *relation,
+				     union prov_identifier *from,
+				     union prov_identifier *to,
+				     union prov_msg *relation,
 				     uint8_t allowed,
 				     struct file *file)
 {
@@ -114,15 +114,15 @@ static inline void __record_relation(uint64_t type,
 	prov_write(relation);
 }
 
-static inline void __update_version(uint64_t type, prov_msg_t *prov)
+static inline void __update_version(uint64_t type, union prov_msg *prov)
 {
-	prov_msg_t old_prov;
-	prov_msg_t relation;
+	union prov_msg old_prov;
+	union prov_msg relation;
 
 	if (filter_update_node(type, prov))
 		return;
-	memset(&relation, 0, sizeof(prov_msg_t));
-	memcpy(&old_prov, prov, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
+	memcpy(&old_prov, prov, sizeof(union prov_msg));
 	node_identifier(prov).version++;
 	clear_recorded(prov);
 	if (node_identifier(prov).type == ACT_TASK)
@@ -132,9 +132,9 @@ static inline void __update_version(uint64_t type, prov_msg_t *prov)
 }
 
 static inline void __propagate(uint64_t type,
-			       prov_msg_t *from,
-			       prov_msg_t *to,
-			       prov_msg_t *relation,
+			       union prov_msg *from,
+			       union prov_msg *to,
+			       union prov_msg *relation,
 			       uint8_t allowed)
 {
 	if (!provenance_does_propagate(from))
@@ -152,12 +152,12 @@ static inline void __propagate(uint64_t type,
 }
 
 static inline void record_relation(uint64_t type,
-				   prov_msg_t *from,
-				   prov_msg_t *to,
+				   union prov_msg *from,
+				   union prov_msg *to,
 				   uint8_t allowed,
 				   struct file *file)
 {
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	// check if the nodes match some capture options
 	apply_target(from);
@@ -167,7 +167,7 @@ static inline void record_relation(uint64_t type,
 		return;
 	if (!should_record_relation(type, from, to, allowed))
 		return;
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(from);
 	__propagate(type, from, to, &relation, allowed);
 	__record_node(to);

@@ -21,9 +21,9 @@
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static long_prov_msg_t *alloc_long_provenance(uint64_t ntype)
+static union long_prov_msg *alloc_long_provenance(uint64_t ntype)
 {
-	long_prov_msg_t *tmp = kzalloc(sizeof(long_prov_msg_t), GFP_ATOMIC);
+	union long_prov_msg *tmp = kzalloc(sizeof(union long_prov_msg), GFP_ATOMIC);
 	if(!tmp)
 		return NULL;
 
@@ -34,7 +34,7 @@ static long_prov_msg_t *alloc_long_provenance(uint64_t ntype)
 	return tmp;
 }
 
-static inline void __long_record_node(long_prov_msg_t *node)
+static inline void __long_record_node(union long_prov_msg *node)
 {
 	if (provenance_is_recorded(node))
 		return;
@@ -42,9 +42,9 @@ static inline void __long_record_node(long_prov_msg_t *node)
 	long_prov_write(node);
 }
 
-static inline void __long_record_relation(uint64_t type, long_prov_msg_t *from, prov_msg_t *to, uint8_t allowed)
+static inline void __long_record_relation(uint64_t type, union long_prov_msg *from, union prov_msg *to, uint8_t allowed)
 {
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	if (unlikely(!prov_enabled)) // capture is not enabled, ignore
 		return;
@@ -53,13 +53,13 @@ static inline void __long_record_relation(uint64_t type, long_prov_msg_t *from, 
 		return;
 	__long_record_node(from);
 	__record_node(to);
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	__record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
 }
 
 static inline void __record_node_name(struct provenance *node, char *name)
 {
-	long_prov_msg_t *fname_prov;
+	union long_prov_msg *fname_prov;
 
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
 	if(!fname_prov){
@@ -153,7 +153,7 @@ out:
 
 static inline void provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
-	long_prov_msg_t *addr_info;
+	union long_prov_msg *addr_info;
 
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
@@ -168,20 +168,20 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 }
 
 static inline void record_write_xattr(uint64_t type,
-				      prov_msg_t *iprov,
-				      prov_msg_t *cprov,
+				      union prov_msg *iprov,
+				      union prov_msg *cprov,
 				      const char *name,
 				      const void *value,
 				      size_t size,
 				      int flags,
 				      uint8_t allowed)
 {
-	long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR);
-	prov_msg_t relation;
+	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
+	union prov_msg relation;
 
 	if(!xattr)
 		return;
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	if (value != NULL) {
@@ -201,14 +201,14 @@ static inline void record_write_xattr(uint64_t type,
 	kfree(xattr);
 }
 
-static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_t *iprov, const char *name, uint8_t allowed)
+static inline void record_read_xattr(uint64_t type, union prov_msg *cprov, union prov_msg *iprov, const char *name, uint8_t allowed)
 {
-	long_prov_msg_t *xattr = alloc_long_provenance(ENT_XATTR);
-	prov_msg_t relation;
+	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
+	union prov_msg relation;
 
 	if(xattr)
 		return;
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(iprov);
@@ -218,9 +218,9 @@ static inline void record_read_xattr(uint64_t type, prov_msg_t *cprov, prov_msg_
 	kfree(xattr);
 }
 
-static inline void record_packet_content(prov_msg_t *pck, const struct sk_buff *skb)
+static inline void record_packet_content(union prov_msg *pck, const struct sk_buff *skb)
 {
-	long_prov_msg_t *cnt = alloc_long_provenance(ENT_PCKCNT);
+	union long_prov_msg *cnt = alloc_long_provenance(ENT_PCKCNT);
 	cnt->pckcnt_info.length=skb_end_offset(skb);
 	if(cnt->pckcnt_info.length > PATH_MAX){
 		cnt->pckcnt_info.truncated=PROV_TRUNCATED;
@@ -231,8 +231,8 @@ static inline void record_packet_content(prov_msg_t *pck, const struct sk_buff *
 	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
 }
 
-static inline int record_log(prov_msg_t *cprov, const char __user *buf, size_t count){
-	long_prov_msg_t *str;
+static inline int record_log(union prov_msg *cprov, const char __user *buf, size_t count){
+	union long_prov_msg *str;
 
 	str = alloc_long_provenance(ENT_STR);
 	if(!str)

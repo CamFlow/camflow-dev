@@ -1016,7 +1016,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
 	struct provenance *cprov = sk_provenance(sk);
 	struct provenance *iprov;
-	prov_msg_t pckprov;
+	union prov_msg pckprov;
 	uint16_t family = sk->sk_family;
 
 	if (cprov == NULL)

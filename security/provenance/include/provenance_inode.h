@@ -64,7 +64,7 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 static inline void provenance_mark_as_opaque(const char *name)
 {
 	struct inode *in;
-	prov_msg_t *prov;
+	union prov_msg *prov;
 
 	in = file_name_to_inode(name);
 	if (!in)
@@ -110,11 +110,11 @@ static inline struct provenance *file_provenance(struct file *file)
 	return inode->i_provenance;
 }
 
-static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cprov)
+static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_msg *cprov)
 {
 	//used for private MMAP
 	struct provenance *prov;
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	if (unlikely(iprov == NULL || cprov == NULL)) // should not occur
 		return NULL;
@@ -129,7 +129,7 @@ static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cpro
 	memcpy(prov_msg(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	prov_msg(prov)->inode_info.mode = iprov->inode_info.mode;
 	__record_node(iprov);
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	__propagate(RL_MMAP, iprov, prov_msg(prov), &relation, FLOW_ALLOWED);
 	__record_node(prov_msg(prov));
 	__record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);

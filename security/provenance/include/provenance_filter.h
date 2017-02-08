@@ -29,7 +29,7 @@ extern uint64_t prov_propagate_node_filter;
 #define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool __filter_node(uint64_t filter, const prov_msg_t *node)
+static inline bool __filter_node(uint64_t filter, const union prov_msg *node)
 {
 	if (!prov_enabled)
 		return true;
@@ -42,7 +42,7 @@ static inline bool __filter_node(uint64_t filter, const prov_msg_t *node)
 }
 
 #define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS) | SUBTYPE(RL_VERSION) | SUBTYPE(RL_NAMED))
-static inline bool filter_update_node(uint64_t relation_type, prov_msg_t *to)
+static inline bool filter_update_node(uint64_t relation_type, union prov_msg *to)
 {
 	if (HIT_FILTER(relation_type, UPDATE_FILTER)) // not update if relation is of above type
 		return true;
@@ -78,7 +78,7 @@ static inline bool filter_propagate_relation(uint64_t type, uint8_t allowed)
 	return false;
 }
 
-static inline bool should_record_relation(uint64_t type, prov_msg_t *from, prov_msg_t *to, uint8_t allowed)
+static inline bool should_record_relation(uint64_t type, union prov_msg *from, union prov_msg *to, uint8_t allowed)
 {
 	// one of the node should not appear in the record, ignore the relation
 	if (filter_node(from) || filter_node(to))
@@ -89,7 +89,7 @@ static inline bool should_record_relation(uint64_t type, prov_msg_t *from, prov_
 	return true;
 }
 
-static inline bool prov_has_secid(prov_msg_t* prov){
+static inline bool prov_has_secid(union prov_msg* prov){
 	switch(prov_type(prov)){
 		case ENT_INODE_UNKNOWN:
 		case ENT_INODE_LINK:
@@ -105,7 +105,7 @@ static inline bool prov_has_secid(prov_msg_t* prov){
 	}
 }
 
-static inline void apply_target(prov_msg_t* prov){
+static inline void apply_target(union prov_msg* prov){
 	uint8_t op;
 	// track based on cgroup
 	if( prov_type(prov)==ACT_TASK ) {
