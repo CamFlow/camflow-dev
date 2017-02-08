@@ -28,12 +28,12 @@
 extern bool relay_ready;
 
 struct prov_boot_buffer {
-	prov_msg_t buffer[PROV_INITIAL_BUFF_SIZE];
+	union prov_msg buffer[PROV_INITIAL_BUFF_SIZE];
 	uint32_t nb_entry;
 };
 
 struct prov_long_boot_buffer {
-	long_prov_msg_t buffer[PROV_INITIAL_LONG_BUFF_SIZE];
+	union long_prov_msg buffer[PROV_INITIAL_LONG_BUFF_SIZE];
 	uint32_t nb_entry;
 };
 
@@ -41,7 +41,7 @@ extern struct prov_boot_buffer *boot_buffer;
 extern struct rchan *prov_chan;
 extern spinlock_t prov_chan_lock;
 
-static inline void prov_write(prov_msg_t *msg)
+static inline void prov_write(union prov_msg *msg)
 {
 	unsigned long flags;
 
@@ -49,12 +49,12 @@ static inline void prov_write(prov_msg_t *msg)
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
-			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(prov_msg_t));
+			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(union prov_msg));
 			boot_buffer->nb_entry++;
 		} else
 			printk(KERN_ERR "Provenance: boot buffer is full.\n");
 	} else
-		relay_write(prov_chan, msg, sizeof(prov_msg_t));
+		relay_write(prov_chan, msg, sizeof(union prov_msg));
 	spin_unlock_irqrestore(&prov_chan_lock, flags);
 }
 
@@ -63,7 +63,7 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 extern struct rchan *long_prov_chan;
 extern spinlock_t long_prov_chan_lock;
 
-static inline void long_prov_write(long_prov_msg_t *msg)
+static inline void long_prov_write(union long_prov_msg *msg)
 {
 	unsigned long flags;
 
@@ -71,11 +71,11 @@ static inline void long_prov_write(long_prov_msg_t *msg)
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
-			memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(long_prov_msg_t));
+			memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(union long_prov_msg));
 		else
 			printk(KERN_ERR "Provenance: long boot buffer is full.\n");
 	} else
-		relay_write(long_prov_chan, msg, sizeof(long_prov_msg_t));
+		relay_write(long_prov_chan, msg, sizeof(union long_prov_msg));
 	spin_unlock_irqrestore(&long_prov_chan_lock, flags);
 }
 

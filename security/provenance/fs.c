@@ -166,7 +166,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 
 {
 	struct provenance *cprov = current_provenance();
-	long_prov_msg_t *node = NULL;
+	union long_prov_msg *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -174,7 +174,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
 		count = -ENOMEM;
 		goto out;
@@ -208,7 +208,7 @@ declare_file_operations(prov_node_ops, prov_write_node, no_read);
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)
 {
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -229,7 +229,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 {
 	struct prov_self_config msg;
 	struct provenance *prov = current_provenance();
-	prov_msg_t *setting;
+	union prov_msg *setting;
 	uint8_t op;
 
 	if (count < sizeof(struct prov_self_config))
@@ -273,13 +273,13 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
-	prov_msg_t *tmp = (prov_msg_t *)buf;
+	union prov_msg *tmp = (union prov_msg *)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t)))
+	if (copy_to_user(tmp, prov_msg(cprov), sizeof(union prov_msg)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
@@ -366,7 +366,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	struct prov_file_config *msg;
 	struct inode *in;
 	struct provenance *prov;
-	prov_msg_t *setting;
+	union prov_msg *setting;
 	uint8_t op;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -433,7 +433,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 
 	prov = in->i_provenance;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if (copy_to_user(&msg->prov, prov, sizeof(prov_msg_t)))
+	if (copy_to_user(&msg->prov, prov, sizeof(union prov_msg)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
 	return rtn;
@@ -445,7 +445,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 {
 	struct prov_process_config *msg;
 	struct provenance *prov;
-	prov_msg_t *setting;
+	union prov_msg *setting;
 	uint8_t op;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -509,7 +509,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		return -EINVAL;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(prov_msg_t)))
+	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(union prov_msg)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
 	return rtn;
