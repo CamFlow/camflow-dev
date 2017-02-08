@@ -21,6 +21,8 @@
 ### v0.2.2
 
 ```
+- change anti-cycle logic to significantly reduce node numbers (edge number
+  remain constant)
 - change how certain target are applied internally.
 - application can be integrated to provenance by writing to a pseudo file.
 - Update to kernel version 4.9.8.

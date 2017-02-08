@@ -49,6 +49,7 @@ struct provenance {
 	spinlock_t lock;
 	uint8_t updt_mmap;
 	uint8_t has_mmap;
+	bool has_outgoing;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -114,21 +115,25 @@ static inline void __record_relation(uint64_t type,
 	prov_write(relation);
 }
 
-static inline void __update_version(uint64_t type, union prov_msg *prov)
+static inline void __update_version(uint64_t type, struct provenance *prov)
 {
 	union prov_msg old_prov;
 	union prov_msg relation;
 
-	if (filter_update_node(type, prov))
+	if(!prov->has_outgoing) // there is no outgoing
 		return;
+	if (filter_update_node(type, prov_msg(prov)))
+		return;
+
 	memset(&relation, 0, sizeof(union prov_msg));
-	memcpy(&old_prov, prov, sizeof(union prov_msg));
-	node_identifier(prov).version++;
-	clear_recorded(prov);
-	if (node_identifier(prov).type == ACT_TASK)
-		__record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	memcpy(&old_prov, prov_msg(prov), sizeof(union prov_msg));
+	node_identifier(prov_msg(prov)).version++;
+	clear_recorded(prov_msg(prov));
+	if (node_identifier(prov_msg(prov)).type == ACT_TASK)
+		__record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	else
-		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	prov->has_outgoing=false; // we update there is no more outgoing edge
 }
 
 static inline void __propagate(uint64_t type,
@@ -152,28 +157,29 @@ static inline void __propagate(uint64_t type,
 }
 
 static inline void record_relation(uint64_t type,
-				   union prov_msg *from,
-				   union prov_msg *to,
+				   struct provenance *from,
+				   struct provenance *to,
 				   uint8_t allowed,
 				   struct file *file)
 {
 	union prov_msg relation;
 
 	// check if the nodes match some capture options
-	apply_target(from);
-	apply_target(to);
+	apply_target(prov_msg(from));
+	apply_target(prov_msg(to));
 
-	if (!provenance_is_tracked(from) && !provenance_is_tracked(to) && !prov_all)
+	if (!provenance_is_tracked(prov_msg(from)) && !provenance_is_tracked(prov_msg(to)) && !prov_all)
 		return;
-	if (!should_record_relation(type, from, to, allowed))
+	if (!should_record_relation(type, prov_msg(from), prov_msg(to), allowed))
 		return;
 	memset(&relation, 0, sizeof(union prov_msg));
-	__record_node(from);
-	__propagate(type, from, to, &relation, allowed);
-	__record_node(to);
+	__record_node(prov_msg(from));
+	__propagate(type, prov_msg(from), prov_msg(to), &relation, allowed);
+	__record_node(prov_msg(to));
 	__update_version(type, to);
-	__record_node(to);
-	__record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, file);
+	__record_node(prov_msg(to));
+	__record_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, allowed, file);
+	from->has_outgoing=true; // there is an outgoing edge
 }
 
 static inline void flow_to_activity(uint64_t type,
@@ -182,7 +188,7 @@ static inline void flow_to_activity(uint64_t type,
 				    uint8_t allowed,
 				    struct file *file)
 {
-	record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+	record_relation(type, from, to, allowed, file);
 	if (should_record_relation(type, prov_msg(from), prov_msg(to), allowed))
 		to->updt_mmap = 1;
 }
@@ -193,7 +199,7 @@ static inline void flow_from_activity(uint64_t type,
 				      uint8_t allowed,
 				      struct file *file)
 {
-	record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+	record_relation(type, from, to, allowed, file);
 }
 
 static inline void flow_between_entities(uint64_t type,
@@ -202,7 +208,7 @@ static inline void flow_between_entities(uint64_t type,
 					 uint8_t allowed,
 					 struct file *file)
 {
-	record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+	record_relation(type, from, to, allowed, file);
 }
 
 static inline void flow_between_activities(uint64_t type,
@@ -211,7 +217,7 @@ static inline void flow_between_activities(uint64_t type,
 					   uint8_t allowed,
 					   struct file *file)
 {
-	record_relation(type, prov_msg(from), prov_msg(to), allowed, file);
+	record_relation(type, from, to, allowed, file);
 }
 
 #endif
