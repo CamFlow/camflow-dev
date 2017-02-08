@@ -86,7 +86,6 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 {
 	char *buffer;
 	char *ptr;
-
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	// should not sleep
@@ -103,7 +102,6 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 static inline void record_inode_name(struct inode *inode, struct provenance *prov)
 {
 	struct dentry *dentry;
-
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	dentry = d_find_alias(inode);
@@ -116,11 +114,11 @@ static inline void record_inode_name(struct inode *inode, struct provenance *pro
 static inline void record_task_name(struct task_struct *task, struct provenance *prov)
 {
 	const struct cred *cred;
+	struct provenance *fprov;
 	struct mm_struct *mm;
 	struct file *exe_file;
 	char *buffer;
 	char *ptr;
-
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	cred = get_task_cred(task);
@@ -132,6 +130,9 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
+		fprov = file_inode(exe_file)->i_provenance;
+		if(provenance_is_opaque(prov_msg(fprov)))
+			set_opaque(prov_msg(prov));
 		// should not sleep
 		buffer = kmalloc_array(PATH_MAX, sizeof(char), GFP_ATOMIC);
 		if(!buffer){

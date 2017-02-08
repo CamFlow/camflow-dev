@@ -155,6 +155,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 
 	inode->i_provenance = iprov;
+	refresh_inode_provenance(inode);
 	return 0;
 }
 
@@ -216,6 +217,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	iprov = inode->i_provenance;
 	if (iprov == NULL)
 		return -ENOMEM;
+	refresh_current_provenance();
 	refresh_inode_provenance(inode);
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
@@ -501,6 +503,7 @@ static int provenance_file_permission(struct file *file, int mask)
 	if (iprov == NULL)
 		return -ENOMEM;
 	refresh_current_provenance();
+	refresh_inode_provenance(inode);
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -521,8 +524,13 @@ static int provenance_file_permission(struct file *file, int mask)
 			flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, file);
 		if ((perms & (FILE__READ)) != 0)
 			flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
-		if ((perms & (FILE__EXECUTE)) != 0)
-			flow_to_activity(RL_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+		if ((perms & (FILE__EXECUTE)) != 0){
+			if (provenance_is_opaque(prov_msg(iprov))) {
+				set_opaque(prov_msg(cprov));
+			}else{
+				flow_to_activity(RL_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+			}
+		}
 	}
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
