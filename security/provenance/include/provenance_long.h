@@ -131,8 +131,10 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	mmput_async(mm);
 	if (exe_file) {
 		fprov = file_inode(exe_file)->i_provenance;
-		if(provenance_is_opaque(prov_msg(fprov)))
+		if(provenance_is_opaque(prov_msg(fprov))){
 			set_opaque(prov_msg(prov));
+			goto out;
+		}
 		// should not sleep
 		buffer = kmalloc_array(PATH_MAX, sizeof(char), GFP_ATOMIC);
 		if(!buffer){
