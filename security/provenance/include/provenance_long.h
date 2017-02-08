@@ -168,8 +168,8 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 }
 
 static inline void record_write_xattr(uint64_t type,
-				      union prov_msg *iprov,
-				      union prov_msg *cprov,
+				      struct provenance *iprov,
+				      struct provenance *cprov,
 				      const char *name,
 				      const void *value,
 				      size_t size,
@@ -194,14 +194,19 @@ static inline void record_write_xattr(uint64_t type,
 		}
 		xattr->xattr_info.flags = flags;
 	}
-	__record_node(cprov);
-	__record_relation(type, &(cprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
+	__record_node(prov_msg(cprov));
+	__record_relation(type, &(prov_msg(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
 	__update_version(type, iprov);
-	__long_record_relation(type, xattr, iprov, allowed);
+	__long_record_relation(type, xattr, prov_msg(iprov), allowed);
 	kfree(xattr);
+	cprov->has_outgoing = true;
 }
 
-static inline void record_read_xattr(uint64_t type, union prov_msg *cprov, union prov_msg *iprov, const char *name, uint8_t allowed)
+static inline void record_read_xattr(uint64_t type,
+							struct provenance *cprov,
+							struct provenance *iprov,
+							const char *name,
+							uint8_t allowed)
 {
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
@@ -211,11 +216,12 @@ static inline void record_read_xattr(uint64_t type, union prov_msg *cprov, union
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
-	__record_node(iprov);
-	__record_relation(type, &(iprov->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
+	__record_node(prov_msg(iprov));
+	__record_relation(type, &(prov_msg(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
 	__update_version(type, cprov);
-	__long_record_relation(type, xattr, cprov, allowed);
+	__long_record_relation(type, xattr, prov_msg(cprov), allowed);
 	kfree(xattr);
+	iprov->has_outgoing = true;
 }
 
 static inline void record_packet_content(union prov_msg *pck, const struct sk_buff *skb)

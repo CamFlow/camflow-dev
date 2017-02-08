@@ -396,7 +396,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 		goto out;
 	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov)))
 		goto out;
-	record_write_xattr(RL_SETXATTR, prov_msg(iprov), prov_msg(cprov), name, value, size, flags, FLOW_ALLOWED);
+	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
@@ -421,7 +421,7 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 		goto out;
 	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov)))
 		goto out;
-	record_read_xattr(RL_GETXATTR, prov_msg(cprov), prov_msg(iprov), name, FLOW_ALLOWED);
+	record_read_xattr(RL_GETXATTR, cprov, iprov, name, FLOW_ALLOWED);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
@@ -467,7 +467,7 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
 	if (!provenance_is_tracked(prov_msg(cprov)) && !provenance_is_tracked(prov_msg(iprov)))
 		goto out;
-	record_write_xattr(RL_RMVXATTR, prov_msg(iprov), prov_msg(cprov), name, NULL, 0, 0, FLOW_ALLOWED);
+	record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(cprov));
@@ -1028,7 +1028,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return 0;
 	if (provenance_is_tracked(prov_msg(iprov))) {
 		provenance_parse_skb_ipv4(skb, &pckprov);
-		record_pck_to_inode(&pckprov, prov_msg(iprov));
+		record_pck_to_inode(&pckprov, iprov);
 
 		if (provenance_is_tracked(prov_msg(cprov)))
 			flow_to_activity(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
