@@ -86,12 +86,13 @@ static inline void refresh_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
 	uint32_t cid;
+	unsigned long irqflags;
 	// will not be recorded
 	if( provenance_is_opaque(prov_msg(prov)) )
 		return;
 	cid = current_cid();
 	record_task_name(current, prov);
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
+	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
 	if (unlikely(prov_msg(prov)->task_info.pid == 0))
 		prov_msg(prov)->task_info.pid = task_pid_nr(current);
 	if (unlikely(prov_msg(prov)->task_info.vpid == 0))
@@ -102,7 +103,7 @@ static inline void refresh_current_provenance(void)
 		current_update_shst(prov);
 		prov->updt_mmap = 0;
 	}
-	spin_unlock(prov_lock(prov));
+	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
 static inline struct provenance *prov_from_vpid(pid_t pid)
