@@ -21,6 +21,7 @@
 ### v0.2.2
 
 ```
+- fixed some rare deadlock issue.
 - change anti-cycle logic to significantly reduce node numbers (edge number
   remain constant)
 - change how certain target are applied internally.

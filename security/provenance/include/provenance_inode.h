@@ -40,6 +40,7 @@ static inline struct inode *file_name_to_inode(const char *name)
 static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 {
 	uint64_t type = ENT_INODE_UNKNOWN;
+	unsigned long irqflags;
 
 	if (S_ISBLK(mode))
 		type = ENT_INODE_BLOCK;
@@ -55,10 +56,10 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 		type = ENT_INODE_FILE;
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
+	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
 	prov_msg(prov)->inode_info.mode = mode;
 	prov_type(prov_msg(prov)) = type;
-	spin_unlock(prov_lock(prov));
+	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
 static inline void provenance_mark_as_opaque(const char *name)
