@@ -102,6 +102,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
 #define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
+#define PROV_LOG_FILE                  				"/sys/kernel/security/provenance/log"
+#define PROV_LOGP_FILE                  			"/sys/kernel/security/provenance/logp"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -167,11 +169,12 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define RL_GETXATTR           (RL_USED      | 0x0000000080000000ULL)
 #define RL_LSTXATTR           (RL_USED      | 0x0000000100000000ULL)
 #define RL_NAMED_PROCESS      (RL_USED      | 0x0000000200000000ULL)
+#define RL_SAID								(RL_USED      | 0x0000000400000000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000000400000000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000800000000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000001000000000ULL)
-#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000002000000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000000800000000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000001000000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000002000000000ULL)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000004000000000ULL)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
@@ -210,8 +213,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_identifier(node)         ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
-#define prov_is_relation(prov)             ((relation_identifier(prov).type & DM_RELATION) != 0)
-#define prov_is_node(prov)                 ((node_identifier(prov).type & DM_RELATION) == 0)
+#define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
+#define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
+#define node_secid(node) 							((node)->node_info.secid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -245,12 +249,12 @@ struct packet_identifier {
 
 #define PROV_IDENTIFIER_BUFFER_LENGTH sizeof(struct node_identifier)
 
-typedef union prov_identifier {
+union prov_identifier {
 	struct node_identifier node_id;
 	struct relation_identifier relation_id;
 	struct packet_identifier packet_id;
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
-} prov_identifier_t;
+};
 
 #define prov_set_flag(node, nbit) prov_flag(node) |= 1 << nbit
 #define prov_clear_flag(node, nbit) prov_flag(node) &= ~(1 << nbit)
@@ -286,7 +290,7 @@ typedef union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements prov_identifier_t identifier; uint8_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies;uint32_t secid;uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
@@ -297,8 +301,8 @@ struct msg_struct {
 struct relation_struct {
 	basic_elements;
 	uint8_t allowed;
-	prov_identifier_t snd;
-	prov_identifier_t rcv;
+	union prov_identifier snd;
+	union prov_identifier rcv;
 	uint8_t set;
 	int64_t offset;
 };
@@ -314,7 +318,6 @@ struct task_prov_struct {
 	uint32_t pid;
 	uint32_t vpid;
 	uint32_t cid;
-	uint32_t secid;
 };
 
 struct inode_prov_struct {
@@ -324,7 +327,6 @@ struct inode_prov_struct {
 	uint32_t gid;
 	uint16_t mode;
 	uint8_t sb_uuid[16];
-	uint32_t secid;
 };
 
 struct iattr_prov_struct {
@@ -359,7 +361,7 @@ struct pck_struct {
 	uint16_t length;
 };
 
-typedef union prov_msg {
+union prov_msg {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
@@ -370,7 +372,7 @@ typedef union prov_msg {
 	struct sb_struct sb_info;
 	struct pck_struct pck_info;
 	struct iattr_prov_struct iattr_info;
-} prov_msg_t;
+};
 
 struct str_struct {
 	basic_elements;
@@ -412,10 +414,10 @@ struct disc_node_struct {
 	basic_elements;
 	size_t length;
 	char content[PATH_MAX];
-	prov_identifier_t parent;
+	union prov_identifier parent;
 };
 
-typedef union long_msg {
+union long_prov_msg {
 	struct msg_struct msg_info;
 	struct node_struct node_info;
 	struct str_struct str_info;
@@ -424,7 +426,7 @@ typedef union long_msg {
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
-} long_prov_msg_t;
+};
 
 struct prov_filter {
 	uint64_t filter;
@@ -439,17 +441,17 @@ struct prov_filter {
 
 struct prov_file_config {
 	char name[PATH_MAX];
-	prov_msg_t prov;
+	union prov_msg prov;
 	uint8_t op;
 };
 
 struct prov_self_config {
-	prov_msg_t prov;
+	union prov_msg prov;
 	uint8_t op;
 };
 
 struct prov_process_config {
-	prov_msg_t prov;
+	union prov_msg prov;
 	uint8_t op;
 	uint32_t vpid;
 };
