@@ -486,6 +486,45 @@ out:
 	return 0;
 }
 
+static int provenance_inode_getsecurity(struct inode *inode, const char *name, void **buffer, bool alloc)
+{
+	struct provenance *iprov = inode->i_provenance;
+	printk(KERN_INFO "Provenance: %s getsec", name);
+	if( unlikely(!iprov) )
+		return -ENOMEM;
+	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
+		return -EOPNOTSUPP;
+	if(!alloc)
+		goto out;
+
+	*buffer = kmalloc(sizeof(struct provenance), GFP_KERNEL);
+	memcpy(*buffer, iprov, sizeof(struct provenance));
+out:
+	return sizeof(struct provenance);
+}
+
+static int provenance_inode_setsecurity(struct inode *inode, const char *name,
+						const void *value, size_t size, int flags)
+{
+	struct provenance *iprov = inode->i_provenance;
+	printk(KERN_INFO "Provenance: %s setsec", name);
+	if( unlikely(!iprov) )
+		return -ENOMEM;
+	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
+		return -EOPNOTSUPP;
+	if(unlikely(!value || size!=sizeof(struct provenance)))
+		return -EACCESS;
+	memcpy()
+	return -EOPNOTSUPP;
+}
+
+static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t buffer_size)
+{
+	const int len = sizeof(XATTR_NAME_PROVENANCE);
+	if (buffer && len <= buffer_size)
+		memcpy(buffer, XATTR_NAME_PROVENANCE, len);
+	return len;
+}
 
 /*
  * Check file permissions before accessing an open file.  This hook is
@@ -1216,31 +1255,34 @@ static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *dat
 static struct security_hook_list provenance_hooks[] = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_free,	      provenance_cred_free),
-	LSM_HOOK_INIT(cred_prepare,	      provenance_cred_prepare),
-	LSM_HOOK_INIT(cred_transfer,	      provenance_cred_transfer),
+	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
+	LSM_HOOK_INIT(cred_prepare,	      		provenance_cred_prepare),
+	LSM_HOOK_INIT(cred_transfer,	      	provenance_cred_transfer),
 	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,   provenance_inode_alloc_security),
-	LSM_HOOK_INIT(inode_create,	      provenance_inode_create),
+	LSM_HOOK_INIT(inode_create,	      		provenance_inode_create),
 	LSM_HOOK_INIT(inode_free_security,    provenance_inode_free_security),
 	LSM_HOOK_INIT(inode_permission,	      provenance_inode_permission),
-	LSM_HOOK_INIT(inode_link,	      provenance_inode_link),
-	LSM_HOOK_INIT(inode_rename,	      provenance_inode_rename),
-	LSM_HOOK_INIT(inode_setattr,	      provenance_inode_setattr),
-	LSM_HOOK_INIT(inode_getattr,	      provenance_inode_getattr),
-	LSM_HOOK_INIT(inode_readlink,	      provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_link,	      			provenance_inode_link),
+	LSM_HOOK_INIT(inode_rename,	      		provenance_inode_rename),
+	LSM_HOOK_INIT(inode_setattr,	      	provenance_inode_setattr),
+	LSM_HOOK_INIT(inode_getattr,	      	provenance_inode_getattr),
+	LSM_HOOK_INIT(inode_readlink,	      	provenance_inode_readlink),
 	LSM_HOOK_INIT(inode_post_setxattr,    provenance_inode_post_setxattr),
-	LSM_HOOK_INIT(inode_getxattr,	      provenance_inode_getxattr),
+	LSM_HOOK_INIT(inode_getxattr,	      	provenance_inode_getxattr),
 	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
 	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
+	LSM_HOOK_INIT(inode_getsecurity, 			provenance_inode_getsecurity),
+	LSM_HOOK_INIT(inode_setsecurity, 			provenance_inode_setsecurity),
+	LSM_HOOK_INIT(inode_listsecurity, 		provenance_inode_listsecurity),
 
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
-	LSM_HOOK_INIT(mmap_file,	      provenance_mmap_file),
-	LSM_HOOK_INIT(file_ioctl,	      provenance_file_ioctl),
-	LSM_HOOK_INIT(file_open,	      provenance_file_open),
+	LSM_HOOK_INIT(mmap_file,	      			provenance_mmap_file),
+	LSM_HOOK_INIT(file_ioctl,	      			provenance_file_ioctl),
+	LSM_HOOK_INIT(file_open,	      			provenance_file_open),
 
 	/* msg related hooks */
 	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
@@ -1251,29 +1293,29 @@ static struct security_hook_list provenance_hooks[] = {
 	/* shared memory related hooks */
 	LSM_HOOK_INIT(shm_alloc_security,     provenance_shm_alloc_security),
 	LSM_HOOK_INIT(shm_free_security,      provenance_shm_free_security),
-	LSM_HOOK_INIT(shm_shmat,	      provenance_shm_shmat),
+	LSM_HOOK_INIT(shm_shmat,	      			provenance_shm_shmat),
 
 	/* socket related hooks */
 	LSM_HOOK_INIT(sk_alloc_security,      provenance_sk_alloc_security),
 	LSM_HOOK_INIT(socket_post_create,     provenance_socket_post_create),
-	LSM_HOOK_INIT(socket_bind,	      provenance_socket_bind),
-	LSM_HOOK_INIT(socket_connect,	      provenance_socket_connect),
-	LSM_HOOK_INIT(socket_listen,	      provenance_socket_listen),
-	LSM_HOOK_INIT(socket_accept,	      provenance_socket_accept),
-	LSM_HOOK_INIT(socket_sendmsg,	      provenance_socket_sendmsg),
-	LSM_HOOK_INIT(socket_recvmsg,	      provenance_socket_recvmsg),
+	LSM_HOOK_INIT(socket_bind,	      		provenance_socket_bind),
+	LSM_HOOK_INIT(socket_connect,	      	provenance_socket_connect),
+	LSM_HOOK_INIT(socket_listen,	      	provenance_socket_listen),
+	LSM_HOOK_INIT(socket_accept,	      	provenance_socket_accept),
+	LSM_HOOK_INIT(socket_sendmsg,	      	provenance_socket_sendmsg),
+	LSM_HOOK_INIT(socket_recvmsg,	      	provenance_socket_recvmsg),
 	LSM_HOOK_INIT(socket_sock_rcv_skb,    provenance_socket_sock_rcv_skb),
 	LSM_HOOK_INIT(unix_stream_connect,    provenance_unix_stream_connect),
-	LSM_HOOK_INIT(unix_may_send,	      provenance_unix_may_send),
+	LSM_HOOK_INIT(unix_may_send,	      	provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_set_creds,	      provenance_bprm_set_creds),
+	LSM_HOOK_INIT(bprm_set_creds,	      	provenance_bprm_set_creds),
 	LSM_HOOK_INIT(bprm_committing_creds,  provenance_bprm_committing_creds),
 
 	/* file system related hooks */
 	LSM_HOOK_INIT(sb_alloc_security,      provenance_sb_alloc_security),
 	LSM_HOOK_INIT(sb_free_security,	      provenance_sb_free_security),
-	LSM_HOOK_INIT(sb_kern_mount,	      provenance_sb_kern_mount)
+	LSM_HOOK_INIT(sb_kern_mount,	      	provenance_sb_kern_mount)
 };
 
 struct kmem_cache *provenance_cache;
