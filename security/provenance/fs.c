@@ -14,6 +14,7 @@
 #include <linux/security.h>
 
 #include "provenance.h"
+#include "provenance_long.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"
 #include "provenance_secctx.h"
@@ -59,6 +60,8 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_SECCTX);
 	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
 	provenance_mark_as_opaque(PROV_CGROUP_FILTER);
+	provenance_mark_as_opaque(PROV_LOG_FILE);
+	provenance_mark_as_opaque(PROV_LOGP_FILE);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -163,7 +166,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 
 {
 	struct provenance *cprov = current_provenance();
-	long_prov_msg_t *node = NULL;
+	union long_prov_msg *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -171,7 +174,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = kzalloc(sizeof(long_prov_msg_t), GFP_KERNEL);
+	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
 		count = -ENOMEM;
 		goto out;
@@ -205,7 +208,7 @@ declare_file_operations(prov_node_ops, prov_write_node, no_read);
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)
 {
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -226,7 +229,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 {
 	struct prov_self_config msg;
 	struct provenance *prov = current_provenance();
-	prov_msg_t *setting;
+	union prov_msg *setting;
 	uint8_t op;
 
 	if (count < sizeof(struct prov_self_config))
@@ -270,13 +273,13 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
-	prov_msg_t *tmp = (prov_msg_t *)buf;
+	union prov_msg *tmp = (union prov_msg *)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(tmp, prov_msg(cprov), sizeof(prov_msg_t)))
+	if (copy_to_user(tmp, prov_msg(cprov), sizeof(union prov_msg)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
@@ -363,7 +366,7 @@ static ssize_t prov_write_file(struct file *file, const char __user *buf,
 	struct prov_file_config *msg;
 	struct inode *in;
 	struct provenance *prov;
-	prov_msg_t *setting;
+	union prov_msg *setting;
 	uint8_t op;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -430,7 +433,7 @@ static ssize_t prov_read_file(struct file *filp, char __user *buf,
 
 	prov = in->i_provenance;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if (copy_to_user(&msg->prov, prov, sizeof(prov_msg_t)))
+	if (copy_to_user(&msg->prov, prov, sizeof(union prov_msg)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
 	return rtn;
@@ -442,7 +445,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 {
 	struct prov_process_config *msg;
 	struct provenance *prov;
-	prov_msg_t *setting;
+	union prov_msg *setting;
 	uint8_t op;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -506,7 +509,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		return -EINVAL;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(prov_msg_t)))
+	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(union prov_msg)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
 	return rtn;
@@ -685,6 +688,31 @@ static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_cgroup_filter_ops, prov_write_cgroup_filter, prov_read_cgroup_filter);
 
+static ssize_t prov_write_log(struct file *file, const char __user *buf,
+					size_t count, loff_t *ppos)
+{
+	struct provenance *cprov = current_provenance();
+
+	if (count <= 0 || count >= PATH_MAX)
+		return 0;
+	set_tracked(prov_msg(cprov));
+	return record_log(prov_msg(cprov), buf, count);
+}
+declare_file_operations(prov_log_ops, prov_write_log, no_read);
+
+static ssize_t prov_write_logp(struct file *file, const char __user *buf,
+					size_t count, loff_t *ppos)
+{
+	struct provenance *cprov = current_provenance();
+
+	if (count <= 0 || count >= PATH_MAX)
+		return 0;
+	set_tracked(prov_msg(cprov));
+	set_propagate(prov_msg(cprov));
+	return record_log(prov_msg(cprov), buf, count);
+}
+declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
+
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
@@ -707,6 +735,8 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
 	securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
 	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
+	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
+	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
 	printk(KERN_INFO "Provenance fs ready.\n");
 	return 0;
 }

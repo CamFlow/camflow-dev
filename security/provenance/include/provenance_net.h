@@ -47,7 +47,7 @@ static inline struct provenance *sk_provenance(struct sock *sk)
 	return prov;
 }
 
-static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_msg_t *prov)
+static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_msg *prov)
 {
 	struct packet_identifier *id;
 	int offset, ihlen;
@@ -64,7 +64,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, prov_m
 	if (ihlen < sizeof(_iph))
 		return -EINVAL;
 
-	memset(prov, 0, sizeof(prov_msg_t));
+	memset(prov, 0, sizeof(union prov_msg));
 	id = &packet_identifier(prov); // we are going fo fill this
 
 	id->type = ENT_PACKET;
@@ -164,37 +164,38 @@ static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters *filters, stru
 }
 
 // incoming packet
-static inline void record_pck_to_inode(prov_msg_t *pck, prov_msg_t *inode)
+static inline void record_pck_to_inode(union prov_msg *pck, struct provenance *inode)
 {
-	prov_msg_t relation;
+	union prov_msg relation;
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
 		return;
-	if (!provenance_is_tracked(inode) && !prov_all)
+	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
 		return;
-	if (!should_record_relation(RL_RCV_PACKET, pck, inode, FLOW_ALLOWED))
+	if (!should_record_relation(RL_RCV_PACKET, pck, prov_msg(inode), FLOW_ALLOWED))
 		return;
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	prov_write(pck);
-	__record_node(inode);
+	__record_node(prov_msg(inode));
 	__update_version(RL_RCV_PACKET, inode);
-	__record_node(inode);
-	__record_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(inode->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	__record_node(prov_msg(inode));
+	__record_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(prov_msg(inode)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 }
 
 // outgoing packet
-static inline void record_inode_to_pck(prov_msg_t *inode, prov_msg_t *pck)
+static inline void record_inode_to_pck(struct provenance *inode, union prov_msg *pck)
 {
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
 		return;
-	if (!provenance_is_tracked(inode) && !prov_all)
+	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
 		return;
-	if (!should_record_relation(RL_SND_PACKET, inode, pck, FLOW_ALLOWED))
+	if (!should_record_relation(RL_SND_PACKET, prov_msg(inode), pck, FLOW_ALLOWED))
 		return;
-	memset(&relation, 0, sizeof(prov_msg_t));
-	__record_node(inode);
+	memset(&relation, 0, sizeof(union prov_msg));
+	__record_node(prov_msg(inode));
 	prov_write(pck);
-	__record_relation(RL_SND_PACKET, &(inode->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	__record_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	inode->has_outgoing=true;
 }
 #endif

@@ -40,6 +40,7 @@ static inline struct inode *file_name_to_inode(const char *name)
 static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 {
 	uint64_t type = ENT_INODE_UNKNOWN;
+	unsigned long irqflags;
 
 	if (S_ISBLK(mode))
 		type = ENT_INODE_BLOCK;
@@ -55,16 +56,16 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 		type = ENT_INODE_FILE;
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
+	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
 	prov_msg(prov)->inode_info.mode = mode;
 	prov_type(prov_msg(prov)) = type;
-	spin_unlock(prov_lock(prov));
+	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
 static inline void provenance_mark_as_opaque(const char *name)
 {
 	struct inode *in;
-	prov_msg_t *prov;
+	union prov_msg *prov;
 
 	in = file_name_to_inode(name);
 	if (!in)
@@ -79,7 +80,10 @@ static inline void provenance_mark_as_opaque(const char *name)
 static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
-	uint8_t op;
+
+	// will not be recorded
+	if( provenance_is_opaque(prov_msg(prov)) )
+		return;
 
 	record_inode_name(inode, prov);
 	if(unlikely(prov_type(prov_msg(prov))==ENT_INODE_UNKNOWN))
@@ -87,13 +91,6 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
-	op = prov_secctx_whichOP(&secctx_filters, prov_msg(prov)->inode_info.secid);
-	if (unlikely(op != 0)) {
-		if ((op & PROV_SEC_TRACKED) != 0)
-			set_tracked(prov_msg(prov));
-		if ((op & PROV_SEC_PROPAGATE) != 0)
-			set_propagate(prov_msg(prov));
-	}
 }
 
 static inline struct provenance *dentry_provenance(struct dentry *dentry)
@@ -114,11 +111,11 @@ static inline struct provenance *file_provenance(struct file *file)
 	return inode->i_provenance;
 }
 
-static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cprov)
+static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_msg *cprov)
 {
 	//used for private MMAP
 	struct provenance *prov;
-	prov_msg_t relation;
+	union prov_msg relation;
 
 	if (unlikely(iprov == NULL || cprov == NULL)) // should not occur
 		return NULL;
@@ -133,7 +130,7 @@ static inline struct provenance *branch_mmap(prov_msg_t *iprov, prov_msg_t *cpro
 	memcpy(prov_msg(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	prov_msg(prov)->inode_info.mode = iprov->inode_info.mode;
 	__record_node(iprov);
-	memset(&relation, 0, sizeof(prov_msg_t));
+	memset(&relation, 0, sizeof(union prov_msg));
 	__propagate(RL_MMAP, iprov, prov_msg(prov), &relation, FLOW_ALLOWED);
 	__record_node(prov_msg(prov));
 	__record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);

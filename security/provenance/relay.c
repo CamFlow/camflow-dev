@@ -63,12 +63,12 @@ DEFINE_SPINLOCK(long_prov_chan_lock);
 static void write_boot_buffer(void)
 {
 	if (boot_buffer->nb_entry > 0)
-		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(prov_msg_t));
+		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_msg));
 	kfree(boot_buffer);
 	boot_buffer = NULL;
 
 	if (long_boot_buffer->nb_entry > 0)
-		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(long_prov_msg_t));
+		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_msg));
 	kfree(long_boot_buffer);
 	long_boot_buffer = NULL;
 }
