@@ -23,20 +23,6 @@
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
-static inline struct inode *file_name_to_inode(const char *name)
-{
-	struct path path;
-	struct inode *inode;
-
-	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
-		printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
-		return NULL;
-	}
-	inode = path.dentry->d_inode;
-	path_put(&path);
-	return inode;
-}
-
 static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 {
 	uint64_t type = ENT_INODE_UNKNOWN;
@@ -64,17 +50,16 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 
 static inline void provenance_mark_as_opaque(const char *name)
 {
-	struct inode *in;
-	union prov_msg *prov;
+	struct path path;
+	struct provenance *prov;
 
-	in = file_name_to_inode(name);
-	if (!in)
-		printk(KERN_ERR "Provenance: could not find %s file.", name);
-	else{
-		prov = in->i_provenance;
-		if (prov)
-			set_opaque(prov);
+	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
+		printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
+		return;
 	}
+	prov = path.dentry->d_inode->i_provenance;
+	if (prov)
+		set_opaque(prov_msg(prov));
 }
 
 static inline void refresh_inode_provenance(struct inode *inode)
