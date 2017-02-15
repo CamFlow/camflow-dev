@@ -50,6 +50,7 @@ struct provenance {
 	uint8_t updt_mmap;
 	uint8_t has_mmap;
 	bool has_outgoing;
+	bool initialised;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))

@@ -43,6 +43,12 @@ static void cred_init_provenance(void)
 	cred->provenance = prov;
 }
 
+static void provenance_d_instantiate(struct dentry *dentry, struct inode *inode)
+{
+	if (inode)
+		inode_init_provenance(inode, dentry);
+}
+
 /*
  * @cred points to the credentials.
  * @gfp indicates the atomicity of any memory allocations.
@@ -218,7 +224,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		return 0;
 	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
-	iprov = inode->i_provenance;
+	iprov = inode_provenance(inode);;
 	if (iprov == NULL)
 		return -ENOMEM;
 	refresh_current_provenance();
@@ -528,7 +534,7 @@ out:
 
 static int provenance_inode_getsecurity(struct inode *inode, const char *name, void **buffer, bool alloc)
 {
-	struct provenance *iprov = inode->i_provenance;
+	struct provenance *iprov = inode_provenance(inode);;
 	printk(KERN_INFO "Provenance: %s getsec", name);
 	if( unlikely(!iprov) )
 		return -ENOMEM;
@@ -1301,6 +1307,7 @@ static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
 	LSM_HOOK_INIT(inode_getsecurity, 			provenance_inode_getsecurity),
 	LSM_HOOK_INIT(inode_listsecurity, 		provenance_inode_listsecurity),
+	LSM_HOOK_INIT(d_instantiate,	      	provenance_d_instantiate),
 
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
