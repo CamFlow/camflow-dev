@@ -392,7 +392,6 @@ static int provenance_inode_setxattr(struct dentry *dentry, const char *name,
 	struct provenance *prov;
 	union prov_msg *setting;
 	if(strcmp(name, XATTR_NAME_PROVENANCE)==0){ // provenance xattr
-		printk(KERN_INFO "Provenance: %s setxattr", name);
 		if(size!=sizeof(union prov_msg))
 			return -ENOMEM;
 		prov = dentry_provenance(dentry);
@@ -429,6 +428,9 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 	struct provenance *iprov = dentry_provenance(dentry);
 	unsigned long irqflags;
 
+	if(strcmp(name, XATTR_NAME_PROVENANCE)==0)
+		return;
+
 	if (!iprov)
 		return;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
@@ -454,6 +456,9 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 	struct provenance *iprov = dentry_provenance(dentry);
 	int rtn = 0;
 	unsigned long irqflags;
+
+	if(strcmp(name, XATTR_NAME_PROVENANCE)==0)
+		return 0;
 
 	if (!iprov)
 		return -ENOMEM;
@@ -502,6 +507,9 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 	struct provenance *iprov = dentry_provenance(dentry);
 	unsigned long irqflags;
 
+	if(strcmp(name, XATTR_NAME_PROVENANCE)==0)
+		return -EPERM;
+
 	if (!iprov)
 		return -ENOMEM;
 
@@ -531,22 +539,7 @@ static int provenance_inode_getsecurity(struct inode *inode, const char *name, v
 	*buffer = kmalloc(sizeof(union prov_msg), GFP_KERNEL);
 	memcpy(*buffer, prov_msg(iprov), sizeof(union prov_msg));
 out:
-	return sizeof(struct provenance);
-}
-
-static int provenance_inode_setsecurity(struct inode *inode, const char *name,
-						const void *value, size_t size, int flags)
-{
-	struct provenance *iprov = inode->i_provenance;
-	printk(KERN_INFO "Provenance: %s setsec", name);
-	if( unlikely(!iprov) )
-		return -ENOMEM;
-	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
-		return -EOPNOTSUPP;
-	if(unlikely(!value || size!=sizeof(struct provenance)))
-		return -ENOMEM;
-	// do something
-	return 0;
+	return sizeof(union prov_msg);
 }
 
 static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t buffer_size)
@@ -1307,7 +1300,6 @@ static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
 	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
 	LSM_HOOK_INIT(inode_getsecurity, 			provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_setsecurity, 			provenance_inode_setsecurity),
 	LSM_HOOK_INIT(inode_listsecurity, 		provenance_inode_listsecurity),
 
 	/* file related hooks */
