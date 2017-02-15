@@ -15,6 +15,7 @@
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/namei.h>
+#include <linux/xattr.h>
 
 #include "provenance_long.h"    // for record_inode_name
 #include "provenance_secctx.h"  // for record_inode_name
@@ -71,29 +72,9 @@ static inline void refresh_inode_provenance(struct inode *inode)
 		return;
 
 	record_inode_name(inode, prov);
-	if(unlikely(prov_type(prov_msg(prov))==ENT_INODE_UNKNOWN))
-		record_inode_type(inode->i_mode, prov);
 	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
-}
-
-static inline struct provenance *dentry_provenance(struct dentry *dentry)
-{
-	struct inode *inode = d_backing_inode(dentry);
-
-	if (inode == NULL)
-		return NULL;
-	return inode->i_provenance;
-}
-
-static inline struct provenance *file_provenance(struct file *file)
-{
-	struct inode *inode = file_inode(file);
-
-	if (inode == NULL)
-		return NULL;
-	return inode->i_provenance;
 }
 
 static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_msg *cprov)
@@ -120,5 +101,76 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 	__record_node(prov_msg(prov));
 	__record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	return prov;
+}
+
+static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
+{
+	struct provenance *prov = inode->i_provenance;
+	union prov_msg *buf;
+	struct dentry *dentry;
+	int rc=0;
+
+	if(prov->initialised)
+		return 0;
+	//spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
+	record_inode_type(inode->i_mode, prov);
+	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not support on this inode
+		goto out;
+	if(opt_dentry)
+		dentry = dget(opt_dentry);
+	else
+		dentry = d_find_alias(inode);
+	if(!dentry)
+		goto out;
+	buf = kmalloc(sizeof(union prov_msg), GFP_NOFS);
+	if(!buf){
+		rc = -ENOMEM;
+		dput(dentry);
+		goto out;
+	}
+	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_msg));
+	dput(dentry);
+	if(rc<0){
+		if(rc!=-ENODATA){
+			printk(KERN_ERR "Provenance get xattr returned %u", rc);
+			kfree(buf);
+			goto free_buf;
+		}else{
+			rc = 0;
+			goto initialised;
+		}
+	}
+	memcpy(prov_msg(prov), buf, sizeof(union prov_msg));
+	rc = 0;
+initialised:
+	prov->initialised=true;
+free_buf:
+	kfree(buf);
+out:
+	//spin_unlock(prov_lock(prov));
+	return rc;
+}
+
+static inline struct provenance* inode_provenance(struct inode *inode){
+	inode_init_provenance(inode, NULL);
+	return inode->i_provenance;
+}
+
+static inline struct provenance *dentry_provenance(struct dentry *dentry)
+{
+	struct inode *inode = d_backing_inode(dentry);
+
+	if (inode == NULL)
+		return NULL;
+	return inode_provenance(inode);
+}
+
+static inline struct provenance *file_provenance(struct file *file)
+{
+	struct inode *inode = file_inode(file);
+
+	if (inode == NULL)
+		return NULL;
+	return inode_provenance(inode);
 }
 #endif
