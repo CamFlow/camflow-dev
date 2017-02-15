@@ -19,6 +19,14 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.2.3
+
+```
+- anticipate read only after init security hooks upcoming changes.
+- handle provenance through extended attribute.
+- Update to kernel version 4.9.9.
+```
+
 ### v0.2.2
 
 ```

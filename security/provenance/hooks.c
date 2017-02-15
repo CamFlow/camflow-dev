@@ -386,6 +386,38 @@ static int provenance_inode_readlink(struct dentry *dentry)
 	return 0;
 }
 
+static int provenance_inode_setxattr(struct dentry *dentry, const char *name,
+ 				  	const void *value, size_t size, int flags)
+{
+	struct provenance *prov;
+	union prov_msg *setting;
+	if(strcmp(name, XATTR_NAME_PROVENANCE)==0){ // provenance xattr
+		printk(KERN_INFO "Provenance: %s setxattr", name);
+		if(size!=sizeof(union prov_msg))
+			return -ENOMEM;
+		prov = dentry_provenance(dentry);
+		setting = (union prov_msg*)value;
+
+		if (provenance_is_tracked(setting))
+			set_tracked(prov_msg(prov));
+		else
+			clear_tracked(prov_msg(prov));
+
+		if (provenance_is_opaque(setting))
+			set_opaque(prov_msg(prov));
+		else
+			clear_opaque(prov_msg(prov));
+
+		if (provenance_does_propagate(setting))
+			set_propagate(prov_msg(prov));
+		else
+			clear_propagate(prov_msg(prov));
+
+		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
+	}
+	return 0;
+}
+
 /*
  * Update inode security field after successful setxattr operation.
  * @value identified by @name for @dentry.
@@ -496,9 +528,8 @@ static int provenance_inode_getsecurity(struct inode *inode, const char *name, v
 		return -EOPNOTSUPP;
 	if(!alloc)
 		goto out;
-
-	*buffer = kmalloc(sizeof(struct provenance), GFP_KERNEL);
-	memcpy(*buffer, iprov, sizeof(struct provenance));
+	*buffer = kmalloc(sizeof(union prov_msg), GFP_KERNEL);
+	memcpy(*buffer, prov_msg(iprov), sizeof(union prov_msg));
 out:
 	return sizeof(struct provenance);
 }
@@ -513,9 +544,9 @@ static int provenance_inode_setsecurity(struct inode *inode, const char *name,
 	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
 		return -EOPNOTSUPP;
 	if(unlikely(!value || size!=sizeof(struct provenance)))
-		return -EACCESS;
-	memcpy()
-	return -EOPNOTSUPP;
+		return -ENOMEM;
+	// do something
+	return 0;
 }
 
 static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t buffer_size)
@@ -1252,7 +1283,7 @@ static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *dat
 	return 0;
 }
 
-static struct security_hook_list provenance_hooks[] = {
+static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
@@ -1270,6 +1301,7 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(inode_setattr,	      	provenance_inode_setattr),
 	LSM_HOOK_INIT(inode_getattr,	      	provenance_inode_getattr),
 	LSM_HOOK_INIT(inode_readlink,	      	provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_setxattr,	      	provenance_inode_setxattr),
 	LSM_HOOK_INIT(inode_post_setxattr,    provenance_inode_post_setxattr),
 	LSM_HOOK_INIT(inode_getxattr,	      	provenance_inode_getxattr),
 	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
