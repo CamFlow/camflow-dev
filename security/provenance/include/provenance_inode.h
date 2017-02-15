@@ -1,4 +1,4 @@
-/*
+ /*
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
@@ -103,6 +103,7 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 	return prov;
 }
 
+// TODO check the locking in there, it is probably wrong...
 static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
 {
 	struct provenance *prov = inode->i_provenance;
@@ -112,7 +113,14 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 
 	if(prov->initialised)
 		return 0;
-	//spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
+	if(prov->initialised){
+		spin_unlock(prov_lock(prov));
+		goto out;
+	}	else {
+		prov->initialised = true;
+	}
+	spin_unlock(prov_lock(prov));
 	record_inode_type(inode->i_mode, prov);
 	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not support on this inode
 		goto out;
@@ -125,44 +133,47 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	buf = kmalloc(sizeof(union prov_msg), GFP_NOFS);
 	if(!buf){
 		rc = -ENOMEM;
+		prov->initialised = false;
 		dput(dentry);
 		goto out;
 	}
 	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_msg));
 	dput(dentry);
 	if(rc<0){
-		if(rc!=-ENODATA){
-			printk(KERN_ERR "Provenance get xattr returned %u", rc);
-			kfree(buf);
+		if(rc!=-ENODATA && rc!=-EOPNOTSUPP){
+			prov->initialised = false;
+			printk(KERN_ERR "Provenance get xattr returned %d", rc);
 			goto free_buf;
 		}else{
 			rc = 0;
-			goto initialised;
+			goto free_buf;
 		}
 	}
 	memcpy(prov_msg(prov), buf, sizeof(union prov_msg));
 	rc = 0;
-initialised:
-	prov->initialised=true;
 free_buf:
 	kfree(buf);
 out:
-	//spin_unlock(prov_lock(prov));
 	return rc;
 }
 
-static inline struct provenance* inode_provenance(struct inode *inode){
-	inode_init_provenance(inode, NULL);
-	return inode->i_provenance;
+static inline struct provenance* inode_provenance(struct inode *inode, bool may_sleep){
+	struct provenance *prov = inode->i_provenance;
+	might_sleep_if(may_sleep);
+	if(!prov->initialised && may_sleep)
+		inode_init_provenance(inode, NULL);
+	return prov;
 }
 
 static inline struct provenance *dentry_provenance(struct dentry *dentry)
 {
 	struct inode *inode = d_backing_inode(dentry);
-
+	struct provenance *prov;
 	if (inode == NULL)
 		return NULL;
-	return inode_provenance(inode);
+	prov = inode->i_provenance;
+	inode_init_provenance(inode, dentry);
+	return prov;
 }
 
 static inline struct provenance *file_provenance(struct file *file)
@@ -171,6 +182,6 @@ static inline struct provenance *file_provenance(struct file *file)
 
 	if (inode == NULL)
 		return NULL;
-	return inode_provenance(inode);
+	return inode_provenance(inode, true);
 }
 #endif
