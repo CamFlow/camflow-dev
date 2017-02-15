@@ -438,12 +438,6 @@ struct prov_filter {
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
 
-struct prov_file_config {
-	char name[PATH_MAX];
-	union prov_msg prov;
-	uint8_t op;
-};
-
 struct prov_self_config {
 	union prov_msg prov;
 	uint8_t op;
