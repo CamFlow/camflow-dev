@@ -18,6 +18,7 @@
 #include <linux/random.h>
 #include <linux/xattr.h>
 #include <linux/file.h>
+#include <linux/workqueue.h>
 
 #include "av_utils.h"
 #include "provenance.h"
@@ -27,6 +28,36 @@
 #include "provenance_long.h"
 #include "provenance_secctx.h"
 #include "provenance_cgroup.h"
+
+struct save_work{
+	struct work_struct work;
+	struct dentry *dentry;
+};
+
+static void __do_prov_save(struct work_struct *pwork){
+	struct save_work *w = container_of(pwork, struct save_work, work);
+	struct dentry *dentry = w->dentry;
+	if(!dentry)
+		goto free_work;
+	save_provenance(dentry);
+free_work:
+	kfree(w);
+}
+struct workqueue_struct *prov_queue;
+
+static void queue_save_provenance(struct provenance* provenance, struct dentry *dentry){
+	struct save_work* work;
+	if(!prov_queue)
+		return;
+	if(!provenance->initialised || provenance->saved) // not initialised or already saved
+		return;
+	work = kmalloc(sizeof(struct save_work), GFP_ATOMIC);
+	if(!work)
+		return;
+	work->dentry = dentry;
+	INIT_WORK(&work->work, __do_prov_save);
+	queue_work(prov_queue, &work->work);
+}
 
 /*
  * initialise the security for the init task
@@ -336,6 +367,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_from_activity(RL_SETATTR, cprov, iattrprov, FLOW_ALLOWED, NULL);
 	flow_between_entities(RL_SETATTR, iattrprov, iprov, FLOW_ALLOWED, NULL);
+	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	free_provenance(iattrprov);
@@ -441,6 +473,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 		goto out;
 	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
 out:
+	queue_save_provenance(iprov, dentry);;
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
@@ -521,6 +554,7 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
 	record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
 out:
+	queue_save_provenance(iprov, dentry);;
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -529,7 +563,6 @@ out:
 static int provenance_inode_getsecurity(struct inode *inode, const char *name, void **buffer, bool alloc)
 {
 	struct provenance *iprov = inode_provenance(inode, true);
-	printk(KERN_INFO "Provenance: %s getsec", name);
 	if( unlikely(!iprov) )
 		return -ENOMEM;
 	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
@@ -549,6 +582,11 @@ static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size
 		memcpy(buffer, XATTR_NAME_PROVENANCE, len);
 	return len;
 }
+
+//TODO
+// file_free
+// file_mmap
+// bprm_check
 
 /*
  * Check file permissions before accessing an open file.  This hook is
@@ -608,6 +646,7 @@ static int provenance_file_permission(struct file *file, int mask)
 			}
 		}
 	}
+	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -663,6 +702,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 			flow_to_activity(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
 		if ((prot & (PROT_EXEC)) != 0)
 			flow_to_activity(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+		queue_save_provenance(iprov, file_dentry(file));
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	} else{
@@ -677,6 +717,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 			flow_to_activity(RL_MMAP_READ, bprov, cprov, FLOW_ALLOWED, file);
 		if ((prot & (PROT_EXEC)) != 0)
 			flow_to_activity(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
+		queue_save_provenance(iprov, file_dentry(file));
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 		free_provenance(bprov);
@@ -706,6 +747,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
+	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1381,11 +1423,14 @@ void __init provenance_add_hooks(void)
 	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
 	if (unlikely(long_boot_buffer == NULL))
 		panic("Provenance: could not allocate long_boot_buffer.");
-
+	prov_queue = alloc_workqueue("prov_queue", 0, 0);
+	if(!prov_queue)
+		printk(KERN_ERR "Provenance: could not initialise work queue.");
 	relay_ready=false;
 	cred_init_provenance();
 	/* register the provenance security hooks */
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
-	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
+	printk(KERN_INFO "Provenance Camflow %s++\n", CAMFLOW_VERSION_STR);
 	printk(KERN_INFO "Provenance hooks ready.\n");
 }
+MODULE_LICENSE("GPL");

@@ -660,3 +660,4 @@ static int __init init_prov_fs(void)
 }
 
 core_initcall(init_prov_fs);
+MODULE_LICENSE("GPL");

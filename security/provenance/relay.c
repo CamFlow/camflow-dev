@@ -74,6 +74,7 @@ static void write_boot_buffer(void)
 }
 
 bool relay_ready;
+extern struct workqueue_struct *prov_queue;
 
 static int __init relay_prov_init(void)
 {
@@ -87,9 +88,8 @@ static int __init relay_prov_init(void)
 	relay_ready=true;
 	// relay buffer are ready, we can write down the boot buffer
 	write_boot_buffer();
-
 	printk(KERN_INFO "Provenance relay ready.\n");
 	return 0;
 }
-
 core_initcall(relay_prov_init);
+MODULE_LICENSE("GPL");
