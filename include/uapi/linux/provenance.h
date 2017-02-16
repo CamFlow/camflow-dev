@@ -266,7 +266,7 @@ union prov_identifier {
 
 #define NAME_RECORDED_BIT 1
 #define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
-#define clear__name_recorded(node)          prov_clear_flag(node, NAME_RECORDED_BIT)
+#define clear_name_recorded(node)          	prov_clear_flag(node, NAME_RECORDED_BIT)
 #define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
 
 #define TRACKED_BIT 2
