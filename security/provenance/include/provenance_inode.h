@@ -70,8 +70,8 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	// will not be recorded
 	if( provenance_is_opaque(prov_msg(prov)) )
 		return;
-
 	record_inode_name(inode, prov);
+	prov_msg(prov)->inode_info.ino = inode->i_ino;
 	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));

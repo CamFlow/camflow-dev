@@ -178,7 +178,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
 	if (unlikely(!iprov))
 		return -ENOMEM;
-
 	prov_msg(iprov)->inode_info.ino = inode->i_ino;
 	prov_msg(iprov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(iprov)->inode_info.gid = __kgid_val(inode->i_gid);
