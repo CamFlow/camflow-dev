@@ -22,6 +22,7 @@
 ### v0.2.3
 
 ```
+- persist provenance information across reboot.
 - anticipate read only after init security hooks upcoming changes.
 - handle provenance through extended attribute.
 - Update to kernel version 4.9.9.
@@ -212,7 +213,6 @@ remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc
 * Switch to 4.9 once confirmed it is LTS.
 * Setting tracking via pid is "racy" (i.e. pid may be reassigned while parameter are being set).
 * Clean-up code.
-* IFC tags and provenance data persistence across reboot.
 * Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
 * Look at [NetLabel](https://www.kernel.org/doc/Documentation/netlabel/introduction.txt), [XFRM](http://man7.org/linux/man-pages/man8/ip-xfrm.8.html) and [IPSEC](http://kernelspec.blogspot.co.uk/2014/10/ipsec-implementation-in-linux-kernel.html) for labelled packet (may or may not do what we want).
 * Look at [Coccinelle](http://coccinelle.lip6.fr/) for patching /security/security.c and .h files.
