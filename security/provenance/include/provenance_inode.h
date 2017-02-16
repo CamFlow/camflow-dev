@@ -152,6 +152,7 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	memcpy(prov_msg(prov), buf, sizeof(union prov_msg));
 	rc = 0;
 free_buf:
+	prov->inode=inode;
 	kfree(buf);
 out:
 	return rc;

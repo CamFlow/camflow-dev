@@ -25,6 +25,7 @@
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
+#include <linux/xattr.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
@@ -51,6 +52,7 @@ struct provenance {
 	uint8_t has_mmap;
 	bool has_outgoing;
 	bool initialised;
+	struct inode *inode;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -116,6 +118,27 @@ static inline void __record_relation(uint64_t type,
 	prov_write(relation);
 }
 
+static inline void save_provenance(struct inode *inode)
+{
+	struct provenance *prov = inode->i_provenance;
+	union prov_msg buf;
+	struct dentry *dentry;
+	if(prov->inode==NULL)
+		return;
+	if(!prov->initialised || !provenance_is_recorded(prov_msg(prov)))
+		return;
+	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not support on this inode
+		return;
+	memcpy(&buf, prov_msg(prov), sizeof(union prov_msg));
+	clear_recorded(&buf);
+	clear_name_recorded(&buf);
+	dentry = d_find_alias(inode);
+	if(!dentry)
+		return;
+	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_msg), 0);
+	dput(dentry);
+}
+
 static inline void __update_version(uint64_t type, struct provenance *prov)
 {
 	union prov_msg old_prov;
@@ -135,6 +158,8 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	else
 		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	prov->has_outgoing=false; // we update there is no more outgoing edge
+	if(prov->inode!=NULL)
+		save_provenance(prov->inode);
 }
 
 static inline void __propagate(uint64_t type,
