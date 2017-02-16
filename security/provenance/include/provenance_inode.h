@@ -122,7 +122,7 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	}
 	spin_unlock(prov_lock(prov));
 	record_inode_type(inode->i_mode, prov);
-	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not support on this inode
+	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not supported on this inode
 		goto out;
 	if(opt_dentry)
 		dentry = dget(opt_dentry);
@@ -142,7 +142,6 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	if(rc<0){
 		if(rc!=-ENODATA && rc!=-EOPNOTSUPP){
 			prov->initialised = false;
-			printk(KERN_ERR "Provenance get xattr returned %d", rc);
 			goto free_buf;
 		}else{
 			rc = 0;
@@ -152,7 +151,6 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	memcpy(prov_msg(prov), buf, sizeof(union prov_msg));
 	rc = 0;
 free_buf:
-	prov->inode=inode;
 	kfree(buf);
 out:
 	return rc;
@@ -184,5 +182,30 @@ static inline struct provenance *file_provenance(struct file *file)
 	if (inode == NULL)
 		return NULL;
 	return inode_provenance(inode, true);
+}
+
+static inline void save_provenance(struct dentry *dentry)
+{
+	struct inode *inode;
+	struct provenance *prov;
+	union prov_msg buf;
+	int rc=0;
+	if(!dentry)
+		return;
+	inode = d_backing_inode(dentry);
+	if(!inode)
+		return;
+	prov = inode->i_provenance;
+	spin_lock(prov_lock(prov));
+	if(!prov->initialised || prov->saved){ // not initialised or already saved
+		spin_unlock(prov_lock(prov));
+		return;
+	}
+	memcpy(&buf, prov_msg(prov), sizeof(union prov_msg));
+	prov->saved=true;
+	spin_unlock(prov_lock(prov));
+	clear_recorded(&buf);
+	clear_name_recorded(&buf);
+	rc = __vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_msg), 0);
 }
 #endif
