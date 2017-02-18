@@ -185,7 +185,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	record_inode_type(inode->i_mode, iprov);
 	sprov = inode->i_sb->s_provenance;
 	memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
-
 	inode->i_provenance = iprov;
 	refresh_inode_provenance(inode);
 	return 0;
@@ -214,10 +213,8 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = dir->i_provenance;
 	unsigned long irqflags;
-
 	if (!iprov)
 		return -ENOMEM;
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
 	flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
@@ -581,11 +578,6 @@ static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size
 		memcpy(buffer, XATTR_NAME_PROVENANCE, len);
 	return len;
 }
-
-//TODO
-// file_free
-// file_mmap
-// bprm_check
 
 /*
  * Check file permissions before accessing an open file.  This hook is
