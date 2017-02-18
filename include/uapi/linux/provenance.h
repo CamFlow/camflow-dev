@@ -95,7 +95,6 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
 #define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
 #define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
-#define PROV_FILE_FILE                        "/sys/kernel/security/provenance/file"
 #define PROV_PROCESS_FILE                     "/sys/kernel/security/provenance/process"
 #define PROV_IPV4_INGRESS_FILE                "/sys/kernel/security/provenance/ipv4_ingress"
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
@@ -267,7 +266,7 @@ union prov_identifier {
 
 #define NAME_RECORDED_BIT 1
 #define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
-#define clear__name_recorded(node)          prov_clear_flag(node, NAME_RECORDED_BIT)
+#define clear_name_recorded(node)          	prov_clear_flag(node, NAME_RECORDED_BIT)
 #define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
 
 #define TRACKED_BIT 2
@@ -438,12 +437,6 @@ struct prov_filter {
 #define PROV_SET_OPAQUE       0x02
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
-
-struct prov_file_config {
-	char name[PATH_MAX];
-	union prov_msg prov;
-	uint8_t op;
-};
 
 struct prov_self_config {
 	union prov_msg prov;

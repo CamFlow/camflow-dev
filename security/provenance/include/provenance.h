@@ -25,6 +25,7 @@
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
+#include <linux/xattr.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
@@ -50,6 +51,8 @@ struct provenance {
 	uint8_t updt_mmap;
 	uint8_t has_mmap;
 	bool has_outgoing;
+	bool initialised;
+	bool saved;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -134,6 +137,7 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	else
 		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	prov->has_outgoing=false; // we update there is no more outgoing edge
+	prov->saved=false;
 }
 
 static inline void __propagate(uint64_t type,
