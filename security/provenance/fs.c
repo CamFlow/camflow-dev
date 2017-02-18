@@ -53,7 +53,6 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_PROPAGATE_RELATION_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
-	provenance_mark_as_opaque(PROV_FILE_FILE);
 	provenance_mark_as_opaque(PROV_PROCESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
@@ -360,86 +359,6 @@ static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_flush_ops, prov_write_flush, no_read);
 
-static ssize_t prov_write_file(struct file *file, const char __user *buf,
-			       size_t count, loff_t *ppos)
-{
-	struct prov_file_config *msg;
-	struct inode *in;
-	struct provenance *prov;
-	union prov_msg *setting;
-	uint8_t op;
-
-	if (!capable(CAP_AUDIT_CONTROL))
-		return -EPERM;
-
-	if (count < sizeof(struct prov_file_config))
-		return -EINVAL;
-
-	msg = (struct prov_file_config *)buf;
-
-	in = file_name_to_inode(msg->name);
-	if (!in) {
-		printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
-		return -EINVAL;
-	}
-	op = msg->op;
-	setting = &msg->prov;
-	prov = in->i_provenance;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if ((op & PROV_SET_TRACKED) != 0) {
-		if (provenance_is_tracked(setting))
-			set_tracked(prov_msg(prov));
-		else
-			clear_tracked(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_OPAQUE) != 0) {
-		if (provenance_is_opaque(setting))
-			set_opaque(prov_msg(prov));
-		else
-			clear_opaque(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_PROPAGATE) != 0) {
-		if (provenance_does_propagate(setting))
-			set_propagate(prov_msg(prov));
-		else
-			clear_propagate(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
-	spin_unlock(prov_lock(prov));
-	return sizeof(struct prov_file_config);
-}
-
-static ssize_t prov_read_file(struct file *filp, char __user *buf,
-			      size_t count, loff_t *ppos)
-{
-	struct prov_file_config *msg;
-	struct inode *in;
-	struct provenance *prov;
-	int rtn = sizeof(struct prov_file_config);
-
-	if (count < sizeof(struct prov_file_config))
-		return -EINVAL;
-
-	msg = (struct prov_file_config *)buf;
-	in = file_name_to_inode(msg->name);
-	if (!in) {
-		printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
-		return -EINVAL;
-	}
-
-	prov = in->i_provenance;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if (copy_to_user(&msg->prov, prov, sizeof(union prov_msg)))
-		rtn = -ENOMEM;
-	spin_unlock(prov_lock(prov));
-	return rtn;
-}
-declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);
-
 static ssize_t prov_write_process(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
@@ -728,7 +647,6 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("propagate_node_filter", 0644, prov_dir, NULL, &prov_propagate_node_filter_ops);
 	securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
 	securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
-	securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
 	securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
 	securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
 	securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
@@ -742,3 +660,4 @@ static int __init init_prov_fs(void)
 }
 
 core_initcall(init_prov_fs);
+MODULE_LICENSE("GPL");

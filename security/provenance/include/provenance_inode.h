@@ -1,4 +1,4 @@
-/*
+ /*
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
@@ -15,6 +15,7 @@
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/namei.h>
+#include <linux/xattr.h>
 
 #include "provenance_long.h"    // for record_inode_name
 #include "provenance_secctx.h"  // for record_inode_name
@@ -22,20 +23,6 @@
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
-
-static inline struct inode *file_name_to_inode(const char *name)
-{
-	struct path path;
-	struct inode *inode;
-
-	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
-		printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
-		return NULL;
-	}
-	inode = path.dentry->d_inode;
-	path_put(&path);
-	return inode;
-}
 
 static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 {
@@ -64,17 +51,16 @@ static inline void record_inode_type(uint16_t mode, struct provenance *prov)
 
 static inline void provenance_mark_as_opaque(const char *name)
 {
-	struct inode *in;
-	union prov_msg *prov;
+	struct path path;
+	struct provenance *prov;
 
-	in = file_name_to_inode(name);
-	if (!in)
-		printk(KERN_ERR "Provenance: could not find %s file.", name);
-	else{
-		prov = in->i_provenance;
-		if (prov)
-			set_opaque(prov);
+	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
+		printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
+		return;
 	}
+	prov = path.dentry->d_inode->i_provenance;
+	if (prov)
+		set_opaque(prov_msg(prov));
 }
 
 static inline void refresh_inode_provenance(struct inode *inode)
@@ -84,31 +70,11 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	// will not be recorded
 	if( provenance_is_opaque(prov_msg(prov)) )
 		return;
-
 	record_inode_name(inode, prov);
-	if(unlikely(prov_type(prov_msg(prov))==ENT_INODE_UNKNOWN))
-		record_inode_type(inode->i_mode, prov);
+	prov_msg(prov)->inode_info.ino = inode->i_ino;
 	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
-}
-
-static inline struct provenance *dentry_provenance(struct dentry *dentry)
-{
-	struct inode *inode = d_backing_inode(dentry);
-
-	if (inode == NULL)
-		return NULL;
-	return inode->i_provenance;
-}
-
-static inline struct provenance *file_provenance(struct file *file)
-{
-	struct inode *inode = file_inode(file);
-
-	if (inode == NULL)
-		return NULL;
-	return inode->i_provenance;
 }
 
 static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_msg *cprov)
@@ -135,5 +101,111 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 	__record_node(prov_msg(prov));
 	__record_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	return prov;
+}
+
+// TODO check the locking in there, it is probably wrong...
+static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
+{
+	struct provenance *prov = inode->i_provenance;
+	union prov_msg *buf;
+	struct dentry *dentry;
+	int rc=0;
+
+	if(prov->initialised)
+		return 0;
+	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
+	if(prov->initialised){
+		spin_unlock(prov_lock(prov));
+		goto out;
+	}	else {
+		prov->initialised = true;
+	}
+	spin_unlock(prov_lock(prov));
+	record_inode_type(inode->i_mode, prov);
+	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not supported on this inode
+		goto out;
+	if(opt_dentry)
+		dentry = dget(opt_dentry);
+	else
+		dentry = d_find_alias(inode);
+	if(!dentry)
+		goto out;
+	buf = kmalloc(sizeof(union prov_msg), GFP_NOFS);
+	if(!buf){
+		rc = -ENOMEM;
+		prov->initialised = false;
+		dput(dentry);
+		goto out;
+	}
+	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_msg));
+	dput(dentry);
+	if(rc<0){
+		if(rc!=-ENODATA && rc!=-EOPNOTSUPP){
+			prov->initialised = false;
+			goto free_buf;
+		}else{
+			rc = 0;
+			goto free_buf;
+		}
+	}
+	memcpy(prov_msg(prov), buf, sizeof(union prov_msg));
+	rc = 0;
+free_buf:
+	kfree(buf);
+out:
+	return rc;
+}
+
+static inline struct provenance* inode_provenance(struct inode *inode, bool may_sleep){
+	struct provenance *prov = inode->i_provenance;
+	might_sleep_if(may_sleep);
+	if(!prov->initialised && may_sleep)
+		inode_init_provenance(inode, NULL);
+	return prov;
+}
+
+static inline struct provenance *dentry_provenance(struct dentry *dentry)
+{
+	struct inode *inode = d_backing_inode(dentry);
+	struct provenance *prov;
+	if (inode == NULL)
+		return NULL;
+	prov = inode->i_provenance;
+	inode_init_provenance(inode, dentry);
+	return prov;
+}
+
+static inline struct provenance *file_provenance(struct file *file)
+{
+	struct inode *inode = file_inode(file);
+
+	if (inode == NULL)
+		return NULL;
+	return inode_provenance(inode, true);
+}
+
+static inline void save_provenance(struct dentry *dentry)
+{
+	struct inode *inode;
+	struct provenance *prov;
+	union prov_msg buf;
+	int rc=0;
+	if(!dentry)
+		return;
+	inode = d_backing_inode(dentry);
+	if(!inode)
+		return;
+	prov = inode->i_provenance;
+	spin_lock(prov_lock(prov));
+	if(!prov->initialised || prov->saved){ // not initialised or already saved
+		spin_unlock(prov_lock(prov));
+		return;
+	}
+	memcpy(&buf, prov_msg(prov), sizeof(union prov_msg));
+	prov->saved=true;
+	spin_unlock(prov_lock(prov));
+	clear_recorded(&buf);
+	clear_name_recorded(&buf);
+	rc = __vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_msg), 0);
 }
 #endif
