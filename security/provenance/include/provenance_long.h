@@ -89,7 +89,7 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	// should not sleep
-	buffer = kmalloc_array(PATH_MAX, sizeof(char), GFP_ATOMIC);
+	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 	if(!buffer){
 		printk(KERN_ERR "Provenance: could not allocate memory\n");
 		return;
@@ -136,7 +136,7 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 			goto out;
 		}
 		// should not sleep
-		buffer = kmalloc_array(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 		if(!buffer){
 			printk(KERN_ERR "Provenance: could not allocate memory\n");
 			fput(exe_file);

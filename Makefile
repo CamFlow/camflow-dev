@@ -1,4 +1,4 @@
-kernel-version=4.9.10
+kernel-version=4.9.11
 lsm-version=0.3.0
 arch=x86_64
 
@@ -19,12 +19,22 @@ prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xvJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
 
-prepare_us:
+prepare_provenance:
 	mkdir -p build
 	cd ./build && git clone https://github.com/CamFlow/camflow-provenance-lib.git
 	cd ./build/camflow-provenance-lib && $(MAKE) prepare
+
+prepare_config:
+	mkdir -p build
 	cd ./build && git clone https://github.com/CamFlow/camflow-config.git
 	cd ./build/camflow-config && $(MAKE) prepare
+
+prepare_cli:
+	mkdir -p build
+	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
+	cd ./build/camflow-cli && $(MAKE) prepare
+
+prepare_us: prepare_provenance prepare_config
 
 copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
@@ -63,6 +73,8 @@ install_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) install
 	cd ./build/camflow-config && $(MAKE) all
 	cd ./build/camflow-config && $(MAKE) install
+	cd ./build/camflow-cli && $(MAKE) all
+	cd ./build/camflow-cli && $(MAKE) install
 
 clean: clean_kernel clean_us
 
