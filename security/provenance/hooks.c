@@ -19,6 +19,7 @@
 #include <linux/xattr.h>
 #include <linux/file.h>
 #include <linux/workqueue.h>
+#include <linux/camflow_policy.h>
 
 #include "av_utils.h"
 #include "provenance.h"
@@ -1387,6 +1388,7 @@ struct ipv4_filters ingress_ipv4filters;
 struct ipv4_filters egress_ipv4filters;
 struct secctx_filters secctx_filters;
 struct cgroup_filters cgroup_filters;
+struct policy_hook policy_hooks;
 bool prov_enabled;
 bool prov_all;
 
@@ -1396,6 +1398,7 @@ void __init provenance_add_hooks(void)
 	INIT_LIST_HEAD(&egress_ipv4filters.list);
 	INIT_LIST_HEAD(&secctx_filters.list);
 	INIT_LIST_HEAD(&cgroup_filters.list);
+	INIT_LIST_HEAD(&policy_hooks.list);
 	prov_enabled = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
 	prov_all = true;

@@ -47,7 +47,7 @@ static inline uint8_t prov_secctx_delete(struct secctx_filters *filters, struct 
 	return 0; // do nothing
 }
 
-static inline uint8_t prov_secctx_add_or_update(struct secctx_filters *filters, struct secctx_filters   *f)
+static inline uint8_t prov_secctx_add_or_update(struct secctx_filters *filters, struct secctx_filters *f)
 {
 	struct list_head *pos, *q;
 	struct secctx_filters *tmp;
