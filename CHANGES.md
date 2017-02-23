@@ -2,8 +2,8 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.0           | 4.9.11         | N/A				|
-| 0.2.3           | 4.9.11         | N/A        |
+| 0.3.0           | 4.9.12         | N/A				|
+| 0.2.3           | 4.9.12         | N/A        |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
 | 0.2.1           | 4.9.5          | 03/02/2017	|
 | 0.2.0           | 4.9.5          | 23/01/2017 |
@@ -30,7 +30,7 @@
 - Persist provenance information across reboot.
 - Anticipate read only after initialisation security hooks upcoming changes.
 - Handle provenance through extended attributes.
-- Update to kernel version 4.9.11.
+- Update to kernel version 4.9.12.
 ```
 
 ### v0.2.2
