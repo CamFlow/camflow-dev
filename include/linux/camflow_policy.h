@@ -15,10 +15,11 @@
 
  #include <uapi/linux/provenance.h>
 
- struct policy_hook {
+struct policy_hook {
   struct list_head list;
-  int (*camflow_policy_hook)(const union prov_msg*, const union prov_msg*, const union prov_msg*);
- };
+  int (*in_edge)(struct relation_struct*, const union prov_msg*);
+  int (*out_edge)(const union prov_msg*, struct relation_struct*);
+};
 
  extern struct policy_hook policy_hooks;
 
@@ -34,17 +35,30 @@ int unregister_camflow_policy_hook( struct policy_hook *hook){
   return 0;
 }
 
-int call_camflow_policy_hook(const union prov_msg *from,
-                            const union prov_msg *to,
-                            const union prov_msg *edge){
+int call_camflow_in_edge(struct relation_struct* in,
+                            const union prov_msg* node){
   int rc=0;
   struct list_head *pos, *q;
   struct policy_hook *fcn;
 
 	list_for_each_safe(pos, q, &(policy_hooks.list)) {
 		fcn = list_entry(pos, struct policy_hook, list);
-		if(!fcn->camflow_policy_hook)
-      rc|=fcn->camflow_policy_hook(from, to, edge);
+		if(!fcn->in_edge)
+      rc|=fcn->in_edge(in, node);
+	}
+  return rc;
+}
+
+int call_camflow_out_edge(const union prov_msg* node,
+                            struct relation_struct* out){
+  int rc=0;
+  struct list_head *pos, *q;
+  struct policy_hook *fcn;
+
+	list_for_each_safe(pos, q, &(policy_hooks.list)) {
+		fcn = list_entry(pos, struct policy_hook, list);
+		if(!fcn->out_edge)
+      rc|=fcn->out_edge(node, out);
 	}
   return rc;
 }
