@@ -19,7 +19,6 @@
 #include <linux/xattr.h>
 #include <linux/file.h>
 #include <linux/workqueue.h>
-#include <linux/camflow_policy.h>
 
 #include "av_utils.h"
 #include "provenance.h"
