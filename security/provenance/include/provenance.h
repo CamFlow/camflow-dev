@@ -26,6 +26,7 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/xattr.h>
+#include <linux/camflow_policy.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
@@ -178,6 +179,8 @@ static inline void record_relation(uint64_t type,
 		return;
 	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(prov_msg(from));
+	call_camflow_out_edge(prov_msg(to), &(relation.relation_info));
+	call_camflow_in_edge(&(relation.relation_info), prov_msg(to));
 	__propagate(type, prov_msg(from), prov_msg(to), &relation, allowed);
 	__record_node(prov_msg(to));
 	__update_version(type, to);
