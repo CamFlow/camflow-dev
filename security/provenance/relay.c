@@ -92,4 +92,3 @@ static int __init relay_prov_init(void)
 	return 0;
 }
 core_initcall(relay_prov_init);
-MODULE_LICENSE("GPL");

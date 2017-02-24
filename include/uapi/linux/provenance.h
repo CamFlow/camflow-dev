@@ -204,8 +204,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
 #define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
 
-#define FLOW_ALLOWED        1
-#define FLOW_DISALLOWED     0
+#define FLOW_ALLOWED        0
+#define FLOW_DISALLOWED     1
 
 #define prov_type(prov)               ((prov)->node_info.identifier.node_id.type)
 #define prov_id_buffer(prov)          ((prov)->node_info.identifier.buffer)

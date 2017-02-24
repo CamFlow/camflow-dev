@@ -54,7 +54,8 @@ static inline void __long_record_relation(uint64_t type, union long_prov_msg *fr
 	__long_record_node(from);
 	__record_node(to);
 	memset(&relation, 0, sizeof(union prov_msg));
-	__record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
+	__prepare_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, NULL);
+	prov_write(&relation);
 }
 
 static inline void __record_node_name(struct provenance *node, char *name)
@@ -195,7 +196,8 @@ static inline void record_write_xattr(uint64_t type,
 		xattr->xattr_info.flags = flags;
 	}
 	__record_node(prov_msg(cprov));
-	__record_relation(type, &(prov_msg(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
+	__prepare_relation(type, &(prov_msg(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
+	prov_write(&relation);
 	__update_version(type, iprov);
 	__long_record_relation(type, xattr, prov_msg(iprov), allowed);
 	kfree(xattr);
@@ -217,7 +219,8 @@ static inline void record_read_xattr(uint64_t type,
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(prov_msg(iprov));
-	__record_relation(type, &(prov_msg(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, allowed, NULL);
+	__prepare_relation(type, &(prov_msg(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
+	prov_write(&relation);
 	__update_version(type, cprov);
 	__long_record_relation(type, xattr, prov_msg(cprov), allowed);
 	kfree(xattr);

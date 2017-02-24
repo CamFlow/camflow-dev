@@ -71,5 +71,4 @@ static int __init provenance_nf_init(void)
 	return 0;
 }
 module_init(provenance_nf_init);
-MODULE_LICENSE("GPL");
 #endif
