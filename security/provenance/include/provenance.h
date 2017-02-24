@@ -98,25 +98,22 @@ static inline void __record_node(union prov_msg *node)
 	prov_write(node);
 }
 
-static inline void __record_relation(uint64_t type,
+static inline void __prepare_relation(uint64_t type,
 				     union prov_identifier *from,
 				     union prov_identifier *to,
 				     union prov_msg *relation,
-				     uint8_t allowed,
 				     struct file *file)
 {
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
 	relation_identifier(relation).machine_id = prov_machine_id;
-	relation->relation_info.allowed = allowed;
 	copy_node_info(&relation->relation_info.snd, from);
 	copy_node_info(&relation->relation_info.rcv, to);
 	if (file != NULL) {
 		relation->relation_info.set = FILE_INFO_SET;
 		relation->relation_info.offset = file->f_pos;
 	}
-	prov_write(relation);
 }
 
 static inline void __update_version(uint64_t type, struct provenance *prov)
@@ -134,9 +131,10 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	node_identifier(prov_msg(prov)).version++;
 	clear_recorded(prov_msg(prov));
 	if (node_identifier(prov_msg(prov)).type == ACT_TASK)
-		__record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+		__prepare_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
 	else
-		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+		__prepare_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
+	prov_write(&relation);
 	prov->has_outgoing=false; // we update there is no more outgoing edge
 	prov->saved=false;
 }
@@ -161,32 +159,79 @@ static inline void __propagate(uint64_t type,
 	}
 }
 
-static inline void record_relation(uint64_t type,
+static inline int call_camflow_out_edge(const union prov_msg* node,
+                            struct relation_struct* out){
+  int rc=0;
+  struct list_head *listentry, *listtmp;
+  struct policy_hook *fcn;
+  printk(KERN_INFO "Provenance out.\n");
+	list_for_each_safe(listentry, listtmp, &policy_hooks) {
+		fcn = list_entry(listentry, struct policy_hook, list);
+		if(fcn->out_edge)
+      rc|=fcn->out_edge(node, out);
+	}
+  return rc;
+}
+
+static inline int call_camflow_in_edge(struct relation_struct* in,
+                            const union prov_msg* node){
+  int rc=0;
+  struct list_head *listentry, *listtmp;
+  struct policy_hook *fcn;
+  printk(KERN_INFO "Provenance in.\n");
+	list_for_each_safe(listentry, listtmp, &policy_hooks) {
+  printk(KERN_INFO "Provenance found?\n");
+		fcn = list_entry(listentry, struct policy_hook, list);
+		if(fcn->in_edge)
+      rc|=fcn->in_edge(in, node);
+	}
+  return rc;
+}
+
+static inline int __check_hooks(union prov_msg *from,
+																union prov_msg *to,
+																union prov_msg *relation){
+	int rc=0;
+	rc = call_camflow_out_edge(from, &(relation->relation_info));
+	rc |= call_camflow_in_edge(&(relation->relation_info), to);
+	if( (rc&CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING){
+		// TODO do something
+	}
+	if( (rc&CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW){
+		relation->relation_info.allowed=FLOW_DISALLOWED;
+		return -EPERM;
+	}
+	return 0;
+}
+
+static inline int record_relation(uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
 				   uint8_t allowed,
 				   struct file *file)
 {
 	union prov_msg relation;
+	int rc=0;
 
 	// check if the nodes match some capture options
 	apply_target(prov_msg(from));
 	apply_target(prov_msg(to));
 
 	if (!provenance_is_tracked(prov_msg(from)) && !provenance_is_tracked(prov_msg(to)) && !prov_all)
-		return;
+		return 0;
 	if (!should_record_relation(type, prov_msg(from), prov_msg(to), allowed))
-		return;
+		return 0;
 	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(prov_msg(from));
-	call_camflow_out_edge(prov_msg(to), &(relation.relation_info));
-	call_camflow_in_edge(&(relation.relation_info), prov_msg(to));
 	__propagate(type, prov_msg(from), prov_msg(to), &relation, allowed);
 	__record_node(prov_msg(to));
 	__update_version(type, to);
 	__record_node(prov_msg(to));
-	__record_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, allowed, file);
+	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
+	rc = __check_hooks(prov_msg(from), prov_msg(to), &relation);
+	prov_write(&relation);
 	from->has_outgoing=true; // there is an outgoing edge
+	return rc;
 }
 
 static inline void flow_to_activity(uint64_t type,

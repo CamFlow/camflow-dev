@@ -658,6 +658,4 @@ static int __init init_prov_fs(void)
 	printk(KERN_INFO "Provenance fs ready.\n");
 	return 0;
 }
-
 core_initcall(init_prov_fs);
-MODULE_LICENSE("GPL");

@@ -164,38 +164,45 @@ static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters *filters, stru
 }
 
 // incoming packet
-static inline void record_pck_to_inode(union prov_msg *pck, struct provenance *inode)
+static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *inode)
 {
 	union prov_msg relation;
+	int rc = 0;
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
-		return;
+		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
-		return;
+		return 0;
 	if (!should_record_relation(RL_RCV_PACKET, pck, prov_msg(inode), FLOW_ALLOWED))
-		return;
+		return 0;
 	memset(&relation, 0, sizeof(union prov_msg));
 	prov_write(pck);
 	__record_node(prov_msg(inode));
 	__update_version(RL_RCV_PACKET, inode);
 	__record_node(prov_msg(inode));
-	__record_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(prov_msg(inode)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	__prepare_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(prov_msg(inode)->msg_info.identifier), &relation, NULL);
+	rc = __check_hooks(pck, prov_msg(inode), &relation);
+	prov_write(&relation);
+	return rc;
 }
 
 // outgoing packet
-static inline void record_inode_to_pck(struct provenance *inode, union prov_msg *pck)
+static inline int record_inode_to_pck(struct provenance *inode, union prov_msg *pck)
 {
 	union prov_msg relation;
-
+	int rc=0;
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
-		return;
+		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
-		return;
+		return 0;
 	if (!should_record_relation(RL_SND_PACKET, prov_msg(inode), pck, FLOW_ALLOWED))
-		return;
+		return 0;
 	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(prov_msg(inode));
 	prov_write(pck);
-	__record_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	__prepare_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, NULL);
+	rc = __check_hooks(prov_msg(inode), pck, &relation);
 	inode->has_outgoing=true;
+	prov_write(&relation);
+	return rc;
 }
 #endif
