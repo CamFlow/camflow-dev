@@ -436,7 +436,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
 static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
-					  size_t count, struct ipv4_filters *filters)
+					  size_t count, struct list_head *filters)
 {
 	struct ipv4_filters     *f;
 
@@ -460,15 +460,17 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 }
 
 static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
-					 size_t count, struct ipv4_filters *filters)
+					 size_t count, struct list_head *filters)
 {
+	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
 	size_t pos = 0;
 
 	if (count < sizeof(struct prov_ipv4_filter))
 		return -ENOMEM;
 
-	list_for_each_entry(tmp, &(filters->list), list) {
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if (count < pos + sizeof(struct prov_ipv4_filter))
 			return -ENOMEM;
 
@@ -541,22 +543,24 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
 	if ((s->filter.op & PROV_SEC_DELETE) != PROV_SEC_DELETE)
-		prov_secctx_add_or_update(&secctx_filters, s);
+		prov_secctx_add_or_update(s);
 	else
-		prov_secctx_delete(&secctx_filters, s);
+		prov_secctx_delete(s);
 	return 0;
 }
 
 static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
+	struct list_head *listentry, *listtmp;
 	struct secctx_filters *tmp;
 	size_t pos = 0;
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
 
-	list_for_each_entry(tmp, &(secctx_filters.list), list) {
+	list_for_each_safe(listentry, listtmp, &secctx_filters) {
+		tmp = list_entry(listentry, struct secctx_filters, list);
 		if (count < pos + sizeof(struct secinfo))
 			return -ENOMEM;
 
@@ -580,25 +584,26 @@ static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *bu
 	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
 		return -EAGAIN;
 	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
-		prov_cgroup_add_or_update(&cgroup_filters, s);
+		prov_cgroup_add_or_update(s);
 	else
-		prov_cgroup_delete(&cgroup_filters, s);
+		prov_cgroup_delete(s);
 	return 0;
 }
 
 static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
+	struct list_head *listentry, *listtmp;
 	struct cgroup_filters *tmp;
 	size_t pos = 0;
 
 	if (count < sizeof(struct cgroupinfo))
 		return -ENOMEM;
 
-	list_for_each_entry(tmp, &(cgroup_filters.list), list) {
+	list_for_each_safe(listentry, listtmp, &cgroup_filters) {
+		tmp = list_entry(listentry, struct cgroup_filters, list);
 		if (count < pos + sizeof(struct cgroupinfo))
 			return -ENOMEM;
-
 		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct cgroupinfo)))
 			return -EAGAIN;
 		pos += sizeof(struct cgroupinfo);
