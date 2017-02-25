@@ -109,17 +109,19 @@ struct ipv4_filters {
 	struct prov_ipv4_filter filter;
 };
 
-extern struct ipv4_filters ingress_ipv4filters;
-extern struct ipv4_filters egress_ipv4filters;
+extern struct list_head ingress_ipv4filters;
+extern struct list_head egress_ipv4filters;
 
 #define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 #define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
-static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters *filters, uint32_t ip, uint32_t port)
+static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, uint32_t port)
 {
+	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
 
-	list_for_each_entry(tmp, &(filters->list), list) {
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))     // ip match filter
 			if (tmp->filter.port == 0 || tmp->filter.port == port)          // any port or match
 				return tmp->filter.op;
@@ -127,17 +129,17 @@ static inline uint8_t prov_ipv4_whichOP(struct ipv4_filters *filters, uint32_t i
 	return 0; // do nothing
 }
 
-static inline uint8_t prov_ipv4_delete(struct ipv4_filters *filters, struct ipv4_filters *f)
+static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_filters *f)
 {
-	struct list_head *pos, *q;
+	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
 
-	list_for_each_safe(pos, q, &(filters->list)) {
-		tmp = list_entry(pos, struct ipv4_filters, list);
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if (tmp->filter.mask == f->filter.mask &&
 		    tmp->filter.ip == f->filter.ip &&
 		    tmp->filter.port == f->filter.port) {
-			list_del(pos);
+			list_del(listentry);
 			kfree(tmp);
 			return 0; // you should only get one
 		}
@@ -145,13 +147,13 @@ static inline uint8_t prov_ipv4_delete(struct ipv4_filters *filters, struct ipv4
 	return 0; // do nothing
 }
 
-static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters *filters, struct ipv4_filters *f)
+static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct ipv4_filters *f)
 {
-	struct list_head *pos, *q;
+	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
 
-	list_for_each_safe(pos, q, &(filters->list)) {
-		tmp = list_entry(pos, struct ipv4_filters, list);
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if (tmp->filter.mask == f->filter.mask &&
 		    tmp->filter.ip == f->filter.ip &&
 		    tmp->filter.port == f->filter.port) {
@@ -159,7 +161,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct ipv4_filters *filters, stru
 			return 0; // you should only get one
 		}
 	}
-	list_add_tail(&(f->list), &filters->list); // not already on the list, we add it
+	list_add_tail(&(f->list), filters); // not already on the list, we add it
 	return 0;
 }
 
