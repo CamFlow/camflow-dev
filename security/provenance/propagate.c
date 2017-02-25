@@ -1,4 +1,4 @@
-/*
+ /*
  *
  * Author: Thomas Pasquier <tfjmp@g.harvard.edu>
  *
@@ -13,13 +13,23 @@
 
 #include "provenance.h"
 
-int in_edge(struct relation_struct* edge, const union prov_msg* node){
+int in_edge(union prov_msg* edge, union prov_msg* node){
   printk(KERN_INFO "Provenance propagate in.\n");
+  if(provenance_does_propagate(edge)){
+    set_tracked(node);
+    set_propagate(node);
+  }
   return 0;
 }
 
-int out_edge(const union prov_msg* node, struct relation_struct* edge){
+int out_edge(union prov_msg* node, union prov_msg* edge){
   printk(KERN_INFO "Provenance propagate out.\n");
+  if(provenance_does_propagate(node)){
+    if( filter_propagate_relation(prov_type(edge)) ){
+  	   set_tracked(edge);
+       set_propagate(edge);
+    }
+  }
   return 0;
 }
 

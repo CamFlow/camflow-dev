@@ -174,7 +174,7 @@ static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *in
 		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
 		return 0;
-	if (!should_record_relation(RL_RCV_PACKET, pck, prov_msg(inode), FLOW_ALLOWED))
+	if (!should_record_relation(RL_RCV_PACKET, pck, prov_msg(inode)))
 		return 0;
 	memset(&relation, 0, sizeof(union prov_msg));
 	prov_write(pck);
@@ -196,7 +196,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_msg *
 		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
 		return 0;
-	if (!should_record_relation(RL_SND_PACKET, prov_msg(inode), pck, FLOW_ALLOWED))
+	if (!should_record_relation(RL_SND_PACKET, prov_msg(inode), pck))
 		return 0;
 	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(prov_msg(inode));

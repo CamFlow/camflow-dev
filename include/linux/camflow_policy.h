@@ -20,8 +20,8 @@
 
 struct policy_hook {
   struct list_head list;
-  int (*out_edge)(const union prov_msg*, struct relation_struct*);
-  int (*in_edge)(struct relation_struct*, const union prov_msg*);
+  int (*out_edge)(union prov_msg*, union prov_msg*);
+  int (*in_edge)(union prov_msg*, union prov_msg*);
 };
 
  extern struct list_head policy_hooks;
