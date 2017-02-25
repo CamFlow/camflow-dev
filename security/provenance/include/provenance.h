@@ -164,7 +164,6 @@ static inline int call_camflow_out_edge(const union prov_msg* node,
   int rc=0;
   struct list_head *listentry, *listtmp;
   struct policy_hook *fcn;
-  printk(KERN_INFO "Provenance out.\n");
 	list_for_each_safe(listentry, listtmp, &policy_hooks) {
 		fcn = list_entry(listentry, struct policy_hook, list);
 		if(fcn->out_edge)
@@ -178,9 +177,7 @@ static inline int call_camflow_in_edge(struct relation_struct* in,
   int rc=0;
   struct list_head *listentry, *listtmp;
   struct policy_hook *fcn;
-  printk(KERN_INFO "Provenance in.\n");
 	list_for_each_safe(listentry, listtmp, &policy_hooks) {
-  printk(KERN_INFO "Provenance found?\n");
 		fcn = list_entry(listentry, struct policy_hook, list);
 		if(fcn->in_edge)
       rc|=fcn->in_edge(in, node);
