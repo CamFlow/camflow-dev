@@ -53,12 +53,8 @@ extern uint64_t prov_relation_filter;
 extern uint64_t prov_propagate_relation_filter;
 
 /* return either or not the relation should be filtered out */
-static inline bool filter_relation(uint64_t type, uint8_t allowed)
+static inline bool filter_relation(uint64_t type)
 {
-	if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED))
-		return true;
-	if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_relation_filter, RL_ALLOWED))
-		return true;
 	// we hit an element of the black list ignore
 	if (HIT_FILTER(prov_relation_filter, type))
 		return true;
@@ -66,25 +62,18 @@ static inline bool filter_relation(uint64_t type, uint8_t allowed)
 }
 
 /* return either or not tracking should propagate */
-static inline bool filter_propagate_relation(uint64_t type, uint8_t allowed)
+static inline bool filter_propagate_relation(uint64_t type)
 {
-	if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_DISALLOWED))
-		return true;
-	if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_ALLOWED))
-		return true;
 	// the relation does not allow tracking propagation
 	if (HIT_FILTER(prov_propagate_relation_filter, type))
 		return true;
 	return false;
 }
 
-static inline bool should_record_relation(uint64_t type, union prov_msg *from, union prov_msg *to, uint8_t allowed)
+static inline bool should_record_relation(uint64_t type, union prov_msg *from, union prov_msg *to)
 {
 	// one of the node should not appear in the record, ignore the relation
 	if (filter_node(from) || filter_node(to))
-		return false;
-	// should the relation appear
-	if (filter_relation(type, allowed))
 		return false;
 	return true;
 }

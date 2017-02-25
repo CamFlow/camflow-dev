@@ -87,7 +87,7 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 		return NULL;
 	if (!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all)
 		return NULL;
-	if (!should_record_relation(RL_MMAP, cprov, iprov, FLOW_ALLOWED))
+	if (!should_record_relation(RL_MMAP, cprov, iprov))
 		return NULL;
 	prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
 
@@ -97,7 +97,6 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 	prov_msg(prov)->inode_info.mode = iprov->inode_info.mode;
 	__record_node(iprov);
 	memset(&relation, 0, sizeof(union prov_msg));
-	__propagate(RL_MMAP, iprov, prov_msg(prov), &relation, FLOW_ALLOWED);
 	__record_node(prov_msg(prov));
 	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
