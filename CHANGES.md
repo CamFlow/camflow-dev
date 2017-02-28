@@ -22,6 +22,7 @@
 ### v0.2.3
 
 ```
+- Put back Unix socket recording.
 - Persist provenance information across reboot.
 - Anticipate read only after initialisation security hooks upcoming changes.
 - Handle provenance through extended attributes.
