@@ -1177,14 +1177,18 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					  struct sock *other,
 					  struct sock *newsk)
 {
-	/*struct provenance* cprov  = current_provenance();
-	   struct provenance* skprov = sk_provenance(sock);
-	   struct provenance* nskprov = sk_provenance(newsk);
-	   struct provenance* okprov = sk_provenance(other);
-
-	      record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
-	      record_relation(RL_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
-	      record_relation(RL_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);*/
+	/*struct provenance *cprov  = current_provenance();
+	struct provenance *iprov = sk_inode_provenance(sock);
+	struct provenance *oprov = sk_inode_provenance(other);
+	struct provenance *nprov = sk_inode_provenance(newsk);
+	unsigned long irqflags;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	flow_from_activity(RL_CONNECT, cprov, nprov, FLOW_ALLOWED, NULL);
+	flow_from_activity(RL_CONNECT, iprov, nprov, FLOW_ALLOWED, NULL);
+	flow_from_activity(RL_CONNECT, oprov, nprov, FLOW_ALLOWED, NULL);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);*/
 	return 0;
 }
 
@@ -1198,10 +1202,14 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	/*struct provenance* skprov = socket_inode_provenance(sock);
-	   struct provenance* okprov = socket_inode_provenance(other);
-
-	      record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);*/
+	struct provenance* sprov = socket_inode_provenance(sock);
+	struct provenance* oprov = socket_inode_provenance(other);
+	unsigned long irqflags;
+	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
+	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
+	flow_between_entities(RL_UNKNOWN, sprov, oprov, FLOW_ALLOWED, NULL);
+	spin_unlock(prov_lock(oprov));
+	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return 0;
 }
 
