@@ -1267,6 +1267,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 		set_opaque(prov_msg(nprov));
 		return;
 	}
+	record_node_name(cprov, bprm->interp);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_between_activities(RL_EXEC_PROCESS, cprov, nprov, FLOW_ALLOWED, NULL);
