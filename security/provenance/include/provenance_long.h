@@ -57,10 +57,11 @@ static inline void __long_record_relation(uint64_t type, union long_prov_msg *fr
 	__record_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, allowed, NULL);
 }
 
-static inline void __record_node_name(struct provenance *node, char *name)
+static inline void record_node_name(struct provenance *node, const char *name)
 {
 	union long_prov_msg *fname_prov;
-
+	if (provenance_is_name_recorded(prov_msg(node)) || !provenance_is_recorded(prov_msg(node)))
+		return;
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
 	if(!fname_prov){
 		printk(KERN_ERR "Provenance: recod name failed to allocate memory\n");
@@ -95,7 +96,7 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 		return;
 	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-	__record_node_name(prov, ptr);
+	record_node_name(prov, ptr);
 	kfree(buffer);
 }
 
@@ -144,7 +145,7 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
-		__record_node_name(prov, ptr);
+		record_node_name(prov, ptr);
 		kfree(buffer);
 	}
 out:
