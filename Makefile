@@ -34,7 +34,7 @@ prepare_cli:
 	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
 	cd ./build/camflow-cli && $(MAKE) prepare
 
-prepare_us: prepare_provenance prepare_config
+prepare_us: prepare_provenance prepare_config prepare_cli
 
 copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
