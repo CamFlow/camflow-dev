@@ -116,6 +116,15 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_secctx.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace include/linux/cred.h
+	uncrustify -c uncrustify.cfg --replace include/linux/fs.h
+	uncrustify -c uncrustify.cfg --replace include/linux/ipc.h
+	uncrustify -c uncrustify.cfg --replace include/linux/lsm_hooks.h
+	uncrustify -c uncrustify.cfg --replace include/linux/msg.h
+	uncrustify -c uncrustify.cfg --replace include/net/sock.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/camflow.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/xattr.h
 
 patch:
 	cd build && mkdir -p pristine
