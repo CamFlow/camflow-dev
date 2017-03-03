@@ -42,7 +42,7 @@ static inline bool __filter_node(uint64_t filter, const union prov_msg *node)
 }
 
 #define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS) | SUBTYPE(RL_VERSION) | SUBTYPE(RL_NAMED))
-static inline bool filter_update_node(uint64_t relation_type, union prov_msg *to)
+static inline bool filter_update_node(uint64_t relation_type)
 {
 	if (HIT_FILTER(relation_type, UPDATE_FILTER)) // not update if relation is of above type
 		return true;
@@ -78,7 +78,7 @@ static inline bool should_record_relation(uint64_t type, union prov_msg *from, u
 	return true;
 }
 
-static inline bool prov_has_secid(union prov_msg* prov)
+static inline bool prov_has_secid(union prov_msg *prov)
 {
 	switch (prov_type(prov)) {
 	case ENT_INODE_UNKNOWN:
@@ -95,12 +95,12 @@ static inline bool prov_has_secid(union prov_msg* prov)
 	}
 }
 
-static inline void apply_target(union prov_msg* prov)
+static inline void apply_target(union prov_msg *prov)
 {
 	uint8_t op;
 
 	// track based on cgroup
-	if ( prov_type(prov) == ACT_TASK ) {
+	if (prov_type(prov) == ACT_TASK) {
 		op = prov_cgroup_whichOP(prov->task_info.cid);
 		if (unlikely(op != 0)) {
 			printk(KERN_INFO "Provenance: apply cgroup filter %u.", op);
@@ -110,7 +110,7 @@ static inline void apply_target(union prov_msg* prov)
 				set_propagate(prov);
 		}
 	}
-	if (prov_has_secid(prov) ) {
+	if (prov_has_secid(prov)) {
 		op = prov_secctx_whichOP(node_secid(prov));
 		if (unlikely(op != 0)) {
 			printk(KERN_INFO "Provenance: apply secctx filter %u.", op);

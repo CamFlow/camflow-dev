@@ -27,6 +27,7 @@
 
 ### v0.2.3
 ```
+- Add support for travis (see https://travis-ci.org/) testing.
 - Put back Unix socket recording.
 - Persist provenance information across reboot.
 - Anticipate read only after initialisation security hooks upcoming changes.

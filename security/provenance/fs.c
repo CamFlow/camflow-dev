@@ -79,7 +79,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char*)get_zeroed_page(GFP_KERNEL);
+	page = (char *)get_zeroed_page(GFP_KERNEL);
 	if (!page)
 		return -ENOMEM;
 
@@ -130,7 +130,7 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t*)buf;
+	uint32_t *tmp = (uint32_t *)buf;
 
 	// ideally should be decoupled from set machine id
 	__init_opaque();
@@ -192,7 +192,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if (copy_to_user((void*)buf, &node, count)) {
+	if (copy_to_user((void *)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
@@ -223,22 +223,7 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
-static ssize_t prov_write_self(struct file *file, const char __user *buf,
-			       size_t count, loff_t *ppos)
-{
-	struct prov_self_config msg;
-	struct provenance *prov = current_provenance();
-	union prov_msg *setting;
-	uint8_t op;
-
-	if (count < sizeof(struct prov_self_config))
-		return -EINVAL;
-
-	if (copy_from_user(&msg, buf, sizeof(struct prov_self_config)))
-		return -ENOMEM;
-
-	setting = &(msg.prov);
-	op = msg.op;
+static inline void update_prov_config(union prov_msg *setting, uint8_t op, struct provenance *prov){
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
@@ -264,8 +249,22 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	if ((op & PROV_SET_TAINT) != 0)
 		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
 	spin_unlock(prov_lock(prov));
+}
 
-	return sizeof(struct prov_self_config);
+static ssize_t prov_write_self(struct file *file, const char __user *buf,
+			       size_t count, loff_t *ppos)
+{
+	struct prov_process_config msg;
+	struct provenance *prov = current_provenance();
+
+	if (count < sizeof(struct prov_process_config))
+		return -EINVAL;
+
+	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
+		return -ENOMEM;
+
+	update_prov_config(&(msg.prov), msg.op, prov);
+	return sizeof(struct prov_process_config);
 }
 
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
@@ -362,10 +361,8 @@ declare_file_operations(prov_flush_ops, prov_write_flush, no_read);
 static ssize_t prov_write_process(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	struct prov_process_config *msg;
+	struct prov_process_config msg;
 	struct provenance *prov;
-	union prov_msg *setting;
-	uint8_t op;
 
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
@@ -373,41 +370,14 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config *)buf;
+	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
+		return -ENOMEM;
 
-	setting = &(msg->prov);
-	op = msg->op;
-
-	prov = prov_from_vpid(msg->vpid);
+	prov = prov_from_vpid(msg.vpid);
 	if (prov == NULL)
 		return -EINVAL;
 
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if ((op & PROV_SET_TRACKED) != 0) {
-		if (provenance_is_tracked(setting))
-			set_tracked(prov_msg(prov));
-		else
-			clear_tracked(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_OPAQUE) != 0) {
-		if (provenance_is_opaque(setting))
-			set_opaque(prov_msg(prov));
-		else
-			clear_opaque(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_PROPAGATE) != 0) {
-		if (provenance_does_propagate(setting))
-			set_propagate(prov_msg(prov));
-		else
-			clear_propagate(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
-
-	spin_unlock(prov_lock(prov));
+	update_prov_config(&(msg.prov), msg.op, prov);
 	return sizeof(struct prov_process_config);
 }
 

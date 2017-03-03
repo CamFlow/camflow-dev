@@ -17,7 +17,7 @@ prepare: prepare_kernel prepare_us
 
 prepare_kernel:
 	mkdir -p build
-	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xvJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
 
 prepare_provenance:
 	mkdir -p build
@@ -40,12 +40,17 @@ copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
 	cd ./build/linux-$(kernel-version) && cp -r ../../include .
 
-config: copy_change
+copy_config:
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
+
+config: copy_change copy_config
 	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
+
+config_travis: copy_change copy_config
+	cd ./build/linux-$(kernel-version) && $(MAKE) defconfig
 
 compile: compile_security compile_kernel compile_us
 
@@ -101,6 +106,17 @@ test: copy_change
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
 
+test_travis: copy_change
+	@echo "Running sparse..."
+	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/
+	@echo "Running checkpatch..."
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/*.c
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/include/*.h
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
+	@echo "Running flawfinder..."
+	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance
+
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
@@ -128,7 +144,7 @@ uncrustify:
 
 patch:
 	cd build && mkdir -p pristine
-	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine
+	cd build && tar -xJf linux-$(kernel-version).tar.xz -C ./pristine
 	cd build/linux-$(kernel-version) && rm -f .config
 	cd build/linux-$(kernel-version) && rm -f  config_sav
 	cd build/linux-$(kernel-version) && rm -f  certs/signing_key.pem
