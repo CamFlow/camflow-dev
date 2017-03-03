@@ -15,7 +15,8 @@ Automated Travis test run the following operation:
 - run [sparse](https://sparse.wiki.kernel.org/index.php/Main_Page);
 - run [checkpatch](https://kernelnewbies.org/CheckpatchTips);
 - run [flawfinder](https://www.dwheeler.com/flawfinder/);
-- run [SonarQube](https://sonarqube.com).
+- run [SonarQube](https://sonarqube.com);
+- build the kernel patch.
 
 ## Warning
 
