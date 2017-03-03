@@ -22,6 +22,7 @@
 ### v0.2.3
 
 ```
+- A variety of minor issues fixed through code analysis.
 - Add support for travis (see https://travis-ci.org/) testing.
 - Put back Unix socket recording.
 - Persist provenance information across reboot.
