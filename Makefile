@@ -55,7 +55,7 @@ config_travis: copy_change copy_config
 compile: compile_security compile_kernel compile_us
 
 compile_security: copy_change
-	cd ./build/linux-$(kernel-version) && $(MAKE) security
+	cd ./build/linux-$(kernel-version) && $(MAKE) security W=1
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4

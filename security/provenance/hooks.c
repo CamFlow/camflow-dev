@@ -380,7 +380,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
  * @path contains the path structure for the file.
  * Return 0 if permission is granted.
  */
-int provenance_inode_getattr(const struct path *path)
+static int provenance_inode_getattr(const struct path *path)
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = dentry_provenance(path->dentry);
