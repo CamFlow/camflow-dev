@@ -142,7 +142,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/xattr.h
 
-patch:
+patch: copy_change
 	cd build && mkdir -p pristine
 	cd build && tar -xJf linux-$(kernel-version).tar.xz -C ./pristine
 	cd build/linux-$(kernel-version) && rm -f .config
