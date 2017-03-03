@@ -170,6 +170,7 @@ static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *in
 {
 	union prov_msg relation;
 	int rc = 0;
+
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
 		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
@@ -191,7 +192,8 @@ static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *in
 static inline int record_inode_to_pck(struct provenance *inode, union prov_msg *pck)
 {
 	union prov_msg relation;
-	int rc=0;
+	int rc = 0;
+
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
 		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
@@ -201,10 +203,15 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_msg *
 	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(prov_msg(inode));
 	prov_write(pck);
-	__prepare_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, NULL);
+		<< << << < HEAD
+		__prepare_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, NULL);
 	rc = __check_hooks(prov_msg(inode), pck, &relation);
-	inode->has_outgoing=true;
+	inode->has_outgoing = true;
 	prov_write(&relation);
 	return rc;
+	== == == =
+		__record_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
+	inode->has_outgoing = true;
+	>> >> >> > 88e4aca21cbd6a5bb58eb45317279e6369fd1136
 }
 #endif

@@ -34,7 +34,7 @@ prepare_cli:
 	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
 	cd ./build/camflow-cli && $(MAKE) prepare
 
-prepare_us: prepare_provenance prepare_config
+prepare_us: prepare_provenance prepare_config prepare_cli
 
 copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
@@ -100,6 +100,31 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
+
+uncrustify:
+	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/av_utils.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_cgroup.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_long.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_secctx.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace include/linux/cred.h
+	uncrustify -c uncrustify.cfg --replace include/linux/fs.h
+	uncrustify -c uncrustify.cfg --replace include/linux/ipc.h
+	uncrustify -c uncrustify.cfg --replace include/linux/lsm_hooks.h
+	uncrustify -c uncrustify.cfg --replace include/linux/msg.h
+	uncrustify -c uncrustify.cfg --replace include/net/sock.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/camflow.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/xattr.h
 
 patch:
 	cd build && mkdir -p pristine

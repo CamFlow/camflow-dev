@@ -44,6 +44,8 @@ enum {
 	PROVENANCE_LOCK_INODE,
 	PROVENANCE_LOCK_MSG,
 	PROVENANCE_LOCK_SHM,
+	PROVENANCE_LOCK_SOCKET,
+	PROVENANCE_LOCK_SOCK
 };
 
 struct provenance {
@@ -99,10 +101,10 @@ static inline void __record_node(union prov_msg *node)
 }
 
 static inline void __prepare_relation(uint64_t type,
-				     union prov_identifier *from,
-				     union prov_identifier *to,
-				     union prov_msg *relation,
-				     struct file *file)
+				      union prov_identifier *from,
+				      union prov_identifier *to,
+				      union prov_msg *relation,
+				      struct file *file)
 {
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
@@ -121,7 +123,7 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	union prov_msg old_prov;
 	union prov_msg relation;
 
-	if(!prov->has_outgoing) // there is no outgoing
+	if (!prov->has_outgoing) // there is no outgoing
 		return;
 	if (filter_update_node(type, prov_msg(prov)))
 		return;
@@ -135,60 +137,66 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	else
 		__prepare_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
-	prov->has_outgoing=false; // we update there is no more outgoing edge
-	prov->saved=false;
+	prov->has_outgoing = false; // we update there is no more outgoing edge
+	prov->saved = false;
 }
 
 static inline int call_camflow_out_edge(union prov_msg* node,
-																				union prov_msg* edge){
-  int rc=0;
-  struct list_head *listentry, *listtmp;
-  struct policy_hook *fcn;
+					union prov_msg* edge)
+{
+	int rc = 0;
+	struct list_head *listentry, *listtmp;
+	struct policy_hook *fcn;
+
 	list_for_each_safe(listentry, listtmp, &policy_hooks) {
 		fcn = list_entry(listentry, struct policy_hook, list);
-		if(fcn->out_edge)
-      rc|=fcn->out_edge(node, edge);
+		if (fcn->out_edge)
+			rc |= fcn->out_edge(node, edge);
 	}
-  return rc;
+	return rc;
 }
 
 static inline int call_camflow_in_edge(union prov_msg* edge,
-                            					 union prov_msg* node){
-  int rc=0;
-  struct list_head *listentry, *listtmp;
-  struct policy_hook *fcn;
+				       union prov_msg* node)
+{
+	int rc = 0;
+	struct list_head *listentry, *listtmp;
+	struct policy_hook *fcn;
+
 	list_for_each_safe(listentry, listtmp, &policy_hooks) {
 		fcn = list_entry(listentry, struct policy_hook, list);
-		if(fcn->in_edge)
-      rc|=fcn->in_edge(edge, node);
+		if (fcn->in_edge)
+			rc |= fcn->in_edge(edge, node);
 	}
-  return rc;
+	return rc;
 }
 
 static inline int __check_hooks(union prov_msg *from,
-																union prov_msg *to,
-																union prov_msg *edge){
-	int rc=0;
+				union prov_msg *to,
+				union prov_msg *edge)
+{
+	int rc = 0;
+
 	rc = call_camflow_out_edge(from, edge);
 	rc |= call_camflow_in_edge(edge, to);
-	if( (rc&CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING){
+	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING) {
 		// TODO do something
 	}
-	if( (rc&CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW){
-		edge->relation_info.allowed=FLOW_DISALLOWED;
+	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+		edge->relation_info.allowed = FLOW_DISALLOWED;
 		return -EPERM;
 	}
 	return 0;
 }
 
 static inline int record_relation(uint64_t type,
-				   struct provenance *from,
-				   struct provenance *to,
-				   uint8_t allowed,
-				   struct file *file)
+				  struct provenance *from,
+				  struct provenance *to,
+				  uint8_t allowed,
+				  struct file *file)
 {
 	union prov_msg relation;
-	int rc=0;
+	int rc = 0;
 
 	// check if the nodes match some capture options
 	apply_target(prov_msg(from));
@@ -203,11 +211,16 @@ static inline int record_relation(uint64_t type,
 	__record_node(prov_msg(to));
 	__update_version(type, to);
 	__record_node(prov_msg(to));
-	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
+		<< << << < HEAD
+		__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
 	rc = __check_hooks(prov_msg(from), prov_msg(to), &relation);
 	prov_write(&relation);
-	from->has_outgoing=true; // there is an outgoing edge
+	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
+	== == == =
+		__record_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, allowed, file);
+	from->has_outgoing = true; // there is an outgoing edge
+	>> >> >> > 88e4aca21cbd6a5bb58eb45317279e6369fd1136
 }
 
 static inline void flow_to_activity(uint64_t type,
