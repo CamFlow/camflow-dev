@@ -125,7 +125,7 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	union prov_msg old_prov;
 	union prov_msg relation;
 
-	if(!prov->has_outgoing) // there is no outgoing
+	if (!prov->has_outgoing) // there is no outgoing
 		return;
 	if (filter_update_node(type, prov_msg(prov)))
 		return;
@@ -138,8 +138,8 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 		__record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	else
 		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-	prov->has_outgoing=false; // we update there is no more outgoing edge
-	prov->saved=false;
+	prov->has_outgoing = false; // we update there is no more outgoing edge
+	prov->saved = false;
 }
 
 static inline void __propagate(uint64_t type,
@@ -185,7 +185,7 @@ static inline void record_relation(uint64_t type,
 	__update_version(type, to);
 	__record_node(prov_msg(to));
 	__record_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, allowed, file);
-	from->has_outgoing=true; // there is an outgoing edge
+	from->has_outgoing = true; // there is an outgoing edge
 }
 
 static inline void flow_to_activity(uint64_t type,

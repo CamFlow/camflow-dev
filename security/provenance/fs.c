@@ -79,7 +79,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char *)get_zeroed_page(GFP_KERNEL);
+	page = (char*)get_zeroed_page(GFP_KERNEL);
 	if (!page)
 		return -ENOMEM;
 
@@ -130,7 +130,7 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t *)buf;
+	uint32_t *tmp = (uint32_t*)buf;
 
 	// ideally should be decoupled from set machine id
 	__init_opaque();
@@ -192,7 +192,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if (copy_to_user((void *)buf, &node, count)) {
+	if (copy_to_user((void*)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
@@ -324,7 +324,7 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	}
 #define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
 	{ \
-		return __read_filter(filp, buf, count, filter);	\
+		return __read_filter(filp, buf, count, filter); \
 	}
 
 uint64_t prov_node_filter;
@@ -613,7 +613,7 @@ static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
 declare_file_operations(prov_cgroup_filter_ops, prov_write_cgroup_filter, prov_read_cgroup_filter);
 
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
-					size_t count, loff_t *ppos)
+			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
 
@@ -625,7 +625,7 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 declare_file_operations(prov_log_ops, prov_write_log, no_read);
 
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
-					size_t count, loff_t *ppos)
+			       size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
 
@@ -640,6 +640,7 @@ declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
+
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
 	securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
