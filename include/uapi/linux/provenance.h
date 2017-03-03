@@ -100,9 +100,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
-#define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
-#define PROV_LOG_FILE                  				"/sys/kernel/security/provenance/log"
-#define PROV_LOGP_FILE                  			"/sys/kernel/security/provenance/logp"
+#define PROV_CGROUP_FILTER                                                                              "/sys/kernel/security/provenance/cgroup"
+#define PROV_LOG_FILE                                           "/sys/kernel/security/provenance/log"
+#define PROV_LOGP_FILE                                          "/sys/kernel/security/provenance/logp"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -202,7 +202,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
 #define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
-#define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
+#define ENT_PCKCNT                                              (DM_ENTITY    | 0x0000000001000000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -214,7 +214,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
-#define node_secid(node) 							((node)->node_info.secid)
+#define node_secid(node)							((node)->node_info.secid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -266,7 +266,7 @@ union prov_identifier {
 
 #define NAME_RECORDED_BIT 1
 #define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
-#define clear_name_recorded(node)          	prov_clear_flag(node, NAME_RECORDED_BIT)
+#define clear_name_recorded(node)						prov_clear_flag(node, NAME_RECORDED_BIT)
 #define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
 
 #define TRACKED_BIT 2
@@ -289,7 +289,7 @@ union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies;uint32_t secid;uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
