@@ -211,16 +211,11 @@ static inline int record_relation(uint64_t type,
 	__record_node(prov_msg(to));
 	__update_version(type, to);
 	__record_node(prov_msg(to));
-		<< << << < HEAD
-		__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
+	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
 	rc = __check_hooks(prov_msg(from), prov_msg(to), &relation);
 	prov_write(&relation);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
-	== == == =
-		__record_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, allowed, file);
-	from->has_outgoing = true; // there is an outgoing edge
-	>> >> >> > 88e4aca21cbd6a5bb58eb45317279e6369fd1136
 }
 
 static inline void flow_to_activity(uint64_t type,
