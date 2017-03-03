@@ -34,6 +34,11 @@ prepare_cli:
 	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
 	cd ./build/camflow-cli && $(MAKE) prepare
 
+prepare_smatch:
+	mkdir -p build
+	cd ./build && git clone git://repo.or.cz/smatch.git
+	cd ./build/smatch && $(MAKE)
+
 prepare_us: prepare_provenance prepare_config prepare_cli
 
 copy_change:
@@ -105,6 +110,9 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
+	@echo "Running smatch..."
+	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
+	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 
 test_travis: copy_change
 	@echo "Running sparse..."
@@ -116,6 +124,9 @@ test_travis: copy_change
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
 	@echo "Running flawfinder..."
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance
+	@echo "Running smatch..."
+	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
+	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c

@@ -174,6 +174,9 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
+	if(!node)
+		return -ENOMEM;
+
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
 		count = -ENOMEM;
 		goto out;
@@ -417,6 +420,9 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 		return -ENOMEM;
 
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
+	if (!f)
+		return -ENOMEM;
+
 	if (copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
 		return -EAGAIN;
 	f->filter.ip = f->filter.ip & f->filter.mask;
@@ -508,6 +514,9 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 		return -ENOMEM;
 
 	s = kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
+	if (!s)
+		return -ENOMEM;
+
 	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
 		return -EAGAIN;
 
@@ -551,6 +560,9 @@ static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *bu
 		return -ENOMEM;
 
 	s = kzalloc(sizeof(struct cgroup_filters), GFP_KERNEL);
+	if (!s)
+		return -ENOMEM;
+		
 	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
 		return -EAGAIN;
 	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
