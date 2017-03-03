@@ -78,26 +78,29 @@ static inline bool should_record_relation(uint64_t type, union prov_msg *from, u
 	return true;
 }
 
-static inline bool prov_has_secid(union prov_msg* prov){
-	switch(prov_type(prov)){
-		case ENT_INODE_UNKNOWN:
-		case ENT_INODE_LINK:
-		case ENT_INODE_FILE:
-		case ENT_INODE_DIRECTORY:
-		case ENT_INODE_CHAR:
-		case ENT_INODE_BLOCK:
-		case ENT_INODE_FIFO:
-		case ENT_INODE_SOCKET:
-		case ENT_INODE_MMAP:
-			return true;
-		default: return false;
+static inline bool prov_has_secid(union prov_msg* prov)
+{
+	switch (prov_type(prov)) {
+	case ENT_INODE_UNKNOWN:
+	case ENT_INODE_LINK:
+	case ENT_INODE_FILE:
+	case ENT_INODE_DIRECTORY:
+	case ENT_INODE_CHAR:
+	case ENT_INODE_BLOCK:
+	case ENT_INODE_FIFO:
+	case ENT_INODE_SOCKET:
+	case ENT_INODE_MMAP:
+		return true;
+	default: return false;
 	}
 }
 
-static inline void apply_target(union prov_msg* prov){
+static inline void apply_target(union prov_msg* prov)
+{
 	uint8_t op;
+
 	// track based on cgroup
-	if( prov_type(prov)==ACT_TASK ) {
+	if ( prov_type(prov) == ACT_TASK ) {
 		op = prov_cgroup_whichOP(prov->task_info.cid);
 		if (unlikely(op != 0)) {
 			printk(KERN_INFO "Provenance: apply cgroup filter %u.", op);
@@ -107,7 +110,7 @@ static inline void apply_target(union prov_msg* prov){
 				set_propagate(prov);
 		}
 	}
-	if (prov_has_secid(prov) ){
+	if (prov_has_secid(prov) ) {
 		op = prov_secctx_whichOP(node_secid(prov));
 		if (unlikely(op != 0)) {
 			printk(KERN_INFO "Provenance: apply secctx filter %u.", op);

@@ -24,7 +24,8 @@ extern uint32_t prov_boot_id;
 static union long_prov_msg *alloc_long_provenance(uint64_t ntype)
 {
 	union long_prov_msg *tmp = kzalloc(sizeof(union long_prov_msg), GFP_ATOMIC);
-	if(!tmp)
+
+	if (!tmp)
 		return NULL;
 
 	prov_type(tmp) = ntype;
@@ -58,12 +59,14 @@ static inline void __long_record_relation(uint64_t type, union long_prov_msg *fr
 	prov_write(&relation);
 }
 
-static inline void __record_node_name(struct provenance *node, char *name)
+static inline void record_node_name(struct provenance *node, const char *name)
 {
 	union long_prov_msg *fname_prov;
 
+	if (provenance_is_name_recorded(prov_msg(node)) || !provenance_is_recorded(prov_msg(node)))
+		return;
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
-	if(!fname_prov){
+	if (!fname_prov) {
 		printk(KERN_ERR "Provenance: recod name failed to allocate memory\n");
 		return;
 	}
@@ -87,22 +90,24 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 {
 	char *buffer;
 	char *ptr;
+
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	// should not sleep
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-	if(!buffer){
+	if (!buffer) {
 		printk(KERN_ERR "Provenance: could not allocate memory\n");
 		return;
 	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-	__record_node_name(prov, ptr);
+	record_node_name(prov, ptr);
 	kfree(buffer);
 }
 
 static inline void record_inode_name(struct inode *inode, struct provenance *prov)
 {
 	struct dentry *dentry;
+
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	dentry = d_find_alias(inode);
@@ -120,6 +125,7 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	struct file *exe_file;
 	char *buffer;
 	char *ptr;
+
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	cred = get_task_cred(task);
@@ -132,20 +138,20 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	mmput_async(mm);
 	if (exe_file) {
 		fprov = file_inode(exe_file)->i_provenance;
-		if(provenance_is_opaque(prov_msg(fprov))){
+		if (provenance_is_opaque(prov_msg(fprov))) {
 			set_opaque(prov_msg(prov));
 			goto out;
 		}
 		// should not sleep
 		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-		if(!buffer){
+		if (!buffer) {
 			printk(KERN_ERR "Provenance: could not allocate memory\n");
 			fput(exe_file);
 			goto out;
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
-		__record_node_name(prov, ptr);
+		record_node_name(prov, ptr);
 		kfree(buffer);
 	}
 out:
@@ -159,7 +165,7 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 	if (provenance_is_name_recorded(prov_msg(prov)) || !provenance_is_recorded(prov_msg(prov)))
 		return;
 	addr_info = alloc_long_provenance(ENT_ADDR);
-	if(!addr_info)
+	if (!addr_info)
 		return;
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
@@ -180,7 +186,7 @@ static inline void record_write_xattr(uint64_t type,
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
 
-	if(!xattr)
+	if (!xattr)
 		return;
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
@@ -205,15 +211,15 @@ static inline void record_write_xattr(uint64_t type,
 }
 
 static inline void record_read_xattr(uint64_t type,
-							struct provenance *cprov,
-							struct provenance *iprov,
-							const char *name,
-							uint8_t allowed)
+				     struct provenance *cprov,
+				     struct provenance *iprov,
+				     const char *name,
+				     uint8_t allowed)
 {
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
 
-	if(xattr)
+	if (xattr)
 		return;
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
@@ -230,9 +236,10 @@ static inline void record_read_xattr(uint64_t type,
 static inline void record_packet_content(union prov_msg *pck, const struct sk_buff *skb)
 {
 	union long_prov_msg *cnt = alloc_long_provenance(ENT_PCKCNT);
-	cnt->pckcnt_info.length=skb_end_offset(skb);
-	if(cnt->pckcnt_info.length > PATH_MAX){
-		cnt->pckcnt_info.truncated=PROV_TRUNCATED;
+
+	cnt->pckcnt_info.length = skb_end_offset(skb);
+	if (cnt->pckcnt_info.length > PATH_MAX) {
+		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
 		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
 	}else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
@@ -240,16 +247,17 @@ static inline void record_packet_content(union prov_msg *pck, const struct sk_bu
 	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
 }
 
-static inline int record_log(union prov_msg *cprov, const char __user *buf, size_t count){
+static inline int record_log(union prov_msg *cprov, const char __user *buf, size_t count)
+{
 	union long_prov_msg *str;
 
 	str = alloc_long_provenance(ENT_STR);
-	if(!str)
+	if (!str)
 		return -ENOMEM;
 	if (copy_from_user(str->str_info.str, buf, count))
 		return -EAGAIN;
-	str->str_info.str[count]='\0'; // make sure the string is null terminated
-	str->str_info.length=count;
+	str->str_info.str[count] = '\0'; // make sure the string is null terminated
+	str->str_info.length = count;
 	__long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
 	kfree(str);
 	return count;

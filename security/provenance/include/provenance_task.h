@@ -87,8 +87,9 @@ static inline void refresh_current_provenance(void)
 	struct provenance *prov = current_provenance();
 	uint32_t cid;
 	unsigned long irqflags;
+
 	// will not be recorded
-	if( provenance_is_opaque(prov_msg(prov)) )
+	if ( provenance_is_opaque(prov_msg(prov)) )
 		return;
 	cid = current_cid();
 	record_task_name(current, prov);
