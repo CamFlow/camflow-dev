@@ -17,6 +17,7 @@ before_install:
 
 before_script:
   - make prepare_kernel
+  - make patch
   - make config_ubuntu
   - make config_travis
 
