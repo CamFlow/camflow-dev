@@ -101,6 +101,22 @@ test: copy_change
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
 
+uncrustify:
+	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/av_utils.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_cgroup.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_long.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_secctx.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+
 patch:
 	cd build && mkdir -p pristine
 	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine

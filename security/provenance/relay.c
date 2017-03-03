@@ -85,7 +85,7 @@ static int __init relay_prov_init(void)
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (long_prov_chan == NULL)
 		panic("Provenance: relay_open failure\n");
-	relay_ready=true;
+	relay_ready = true;
 	// relay buffer are ready, we can write down the boot buffer
 	write_boot_buffer();
 	printk(KERN_INFO "Provenance relay ready.\n");

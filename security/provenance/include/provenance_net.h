@@ -169,6 +169,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 static inline void record_pck_to_inode(union prov_msg *pck, struct provenance *inode)
 {
 	union prov_msg relation;
+
 	if (unlikely(pck == NULL || inode == NULL)) // should not occur
 		return;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
@@ -198,6 +199,6 @@ static inline void record_inode_to_pck(struct provenance *inode, union prov_msg 
 	__record_node(prov_msg(inode));
 	prov_write(pck);
 	__record_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-	inode->has_outgoing=true;
+	inode->has_outgoing = true;
 }
 #endif

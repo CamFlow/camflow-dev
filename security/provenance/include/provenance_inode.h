@@ -1,4 +1,4 @@
- /*
+/*
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
@@ -68,7 +68,7 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	struct provenance *prov = inode->i_provenance;
 
 	// will not be recorded
-	if( provenance_is_opaque(prov_msg(prov)) )
+	if ( provenance_is_opaque(prov_msg(prov)) )
 		return;
 	record_inode_name(inode, prov);
 	prov_msg(prov)->inode_info.ino = inode->i_ino;
@@ -109,29 +109,28 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	struct provenance *prov = inode->i_provenance;
 	union prov_msg *buf;
 	struct dentry *dentry;
-	int rc=0;
+	int rc = 0;
 
-	if(prov->initialised)
+	if (prov->initialised)
 		return 0;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if(prov->initialised){
+	if (prov->initialised) {
 		spin_unlock(prov_lock(prov));
 		goto out;
-	}	else {
+	}       else
 		prov->initialised = true;
-	}
 	spin_unlock(prov_lock(prov));
 	record_inode_type(inode->i_mode, prov);
-	if( !(inode->i_opflags & IOP_XATTR) ) // xattr not supported on this inode
+	if ( !(inode->i_opflags & IOP_XATTR) ) // xattr not supported on this inode
 		goto out;
-	if(opt_dentry)
+	if (opt_dentry)
 		dentry = dget(opt_dentry);
 	else
 		dentry = d_find_alias(inode);
-	if(!dentry)
+	if (!dentry)
 		goto out;
 	buf = kmalloc(sizeof(union prov_msg), GFP_NOFS);
-	if(!buf){
+	if (!buf) {
 		rc = -ENOMEM;
 		prov->initialised = false;
 		dput(dentry);
@@ -139,8 +138,8 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	}
 	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_msg));
 	dput(dentry);
-	if(rc<0){
-		if(rc!=-ENODATA && rc!=-EOPNOTSUPP){
+	if (rc < 0) {
+		if (rc != -ENODATA && rc != -EOPNOTSUPP) {
 			prov->initialised = false;
 			goto free_buf;
 		}else{
@@ -156,10 +155,12 @@ out:
 	return rc;
 }
 
-static inline struct provenance* inode_provenance(struct inode *inode, bool may_sleep){
+static inline struct provenance* inode_provenance(struct inode *inode, bool may_sleep)
+{
 	struct provenance *prov = inode->i_provenance;
+
 	might_sleep_if(may_sleep);
-	if(!prov->initialised && may_sleep)
+	if (!prov->initialised && may_sleep)
 		inode_init_provenance(inode, NULL);
 	return prov;
 }
@@ -168,6 +169,7 @@ static inline struct provenance *dentry_provenance(struct dentry *dentry)
 {
 	struct inode *inode = d_backing_inode(dentry);
 	struct provenance *prov;
+
 	if (inode == NULL)
 		return NULL;
 	prov = inode->i_provenance;
@@ -189,20 +191,21 @@ static inline void save_provenance(struct dentry *dentry)
 	struct inode *inode;
 	struct provenance *prov;
 	union prov_msg buf;
-	int rc=0;
-	if(!dentry)
+	int rc = 0;
+
+	if (!dentry)
 		return;
 	inode = d_backing_inode(dentry);
-	if(!inode)
+	if (!inode)
 		return;
 	prov = inode->i_provenance;
 	spin_lock(prov_lock(prov));
-	if(!prov->initialised || prov->saved){ // not initialised or already saved
+	if (!prov->initialised || prov->saved) { // not initialised or already saved
 		spin_unlock(prov_lock(prov));
 		return;
 	}
 	memcpy(&buf, prov_msg(prov), sizeof(union prov_msg));
-	prov->saved=true;
+	prov->saved = true;
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
 	clear_name_recorded(&buf);
