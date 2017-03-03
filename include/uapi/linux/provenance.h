@@ -17,7 +17,7 @@
 #include <linux/limits.h>
 #else
 #include <linux/socket.h>
-#include <uapi/linux/limits.h>
+#include <linux/limits.h>
 #include <linux/mutex.h>
 #endif
 
@@ -255,8 +255,8 @@ union prov_identifier {
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 };
 
-#define prov_set_flag(node, nbit) prov_flag(node) |= 1 << nbit
-#define prov_clear_flag(node, nbit) prov_flag(node) &= ~(1 << nbit)
+#define prov_set_flag(node, nbit) 	(prov_flag(node) |= 1 << nbit)
+#define prov_clear_flag(node, nbit) (prov_flag(node) &= ~(1 << nbit))
 #define prov_check_flag(node, nbit) ((prov_flag(node) & (1 << nbit)) == (1 << nbit))
 
 #define RECORDED_BIT 0
@@ -437,11 +437,6 @@ struct prov_filter {
 #define PROV_SET_OPAQUE       0x02
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
-
-struct prov_self_config {
-	union prov_msg prov;
-	uint8_t op;
-};
 
 struct prov_process_config {
 	union prov_msg prov;

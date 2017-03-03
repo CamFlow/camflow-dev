@@ -125,7 +125,7 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 
 	if (!prov->has_outgoing) // there is no outgoing
 		return;
-	if (filter_update_node(type, prov_msg(prov)))
+	if (filter_update_node(type))
 		return;
 
 	memset(&relation, 0, sizeof(union prov_msg));
