@@ -254,17 +254,17 @@ static inline void update_prov_config(union prov_msg *setting, uint8_t op, struc
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct prov_self_config msg;
+	struct prov_process_config msg;
 	struct provenance *prov = current_provenance();
 
-	if (count < sizeof(struct prov_self_config))
+	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	if (copy_from_user(&msg, buf, sizeof(struct prov_self_config)))
+	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
 		return -ENOMEM;
 
 	update_prov_config(&(msg.prov), msg.op, prov);
-	return sizeof(struct prov_self_config);
+	return sizeof(struct prov_process_config);
 }
 
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
