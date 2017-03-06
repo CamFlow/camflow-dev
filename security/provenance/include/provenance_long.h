@@ -70,7 +70,7 @@ static inline void record_node_name(struct provenance *node, const char *name)
 		return;
 	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length = strlen(fname_prov->file_name_info.name);
+	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 	if (prov_type(prov_msg(node)) == ACT_TASK) {
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
 		__long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_msg(node), FLOW_ALLOWED);
@@ -238,7 +238,7 @@ static inline void record_packet_content(union prov_msg *pck, const struct sk_bu
 	if (cnt->pckcnt_info.length > PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
 		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
-	}else
+	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
 	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
