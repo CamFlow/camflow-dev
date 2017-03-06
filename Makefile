@@ -107,6 +107,7 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
 
 test_travis: copy_change
+	@echo "Running sparse..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/
 	@echo "Running checkpatch..."
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/*.c

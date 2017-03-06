@@ -10,6 +10,12 @@ The source code for the provenance userspace library is available [here](https:/
 | Master | ![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master) |
 | Dev    | ![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)       |
 
+Automated Travis test run the following operation:
+- build the kernel;
+- run [sparse](https://sparse.wiki.kernel.org/index.php/Main_Page);
+- run [checkpatch](https://kernelnewbies.org/CheckpatchTips);
+- run [flawfinder](https://www.dwheeler.com/flawfinder/).
+
 ## Warning
 
 The code is neither feature complete nor stable.
