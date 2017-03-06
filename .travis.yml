@@ -10,8 +10,11 @@ before_install:
 
 before_script:
   - make prepare_kernel
-  - make config
+  - make copy_config
 
 script:
   - make compile_kernel
   - make test
+
+notifications:
+  slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM
