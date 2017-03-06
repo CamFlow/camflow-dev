@@ -6,10 +6,11 @@ os:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get -y install build-essential
-  - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev bc nano patch mosquitto
+  - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev bc nano patch mosquitto libelf-dev
 
 before_script:
   - make prepare_kernel
+  - make config_ubuntu
   - make copy_config
 
 script:
