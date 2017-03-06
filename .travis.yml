@@ -3,10 +3,10 @@ sudo: required
 language: c
 
 addons:
-  sonarqube: true
-  branches:
-    - master
-    - dev
+  sonarqube:
+    branches:
+      - master
+      - dev
 
 before_install:
   - sudo apt-get update -qq
