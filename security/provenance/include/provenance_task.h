@@ -89,7 +89,7 @@ static inline void refresh_current_provenance(void)
 	unsigned long irqflags;
 
 	// will not be recorded
-	if ( provenance_is_opaque(prov_msg(prov)) )
+	if (provenance_is_opaque(prov_msg(prov)))
 		return;
 	cid = current_cid();
 	record_task_name(current, prov);

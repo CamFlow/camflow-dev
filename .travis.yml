@@ -6,7 +6,9 @@ os:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get -y install build-essential
-  - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev bc nano patch mosquitto libelf-dev
+  - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev
+  - sudo apt-get -y install bc nano patch mosquitto
+  - sudo apt-get -y install libelf-dev sparse flawfinder
 
 before_script:
   - make prepare_kernel

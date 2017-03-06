@@ -238,7 +238,7 @@ static inline void record_packet_content(union prov_msg *pck, const struct sk_bu
 	if (cnt->pckcnt_info.length > PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
 		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
-	}else
+	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
 	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);

@@ -47,9 +47,9 @@ free_work:
 }
 struct workqueue_struct *prov_queue;
 
-static void queue_save_provenance(struct provenance* provenance, struct dentry *dentry)
+static void queue_save_provenance(struct provenance *provenance, struct dentry *dentry)
 {
-	struct save_work* work;
+	struct save_work *work;
 
 	if (!prov_queue)
 		return;
@@ -429,7 +429,7 @@ static int provenance_inode_setxattr(struct dentry *dentry, const char *name,
 		if (size != sizeof(union prov_msg))
 			return -ENOMEM;
 		prov = dentry_provenance(dentry);
-		setting = (union prov_msg*)value;
+		setting = (union prov_msg *)value;
 
 		if (provenance_is_tracked(setting))
 			set_tracked(prov_msg(prov));
@@ -566,7 +566,7 @@ static int provenance_inode_getsecurity(struct inode *inode, const char *name, v
 {
 	struct provenance *iprov = inode_provenance(inode, true);
 
-	if ( unlikely(!iprov) )
+	if (unlikely(!iprov))
 		return -ENOMEM;
 	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
 		return -EOPNOTSUPP;
@@ -1209,8 +1209,8 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	struct provenance* sprov = socket_inode_provenance(sock);
-	struct provenance* oprov = socket_inode_provenance(other);
+	struct provenance *sprov = socket_inode_provenance(sock);
+	struct provenance *oprov = socket_inode_provenance(other);
 	unsigned long irqflags;
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
