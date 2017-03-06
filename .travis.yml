@@ -3,6 +3,7 @@ sudo: required
 language: c
 
 addons:
+  sonarqube: true
   branches:
     - master
     - dev
@@ -20,7 +21,7 @@ before_script:
   - make config_travis
 
 script:
-  - sonar-scanner
+  - sonar-scanner -Dsonar.login=$SONAR_TOKEN
   - make compile_security
   - make compile_kernel
   - make test_travis
