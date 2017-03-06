@@ -21,7 +21,7 @@ before_script:
   - make config_travis
 
 script:
-  - sonar-scanner -Dsonar.login=$SONAR_TOKEN
+  - sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=https://sonarqube.com
   - make compile_security
   - make compile_kernel
   - make test_travis
