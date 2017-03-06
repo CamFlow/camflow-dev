@@ -21,8 +21,8 @@
 #define LONG_PROV_BASE_NAME "long_provenance"
 
 /* global variable, extern in provenance.h */
-struct rchan *prov_chan = NULL;
-struct rchan *long_prov_chan = NULL;
+struct rchan *prov_chan;
+struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
@@ -56,9 +56,6 @@ static struct rchan_callbacks relay_callbacks = {
 	.create_buf_file	= create_buf_file_handler,
 	.remove_buf_file	= remove_buf_file_handler,
 };
-
-DEFINE_SPINLOCK(prov_chan_lock);
-DEFINE_SPINLOCK(long_prov_chan_lock);
 
 static void write_boot_buffer(void)
 {
