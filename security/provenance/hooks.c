@@ -45,8 +45,8 @@ static void __do_prov_save(struct work_struct *pwork)
 free_work:
 	kfree(w);
 }
-struct workqueue_struct *prov_queue;
 
+static struct workqueue_struct *prov_queue;
 static void queue_save_provenance(struct provenance *provenance, struct dentry *dentry)
 {
 	struct save_work *work;

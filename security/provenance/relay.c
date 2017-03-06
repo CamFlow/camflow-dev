@@ -57,9 +57,6 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
-DEFINE_SPINLOCK(prov_chan_lock);
-DEFINE_SPINLOCK(long_prov_chan_lock);
-
 static void write_boot_buffer(void)
 {
 	if (boot_buffer->nb_entry > 0)
