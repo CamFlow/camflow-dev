@@ -17,7 +17,7 @@ prepare: prepare_kernel prepare_us
 
 prepare_kernel:
 	mkdir -p build
-	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xvJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
 
 prepare_provenance:
 	mkdir -p build
@@ -133,7 +133,7 @@ uncrustify:
 
 patch:
 	cd build && mkdir -p pristine
-	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine
+	cd build && tar -xJf linux-$(kernel-version).tar.xz -C ./pristine
 	cd build/linux-$(kernel-version) && rm -f .config
 	cd build/linux-$(kernel-version) && rm -f  config_sav
 	cd build/linux-$(kernel-version) && rm -f  certs/signing_key.pem
