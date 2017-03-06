@@ -1,7 +1,12 @@
 # CamFlow
 
 If you simply wish to install CamFlow please visit [here](https://github.com/CamFlow/camflow-install).
-The source code for the provenance and IFC userspace libraries are available [here](https://github.com/CamFlow/camflow-provenance-lib) and [there](https://github.com/CamFlow/camflow-ifc-lib).
+The source code for the provenance userspace library is available [here](https://github.com/CamFlow/camflow-provenance-lib).
+
+# Build Status
+
+| Master | ![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master) |
+| Dev    | ![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev) |
 
 ## Warning
 
@@ -17,4 +22,3 @@ make config # select relevant modules in security
 make compile # patience, sudo password will be asked during compilation
 make install # patience, sudo password will be asked during installation
  ```
- 
