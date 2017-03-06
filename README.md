@@ -5,16 +5,17 @@ The source code for the provenance userspace library is available [here](https:/
 
 # Build Status
 
-| Branch | Status                                                                                  |
-|--------|-----------------------------------------------------------------------------------------|
-| Master | ![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master) |
-| Dev    | ![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)       |
+| Branch | Status                                                                                  | SonarQube |
+|--------|-----------------------------------------------------------------------------------------|-----------|
+|Master | ![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)  |[link]()   |
+| Dev    | ![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)       |[link]()   |
 
 Automated Travis test run the following operation:
 - build the kernel;
 - run [sparse](https://sparse.wiki.kernel.org/index.php/Main_Page);
 - run [checkpatch](https://kernelnewbies.org/CheckpatchTips);
-- run [flawfinder](https://www.dwheeler.com/flawfinder/).
+- run [flawfinder](https://www.dwheeler.com/flawfinder/);
+- run [SonarQube](https://sonarqube.com).
 
 ## Warning
 
