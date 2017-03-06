@@ -62,7 +62,7 @@ static inline void long_prov_write(union long_prov_msg *msg)
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
-			memcpy(&long_boot_buffer->buffer[long_boot_buffer->nb_entry++], msg, sizeof(union long_prov_msg));
+			memcpy(&(long_boot_buffer->buffer[long_boot_buffer->nb_entry++]), msg, sizeof(union long_prov_msg));
 		else
 			printk(KERN_ERR "Provenance: long boot buffer is full.\n");
 	} else
