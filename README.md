@@ -5,8 +5,10 @@ The source code for the provenance userspace library is available [here](https:/
 
 # Build Status
 
+| Branch | Status                                                                                  |
+|--------|-----------------------------------------------------------------------------------------|
 | Master | ![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master) |
-| Dev    | ![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev) |
+| Dev    | ![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)       |
 
 ## Warning
 
