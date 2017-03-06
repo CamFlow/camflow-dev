@@ -3,6 +3,14 @@ language: c
 os:
   - linux
 
+dist: trusty
+sudo: required
+
+addons:
+  branches:
+    - master
+    - dev
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get -y install build-essential
@@ -14,6 +22,7 @@ before_script:
   - make config_travis
 
 script:
+  - sonar-scanner
   - make compile_security
   - make compile_kernel
   - make test
