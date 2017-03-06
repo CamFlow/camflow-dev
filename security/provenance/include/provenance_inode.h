@@ -191,7 +191,6 @@ static inline void save_provenance(struct dentry *dentry)
 	struct inode *inode;
 	struct provenance *prov;
 	union prov_msg buf;
-	int rc = 0;
 
 	if (!dentry)
 		return;
@@ -209,6 +208,6 @@ static inline void save_provenance(struct dentry *dentry)
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
 	clear_name_recorded(&buf);
-	rc = __vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_msg), 0);
+	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_msg), 0);
 }
 #endif
