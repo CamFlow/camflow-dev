@@ -1040,7 +1040,7 @@
 #define X_APPLICATION_DATA__PASTE_AFTER_CONFIRM   0x00000002UL
 #define X_APPLICATION_DATA__COPY                  0x00000004UL
 
-static inline uint32_t file_mask_to_perms(int mode, int mask)
+static inline uint32_t file_mask_to_perms(int mode, unsigned int mask)
 {
 	uint32_t av = 0;
 
