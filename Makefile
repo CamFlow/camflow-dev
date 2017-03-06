@@ -106,6 +106,16 @@ test: copy_change
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
 
+test_travis: copy_change
+	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/
+	@echo "Running checkpatch..."
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/*.c
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/include/*.h
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
+	@echo "Running flawfinder..."
+	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance
+
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c

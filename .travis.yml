@@ -16,7 +16,7 @@ before_script:
 script:
   - make compile_security
   - make compile_kernel
-  - make test
+  - make test_travis
 
 notifications:
   slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM
