@@ -9,9 +9,9 @@ before_install:
   - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev bc nano patch mosquitto
 
 before_script:
-  make prepare_kernel
-  make config
+  - make prepare_kernel
+  - make config
 
 script:
-  make compile_kernel
-  make test
+  - make compile_kernel
+  - make test
