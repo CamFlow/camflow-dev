@@ -42,7 +42,7 @@ static inline bool __filter_node(uint64_t filter, const union prov_msg *node)
 }
 
 #define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS) | SUBTYPE(RL_VERSION) | SUBTYPE(RL_NAMED))
-static inline bool filter_update_node(uint64_t relation_type, union prov_msg *to)
+static inline bool filter_update_node(uint64_t relation_type)
 {
 	if (HIT_FILTER(relation_type, UPDATE_FILTER)) // not update if relation is of above type
 		return true;
