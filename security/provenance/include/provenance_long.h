@@ -70,7 +70,7 @@ static inline void record_node_name(struct provenance *node, const char *name)
 		return;
 	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length = strlen(fname_prov->file_name_info.name);
+	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 	if (prov_type(prov_msg(node)) == ACT_TASK) {
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
 		__long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_msg(node), FLOW_ALLOWED);
