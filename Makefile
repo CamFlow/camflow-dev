@@ -49,6 +49,9 @@ config: copy_change copy_config
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
+config_travis: copy_change copy_config
+	cd ./build/linux-$(kernel-version) && $(MAKE) defconfig
+
 compile: compile_security compile_kernel compile_us
 
 compile_security: copy_change
