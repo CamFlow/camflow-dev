@@ -50,10 +50,14 @@ static inline struct provenance *sk_provenance(struct sock *sk)
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_msg *prov)
 {
 	struct packet_identifier *id;
-	int offset, ihlen;
-	struct iphdr _iph, *ih;
-	struct tcphdr _tcph, *th;
-	struct udphdr _udph, *uh;
+	int offset;
+	int ihlen;
+	struct iphdr _iph;
+	struct iphdr *ih;
+	struct tcphdr _tcph;
+	struct tcphdr *th;
+	struct udphdr _udph;
+	struct udphdr	*uh;
 
 	offset = skb_network_offset(skb);
 	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph); // we obtain the ip header
