@@ -47,25 +47,58 @@ static inline struct provenance *sk_provenance(struct sock *sk)
 	return prov;
 }
 
+#define ihlen(ih) (ih->ihl * 4)
+
+static inline void __extract_tcp_info(struct sk_buff *skb,
+																			struct iphdr *ih,
+																			int offset,
+																			struct packet_identifier *id)
+{
+	struct tcphdr _tcph;
+	struct tcphdr *th;
+
+	if (ntohs(ih->frag_off) & IP_OFFSET)
+		return;
+	offset += ihlen(ih); //point to tcp packet
+	th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
+	if (!th)
+		return;
+	id->snd_port = th->source;
+	id->rcv_port = th->dest;
+	id->seq = th->seq;
+}
+
+static inline void __extract_udp_info(struct sk_buff *skb,
+																			struct iphdr *ih,
+																			int offset,
+																			struct packet_identifier *id)
+{
+	struct udphdr _udph;
+	struct udphdr	*uh;
+
+	if (ntohs(ih->frag_off) & IP_OFFSET)
+		return;
+	offset += ihlen(ih); //point to udp packet
+	uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
+	if (!uh)
+		return;
+	id->snd_port = uh->source;
+	id->rcv_port = uh->dest;
+}
+
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_msg *prov)
 {
 	struct packet_identifier *id;
 	int offset;
-	int ihlen;
 	struct iphdr _iph;
 	struct iphdr *ih;
-	struct tcphdr _tcph;
-	struct tcphdr *th;
-	struct udphdr _udph;
-	struct udphdr	*uh;
 
 	offset = skb_network_offset(skb);
 	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph); // we obtain the ip header
 	if (ih == NULL)
 		return -EINVAL;
 
-	ihlen = ih->ihl * 4; // header size
-	if (ihlen < sizeof(_iph))
+	if (ihlen(ih) < sizeof(_iph))
 		return -EINVAL;
 
 	memset(prov, 0, sizeof(union prov_msg));
@@ -82,25 +115,10 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 	// now we collect
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
-		if (ntohs(ih->frag_off) & IP_OFFSET)
-			break;
-		offset += ihlen; //point to tcp packet
-		th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
-		if (th == NULL)
-			break;
-		id->snd_port = th->source;
-		id->rcv_port = th->dest;
-		id->seq = th->seq;
+		__extract_tcp_info(skb, ih, offset, id);
 		break;
 	case IPPROTO_UDP:
-		if (ntohs(ih->frag_off) & IP_OFFSET)
-			break;
-		offset += ihlen; //point to tcp packet
-		uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
-		if (uh == NULL)
-			break;
-		id->snd_port = uh->source;
-		id->rcv_port = uh->dest;
+		__extract_udp_info(skb, ih, offset, id);
 		break;
 	default:
 		break;
