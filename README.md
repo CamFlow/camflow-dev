@@ -7,8 +7,8 @@ The source code for the provenance userspace library is available [here](https:/
 
 | Branch | Status                                                                                  | SonarQube |
 |--------|-----------------------------------------------------------------------------------------|-----------|
-| master | [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches)  |[![SonarQube Status](https://sonarqube.com//api/badges/gate?key=camflow%3Adev)]()   |
-| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)](https://travis-ci.org/CamFlow/camflow-dev/branches)      |[![SonarQube Status](https://sonarqube.com//api/badges/gate?key=camflow%3Adev%3Adev)](https://sonarqube.com/dashboard?id=camflow%3Adev%3Adev)   |
+| master | [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches)  |[![SonarQube Status](https://sonarqube.com/api/badges/gate?key=camflow%3Adev)](https://sonarqube.com/dashboard?id=camflow%3Adev)   |
+| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)](https://travis-ci.org/CamFlow/camflow-dev/branches)      |[![SonarQube Status](https://sonarqube.com/api/badges/gate?key=camflow%3Adev%3Adev)](https://sonarqube.com/dashboard?id=camflow%3Adev%3Adev)   |
 
 Automated Travis test run the following operation:
 - build the kernel;
