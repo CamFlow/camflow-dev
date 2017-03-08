@@ -56,11 +56,12 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 {
 	struct tcphdr _tcph;
 	struct tcphdr *th;
+	int tcpoff;
 
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
-	offset += ihlen(ih); //point to tcp packet
-	th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
+	tcpoff = offset + ihlen(ih); //point to tcp packet
+	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
 	if (!th)
 		return;
 	id->snd_port = th->source;
@@ -75,11 +76,12 @@ static inline void __extract_udp_info(struct sk_buff *skb,
 {
 	struct udphdr _udph;
 	struct udphdr	*uh;
+	int udpoff;
 
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
-	offset += ihlen(ih); //point to udp packet
-	uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
+	udpoff = offset + ihlen(ih); //point to udp packet
+	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
 	if (!uh)
 		return;
 	id->snd_port = uh->source;
