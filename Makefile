@@ -1,5 +1,5 @@
-kernel-version=4.9.9
-lsm-version=0.2.2
+kernel-version=4.9.13
+lsm-version=0.2.3
 arch=x86_64
 
 all: config compile
@@ -17,30 +17,50 @@ prepare: prepare_kernel prepare_us
 
 prepare_kernel:
 	mkdir -p build
-	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xvJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
 
-prepare_us:
+prepare_provenance:
 	mkdir -p build
 	cd ./build && git clone https://github.com/CamFlow/camflow-provenance-lib.git
 	cd ./build/camflow-provenance-lib && $(MAKE) prepare
+
+prepare_config:
+	mkdir -p build
 	cd ./build && git clone https://github.com/CamFlow/camflow-config.git
 	cd ./build/camflow-config && $(MAKE) prepare
+
+prepare_cli:
+	mkdir -p build
+	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
+	cd ./build/camflow-cli && $(MAKE) prepare
+
+prepare_smatch:
+	mkdir -p build
+	cd ./build && git clone git://repo.or.cz/smatch.git
+	cd ./build/smatch && $(MAKE)
+
+prepare_us: prepare_provenance prepare_config prepare_cli
 
 copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
 	cd ./build/linux-$(kernel-version) && cp -r ../../include .
 
-config: copy_change
+copy_config:
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
+
+config: copy_change copy_config
 	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
+config_travis: copy_change copy_config
+	cd ./build/linux-$(kernel-version) && $(MAKE) defconfig
+
 compile: compile_security compile_kernel compile_us
 
 compile_security: copy_change
-	cd ./build/linux-$(kernel-version) && $(MAKE) security
+	cd ./build/linux-$(kernel-version) && $(MAKE) security W=1
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
@@ -63,6 +83,8 @@ install_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) install
 	cd ./build/camflow-config && $(MAKE) all
 	cd ./build/camflow-config && $(MAKE) install
+	cd ./build/camflow-cli && $(MAKE) all
+	cd ./build/camflow-cli && $(MAKE) install
 
 clean: clean_kernel clean_us
 
@@ -88,10 +110,52 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance > /tmp/flawfinder.txt
+	@echo "Running smatch..."
+	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
+	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 
-patch:
+test_travis: copy_change
+	@echo "Running sparse..."
+	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/
+	@echo "Running checkpatch..."
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/*.c
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file security/provenance/include/*.h
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h
+	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
+	@echo "Running flawfinder..."
+	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance
+	@echo "Running smatch..."
+	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
+	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+
+uncrustify:
+	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/av_utils.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_cgroup.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_long.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_secctx.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace include/linux/cred.h
+	uncrustify -c uncrustify.cfg --replace include/linux/fs.h
+	uncrustify -c uncrustify.cfg --replace include/linux/ipc.h
+	uncrustify -c uncrustify.cfg --replace include/linux/lsm_hooks.h
+	uncrustify -c uncrustify.cfg --replace include/linux/msg.h
+	uncrustify -c uncrustify.cfg --replace include/net/sock.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/camflow.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/xattr.h
+
+patch: copy_change
 	cd build && mkdir -p pristine
-	cd build && tar -xvJf linux-$(kernel-version).tar.xz -C ./pristine
+	cd build && tar -xJf linux-$(kernel-version).tar.xz -C ./pristine
 	cd build/linux-$(kernel-version) && rm -f .config
 	cd build/linux-$(kernel-version) && rm -f  config_sav
 	cd build/linux-$(kernel-version) && rm -f  certs/signing_key.pem

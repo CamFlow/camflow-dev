@@ -18,6 +18,7 @@
 #include <linux/random.h>
 #include <linux/xattr.h>
 #include <linux/file.h>
+#include <linux/workqueue.h>
 
 #include "av_utils.h"
 #include "provenance.h"
@@ -27,6 +28,40 @@
 #include "provenance_long.h"
 #include "provenance_secctx.h"
 #include "provenance_cgroup.h"
+
+struct save_work {
+	struct work_struct work;
+	struct dentry *dentry;
+};
+
+static void __do_prov_save(struct work_struct *pwork)
+{
+	struct save_work *w = container_of(pwork, struct save_work, work);
+	struct dentry *dentry = w->dentry;
+
+	if (!dentry)
+		goto free_work;
+	save_provenance(dentry);
+free_work:
+	kfree(w);
+}
+
+static struct workqueue_struct *prov_queue;
+static void queue_save_provenance(struct provenance *provenance, struct dentry *dentry)
+{
+	struct save_work *work;
+
+	if (!prov_queue)
+		return;
+	if (!provenance->initialised || provenance->saved) // not initialised or already saved
+		return;
+	work = kmalloc(sizeof(struct save_work), GFP_ATOMIC);
+	if (!work)
+		return;
+	work->dentry = dentry;
+	INIT_WORK(&work->work, __do_prov_save);
+	queue_work(prov_queue, &work->work);
+}
 
 /*
  * initialise the security for the init task
@@ -147,7 +182,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
 	if (unlikely(!iprov))
 		return -ENOMEM;
-
 	prov_msg(iprov)->inode_info.ino = inode->i_ino;
 	prov_msg(iprov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(iprov)->inode_info.gid = __kgid_val(inode->i_gid);
@@ -155,7 +189,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	record_inode_type(inode->i_mode, iprov);
 	sprov = inode->i_sb->s_provenance;
 	memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
-
 	inode->i_provenance = iprov;
 	refresh_inode_provenance(inode);
 	return 0;
@@ -187,7 +220,6 @@ static int provenance_inode_create(struct inode *dir, struct dentry *dentry, umo
 
 	if (!iprov)
 		return -ENOMEM;
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
 	flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
@@ -218,7 +250,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		return 0;
 	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
-	iprov = inode->i_provenance;
+	iprov = inode_provenance(inode, false);
 	if (iprov == NULL)
 		return -ENOMEM;
 	refresh_current_provenance();
@@ -336,6 +368,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_from_activity(RL_SETATTR, cprov, iattrprov, FLOW_ALLOWED, NULL);
 	flow_between_entities(RL_SETATTR, iattrprov, iprov, FLOW_ALLOWED, NULL);
+	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	free_provenance(iattrprov);
@@ -347,7 +380,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
  * @path contains the path structure for the file.
  * Return 0 if permission is granted.
  */
-int provenance_inode_getattr(const struct path *path)
+static int provenance_inode_getattr(const struct path *path)
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = dentry_provenance(path->dentry);
@@ -386,6 +419,38 @@ static int provenance_inode_readlink(struct dentry *dentry)
 	return 0;
 }
 
+static int provenance_inode_setxattr(struct dentry *dentry, const char *name,
+				     const void *value, size_t size, int flags)
+{
+	struct provenance *prov;
+	union prov_msg *setting;
+
+	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0) { // provenance xattr
+		if (size != sizeof(union prov_msg))
+			return -ENOMEM;
+		prov = dentry_provenance(dentry);
+		setting = (union prov_msg *)value;
+
+		if (provenance_is_tracked(setting))
+			set_tracked(prov_msg(prov));
+		else
+			clear_tracked(prov_msg(prov));
+
+		if (provenance_is_opaque(setting))
+			set_opaque(prov_msg(prov));
+		else
+			clear_opaque(prov_msg(prov));
+
+		if (provenance_does_propagate(setting))
+			set_propagate(prov_msg(prov));
+		else
+			clear_propagate(prov_msg(prov));
+
+		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
+	}
+	return 0;
+}
+
 /*
  * Update inode security field after successful setxattr operation.
  * @value identified by @name for @dentry.
@@ -397,6 +462,9 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 	struct provenance *iprov = dentry_provenance(dentry);
 	unsigned long irqflags;
 
+	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0)
+		return;
+
 	if (!iprov)
 		return;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
@@ -407,6 +475,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry, const char *na
 		goto out;
 	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
 out:
+	queue_save_provenance(iprov, dentry);;
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
@@ -422,6 +491,9 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 	struct provenance *iprov = dentry_provenance(dentry);
 	int rtn = 0;
 	unsigned long irqflags;
+
+	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0)
+		return 0;
 
 	if (!iprov)
 		return -ENOMEM;
@@ -470,6 +542,9 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 	struct provenance *iprov = dentry_provenance(dentry);
 	unsigned long irqflags;
 
+	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0)
+		return -EPERM;
+
 	if (!iprov)
 		return -ENOMEM;
 
@@ -481,11 +556,36 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
 	record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0, FLOW_ALLOWED);
 out:
+	queue_save_provenance(iprov, dentry);;
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
 }
 
+static int provenance_inode_getsecurity(struct inode *inode, const char *name, void **buffer, bool alloc)
+{
+	struct provenance *iprov = inode_provenance(inode, true);
+
+	if (unlikely(!iprov))
+		return -ENOMEM;
+	if (strcmp(name, XATTR_PROVENANCE_SUFFIX))
+		return -EOPNOTSUPP;
+	if (!alloc)
+		goto out;
+	*buffer = kmalloc(sizeof(union prov_msg), GFP_KERNEL);
+	memcpy(*buffer, prov_msg(iprov), sizeof(union prov_msg));
+out:
+	return sizeof(union prov_msg);
+}
+
+static int provenance_inode_listsecurity(struct inode *inode, char *buffer, size_t buffer_size)
+{
+	const int len = sizeof(XATTR_NAME_PROVENANCE);
+
+	if (buffer && len <= buffer_size)
+		memcpy(buffer, XATTR_NAME_PROVENANCE, len);
+	return len;
+}
 
 /*
  * Check file permissions before accessing an open file.  This hook is
@@ -537,14 +637,14 @@ static int provenance_file_permission(struct file *file, int mask)
 			flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, file);
 		if ((perms & (FILE__READ)) != 0)
 			flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
-		if ((perms & (FILE__EXECUTE)) != 0){
-			if (provenance_is_opaque(prov_msg(iprov))) {
+		if ((perms & (FILE__EXECUTE)) != 0) {
+			if (provenance_is_opaque(prov_msg(iprov)))
 				set_opaque(prov_msg(cprov));
-			}else{
+			else
 				flow_to_activity(RL_EXEC, iprov, cprov, FLOW_ALLOWED, file);
-			}
 		}
 	}
+	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -600,6 +700,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 			flow_to_activity(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
 		if ((prot & (PROT_EXEC)) != 0)
 			flow_to_activity(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
+		queue_save_provenance(iprov, file_dentry(file));
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	} else{
@@ -614,6 +715,7 @@ static int provenance_mmap_file(struct file *file, unsigned long reqprot, unsign
 			flow_to_activity(RL_MMAP_READ, bprov, cprov, FLOW_ALLOWED, file);
 		if ((prot & (PROT_EXEC)) != 0)
 			flow_to_activity(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
+		queue_save_provenance(iprov, file_dentry(file));
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 		free_provenance(bprov);
@@ -643,6 +745,7 @@ static int provenance_file_ioctl(struct file *file, unsigned int cmd, unsigned l
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_from_activity(RL_WRITE, cprov, iprov, FLOW_ALLOWED, NULL);
 	flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, NULL);
+	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1061,7 +1164,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		record_pck_to_inode(&pckprov, iprov);
 		if (provenance_is_tracked(prov_msg(cprov)))
 			flow_to_activity(RL_RCV, iprov, cprov, FLOW_ALLOWED, NULL);
-		if(provenance_records_packet(prov_msg(iprov)))
+		if (provenance_records_packet(prov_msg(iprov)))
 			record_packet_content(&pckprov, skb);
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1081,14 +1184,18 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					  struct sock *other,
 					  struct sock *newsk)
 {
-	/*struct provenance* cprov  = current_provenance();
-	   struct provenance* skprov = sk_provenance(sock);
-	   struct provenance* nskprov = sk_provenance(newsk);
-	   struct provenance* okprov = sk_provenance(other);
-
-	      record_relation(RL_CONNECT, cprov, skprov, FLOW_ALLOWED);
-	      record_relation(RL_ASSOCIATE, skprov, nskprov, FLOW_ALLOWED);
-	      record_relation(RL_ASSOCIATE, skprov, okprov, FLOW_ALLOWED);*/
+	/*struct provenance *cprov  = current_provenance();
+	   struct provenance *iprov = sk_inode_provenance(sock);
+	   struct provenance *oprov = sk_inode_provenance(other);
+	   struct provenance *nprov = sk_inode_provenance(newsk);
+	   unsigned long irqflags;
+	   spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
+	   spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	   flow_from_activity(RL_CONNECT, cprov, nprov, FLOW_ALLOWED, NULL);
+	   flow_from_activity(RL_CONNECT, iprov, nprov, FLOW_ALLOWED, NULL);
+	   flow_from_activity(RL_CONNECT, oprov, nprov, FLOW_ALLOWED, NULL);
+	   spin_unlock(prov_lock(iprov));
+	   spin_unlock_irqrestore(prov_lock(cprov), irqflags);*/
 	return 0;
 }
 
@@ -1102,10 +1209,15 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	/*struct provenance* skprov = socket_inode_provenance(sock);
-	   struct provenance* okprov = socket_inode_provenance(other);
+	struct provenance *sprov = socket_inode_provenance(sock);
+	struct provenance *oprov = socket_inode_provenance(other);
+	unsigned long irqflags;
 
-	      record_relation(RL_UNKNOWN, skprov, okprov, FLOW_ALLOWED);*/
+	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
+	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
+	flow_between_entities(RL_UNKNOWN, sprov, oprov, FLOW_ALLOWED, NULL);
+	spin_unlock(prov_lock(oprov));
+	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return 0;
 }
 
@@ -1163,6 +1275,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 		set_opaque(prov_msg(nprov));
 		return;
 	}
+	record_node_name(cprov, bprm->interp);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	flow_between_activities(RL_EXEC_PROCESS, cprov, nprov, FLOW_ALLOWED, NULL);
@@ -1213,7 +1326,7 @@ static int provenance_sb_kern_mount(struct super_block *sb, int flags, void *dat
 	return 0;
 }
 
-static struct security_hook_list provenance_hooks[] = {
+static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free,	      provenance_cred_free),
@@ -1231,10 +1344,13 @@ static struct security_hook_list provenance_hooks[] = {
 	LSM_HOOK_INIT(inode_setattr,	      provenance_inode_setattr),
 	LSM_HOOK_INIT(inode_getattr,	      provenance_inode_getattr),
 	LSM_HOOK_INIT(inode_readlink,	      provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_setxattr,	      provenance_inode_setxattr),
 	LSM_HOOK_INIT(inode_post_setxattr,    provenance_inode_post_setxattr),
 	LSM_HOOK_INIT(inode_getxattr,	      provenance_inode_getxattr),
 	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
 	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
+	LSM_HOOK_INIT(inode_getsecurity,      provenance_inode_getsecurity),
+	LSM_HOOK_INIT(inode_listsecurity,     provenance_inode_listsecurity),
 
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
@@ -1284,19 +1400,15 @@ uint32_t prov_boot_id;
 struct prov_boot_buffer         *boot_buffer;
 struct prov_long_boot_buffer    *long_boot_buffer;
 
-struct ipv4_filters ingress_ipv4filters;
-struct ipv4_filters egress_ipv4filters;
-struct secctx_filters secctx_filters;
-struct cgroup_filters cgroup_filters;
+LIST_HEAD(ingress_ipv4filters);
+LIST_HEAD(egress_ipv4filters);
+LIST_HEAD(secctx_filters);
+LIST_HEAD(cgroup_filters);
 bool prov_enabled;
 bool prov_all;
 
 void __init provenance_add_hooks(void)
 {
-	INIT_LIST_HEAD(&ingress_ipv4filters.list);
-	INIT_LIST_HEAD(&egress_ipv4filters.list);
-	INIT_LIST_HEAD(&secctx_filters.list);
-	INIT_LIST_HEAD(&cgroup_filters.list);
 	prov_enabled = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
 	prov_all = true;
@@ -1315,11 +1427,14 @@ void __init provenance_add_hooks(void)
 	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
 	if (unlikely(long_boot_buffer == NULL))
 		panic("Provenance: could not allocate long_boot_buffer.");
-
-	relay_ready=false;
+	prov_queue = alloc_workqueue("prov_queue", 0, 0);
+	if (!prov_queue)
+		printk(KERN_ERR "Provenance: could not initialise work queue.");
+	relay_ready = false;
 	cred_init_provenance();
 	/* register the provenance security hooks */
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
 	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
 	printk(KERN_INFO "Provenance hooks ready.\n");
 }
+MODULE_LICENSE("GPL");

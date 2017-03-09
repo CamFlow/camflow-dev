@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.2.3           | 4.9.13         | N/A        |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
 | 0.2.1           | 4.9.5          | 03/02/2017	|
 | 0.2.0           | 4.9.5          | 23/01/2017 |
@@ -18,21 +19,33 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.2.3
+
+```
+- A variety of minor issues fixed through code analysis.
+- Add support for travis (see https://travis-ci.org/) testing.
+- Put back Unix socket recording.
+- Persist provenance information across reboot.
+- Anticipate read only after initialisation security hooks upcoming changes.
+- Handle provenance through extended attributes.
+- Update to kernel version 4.9.13.
+```
+
 ### v0.2.2
 
 ```
-- fixed some rare deadlock issue.
-- change anti-cycle logic to significantly reduce node numbers (edge number
+- Fixed some rare deadlock issue.
+- Change anti-cycle logic to significantly reduce node numbers (edge number
   remain constant)
-- change how certain target are applied internally.
-- application can be integrated to provenance by writing to a pseudo file.
+- Change how certain target are applied internally.
+- Application can be integrated to provenance by writing to a pseudo file.
 - Update to kernel version 4.9.9.
 ```
 
 ### v0.2.1
 
 ```
-- performance improvement.
+- Performance improvement.
 ```
 
 ### v0.2.0
@@ -49,8 +62,7 @@
 - Can now record IP packets content.
 - Record inode and task secid and secctx (from "major" LSM).
 - Code cleanup.
-- Support for IFC on a temporary hold (manpower and priority reason), code
-remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc.
+- Support for IFC on a temporary hold (manpower and priority reason).
 - Fix "sleeping function called from invalid context" when d_find_alias was
  called in provenance_inode_permission.
 - Identify containers via "cid" (current_cid() << (current->nsproxy->cgroup_ns->ns.inum)).
@@ -188,22 +200,3 @@ remain available on branch "ifc" https://github.com/CamFlow/camflow-dev/tree/ifc
 ```
 - Initial release.
 ```
-
-## Plan
-
-### 0.2.X
-
-* generalise access denial recording.
-* look at some form of automated testing.
-* support for Raspberry Pi / ARM.
-* refactor userspace API.
-
-### 0.3.X
-
-* Switch to 4.9 once confirmed it is LTS.
-* Setting tracking via pid is "racy" (i.e. pid may be reassigned while parameter are being set).
-* Clean-up code.
-* IFC tags and provenance data persistence across reboot.
-* Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
-* Look at [NetLabel](https://www.kernel.org/doc/Documentation/netlabel/introduction.txt), [XFRM](http://man7.org/linux/man-pages/man8/ip-xfrm.8.html) and [IPSEC](http://kernelspec.blogspot.co.uk/2014/10/ipsec-implementation-in-linux-kernel.html) for labelled packet (may or may not do what we want).
-* Look at [Coccinelle](http://coccinelle.lip6.fr/) for patching /security/security.c and .h files.

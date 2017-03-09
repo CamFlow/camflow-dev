@@ -35,7 +35,7 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		record_inode_to_pck(iprov, &pckprov);
-		if(provenance_records_packet(prov_msg(iprov)))
+		if (provenance_records_packet(prov_msg(iprov)))
 			record_packet_content(&pckprov, skb);
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -71,4 +71,5 @@ static int __init provenance_nf_init(void)
 	return 0;
 }
 module_init(provenance_nf_init);
+MODULE_LICENSE("GPL");
 #endif

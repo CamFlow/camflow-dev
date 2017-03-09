@@ -17,7 +17,7 @@
 #include <linux/limits.h>
 #else
 #include <linux/socket.h>
-#include <uapi/linux/limits.h>
+#include <linux/limits.h>
 #include <linux/mutex.h>
 #endif
 
@@ -95,15 +95,14 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
 #define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
 #define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
-#define PROV_FILE_FILE                        "/sys/kernel/security/provenance/file"
 #define PROV_PROCESS_FILE                     "/sys/kernel/security/provenance/process"
 #define PROV_IPV4_INGRESS_FILE                "/sys/kernel/security/provenance/ipv4_ingress"
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
-#define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
-#define PROV_LOG_FILE                  				"/sys/kernel/security/provenance/log"
-#define PROV_LOGP_FILE                  			"/sys/kernel/security/provenance/logp"
+#define PROV_CGROUP_FILTER                                                                              "/sys/kernel/security/provenance/cgroup"
+#define PROV_LOG_FILE                                           "/sys/kernel/security/provenance/log"
+#define PROV_LOGP_FILE                                          "/sys/kernel/security/provenance/logp"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -203,7 +202,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
 #define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
-#define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
+#define ENT_PCKCNT                                              (DM_ENTITY    | 0x0000000001000000ULL)
 
 #define FLOW_ALLOWED        1
 #define FLOW_DISALLOWED     0
@@ -215,7 +214,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
-#define node_secid(node) 							((node)->node_info.secid)
+#define node_secid(node)							((node)->node_info.secid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -256,8 +255,8 @@ union prov_identifier {
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 };
 
-#define prov_set_flag(node, nbit) prov_flag(node) |= 1 << nbit
-#define prov_clear_flag(node, nbit) prov_flag(node) &= ~(1 << nbit)
+#define prov_set_flag(node, nbit) 	(prov_flag(node) |= 1 << nbit)
+#define prov_clear_flag(node, nbit) (prov_flag(node) &= ~(1 << nbit))
 #define prov_check_flag(node, nbit) ((prov_flag(node) & (1 << nbit)) == (1 << nbit))
 
 #define RECORDED_BIT 0
@@ -267,7 +266,7 @@ union prov_identifier {
 
 #define NAME_RECORDED_BIT 1
 #define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
-#define clear__name_recorded(node)          prov_clear_flag(node, NAME_RECORDED_BIT)
+#define clear_name_recorded(node)						prov_clear_flag(node, NAME_RECORDED_BIT)
 #define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
 
 #define TRACKED_BIT 2
@@ -290,7 +289,7 @@ union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies;uint32_t secid;uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
@@ -438,17 +437,6 @@ struct prov_filter {
 #define PROV_SET_OPAQUE       0x02
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
-
-struct prov_file_config {
-	char name[PATH_MAX];
-	union prov_msg prov;
-	uint8_t op;
-};
-
-struct prov_self_config {
-	union prov_msg prov;
-	uint8_t op;
-};
 
 struct prov_process_config {
 	union prov_msg prov;

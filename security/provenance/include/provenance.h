@@ -25,6 +25,7 @@
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
+#include <linux/xattr.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
@@ -42,6 +43,8 @@ enum {
 	PROVENANCE_LOCK_INODE,
 	PROVENANCE_LOCK_MSG,
 	PROVENANCE_LOCK_SHM,
+	PROVENANCE_LOCK_SOCKET,
+	PROVENANCE_LOCK_SOCK
 };
 
 struct provenance {
@@ -50,6 +53,8 @@ struct provenance {
 	uint8_t updt_mmap;
 	uint8_t has_mmap;
 	bool has_outgoing;
+	bool initialised;
+	bool saved;
 };
 
 #define prov_msg(provenance) (&(provenance->msg))
@@ -120,9 +125,9 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	union prov_msg old_prov;
 	union prov_msg relation;
 
-	if(!prov->has_outgoing) // there is no outgoing
+	if (!prov->has_outgoing) // there is no outgoing
 		return;
-	if (filter_update_node(type, prov_msg(prov)))
+	if (filter_update_node(type))
 		return;
 
 	memset(&relation, 0, sizeof(union prov_msg));
@@ -133,7 +138,8 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 		__record_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
 	else
 		__record_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, FLOW_ALLOWED, NULL);
-	prov->has_outgoing=false; // we update there is no more outgoing edge
+	prov->has_outgoing = false; // we update there is no more outgoing edge
+	prov->saved = false;
 }
 
 static inline void __propagate(uint64_t type,
@@ -179,7 +185,7 @@ static inline void record_relation(uint64_t type,
 	__update_version(type, to);
 	__record_node(prov_msg(to));
 	__record_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, allowed, file);
-	from->has_outgoing=true; // there is an outgoing edge
+	from->has_outgoing = true; // there is an outgoing edge
 }
 
 static inline void flow_to_activity(uint64_t type,

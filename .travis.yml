@@ -1,0 +1,33 @@
+dist: trusty
+sudo: required
+language: c
+
+addons:
+  sonarqube:
+    branches:
+      - master
+      - dev
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get -y install build-essential
+  - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev
+  - sudo apt-get -y install bc nano patch mosquitto
+  - sudo apt-get -y install libelf-dev sparse flawfinder
+  - sudo apt-get -y install libedit-dev
+
+before_script:
+  - make prepare_kernel
+  - make prepare_smatch
+  - make patch
+  - make config_ubuntu
+  - make config_travis
+
+script:
+  - sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=https://sonarqube.com
+  - make compile_security
+  - make compile_kernel
+  - make test_travis
+
+notifications:
+  slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM
