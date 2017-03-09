@@ -18,28 +18,30 @@ struct cgroup_filters {
 	struct cgroupinfo filter;
 };
 
-extern struct cgroup_filters cgroup_filters;
+extern struct list_head cgroup_filters;
 
-static inline uint8_t prov_cgroup_whichOP(struct cgroup_filters *filters, uint32_t cid)
+static inline uint8_t prov_cgroup_whichOP(uint32_t cid)
 {
+	struct list_head *listentry, *listtmp;
 	struct cgroup_filters *tmp;
 
-	list_for_each_entry(tmp, &(filters->list), list) {
+	list_for_each_safe(listentry, listtmp, &cgroup_filters) {
+		tmp = list_entry(listentry, struct cgroup_filters, list);
 		if (tmp->filter.cid == cid)
 			return tmp->filter.op;
 	}
 	return 0; // do nothing
 }
 
-static inline uint8_t prov_cgroup_delete(struct cgroup_filters *filters, struct cgroup_filters *f)
+static inline uint8_t prov_cgroup_delete(struct cgroup_filters *f)
 {
-	struct list_head *pos, *q;
+	struct list_head *listentry, *listtmp;
 	struct cgroup_filters *tmp;
 
-	list_for_each_safe(pos, q, &(filters->list)) {
-		tmp = list_entry(pos, struct cgroup_filters, list);
+	list_for_each_safe(listentry, listtmp, &cgroup_filters) {
+		tmp = list_entry(listentry, struct cgroup_filters, list);
 		if (tmp->filter.cid == f->filter.cid) {
-			list_del(pos);
+			list_del(listentry);
 			kfree(tmp);
 			return 0; // you should only get one
 		}
@@ -47,19 +49,19 @@ static inline uint8_t prov_cgroup_delete(struct cgroup_filters *filters, struct 
 	return 0; // do nothing
 }
 
-static inline uint8_t prov_cgroup_add_or_update(struct cgroup_filters *filters, struct cgroup_filters *f)
+static inline uint8_t prov_cgroup_add_or_update(struct cgroup_filters *f)
 {
-	struct list_head *pos, *q;
+	struct list_head *listentry, *listtmp;
 	struct cgroup_filters *tmp;
 
-	list_for_each_safe(pos, q, &(filters->list)) {
-		tmp = list_entry(pos, struct cgroup_filters, list);
+	list_for_each_safe(listentry, listtmp, &cgroup_filters) {
+		tmp = list_entry(listentry, struct cgroup_filters, list);
 		if (tmp->filter.cid == f->filter.cid) {
 			tmp->filter.op = f->filter.op;
 			return 0; // you should only get one
 		}
 	}
-	list_add_tail(&(f->list), &(filters->list)); // not already on the list, we add it
+	list_add_tail(&(f->list), &cgroup_filters); // not already on the list, we add it
 	return 0;
 }
 

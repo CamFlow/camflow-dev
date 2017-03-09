@@ -53,7 +53,6 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_PROPAGATE_RELATION_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
-	provenance_mark_as_opaque(PROV_FILE_FILE);
 	provenance_mark_as_opaque(PROV_PROCESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
@@ -175,6 +174,9 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
+	if(!node)
+		return -ENOMEM;
+
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
 		count = -ENOMEM;
 		goto out;
@@ -224,22 +226,7 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
-static ssize_t prov_write_self(struct file *file, const char __user *buf,
-			       size_t count, loff_t *ppos)
-{
-	struct prov_self_config msg;
-	struct provenance *prov = current_provenance();
-	union prov_msg *setting;
-	uint8_t op;
-
-	if (count < sizeof(struct prov_self_config))
-		return -EINVAL;
-
-	if (copy_from_user(&msg, buf, sizeof(struct prov_self_config)))
-		return -ENOMEM;
-
-	setting = &(msg.prov);
-	op = msg.op;
+static inline void update_prov_config(union prov_msg *setting, uint8_t op, struct provenance *prov){
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
@@ -265,8 +252,22 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	if ((op & PROV_SET_TAINT) != 0)
 		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
 	spin_unlock(prov_lock(prov));
+}
 
-	return sizeof(struct prov_self_config);
+static ssize_t prov_write_self(struct file *file, const char __user *buf,
+			       size_t count, loff_t *ppos)
+{
+	struct prov_process_config msg;
+	struct provenance *prov = current_provenance();
+
+	if (count < sizeof(struct prov_process_config))
+		return -EINVAL;
+
+	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
+		return -ENOMEM;
+
+	update_prov_config(&(msg.prov), msg.op, prov);
+	return sizeof(struct prov_process_config);
 }
 
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
@@ -325,7 +326,7 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	}
 #define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
 	{ \
-		return __read_filter(filp, buf, count, filter);	\
+		return __read_filter(filp, buf, count, filter); \
 	}
 
 uint64_t prov_node_filter;
@@ -360,93 +361,11 @@ static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_flush_ops, prov_write_flush, no_read);
 
-static ssize_t prov_write_file(struct file *file, const char __user *buf,
-			       size_t count, loff_t *ppos)
-{
-	struct prov_file_config *msg;
-	struct inode *in;
-	struct provenance *prov;
-	union prov_msg *setting;
-	uint8_t op;
-
-	if (!capable(CAP_AUDIT_CONTROL))
-		return -EPERM;
-
-	if (count < sizeof(struct prov_file_config))
-		return -EINVAL;
-
-	msg = (struct prov_file_config *)buf;
-
-	in = file_name_to_inode(msg->name);
-	if (!in) {
-		printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
-		return -EINVAL;
-	}
-	op = msg->op;
-	setting = &msg->prov;
-	prov = in->i_provenance;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if ((op & PROV_SET_TRACKED) != 0) {
-		if (provenance_is_tracked(setting))
-			set_tracked(prov_msg(prov));
-		else
-			clear_tracked(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_OPAQUE) != 0) {
-		if (provenance_is_opaque(setting))
-			set_opaque(prov_msg(prov));
-		else
-			clear_opaque(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_PROPAGATE) != 0) {
-		if (provenance_does_propagate(setting))
-			set_propagate(prov_msg(prov));
-		else
-			clear_propagate(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
-	spin_unlock(prov_lock(prov));
-	return sizeof(struct prov_file_config);
-}
-
-static ssize_t prov_read_file(struct file *filp, char __user *buf,
-			      size_t count, loff_t *ppos)
-{
-	struct prov_file_config *msg;
-	struct inode *in;
-	struct provenance *prov;
-	int rtn = sizeof(struct prov_file_config);
-
-	if (count < sizeof(struct prov_file_config))
-		return -EINVAL;
-
-	msg = (struct prov_file_config *)buf;
-	in = file_name_to_inode(msg->name);
-	if (!in) {
-		printk(KERN_ERR "Provenance: could not find %s file.", msg->name);
-		return -EINVAL;
-	}
-
-	prov = in->i_provenance;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if (copy_to_user(&msg->prov, prov, sizeof(union prov_msg)))
-		rtn = -ENOMEM;
-	spin_unlock(prov_lock(prov));
-	return rtn;
-}
-declare_file_operations(prov_file_ops, prov_write_file, prov_read_file);
-
 static ssize_t prov_write_process(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	struct prov_process_config *msg;
+	struct prov_process_config msg;
 	struct provenance *prov;
-	union prov_msg *setting;
-	uint8_t op;
 
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
@@ -454,41 +373,14 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config *)buf;
+	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
+		return -ENOMEM;
 
-	setting = &(msg->prov);
-	op = msg->op;
-
-	prov = prov_from_vpid(msg->vpid);
+	prov = prov_from_vpid(msg.vpid);
 	if (prov == NULL)
 		return -EINVAL;
 
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if ((op & PROV_SET_TRACKED) != 0) {
-		if (provenance_is_tracked(setting))
-			set_tracked(prov_msg(prov));
-		else
-			clear_tracked(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_OPAQUE) != 0) {
-		if (provenance_is_opaque(setting))
-			set_opaque(prov_msg(prov));
-		else
-			clear_opaque(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_PROPAGATE) != 0) {
-		if (provenance_does_propagate(setting))
-			set_propagate(prov_msg(prov));
-		else
-			clear_propagate(prov_msg(prov));
-	}
-
-	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
-
-	spin_unlock(prov_lock(prov));
+	update_prov_config(&(msg.prov), msg.op, prov);
 	return sizeof(struct prov_process_config);
 }
 
@@ -517,7 +409,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
 static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
-					  size_t count, struct ipv4_filters *filters)
+					  size_t count, struct list_head *filters)
 {
 	struct ipv4_filters     *f;
 
@@ -528,6 +420,9 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 		return -ENOMEM;
 
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
+	if (!f)
+		return -ENOMEM;
+
 	if (copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
 		return -EAGAIN;
 	f->filter.ip = f->filter.ip & f->filter.mask;
@@ -541,15 +436,17 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 }
 
 static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
-					 size_t count, struct ipv4_filters *filters)
+					 size_t count, struct list_head *filters)
 {
+	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
 	size_t pos = 0;
 
 	if (count < sizeof(struct prov_ipv4_filter))
 		return -ENOMEM;
 
-	list_for_each_entry(tmp, &(filters->list), list) {
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if (count < pos + sizeof(struct prov_ipv4_filter))
 			return -ENOMEM;
 
@@ -617,27 +514,32 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 		return -ENOMEM;
 
 	s = kzalloc(sizeof(struct secctx_filters), GFP_KERNEL);
+	if (!s)
+		return -ENOMEM;
+
 	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
 		return -EAGAIN;
 
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
 	if ((s->filter.op & PROV_SEC_DELETE) != PROV_SEC_DELETE)
-		prov_secctx_add_or_update(&secctx_filters, s);
+		prov_secctx_add_or_update(s);
 	else
-		prov_secctx_delete(&secctx_filters, s);
+		prov_secctx_delete(s);
 	return 0;
 }
 
 static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
+	struct list_head *listentry, *listtmp;
 	struct secctx_filters *tmp;
 	size_t pos = 0;
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
 
-	list_for_each_entry(tmp, &(secctx_filters.list), list) {
+	list_for_each_safe(listentry, listtmp, &secctx_filters) {
+		tmp = list_entry(listentry, struct secctx_filters, list);
 		if (count < pos + sizeof(struct secinfo))
 			return -ENOMEM;
 
@@ -658,28 +560,32 @@ static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *bu
 		return -ENOMEM;
 
 	s = kzalloc(sizeof(struct cgroup_filters), GFP_KERNEL);
+	if (!s)
+		return -ENOMEM;
+		
 	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
 		return -EAGAIN;
 	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
-		prov_cgroup_add_or_update(&cgroup_filters, s);
+		prov_cgroup_add_or_update(s);
 	else
-		prov_cgroup_delete(&cgroup_filters, s);
+		prov_cgroup_delete(s);
 	return 0;
 }
 
 static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
+	struct list_head *listentry, *listtmp;
 	struct cgroup_filters *tmp;
 	size_t pos = 0;
 
 	if (count < sizeof(struct cgroupinfo))
 		return -ENOMEM;
 
-	list_for_each_entry(tmp, &(cgroup_filters.list), list) {
+	list_for_each_safe(listentry, listtmp, &cgroup_filters) {
+		tmp = list_entry(listentry, struct cgroup_filters, list);
 		if (count < pos + sizeof(struct cgroupinfo))
 			return -ENOMEM;
-
 		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct cgroupinfo)))
 			return -EAGAIN;
 		pos += sizeof(struct cgroupinfo);
@@ -689,7 +595,7 @@ static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
 declare_file_operations(prov_cgroup_filter_ops, prov_write_cgroup_filter, prov_read_cgroup_filter);
 
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
-					size_t count, loff_t *ppos)
+			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
 
@@ -701,7 +607,7 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 declare_file_operations(prov_log_ops, prov_write_log, no_read);
 
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
-					size_t count, loff_t *ppos)
+			       size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
 
@@ -716,6 +622,7 @@ declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
+
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
 	securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
@@ -728,7 +635,6 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("propagate_node_filter", 0644, prov_dir, NULL, &prov_propagate_node_filter_ops);
 	securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
 	securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
-	securityfs_create_file("file", 0644, prov_dir, NULL, &prov_file_ops);
 	securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
 	securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
 	securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
@@ -742,3 +648,4 @@ static int __init init_prov_fs(void)
 }
 
 core_initcall(init_prov_fs);
+MODULE_LICENSE("GPL");
