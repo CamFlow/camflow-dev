@@ -14,7 +14,6 @@
 #include "provenance.h"
 
 static int out_edge(union prov_msg* node, union prov_msg* edge){
-  printk(KERN_INFO "Provenance propagate out.\n");
   if(provenance_does_propagate(node)){
     // can propagate over edge?
     if( !filter_propagate_relation(prov_type(edge)) ){
@@ -26,7 +25,6 @@ static int out_edge(union prov_msg* node, union prov_msg* edge){
 }
 
 static int in_edge(union prov_msg* edge, union prov_msg* node){
-  printk(KERN_INFO "Provenance propagate in.\n");
   if(provenance_does_propagate(edge)){
     // can propagate to node?
     if(!filter_propagate_node(node)){
