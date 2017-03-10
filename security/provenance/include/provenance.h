@@ -26,10 +26,10 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/xattr.h>
-#include <linux/camflow_query.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
+#include "provenance_query.h"
 
 #define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
 #define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
@@ -141,54 +141,6 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	prov->saved = false;
 }
 
-static inline int call_camflow_out_edge(union prov_msg* node,
-					union prov_msg* edge)
-{
-	int rc = 0;
-	struct list_head *listentry, *listtmp;
-	struct policy_hook *fcn;
-
-	list_for_each_safe(listentry, listtmp, &policy_hooks) {
-		fcn = list_entry(listentry, struct policy_hook, list);
-		if (fcn->out_edge)
-			rc |= fcn->out_edge(node, edge);
-	}
-	return rc;
-}
-
-static inline int call_camflow_in_edge(union prov_msg* edge,
-				       union prov_msg* node)
-{
-	int rc = 0;
-	struct list_head *listentry, *listtmp;
-	struct policy_hook *fcn;
-
-	list_for_each_safe(listentry, listtmp, &policy_hooks) {
-		fcn = list_entry(listentry, struct policy_hook, list);
-		if (fcn->in_edge)
-			rc |= fcn->in_edge(edge, node);
-	}
-	return rc;
-}
-
-static inline int __check_hooks(union prov_msg *from,
-				union prov_msg *to,
-				union prov_msg *edge)
-{
-	int rc = 0;
-
-	rc = call_camflow_out_edge(from, edge);
-	rc |= call_camflow_in_edge(edge, to);
-	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING) {
-		printk(KERN_WARNING "Provenance warning raised.\n");
-	}
-	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
-		edge->relation_info.allowed = FLOW_DISALLOWED;
-		return -EPERM;
-	}
-	return 0;
-}
-
 static inline int record_relation(uint64_t type,
 				  struct provenance *from,
 				  struct provenance *to,
@@ -212,7 +164,7 @@ static inline int record_relation(uint64_t type,
 	__update_version(type, to);
 	__record_node(prov_msg(to));
 	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
-	rc = __check_hooks(prov_msg(from), prov_msg(to), &relation);
+	rc = call_query_hooks(prov_msg(from), prov_msg(to), &relation);
 	prov_write(&relation);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;

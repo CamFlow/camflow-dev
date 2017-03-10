@@ -207,7 +207,7 @@ static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *in
 	__update_version(RL_RCV_PACKET, inode);
 	__record_node(prov_msg(inode));
 	__prepare_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(prov_msg(inode)->msg_info.identifier), &relation, NULL);
-	rc = __check_hooks(pck, prov_msg(inode), &relation);
+	rc = call_query_hooks(pck, prov_msg(inode), &relation);
 	prov_write(&relation);
 	return rc;
 }
@@ -228,7 +228,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_msg *
 	__record_node(prov_msg(inode));
 	prov_write(pck);
 	__prepare_relation(RL_SND_PACKET, &(prov_msg(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, NULL);
-	rc = __check_hooks(prov_msg(inode), pck, &relation);
+	rc = call_query_hooks(prov_msg(inode), pck, &relation);
 	inode->has_outgoing = true;
 	prov_write(&relation);
 	return rc;
