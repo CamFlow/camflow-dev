@@ -3,6 +3,6 @@
 #
 obj-$(CONFIG_SECURITY_PROVENANCE) := provenance.o
 
-provenance-y := relay.o hooks.o fs.o netfilter.o propagate.o
+provenance-y := relay.o hooks.o query.o fs.o netfilter.o propagate.o
 
 ccflags-y := -I$(srctree)/security/provenance/include
