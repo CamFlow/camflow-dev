@@ -3,7 +3,7 @@
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
 | 0.3.0           | 4.9.13         | N/A				|
-| 0.2.3           | 4.9.13         | N/A        |
+| 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
 | 0.2.1           | 4.9.5          | 03/02/2017	|
 | 0.2.0           | 4.9.5          | 23/01/2017 |
@@ -27,6 +27,7 @@
 
 ### v0.2.3
 ```
+- A variety of minor issues fixed through code analysis.
 - Add support for travis (see https://travis-ci.org/) testing.
 - Put back Unix socket recording.
 - Persist provenance information across reboot.
@@ -204,20 +205,3 @@
 ```
 - Initial release.
 ```
-
-## Plan
-
-### 0.2.X
-
-* generalise access denial recording.
-* look at some form of automated testing.
-* support for Raspberry Pi / ARM.
-* refactor userspace API.
-
-### 0.3.X
-
-* Switch to 4.9 once confirmed it is LTS.
-* Clean-up code.
-* Look at [keystore](https://lwn.net/Articles/210502/) to store tag related metadata (e.g. associated certificate for MW)
-* Look at [NetLabel](https://www.kernel.org/doc/Documentation/netlabel/introduction.txt), [XFRM](http://man7.org/linux/man-pages/man8/ip-xfrm.8.html) and [IPSEC](http://kernelspec.blogspot.co.uk/2014/10/ipsec-implementation-in-linux-kernel.html) for labelled packet (may or may not do what we want).
-* Look at [Coccinelle](http://coccinelle.lip6.fr/) for patching /security/security.c and .h files.

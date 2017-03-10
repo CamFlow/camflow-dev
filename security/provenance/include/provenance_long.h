@@ -219,7 +219,7 @@ static inline void record_read_xattr(uint64_t type,
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
 
-	if (xattr)
+	if(!xattr)
 		return;
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);

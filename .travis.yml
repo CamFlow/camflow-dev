@@ -14,9 +14,12 @@ before_install:
   - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev
   - sudo apt-get -y install bc nano patch mosquitto
   - sudo apt-get -y install libelf-dev sparse flawfinder
+  - sudo apt-get -y install libedit-dev
 
 before_script:
   - make prepare_kernel
+  - make prepare_smatch
+  - make patch
   - make config_ubuntu
   - make config_travis
 
