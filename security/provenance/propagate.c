@@ -13,7 +13,7 @@
 
 #include "provenance.h"
 
-int out_edge(union prov_msg* node, union prov_msg* edge){
+static int out_edge(union prov_msg* node, union prov_msg* edge){
   printk(KERN_INFO "Provenance propagate out.\n");
   if(provenance_does_propagate(node)){
     if( !filter_propagate_relation(prov_type(edge)) ){
@@ -24,7 +24,7 @@ int out_edge(union prov_msg* node, union prov_msg* edge){
   return 0;
 }
 
-int in_edge(union prov_msg* edge, union prov_msg* node){
+static int in_edge(union prov_msg* edge, union prov_msg* node){
   printk(KERN_INFO "Provenance propagate in.\n");
   if(provenance_does_propagate(edge)){
     set_tracked(node);

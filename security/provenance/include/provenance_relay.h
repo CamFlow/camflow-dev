@@ -10,8 +10,8 @@
  *	(at your option) any later version.
  *
  */
-#ifndef _LINUX_PROVENANCE_RELAY_H
-#define _LINUX_PROVENANCE_RELAY_H
+#ifndef CONFIG_SECURITY_PROVENANCE_RELAY_H
+#define CONFIG_SECURITY_PROVENANCE_RELAY_H
 
 #include <linux/relay.h>
 #include <linux/spinlock.h>
