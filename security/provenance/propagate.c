@@ -16,6 +16,7 @@
 static int out_edge(union prov_msg* node, union prov_msg* edge){
   printk(KERN_INFO "Provenance propagate out.\n");
   if(provenance_does_propagate(node)){
+    // can propagate over edge?
     if( !filter_propagate_relation(prov_type(edge)) ){
   	   set_tracked(edge);
        set_propagate(edge);
@@ -27,20 +28,23 @@ static int out_edge(union prov_msg* node, union prov_msg* edge){
 static int in_edge(union prov_msg* edge, union prov_msg* node){
   printk(KERN_INFO "Provenance propagate in.\n");
   if(provenance_does_propagate(edge)){
-    set_tracked(node);
-    set_propagate(node);
+    // can propagate to node?
+    if(!filter_propagate_node(node)){
+      set_tracked(node);
+      set_propagate(node);
+    }
   }
   return 0;
 }
 
-struct policy_hook hooks = {
+struct provenance_query_hooks hooks = {
   .out_edge=out_edge,
   .in_edge=in_edge
 };
 
 static int __init init_prov_propagate(void)
 {
-  register_camflow_policy_hook(&hooks);
+  register_camflow_query_hook(&hooks);
   printk(KERN_INFO "Provenance propagate ready.\n");
 	return 0;
 }

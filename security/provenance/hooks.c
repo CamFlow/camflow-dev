@@ -1404,7 +1404,7 @@ LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
 LIST_HEAD(secctx_filters);
 LIST_HEAD(cgroup_filters);
-LIST_HEAD(policy_hooks);
+LIST_HEAD(provenance_query_hooks);
 bool prov_enabled;
 bool prov_all;
 
@@ -1437,19 +1437,4 @@ void __init provenance_add_hooks(void)
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
 	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
 	printk(KERN_INFO "Provenance hooks ready.\n");
-}
-
-int register_camflow_policy_hook( struct policy_hook *hook)
-{
-	if (!hook)
-		return -ENOMEM;
-	printk(KERN_INFO "Provenance registering policy hook...\n");
-	list_add_tail_rcu(&(hook->list), &policy_hooks);
-	return 0;
-}
-
-int unregister_camflow_policy_hook( struct policy_hook *hook)
-{
-	list_del_rcu(&(hook->list));
-	return 0;
 }

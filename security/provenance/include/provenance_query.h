@@ -19,10 +19,10 @@
  {
  	int rc = 0;
  	struct list_head *listentry, *listtmp;
- 	struct policy_hook *fcn;
+ 	struct provenance_query_hooks *fcn;
 
- 	list_for_each_safe(listentry, listtmp, &policy_hooks) {
- 		fcn = list_entry(listentry, struct policy_hook, list);
+ 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
+ 		fcn = list_entry(listentry, struct provenance_query_hooks, list);
  		if (fcn->out_edge)
  			rc |= fcn->out_edge(node, edge);
  	}
@@ -34,10 +34,10 @@
  {
  	int rc = 0;
  	struct list_head *listentry, *listtmp;
- 	struct policy_hook *fcn;
+ 	struct provenance_query_hooks *fcn;
 
- 	list_for_each_safe(listentry, listtmp, &policy_hooks) {
- 		fcn = list_entry(listentry, struct policy_hook, list);
+ 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
+ 		fcn = list_entry(listentry, struct provenance_query_hooks, list);
  		if (fcn->in_edge)
  			rc |= fcn->in_edge(edge, node);
  	}
