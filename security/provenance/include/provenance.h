@@ -26,7 +26,7 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/xattr.h>
-#include <linux/camflow_policy.h>
+#include <linux/camflow_query.h>
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
@@ -180,7 +180,7 @@ static inline int __check_hooks(union prov_msg *from,
 	rc = call_camflow_out_edge(from, edge);
 	rc |= call_camflow_in_edge(edge, to);
 	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING) {
-		// TODO do something
+		printk(KERN_WARNING "Provenance warning raised.\n");
 	}
 	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
 		edge->relation_info.allowed = FLOW_DISALLOWED;
