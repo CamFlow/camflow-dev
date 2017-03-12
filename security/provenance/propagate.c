@@ -13,7 +13,8 @@
 
 #include "provenance.h"
 
-static int out_edge(union prov_msg* node, union prov_msg* edge){
+static int out_edge(union prov_msg *node, union prov_msg *edge)
+{
   if(provenance_does_propagate(node)){
     // can propagate over edge?
     if( !filter_propagate_relation(prov_type(edge)) ){
@@ -24,7 +25,8 @@ static int out_edge(union prov_msg* node, union prov_msg* edge){
   return 0;
 }
 
-static int in_edge(union prov_msg* edge, union prov_msg* node){
+static int in_edge(union prov_msg *edge, union prov_msg *node)
+{
   if(provenance_does_propagate(edge)){
     // can propagate to node?
     if(!filter_propagate_node(node)){
@@ -37,7 +39,7 @@ static int in_edge(union prov_msg* edge, union prov_msg* node){
 
 struct provenance_query_hooks hooks = {
   QUERY_HOOK_INIT(out_edge, out_edge),
-  QUERY_HOOK_INIT(in_edge, in_edge),
+  QUERY_HOOK_INIT(in_edge, in_edge)
 };
 
 static int __init init_prov_propagate(void)
