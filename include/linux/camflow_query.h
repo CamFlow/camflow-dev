@@ -18,6 +18,8 @@
  #define CAMFLOW_RAISE_WARNING  1
  #define CAMFLOW_PREVENT_FLOW   2
 
+ #define QUERY_HOOK_INIT(HEAD, HOOK) .HEAD=&HOOK
+
 struct provenance_query_hooks {
   struct list_head list;
   int (*out_edge)(union prov_msg*, union prov_msg*);

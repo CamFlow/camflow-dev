@@ -36,8 +36,8 @@ static int in_edge(union prov_msg* edge, union prov_msg* node){
 }
 
 struct provenance_query_hooks hooks = {
-  .out_edge=out_edge,
-  .in_edge=in_edge
+  QUERY_HOOK_INIT(out_edge, out_edge),
+  QUERY_HOOK_INIT(in_edge, in_edge),
 };
 
 static int __init init_prov_propagate(void)
