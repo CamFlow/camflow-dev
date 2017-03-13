@@ -97,8 +97,7 @@ static inline void __record_node(union prov_msg *node)
 	set_recorded(node);
 	if (unlikely(node_identifier(node).machine_id != prov_machine_id))
 		node_identifier(node).machine_id = prov_machine_id;
-	if(!call_hooks_newnode(node))
-		prov_write(node);
+	prov_write(node);
 }
 
 static inline void __prepare_relation(uint64_t type,
@@ -133,7 +132,6 @@ static inline void __update_version(uint64_t type, struct provenance *prov)
 	memcpy(&old_prov, prov_msg(prov), sizeof(union prov_msg));
 	node_identifier(prov_msg(prov)).version++;
 	clear_recorded(prov_msg(prov));
-	__record_node(prov_msg(prov));
 	if (node_identifier(prov_msg(prov)).type == ACT_TASK)
 		__prepare_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
 	else
@@ -164,6 +162,7 @@ static inline int record_relation(uint64_t type,
 	__record_node(prov_msg(from));
 	__record_node(prov_msg(to));
 	__update_version(type, to);
+	__record_node(prov_msg(to));
 	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
 	rc = call_query_hooks(prov_msg(from), prov_msg(to), &relation);
 	prov_write(&relation);
