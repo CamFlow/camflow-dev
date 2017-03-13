@@ -22,12 +22,11 @@
 
 struct provenance_query_hooks {
   struct list_head list;
-  int (*new_node)(union prov_msg*);
   int (*out_edge)(union prov_msg*, union prov_msg*);
   int (*in_edge)(union prov_msg*, union prov_msg*);
 };
 
-extern struct list_head provenance_query_hooks;
+ extern struct list_head provenance_query_hooks;
 
 int register_camflow_query_hook( struct provenance_query_hooks *hook);
 int unregister_camflow_query_hook( struct provenance_query_hooks *hook);
