@@ -43,7 +43,9 @@ static inline void __long_record_node(union long_prov_msg *node)
 	long_prov_write(node);
 }
 
-static inline void __long_record_relation(uint64_t type, union long_prov_msg *from, union prov_msg *to, uint8_t allowed)
+static inline void __long_record_relation(uint64_t type,
+																					union long_prov_msg *from,
+																					union prov_msg *to)
 {
 	union prov_msg relation;
 
@@ -74,12 +76,12 @@ static inline void record_node_name(struct provenance *node, const char *name)
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 	if (prov_type(prov_msg(node)) == ACT_TASK) {
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
-		__long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_msg(node), FLOW_ALLOWED);
+		__long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_msg(node));
 		set_name_recorded(prov_msg(node));
 		spin_unlock(prov_lock(node));
 	} else{
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
-		__long_record_relation(RL_NAMED, fname_prov, prov_msg(node), FLOW_ALLOWED);
+		__long_record_relation(RL_NAMED, fname_prov, prov_msg(node));
 		set_name_recorded(prov_msg(node));
 		spin_unlock(prov_lock(node));
 	}
@@ -169,7 +171,7 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 		return;
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
-	__long_record_relation(RL_NAMED, addr_info, prov_msg(prov), FLOW_ALLOWED);
+	__long_record_relation(RL_NAMED, addr_info, prov_msg(prov));
 	kfree(addr_info);
 	set_name_recorded(prov_msg(prov));
 }
@@ -180,8 +182,7 @@ static inline void record_write_xattr(uint64_t type,
 				      const char *name,
 				      const void *value,
 				      size_t size,
-				      int flags,
-				      uint8_t allowed)
+				      int flags)
 {
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
@@ -204,8 +205,9 @@ static inline void record_write_xattr(uint64_t type,
 	__record_node(prov_msg(cprov));
 	__prepare_relation(type, &(prov_msg(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
-	__update_version(type, iprov);
-	__long_record_relation(type, xattr, prov_msg(iprov), allowed);
+	if(filter_update_node(type))
+		update_version(iprov);
+	__long_record_relation(type, xattr, prov_msg(iprov));
 	kfree(xattr);
 	cprov->has_outgoing = true;
 }
@@ -213,8 +215,7 @@ static inline void record_write_xattr(uint64_t type,
 static inline void record_read_xattr(uint64_t type,
 				     struct provenance *cprov,
 				     struct provenance *iprov,
-				     const char *name,
-				     uint8_t allowed)
+				     const char *name)
 {
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
@@ -227,13 +228,14 @@ static inline void record_read_xattr(uint64_t type,
 	__record_node(prov_msg(iprov));
 	__prepare_relation(type, &(prov_msg(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
-	__update_version(type, cprov);
-	__long_record_relation(type, xattr, prov_msg(cprov), allowed);
+	if(filter_update_node(type))
+		update_version(iprov);
+	__long_record_relation(type, xattr, prov_msg(cprov));
 	kfree(xattr);
 	iprov->has_outgoing = true;
 }
 
-static inline void record_packet_content(union prov_msg *pck, const struct sk_buff *skb)
+static inline void record_packet_content(struct provenance *pck, const struct sk_buff *skb)
 {
 	union long_prov_msg *cnt = alloc_long_provenance(ENT_PCKCNT);
 
@@ -244,7 +246,7 @@ static inline void record_packet_content(union prov_msg *pck, const struct sk_bu
 	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
-	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+	__long_record_relation(RL_READ, cnt, prov_msg(pck));
 }
 
 static inline int record_log(union prov_msg *cprov, const char __user *buf, size_t count)
@@ -258,7 +260,7 @@ static inline int record_log(union prov_msg *cprov, const char __user *buf, size
 		return -EAGAIN;
 	str->str_info.str[count] = '\0'; // make sure the string is null terminated
 	str->str_info.length = count;
-	__long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
+	__long_record_relation(RL_SAID, str, cprov);
 	kfree(str);
 	return count;
 }

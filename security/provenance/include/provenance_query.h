@@ -14,20 +14,6 @@
  #define CONFIG_SECURITY_PROVENANCE_QUERY_H
  #include <linux/camflow_query.h>
 
-static inline int call_hooks_newnode(union prov_msg *node)
-{
-  int rc=0;
-  struct list_head *listentry, *listtmp;
-  struct provenance_query_hooks *fcn;
-
-  list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
-		if (fcn->new_node)
-			rc |= fcn->new_node(node);
-	}
-  return rc;
-}
-
 static inline int call_hooks_out_edge(union prov_msg *node,
 					union prov_msg *edge)
 {
@@ -69,18 +55,20 @@ static inline int call_query_hooks(union prov_msg *from,
 		printk(KERN_WARNING "Provenance warning raised.\n");
 	}
 	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+    printk(KERN_ERR "Provenance disallowed flow.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;
-		return -EPERM;
+		return CAMFLOW_PREVENT_FLOW;
 	}
 	rc = call_hooks_in_edge(edge, to);
 	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING) {
 		printk(KERN_WARNING "Provenance warning raised.\n");
 	}
 	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+    printk(KERN_ERR "Provenance disallowed flow.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;
-		return -EPERM;
+		return CAMFLOW_PREVENT_FLOW;
 	}
-	return 0;
+	return rc;
 }
 
  #endif
