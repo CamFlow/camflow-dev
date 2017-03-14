@@ -44,6 +44,18 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val)
 	}
 }
 
+// djb2 hash implementation by Dan Bernstein
+static inline uint64_t djb2_hash(const char *str){
+  uint64_t hash = 5381;
+  int c = *str;
+  while(c){
+    hash = ((hash<<5)+hash) + c;
+    c = *++str;
+  }
+  return hash;
+}
+#define generate_tag(str) djb2_hash(str)
+
 /* element in set belong to super */
 static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES])
 {
@@ -208,6 +220,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define FLOW_DISALLOWED     1
 
 #define prov_type(prov)               ((prov)->node_info.identifier.node_id.type)
+#define node_type(node) prov_type(node)
+#define edge_type(edge) prov_type(edge)
 #define prov_id_buffer(prov)          ((prov)->node_info.identifier.buffer)
 #define node_identifier(node)         ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
