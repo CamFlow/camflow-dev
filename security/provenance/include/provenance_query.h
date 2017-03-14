@@ -51,11 +51,20 @@
  	int rc = 0;
 
  	rc = call_camflow_out_edge(from, edge);
- 	rc |= call_camflow_in_edge(edge, to);
  	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING) {
  		printk(KERN_WARNING "Provenance warning raised.\n");
  	}
  	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+    printk(KERN_ERR "Provenance error raised.\n");
+ 		edge->relation_info.allowed = FLOW_DISALLOWED;
+ 		return -EPERM;
+ 	}
+ 	rc = call_camflow_in_edge(edge, to);
+  if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING) {
+ 		printk(KERN_WARNING "Provenance warning raised.\n");
+ 	}
+ 	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+    printk(KERN_ERR "Provenance error raised.\n");
  		edge->relation_info.allowed = FLOW_DISALLOWED;
  		return -EPERM;
  	}
