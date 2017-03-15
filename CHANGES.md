@@ -22,7 +22,7 @@
 
 ### v0.3.0
 ```
-- reworked taint system.
+- implemented run-time query system.
 - Update to kernel version 4.9.14.
 ```
 
