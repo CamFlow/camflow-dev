@@ -562,7 +562,7 @@ static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *bu
 	s = kzalloc(sizeof(struct cgroup_filters), GFP_KERNEL);
 	if (!s)
 		return -ENOMEM;
-		
+
 	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
 		return -EAGAIN;
 	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
@@ -643,7 +643,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
 	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
-	printk(KERN_INFO "Provenance fs ready.\n");
+	pr_info("Provenance fs ready.\n");
 	return 0;
 }
 core_initcall(init_prov_fs);

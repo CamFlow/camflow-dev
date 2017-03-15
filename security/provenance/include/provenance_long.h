@@ -67,7 +67,7 @@ static inline void record_node_name(struct provenance *node, const char *name)
 		return;
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
 	if (!fname_prov) {
-		printk(KERN_ERR "Provenance: recod name failed to allocate memory\n");
+		pr_err("Provenance: recod name failed to allocate memory\n");
 		return;
 	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
@@ -96,7 +96,7 @@ static inline void record_inode_name_from_dentry(struct dentry *dentry, struct p
 	// should not sleep
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 	if (!buffer) {
-		printk(KERN_ERR "Provenance: could not allocate memory\n");
+		pr_err("Provenance: could not allocate memory\n");
 		return;
 	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
@@ -145,7 +145,7 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 		// should not sleep
 		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 		if (!buffer) {
-			printk(KERN_ERR "Provenance: could not allocate memory\n");
+			pr_err("Provenance: could not allocate memory\n");
 			fput(exe_file);
 			goto out;
 		}

@@ -67,7 +67,7 @@ static int __init provenance_nf_init(void)
 	err = nf_register_hooks(provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
 	if (err)
 		panic("Provenance: nf_register_hooks: error %d\n", err);
-	printk(KERN_INFO "Provenance netfilter ready.\n");
+	pr_info("Provenance netfilter ready.\n");
 	return 0;
 }
 module_init(provenance_nf_init);

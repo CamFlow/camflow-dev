@@ -55,7 +55,7 @@ static inline void provenance_mark_as_opaque(const char *name)
 	struct provenance *prov;
 
 	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
-		printk(KERN_ERR "Provenance: Failed file look up (%s).", name);
+		pr_err("Provenance: Failed file look up (%s).", name);
 		return;
 	}
 	prov = path.dentry->d_inode->i_provenance;
