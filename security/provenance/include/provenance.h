@@ -118,27 +118,31 @@ static inline void __prepare_relation(uint64_t type,
 	}
 }
 
-static inline void __update_version(uint64_t type, struct provenance *prov)
+static inline int __update_version(uint64_t type, struct provenance *prov)
 {
 	union prov_msg old_prov;
 	union prov_msg relation;
+	int rc=0;
 
 	if (!prov->has_outgoing) // there is no outgoing
-		return;
+		return 0;
 	if (filter_update_node(type))
-		return;
+		return 0;
 
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(&old_prov, prov_msg(prov), sizeof(union prov_msg));
+	memset(prov_taint(prov_msg(prov)), 0, PROV_N_BYTES);
 	node_identifier(prov_msg(prov)).version++;
 	clear_recorded(prov_msg(prov));
 	if (node_identifier(prov_msg(prov)).type == ACT_TASK)
 		__prepare_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
 	else
 		__prepare_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
+	rc = call_query_hooks(&old_prov, prov_msg(prov), &relation);
 	prov_write(&relation);
 	prov->has_outgoing = false; // we update there is no more outgoing edge
 	prov->saved = false;
+	return rc;
 }
 
 static inline int record_relation(uint64_t type,
@@ -161,7 +165,9 @@ static inline int record_relation(uint64_t type,
 	memset(&relation, 0, sizeof(union prov_msg));
 	__record_node(prov_msg(from));
 	__record_node(prov_msg(to));
-	__update_version(type, to);
+	rc = __update_version(type, to);
+	if(rc<0)
+		return rc;
 	__record_node(prov_msg(to));
 	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
 	rc = call_query_hooks(prov_msg(from), prov_msg(to), &relation);
