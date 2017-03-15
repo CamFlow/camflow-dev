@@ -103,7 +103,7 @@ static inline void apply_target(union prov_msg *prov)
 	if (prov_type(prov) == ACT_TASK) {
 		op = prov_cgroup_whichOP(prov->task_info.cid);
 		if (unlikely(op != 0)) {
-			printk(KERN_INFO "Provenance: apply cgroup filter %u.", op);
+			pr_info("Provenance: apply cgroup filter %u.", op);
 			if ((op & PROV_CGROUP_TRACKED) != 0)
 				set_tracked(prov);
 			if ((op & PROV_CGROUP_PROPAGATE) != 0)
@@ -113,7 +113,7 @@ static inline void apply_target(union prov_msg *prov)
 	if (prov_has_secid(prov)) {
 		op = prov_secctx_whichOP(node_secid(prov));
 		if (unlikely(op != 0)) {
-			printk(KERN_INFO "Provenance: apply secctx filter %u.", op);
+			pr_info("Provenance: apply secctx filter %u.", op);
 			if ((op & PROV_SEC_TRACKED) != 0)
 				set_tracked(prov);
 			if ((op & PROV_SEC_PROPAGATE) != 0)

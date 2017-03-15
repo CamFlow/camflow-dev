@@ -1430,11 +1430,11 @@ void __init provenance_add_hooks(void)
 		panic("Provenance: could not allocate long_boot_buffer.");
 	prov_queue = alloc_workqueue("prov_queue", 0, 0);
 	if (!prov_queue)
-		printk(KERN_ERR "Provenance: could not initialise work queue.");
+		pr_err("Provenance: could not initialise work queue.");
 	relay_ready = false;
 	cred_init_provenance();
 	/* register the provenance security hooks */
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
-	printk(KERN_INFO "Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
-	printk(KERN_INFO "Provenance hooks ready.\n");
+	pr_info("Provenance Camflow %s\n", CAMFLOW_VERSION_STR);
+	pr_info("Provenance hooks ready.\n");
 }

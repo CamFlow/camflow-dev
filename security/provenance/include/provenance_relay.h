@@ -48,7 +48,7 @@ static inline void prov_write(union prov_msg *msg)
 			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(union prov_msg));
 			boot_buffer->nb_entry++;
 		} else
-			printk(KERN_ERR "Provenance: boot buffer is full.\n");
+			pr_err("Provenance: boot buffer is full.\n");
 	} else
 		relay_write(prov_chan, msg, sizeof(union prov_msg));
 }
@@ -64,7 +64,7 @@ static inline void long_prov_write(union long_prov_msg *msg)
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
 			memcpy(&(long_boot_buffer->buffer[long_boot_buffer->nb_entry++]), msg, sizeof(union long_prov_msg));
 		else
-			printk(KERN_ERR "Provenance: long boot buffer is full.\n");
+			pr_err("Provenance: long boot buffer is full.\n");
 	} else
 		relay_write(long_prov_chan, msg, sizeof(union long_prov_msg));
 }
