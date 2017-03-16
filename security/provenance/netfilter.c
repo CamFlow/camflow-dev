@@ -10,8 +10,6 @@
  * or (at your option) any later version.
  *
  */
-#if defined(CONFIG_NETFILTER)
-
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
@@ -70,4 +68,3 @@ static int __init provenance_nf_init(void)
 	return 0;
 }
 module_init(provenance_nf_init);
-#endif
