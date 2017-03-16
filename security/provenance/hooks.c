@@ -472,7 +472,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
  */
 static void provenance_inode_post_setxattr(struct dentry *dentry,
 																						const char *name,
-					   																const void *value,
+																						const void *value,
 																						size_t size,
 																						int flags)
 {
