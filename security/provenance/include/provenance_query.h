@@ -52,17 +52,17 @@ static inline int call_query_hooks(union prov_msg *from,
 
 	rc = call_camflow_out_edge(from, edge);
 	if ((rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING)
-		pr_warning("Provenance warning raised.\n");
+		pr_warning("Provenance: warning raised.\n");
 	if ((rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
-		pr_err("Provenance error raised.\n");
+		pr_err("Provenance: error raised.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;
 		return -EPERM;
 	}
 	rc = call_camflow_in_edge(edge, to);
 	if ((rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING)
-		pr_warning("Provenance warning raised.\n");
+		pr_warning("Provenance: warning raised.\n");
 	if ((rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
-		pr_err("Provenance error raised.\n");
+		pr_err("Provenance: error raised.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;
 		return -EPERM;
 	}

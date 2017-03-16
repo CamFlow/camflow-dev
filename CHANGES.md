@@ -22,7 +22,8 @@
 
 ### v0.3.0
 ```
-- implemented run-time query system.
+- Implemented run-time query system.
+- Debug output lisibility improved.
 - Update to kernel version 4.9.15.
 ```
 
@@ -32,7 +33,7 @@
 - Add support for travis (see https://travis-ci.org/) testing.
 - Put back Unix socket recording.
 - Persist provenance information across reboot.
-- Anticipate read only after initialisation security hooks upcoming changes.
+- Anticipate upcoming changes: read only after initialisation of security hooks.
 - Handle provenance through extended attributes.
 - Update to kernel version 4.9.13.
 ```
