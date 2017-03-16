@@ -14,8 +14,8 @@
  #define CONFIG_SECURITY_PROVENANCE_QUERY_H
  #include <linux/camflow_query.h>
 
-static inline int call_camflow_out_edge(union prov_msg* node,
-					union prov_msg* edge)
+static inline int call_camflow_out_edge(union prov_msg *node,
+					union prov_msg *edge)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -29,8 +29,8 @@ static inline int call_camflow_out_edge(union prov_msg* node,
 	return rc;
 }
 
-static inline int call_camflow_in_edge(union prov_msg* edge,
-				       union prov_msg* node)
+static inline int call_camflow_in_edge(union prov_msg *edge,
+				       union prov_msg *node)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -51,17 +51,17 @@ static inline int call_query_hooks(union prov_msg *from,
 	int rc = 0;
 
 	rc = call_camflow_out_edge(from, edge);
-	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING)
+	if ((rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING)
 		pr_warning("Provenance warning raised.\n");
-	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+	if ((rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
 		pr_err("Provenance error raised.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;
 		return -EPERM;
 	}
 	rc = call_camflow_in_edge(edge, to);
-	if ( (rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING)
+	if ((rc & CAMFLOW_RAISE_WARNING) == CAMFLOW_RAISE_WARNING)
 		pr_warning("Provenance warning raised.\n");
-	if ( (rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
+	if ((rc & CAMFLOW_PREVENT_FLOW) == CAMFLOW_PREVENT_FLOW) {
 		pr_err("Provenance error raised.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;
 		return -EPERM;

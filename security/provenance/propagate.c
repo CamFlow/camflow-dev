@@ -13,11 +13,11 @@
 
 #include "provenance.h"
 
-static int out_edge(union prov_msg* node, union prov_msg* edge)
+static int out_edge(union prov_msg *node, union prov_msg *edge)
 {
 	if (provenance_does_propagate(node) && provenance_is_tracked(node)) {
 		// can propagate over edge?
-		if ( !filter_propagate_relation(prov_type(edge)) ) {
+		if (!filter_propagate_relation(prov_type(edge))) {
 			set_tracked(edge);
 			set_propagate(edge);
 		}
@@ -25,7 +25,7 @@ static int out_edge(union prov_msg* node, union prov_msg* edge)
 	return 0;
 }
 
-static int in_edge(union prov_msg* edge, union prov_msg* node)
+static int in_edge(union prov_msg *edge, union prov_msg *node)
 {
 	if (provenance_does_propagate(edge) && provenance_is_tracked(edge)) {
 		// can propagate to node?

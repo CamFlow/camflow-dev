@@ -45,10 +45,11 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val)
 }
 
 // djb2 hash implementation by Dan Bernstein
-static inline uint64_t djb2_hash(const char *str){
+static inline uint64_t djb2_hash(const char *str)
+{
   uint64_t hash = 5381;
   int c = *str;
-  while(c){
+  while (c) {
     hash = ((hash<<5)+hash) + c;
     c = *++str;
   }

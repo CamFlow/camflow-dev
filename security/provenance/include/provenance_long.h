@@ -206,7 +206,7 @@ static inline int record_write_xattr(uint64_t type,
 	__prepare_relation(type, &(prov_msg(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
 	rc = __update_version(type, iprov);
-	if ( rc < 0 )
+	if (rc < 0)
 		return rc;
 	__long_record_relation(type, xattr, prov_msg(iprov), allowed);
 	kfree(xattr);
@@ -233,7 +233,7 @@ static inline int record_read_xattr(uint64_t type,
 	__prepare_relation(type, &(prov_msg(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
 	rc = __update_version(type, cprov);
-	if ( rc < 0 )
+	if (rc < 0)
 		return rc;
 	__long_record_relation(type, xattr, prov_msg(cprov), allowed);
 	kfree(xattr);
