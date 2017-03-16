@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.0           | 4.9.14         | N/A				|
+| 0.3.0           | 4.9.15         | N/A				|
 | 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
 | 0.2.1           | 4.9.5          | 03/02/2017	|
@@ -23,7 +23,7 @@
 ### v0.3.0
 ```
 - implemented run-time query system.
-- Update to kernel version 4.9.14.
+- Update to kernel version 4.9.15.
 ```
 
 ### v0.2.3
