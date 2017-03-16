@@ -205,7 +205,7 @@ static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *in
 	prov_write(pck);
 	__record_node(prov_msg(inode));
 	rc = __update_version(RL_RCV_PACKET, inode);
-	if ( rc < 0 )
+	if (rc < 0)
 		return rc;
 	__record_node(prov_msg(inode));
 	__prepare_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(prov_msg(inode)->msg_info.identifier), &relation, NULL);

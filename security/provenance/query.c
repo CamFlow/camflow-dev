@@ -13,7 +13,7 @@
  #include <linux/rculist.h>
  #include "provenance_query.h"
 
-int register_camflow_query_hook( struct provenance_query_hooks *hook)
+int register_camflow_query_hook(struct provenance_query_hooks *hook)
 {
 	if (!hook)
 		return -ENOMEM;
@@ -23,7 +23,7 @@ int register_camflow_query_hook( struct provenance_query_hooks *hook)
 }
 EXPORT_SYMBOL_GPL(register_camflow_query_hook);
 
-int unregister_camflow_query_hook( struct provenance_query_hooks *hook)
+int unregister_camflow_query_hook(struct provenance_query_hooks *hook)
 {
 	list_del_rcu(&(hook->list));
 	return 0;
