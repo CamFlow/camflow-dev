@@ -175,17 +175,17 @@ static inline void provenance_record_address(struct sockaddr *address, int addrl
 }
 
 static inline int record_write_xattr(uint64_t type,
-				      struct provenance *iprov,
-				      struct provenance *cprov,
-				      const char *name,
-				      const void *value,
-				      size_t size,
-				      int flags,
-				      uint8_t allowed)
+				     struct provenance *iprov,
+				     struct provenance *cprov,
+				     const char *name,
+				     const void *value,
+				     size_t size,
+				     int flags,
+				     uint8_t allowed)
 {
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
-	int rc=0;
+	int rc = 0;
 
 	if (!xattr)
 		return 0;
@@ -206,7 +206,7 @@ static inline int record_write_xattr(uint64_t type,
 	__prepare_relation(type, &(prov_msg(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
 	rc = __update_version(type, iprov);
-	if( rc<0 )
+	if ( rc < 0 )
 		return rc;
 	__long_record_relation(type, xattr, prov_msg(iprov), allowed);
 	kfree(xattr);
@@ -215,16 +215,16 @@ static inline int record_write_xattr(uint64_t type,
 }
 
 static inline int record_read_xattr(uint64_t type,
-				     struct provenance *cprov,
-				     struct provenance *iprov,
-				     const char *name,
-				     uint8_t allowed)
+				    struct provenance *cprov,
+				    struct provenance *iprov,
+				    const char *name,
+				    uint8_t allowed)
 {
 	union long_prov_msg *xattr = alloc_long_provenance(ENT_XATTR);
 	union prov_msg relation;
-	int rc=0;
+	int rc = 0;
 
-	if(!xattr)
+	if (!xattr)
 		return 0;
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
@@ -233,7 +233,7 @@ static inline int record_read_xattr(uint64_t type,
 	__prepare_relation(type, &(prov_msg(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
 	rc = __update_version(type, cprov);
-	if( rc<0 )
+	if ( rc < 0 )
 		return rc;
 	__long_record_relation(type, xattr, prov_msg(cprov), allowed);
 	kfree(xattr);
