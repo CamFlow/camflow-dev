@@ -13,13 +13,13 @@
 #ifndef _AV_UTILS_PROVENANCE_H
 #define _AV_UTILS_PROVENANCE_H
 
-#define FILE__EXECUTE 0x00000001UL
-#define FILE__READ 		0x00000002UL
-#define FILE__APPEND 	0x00000004UL
-#define FILE__WRITE 	0x00000008UL
-#define DIR__SEARCH 	0x00000010UL
-#define DIR__WRITE 		0x00000020UL
-#define DIR__READ 		0x00000040UL
+#define FILE__EXECUTE   0x00000001UL
+#define FILE__READ      0x00000002UL
+#define FILE__APPEND    0x00000004UL
+#define FILE__WRITE     0x00000008UL
+#define DIR__SEARCH     0x00000010UL
+#define DIR__WRITE      0x00000020UL
+#define DIR__READ       0x00000040UL
 
 static inline uint32_t file_mask_to_perms(int mode, unsigned int mask)
 {

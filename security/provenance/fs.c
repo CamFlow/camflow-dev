@@ -79,7 +79,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char *)get_zeroed_page(GFP_KERNEL);
+	page = (char*)get_zeroed_page(GFP_KERNEL);
 	if (!page)
 		return -ENOMEM;
 
@@ -130,7 +130,7 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t *)buf;
+	uint32_t *tmp = (uint32_t*)buf;
 
 	// ideally should be decoupled from set machine id
 	__init_opaque();
@@ -174,7 +174,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
-	if(!node)
+	if (!node)
 		return -ENOMEM;
 
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
@@ -195,7 +195,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if (copy_to_user((void *)buf, &node, count)) {
+	if (copy_to_user((void*)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
@@ -226,7 +226,8 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
-static inline void update_prov_config(union prov_msg *setting, uint8_t op, struct provenance *prov){
+static inline void update_prov_config(union prov_msg *setting, uint8_t op, struct provenance *prov)
+{
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))

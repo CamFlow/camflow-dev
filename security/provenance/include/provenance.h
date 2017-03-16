@@ -122,7 +122,7 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 {
 	union prov_msg old_prov;
 	union prov_msg relation;
-	int rc=0;
+	int rc = 0;
 
 	if (!prov->has_outgoing) // there is no outgoing
 		return 0;
@@ -166,7 +166,7 @@ static inline int record_relation(uint64_t type,
 	__record_node(prov_msg(from));
 	__record_node(prov_msg(to));
 	rc = __update_version(type, to);
-	if(rc<0)
+	if (rc < 0)
 		return rc;
 	__record_node(prov_msg(to));
 	__prepare_relation(type, &(prov_msg(from)->msg_info.identifier), &(prov_msg(to)->msg_info.identifier), &relation, file);
