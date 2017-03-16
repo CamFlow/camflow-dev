@@ -19,6 +19,8 @@
 #define CAMFLOW_VERSION_MAJOR     0
 #define CAMFLOW_VERSION_MINOR     3
 #define CAMFLOW_VERSION_PATCH     0
-#define CAMFLOW_VERSION_STR       "v"xstr (CAMFLOW_VERSION_MAJOR)"."xstr (CAMFLOW_VERSION_MINOR)"."xstr (CAMFLOW_VERSION_PATCH)
+#define CAMFLOW_VERSION_STR "v"xstr(CAMFLOW_VERSION_MAJOR)\
+                            "."xstr(CAMFLOW_VERSION_MINOR)\
+                            "."xstr(CAMFLOW_VERSION_PATCH)\
 
 #endif
