@@ -6,8 +6,8 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
- * published by the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
+ * published by the Free Software Foundation; either version 2 of the License,
+ * or (at your option) any later version.
  *
  */
 #ifndef _UAPI_LINUX_PROVENANCE_H
@@ -49,7 +49,7 @@ static inline uint64_t djb2_hash(const char *str)
 {
 	uint64_t hash = 5381;
 	int c = *str;
-	
+
 	while (c) {
 		hash = ((hash<<5)+hash) + c;
 		c = *++str;
@@ -230,7 +230,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
-#define node_secid(node)                                                        ((node)->node_info.secid)
+#define node_secid(node)              ((node)->node_info.secid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
