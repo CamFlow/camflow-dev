@@ -17,7 +17,7 @@ int register_camflow_query_hook(struct provenance_query_hooks *hook)
 {
 	if (!hook)
 		return -ENOMEM;
-	pr_info("Provenance registering policy hook...\n");
+	pr_info("Provenance: registering policy hook...\n");
 	list_add_tail_rcu(&(hook->list), &provenance_query_hooks);
 	return 0;
 }

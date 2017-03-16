@@ -643,7 +643,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
 	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
-	pr_info("Provenance fs ready.\n");
+	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
 core_initcall(init_prov_fs);
