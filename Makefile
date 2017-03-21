@@ -65,6 +65,9 @@ compile_security: copy_change
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
 
+rpm: copy_change
+	cd ./build/linux-$(kernel-version) && $(MAKE) rpm
+
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 	cd ./build/camflow-provenance-lib && $(MAKE) clean

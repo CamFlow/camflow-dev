@@ -28,6 +28,7 @@ script:
   - make compile_security
   - make compile_kernel
   - make test_travis
+  - make rpm
 
 notifications:
   slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM
