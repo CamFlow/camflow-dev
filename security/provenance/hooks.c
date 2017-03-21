@@ -340,7 +340,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
  */
 static int provenance_inode_rename(struct inode *old_dir,
 																		struct dentry *old_dentry,
-				   													struct inode *new_dir,
+																		struct inode *new_dir,
 																		struct dentry *new_dentry)
 {
 	return provenance_inode_link(old_dentry, new_dir, new_dentry);
@@ -433,7 +433,7 @@ static int provenance_inode_readlink(struct dentry *dentry)
 
 static int provenance_inode_setxattr(struct dentry *dentry,
 																			const char *name,
-				     													const void *value,
+																			const void *value,
 																			size_t size,
 																			int flags)
 {
@@ -855,8 +855,8 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq,
  */
 static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
 																				struct msg_msg *msg,
-				       													struct task_struct *target,
-				       													long type,
+																				struct task_struct *target,
+																				long type,
 																				int mode)
 {
 	struct provenance *cprov = target->cred->provenance;
@@ -969,7 +969,7 @@ static int provenance_sk_alloc_security(struct sock *sk,
  */
 static int provenance_socket_post_create(struct socket *sock,
 																					int family,
-					 																int type,
+																					int type,
 																					int protocol,
 																					int kern)
 {
@@ -1135,7 +1135,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
  */
 static int provenance_socket_sendmsg(struct socket *sock,
 																			struct msghdr *msg,
-				     													int size)
+																			int size)
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
@@ -1161,7 +1161,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
  */
 static int provenance_socket_recvmsg(struct socket *sock,
 																			struct msghdr *msg,
-				     									 				int size,
+																			int size,
 																			int flags)
 {
 	struct provenance *cprov = current_provenance();
