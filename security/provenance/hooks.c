@@ -192,7 +192,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	prov_msg(iprov)->inode_info.uid = __kuid_val(inode->i_uid);
 	prov_msg(iprov)->inode_info.gid = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_msg(iprov)->inode_info.secid));
-	record_inode_type(inode->i_mode, iprov);
+	update_inode_type(inode->i_mode, iprov);
 	sprov = inode->i_sb->s_provenance;
 	memcpy(prov_msg(iprov)->inode_info.sb_uuid, prov_msg(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	inode->i_provenance = iprov;

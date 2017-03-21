@@ -24,7 +24,7 @@
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
-static inline void record_inode_type(uint16_t mode, struct provenance *prov)
+static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
 	uint64_t type = ENT_INODE_UNKNOWN;
 	unsigned long irqflags;
@@ -120,7 +120,7 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	}       else
 		prov->initialised = true;
 	spin_unlock(prov_lock(prov));
-	record_inode_type(inode->i_mode, prov);
+	update_inode_type(inode->i_mode, prov);
 	if (!(inode->i_opflags & IOP_XATTR)) // xattr not supported on this inode
 		goto out;
 	if (opt_dentry)
