@@ -83,7 +83,7 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 	struct provenance *prov;
 	union prov_msg relation;
 
-	if (unlikely(iprov == NULL || cprov == NULL)) // should not occur
+	if (unlikely(!iprov || !cprov)) // should not occur
 		return NULL;
 	if (!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all)
 		return NULL;
@@ -170,7 +170,7 @@ static inline struct provenance *dentry_provenance(struct dentry *dentry)
 	struct inode *inode = d_backing_inode(dentry);
 	struct provenance *prov;
 
-	if (inode == NULL)
+	if (!inode)
 		return NULL;
 	prov = inode->i_provenance;
 	inode_init_provenance(inode, dentry);
@@ -181,7 +181,7 @@ static inline struct provenance *file_provenance(struct file *file)
 {
 	struct inode *inode = file_inode(file);
 
-	if (inode == NULL)
+	if (!inode)
 		return NULL;
 	return inode_provenance(inode, true);
 }

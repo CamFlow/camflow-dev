@@ -35,7 +35,7 @@ static inline struct provenance *sk_inode_provenance(struct sock *sk)
 {
 	struct socket *sock = sk->sk_socket;
 
-	if (sock == NULL)
+	if (!sock)
 		return NULL;
 	return socket_inode_provenance(sock);
 }
@@ -97,7 +97,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 
 	offset = skb_network_offset(skb);
 	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph); // we obtain the ip header
-	if (ih == NULL)
+	if (!ih)
 		return -EINVAL;
 
 	if (ihlen(ih) < sizeof(_iph))
@@ -195,7 +195,7 @@ static inline int record_pck_to_inode(union prov_msg *pck, struct provenance *in
 	union prov_msg relation;
 	int rc = 0;
 
-	if (unlikely(pck == NULL || inode == NULL)) // should not occur
+	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
 		return 0;
@@ -220,7 +220,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_msg *
 	union prov_msg relation;
 	int rc = 0;
 
-	if (unlikely(pck == NULL || inode == NULL)) // should not occur
+	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
 	if (!provenance_is_tracked(prov_msg(inode)) && !prov_all)
 		return 0;

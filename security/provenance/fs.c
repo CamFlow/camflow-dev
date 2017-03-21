@@ -377,7 +377,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	prov = prov_from_vpid(msg.vpid);
-	if (prov == NULL)
+	if (!prov)
 		return -EINVAL;
 
 	update_prov_config(&(msg.prov), msg.op, prov);
@@ -397,7 +397,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	msg = (struct prov_process_config *)buf;
 
 	prov = prov_from_vpid(msg->vpid);
-	if (prov == NULL)
+	if (!prov)
 		return -EINVAL;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
