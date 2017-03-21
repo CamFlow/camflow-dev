@@ -21,12 +21,12 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 	union prov_msg pckprov;
 	unsigned long irqflags;
 
-	if (cprov == NULL)
+	if (!cprov)
 		return NF_ACCEPT;
 
 	if (provenance_is_tracked(prov_msg(cprov))) {
 		iprov = sk_inode_provenance(skb->sk);
-		if (iprov == NULL)
+		if (!iprov)
 			return NF_ACCEPT;
 		provenance_parse_skb_ipv4(skb, &pckprov);
 		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);

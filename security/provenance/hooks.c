@@ -259,7 +259,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
 	iprov = inode_provenance(inode, false);
-	if (iprov == NULL)
+	if (!iprov)
 		return -ENOMEM;
 	refresh_current_provenance();
 	refresh_inode_provenance(inode);
@@ -636,7 +636,7 @@ static int provenance_file_permission(struct file *file, int mask)
 	uint32_t perms;
 	unsigned long irqflags;
 
-	if (iprov == NULL)
+	if (!iprov)
 		return -ENOMEM;
 	refresh_current_provenance();
 	refresh_inode_provenance(inode);
@@ -713,7 +713,7 @@ static int provenance_mmap_file(struct file *file,
 	struct provenance *bprov = NULL;
 	unsigned long irqflags;
 
-	if (unlikely(file == NULL))
+	if (unlikely(!file))
 		return 0;
 	iprov = file_provenance(file);
 	if ((flags & MAP_TYPE) == MAP_SHARED) {
@@ -731,7 +731,7 @@ static int provenance_mmap_file(struct file *file,
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	} else{
 		bprov = branch_mmap(prov_msg(iprov), prov_msg(cprov));
-		if (bprov == NULL)
+		if (!bprov)
 			return 0;
 		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -1141,7 +1141,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	struct provenance *iprov = socket_inode_provenance(sock);
 	unsigned long irqflags;
 
-	if (iprov == NULL)
+	if (!iprov)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -1168,7 +1168,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	struct provenance *iprov = socket_inode_provenance(sock);
 	unsigned long irqflags;
 
-	if (iprov == NULL)
+	if (!iprov)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -1194,12 +1194,12 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	uint16_t family = sk->sk_family;
 	unsigned long irqflags;
 
-	if (cprov == NULL)
+	if (!cprov)
 		return 0;
 	if (family != PF_INET)
 		return 0;
 	iprov = sk_inode_provenance(sk);
-	if (iprov == NULL)
+	if (!iprov)
 		return 0;
 	if (provenance_is_tracked(prov_msg(iprov)) ||
 			provenance_is_tracked(prov_msg(cprov))) {
@@ -1471,10 +1471,10 @@ void __init provenance_add_hooks(void)
 					     0, SLAB_PANIC, NULL);
 	/* init relay buffers, to deal with provenance before FS is ready */
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
-	if (unlikely(boot_buffer == NULL))
+	if (unlikely(!boot_buffer))
 		panic("Provenance: could not allocate boot_buffer.");
 	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
-	if (unlikely(long_boot_buffer == NULL))
+	if (unlikely(!long_boot_buffer))
 		panic("Provenance: could not allocate long_boot_buffer.");
 	prov_queue = alloc_workqueue("prov_queue", 0, 0);
 	if (!prov_queue)
