@@ -23,7 +23,7 @@
 ### v0.3.0
 ```
 - Implemented run-time query system.
-- Debug output lisibility improved.
+- Debug output legibility improved.
 - Update to kernel version 4.9.15.
 ```
 
