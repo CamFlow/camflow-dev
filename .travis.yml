@@ -15,6 +15,7 @@ before_install:
   - sudo apt-get -y install bc nano patch mosquitto
   - sudo apt-get -y install libelf-dev sparse flawfinder
   - sudo apt-get -y install libedit-dev
+  - sudo apt-get -y install rpm
 
 before_script:
   - make prepare_kernel
