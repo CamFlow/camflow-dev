@@ -112,7 +112,7 @@ static inline void __prepare_relation(uint64_t type,
 	relation_identifier(relation).machine_id = prov_machine_id;
 	copy_node_info(&relation->relation_info.snd, from);
 	copy_node_info(&relation->relation_info.rcv, to);
-	if (file != NULL) {
+	if (file) {
 		relation->relation_info.set = FILE_INFO_SET;
 		relation->relation_info.offset = file->f_pos;
 	}

@@ -29,9 +29,9 @@ static inline uint32_t current_cid(void)
 	struct cgroup_namespace *cns;
 
 	task_lock(current);
-	if (current->nsproxy != NULL) {
+	if (current->nsproxy) {
 		cns = current->nsproxy->cgroup_ns;
-		if (cns != NULL) {
+		if (cns) {
 			get_cgroup_ns(cns);
 			cid = cns->ns.inum;
 			put_cgroup_ns(cns);
