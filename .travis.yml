@@ -31,5 +31,8 @@ script:
   - make test_travis
   - make rpm
 
+after_success:
+  - make submit_patch
+
 notifications:
   slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM

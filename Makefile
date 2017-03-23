@@ -165,3 +165,10 @@ patch: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build && diff -uprN -b -B ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
+
+submit_patch:
+	cd ./build && git clone https://github.com/CamFlow/camflow-patches.git
+	cd ./build/camflow-patches &&	mkdir -p v$(lsm-version)-beta
+	cd ./build/camflow-patches && cp -f ../patch-$(kernel-version)-v$(lsm-version) ./v$(lsm-version)-beta/patch-$(kernel-version)-v$(lsm-version)
+	cd ./build/camflow-patches && cp -f ../../configs/config-fedora ./v$(lsm-version)-beta/.config
+	cd ./build/camflow-patches && git commit -a -m 'Travis publishing beta patch' && git push
