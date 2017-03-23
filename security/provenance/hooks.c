@@ -106,7 +106,8 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
  */
 static void provenance_cred_free(struct cred *cred)
 {
-	free_provenance(cred->provenance);
+	if (cred->provenance)
+		free_provenance(cred->provenance);
 	cred->provenance = NULL;
 }
 
@@ -207,7 +208,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	free_provenance(inode->i_provenance);
+	if (inode->i_provenance)
+		free_provenance(inode->i_provenance);
 	inode->i_provenance = NULL;
 }
 
@@ -366,6 +368,8 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	if (!iprov)
 		return -ENOMEM;
 	iattrprov = alloc_provenance(ENT_IATTR, GFP_KERNEL);
+	if(!iattrpov)
+		return -ENOMEM;
 
 	prov_msg(iattrprov)->iattr_info.valid = iattr->ia_valid;
 	prov_msg(iattrprov)->iattr_info.mode = iattr->ia_mode;
@@ -813,7 +817,8 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
  */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
-	free_provenance(msg->provenance);
+	if (msg->provenance)
+		free_provenance(msg->provenance);
 	msg->provenance = NULL;
 }
 
@@ -901,7 +906,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
  */
 static void provenance_shm_free_security(struct shmid_kernel *shp)
 {
-	free_provenance(shp->shm_perm.provenance);
+	if (shp->shm_perm.provenance)
+		free_provenance(shp->shm_perm.provenance);
 	shp->shm_perm.provenance = NULL;
 }
 
@@ -1352,7 +1358,8 @@ static int provenance_sb_alloc_security(struct super_block *sb)
  */
 static void provenance_sb_free_security(struct super_block *sb)
 {
-	free_provenance(sb->s_provenance);
+	if (sb->s_provenance)
+		free_provenance(sb->s_provenance);
 	sb->s_provenance = NULL;
 }
 
