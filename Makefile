@@ -166,10 +166,9 @@ patch: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build && diff -uprN -b -B ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
 
-submit_patch:
-	cd ./build && git clone https://github.com/CamFlow/camflow-patches.git
-	cd ./build/camflow-patches &&	mkdir -p v$(lsm-version)-beta
-	cd ./build/camflow-patches && cp -f ../patch-$(kernel-version)-v$(lsm-version) ./v$(lsm-version)-beta/patch-$(kernel-version)-v$(lsm-version)
-	cd ./build/camflow-patches && cp -f ../../configs/config-fedora ./v$(lsm-version)-beta/.config
-	cd ./build/camflow-patches && git config user.name "Travis" && git config user.email "travis@travis-ci.org"
-	cd ./build/camflow-patches && git add . && git commit -a -m 'Travis publishing beta patch'
+prepare_release_travis:
+	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
+	cp -f /home/travis/rmpbuild/SRPMS/kernel-$(kernel-version)-2.src.rpm kernel-camflow.src.rpm
+	cp -f /home/travis/rmpbuild/SRPMS/x86_64/kernel-$(kernel-version)-2.x86_64.rpm kernel-camflow.x86_64.rpm
+	cp -f /home/travis/rmpbuild/SRPMS/x86_64/kernel-headers-$(kernel-version)-2.x86_64.rpm kernel-headers-camflow.x86_64.rpm
+	cp -f /home/travis/rmpbuild/SRPMS/x86_64/kernel-devel-$(kernel-version)-2.x86_64.rpm kernel-devel-camflow.x86_64.rpm
