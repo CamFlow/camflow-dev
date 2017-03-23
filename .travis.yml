@@ -33,6 +33,7 @@ script:
 
 after_success:
   - make submit_patch
+  - cd build/camflow-patches && git push -f -q https://tfjmp:$GITHUB_KEY@github.com/CamFlow/camflow-patches
 
 notifications:
   slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM
