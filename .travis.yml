@@ -32,8 +32,20 @@ script:
   - make rpm
 
 after_success:
-  - make submit_patch
-  - cd build/camflow-patches && git push -q https://tfjmp:$GITHUB_KEY@github.com/CamFlow/camflow-patches &2> /dev/null
+  - make prepare_release_travis
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_KEY"
+  file:
+    - patch
+    - kernel-camflow.src.rpm
+    - kernel-camflow.x86_64.rpm
+    - kernel-headers-camflow.x86_64.rpm
+    - kernel-devel-camflow.x86_64.rpm
+  skip_cleanup: true
+  on:
+    tags: true
 
 notifications:
   slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM
