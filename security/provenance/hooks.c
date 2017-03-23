@@ -368,7 +368,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	if (!iprov)
 		return -ENOMEM;
 	iattrprov = alloc_provenance(ENT_IATTR, GFP_KERNEL);
-	if(!iattrpov)
+	if(!iattrprov)
 		return -ENOMEM;
 
 	prov_msg(iattrprov)->iattr_info.valid = iattr->ia_valid;
