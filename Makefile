@@ -171,4 +171,4 @@ submit_patch:
 	cd ./build/camflow-patches &&	mkdir -p v$(lsm-version)-beta
 	cd ./build/camflow-patches && cp -f ../patch-$(kernel-version)-v$(lsm-version) ./v$(lsm-version)-beta/patch-$(kernel-version)-v$(lsm-version)
 	cd ./build/camflow-patches && cp -f ../../configs/config-fedora ./v$(lsm-version)-beta/.config
-	cd ./build/camflow-patches && git commit -a -m 'Travis publishing beta patch' && git push
+	cd ./build/camflow-patches && git add . && git commit -a -m 'Travis publishing beta patch' && git push
