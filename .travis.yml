@@ -21,7 +21,7 @@ before_script:
   - make prepare_kernel
   - make prepare_smatch
   - make patch
-  - make config_ubuntu
+  - make config_fedora
   - make config_travis
 
 script:
