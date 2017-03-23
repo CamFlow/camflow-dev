@@ -200,7 +200,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 out:
-	if (node != NULL)
+	if (node)
 		kfree(node);
 	return count;
 }

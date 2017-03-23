@@ -192,7 +192,7 @@ static inline int record_write_xattr(uint64_t type,
 	memset(&relation, 0, sizeof(union prov_msg));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
-	if (value != NULL) {
+	if (value) {
 		if (size < PROV_XATTR_VALUE_SIZE) {
 			xattr->xattr_info.size = size;
 			memcpy(xattr->xattr_info.value, value, size);
