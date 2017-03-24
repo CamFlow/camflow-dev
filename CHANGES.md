@@ -22,6 +22,7 @@
 
 ### v0.3.0
 ```
+- union prov_msg -> union prov_elt
 - Implemented run-time query system.
 - Debug output legibility improved.
 - Update to kernel version 4.10.5.

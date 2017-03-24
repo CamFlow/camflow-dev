@@ -376,7 +376,7 @@ struct pck_struct {
 	uint16_t length;
 };
 
-union prov_msg {
+union prov_elt {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
@@ -432,7 +432,7 @@ struct disc_node_struct {
 	union prov_identifier parent;
 };
 
-union long_prov_msg {
+union long_prov_elt {
 	struct msg_struct msg_info;
 	struct node_struct node_info;
 	struct str_struct str_info;
@@ -455,7 +455,7 @@ struct prov_filter {
 #define PROV_SET_TAINT        0x08
 
 struct prov_process_config {
-	union prov_msg prov;
+	union prov_elt prov;
 	uint8_t op;
 	uint32_t vpid;
 };

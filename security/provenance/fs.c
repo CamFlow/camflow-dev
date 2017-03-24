@@ -164,7 +164,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 
 {
 	struct provenance *cprov = current_provenance();
-	union long_prov_msg *node = NULL;
+	union long_prov_elt *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -172,7 +172,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
+	node = kzalloc(sizeof(union long_prov_elt), GFP_KERNEL);
 	if (!node)
 		return -ENOMEM;
 
@@ -182,8 +182,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-		__record_node(prov_msg(cprov));
-		copy_node_info(&node->disc_node_info.parent, &prov_msg(cprov)->node_info.identifier);
+		__record_node(prov_elt(cprov));
+		copy_node_info(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
@@ -209,7 +209,7 @@ declare_file_operations(prov_node_ops, prov_write_node, no_read);
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)
 {
-	union prov_msg relation;
+	union prov_elt relation;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -225,32 +225,32 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
-static inline void update_prov_config(union prov_msg *setting, uint8_t op, struct provenance *prov)
+static inline void update_prov_config(union prov_elt *setting, uint8_t op, struct provenance *prov)
 {
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
-			set_tracked(prov_msg(prov));
+			set_tracked(prov_elt(prov));
 		else
-			clear_tracked(prov_msg(prov));
+			clear_tracked(prov_elt(prov));
 	}
 
 	if ((op & PROV_SET_OPAQUE) != 0) {
 		if (provenance_is_opaque(setting))
-			set_opaque(prov_msg(prov));
+			set_opaque(prov_elt(prov));
 		else
-			clear_opaque(prov_msg(prov));
+			clear_opaque(prov_elt(prov));
 	}
 
 	if ((op & PROV_SET_PROPAGATE) != 0) {
 		if (provenance_does_propagate(setting))
-			set_propagate(prov_msg(prov));
+			set_propagate(prov_elt(prov));
 		else
-			clear_propagate(prov_msg(prov));
+			clear_propagate(prov_elt(prov));
 	}
 
 	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
+		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
 	spin_unlock(prov_lock(prov));
 }
 
@@ -274,13 +274,13 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
-	union prov_msg *tmp = (union prov_msg *)buf;
+	union prov_elt *tmp = (union prov_elt *)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(tmp, prov_msg(cprov), sizeof(union prov_msg)))
+	if (copy_to_user(tmp, prov_elt(cprov), sizeof(union prov_elt)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
@@ -401,7 +401,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		return -EINVAL;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(union prov_msg)))
+	if (copy_to_user(&msg->prov, prov_elt(prov), sizeof(union prov_elt)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
 	return rtn;
@@ -601,8 +601,8 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 
 	if (count <= 0 || count >= PATH_MAX)
 		return 0;
-	set_tracked(prov_msg(cprov));
-	return record_log(prov_msg(cprov), buf, count);
+	set_tracked(prov_elt(cprov));
+	return record_log(prov_elt(cprov), buf, count);
 }
 declare_file_operations(prov_log_ops, prov_write_log, no_read);
 
@@ -613,9 +613,9 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 
 	if (count <= 0 || count >= PATH_MAX)
 		return 0;
-	set_tracked(prov_msg(cprov));
-	set_propagate(prov_msg(cprov));
-	return record_log(prov_msg(cprov), buf, count);
+	set_tracked(prov_elt(cprov));
+	set_propagate(prov_elt(cprov));
+	return record_log(prov_elt(cprov), buf, count);
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 

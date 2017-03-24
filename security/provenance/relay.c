@@ -59,12 +59,12 @@ static struct rchan_callbacks relay_callbacks = {
 static void write_boot_buffer(void)
 {
 	if (boot_buffer->nb_entry > 0)
-		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_msg));
+		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
 	kfree(boot_buffer);
 	boot_buffer = NULL;
 
 	if (long_boot_buffer->nb_entry > 0)
-		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_msg));
+		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_elt));
 	kfree(long_boot_buffer);
 	long_boot_buffer = NULL;
 }

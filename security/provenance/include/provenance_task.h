@@ -89,17 +89,17 @@ static inline void refresh_current_provenance(void)
 	unsigned long irqflags;
 
 	// will not be recorded
-	if (provenance_is_opaque(prov_msg(prov)))
+	if (provenance_is_opaque(prov_elt(prov)))
 		return;
 	cid = current_cid();
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
-	if (unlikely(prov_msg(prov)->task_info.pid == 0))
-		prov_msg(prov)->task_info.pid = task_pid_nr(current);
-	if (unlikely(prov_msg(prov)->task_info.vpid == 0))
-		prov_msg(prov)->task_info.vpid = task_pid_vnr(current);
-	prov_msg(prov)->task_info.cid = cid;
-	security_task_getsecid(current, &(prov_msg(prov)->task_info.secid));
+	if (unlikely(prov_elt(prov)->task_info.pid == 0))
+		prov_elt(prov)->task_info.pid = task_pid_nr(current);
+	if (unlikely(prov_elt(prov)->task_info.vpid == 0))
+		prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	prov_elt(prov)->task_info.cid = cid;
+	security_task_getsecid(current, &(prov_elt(prov)->task_info.secid));
 	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
 		prov->updt_mmap = 0;
