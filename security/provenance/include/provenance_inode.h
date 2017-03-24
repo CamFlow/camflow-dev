@@ -44,8 +44,8 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
-	prov_msg(prov)->inode_info.mode = mode;
-	prov_type(prov_msg(prov)) = type;
+	prov_elt(prov)->inode_info.mode = mode;
+	prov_type(prov_elt(prov)) = type;
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
@@ -60,7 +60,7 @@ static inline void provenance_mark_as_opaque(const char *name)
 	}
 	prov = path.dentry->d_inode->i_provenance;
 	if (prov)
-		set_opaque(prov_msg(prov));
+		set_opaque(prov_elt(prov));
 }
 
 static inline void refresh_inode_provenance(struct inode *inode)
@@ -68,20 +68,20 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	struct provenance *prov = inode->i_provenance;
 
 	// will not be recorded
-	if (provenance_is_opaque(prov_msg(prov)))
+	if (provenance_is_opaque(prov_elt(prov)))
 		return;
 	record_inode_name(inode, prov);
-	prov_msg(prov)->inode_info.ino = inode->i_ino;
-	prov_msg(prov)->inode_info.uid = __kuid_val(inode->i_uid);
-	prov_msg(prov)->inode_info.gid = __kgid_val(inode->i_gid);
-	security_inode_getsecid(inode, &(prov_msg(prov)->inode_info.secid));
+	prov_elt(prov)->inode_info.ino = inode->i_ino;
+	prov_elt(prov)->inode_info.uid = __kuid_val(inode->i_uid);
+	prov_elt(prov)->inode_info.gid = __kgid_val(inode->i_gid);
+	security_inode_getsecid(inode, &(prov_elt(prov)->inode_info.secid));
 }
 
-static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_msg *cprov)
+static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_elt *cprov)
 {
 	//used for private MMAP
 	struct provenance *prov;
-	union prov_msg relation;
+	union prov_elt relation;
 
 	if (unlikely(!iprov || !cprov)) // should not occur
 		return NULL;
@@ -91,14 +91,14 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 		return NULL;
 	prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
 
-	prov_msg(prov)->inode_info.uid = iprov->inode_info.uid;
-	prov_msg(prov)->inode_info.gid = iprov->inode_info.gid;
-	memcpy(prov_msg(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
-	prov_msg(prov)->inode_info.mode = iprov->inode_info.mode;
+	prov_elt(prov)->inode_info.uid = iprov->inode_info.uid;
+	prov_elt(prov)->inode_info.gid = iprov->inode_info.gid;
+	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
+	prov_elt(prov)->inode_info.mode = iprov->inode_info.mode;
 	__record_node(iprov);
-	memset(&relation, 0, sizeof(union prov_msg));
-	__record_node(prov_msg(prov));
-	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_msg(prov)->msg_info.identifier), &relation, NULL);
+	memset(&relation, 0, sizeof(union prov_elt));
+	__record_node(prov_elt(prov));
+	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
 	prov_write(&relation);
 	return prov;
 }
@@ -107,7 +107,7 @@ static inline struct provenance *branch_mmap(union prov_msg *iprov, union prov_m
 static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
 {
 	struct provenance *prov = inode->i_provenance;
-	union prov_msg *buf;
+	union prov_elt *buf;
 	struct dentry *dentry;
 	int rc = 0;
 
@@ -129,14 +129,14 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 		dentry = d_find_alias(inode);
 	if (!dentry)
 		goto out;
-	buf = kmalloc(sizeof(union prov_msg), GFP_NOFS);
+	buf = kmalloc(sizeof(union prov_elt), GFP_NOFS);
 	if (!buf) {
 		rc = -ENOMEM;
 		prov->initialised = false;
 		dput(dentry);
 		goto out;
 	}
-	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_msg));
+	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_elt));
 	dput(dentry);
 	if (rc < 0) {
 		if (rc != -ENODATA && rc != -EOPNOTSUPP) {
@@ -147,7 +147,7 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 			goto free_buf;
 		}
 	}
-	memcpy(prov_msg(prov), buf, sizeof(union prov_msg));
+	memcpy(prov_elt(prov), buf, sizeof(union prov_elt));
 	rc = 0;
 free_buf:
 	kfree(buf);
@@ -190,7 +190,7 @@ static inline void save_provenance(struct dentry *dentry)
 {
 	struct inode *inode;
 	struct provenance *prov;
-	union prov_msg buf;
+	union prov_elt buf;
 
 	if (!dentry)
 		return;
@@ -203,11 +203,11 @@ static inline void save_provenance(struct dentry *dentry)
 		spin_unlock(prov_lock(prov));
 		return;
 	}
-	memcpy(&buf, prov_msg(prov), sizeof(union prov_msg));
+	memcpy(&buf, prov_elt(prov), sizeof(union prov_elt));
 	prov->saved = true;
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
 	clear_name_recorded(&buf);
-	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_msg), 0);
+	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_elt), 0);
 }
 #endif

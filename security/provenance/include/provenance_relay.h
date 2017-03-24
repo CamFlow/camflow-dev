@@ -28,45 +28,45 @@
 extern bool relay_ready;
 
 struct prov_boot_buffer {
-	union prov_msg buffer[PROV_INITIAL_BUFF_SIZE];
+	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];
 	uint32_t nb_entry;
 };
 
 struct prov_long_boot_buffer {
-	union long_prov_msg buffer[PROV_INITIAL_LONG_BUFF_SIZE];
+	union long_prov_elt buffer[PROV_INITIAL_LONG_BUFF_SIZE];
 	uint32_t nb_entry;
 };
 
 extern struct prov_boot_buffer *boot_buffer;
 extern struct rchan *prov_chan;
 
-static inline void prov_write(union prov_msg *msg)
+static inline void prov_write(union prov_elt *msg)
 {
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
-			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(union prov_msg));
+			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(union prov_elt));
 			boot_buffer->nb_entry++;
 		} else
 			pr_err("Provenance: boot buffer is full.\n");
 	} else
-		relay_write(prov_chan, msg, sizeof(union prov_msg));
+		relay_write(prov_chan, msg, sizeof(union prov_elt));
 }
 
 
 extern struct prov_long_boot_buffer *long_boot_buffer;
 extern struct rchan *long_prov_chan;
 
-static inline void long_prov_write(union long_prov_msg *msg)
+static inline void long_prov_write(union long_prov_elt *msg)
 {
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
-			memcpy(&(long_boot_buffer->buffer[long_boot_buffer->nb_entry++]), msg, sizeof(union long_prov_msg));
+			memcpy(&(long_boot_buffer->buffer[long_boot_buffer->nb_entry++]), msg, sizeof(union long_prov_elt));
 		else
 			pr_err("Provenance: long boot buffer is full.\n");
 	} else
-		relay_write(long_prov_chan, msg, sizeof(union long_prov_msg));
+		relay_write(long_prov_chan, msg, sizeof(union long_prov_elt));
 }
 
 /* force sub-buffer switch */

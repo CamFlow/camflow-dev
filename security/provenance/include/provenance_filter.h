@@ -29,7 +29,7 @@ extern uint64_t prov_propagate_node_filter;
 #define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool __filter_node(uint64_t filter, const union prov_msg *node)
+static inline bool __filter_node(uint64_t filter, const union prov_elt *node)
 {
 	if (!prov_enabled)
 		return true;
@@ -70,7 +70,7 @@ static inline bool filter_propagate_relation(uint64_t type)
 	return false;
 }
 
-static inline bool should_record_relation(uint64_t type, union prov_msg *from, union prov_msg *to)
+static inline bool should_record_relation(uint64_t type, union prov_elt *from, union prov_elt *to)
 {
 	// one of the node should not appear in the record, ignore the relation
 	if (filter_node(from) || filter_node(to))
@@ -78,7 +78,7 @@ static inline bool should_record_relation(uint64_t type, union prov_msg *from, u
 	return true;
 }
 
-static inline bool prov_has_secid(union prov_msg *prov)
+static inline bool prov_has_secid(union prov_elt *prov)
 {
 	switch (prov_type(prov)) {
 	case ENT_INODE_UNKNOWN:
@@ -95,7 +95,7 @@ static inline bool prov_has_secid(union prov_msg *prov)
 	}
 }
 
-static inline void apply_target(union prov_msg *prov)
+static inline void apply_target(union prov_elt *prov)
 {
 	uint8_t op;
 
