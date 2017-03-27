@@ -29,7 +29,7 @@ extern uint64_t prov_propagate_node_filter;
 #define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool __filter_node(uint64_t filter, const union prov_elt *node)
+static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 {
 	if (!prov_enabled)
 		return true;
@@ -73,7 +73,7 @@ static inline bool filter_propagate_relation(uint64_t type)
 static inline bool should_record_relation(uint64_t type, union prov_elt *from, union prov_elt *to)
 {
 	// one of the node should not appear in the record, ignore the relation
-	if (filter_node(from) || filter_node(to))
+	if (filter_node((prov_entry_t*)from) || filter_node((prov_entry_t*)to))
 		return false;
 	return true;
 }

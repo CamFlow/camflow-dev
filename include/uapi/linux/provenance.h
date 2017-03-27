@@ -434,7 +434,15 @@ struct disc_node_struct {
 
 union long_prov_elt {
 	struct msg_struct msg_info;
+	struct relation_struct relation_info;
 	struct node_struct node_info;
+	struct task_prov_struct task_info;
+	struct inode_prov_struct inode_info;
+	struct msg_msg_struct msg_msg_info;
+	struct shm_struct shm_info;
+	struct sb_struct sb_info;
+	struct pck_struct pck_info;
+	struct iattr_prov_struct iattr_info;
 	struct str_struct str_info;
 	struct file_name_struct file_name_info;
 	struct address_struct address_info;
@@ -442,6 +450,8 @@ union long_prov_elt {
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
 };
+
+typedef union long_prov_elt prov_entry_t;
 
 struct prov_filter {
 	uint64_t filter;
