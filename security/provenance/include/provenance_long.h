@@ -43,20 +43,23 @@ static inline void __long_record_node(union long_prov_elt *node)
 	long_prov_write(node);
 }
 
-static inline void __long_record_relation(uint64_t type, union long_prov_elt *from, union prov_elt *to, uint8_t allowed)
+static inline int __long_record_relation(uint64_t type, union long_prov_elt *from, union prov_elt *to, uint8_t allowed)
 {
 	union prov_elt relation;
+	int rc;
 
 	if (unlikely(!prov_enabled)) // capture is not enabled, ignore
-		return;
+		return 0;
 	// don't record if to or from are opaque
 	if (unlikely(provenance_is_opaque(to)))
-		return;
+		return 0;
 	__long_record_node(from);
 	__record_node(to);
 	memset(&relation, 0, sizeof(union prov_elt));
 	__prepare_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, NULL);
+	rc = call_query_hooks(from, (prov_entry_t*)to, (prov_entry_t*)&relation);
 	prov_write(&relation);
+	return rc;
 }
 
 static inline void record_node_name(struct provenance *node, const char *name)
@@ -204,11 +207,12 @@ static inline int record_write_xattr(uint64_t type,
 	}
 	__record_node(prov_elt(cprov));
 	__prepare_relation(type, &(prov_elt(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
+	rc = call_query_hooks(prov_entry(cprov), xattr, (prov_entry_t*)&relation);
 	prov_write(&relation);
 	rc = __update_version(type, iprov);
 	if (rc < 0)
 		return rc;
-	__long_record_relation(type, xattr, prov_elt(iprov), allowed);
+	rc = __long_record_relation(type, xattr, prov_elt(iprov), allowed);
 	kfree(xattr);
 	cprov->has_outgoing = true;
 	return rc;
@@ -231,11 +235,12 @@ static inline int record_read_xattr(uint64_t type,
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(prov_elt(iprov));
 	__prepare_relation(type, &(prov_elt(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
+	rc = call_query_hooks(prov_entry(iprov), xattr, (prov_entry_t*)&relation);
 	prov_write(&relation);
 	rc = __update_version(type, cprov);
 	if (rc < 0)
 		return rc;
-	__long_record_relation(type, xattr, prov_elt(cprov), allowed);
+	rc = __long_record_relation(type, xattr, prov_elt(cprov), allowed);
 	kfree(xattr);
 	iprov->has_outgoing = true;
 	return rc;
