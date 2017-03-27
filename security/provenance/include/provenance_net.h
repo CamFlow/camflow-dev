@@ -209,7 +209,7 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 		return rc;
 	__record_node(prov_elt(inode));
 	__prepare_relation(RL_RCV_PACKET, &(pck->msg_info.identifier), &(prov_elt(inode)->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks((prov_entry_t*)pck, prov_entry(inode), (prov_entry_t*)&relation);
+	rc = call_query_hooks((prov_entry_t *)pck, prov_entry(inode), (prov_entry_t *)&relation);
 	prov_write(&relation);
 	return rc;
 }
@@ -230,7 +230,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 	__record_node(prov_elt(inode));
 	prov_write(pck);
 	__prepare_relation(RL_SND_PACKET, &(prov_elt(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(prov_entry(inode), (prov_entry_t*)pck, (prov_entry_t*)&relation);
+	rc = call_query_hooks(prov_entry(inode), (prov_entry_t *)pck, (prov_entry_t *)&relation);
 	inode->has_outgoing = true;
 	prov_write(&relation);
 	return rc;
