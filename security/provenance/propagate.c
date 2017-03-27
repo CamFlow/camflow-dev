@@ -12,7 +12,7 @@
  */
 #include "provenance.h"
 
-static int out_edge(union prov_elt *node, union prov_elt *edge)
+static int out_edge(prov_entry_t *node, prov_entry_t *edge)
 {
 	if (provenance_does_propagate(node) && provenance_is_tracked(node)) {
 		// can propagate over edge?
@@ -24,7 +24,7 @@ static int out_edge(union prov_elt *node, union prov_elt *edge)
 	return 0;
 }
 
-static int in_edge(union prov_elt *edge, union prov_elt *node)
+static int in_edge(prov_entry_t *edge, prov_entry_t *node)
 {
 	if (provenance_does_propagate(edge) && provenance_is_tracked(edge)) {
 		// can propagate to node?

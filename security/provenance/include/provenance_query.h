@@ -14,8 +14,8 @@
  #define CONFIG_SECURITY_PROVENANCE_QUERY_H
  #include <linux/camflow_query.h>
 
-static inline int call_camflow_out_edge(union prov_elt *node,
-					union prov_elt *edge)
+static inline int call_camflow_out_edge(prov_entry_t *node,
+					                               prov_entry_t *edge)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -29,8 +29,8 @@ static inline int call_camflow_out_edge(union prov_elt *node,
 	return rc;
 }
 
-static inline int call_camflow_in_edge(union prov_elt *edge,
-				       union prov_elt *node)
+static inline int call_camflow_in_edge(prov_entry_t *edge,
+				                                prov_entry_t *node)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -44,9 +44,9 @@ static inline int call_camflow_in_edge(union prov_elt *edge,
 	return rc;
 }
 
-static inline int call_query_hooks(union prov_elt *from,
-				   union prov_elt *to,
-				   union prov_elt *edge)
+static inline int call_query_hooks(prov_entry_t *from,
+				   prov_entry_t *to,
+				   prov_entry_t *edge)
 {
 	int rc = 0;
 

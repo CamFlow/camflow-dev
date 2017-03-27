@@ -22,8 +22,8 @@
 
 struct provenance_query_hooks {
   struct list_head list;
-  int (*out_edge)(union prov_elt*, union prov_elt*);
-  int (*in_edge)(union prov_elt*, union prov_elt*);
+  int (*out_edge)(prov_entry_t*, prov_entry_t*);
+  int (*in_edge)(prov_entry_t*, prov_entry_t*);
 };
 
  extern struct list_head provenance_query_hooks;
