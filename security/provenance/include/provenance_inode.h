@@ -99,7 +99,7 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 	memset(&relation, 0, sizeof(union prov_elt));
 	__record_node(prov_elt(prov));
 	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
-	call_query_hooks((prov_entry_t*)iprov, prov_entry(prov), (prov_entry_t*)&relation);
+	call_query_hooks((prov_entry_t *)iprov, prov_entry(prov), (prov_entry_t *)&relation);
 	prov_write(&relation);
 	return prov;
 }

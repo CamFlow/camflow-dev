@@ -57,7 +57,7 @@ static inline int __long_record_relation(uint64_t type, union long_prov_elt *fro
 	__record_node(to);
 	memset(&relation, 0, sizeof(union prov_elt));
 	__prepare_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(from, (prov_entry_t*)to, (prov_entry_t*)&relation);
+	rc = call_query_hooks(from, (prov_entry_t *)to, (prov_entry_t *)&relation);
 	prov_write(&relation);
 	return rc;
 }
@@ -207,7 +207,7 @@ static inline int record_write_xattr(uint64_t type,
 	}
 	__record_node(prov_elt(cprov));
 	__prepare_relation(type, &(prov_elt(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(prov_entry(cprov), xattr, (prov_entry_t*)&relation);
+	rc = call_query_hooks(prov_entry(cprov), xattr, (prov_entry_t *)&relation);
 	prov_write(&relation);
 	rc = __update_version(type, iprov);
 	if (rc < 0)
@@ -235,7 +235,7 @@ static inline int record_read_xattr(uint64_t type,
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(prov_elt(iprov));
 	__prepare_relation(type, &(prov_elt(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(prov_entry(iprov), xattr, (prov_entry_t*)&relation);
+	rc = call_query_hooks(prov_entry(iprov), xattr, (prov_entry_t *)&relation);
 	prov_write(&relation);
 	rc = __update_version(type, cprov);
 	if (rc < 0)
