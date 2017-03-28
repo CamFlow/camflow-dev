@@ -18,6 +18,7 @@ prepare: prepare_kernel prepare_us
 prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow-$(lsm-version)/g" Makefile
 
 prepare_provenance:
 	mkdir -p build
