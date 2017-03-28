@@ -174,18 +174,21 @@ out:
 static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
-	int rc;
+	int rc=0;
 
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	addr_info = alloc_long_provenance(ENT_ADDR);
-	if (!addr_info)
-		return -ENOMEM;
+	if (!addr_info){
+		rc = -ENOMEM;
+		goto out;
+	}
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
 	rc = __long_record_relation(RL_NAMED, addr_info, prov_elt(prov), FLOW_ALLOWED);
-	kfree(addr_info);
 	set_name_recorded(prov_elt(prov));
+out:
+	kfree(addr_info);
 	return rc;
 }
 
@@ -203,7 +206,7 @@ static inline int record_write_xattr(uint64_t type,
 	int rc = 0;
 
 	if (!xattr)
-		return 0;
+		goto out;
 	memset(&relation, 0, sizeof(union prov_elt));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
@@ -223,10 +226,11 @@ static inline int record_write_xattr(uint64_t type,
 	prov_write(&relation);
 	rc = __update_version(type, iprov);
 	if (rc < 0)
-		return rc;
+		goto out;
 	rc = __long_record_relation(type, xattr, prov_elt(iprov), allowed);
-	kfree(xattr);
 	cprov->has_outgoing = true;
+out:
+	kfree(xattr);
 	return rc;
 }
 
@@ -241,7 +245,7 @@ static inline int record_read_xattr(uint64_t type,
 	int rc = 0;
 
 	if (!xattr)
-		return 0;
+		goto out;
 	memset(&relation, 0, sizeof(union prov_elt));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
@@ -251,10 +255,11 @@ static inline int record_read_xattr(uint64_t type,
 	prov_write(&relation);
 	rc = __update_version(type, cprov);
 	if (rc < 0)
-		return rc;
+		goto out;
 	rc = __long_record_relation(type, xattr, prov_elt(cprov), allowed);
-	kfree(xattr);
 	iprov->has_outgoing = true;
+out:
+	kfree(xattr);
 	return rc;
 }
 
@@ -271,22 +276,31 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
 	rc = __long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+	kfree(cnt);
 	return rc;
 }
 
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
 	union long_prov_elt *str;
+	int rc=0;
 
 	str = alloc_long_provenance(ENT_STR);
-	if (!str)
-		return -ENOMEM;
-	if (copy_from_user(str->str_info.str, buf, count))
-		return -EAGAIN;
+	if (!str) {
+		rc = -ENOMEM;
+		goto out;
+	}
+	if (copy_from_user(str->str_info.str, buf, count)) {
+		rc = -EAGAIN;
+		goto out;
+	}
 	str->str_info.str[count] = '\0'; // make sure the string is null terminated
 	str->str_info.length = count;
-	__long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
+	rc = __long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
+out:
 	kfree(str);
+	if(rc<0)
+		return rc;
 	return count;
 }
 #endif
