@@ -166,5 +166,5 @@ patch: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build && diff -uprN -b -B ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
 
-prepare_release_travis:
+prepare_release_travis: rpm
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
