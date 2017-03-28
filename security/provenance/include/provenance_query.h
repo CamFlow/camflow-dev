@@ -15,7 +15,7 @@
  #include <linux/camflow_query.h>
 
 static inline int call_camflow_out_edge(prov_entry_t *node,
-					                               prov_entry_t *edge)
+					prov_entry_t *edge)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -30,7 +30,7 @@ static inline int call_camflow_out_edge(prov_entry_t *node,
 }
 
 static inline int call_camflow_in_edge(prov_entry_t *edge,
-				                                prov_entry_t *node)
+				       prov_entry_t *node)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;

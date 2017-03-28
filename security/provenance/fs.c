@@ -78,7 +78,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char *)get_zeroed_page(GFP_KERNEL);
+	page = (char*)get_zeroed_page(GFP_KERNEL);
 	if (!page)
 		return -ENOMEM;
 
@@ -129,7 +129,7 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t *)buf;
+	uint32_t *tmp = (uint32_t*)buf;
 
 	// ideally should be decoupled from set machine id
 	__init_opaque();
@@ -194,7 +194,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 
-	if (copy_to_user((void *)buf, &node, count)) {
+	if (copy_to_user((void*)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
