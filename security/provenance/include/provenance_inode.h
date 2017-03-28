@@ -104,9 +104,9 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
 	rc = call_query_hooks((prov_entry_t *)iprov, prov_entry(prov), (prov_entry_t *)&relation);
 	prov_write(&relation);
-	if(rc < 0){
+	if(rc < 0) {
 		kfree(prov);
-		prov=NULL;
+		prov = NULL;
 	}
 	return prov;
 }
