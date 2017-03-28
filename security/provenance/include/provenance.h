@@ -60,7 +60,7 @@ struct provenance {
 
 #define prov_elt(provenance) (&(provenance->msg))
 #define prov_lock(provenance) (&(provenance->lock))
-#define prov_entry(provenance) ((prov_entry_t *)prov_elt(provenance))
+#define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
 
 #define ASSIGN_NODE_ID 0
 extern uint32_t prov_machine_id;
@@ -92,7 +92,7 @@ static inline void copy_node_info(union prov_identifier *dest, union prov_identi
 
 static inline void __record_node(union prov_elt *node)
 {
-	if (filter_node((prov_entry_t *)node) || provenance_is_recorded(node)) // filtered or already recorded
+	if (filter_node((prov_entry_t*)node) || provenance_is_recorded(node))  // filtered or already recorded
 		return;
 
 	set_recorded(node);
@@ -139,7 +139,7 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 		__prepare_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
 	else
 		__prepare_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks((prov_entry_t *)&old_prov, prov_entry(prov), (prov_entry_t *)&relation);
+	rc = call_query_hooks((prov_entry_t*)&old_prov, prov_entry(prov), (prov_entry_t*)&relation);
 	prov_write(&relation);
 	prov->has_outgoing = false; // we update there is no more outgoing edge
 	prov->saved = false;
@@ -171,47 +171,48 @@ static inline int record_relation(uint64_t type,
 		return rc;
 	__record_node(prov_elt(to));
 	__prepare_relation(type, &(prov_elt(from)->msg_info.identifier), &(prov_elt(to)->msg_info.identifier), &relation, file);
-	rc = call_query_hooks(prov_entry(from), prov_entry(to), (prov_entry_t *)&relation);
+	rc = call_query_hooks(prov_entry(from), prov_entry(to), (prov_entry_t*)&relation);
 	prov_write(&relation);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
 }
 
 static inline int flow_to_activity(uint64_t type,
-				    struct provenance *from,
-				    struct provenance *to,
-				    uint8_t allowed,
-				    struct file *file)
+				   struct provenance *from,
+				   struct provenance *to,
+				   uint8_t allowed,
+				   struct file *file)
 {
 	int rc = record_relation(type, from, to, allowed, file);
+
 	if (should_record_relation(type, prov_elt(from), prov_elt(to)))
 		to->updt_mmap = 1;
 	return rc;
 }
 
 static inline int flow_from_activity(uint64_t type,
-				      struct provenance *from,
-				      struct provenance *to,
-				      uint8_t allowed,
-				      struct file *file)
+				     struct provenance *from,
+				     struct provenance *to,
+				     uint8_t allowed,
+				     struct file *file)
 {
 	return record_relation(type, from, to, allowed, file);
 }
 
 static inline int flow_between_entities(uint64_t type,
-					 struct provenance *from,
-					 struct provenance *to,
-					 uint8_t allowed,
-					 struct file *file)
+					struct provenance *from,
+					struct provenance *to,
+					uint8_t allowed,
+					struct file *file)
 {
 	return record_relation(type, from, to, allowed, file);
 }
 
 static inline int flow_between_activities(uint64_t type,
-					   struct provenance *from,
-					   struct provenance *to,
-					   uint8_t allowed,
-					   struct file *file)
+					  struct provenance *from,
+					  struct provenance *to,
+					  uint8_t allowed,
+					  struct file *file)
 {
 	return record_relation(type, from, to, allowed, file);
 }

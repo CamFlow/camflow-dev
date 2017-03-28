@@ -57,7 +57,7 @@ static inline int __long_record_relation(uint64_t type, union long_prov_elt *fro
 	__record_node(to);
 	memset(&relation, 0, sizeof(union prov_elt));
 	__prepare_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(from, (prov_entry_t *)to, (prov_entry_t *)&relation);
+	rc = call_query_hooks(from, (prov_entry_t*)to, (prov_entry_t*)&relation);
 	prov_write(&relation);
 	return rc;
 }
@@ -98,7 +98,7 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 	int rc;
 
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
-			!provenance_is_recorded(prov_elt(prov)))
+	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	// should not sleep
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
@@ -135,10 +135,10 @@ static inline int record_task_name(struct task_struct *task, struct provenance *
 	struct file *exe_file;
 	char *buffer;
 	char *ptr;
-	int rc=0;
+	int rc = 0;
 
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
-	 		!provenance_is_recorded(prov_elt(prov)))
+	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	cred = get_task_cred(task);
 	if (!cred)
@@ -174,12 +174,12 @@ out:
 static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
-	int rc=0;
+	int rc = 0;
 
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	addr_info = alloc_long_provenance(ENT_ADDR);
-	if (!addr_info){
+	if (!addr_info) {
 		rc = -ENOMEM;
 		goto out;
 	}
@@ -222,7 +222,7 @@ static inline int record_write_xattr(uint64_t type,
 	}
 	__record_node(prov_elt(cprov));
 	__prepare_relation(type, &(prov_elt(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(prov_entry(cprov), xattr, (prov_entry_t *)&relation);
+	rc = call_query_hooks(prov_entry(cprov), xattr, (prov_entry_t*)&relation);
 	prov_write(&relation);
 	rc = __update_version(type, iprov);
 	if (rc < 0)
@@ -251,7 +251,7 @@ static inline int record_read_xattr(uint64_t type,
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(prov_elt(iprov));
 	__prepare_relation(type, &(prov_elt(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks(prov_entry(iprov), xattr, (prov_entry_t *)&relation);
+	rc = call_query_hooks(prov_entry(iprov), xattr, (prov_entry_t*)&relation);
 	prov_write(&relation);
 	rc = __update_version(type, cprov);
 	if (rc < 0)
@@ -283,7 +283,7 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
 	union long_prov_elt *str;
-	int rc=0;
+	int rc = 0;
 
 	str = alloc_long_provenance(ENT_STR);
 	if (!str) {
@@ -299,7 +299,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	rc = __long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
 out:
 	kfree(str);
-	if(rc<0)
+	if (rc < 0)
 		return rc;
 	return count;
 }
