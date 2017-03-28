@@ -177,43 +177,44 @@ static inline int record_relation(uint64_t type,
 	return rc;
 }
 
-static inline void flow_to_activity(uint64_t type,
+static inline int flow_to_activity(uint64_t type,
 				    struct provenance *from,
 				    struct provenance *to,
 				    uint8_t allowed,
 				    struct file *file)
 {
-	record_relation(type, from, to, allowed, file);
+	int rc = record_relation(type, from, to, allowed, file);
 	if (should_record_relation(type, prov_elt(from), prov_elt(to)))
 		to->updt_mmap = 1;
+	return rc;
 }
 
-static inline void flow_from_activity(uint64_t type,
+static inline int flow_from_activity(uint64_t type,
 				      struct provenance *from,
 				      struct provenance *to,
 				      uint8_t allowed,
 				      struct file *file)
 {
-	record_relation(type, from, to, allowed, file);
+	return record_relation(type, from, to, allowed, file);
 }
 
-static inline void flow_between_entities(uint64_t type,
+static inline int flow_between_entities(uint64_t type,
 					 struct provenance *from,
 					 struct provenance *to,
 					 uint8_t allowed,
 					 struct file *file)
 {
-	record_relation(type, from, to, allowed, file);
+	return record_relation(type, from, to, allowed, file);
 }
 
-static inline void flow_between_activities(uint64_t type,
+static inline int flow_between_activities(uint64_t type,
 					   struct provenance *from,
 					   struct provenance *to,
 					   uint8_t allowed,
 					   struct file *file)
 {
-	record_relation(type, from, to, allowed, file);
+	return record_relation(type, from, to, allowed, file);
 }
 
 #endif
-#endif /* _LINUX_PROVENANCE_H */
+#endif

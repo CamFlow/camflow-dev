@@ -62,65 +62,72 @@ static inline int __long_record_relation(uint64_t type, union long_prov_elt *fro
 	return rc;
 }
 
-static inline void record_node_name(struct provenance *node, const char *name)
+static inline int record_node_name(struct provenance *node, const char *name)
 {
 	union long_prov_elt *fname_prov;
+	int rc;
 
 	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
-		return;
+		return 0;
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
 	if (!fname_prov) {
 		pr_err("Provenance: recod name failed to allocate memory\n");
-		return;
+		return -ENOMEM;
 	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
-		__long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), FLOW_ALLOWED);
+		rc = __long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), FLOW_ALLOWED);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	} else{
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
-		__long_record_relation(RL_NAMED, fname_prov, prov_elt(node), FLOW_ALLOWED);
+		rc = __long_record_relation(RL_NAMED, fname_prov, prov_elt(node), FLOW_ALLOWED);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	}
 	kfree(fname_prov);
+	return rc;
 }
 
-static inline void record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
+static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
 {
 	char *buffer;
 	char *ptr;
+	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
-		return;
+	if (provenance_is_name_recorded(prov_elt(prov)) ||
+			!provenance_is_recorded(prov_elt(prov)))
+		return 0;
 	// should not sleep
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 	if (!buffer) {
 		pr_err("Provenance: could not allocate memory\n");
-		return;
+		return -ENOMEM;
 	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-	record_node_name(prov, ptr);
+	rc = record_node_name(prov, ptr);
 	kfree(buffer);
+	return rc;
 }
 
-static inline void record_inode_name(struct inode *inode, struct provenance *prov)
+static inline int record_inode_name(struct inode *inode, struct provenance *prov)
 {
 	struct dentry *dentry;
+	int rc;
 
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
-		return;
+		return 0;
 	dentry = d_find_alias(inode);
 	if (!dentry) // we did not find a dentry, not sure if it should ever happen
-		return;
-	record_inode_name_from_dentry(dentry, prov);
+		return 0;
+	rc = record_inode_name_from_dentry(dentry, prov);
 	dput(dentry);
+	return rc;
 }
 
-static inline void record_task_name(struct task_struct *task, struct provenance *prov)
+static inline int record_task_name(struct task_struct *task, struct provenance *prov)
 {
 	const struct cred *cred;
 	struct provenance *fprov;
@@ -128,12 +135,14 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 	struct file *exe_file;
 	char *buffer;
 	char *ptr;
+	int rc=0;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
-		return;
+	if (provenance_is_name_recorded(prov_elt(prov)) ||
+	 		!provenance_is_recorded(prov_elt(prov)))
+		return 0;
 	cred = get_task_cred(task);
 	if (!cred)
-		return;
+		return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
@@ -154,27 +163,30 @@ static inline void record_task_name(struct task_struct *task, struct provenance 
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file);
-		record_node_name(prov, ptr);
+		rc = record_node_name(prov, ptr);
 		kfree(buffer);
 	}
 out:
 	put_cred(cred);
+	return rc;
 }
 
-static inline void provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
+static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
+	int rc;
 
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
-		return;
+		return 0;
 	addr_info = alloc_long_provenance(ENT_ADDR);
 	if (!addr_info)
-		return;
+		return -ENOMEM;
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
-	__long_record_relation(RL_NAMED, addr_info, prov_elt(prov), FLOW_ALLOWED);
+	rc = __long_record_relation(RL_NAMED, addr_info, prov_elt(prov), FLOW_ALLOWED);
 	kfree(addr_info);
 	set_name_recorded(prov_elt(prov));
+	return rc;
 }
 
 static inline int record_write_xattr(uint64_t type,
@@ -246,9 +258,10 @@ static inline int record_read_xattr(uint64_t type,
 	return rc;
 }
 
-static inline void record_packet_content(union prov_elt *pck, const struct sk_buff *skb)
+static inline int record_packet_content(union prov_elt *pck, const struct sk_buff *skb)
 {
 	union long_prov_elt *cnt = alloc_long_provenance(ENT_PCKCNT);
+	int rc;
 
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length > PATH_MAX) {
@@ -257,7 +270,8 @@ static inline void record_packet_content(union prov_elt *pck, const struct sk_bu
 	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
-	__long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+	rc = __long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+	return rc;
 }
 
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
