@@ -38,6 +38,7 @@ deploy:
   api_key: "$GITHUB_KEY"
   file:
     - patch
+    - camflow-kernel.src.rpm
   skip_cleanup: true
   on:
     tags: true

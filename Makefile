@@ -169,4 +169,4 @@ patch: copy_change
 
 prepare_release_travis: rpm
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
-	cp -f /home/travis/rpmbuild/SRPMS/kernel-$(kernel-version)camflow_$(lsm-version)-2.src.rpm camflow-kernel-$(kernel-version).src.rpm
+	cp -f /home/travis/rpmbuild/SRPMS/kernel-$(kernel-version)camflow_$(lsm-version)-2.src.rpm camflow-kernel.src.rpm
