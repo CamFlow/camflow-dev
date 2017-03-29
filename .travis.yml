@@ -39,6 +39,9 @@ deploy:
   file:
     - patch
     - camflow-kernel.src.rpm
+    - camflow-kernel.x86_64.rpm
+    - camflow-kernel-headers.x86_64.rpm
+    - camflow-kernel-devel.x86_64.rpm
   skip_cleanup: true
   on:
     tags: true
