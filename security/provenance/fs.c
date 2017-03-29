@@ -47,6 +47,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
+	provenance_mark_as_opaque(PROV_BOOT_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
@@ -158,6 +159,40 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 	return count;
 }
 declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_machine_id);
+
+static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
+				     size_t count, loff_t *ppos)
+{
+	uint32_t *tmp = (uint32_t*)buf;
+
+	// ideally should be decoupled from set machine id
+	__init_opaque();
+
+	if (!capable(CAP_AUDIT_CONTROL))
+		return -EPERM;
+
+	if (count < sizeof(uint32_t))
+		return -ENOMEM;
+
+	if (copy_from_user(&prov_boot_id, tmp, sizeof(uint32_t)))
+		return -EAGAIN;
+
+	return count; // read only
+}
+
+static ssize_t prov_read_boot_id(struct file *filp, char __user *buf,
+				    size_t count, loff_t *ppos)
+{
+	if (count < sizeof(uint32_t))
+		return -ENOMEM;
+
+	if (copy_to_user(buf, &prov_boot_id, sizeof(uint32_t)))
+		return -EAGAIN;
+
+	return count;
+}
+declare_file_operations(prov_boot_id_ops, prov_write_boot_id, prov_read_boot_id);
+
 
 static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
@@ -630,6 +665,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
 	securityfs_create_file("self", 0666, prov_dir, NULL, &prov_self_ops);
 	securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
+	securityfs_create_file("boot_id", 0444, prov_dir, NULL, &prov_boot_id_ops);
 	securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
 	securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
 	securityfs_create_file("propagate_node_filter", 0644, prov_dir, NULL, &prov_propagate_node_filter_ops);

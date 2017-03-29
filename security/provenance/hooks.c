@@ -1561,8 +1561,7 @@ void __init provenance_add_hooks(void)
 	prov_all = false;
 #endif
 	prov_machine_id = 1;
-	// proper counter instead of random id?
-	get_random_bytes(&prov_boot_id, sizeof(uint32_t));
+	prov_boot_id = 0;
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);

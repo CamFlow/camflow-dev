@@ -104,6 +104,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
 #define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
 #define PROV_MACHINE_ID_FILE                  "/sys/kernel/security/provenance/machine_id"
+#define PROV_BOOT_ID_FILE                  		"/sys/kernel/security/provenance/boot_id"
 #define PROV_NODE_FILTER_FILE                 "/sys/kernel/security/provenance/node_filter"
 #define PROV_RELATION_FILTER_FILE             "/sys/kernel/security/provenance/relation_filter"
 #define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"

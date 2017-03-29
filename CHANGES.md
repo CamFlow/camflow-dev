@@ -22,6 +22,7 @@
 
 ### v0.3.0
 ```
+- boot id is set from userspace.
 - union prov_msg -> union prov_elt
 - Implemented run-time query system.
 - Debug output legibility improved.
