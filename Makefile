@@ -50,13 +50,15 @@ copy_config:
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 
 config: copy_change copy_config
+	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
 	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
 config_travis: copy_change copy_config
-	cd ./build/linux-$(kernel-version) && $(MAKE) defconfig
+	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
+	cd ./build/linux-$(kernel-version) && $(MAKE) oldconfig
 
 compile: compile_security compile_kernel compile_us
 
