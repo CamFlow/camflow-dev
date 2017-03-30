@@ -1,4 +1,4 @@
-kernel-version=4.10.6
+kernel-version=4.10.7
 lsm-version=0.3.0
 arch=x86_64
 
@@ -50,7 +50,6 @@ copy_config:
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 
 config: copy_change copy_config
-	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
 	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
