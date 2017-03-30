@@ -132,7 +132,6 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 
 	memset(&relation, 0, sizeof(union prov_elt));
 	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
-	memset(prov_taint(prov_elt(prov)), 0, PROV_N_BYTES);
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
