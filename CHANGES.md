@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.0           | 4.10.6         | N/A				|
+| 0.3.0           | 4.10.7         | N/A				|
 | 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
 | 0.2.1           | 4.9.5          | 03/02/2017	|
@@ -26,7 +26,7 @@
 - union prov_msg -> union prov_elt
 - Implemented run-time query system.
 - Debug output legibility improved.
-- Update to kernel version 4.10.6.
+- Update to kernel version 4.10.7.
 ```
 
 ### v0.2.3
