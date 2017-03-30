@@ -224,9 +224,11 @@ static inline int record_write_xattr(uint64_t type,
 	__prepare_relation(type, &(prov_elt(cprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	rc = call_query_hooks(prov_entry(cprov), xattr, (prov_entry_t*)&relation);
 	prov_write(&relation);
+	__record_node(prov_elt(iprov));
 	rc = __update_version(type, iprov);
 	if (rc < 0)
 		goto out;
+	__record_node(prov_elt(iprov));
 	rc = __long_record_relation(type, xattr, prov_elt(iprov), allowed);
 	cprov->has_outgoing = true;
 out:
@@ -253,9 +255,11 @@ static inline int record_read_xattr(uint64_t type,
 	__prepare_relation(type, &(prov_elt(iprov)->msg_info.identifier), &(xattr->msg_info.identifier), &relation, NULL);
 	rc = call_query_hooks(prov_entry(iprov), xattr, (prov_entry_t*)&relation);
 	prov_write(&relation);
+	__record_node(prov_elt(cprov));
 	rc = __update_version(type, cprov);
 	if (rc < 0)
 		goto out;
+	__record_node(prov_elt(cprov));
 	rc = __long_record_relation(type, xattr, prov_elt(cprov), allowed);
 	iprov->has_outgoing = true;
 out:
