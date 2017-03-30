@@ -206,6 +206,8 @@ static inline void save_provenance(struct dentry *dentry)
 	if (!inode)
 		return;
 	prov = inode->i_provenance;
+	if (!prov)
+		return;
 	spin_lock(prov_lock(prov));
 	if (!prov->initialised || prov->saved) { // not initialised or already saved
 		spin_unlock(prov_lock(prov));
@@ -216,6 +218,8 @@ static inline void save_provenance(struct dentry *dentry)
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
 	clear_name_recorded(&buf);
+	if (!dentry)
+		return;
 	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_elt), 0);
 }
 #endif
