@@ -56,7 +56,7 @@ static inline uint64_t djb2_hash(const char *str)
 	}
 	return hash;
 }
-#define generate_tag(str) djb2_hash(str)
+#define generate_label(str) djb2_hash(str)
 
 /* element in set belong to super */
 static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES])
