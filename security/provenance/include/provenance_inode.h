@@ -99,13 +99,12 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	prov_elt(prov)->inode_info.mode = iprov->inode_info.mode;
 	__record_node(iprov);
-	memset(&relation, 0, sizeof(union prov_elt));
 	__record_node(prov_elt(prov));
 	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
 	rc = call_query_hooks((prov_entry_t*)iprov, prov_entry(prov), (prov_entry_t*)&relation);
 	prov_write(&relation);
 	if (rc < 0) {
-		kfree(prov);
+		free_provenance(prov);
 		prov = NULL;
 	}
 	return prov;

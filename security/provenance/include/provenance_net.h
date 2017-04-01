@@ -201,7 +201,6 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 		return 0;
 	if (!should_record_relation(RL_RCV_PACKET, pck, prov_elt(inode)))
 		return 0;
-	memset(&relation, 0, sizeof(union prov_elt));
 	prov_write(pck);
 	__record_node(prov_elt(inode));
 	rc = __update_version(RL_RCV_PACKET, inode);
@@ -226,7 +225,6 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 		return 0;
 	if (!should_record_relation(RL_SND_PACKET, prov_elt(inode), pck))
 		return 0;
-	memset(&relation, 0, sizeof(union prov_elt));
 	__record_node(prov_elt(inode));
 	prov_write(pck);
 	__prepare_relation(RL_SND_PACKET, &(prov_elt(inode)->msg_info.identifier), &(pck->msg_info.identifier), &relation, NULL);

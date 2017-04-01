@@ -55,7 +55,6 @@ static inline int __long_record_relation(uint64_t type, union long_prov_elt *fro
 		return 0;
 	__long_record_node(from);
 	__record_node(to);
-	memset(&relation, 0, sizeof(union prov_elt));
 	__prepare_relation(type, &(from->msg_info.identifier), &(to->msg_info.identifier), &relation, NULL);
 	rc = call_query_hooks(from, (prov_entry_t*)to, (prov_entry_t*)&relation);
 	prov_write(&relation);
@@ -207,7 +206,6 @@ static inline int record_write_xattr(uint64_t type,
 
 	if (!xattr)
 		goto out;
-	memset(&relation, 0, sizeof(union prov_elt));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	if (value) {
@@ -248,7 +246,6 @@ static inline int record_read_xattr(uint64_t type,
 
 	if (!xattr)
 		goto out;
-	memset(&relation, 0, sizeof(union prov_elt));
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(prov_elt(iprov));

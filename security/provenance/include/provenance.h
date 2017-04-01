@@ -107,6 +107,7 @@ static inline void __prepare_relation(uint64_t type,
 				      union prov_elt *relation,
 				      struct file *file)
 {
+	memset(relation, 0, sizeof(union prov_elt));
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
@@ -129,8 +130,6 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 		return 0;
 	if (filter_update_node(type))
 		return 0;
-
-	memset(&relation, 0, sizeof(union prov_elt));
 	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
@@ -162,7 +161,6 @@ static inline int record_relation(uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_elt(from), prov_elt(to)))
 		return 0;
-	memset(&relation, 0, sizeof(union prov_elt));
 	__record_node(prov_elt(from));
 	__record_node(prov_elt(to));
 	rc = __update_version(type, to);
