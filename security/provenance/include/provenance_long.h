@@ -21,7 +21,7 @@
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-static union long_prov_elt *alloc_long_provenance(uint64_t ntype)
+static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
 	union long_prov_elt *tmp = kzalloc(sizeof(union long_prov_elt), GFP_ATOMIC);
 
