@@ -120,18 +120,14 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 		return NULL;
 	if (!provenance_is_tracked(iprov) && !provenance_is_tracked(cprov) && !prov_all)
 		return NULL;
-	if (!should_record_relation(RL_MMAP, cprov, iprov))
-		return NULL;
 	prov = alloc_provenance(ENT_INODE_MMAP, GFP_ATOMIC);
 	if (!prov)
 		return NULL;
+	set_tracked(prov_elt(prov));
 	prov_elt(prov)->inode_info.uid = iprov->inode_info.uid;
 	prov_elt(prov)->inode_info.gid = iprov->inode_info.gid;
 	prov_elt(prov)->inode_info.mode = iprov->inode_info.mode;
 	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
-	__record_node(iprov);
-	__record_node(prov_elt(prov));
-	__record_relation(RL_MMAP, iprov, prov_elt(prov), NULL);
 	return prov;
 }
 
