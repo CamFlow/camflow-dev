@@ -17,7 +17,6 @@
 #include <linux/binfmts.h>
 #include <linux/sched.h>
 
-#include "provenance_long.h"
 #include "provenance_secctx.h"
 #include "provenance_cgroup.h"
 #include "provenance_inode.h"
@@ -81,6 +80,49 @@ static inline void current_update_shst(struct provenance *cprov)
 	mmput_async(mm);
 }
 
+static inline int record_task_name(struct task_struct *task, struct provenance *prov)
+{
+	const struct cred *cred;
+	struct provenance *fprov;
+	struct mm_struct *mm;
+	struct file *exe_file;
+	char *buffer;
+	char *ptr;
+	int rc = 0;
+
+	if (provenance_is_name_recorded(prov_elt(prov)) ||
+	    !provenance_is_recorded(prov_elt(prov)))
+		return 0;
+	cred = get_task_cred(task);
+	if (!cred)
+		return rc;
+	mm = get_task_mm(task);
+	if (!mm)
+		goto out;
+	exe_file = get_mm_exe_file(mm);
+	mmput_async(mm);
+	if (exe_file) {
+		fprov = file_inode(exe_file)->i_provenance;
+		if (provenance_is_opaque(prov_elt(fprov))) {
+			set_opaque(prov_elt(prov));
+			goto out;
+		}
+		// should not sleep
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		if (!buffer) {
+			pr_err("Provenance: could not allocate memory\n");
+			fput(exe_file);
+			goto out;
+		}
+		ptr = file_path(exe_file, buffer, PATH_MAX);
+		fput(exe_file);
+		rc = record_node_name(prov, ptr);
+		kfree(buffer);
+	}
+out:
+	put_cred(cred);
+	return rc;
+}
 
 static inline void refresh_current_provenance(void)
 {

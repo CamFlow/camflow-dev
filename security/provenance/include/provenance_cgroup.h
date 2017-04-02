@@ -64,5 +64,4 @@ static inline uint8_t prov_cgroup_add_or_update(struct cgroup_filters *f)
 	list_add_tail(&(f->list), &cgroup_filters); // not already on the list, we add it
 	return 0;
 }
-
 #endif

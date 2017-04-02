@@ -46,5 +46,4 @@ static inline uint32_t file_mask_to_perms(int mode, unsigned int mask)
 
 	return av;
 }
-
 #endif

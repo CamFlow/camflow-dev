@@ -29,13 +29,7 @@
 
 #include "provenance_filter.h"
 #include "provenance_relay.h"
-#include "provenance_query.h"
 
-#define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
-#define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
-
-extern atomic64_t prov_relation_id;
-extern atomic64_t prov_node_id;
 extern struct kmem_cache *provenance_cache;
 
 enum {
@@ -63,8 +57,6 @@ struct provenance {
 #define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
 
 #define ASSIGN_NODE_ID 0
-extern uint32_t prov_machine_id;
-extern uint32_t prov_boot_id;
 
 static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
@@ -85,45 +77,74 @@ static inline void free_provenance(struct provenance *prov)
 	kmem_cache_free(provenance_cache, prov);
 }
 
-static inline void copy_identifier(union prov_identifier *dest, union prov_identifier *src)
+static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
-	memcpy(dest, src, sizeof(union prov_identifier));
+	union long_prov_elt *tmp = kzalloc(sizeof(union long_prov_elt), GFP_ATOMIC);
+
+	if (!tmp)
+		return NULL;
+
+	prov_type(tmp) = ntype;
+	node_identifier(tmp).id = prov_next_node_id();
+	node_identifier(tmp).boot_id = prov_boot_id;
+	node_identifier(tmp).machine_id = prov_machine_id;
+	return tmp;
 }
 
-static inline void __record_node(union prov_elt *node)
+static inline int record_node_name(struct provenance *node, const char *name)
 {
-	if (filter_node((prov_entry_t*)node) || provenance_is_recorded(node))  // filtered or already recorded
-		return;
-	set_recorded(node);
-	if (unlikely(node_identifier(node).machine_id != prov_machine_id))
-		node_identifier(node).machine_id = prov_machine_id;
-	prov_write(node);
-}
-
-static inline int __record_relation(uint64_t type,
-				      void *from,
-				      void *to,
-				      struct file *file)
-{
-	union prov_elt relation;
-	prov_entry_t *f=from;
-	prov_entry_t *t=to;
+	union long_prov_elt *fname_prov;
 	int rc;
 
-	memset(&relation, 0, sizeof(union prov_elt));
-	prov_type(&relation) = type;
-	relation_identifier(&relation).id = prov_next_relation_id();
-	relation_identifier(&relation).boot_id = prov_boot_id;
-	relation_identifier(&relation).machine_id = prov_machine_id;
-	copy_identifier(&relation.relation_info.snd, &get_prov_identifier(f));
-	copy_identifier(&relation.relation_info.rcv, &get_prov_identifier(t));
-	if (file) {
-		relation.relation_info.set = FILE_INFO_SET;
-		relation.relation_info.offset = file->f_pos;
+	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
+		return 0;
+	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
+	if (!fname_prov) {
+		pr_err("Provenance: recod name failed to allocate memory\n");
+		return -ENOMEM;
 	}
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
-	prov_write(&relation);
+	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
+	__long_record_node(fname_prov);
+	if (prov_type(prov_elt(node)) == ACT_TASK) {
+		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
+		rc = __record_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
+		set_name_recorded(prov_elt(node));
+		spin_unlock(prov_lock(node));
+	} else{
+		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
+		rc = __record_relation(RL_NAMED, fname_prov, prov_elt(node), NULL);
+		set_name_recorded(prov_elt(node));
+		spin_unlock(prov_lock(node));
+	}
+	kfree(fname_prov);
 	return rc;
+}
+
+static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
+{
+	union long_prov_elt *str;
+	int rc = 0;
+
+	str = alloc_long_provenance(ENT_STR);
+	if (!str) {
+		rc = -ENOMEM;
+		goto out;
+	}
+	if (copy_from_user(str->str_info.str, buf, count)) {
+		rc = -EAGAIN;
+		goto out;
+	}
+	str->str_info.str[count] = '\0'; // make sure the string is null terminated
+	str->str_info.length = count;
+	__record_node(cprov);
+	__long_record_node(str);
+	rc = __record_relation(RL_SAID, str, cprov, NULL);
+out:
+	kfree(str);
+	if (rc < 0)
+		return rc;
+	return count;
 }
 
 static inline int __update_version(uint64_t type, struct provenance *prov)
@@ -213,6 +234,5 @@ static inline int flow_between_activities(uint64_t type,
 {
 	return record_relation(type, from, to, allowed, file);
 }
-
 #endif
 #endif
