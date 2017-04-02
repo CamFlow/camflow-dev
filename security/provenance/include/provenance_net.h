@@ -200,8 +200,6 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 		return 0;
 	if (!should_record_relation(RL_RCV_PACKET, pck, prov_elt(inode)))
 		return 0;
-	prov_write(pck);
-	__record_node(prov_elt(inode));
 	rc = __update_version(RL_RCV_PACKET, inode);
 	if (rc < 0)
 		return rc;
