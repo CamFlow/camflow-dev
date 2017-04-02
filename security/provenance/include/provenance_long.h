@@ -43,22 +43,6 @@ static inline void __long_record_node(union long_prov_elt *node)
 	long_prov_write(node);
 }
 
-static inline int __long_record_relation(uint64_t type, union long_prov_elt *from, union prov_elt *to, uint8_t allowed)
-{
-	union prov_elt relation;
-	int rc;
-
-	if (unlikely(!prov_enabled)) // capture is not enabled, ignore
-		return 0;
-	// don't record if to or from are opaque
-	if (unlikely(provenance_is_opaque(to)))
-		return 0;
-	__long_record_node(from);
-	__record_node(to);
-	rc = __record_relation(type, from, to, &relation, NULL);
-	return rc;
-}
-
 static inline int record_node_name(struct provenance *node, const char *name)
 {
 	union long_prov_elt *fname_prov;
@@ -73,14 +57,15 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
+	__long_record_node(fname_prov);
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
-		rc = __long_record_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), FLOW_ALLOWED);
+		rc = __record_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	} else{
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
-		rc = __long_record_relation(RL_NAMED, fname_prov, prov_elt(node), FLOW_ALLOWED);
+		rc = __record_relation(RL_NAMED, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	}
@@ -182,7 +167,8 @@ static inline int provenance_record_address(struct sockaddr *address, int addrle
 	}
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
-	rc = __long_record_relation(RL_NAMED, addr_info, prov_elt(prov), FLOW_ALLOWED);
+	__long_record_node(addr_info);
+	rc = __record_relation(RL_NAMED, addr_info, prov_elt(prov), NULL);
 	set_name_recorded(prov_elt(prov));
 out:
 	kfree(addr_info);
@@ -199,7 +185,6 @@ static inline int record_write_xattr(uint64_t type,
 				     uint8_t allowed)
 {
 	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
-	union prov_elt relation;
 	int rc = 0;
 
 	if (!xattr)
@@ -217,7 +202,8 @@ static inline int record_write_xattr(uint64_t type,
 		xattr->xattr_info.flags = flags;
 	}
 	__record_node(prov_elt(cprov));
-	rc = __record_relation(type, prov_elt(cprov), xattr, &relation, NULL);
+	__long_record_node(xattr);
+	rc = __record_relation(type, prov_elt(cprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
 	__record_node(prov_elt(iprov));
@@ -225,7 +211,7 @@ static inline int record_write_xattr(uint64_t type,
 	if (rc < 0)
 		goto out;
 	__record_node(prov_elt(iprov));
-	rc = __long_record_relation(type, xattr, prov_elt(iprov), allowed);
+	rc = __record_relation(type, xattr, prov_elt(iprov), NULL);
 	cprov->has_outgoing = true;
 out:
 	kfree(xattr);
@@ -239,7 +225,6 @@ static inline int record_read_xattr(uint64_t type,
 				    uint8_t allowed)
 {
 	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
-	union prov_elt relation;
 	int rc = 0;
 
 	if (!xattr)
@@ -247,7 +232,8 @@ static inline int record_read_xattr(uint64_t type,
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	__record_node(prov_elt(iprov));
-	rc = __record_relation(type, prov_elt(iprov), xattr, &relation, NULL);
+	__long_record_node(xattr);
+	rc = __record_relation(type, prov_elt(iprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
 	__record_node(prov_elt(cprov));
@@ -255,7 +241,7 @@ static inline int record_read_xattr(uint64_t type,
 	if (rc < 0)
 		goto out;
 	__record_node(prov_elt(cprov));
-	rc = __long_record_relation(type, xattr, prov_elt(cprov), allowed);
+	rc = __record_relation(type, xattr, prov_elt(cprov), NULL);
 	iprov->has_outgoing = true;
 out:
 	kfree(xattr);
@@ -274,7 +260,7 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	__long_record_node(cnt);
-	rc = __long_record_relation(RL_READ, cnt, pck, FLOW_ALLOWED);
+	rc = __record_relation(RL_READ, cnt, pck, NULL);
 	kfree(cnt);
 	return rc;
 }
@@ -295,7 +281,8 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	}
 	str->str_info.str[count] = '\0'; // make sure the string is null terminated
 	str->str_info.length = count;
-	rc = __long_record_relation(RL_SAID, str, cprov, FLOW_ALLOWED);
+	__long_record_node(str);
+	rc = __record_relation(RL_SAID, str, cprov, NULL);
 out:
 	kfree(str);
 	if (rc < 0)

@@ -192,7 +192,6 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 // incoming packet
 static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *inode)
 {
-	union prov_elt relation;
 	int rc = 0;
 
 	if (unlikely(!pck || !inode)) // should not occur
@@ -207,14 +206,14 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 	if (rc < 0)
 		return rc;
 	__record_node(prov_elt(inode));
-	rc = __record_relation(RL_RCV_PACKET, pck, prov_elt(inode), &relation, NULL);
+	prov_write(pck);
+	rc = __record_relation(RL_RCV_PACKET, pck, prov_elt(inode), NULL);
 	return rc;
 }
 
 // outgoing packet
 static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *pck)
 {
-	union prov_elt relation;
 	int rc = 0;
 
 	if (unlikely(!pck || !inode)) // should not occur
@@ -225,7 +224,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 		return 0;
 	__record_node(prov_elt(inode));
 	prov_write(pck);
-	rc = __record_relation(RL_SND_PACKET, prov_elt(inode), pck, &relation, NULL);
+	rc = __record_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL);
 	inode->has_outgoing = true;
 	return rc;
 }

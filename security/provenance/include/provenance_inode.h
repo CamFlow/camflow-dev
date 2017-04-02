@@ -80,7 +80,6 @@ static inline void refresh_inode_provenance(struct inode *inode)
 static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_elt *cprov)
 {
 	struct provenance *prov;
-	union prov_elt relation;
 
 	if (unlikely(!iprov || !cprov)) // should not occur
 		return NULL;
@@ -97,7 +96,7 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	__record_node(iprov);
 	__record_node(prov_elt(prov));
-	__record_relation(RL_MMAP, iprov, prov_elt(prov), &relation, NULL);
+	__record_relation(RL_MMAP, iprov, prov_elt(prov), NULL);
 	return prov;
 }
 
