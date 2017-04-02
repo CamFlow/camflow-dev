@@ -781,11 +781,17 @@ first_out:
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	} else{
-		bprov = branch_mmap(prov_elt(iprov), prov_elt(cprov));
-		if (!bprov)
-			return 0;
 		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+		bprov = branch_mmap(prov_elt(iprov), prov_elt(cprov));
+		if (!bprov)
+			goto second_out;
+		rc = flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
+		if (rc < 0)
+			goto second_out;
+		rc = flow_between_entities(RL_MMAP, iprov, bprov, FLOW_ALLOWED, file);
+		if (rc < 0)
+			goto second_out;
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = flow_from_activity(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
 		if (rc < 0)
@@ -800,7 +806,8 @@ first_out:
 second_out:
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-		free_provenance(bprov);
+		if(bprov)
+			free_provenance(bprov);
 	}
 	return rc;
 }
