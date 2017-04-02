@@ -159,6 +159,8 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
+	__record_node(prov_elt(prov));
+	__record_node(&old_prov);
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
 		rc = __record_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
 	else
@@ -184,11 +186,10 @@ static inline int record_relation(uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_elt(from), prov_elt(to)))
 		return 0;
-	__record_node(prov_elt(from));
-	__record_node(prov_elt(to));
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
+	__record_node(prov_elt(from));
 	__record_node(prov_elt(to));
 	rc = __record_relation(type, prov_elt(from), prov_elt(to), file);
 	from->has_outgoing = true; // there is an outgoing edge

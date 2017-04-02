@@ -274,7 +274,6 @@ static inline int record_write_xattr(uint64_t type,
 	rc = __record_relation(type, prov_elt(cprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
-	__record_node(prov_elt(iprov));
 	rc = __update_version(type, iprov);
 	if (rc < 0)
 		goto out;
@@ -304,7 +303,6 @@ static inline int record_read_xattr(uint64_t type,
 	rc = __record_relation(type, prov_elt(iprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
-	__record_node(prov_elt(cprov));
 	rc = __update_version(type, cprov);
 	if (rc < 0)
 		goto out;
