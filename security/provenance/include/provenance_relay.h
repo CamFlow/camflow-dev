@@ -116,7 +116,7 @@ static inline int __record_relation(uint64_t type,
 	union prov_elt relation;
 	prov_entry_t *f=from;
 	prov_entry_t *t=to;
-	int rc;
+	int rc=0;
 
 	memset(&relation, 0, sizeof(union prov_elt));
 	prov_type(&relation) = type;

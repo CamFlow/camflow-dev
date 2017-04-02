@@ -762,53 +762,48 @@ static int provenance_mmap_file(struct file *file,
 	if (unlikely(!file))
 		return 0;
 	iprov = file_provenance(file);
+	if(!iprov)
+		return -ENOMEM;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
+	if (rc < 0)
+		goto out;
 	if ((flags & MAP_TYPE) == MAP_SHARED) {
-		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		cprov->has_mmap = 1;
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = flow_from_activity(RL_MMAP_WRITE, cprov, iprov, FLOW_ALLOWED, file);
 		if (rc < 0)
-			goto first_out;
+			goto out;
 		if ((prot & (PROT_READ)) != 0)
 			rc = flow_to_activity(RL_MMAP_READ, iprov, cprov, FLOW_ALLOWED, file);
 		if (rc < 0)
-			goto first_out;
+			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
 			rc = flow_to_activity(RL_MMAP_EXEC, iprov, cprov, FLOW_ALLOWED, file);
-		queue_save_provenance(iprov, file_dentry(file));
-first_out:
-		spin_unlock(prov_lock(iprov));
-		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	} else{
-		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-		bprov = branch_mmap(prov_elt(iprov), prov_elt(cprov));
+		bprov = branch_mmap(iprov, cprov);
 		if (!bprov)
-			goto second_out;
-		rc = flow_to_activity(RL_READ, iprov, cprov, FLOW_ALLOWED, file);
-		if (rc < 0)
-			goto second_out;
+			goto out;
 		rc = flow_between_entities(RL_MMAP, iprov, bprov, FLOW_ALLOWED, file);
 		if (rc < 0)
-			goto second_out;
+			goto out;
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = flow_from_activity(RL_MMAP_WRITE, cprov, bprov, FLOW_ALLOWED, file);
 		if (rc < 0)
-			goto second_out;
+			goto out;
 		if ((prot & (PROT_READ)) != 0)
 			rc = flow_to_activity(RL_MMAP_READ, bprov, cprov, FLOW_ALLOWED, file);
 		if (rc < 0)
-			goto second_out;
+			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
 			rc = flow_to_activity(RL_MMAP_EXEC, bprov, cprov, FLOW_ALLOWED, file);
-		queue_save_provenance(iprov, file_dentry(file));
-second_out:
+	}
+out:
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 		if(bprov)
 			free_provenance(bprov);
-	}
 	return rc;
 }
 
