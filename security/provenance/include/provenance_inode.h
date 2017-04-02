@@ -127,6 +127,7 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 	prov_elt(prov)->inode_info.uid = iprov->inode_info.uid;
 	prov_elt(prov)->inode_info.gid = iprov->inode_info.gid;
 	prov_elt(prov)->inode_info.mode = iprov->inode_info.mode;
+	prov_elt(prov)->inode_info.ino = iprov->inode_info.ino;
 	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	return prov;
 }
