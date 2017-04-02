@@ -68,5 +68,4 @@ static inline int call_query_hooks(prov_entry_t *from,
 	}
 	return 0;
 }
-
  #endif

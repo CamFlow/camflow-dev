@@ -17,7 +17,6 @@
 #include <linux/namei.h>
 #include <linux/xattr.h>
 
-#include "provenance_long.h"    // for record_inode_name
 #include "provenance_secctx.h"  // for record_inode_name
 
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
@@ -63,6 +62,42 @@ static inline void provenance_mark_as_opaque(const char *name)
 		set_opaque(prov_elt(prov));
 }
 
+static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
+{
+	char *buffer;
+	char *ptr;
+	int rc;
+
+	if (provenance_is_name_recorded(prov_elt(prov)) ||
+	    !provenance_is_recorded(prov_elt(prov)))
+		return 0;
+	// should not sleep
+	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+	if (!buffer) {
+		pr_err("Provenance: could not allocate memory\n");
+		return -ENOMEM;
+	}
+	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
+	rc = record_node_name(prov, ptr);
+	kfree(buffer);
+	return rc;
+}
+
+static inline int record_inode_name(struct inode *inode, struct provenance *prov)
+{
+	struct dentry *dentry;
+	int rc;
+
+	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
+		return 0;
+	dentry = d_find_alias(inode);
+	if (!dentry) // we did not find a dentry, not sure if it should ever happen
+		return 0;
+	rc = record_inode_name_from_dentry(dentry, prov);
+	dput(dentry);
+	return rc;
+}
+
 static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
@@ -87,7 +122,7 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 		return NULL;
 	if (!should_record_relation(RL_MMAP, cprov, iprov))
 		return NULL;
-	prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
+	prov = alloc_provenance(ENT_INODE_MMAP, GFP_ATOMIC);
 	if (!prov)
 		return NULL;
 	prov_elt(prov)->inode_info.uid = iprov->inode_info.uid;
@@ -210,5 +245,78 @@ static inline void save_provenance(struct dentry *dentry)
 	if (!dentry)
 		return;
 	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_elt), 0);
+}
+
+static inline int record_write_xattr(uint64_t type,
+				     struct provenance *iprov,
+				     struct provenance *cprov,
+				     const char *name,
+				     const void *value,
+				     size_t size,
+				     int flags,
+				     uint8_t allowed)
+{
+	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
+	int rc = 0;
+
+	if (!xattr)
+		goto out;
+	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
+	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
+	if (value) {
+		if (size < PROV_XATTR_VALUE_SIZE) {
+			xattr->xattr_info.size = size;
+			memcpy(xattr->xattr_info.value, value, size);
+		} else{
+			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
+			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
+		}
+		xattr->xattr_info.flags = flags;
+	}
+	__record_node(prov_elt(cprov));
+	__long_record_node(xattr);
+	rc = __record_relation(type, prov_elt(cprov), xattr, NULL);
+	if (rc < 0)
+		goto out;
+	__record_node(prov_elt(iprov));
+	rc = __update_version(type, iprov);
+	if (rc < 0)
+		goto out;
+	__record_node(prov_elt(iprov));
+	rc = __record_relation(type, xattr, prov_elt(iprov), NULL);
+	cprov->has_outgoing = true;
+out:
+	kfree(xattr);
+	return rc;
+}
+
+static inline int record_read_xattr(uint64_t type,
+				    struct provenance *cprov,
+				    struct provenance *iprov,
+				    const char *name,
+				    uint8_t allowed)
+{
+	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
+	int rc = 0;
+
+	if (!xattr)
+		goto out;
+	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
+	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
+	__record_node(prov_elt(iprov));
+	__long_record_node(xattr);
+	rc = __record_relation(type, prov_elt(iprov), xattr, NULL);
+	if (rc < 0)
+		goto out;
+	__record_node(prov_elt(cprov));
+	rc = __update_version(type, cprov);
+	if (rc < 0)
+		goto out;
+	__record_node(prov_elt(cprov));
+	rc = __record_relation(type, xattr, prov_elt(cprov), NULL);
+	iprov->has_outgoing = true;
+out:
+	kfree(xattr);
+	return rc;
 }
 #endif

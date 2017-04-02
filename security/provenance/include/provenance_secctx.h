@@ -64,5 +64,4 @@ static inline uint8_t prov_secctx_add_or_update(struct secctx_filters *f)
 	list_add_tail(&(f->list), &secctx_filters); // not already on the list, we add it
 	return 0;
 }
-
 #endif

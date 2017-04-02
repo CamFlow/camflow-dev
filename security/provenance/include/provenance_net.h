@@ -228,4 +228,43 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 	inode->has_outgoing = true;
 	return rc;
 }
+
+static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
+{
+	union long_prov_elt *addr_info;
+	int rc = 0;
+
+	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
+		return 0;
+	addr_info = alloc_long_provenance(ENT_ADDR);
+	if (!addr_info) {
+		rc = -ENOMEM;
+		goto out;
+	}
+	addr_info->address_info.length = addrlen;
+	memcpy(&(addr_info->address_info.addr), address, addrlen);
+	__long_record_node(addr_info);
+	rc = __record_relation(RL_NAMED, addr_info, prov_elt(prov), NULL);
+	set_name_recorded(prov_elt(prov));
+out:
+	kfree(addr_info);
+	return rc;
+}
+
+static inline int record_packet_content(union prov_elt *pck, const struct sk_buff *skb)
+{
+	union long_prov_elt *cnt = alloc_long_provenance(ENT_PCKCNT);
+	int rc;
+
+	cnt->pckcnt_info.length = skb_end_offset(skb);
+	if (cnt->pckcnt_info.length > PATH_MAX) {
+		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
+		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
+	} else
+		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
+	__long_record_node(cnt);
+	rc = __record_relation(RL_READ, cnt, pck, NULL);
+	kfree(cnt);
+	return rc;
+}
 #endif

@@ -121,5 +121,4 @@ static inline void apply_target(union prov_elt *prov)
 		}
 	}
 }
-
 #endif
