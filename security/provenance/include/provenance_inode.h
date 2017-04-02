@@ -79,10 +79,8 @@ static inline void refresh_inode_provenance(struct inode *inode)
 
 static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_elt *cprov)
 {
-	//used for private MMAP
 	struct provenance *prov;
 	union prov_elt relation;
-	int rc;
 
 	if (unlikely(!iprov || !cprov)) // should not occur
 		return NULL;
@@ -93,20 +91,13 @@ static inline struct provenance *branch_mmap(union prov_elt *iprov, union prov_e
 	prov = alloc_provenance(ENT_INODE_MMAP, GFP_KERNEL);
 	if (!prov)
 		return NULL;
-
 	prov_elt(prov)->inode_info.uid = iprov->inode_info.uid;
 	prov_elt(prov)->inode_info.gid = iprov->inode_info.gid;
-	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	prov_elt(prov)->inode_info.mode = iprov->inode_info.mode;
+	memcpy(prov_elt(prov)->inode_info.sb_uuid, iprov->inode_info.sb_uuid, 16 * sizeof(uint8_t));
 	__record_node(iprov);
 	__record_node(prov_elt(prov));
-	__prepare_relation(RL_MMAP, &(iprov->msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks((prov_entry_t*)iprov, prov_entry(prov), (prov_entry_t*)&relation);
-	prov_write(&relation);
-	if (rc < 0) {
-		free_provenance(prov);
-		prov = NULL;
-	}
+	__record_relation(RL_MMAP, iprov, prov_elt(prov), &relation, NULL);
 	return prov;
 }
 

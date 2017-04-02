@@ -85,7 +85,7 @@ static inline void free_provenance(struct provenance *prov)
 	kmem_cache_free(provenance_cache, prov);
 }
 
-static inline void copy_node_info(union prov_identifier *dest, union prov_identifier *src)
+static inline void copy_identifier(union prov_identifier *dest, union prov_identifier *src)
 {
 	memcpy(dest, src, sizeof(union prov_identifier));
 }
@@ -94,30 +94,36 @@ static inline void __record_node(union prov_elt *node)
 {
 	if (filter_node((prov_entry_t*)node) || provenance_is_recorded(node))  // filtered or already recorded
 		return;
-
 	set_recorded(node);
 	if (unlikely(node_identifier(node).machine_id != prov_machine_id))
 		node_identifier(node).machine_id = prov_machine_id;
 	prov_write(node);
 }
 
-static inline void __prepare_relation(uint64_t type,
-				      union prov_identifier *from,
-				      union prov_identifier *to,
+static inline int __record_relation(uint64_t type,
+				      void *from,
+				      void *to,
 				      union prov_elt *relation,
 				      struct file *file)
 {
+	int rc;
+	prov_entry_t *f=from;
+	prov_entry_t *t=to;
+
 	memset(relation, 0, sizeof(union prov_elt));
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
 	relation_identifier(relation).machine_id = prov_machine_id;
-	copy_node_info(&relation->relation_info.snd, from);
-	copy_node_info(&relation->relation_info.rcv, to);
+	copy_identifier(&relation->relation_info.snd, &get_prov_identifier(f));
+	copy_identifier(&relation->relation_info.rcv, &get_prov_identifier(t));
 	if (file) {
 		relation->relation_info.set = FILE_INFO_SET;
 		relation->relation_info.offset = file->f_pos;
 	}
+	rc = call_query_hooks(f, t, (prov_entry_t*)relation);
+	prov_write(relation);
+	return rc;
 }
 
 static inline int __update_version(uint64_t type, struct provenance *prov)
@@ -134,11 +140,9 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
-		__prepare_relation(RL_VERSION_PROCESS, &(old_prov.msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
+		rc = __record_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), &relation, NULL);
 	else
-		__prepare_relation(RL_VERSION, &(old_prov.msg_info.identifier), &(prov_elt(prov)->msg_info.identifier), &relation, NULL);
-	rc = call_query_hooks((prov_entry_t*)&old_prov, prov_entry(prov), (prov_entry_t*)&relation);
-	prov_write(&relation);
+		rc = __record_relation(RL_VERSION, &old_prov, prov_elt(prov), &relation, NULL);
 	prov->has_outgoing = false; // we update there is no more outgoing edge
 	prov->saved = false;
 	return rc;
@@ -167,9 +171,7 @@ static inline int record_relation(uint64_t type,
 	if (rc < 0)
 		return rc;
 	__record_node(prov_elt(to));
-	__prepare_relation(type, &(prov_elt(from)->msg_info.identifier), &(prov_elt(to)->msg_info.identifier), &relation, file);
-	rc = call_query_hooks(prov_entry(from), prov_entry(to), (prov_entry_t*)&relation);
-	prov_write(&relation);
+	rc = __record_relation(type, prov_elt(from), prov_elt(to), &relation, file);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
 }
