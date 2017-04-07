@@ -268,16 +268,16 @@ static inline int record_write_xattr(uint64_t type,
 		}
 		xattr->xattr_info.flags = flags;
 	}
-	__record_node(prov_elt(cprov));
-	__long_record_node(xattr);
-	rc = __record_relation(type, prov_elt(cprov), xattr, NULL);
+	write_node(prov_elt(cprov));
+	write_long_node(xattr);
+	rc = write_relation(type, prov_elt(cprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(type, iprov);
 	if (rc < 0)
 		goto out;
-	__record_node(prov_elt(iprov));
-	rc = __record_relation(type, xattr, prov_elt(iprov), NULL);
+	write_node(prov_elt(iprov));
+	rc = write_relation(type, xattr, prov_elt(iprov), NULL);
 	cprov->has_outgoing = true;
 out:
 	kfree(xattr);
@@ -297,16 +297,16 @@ static inline int record_read_xattr(uint64_t type,
 		goto out;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
-	__record_node(prov_elt(iprov));
-	__long_record_node(xattr);
-	rc = __record_relation(type, prov_elt(iprov), xattr, NULL);
+	write_node(prov_elt(iprov));
+	write_long_node(xattr);
+	rc = write_relation(type, prov_elt(iprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(type, cprov);
 	if (rc < 0)
 		goto out;
-	__record_node(prov_elt(cprov));
-	rc = __record_relation(type, xattr, prov_elt(cprov), NULL);
+	write_node(prov_elt(cprov));
+	rc = write_relation(type, xattr, prov_elt(cprov), NULL);
 	iprov->has_outgoing = true;
 out:
 	kfree(xattr);
