@@ -105,15 +105,15 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	}
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
-	__long_record_node(fname_prov);
+	write_long_node(fname_prov);
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
-		rc = __record_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
+		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	} else{
 		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
-		rc = __record_relation(RL_NAMED, fname_prov, prov_elt(node), NULL);
+		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	}
@@ -137,9 +137,9 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	}
 	str->str_info.str[count] = '\0'; // make sure the string is null terminated
 	str->str_info.length = count;
-	__record_node(cprov);
-	__long_record_node(str);
-	rc = __record_relation(RL_SAID, str, cprov, NULL);
+	write_node(cprov);
+	write_long_node(str);
+	rc = write_relation(RL_SAID, str, cprov, NULL);
 out:
 	kfree(str);
 	if (rc < 0)
@@ -159,12 +159,12 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
-	__record_node(prov_elt(prov));
-	__record_node(&old_prov);
+	write_node(prov_elt(prov));
+	write_node(&old_prov);
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
-		rc = __record_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
+		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
 	else
-		rc = __record_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
+		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
 	prov->has_outgoing = false; // we update there is no more outgoing edge
 	prov->saved = false;
 	return rc;
@@ -189,9 +189,9 @@ static inline int record_relation(uint64_t type,
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
-	__record_node(prov_elt(from));
-	__record_node(prov_elt(to));
-	rc = __record_relation(type, prov_elt(from), prov_elt(to), file);
+	write_node(prov_elt(from));
+	write_node(prov_elt(to));
+	rc = write_relation(type, prov_elt(from), prov_elt(to), file);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
 }
