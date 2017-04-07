@@ -105,8 +105,10 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
  */
 static void provenance_cred_free(struct cred *cred)
 {
-	if (cred->provenance)
+	if (cred->provenance){
+		terminate_task(cred->provenance);
 		free_provenance(cred->provenance);
+	}
 	cred->provenance = NULL;
 }
 
