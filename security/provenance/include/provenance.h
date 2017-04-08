@@ -31,6 +31,7 @@
 #include "provenance_relay.h"
 
 extern struct kmem_cache *provenance_cache;
+extern struct kmem_cache *long_provenance_cache;
 
 enum {
 	PROVENANCE_LOCK_TASK,
@@ -79,16 +80,20 @@ static inline void free_provenance(struct provenance *prov)
 
 static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
-	union long_prov_elt *tmp = kzalloc(sizeof(union long_prov_elt), GFP_ATOMIC);
+	union long_prov_elt *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
 	if (!tmp)
 		return NULL;
-
 	prov_type(tmp) = ntype;
 	node_identifier(tmp).id = prov_next_node_id();
 	node_identifier(tmp).boot_id = prov_boot_id;
 	node_identifier(tmp).machine_id = prov_machine_id;
 	return tmp;
+}
+
+static inline void free_long_provenance(union long_prov_elt *prov)
+{
+	kmem_cache_free(long_provenance_cache, prov);
 }
 
 static inline int record_node_name(struct provenance *node, const char *name)
@@ -117,7 +122,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 	}
-	kfree(fname_prov);
+	free_long_provenance(fname_prov);
 	return rc;
 }
 
@@ -141,7 +146,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	write_long_node(str);
 	rc = write_relation(RL_SAID, str, cprov, NULL);
 out:
-	kfree(str);
+	free_long_provenance(str);
 	if (rc < 0)
 		return rc;
 	return count;

@@ -280,7 +280,7 @@ static inline int record_write_xattr(uint64_t type,
 	rc = write_relation(type, xattr, prov_elt(iprov), NULL);
 	cprov->has_outgoing = true;
 out:
-	kfree(xattr);
+	free_long_provenance(xattr);
 	return rc;
 }
 
@@ -309,7 +309,7 @@ static inline int record_read_xattr(uint64_t type,
 	rc = write_relation(type, xattr, prov_elt(cprov), NULL);
 	iprov->has_outgoing = true;
 out:
-	kfree(xattr);
+	free_long_provenance(xattr);
 	return rc;
 }
 #endif

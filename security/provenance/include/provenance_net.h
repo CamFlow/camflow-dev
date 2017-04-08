@@ -245,7 +245,7 @@ static inline int provenance_record_address(struct sockaddr *address, int addrle
 	rc = write_relation(RL_NAMED, addr_info, prov_elt(prov), NULL);
 	set_name_recorded(prov_elt(prov));
 out:
-	kfree(addr_info);
+	free_long_provenance(addr_info);
 	return rc;
 }
 
@@ -262,7 +262,7 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	write_long_node(cnt);
 	rc = write_relation(RL_READ, cnt, pck, NULL);
-	kfree(cnt);
+	free_long_provenance(cnt);
 	return rc;
 }
 #endif
