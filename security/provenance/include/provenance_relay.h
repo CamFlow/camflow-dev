@@ -87,7 +87,7 @@ extern uint32_t prov_boot_id;
 
 static inline void write_node(union prov_elt *node)
 {
-	if (filter_node((prov_entry_t*)node) || provenance_is_recorded(node))  // filtered or already recorded
+	if (filter_node((prov_entry_t *)node) || provenance_is_recorded(node))  // filtered or already recorded
 		return;
 	set_recorded(node);
 	if (unlikely(node_identifier(node).machine_id != prov_machine_id))
@@ -114,9 +114,9 @@ static inline int write_relation(uint64_t type,
 				      struct file *file)
 {
 	union prov_elt relation;
-	prov_entry_t *f=from;
-	prov_entry_t *t=to;
-	int rc=0;
+	prov_entry_t *f = from;
+	prov_entry_t *t = to;
+	int rc = 0;
 
 	memset(&relation, 0, sizeof(union prov_elt));
 	prov_type(&relation) = type;
@@ -129,7 +129,7 @@ static inline int write_relation(uint64_t type,
 		relation.relation_info.set = FILE_INFO_SET;
 		relation.relation_info.offset = file->f_pos;
 	}
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
+	rc = call_query_hooks(f, t, (prov_entry_t *)&relation);
 	prov_write(&relation);
 	return rc;
 }

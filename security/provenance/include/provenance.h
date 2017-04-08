@@ -55,7 +55,7 @@ struct provenance {
 
 #define prov_elt(provenance) (&(provenance->msg))
 #define prov_lock(provenance) (&(provenance->lock))
-#define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
+#define prov_entry(provenance) ((prov_entry_t *)prov_elt(provenance))
 
 #define ASSIGN_NODE_ID 0
 
