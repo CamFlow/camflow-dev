@@ -105,7 +105,7 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
  */
 static void provenance_cred_free(struct cred *cred)
 {
-	if (cred->provenance){
+	if (cred->provenance) {
 		terminate_task(cred->provenance);
 		free_provenance(cred->provenance);
 	}
@@ -525,7 +525,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 		goto out;
 	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags, FLOW_ALLOWED);
 out:
-	queue_save_provenance(iprov, dentry);;
+	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
@@ -764,7 +764,7 @@ static int provenance_mmap_file(struct file *file,
 	if (unlikely(!file))
 		return 0;
 	iprov = file_provenance(file);
-	if(!iprov)
+	if (!iprov)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -804,7 +804,7 @@ static int provenance_mmap_file(struct file *file,
 out:
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-		if(bprov)
+		if (bprov)
 			free_provenance(bprov);
 	return rc;
 }
