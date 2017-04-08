@@ -1540,6 +1540,7 @@ static struct security_hook_list provenance_hooks[] __ro_after_init = {
 };
 
 struct kmem_cache *provenance_cache;
+struct kmem_cache *long_provenance_cache;
 
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
@@ -1567,6 +1568,9 @@ void __init provenance_add_hooks(void)
 	prov_boot_id = 0;
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
+					     0, SLAB_PANIC, NULL);
+	long_provenance_cache = kmem_cache_create("long_provenance_struct",
+					     sizeof(union long_prov_elt),
 					     0, SLAB_PANIC, NULL);
 	/* init relay buffers, to deal with provenance before FS is ready */
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
