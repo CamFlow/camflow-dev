@@ -69,9 +69,9 @@ static inline void current_update_shst(struct provenance *cprov)
 				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
-					record_relation(RL_SH_READ, mmprov, cprov, FLOW_ALLOWED, NULL);
+					record_relation(RL_SH_READ, mmprov, cprov, NULL);
 				if (vm_write_mayshare(flags))
-					record_relation(RL_SH_WRITE, cprov, mmprov, FLOW_ALLOWED, NULL);
+					record_relation(RL_SH_WRITE, cprov, mmprov, NULL);
 				spin_unlock(prov_lock(mmprov));
 			}
 		}

@@ -248,8 +248,7 @@ static inline int record_write_xattr(uint64_t type,
 				     const char *name,
 				     const void *value,
 				     size_t size,
-				     int flags,
-				     uint8_t allowed)
+				     int flags)
 {
 	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
 	int rc = 0;
@@ -287,8 +286,7 @@ out:
 static inline int record_read_xattr(uint64_t type,
 				    struct provenance *cprov,
 				    struct provenance *iprov,
-				    const char *name,
-				    uint8_t allowed)
+				    const char *name)
 {
 	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
 	int rc = 0;
