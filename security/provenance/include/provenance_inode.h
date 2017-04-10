@@ -312,4 +312,25 @@ out:
 	free_long_provenance(xattr);
 	return rc;
 }
+
+static inline int close_inode(struct provenance *iprov){
+	union prov_elt old_prov;
+	int rc;
+	if (!provenance_is_tracked(prov_elt(iprov)) && !prov_all)
+		return 0;
+	if (filter_node(prov_entry(iprov)))
+		return 0;
+	// persistent
+	if (prov_type(prov_entry(iprov)) == ENT_INODE_FILE ||
+			prov_type(prov_entry(iprov)) == ENT_INODE_DIRECTORY)
+		return 0;
+	memcpy(&old_prov, prov_elt(iprov), sizeof(union prov_elt));
+	node_identifier(prov_elt(iprov)).version++;
+	clear_recorded(prov_elt(iprov));
+	write_node(&old_prov);
+	write_node(prov_elt(iprov));
+	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL);
+	iprov->has_outgoing = false;
+	return rc;
+}
 #endif
