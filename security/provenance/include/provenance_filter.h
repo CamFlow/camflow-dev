@@ -14,8 +14,9 @@
 #define _LINUX_PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
-#include <provenance_cgroup.h>
-#include <provenance_secctx.h>
+
+#include "provenance_cgroup.h"
+#include "provenance_secctx.h"
 
 extern bool prov_enabled;
 extern bool prov_all;
