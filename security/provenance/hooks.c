@@ -25,8 +25,6 @@
 #include "provenance_net.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"
-#include "provenance_secctx.h"
-#include "provenance_cgroup.h"
 
 struct save_work {
 	struct work_struct work;
