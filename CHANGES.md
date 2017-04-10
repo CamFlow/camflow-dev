@@ -22,7 +22,8 @@
 
 ### v0.3.0
 ```
-- add a terminate relationship when a task is freed.
+- add a closed relationship when an inode is freed.
+- add a terminate relationship when a cred is freed.
 - boot id is set from userspace.
 - union prov_msg -> union prov_elt
 - Implemented run-time query system.

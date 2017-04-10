@@ -211,8 +211,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	if (inode->i_provenance)
+	if (inode->i_provenance){
+		close_inode(inode->i_provenance);
 		free_provenance(inode->i_provenance);
+	}
 	inode->i_provenance = NULL;
 }
 

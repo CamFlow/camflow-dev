@@ -173,8 +173,8 @@ static inline int terminate_task(struct provenance *tprov){
 	memcpy(&old_prov, prov_elt(tprov), sizeof(union prov_elt));
 	node_identifier(prov_elt(tprov)).version++;
 	clear_recorded(prov_elt(tprov));
-	write_node(prov_elt(tprov));
 	write_node(&old_prov);
+	write_node(prov_elt(tprov));
 	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL);
 	tprov->has_outgoing = false;
 	return rc;
