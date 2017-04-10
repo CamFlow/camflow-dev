@@ -806,8 +806,10 @@ static int provenance_mmap_file(struct file *file,
 out:
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-		if (bprov)
+		if (bprov){
+			close_inode(bprov);
 			free_provenance(bprov);
+		}
 	return rc;
 }
 
