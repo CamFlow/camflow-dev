@@ -250,9 +250,12 @@ static inline int record_write_xattr(uint64_t type,
 				     size_t size,
 				     int flags)
 {
-	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
+	union long_prov_elt *xattr;
 	int rc = 0;
 
+	if (!should_record_relation(type, prov_elt(cprov), prov_elt(iprov)))
+		return 0;
+	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
 		goto out;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
@@ -288,9 +291,12 @@ static inline int record_read_xattr(uint64_t type,
 				    struct provenance *iprov,
 				    const char *name)
 {
-	union long_prov_elt *xattr = alloc_long_provenance(ENT_XATTR);
+	union long_prov_elt *xattr;
 	int rc = 0;
 
+	if (!should_record_relation(type, prov_elt(iprov), prov_elt(cprov)))
+		return 0;
+	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
 		goto out;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
