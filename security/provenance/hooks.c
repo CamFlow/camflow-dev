@@ -20,7 +20,6 @@
 #include <linux/file.h>
 #include <linux/workqueue.h>
 
-#include "av_utils.h"
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_inode.h"

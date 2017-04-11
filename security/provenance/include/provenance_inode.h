@@ -320,6 +320,7 @@ out:
 static inline int close_inode(struct provenance *iprov){
 	union prov_elt old_prov;
 	int rc;
+
 	if (!provenance_is_tracked(prov_elt(iprov)) && !prov_all)
 		return 0;
 	if (filter_node(prov_entry(iprov)))
@@ -336,5 +337,38 @@ static inline int close_inode(struct provenance *iprov){
 	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL);
 	iprov->has_outgoing = false;
 	return rc;
+}
+
+#define FILE__EXECUTE   0x00000001UL
+#define FILE__READ      0x00000002UL
+#define FILE__APPEND    0x00000004UL
+#define FILE__WRITE     0x00000008UL
+#define DIR__SEARCH     0x00000010UL
+#define DIR__WRITE      0x00000020UL
+#define DIR__READ       0x00000040UL
+
+static inline uint32_t file_mask_to_perms(int mode, unsigned int mask)
+{
+	uint32_t av = 0;
+
+	if (!S_ISDIR(mode)) {
+		if (mask & MAY_EXEC)
+			av |= FILE__EXECUTE;
+		if (mask & MAY_READ)
+			av |= FILE__READ;
+		if (mask & MAY_APPEND)
+			av |= FILE__APPEND;
+		else if (mask & MAY_WRITE)
+			av |= FILE__WRITE;
+	} else {
+		if (mask & MAY_EXEC)
+			av |= DIR__SEARCH;
+		if (mask & MAY_WRITE)
+			av |= DIR__WRITE;
+		if (mask & MAY_READ)
+			av |= DIR__READ;
+	}
+
+	return av;
 }
 #endif
