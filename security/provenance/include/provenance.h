@@ -13,8 +13,6 @@
 #ifndef _LINUX_PROVENANCE_H
 #define _LINUX_PROVENANCE_H
 
-#ifdef CONFIG_SECURITY_PROVENANCE
-
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/bug.h>
@@ -235,5 +233,4 @@ static inline int flow_between_activities(uint64_t type,
 {
 	return record_relation(type, from, to, file);
 }
-#endif
 #endif
