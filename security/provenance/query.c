@@ -10,9 +10,9 @@
  * or (at your option) any later version.
  *
  */
- #include <linux/rculist.h>
- 
- #include "provenance_query.h"
+#include <linux/rculist.h>
+
+#include "provenance_query.h"
 
 int register_camflow_query_hook(struct provenance_query_hooks *hook)
 {
