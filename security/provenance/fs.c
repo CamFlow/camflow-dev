@@ -6,19 +6,16 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
- * published by the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
+ * published by the Free Software Foundation; either version 2 of the License,
+ * or (at your option) any later version.
  *
  */
-
 #include <linux/security.h>
 
 #include "provenance.h"
-#include "provenance_long.h"
 #include "provenance_inode.h"
+#include "provenance_net.h"
 #include "provenance_task.h"
-#include "provenance_secctx.h"
-#include "provenance_cgroup.h"
 
 #define TMPBUFLEN       12
 
@@ -48,6 +45,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
+	provenance_mark_as_opaque(PROV_BOOT_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
@@ -160,12 +158,46 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_machine_id);
 
+static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
+				     size_t count, loff_t *ppos)
+{
+	uint32_t *tmp = (uint32_t *)buf;
+
+	// ideally should be decoupled from set machine id
+	__init_opaque();
+
+	if (!capable(CAP_AUDIT_CONTROL))
+		return -EPERM;
+
+	if (count < sizeof(uint32_t))
+		return -ENOMEM;
+
+	if (copy_from_user(&prov_boot_id, tmp, sizeof(uint32_t)))
+		return -EAGAIN;
+
+	return count; // read only
+}
+
+static ssize_t prov_read_boot_id(struct file *filp, char __user *buf,
+				    size_t count, loff_t *ppos)
+{
+	if (count < sizeof(uint32_t))
+		return -ENOMEM;
+
+	if (copy_to_user(buf, &prov_boot_id, sizeof(uint32_t)))
+		return -EAGAIN;
+
+	return count;
+}
+declare_file_operations(prov_boot_id_ops, prov_write_boot_id, prov_read_boot_id);
+
+
 static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 
 {
 	struct provenance *cprov = current_provenance();
-	union long_prov_msg *node = NULL;
+	union long_prov_elt *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -173,8 +205,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = kzalloc(sizeof(union long_prov_msg), GFP_KERNEL);
-	if(!node)
+	node = kzalloc(sizeof(union long_prov_elt), GFP_KERNEL);
+	if (!node)
 		return -ENOMEM;
 
 	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
@@ -183,8 +215,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-		__record_node(prov_msg(cprov));
-		copy_node_info(&node->disc_node_info.parent, &prov_msg(cprov)->node_info.identifier);
+		write_node(prov_elt(cprov));
+		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
@@ -201,7 +233,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 out:
-	if (node != NULL)
+	if (node)
 		kfree(node);
 	return count;
 }
@@ -210,7 +242,7 @@ declare_file_operations(prov_node_ops, prov_write_node, no_read);
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)
 {
-	union prov_msg relation;
+	union prov_elt relation;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -226,31 +258,32 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
-static inline void update_prov_config(union prov_msg *setting, uint8_t op, struct provenance *prov){
+static inline void update_prov_config(union prov_elt *setting, uint8_t op, struct provenance *prov)
+{
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
-			set_tracked(prov_msg(prov));
+			set_tracked(prov_elt(prov));
 		else
-			clear_tracked(prov_msg(prov));
+			clear_tracked(prov_elt(prov));
 	}
 
 	if ((op & PROV_SET_OPAQUE) != 0) {
 		if (provenance_is_opaque(setting))
-			set_opaque(prov_msg(prov));
+			set_opaque(prov_elt(prov));
 		else
-			clear_opaque(prov_msg(prov));
+			clear_opaque(prov_elt(prov));
 	}
 
 	if ((op & PROV_SET_PROPAGATE) != 0) {
 		if (provenance_does_propagate(setting))
-			set_propagate(prov_msg(prov));
+			set_propagate(prov_elt(prov));
 		else
-			clear_propagate(prov_msg(prov));
+			clear_propagate(prov_elt(prov));
 	}
 
 	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_msg(prov)), prov_taint(setting));
+		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
 	spin_unlock(prov_lock(prov));
 }
 
@@ -274,13 +307,13 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = current_provenance();
-	union prov_msg *tmp = (union prov_msg *)buf;
+	union prov_elt *tmp = (union prov_elt *)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(tmp, prov_msg(cprov), sizeof(union prov_msg)))
+	if (copy_to_user(tmp, prov_elt(cprov), sizeof(union prov_elt)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
@@ -377,7 +410,7 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	prov = prov_from_vpid(msg.vpid);
-	if (prov == NULL)
+	if (!prov)
 		return -EINVAL;
 
 	update_prov_config(&(msg.prov), msg.op, prov);
@@ -397,11 +430,11 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	msg = (struct prov_process_config *)buf;
 
 	prov = prov_from_vpid(msg->vpid);
-	if (prov == NULL)
+	if (!prov)
 		return -EINVAL;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(&msg->prov, prov_msg(prov), sizeof(union prov_msg)))
+	if (copy_to_user(&msg->prov, prov_elt(prov), sizeof(union prov_elt)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
 	return rtn;
@@ -562,7 +595,7 @@ static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *bu
 	s = kzalloc(sizeof(struct cgroup_filters), GFP_KERNEL);
 	if (!s)
 		return -ENOMEM;
-		
+
 	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
 		return -EAGAIN;
 	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
@@ -601,8 +634,8 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 
 	if (count <= 0 || count >= PATH_MAX)
 		return 0;
-	set_tracked(prov_msg(cprov));
-	return record_log(prov_msg(cprov), buf, count);
+	set_tracked(prov_elt(cprov));
+	return record_log(prov_elt(cprov), buf, count);
 }
 declare_file_operations(prov_log_ops, prov_write_log, no_read);
 
@@ -613,9 +646,9 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 
 	if (count <= 0 || count >= PATH_MAX)
 		return 0;
-	set_tracked(prov_msg(cprov));
-	set_propagate(prov_msg(cprov));
-	return record_log(prov_msg(cprov), buf, count);
+	set_tracked(prov_elt(cprov));
+	set_propagate(prov_elt(cprov));
+	return record_log(prov_elt(cprov), buf, count);
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
@@ -630,6 +663,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
 	securityfs_create_file("self", 0666, prov_dir, NULL, &prov_self_ops);
 	securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
+	securityfs_create_file("boot_id", 0444, prov_dir, NULL, &prov_boot_id_ops);
 	securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
 	securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
 	securityfs_create_file("propagate_node_filter", 0644, prov_dir, NULL, &prov_propagate_node_filter_ops);
@@ -643,9 +677,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
 	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
-	printk(KERN_INFO "Provenance fs ready.\n");
+	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
-
 core_initcall(init_prov_fs);
-MODULE_LICENSE("GPL");

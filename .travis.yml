@@ -15,12 +15,12 @@ before_install:
   - sudo apt-get -y install bc nano patch mosquitto
   - sudo apt-get -y install libelf-dev sparse flawfinder
   - sudo apt-get -y install libedit-dev
+  - sudo apt-get -y install rpm
 
 before_script:
   - make prepare_kernel
   - make prepare_smatch
   - make patch
-  - make config_ubuntu
   - make config_travis
 
 script:
@@ -28,6 +28,22 @@ script:
   - make compile_security
   - make compile_kernel
   - make test_travis
+
+after_success:
+  - make prepare_release_travis
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_KEY"
+  file:
+    - patch
+    - camflow-kernel.src.rpm
+    - camflow-kernel.x86_64.rpm
+    - camflow-kernel-headers.x86_64.rpm
+    - camflow-kernel-devel.x86_64.rpm
+  skip_cleanup: true
+  on:
+    tags: true
 
 notifications:
   slack: camflow:T3Umf9cAIwKnaxFEkjeZV7RM

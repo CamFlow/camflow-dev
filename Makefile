@@ -1,5 +1,5 @@
-kernel-version=4.9.13
-lsm-version=0.2.3
+kernel-version=4.10.8
+lsm-version=0.3.0
 arch=x86_64
 
 all: config compile
@@ -18,6 +18,7 @@ prepare: prepare_kernel prepare_us
 prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow-$(lsm-version)/g" Makefile
 
 prepare_provenance:
 	mkdir -p build
@@ -54,8 +55,9 @@ config: copy_change copy_config
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
-config_travis: copy_change copy_config
-	cd ./build/linux-$(kernel-version) && $(MAKE) defconfig
+config_travis: config_fedora copy_change copy_config
+	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
+	cd ./build/linux-$(kernel-version) && $(MAKE) oldconfig
 
 compile: compile_security compile_kernel compile_us
 
@@ -64,6 +66,9 @@ compile_security: copy_change
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
+
+rpm: copy_change
+	cd ./build/linux-$(kernel-version) && $(MAKE) rpm
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -132,6 +137,8 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/propagate.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/query.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/av_utils.h
@@ -139,19 +146,11 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_long.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_secctx.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
-	uncrustify -c uncrustify.cfg --replace include/linux/cred.h
-	uncrustify -c uncrustify.cfg --replace include/linux/fs.h
-	uncrustify -c uncrustify.cfg --replace include/linux/ipc.h
-	uncrustify -c uncrustify.cfg --replace include/linux/lsm_hooks.h
-	uncrustify -c uncrustify.cfg --replace include/linux/msg.h
-	uncrustify -c uncrustify.cfg --replace include/net/sock.h
-	uncrustify -c uncrustify.cfg --replace include/uapi/linux/camflow.h
-	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
-	uncrustify -c uncrustify.cfg --replace include/uapi/linux/xattr.h
 
 patch: copy_change
 	cd build && mkdir -p pristine
@@ -168,3 +167,10 @@ patch: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build && diff -uprN -b -B ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
+
+prepare_release_travis: rpm
+	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
+	cp -f /home/travis/rpmbuild/SRPMS/kernel-$(kernel-version)camflow_$(lsm-version)-2.src.rpm camflow-kernel.src.rpm
+	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel.x86_64.rpm
+	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-headers-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel-headers.x86_64.rpm
+	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-devel-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel-devel.x86_64.rpm

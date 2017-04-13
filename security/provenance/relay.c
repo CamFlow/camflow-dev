@@ -6,11 +6,10 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
- * published by the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
+ * published by the Free Software Foundation; either version 2 of the License,
+ * or (at your option) any later version.
  *
  */
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/debugfs.h>
@@ -60,12 +59,12 @@ static struct rchan_callbacks relay_callbacks = {
 static void write_boot_buffer(void)
 {
 	if (boot_buffer->nb_entry > 0)
-		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_msg));
+		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
 	kfree(boot_buffer);
 	boot_buffer = NULL;
 
 	if (long_boot_buffer->nb_entry > 0)
-		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_msg));
+		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_elt));
 	kfree(long_boot_buffer);
 	long_boot_buffer = NULL;
 }
@@ -76,17 +75,16 @@ extern struct workqueue_struct *prov_queue;
 static int __init relay_prov_init(void)
 {
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (prov_chan == NULL)
+	if (!prov_chan)
 		panic("Provenance: relay_open failure\n");
 
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (long_prov_chan == NULL)
+	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
 	relay_ready = true;
 	// relay buffer are ready, we can write down the boot buffer
 	write_boot_buffer();
-	printk(KERN_INFO "Provenance relay ready.\n");
+	pr_info("Provenance: relay ready.\n");
 	return 0;
 }
 core_initcall(relay_prov_init);
-MODULE_LICENSE("GPL");
