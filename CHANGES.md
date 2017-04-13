@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.3.0           | 4.10.8         | N/A				|
 | 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
 | 0.2.1           | 4.9.5          | 03/02/2017	|
@@ -19,14 +20,24 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-### v0.2.3
+### v0.3.0
+```
+- add a closed relationship when an inode is freed.
+- add a terminate relationship when a cred is freed.
+- boot id is set from userspace.
+- union prov_msg -> union prov_elt
+- Implemented run-time query system.
+- Debug output legibility improved.
+- Update to kernel version 4.10.8.
+```
 
+### v0.2.3
 ```
 - A variety of minor issues fixed through code analysis.
 - Add support for travis (see https://travis-ci.org/) testing.
 - Put back Unix socket recording.
 - Persist provenance information across reboot.
-- Anticipate read only after initialisation security hooks upcoming changes.
+- Anticipate upcoming changes: read only after initialisation of security hooks.
 - Handle provenance through extended attributes.
 - Update to kernel version 4.9.13.
 ```
