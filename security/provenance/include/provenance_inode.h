@@ -130,7 +130,6 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
 	return prov;
 }
 
-// TODO check the locking in there, it is probably wrong...
 static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
 {
 	struct provenance *prov = inode->i_provenance;
