@@ -130,7 +130,6 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
 	return prov;
 }
 
-// TODO check the locking in there, it is probably wrong...
 static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
 {
 	struct provenance *prov = inode->i_provenance;
@@ -143,25 +142,24 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
 	if (prov->initialised) {
 		spin_unlock(prov_lock(prov));
-		goto out;
+		return 0;
 	}       else
 		prov->initialised = true;
 	spin_unlock(prov_lock(prov));
 	update_inode_type(inode->i_mode, prov);
 	if (!(inode->i_opflags & IOP_XATTR)) // xattr not supported on this inode
-		goto out;
+		return 0;
 	if (opt_dentry)
 		dentry = dget(opt_dentry);
 	else
 		dentry = d_find_alias(inode);
 	if (!dentry)
-		goto out;
+		return 0;
 	buf = kmalloc(sizeof(union prov_elt), GFP_NOFS);
 	if (!buf) {
-		rc = -ENOMEM;
 		prov->initialised = false;
 		dput(dentry);
-		goto out;
+		return -ENOMEM;
 	}
 	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_elt));
 	dput(dentry);
@@ -178,7 +176,6 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	rc = 0;
 free_buf:
 	kfree(buf);
-out:
 	return rc;
 }
 
