@@ -10,9 +10,9 @@
  * or (at your option) any later version.
  *
  */
- #ifndef CONFIG_SECURITY_PROVENANCE_QUERY_H
- #define CONFIG_SECURITY_PROVENANCE_QUERY_H
- #include <linux/camflow_query.h>
+#ifndef CONFIG_SECURITY_PROVENANCE_QUERY_H
+#define CONFIG_SECURITY_PROVENANCE_QUERY_H
+#include <linux/camflow_query.h>
 
 static inline int call_camflow_out_edge(prov_entry_t *node,
 					prov_entry_t *edge)
@@ -68,4 +68,4 @@ static inline int call_query_hooks(prov_entry_t *from,
 	}
 	return 0;
 }
- #endif
+#endif
