@@ -208,7 +208,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	if (inode->i_provenance){
+	if (inode->i_provenance) {
 		close_inode(inode->i_provenance);
 		free_provenance(inode->i_provenance);
 	}
@@ -805,7 +805,7 @@ static int provenance_mmap_file(struct file *file,
 out:
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-		if (bprov){
+		if (bprov) {
 			close_inode(bprov);
 			free_provenance(bprov);
 		}

@@ -163,12 +163,13 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
 	return tprov;
 }
 
-static inline int terminate_task(struct provenance *tprov){
+static inline int terminate_task(struct provenance *tprov)
+{
 	union prov_elt old_prov;
 	int rc;
 	if (!provenance_is_tracked(prov_elt(tprov)) && !prov_all)
 		return 0;
-	if(filter_node(prov_entry(tprov)))
+	if (filter_node(prov_entry(tprov)))
 		return 0;
 	memcpy(&old_prov, prov_elt(tprov), sizeof(union prov_elt));
 	node_identifier(prov_elt(tprov)).version++;

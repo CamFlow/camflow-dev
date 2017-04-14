@@ -314,7 +314,8 @@ out:
 	return rc;
 }
 
-static inline int close_inode(struct provenance *iprov){
+static inline int close_inode(struct provenance *iprov)
+{
 	union prov_elt old_prov;
 	int rc;
 
