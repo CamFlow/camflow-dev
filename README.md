@@ -27,6 +27,11 @@ Do not hesitate to fork the repository or to report bugs.
 
 ## Building
 
+``` shell
+sudo dnf groupinstall 'Development Tools'
+sudo dnf install ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto
+```
+
 ```
 make prepare
 make config # select relevant modules in security
