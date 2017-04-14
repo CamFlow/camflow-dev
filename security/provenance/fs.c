@@ -25,8 +25,7 @@
 		.llseek		= generic_file_llseek, \
 }
 
-static ssize_t no_read(struct file *filp, char __user *buf,
-		       size_t count, loff_t *ppos)
+static ssize_t no_read(struct file *filp, char __user *buf, size_t count, loff_t *ppos)
 {
 	return -EPERM; // write only
 }

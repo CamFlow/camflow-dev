@@ -990,8 +990,7 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
  * @shmflg contains the operational flags.
  * Return 0 if permission is granted.
  */
-static int provenance_shm_shmat(struct shmid_kernel *shp,
-				char __user *shmaddr, int shmflg)
+static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, int shmflg)
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *sprov = shp->shm_perm.provenance;
