@@ -353,6 +353,8 @@ out:
 	return rc;
 }
 
+// TODO probably deal with unlink (useful for stream processing)
+
 /*
  * Check for permission to rename a file or directory.
  * @old_dir contains the inode structure for parent of the old link.
