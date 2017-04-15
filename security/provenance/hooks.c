@@ -25,6 +25,7 @@
 #include "provenance_inode.h"
 #include "provenance_task.h"
 
+#ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 struct save_work {
 	struct work_struct work;
 	struct dentry *dentry;
@@ -43,7 +44,7 @@ free_work:
 }
 
 static struct workqueue_struct *prov_queue;
-static void queue_save_provenance(struct provenance *provenance,
+static inline void queue_save_provenance(struct provenance *provenance,
 				  struct dentry *dentry)
 {
 	struct save_work *work;
@@ -60,6 +61,11 @@ static void queue_save_provenance(struct provenance *provenance,
 	INIT_WORK(&work->work, __do_prov_save);
 	queue_work(prov_queue, &work->work);
 }
+#else
+static inline void queue_save_provenance(struct provenance *provenance,
+					struct dentry *dentry)
+					{}
+#endif
 
 /*
  * initialise the security for the init task
@@ -1581,9 +1587,11 @@ void __init provenance_add_hooks(void)
 	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
 	if (unlikely(!long_boot_buffer))
 		panic("Provenance: could not allocate long_boot_buffer.");
+#ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 	prov_queue = alloc_workqueue("prov_queue", 0, 0);
 	if (!prov_queue)
 		pr_err("Provenance: could not initialise work queue.");
+#endif
 	relay_ready = false;
 	cred_init_provenance();
 	/* register the provenance security hooks */
