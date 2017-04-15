@@ -6,16 +6,17 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
- * published by the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
+ * published by the Free Software Foundation; either version 2 of the License,
+ * or (at your option) any later version.
  *
  */
 #ifndef _LINUX_PROVENANCE_FILTER_H
 #define _LINUX_PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
-#include <provenance_cgroup.h>
-#include <provenance_secctx.h>
+
+#include "provenance_cgroup.h"
+#include "provenance_secctx.h"
 
 extern bool prov_enabled;
 extern bool prov_all;
@@ -29,7 +30,7 @@ extern uint64_t prov_propagate_node_filter;
 #define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
-static inline bool __filter_node(uint64_t filter, const union prov_msg *node)
+static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 {
 	if (!prov_enabled)
 		return true;
@@ -53,12 +54,8 @@ extern uint64_t prov_relation_filter;
 extern uint64_t prov_propagate_relation_filter;
 
 /* return either or not the relation should be filtered out */
-static inline bool filter_relation(uint64_t type, uint8_t allowed)
+static inline bool filter_relation(uint64_t type)
 {
-	if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_relation_filter, RL_DISALLOWED))
-		return true;
-	if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_relation_filter, RL_ALLOWED))
-		return true;
 	// we hit an element of the black list ignore
 	if (HIT_FILTER(prov_relation_filter, type))
 		return true;
@@ -66,30 +63,25 @@ static inline bool filter_relation(uint64_t type, uint8_t allowed)
 }
 
 /* return either or not tracking should propagate */
-static inline bool filter_propagate_relation(uint64_t type, uint8_t allowed)
+static inline bool filter_propagate_relation(uint64_t type)
 {
-	if (allowed == FLOW_DISALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_DISALLOWED))
-		return true;
-	if (allowed == FLOW_ALLOWED && HIT_FILTER(prov_propagate_relation_filter, RL_ALLOWED))
-		return true;
 	// the relation does not allow tracking propagation
 	if (HIT_FILTER(prov_propagate_relation_filter, type))
 		return true;
 	return false;
 }
 
-static inline bool should_record_relation(uint64_t type, union prov_msg *from, union prov_msg *to, uint8_t allowed)
+static inline bool should_record_relation(uint64_t type, union prov_elt *from, union prov_elt *to)
 {
-	// one of the node should not appear in the record, ignore the relation
-	if (filter_node(from) || filter_node(to))
+	if (filter_relation(type))
 		return false;
-	// should the relation appear
-	if (filter_relation(type, allowed))
+	// one of the node should not appear in the record, ignore the relation
+	if (filter_node((prov_entry_t *)from) || filter_node((prov_entry_t *)to))
 		return false;
 	return true;
 }
 
-static inline bool prov_has_secid(union prov_msg *prov)
+static inline bool prov_has_secid(union prov_elt *prov)
 {
 	switch (prov_type(prov)) {
 	case ENT_INODE_UNKNOWN:
@@ -106,7 +98,7 @@ static inline bool prov_has_secid(union prov_msg *prov)
 	}
 }
 
-static inline void apply_target(union prov_msg *prov)
+static inline void apply_target(union prov_elt *prov)
 {
 	uint8_t op;
 
@@ -114,7 +106,7 @@ static inline void apply_target(union prov_msg *prov)
 	if (prov_type(prov) == ACT_TASK) {
 		op = prov_cgroup_whichOP(prov->task_info.cid);
 		if (unlikely(op != 0)) {
-			printk(KERN_INFO "Provenance: apply cgroup filter %u.", op);
+			pr_info("Provenance: apply cgroup filter %u.", op);
 			if ((op & PROV_CGROUP_TRACKED) != 0)
 				set_tracked(prov);
 			if ((op & PROV_CGROUP_PROPAGATE) != 0)
@@ -124,7 +116,7 @@ static inline void apply_target(union prov_msg *prov)
 	if (prov_has_secid(prov)) {
 		op = prov_secctx_whichOP(node_secid(prov));
 		if (unlikely(op != 0)) {
-			printk(KERN_INFO "Provenance: apply secctx filter %u.", op);
+			pr_info("Provenance: apply secctx filter %u.", op);
 			if ((op & PROV_SEC_TRACKED) != 0)
 				set_tracked(prov);
 			if ((op & PROV_SEC_PROPAGATE) != 0)
@@ -132,5 +124,4 @@ static inline void apply_target(union prov_msg *prov)
 		}
 	}
 }
-
 #endif

@@ -6,8 +6,8 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
- * published by the Free Software Foundation; either version 2 of the License, or
- *	(at your option) any later version.
+ * published by the Free Software Foundation; either version 2 of the License,
+ * or (at your option) any later version.
  *
  */
 #ifndef _UAPI_LINUX_PROVENANCE_H
@@ -43,6 +43,20 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val)
 		bloom[PROV_BYTE_INDEX(pos)] |= 1 << PROV_BIT_INDEX(pos);
 	}
 }
+
+// djb2 hash implementation by Dan Bernstein
+static inline uint64_t djb2_hash(const char *str)
+{
+	uint64_t hash = 5381;
+	int c = *str;
+
+	while (c) {
+		hash = ((hash<<5)+hash) + c;
+		c = *++str;
+	}
+	return hash;
+}
+#define generate_label(str) djb2_hash(str)
 
 /* element in set belong to super */
 static inline bool prov_bloom_match(const uint8_t super[PROV_N_BYTES], const uint8_t set[PROV_N_BYTES])
@@ -90,6 +104,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
 #define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
 #define PROV_MACHINE_ID_FILE                  "/sys/kernel/security/provenance/machine_id"
+#define PROV_BOOT_ID_FILE                  		"/sys/kernel/security/provenance/boot_id"
 #define PROV_NODE_FILTER_FILE                 "/sys/kernel/security/provenance/node_filter"
 #define PROV_RELATION_FILTER_FILE             "/sys/kernel/security/provenance/relation_filter"
 #define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
@@ -100,9 +115,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
-#define PROV_CGROUP_FILTER                                                                              "/sys/kernel/security/provenance/cgroup"
-#define PROV_LOG_FILE                                           "/sys/kernel/security/provenance/log"
-#define PROV_LOGP_FILE                                          "/sys/kernel/security/provenance/logp"
+#define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
+#define PROV_LOG_FILE													"/sys/kernel/security/provenance/log"
+#define PROV_LOGP_FILE												"/sys/kernel/security/provenance/logp"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -137,43 +152,45 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define RL_MMAP               (RL_DERIVED   | 0x0000000000000004ULL)
 #define RL_SND_PACKET         (RL_DERIVED   | 0x0000000000000008ULL)
 #define RL_RCV_PACKET         (RL_DERIVED   | 0x0000000000000010ULL)
+#define RL_CLOSED			        (RL_DERIVED   | 0x0000000000000020ULL)
 /* GENERATED SUBTYPES */
-#define RL_CREATE             (RL_GENERATED | 0x0000000000000020ULL)
-#define RL_WRITE              (RL_GENERATED | 0x0000000000000040ULL)
-#define RL_PERM_WRITE         (RL_GENERATED | 0x0000000000000080ULL)
-#define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000100ULL)
-#define RL_SH_WRITE           (RL_GENERATED | 0x0000000000000200ULL)
-#define RL_CONNECT            (RL_GENERATED | 0x0000000000000400ULL)
-#define RL_LISTEN             (RL_GENERATED | 0x0000000000000800ULL)
-#define RL_BIND               (RL_GENERATED | 0x0000000000001000ULL)
-#define RL_SND                (RL_GENERATED | 0x0000000000002000ULL)
-#define RL_LINK               (RL_GENERATED | 0x0000000000004000ULL)
-#define RL_SETATTR            (RL_GENERATED | 0x0000000000008000ULL)
-#define RL_SETXATTR           (RL_GENERATED | 0x0000000000010000ULL)
-#define RL_RMVXATTR           (RL_GENERATED | 0x0000000000020000ULL)
+#define RL_CREATE             (RL_GENERATED | 0x0000000000000040ULL)
+#define RL_WRITE              (RL_GENERATED | 0x0000000000000080ULL)
+#define RL_PERM_WRITE         (RL_GENERATED | 0x0000000000000100ULL)
+#define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000200ULL)
+#define RL_SH_WRITE           (RL_GENERATED | 0x0000000000000400ULL)
+#define RL_CONNECT            (RL_GENERATED | 0x0000000000000800ULL)
+#define RL_LISTEN             (RL_GENERATED | 0x0000000000001000ULL)
+#define RL_BIND               (RL_GENERATED | 0x0000000000002000ULL)
+#define RL_SND                (RL_GENERATED | 0x0000000000004000ULL)
+#define RL_LINK               (RL_GENERATED | 0x0000000000008000ULL)
+#define RL_SETATTR            (RL_GENERATED | 0x0000000000010000ULL)
+#define RL_SETXATTR           (RL_GENERATED | 0x0000000000020000ULL)
+#define RL_RMVXATTR           (RL_GENERATED | 0x0000000000040000ULL)
 /* USED SUBTYPES */
-#define RL_READ               (RL_USED      | 0x0000000000040000ULL)
-#define RL_MMAP_READ          (RL_USED      | 0x0000000000080000ULL)
-#define RL_PERM_READ          (RL_USED      | 0x0000000000100000ULL)
-#define RL_SH_READ            (RL_USED      | 0x0000000000200000ULL)
-#define RL_EXEC               (RL_USED      | 0x0000000000400000ULL)
-#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000800000ULL)
-#define RL_PERM_EXEC          (RL_USED      | 0x0000000001000000ULL)
-#define RL_ACCEPT             (RL_USED      | 0x0000000002000000ULL)
-#define RL_RCV                (RL_USED      | 0x0000000004000000ULL)
-#define RL_OPEN               (RL_USED      | 0x0000000008000000ULL)
-#define RL_SEARCH             (RL_USED      | 0x0000000010000000ULL)
-#define RL_GETATTR            (RL_USED      | 0x0000000020000000ULL)
-#define RL_READLINK           (RL_USED      | 0x0000000040000000ULL)
-#define RL_GETXATTR           (RL_USED      | 0x0000000080000000ULL)
-#define RL_LSTXATTR           (RL_USED      | 0x0000000100000000ULL)
-#define RL_NAMED_PROCESS      (RL_USED      | 0x0000000200000000ULL)
-#define RL_SAID								(RL_USED      | 0x0000000400000000ULL)
+#define RL_READ               (RL_USED      | 0x0000000000080000ULL)
+#define RL_MMAP_READ          (RL_USED      | 0x0000000000100000ULL)
+#define RL_PERM_READ          (RL_USED      | 0x0000000000200000ULL)
+#define RL_SH_READ            (RL_USED      | 0x0000000000400000ULL)
+#define RL_EXEC               (RL_USED      | 0x0000000000800000ULL)
+#define RL_MMAP_EXEC          (RL_USED      | 0x0000000001000000ULL)
+#define RL_PERM_EXEC          (RL_USED      | 0x0000000002000000ULL)
+#define RL_ACCEPT             (RL_USED      | 0x0000000004000000ULL)
+#define RL_RCV                (RL_USED      | 0x0000000008000000ULL)
+#define RL_OPEN               (RL_USED      | 0x0000000010000000ULL)
+#define RL_SEARCH             (RL_USED      | 0x0000000020000000ULL)
+#define RL_GETATTR            (RL_USED      | 0x0000000040000000ULL)
+#define RL_READLINK           (RL_USED      | 0x0000000080000000ULL)
+#define RL_GETXATTR           (RL_USED      | 0x0000000100000000ULL)
+#define RL_LSTXATTR           (RL_USED      | 0x0000000200000000ULL)
+#define RL_NAMED_PROCESS      (RL_USED      | 0x0000000400000000ULL)
+#define RL_SAID								(RL_USED      | 0x0000000800000000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000000800000000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000001000000000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000002000000000ULL)
-#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000004000000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000001000000000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000002000000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000004000000000ULL)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000008000000000ULL)
+#define RL_TERMINATE_PROCESS  (RL_INFORMED  | 0x0000010000000000ULL)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
@@ -202,19 +219,22 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define ENT_DISC              (DM_ENTITY    | 0x0000000000200000ULL)
 #define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
 #define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
-#define ENT_PCKCNT                                              (DM_ENTITY    | 0x0000000001000000ULL)
+#define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
 
-#define FLOW_ALLOWED        1
-#define FLOW_DISALLOWED     0
+#define FLOW_ALLOWED        0
+#define FLOW_DISALLOWED     1
 
 #define prov_type(prov)               ((prov)->node_info.identifier.node_id.type)
+#define node_type(node) prov_type(node)
+#define edge_type(edge) prov_type(edge)
 #define prov_id_buffer(prov)          ((prov)->node_info.identifier.buffer)
 #define node_identifier(node)         ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
+#define get_prov_identifier(node)			((node)->node_info.identifier)
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
-#define node_secid(node)							((node)->node_info.secid)
+#define node_secid(node)              ((node)->node_info.secid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -266,7 +286,7 @@ union prov_identifier {
 
 #define NAME_RECORDED_BIT 1
 #define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
-#define clear_name_recorded(node)						prov_clear_flag(node, NAME_RECORDED_BIT)
+#define clear_name_recorded(node)           prov_clear_flag(node, NAME_RECORDED_BIT)
 #define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
 
 #define TRACKED_BIT 2
@@ -360,7 +380,7 @@ struct pck_struct {
 	uint16_t length;
 };
 
-union prov_msg {
+union prov_elt {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
@@ -416,9 +436,17 @@ struct disc_node_struct {
 	union prov_identifier parent;
 };
 
-union long_prov_msg {
+union long_prov_elt {
 	struct msg_struct msg_info;
+	struct relation_struct relation_info;
 	struct node_struct node_info;
+	struct task_prov_struct task_info;
+	struct inode_prov_struct inode_info;
+	struct msg_msg_struct msg_msg_info;
+	struct shm_struct shm_info;
+	struct sb_struct sb_info;
+	struct pck_struct pck_info;
+	struct iattr_prov_struct iattr_info;
 	struct str_struct str_info;
 	struct file_name_struct file_name_info;
 	struct address_struct address_info;
@@ -426,6 +454,8 @@ union long_prov_msg {
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
 };
+
+typedef union long_prov_elt prov_entry_t;
 
 struct prov_filter {
 	uint64_t filter;
@@ -439,7 +469,7 @@ struct prov_filter {
 #define PROV_SET_TAINT        0x08
 
 struct prov_process_config {
-	union prov_msg prov;
+	union prov_elt prov;
 	uint8_t op;
 	uint32_t vpid;
 };

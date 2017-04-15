@@ -15,6 +15,7 @@ Automated Travis test run the following operation:
 - run [sparse](https://sparse.wiki.kernel.org/index.php/Main_Page);
 - run [checkpatch](https://kernelnewbies.org/CheckpatchTips);
 - run [flawfinder](https://www.dwheeler.com/flawfinder/);
+- run [smatch](https://lwn.net/Articles/691882/);
 - run [SonarQube](https://sonarqube.com);
 - build the kernel patch.
 
@@ -26,9 +27,14 @@ Do not hesitate to fork the repository or to report bugs.
 
 ## Building
 
+``` shell
+sudo dnf groupinstall 'Development Tools'
+sudo dnf install ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto
+```
+
 ```
 make prepare
 make config # select relevant modules in security
-make compile # patience, sudo password will be asked during compilation
-make install # patience, sudo password will be asked during installation
+make compile # patience, password will be asked during compilation
+make install # patience, password will be asked during installation
  ```
