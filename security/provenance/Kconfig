@@ -17,3 +17,12 @@ config SECURITY_PROVENANCE_WHOLE_SYSTEM
 	  This option activate whole system provenance capture from boot.
 
 	  If you are unsure how to answer this question, answer N.
+
+config SECURITY_PROVENANCE_PERSISTENCE
+	bool "CamFlow - Persistence"
+	depends on SECURITY_PROVENANCE
+	default n
+	help
+	  This option persist inode provenance state across reboot.
+
+	  If you are unsure how to answer this question, answer N.

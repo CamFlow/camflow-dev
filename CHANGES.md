@@ -22,6 +22,7 @@
 
 ### v0.3.0
 ```
+- make persistence of inode provenance information a build option.
 - add a closed relationship when an inode is freed.
 - add a terminate relationship when a cred is freed.
 - boot id is set from userspace.
