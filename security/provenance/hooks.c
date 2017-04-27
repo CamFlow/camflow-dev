@@ -63,8 +63,7 @@ static inline void queue_save_provenance(struct provenance *provenance,
 }
 #else
 static inline void queue_save_provenance(struct provenance *provenance,
-					struct dentry *dentry)
-					{}
+					struct dentry *dentry){}
 #endif
 
 /*
