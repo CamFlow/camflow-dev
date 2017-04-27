@@ -104,7 +104,7 @@ static inline void apply_target(union prov_elt *prov)
 
 	// track based on cgroup
 	if (prov_type(prov) == ACT_TASK) {
-		op = prov_cgroup_whichOP(prov->task_info.cid);
+		op = prov_cgroup_whichOP(prov->task_info.cgroupns);
 		if (unlikely(op != 0)) {
 			pr_info("Provenance: apply cgroup filter %u.", op);
 			if ((op & PROV_CGROUP_TRACKED) != 0)

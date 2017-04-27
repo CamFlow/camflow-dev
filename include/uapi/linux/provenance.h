@@ -336,7 +336,12 @@ struct task_prov_struct {
 	uint32_t gid;
 	uint32_t pid;
 	uint32_t vpid;
-	uint32_t cid;
+	uint32_t utsns;
+	uint32_t ipcns;
+	uint32_t mntns;
+	uint32_t pidns;
+	uint32_t netns;
+	uint32_t cgroupns;
 };
 
 struct inode_prov_struct {
