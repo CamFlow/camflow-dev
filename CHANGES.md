@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.1           | 4.10.10        | N/A        |
+| 0.3.1           | 4.10.13        | N/A        |
 | 0.3.0           | 4.10.10        | 15/04/2017 |
 | 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
@@ -23,15 +23,15 @@
 
 ### v0.3.0
 ```
-- Update to kernel version 4.10.10.
+- Update to kernel version 4.10.13.
 ```
 
 ### v0.3.0
 ```
-- make persistence of inode provenance information a build option.
-- add a closed relationship when an inode is freed.
-- add a terminate relationship when a cred is freed.
-- boot id is set from userspace.
+- Make persistence of inode provenance information a build option.
+- Add a closed relationship when an inode is freed.
+- Add a terminate relationship when a cred is freed.
+- Boot id is set from userspace.
 - union prov_msg -> union prov_elt
 - Implemented run-time query system.
 - Debug output legibility improved.
