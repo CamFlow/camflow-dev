@@ -21,8 +21,9 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-### v0.3.0
+### v0.3.1
 ```
+- Record all available namespace id.
 - Update to kernel version 4.10.13.
 ```
 
