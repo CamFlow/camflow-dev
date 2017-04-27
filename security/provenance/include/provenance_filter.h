@@ -21,7 +21,7 @@
 extern bool prov_enabled;
 extern bool prov_all;
 
-#define HIT_FILTER(filter, data) ((filter & data) != 0)
+#define HIT_FILTER(filter, type) ((filter & type) == type)
 
 extern uint64_t prov_node_filter;
 extern uint64_t prov_propagate_node_filter;
@@ -45,7 +45,7 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 #define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS) | SUBTYPE(RL_VERSION) | SUBTYPE(RL_NAMED))
 static inline bool filter_update_node(uint64_t relation_type)
 {
-	if (HIT_FILTER(relation_type, UPDATE_FILTER)) // not update if relation is of above type
+	if (HIT_FILTER(UPDATE_FILTER, relation_type)) // not update if relation is of above type
 		return true;
 	return false;
 }
