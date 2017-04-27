@@ -23,6 +23,7 @@
 
 ### v0.3.1
 ```
+- Modified node and relation types.
 - Record all available namespace id.
 - Update to kernel version 4.10.13.
 ```
