@@ -16,6 +16,8 @@
 #include <linux/cred.h>
 #include <linux/binfmts.h>
 #include <linux/sched.h>
+#include <linux/sched/task.h>
+#include <linux/sched/mm.h>
 #include <linux/utsname.h>
 #include <linux/ipc_namespace.h>
 #include <linux/mnt_namespace.h>
