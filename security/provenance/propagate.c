@@ -47,4 +47,4 @@ static int __init init_prov_propagate(void)
 	pr_info("Provenance: propagate ready.\n");
 	return 0;
 }
-core_initcall(init_prov_propagate);
+security_initcall(init_prov_propagate);
