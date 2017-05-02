@@ -23,6 +23,7 @@
 
 ### v0.3.1
 ```
+- Load netfilter on subsys_initcall.
 - Load propagate "query" much earlier.
 - Modified node and relation types.
 - Record all available namespace id.
