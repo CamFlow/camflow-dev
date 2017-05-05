@@ -67,4 +67,4 @@ static int __init provenance_nf_init(void)
 	pr_info("Provenance: netfilter ready.\n");
 	return 0;
 }
-module_init(provenance_nf_init);
+subsys_initcall(provenance_nf_init);

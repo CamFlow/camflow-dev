@@ -1594,7 +1594,7 @@ void __init provenance_add_hooks(void)
 	relay_ready = false;
 	cred_init_provenance();
 	/* register the provenance security hooks */
-	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
+	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");
 	pr_info("Provenance: Camflow %s\n", CAMFLOW_VERSION_STR);
 	pr_info("Provenance: hooks ready.\n");
 }
