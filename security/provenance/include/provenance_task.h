@@ -231,11 +231,11 @@ static inline void refresh_current_provenance(void)
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	utsns = current_utsns();;
-	ipcns = current_ipcns();;
-	mntns = current_mntns();;
-	pidns = current_pidns();;
-	netns = current_netns();;
+	utsns = current_utsns();
+	ipcns = current_ipcns();
+	mntns = current_mntns();
+	pidns = current_pidns();
+	netns = current_netns();
 	cgroupns = current_cgroupns();
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
