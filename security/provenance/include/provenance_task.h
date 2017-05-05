@@ -222,35 +222,23 @@ out:
 static inline void refresh_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
-	uint32_t utsns;
-	uint32_t ipcns;
-	uint32_t mntns;
-	uint32_t pidns;
-	uint32_t netns;
-	uint32_t cgroupns;
 	unsigned long irqflags;
 
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	utsns = current_utsns();
-	ipcns = current_ipcns();
-	mntns = current_mntns();
-	pidns = current_pidns();
-	netns = current_netns();
-	cgroupns = current_cgroupns();
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
 	if (unlikely(prov_elt(prov)->task_info.pid == 0))
 		prov_elt(prov)->task_info.pid = task_pid_nr(current);
 	if (unlikely(prov_elt(prov)->task_info.vpid == 0))
 		prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
-	prov_elt(prov)->task_info.utsns = utsns;
-	prov_elt(prov)->task_info.ipcns = ipcns;
-	prov_elt(prov)->task_info.mntns = mntns;
-	prov_elt(prov)->task_info.pidns = pidns;
-	prov_elt(prov)->task_info.netns = netns;
-	prov_elt(prov)->task_info.cgroupns = cgroupns;
+	prov_elt(prov)->task_info.utsns = current_utsns();
+	prov_elt(prov)->task_info.ipcns = current_ipcns();
+	prov_elt(prov)->task_info.mntns = current_mntns();
+	prov_elt(prov)->task_info.pidns = current_pidns();
+	prov_elt(prov)->task_info.netns = current_netns();
+	prov_elt(prov)->task_info.cgroupns = current_cgroupns();
 	security_task_getsecid(current, &(prov_elt(prov)->task_info.secid));
 	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
