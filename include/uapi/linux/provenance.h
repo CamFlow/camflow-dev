@@ -115,7 +115,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_IPV4_EGRESS_FILE                 "/sys/kernel/security/provenance/ipv4_egress"
 #define PROV_SECCTX                           "/sys/kernel/security/provenance/secctx"
 #define PROV_SECCTX_FILTER                    "/sys/kernel/security/provenance/secctx_filter"
-#define PROV_CGROUP_FILTER										"/sys/kernel/security/provenance/cgroup"
+#define PROV_NS_FILTER												"/sys/kernel/security/provenance/ns"
 #define PROV_LOG_FILE													"/sys/kernel/security/provenance/log"
 #define PROV_LOGP_FILE												"/sys/kernel/security/provenance/logp"
 
@@ -508,14 +508,20 @@ struct secinfo {
 	uint64_t taint;
 };
 
-#define PROV_CGROUP_TRACKED      0x01
-#define PROV_CGROUP_OPAQUE       0x02
-#define PROV_CGROUP_PROPAGATE    0x04
-#define PROV_CGROUP_TAINT        0x08
-#define PROV_CGROUP_DELETE       0x10 // to actually delete a filter from the list
+#define PROV_NS_TRACKED      0x01
+#define PROV_NS_OPAQUE       0x02
+#define PROV_NS_PROPAGATE    0x04
+#define PROV_NS_TAINT        0x08
+#define PROV_NS_DELETE       0x10 // to actually delete a filter from the list
+#define IGNORE_NS 0
 
-struct cgroupinfo {
-	uint32_t cid;
+struct nsinfo {
+	uint32_t utsns;
+	uint32_t ipcns;
+	uint32_t mntns;
+	uint32_t pidns;
+	uint32_t netns;
+	uint32_t cgroupns;
 	uint8_t op;
 	uint64_t taint;
 };

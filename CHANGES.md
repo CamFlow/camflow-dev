@@ -23,6 +23,7 @@
 
 ### v0.3.1
 ```
+- Update filters to support namespaces based selection.
 - Load netfilter on subsys_initcall.
 - Load propagate "query" much earlier.
 - Modified node and relation types.

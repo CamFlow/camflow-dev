@@ -25,8 +25,6 @@
 #include <linux/pid_namespace.h>
 #include "../../../fs/mount.h" // nasty
 
-#include "provenance_secctx.h"
-#include "provenance_cgroup.h"
 #include "provenance_inode.h"
 
 #define current_pid() (current->pid)

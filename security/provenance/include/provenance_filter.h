@@ -15,7 +15,7 @@
 
 #include <uapi/linux/provenance.h>
 
-#include "provenance_cgroup.h"
+#include "provenance_ns.h"
 #include "provenance_secctx.h"
 
 extern bool prov_enabled;
@@ -102,15 +102,22 @@ static inline void apply_target(union prov_elt *prov)
 {
 	uint8_t op;
 
-	// track based on cgroup
+	// track based on ns
 	if (prov_type(prov) == ACT_TASK) {
-		op = prov_cgroup_whichOP(prov->task_info.cgroupns);
+		op = prov_ns_whichOP(prov->task_info.utsns,
+										prov->task_info.ipcns,
+										prov->task_info.mntns,
+										prov->task_info.pidns,
+										prov->task_info.netns,
+										prov->task_info.cgroupns);
 		if (unlikely(op != 0)) {
-			pr_info("Provenance: apply cgroup filter %u.", op);
-			if ((op & PROV_CGROUP_TRACKED) != 0)
+			pr_info("Provenance: apply ns filter %u.", op);
+			if ((op & PROV_NS_TRACKED) != 0)
 				set_tracked(prov);
-			if ((op & PROV_CGROUP_PROPAGATE) != 0)
+			if ((op & PROV_NS_PROPAGATE) != 0)
 				set_propagate(prov);
+			if ((op & PROV_NS_OPAQUE) != 0)
+				set_opaque(prov);
 		}
 	}
 	if (prov_has_secid(prov)) {
@@ -121,6 +128,8 @@ static inline void apply_target(union prov_elt *prov)
 				set_tracked(prov);
 			if ((op & PROV_SEC_PROPAGATE) != 0)
 				set_propagate(prov);
+			if ((op & PROV_SEC_OPAQUE) != 0)
+				set_opaque(prov);
 		}
 	}
 }

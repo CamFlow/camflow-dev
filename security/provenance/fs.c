@@ -55,7 +55,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
 	provenance_mark_as_opaque(PROV_SECCTX);
 	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
-	provenance_mark_as_opaque(PROV_CGROUP_FILTER);
+	provenance_mark_as_opaque(PROV_NS_FILTER);
 	provenance_mark_as_opaque(PROV_LOG_FILE);
 	provenance_mark_as_opaque(PROV_LOGP_FILE);
 }
@@ -583,48 +583,48 @@ static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_secctx_filter_ops, prov_write_secctx_filter, prov_read_secctx_filter);
 
-static ssize_t prov_write_cgroup_filter(struct file *file, const char __user *buf,
+static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 					size_t count, loff_t *ppos)
 {
-	struct cgroup_filters *s;
+	struct ns_filters *s;
 
-	if (count < sizeof(struct cgroupinfo))
+	if (count < sizeof(struct nsinfo))
 		return -ENOMEM;
 
-	s = kzalloc(sizeof(struct cgroup_filters), GFP_KERNEL);
+	s = kzalloc(sizeof(struct ns_filters), GFP_KERNEL);
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct cgroupinfo)))
+	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo)))
 		return -EAGAIN;
-	if ((s->filter.op & PROV_CGROUP_DELETE) != PROV_CGROUP_DELETE)
-		prov_cgroup_add_or_update(s);
+	if ((s->filter.op & PROV_NS_DELETE) != PROV_NS_DELETE)
+		prov_ns_add_or_update(s);
 	else
-		prov_cgroup_delete(s);
+		prov_ns_delete(s);
 	return 0;
 }
 
-static ssize_t prov_read_cgroup_filter(struct file *filp, char __user *buf,
+static ssize_t prov_read_ns_filter(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
 	struct list_head *listentry, *listtmp;
-	struct cgroup_filters *tmp;
+	struct ns_filters *tmp;
 	size_t pos = 0;
 
-	if (count < sizeof(struct cgroupinfo))
+	if (count < sizeof(struct nsinfo))
 		return -ENOMEM;
 
-	list_for_each_safe(listentry, listtmp, &cgroup_filters) {
-		tmp = list_entry(listentry, struct cgroup_filters, list);
-		if (count < pos + sizeof(struct cgroupinfo))
+	list_for_each_safe(listentry, listtmp, &ns_filters) {
+		tmp = list_entry(listentry, struct ns_filters, list);
+		if (count < pos + sizeof(struct nsinfo))
 			return -ENOMEM;
-		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct cgroupinfo)))
+		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct nsinfo)))
 			return -EAGAIN;
-		pos += sizeof(struct cgroupinfo);
+		pos += sizeof(struct nsinfo);
 	}
 	return pos;
 }
-declare_file_operations(prov_cgroup_filter_ops, prov_write_cgroup_filter, prov_read_cgroup_filter);
+declare_file_operations(prov_ns_filter_ops, prov_write_ns_filter, prov_read_ns_filter);
 
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
@@ -673,7 +673,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
 	securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
 	securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
-	securityfs_create_file("cgroup", 0644, prov_dir, NULL, &prov_cgroup_filter_ops);
+	securityfs_create_file("ns", 0644, prov_dir, NULL, &prov_ns_filter_ops);
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
 	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
 	pr_info("Provenance: fs ready.\n");
