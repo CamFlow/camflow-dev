@@ -1,5 +1,7 @@
 # CamFlow
 
+[![DOI](https://zenodo.org/badge/48607854.svg)](https://zenodo.org/badge/latestdoi/48607854)
+
 If you simply wish to install CamFlow please visit [here](https://github.com/CamFlow/camflow-install).
 The source code for the provenance userspace library is available [here](https://github.com/CamFlow/camflow-provenance-lib).
 
