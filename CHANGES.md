@@ -26,7 +26,6 @@
 - Update filters to support namespaces based selection.
 - Load netfilter on subsys_initcall.
 - Load propagate "query" much earlier.
-- Modified node and relation types.
 - Record all available namespace id.
 - Update to kernel version 4.11.
 ```
