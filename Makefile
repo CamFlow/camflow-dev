@@ -35,12 +35,17 @@ prepare_cli:
 	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
 	cd ./build/camflow-cli && $(MAKE) prepare
 
+prepare_service:
+	mkdir -p build
+	cd ./build && git clone https://github.com/CamFlow/camflow-service.git
+	cd ./build/camflow-service && $(MAKE) prepare
+
 prepare_smatch:
 	mkdir -p build
 	cd ./build && git clone git://repo.or.cz/smatch.git
 	cd ./build/smatch && $(MAKE)
 
-prepare_us: prepare_provenance prepare_config prepare_cli
+prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
 copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../security .
@@ -90,6 +95,8 @@ install_us:
 	cd ./build/camflow-config && $(MAKE) install
 	cd ./build/camflow-cli && $(MAKE) all
 	cd ./build/camflow-cli && $(MAKE) install
+	cd ./build/camflow-service && $(MAKE) all
+	cd ./build/camflow-service && $(MAKE) install
 
 clean: clean_kernel clean_us
 
@@ -100,6 +107,8 @@ clean_kernel:
 clean_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) clean
 	cd ./build/camflow-config && $(MAKE) clean
+	cd ./build/camflow-cli && $(MAKE) clean
+	cd ./build/camflow-service && $(MAKE) clean
 
 delete_kernel:
 	cd ./build && rm -rf ./linux-$(kernel-version)
