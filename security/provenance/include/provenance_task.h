@@ -26,6 +26,7 @@
 #include "../../../fs/mount.h" // nasty
 
 #include "provenance_inode.h"
+#include "provenance_policy.h"
 
 #define current_pid() (current->pid)
 static inline uint32_t current_cgroupns(void)
@@ -263,7 +264,7 @@ static inline int terminate_task(struct provenance *tprov)
 {
 	union prov_elt old_prov;
 	int rc;
-	if (!provenance_is_tracked(prov_elt(tprov)) && !prov_all)
+	if (!provenance_is_tracked(prov_elt(tprov)) && !prov_policy.prov_all)
 		return 0;
 	if (filter_node(prov_entry(tprov)))
 		return 0;

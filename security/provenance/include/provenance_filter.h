@@ -15,11 +15,9 @@
 
 #include <uapi/linux/provenance.h>
 
+#include "provenance_policy.h"
 #include "provenance_ns.h"
 #include "provenance_secctx.h"
-
-extern bool prov_enabled;
-extern bool prov_all;
 
 #define HIT_FILTER(filter, data) ((filter & data) != 0)
 
@@ -32,7 +30,7 @@ extern uint64_t prov_propagate_node_filter;
 /* return either or not the node should be filtered out */
 static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 {
-	if (!prov_enabled)
+	if (!prov_policy.prov_enabled)
 		return true;
 	if (provenance_is_opaque(node))
 		return true;
