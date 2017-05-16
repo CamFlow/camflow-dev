@@ -23,6 +23,7 @@
 
 ### v0.3.1
 ```
+- Expose hash of currently loaded capture polciy to user space.
 - Update filters to support namespaces based selection.
 - Load netfilter on subsys_initcall.
 - Load propagate "query" much earlier.

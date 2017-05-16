@@ -21,6 +21,8 @@
 #include <linux/mutex.h>
 #endif
 
+#define PROVENANCE_HASH "sha256"
+
 #define PROV_GOLDEN_RATIO_64 0x61C8864680B583EBUL
 static inline uint32_t prov_hash(uint64_t val)
 {
@@ -118,6 +120,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_NS_FILTER												"/sys/kernel/security/provenance/ns"
 #define PROV_LOG_FILE													"/sys/kernel/security/provenance/log"
 #define PROV_LOGP_FILE												"/sys/kernel/security/provenance/logp"
+#define PROV_POLICY_HASH_FILE									"/sys/kernel/security/provenance/policy_hash"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"

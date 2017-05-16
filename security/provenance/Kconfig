@@ -4,6 +4,7 @@ config SECURITY_PROVENANCE
          select RELAY
          select SECURITYFS
          select NETFILTER
+         select CRYPTO_SHA256
          default y
          help
           This selects CamFlow provenance modules. It captures provenance through

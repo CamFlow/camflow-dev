@@ -11,6 +11,7 @@
  *
  */
 #include <linux/security.h>
+#include <crypto/hash.h>
 
 #include "provenance.h"
 #include "provenance_inode.h"
@@ -58,6 +59,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_NS_FILTER);
 	provenance_mark_as_opaque(PROV_LOG_FILE);
 	provenance_mark_as_opaque(PROV_LOGP_FILE);
+	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -647,6 +649,70 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
+static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
+				       size_t count, loff_t *ppos)
+{
+	size_t pos = 0;
+	size_t size;
+	int rc;
+	struct crypto_shash *policy_shash_tfm;
+	struct shash_desc *hashdesc = NULL;
+	uint8_t* buff = NULL;
+
+	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
+	if(IS_ERR(policy_shash_tfm))
+		return -ENOMEM;
+	pos = crypto_shash_digestsize(policy_shash_tfm);
+	if(count < pos)
+		return -ENOMEM;
+	buff = kzalloc(pos, GFP_KERNEL);
+	if(!buff){
+		pr_err("Provenance: error allocating hash buffer.");
+		pos = -ENOMEM;
+		goto out;
+	}
+	size = sizeof(struct shash_desc) + crypto_shash_descsize(policy_shash_tfm);
+	hashdesc = (struct shash_desc*)kzalloc(size, GFP_KERNEL);
+	if(!hashdesc){
+		pr_err("Provenance: error allocating hash desc.");
+		pos = -ENOMEM;
+		goto out;
+	}
+	hashdesc->tfm = policy_shash_tfm;
+	hashdesc->flags = 0x0;
+	rc = crypto_shash_init(hashdesc);
+	if(rc){
+		pr_err("Provenance: error initialising hash.");
+		pos = -EAGAIN;
+		goto out;
+	}
+	rc = crypto_shash_update(hashdesc, (u8*)&prov_policy, sizeof(struct capture_policy));
+	if(rc){
+		pr_err("Provenance: error updating hash.");
+		pos = -EAGAIN;
+		goto out;
+	}
+	rc = crypto_shash_final(hashdesc, buff);
+	if(rc){
+		pr_err("Provenance: error finialising hash.");
+		pos = -EAGAIN;
+		goto out;
+	}
+	if (copy_to_user(buf, buff, pos)){
+		pr_err("Provenance: error copying hash to user.");
+		pos = -EAGAIN;
+		goto out;
+	}
+out:
+	if(!buff)
+		kfree(buff);
+	if(!hashdesc)
+		kfree(hashdesc);
+	crypto_free_shash(policy_shash_tfm);
+	return pos;
+}
+declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
+
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
@@ -672,6 +738,7 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("ns", 0644, prov_dir, NULL, &prov_ns_filter_ops);
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
 	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
+	securityfs_create_file("policy_hash", 0444, prov_dir, NULL, &prov_policy_hash_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
