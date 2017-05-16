@@ -361,24 +361,20 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 		return __read_filter(filp, buf, count, filter); \
 	}
 
-uint64_t prov_node_filter;
-declare_write_filter_fcn(prov_write_node_filter, prov_node_filter);
-declare_reader_filter_fcn(prov_read_node_filter, prov_node_filter);
+declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
+declare_reader_filter_fcn(prov_read_node_filter, prov_policy.prov_node_filter);
 declare_file_operations(prov_node_filter_ops, prov_write_node_filter, prov_read_node_filter);
 
-uint64_t prov_relation_filter;
-declare_write_filter_fcn(prov_write_relation_filter, prov_relation_filter);
-declare_reader_filter_fcn(prov_read_relation_filter, prov_relation_filter);
+declare_write_filter_fcn(prov_write_relation_filter, prov_policy.prov_relation_filter);
+declare_reader_filter_fcn(prov_read_relation_filter, prov_policy.prov_relation_filter);
 declare_file_operations(prov_relation_filter_ops, prov_write_relation_filter, prov_read_relation_filter);
 
-uint64_t prov_propagate_node_filter;
-declare_write_filter_fcn(prov_write_propagate_node_filter, prov_propagate_node_filter);
-declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_propagate_node_filter);
+declare_write_filter_fcn(prov_write_propagate_node_filter, prov_policy.prov_propagate_node_filter);
+declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_policy.prov_propagate_node_filter);
 declare_file_operations(prov_propagate_node_filter_ops, prov_write_propagate_node_filter, prov_read_propagate_node_filter);
 
-uint64_t prov_propagate_relation_filter;
-declare_write_filter_fcn(prov_write_propagate_relation_filter, prov_propagate_relation_filter);
-declare_reader_filter_fcn(prov_read_propagate_relation_filter, prov_propagate_relation_filter);
+declare_write_filter_fcn(prov_write_propagate_relation_filter, prov_policy.prov_propagate_relation_filter);
+declare_reader_filter_fcn(prov_read_propagate_relation_filter, prov_policy.prov_propagate_relation_filter);
 declare_file_operations(prov_propagate_relation_filter_ops, prov_write_propagate_relation_filter, prov_read_propagate_relation_filter);
 
 static ssize_t prov_write_flush(struct file *file, const char __user *buf,

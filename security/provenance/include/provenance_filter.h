@@ -21,11 +21,8 @@
 
 #define HIT_FILTER(filter, data) ((filter & data) != 0)
 
-extern uint64_t prov_node_filter;
-extern uint64_t prov_propagate_node_filter;
-
-#define filter_node(node) __filter_node(prov_node_filter, node)
-#define filter_propagate_node(node) __filter_node(prov_propagate_node_filter, node)
+#define filter_node(node) __filter_node(prov_policy.prov_node_filter, node)
+#define filter_propagate_node(node) __filter_node(prov_policy.prov_propagate_node_filter, node)
 
 /* return either or not the node should be filtered out */
 static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
@@ -48,14 +45,11 @@ static inline bool filter_update_node(uint64_t relation_type)
 	return false;
 }
 
-extern uint64_t prov_relation_filter;
-extern uint64_t prov_propagate_relation_filter;
-
 /* return either or not the relation should be filtered out */
 static inline bool filter_relation(uint64_t type)
 {
 	// we hit an element of the black list ignore
-	if (HIT_FILTER(prov_relation_filter, type))
+	if (HIT_FILTER(prov_policy.prov_relation_filter, type))
 		return true;
 	return false;
 }
@@ -64,7 +58,7 @@ static inline bool filter_relation(uint64_t type)
 static inline bool filter_propagate_relation(uint64_t type)
 {
 	// the relation does not allow tracking propagation
-	if (HIT_FILTER(prov_propagate_relation_filter, type))
+	if (HIT_FILTER(prov_policy.prov_propagate_relation_filter, type))
 		return true;
 	return false;
 }
