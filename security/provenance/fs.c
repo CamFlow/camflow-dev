@@ -686,6 +686,14 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		pos = -EAGAIN;
 		goto out;
 	}
+	/* LSM version */
+	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
+	if(rc){
+		pr_err("Provenance: error updating hash.");
+		pos = -EAGAIN;
+		goto out;
+	}
+	/* general policy */
 	rc = crypto_shash_update(hashdesc, (u8*)&prov_policy, sizeof(struct capture_policy));
 	if(rc){
 		pr_err("Provenance: error updating hash.");
