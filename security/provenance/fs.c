@@ -661,6 +661,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *ipv4_tmp;
 	struct ns_filters *ns_tmp;
+	struct secctx_filters *secctx_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
 	if(IS_ERR(policy_shash_tfm))
@@ -727,6 +728,16 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	list_for_each_safe(listentry, listtmp, &ns_filters) {
 		ns_tmp = list_entry(listentry, struct ns_filters, list);
 		rc = crypto_shash_update(hashdesc, (u8*)&ns_tmp->filter, sizeof(struct nsinfo));
+		if(rc){
+			pr_err("Provenance: error updating hash.");
+			pos = -EAGAIN;
+			goto out;
+		}
+	}
+	/* secctx policy */
+	list_for_each_safe(listentry, listtmp, &secctx_filters) {
+		secctx_tmp = list_entry(listentry, struct secctx_filters, list);
+		rc = crypto_shash_update(hashdesc, (u8*)&secctx_tmp->filter, sizeof(struct secinfo));
 		if(rc){
 			pr_err("Provenance: error updating hash.");
 			pos = -EAGAIN;
