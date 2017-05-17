@@ -1560,9 +1560,6 @@ LIST_HEAD(provenance_query_hooks);
 
 struct capture_policy prov_policy;
 
-uint32_t prov_machine_id;
-uint32_t prov_boot_id;
-
 void __init provenance_add_hooks(void)
 {
 	prov_policy.prov_enabled = true;
@@ -1571,8 +1568,8 @@ void __init provenance_add_hooks(void)
 #else
 	prov_policy.prov_all = false;
 #endif
-	prov_machine_id = 1;
-	prov_boot_id = 0;
+	prov_policy.prov_machine_id = 1;
+	prov_policy.prov_boot_id = 0;
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);
