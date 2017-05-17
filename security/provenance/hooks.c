@@ -1560,6 +1560,9 @@ LIST_HEAD(provenance_query_hooks);
 
 struct capture_policy prov_policy;
 
+uint32_t prov_machine_id;
+uint32_t prov_boot_id;
+
 void __init provenance_add_hooks(void)
 {
 	prov_policy.prov_enabled = true;
