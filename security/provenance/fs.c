@@ -658,6 +658,8 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct crypto_shash *policy_shash_tfm;
 	struct shash_desc *hashdesc = NULL;
 	uint8_t* buff = NULL;
+	struct list_head *listentry, *listtmp;
+	struct ipv4_filters *ipv4_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
 	if(IS_ERR(policy_shash_tfm))
@@ -699,6 +701,26 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		pr_err("Provenance: error updating hash.");
 		pos = -EAGAIN;
 		goto out;
+	}
+	/* ingress network policy */
+	list_for_each_safe(listentry, listtmp, &ingress_ipv4filters) {
+		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
+		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
+		if(rc){
+			pr_err("Provenance: error updating hash.");
+			pos = -EAGAIN;
+			goto out;
+		}
+	}
+	/* egress network policy */
+	list_for_each_safe(listentry, listtmp, &egress_ipv4filters) {
+		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
+		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
+		if(rc){
+			pr_err("Provenance: error updating hash.");
+			pos = -EAGAIN;
+			goto out;
+		}
 	}
 	rc = crypto_shash_final(hashdesc, buff);
 	if(rc){
