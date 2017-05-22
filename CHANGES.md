@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.1           | 4.11.1         | N/A        |
+| 0.3.1           | 4.11.2         | N/A        |
 | 0.3.0           | 4.10.10        | 15/04/2017 |
 | 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
@@ -28,7 +28,7 @@
 - Load netfilter on subsys_initcall.
 - Load propagate "query" much earlier.
 - Record all available namespace id.
-- Update to kernel version 4.11.
+- Update to kernel version 4.11.2.
 ```
 
 ### v0.3.0
