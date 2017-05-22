@@ -23,6 +23,7 @@
 #include <linux/skbuff.h>
 
 #include "provenance.h"
+#include "provenance_policy.h"
 
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
@@ -196,7 +197,7 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 
 	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
-	if (!provenance_is_tracked(prov_elt(inode)) && !prov_all)
+	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(RL_RCV_PACKET, pck, prov_elt(inode)))
 		return 0;
@@ -216,7 +217,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 
 	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
-	if (!provenance_is_tracked(prov_elt(inode)) && !prov_all)
+	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(RL_SND_PACKET, prov_elt(inode), pck))
 		return 0;

@@ -63,8 +63,7 @@ static inline void queue_save_provenance(struct provenance *provenance,
 }
 #else
 static inline void queue_save_provenance(struct provenance *provenance,
-					struct dentry *dentry)
-					{}
+					struct dentry *dentry){}
 #endif
 
 /*
@@ -1550,27 +1549,27 @@ static struct security_hook_list provenance_hooks[] __ro_after_init = {
 struct kmem_cache *provenance_cache;
 struct kmem_cache *long_provenance_cache;
 
-uint32_t prov_machine_id;
-uint32_t prov_boot_id;
-
 struct prov_boot_buffer         *boot_buffer;
 struct prov_long_boot_buffer    *long_boot_buffer;
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
 LIST_HEAD(secctx_filters);
-LIST_HEAD(cgroup_filters);
+LIST_HEAD(ns_filters);
 LIST_HEAD(provenance_query_hooks);
-bool prov_enabled;
-bool prov_all;
+
+struct capture_policy prov_policy;
+
+uint32_t prov_machine_id;
+uint32_t prov_boot_id;
 
 void __init provenance_add_hooks(void)
 {
-	prov_enabled = true;
+	prov_policy.prov_enabled = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
-	prov_all = true;
+	prov_policy.prov_all = true;
 #else
-	prov_all = false;
+	prov_policy.prov_all = false;
 #endif
 	prov_machine_id = 1;
 	prov_boot_id = 0;
@@ -1595,7 +1594,7 @@ void __init provenance_add_hooks(void)
 	relay_ready = false;
 	cred_init_provenance();
 	/* register the provenance security hooks */
-	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks));
+	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");
 	pr_info("Provenance: Camflow %s\n", CAMFLOW_VERSION_STR);
 	pr_info("Provenance: hooks ready.\n");
 }

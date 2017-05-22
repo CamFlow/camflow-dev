@@ -17,6 +17,7 @@
 #include <linux/namei.h>
 #include <linux/xattr.h>
 
+#include "provenance_policy.h"
 #include "provenance_secctx.h"  // for record_inode_name
 
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
@@ -116,7 +117,7 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
 {
 	struct provenance *prov;
 
-	if (!provenance_is_tracked(prov_elt(iprov)) && !provenance_is_tracked(prov_elt(cprov)) && !prov_all)
+	if (!provenance_is_tracked(prov_elt(iprov)) && !provenance_is_tracked(prov_elt(cprov)) && !prov_policy.prov_all)
 		return NULL;
 	prov = alloc_provenance(ENT_INODE_MMAP, GFP_ATOMIC);
 	if (!prov)
@@ -319,7 +320,7 @@ static inline int close_inode(struct provenance *iprov)
 	union prov_elt old_prov;
 	int rc;
 
-	if (!provenance_is_tracked(prov_elt(iprov)) && !prov_all)
+	if (!provenance_is_tracked(prov_elt(iprov)) && !prov_policy.prov_all)
 		return 0;
 	if (filter_node(prov_entry(iprov)))
 		return 0;

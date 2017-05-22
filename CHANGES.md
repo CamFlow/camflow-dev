@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.3.1           | 4.11.2         | 22/05/2017 |
 | 0.3.0           | 4.10.10        | 15/04/2017 |
 | 0.2.3           | 4.9.13         | 09/03/2017 |
 | 0.2.2           | 4.9.9          | 14/02/2017 |
@@ -20,12 +21,22 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.3.1
+```
+- Expose hash of currently loaded capture polciy to user space.
+- Update filters to support namespaces based selection.
+- Load netfilter on subsys_initcall.
+- Load propagate "query" much earlier.
+- Record all available namespace id.
+- Update to kernel version 4.11.2.
+```
+
 ### v0.3.0
 ```
-- make persistence of inode provenance information a build option.
-- add a closed relationship when an inode is freed.
-- add a terminate relationship when a cred is freed.
-- boot id is set from userspace.
+- Make persistence of inode provenance information a build option.
+- Add a closed relationship when an inode is freed.
+- Add a terminate relationship when a cred is freed.
+- Boot id is set from userspace.
 - union prov_msg -> union prov_elt
 - Implemented run-time query system.
 - Debug output legibility improved.
