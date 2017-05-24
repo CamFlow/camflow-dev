@@ -1,5 +1,5 @@
 kernel-version=4.11.2
-lsm-version=0.3.1
+lsm-version=0.3.2
 arch=x86_64
 
 all: config compile
