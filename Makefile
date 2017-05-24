@@ -52,6 +52,7 @@ copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../include .
 
 copy_config:
+	cp -f /boot/config-$(shell uname -r) .config
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 
 config: copy_change copy_config
@@ -88,6 +89,7 @@ install: install_kernel install_us
 install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
+	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow-$(lsm-version)
 
 install_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) install
