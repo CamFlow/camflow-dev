@@ -67,7 +67,7 @@ compile_security: copy_change
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
 
-rpm: copy_change
+rpm:
 	cd ./build/linux-$(kernel-version) && $(MAKE) rpm
 
 compile_us:
@@ -124,7 +124,7 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 
-test_travis: copy_change
+test_travis:
 	@echo "Running sparse..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/
 	@echo "Running checkpatch..."
