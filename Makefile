@@ -4,15 +4,6 @@ arch=x86_64
 
 all: config compile
 
-config_ubuntu:
-	cp -f configs/config-ubuntu .config
-
-config_fedora:
-	cp -f configs/config-fedora .config
-
-config_dev:
-	cp -f configs/config-dev .config
-
 prepare: prepare_kernel prepare_us
 
 prepare_kernel:
@@ -61,7 +52,7 @@ config: copy_change copy_config
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
-config_travis: config_fedora copy_change copy_config
+config_travis: copy_change copy_config
 	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
 	cd ./build/linux-$(kernel-version) && $(MAKE) oldconfig
 
