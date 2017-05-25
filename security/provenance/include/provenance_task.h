@@ -128,7 +128,6 @@ static inline uint32_t current_pidns(void)
 	ns = task_active_pid_ns(current);
 	if (ns) {
 		id = ns->ns.inum;
-		put_pid_ns(ns);
 	}
 	task_unlock(current);
 	return id;
