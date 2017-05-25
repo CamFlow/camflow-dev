@@ -24,6 +24,7 @@
 
 ### v0.3.2
 ```
+- Fix issue created by reading pidns.
 - Update to kernel version 4.11.2.
 ```
 
