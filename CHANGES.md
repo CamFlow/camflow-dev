@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.2           | 4.11.2         | N/A        |
+| 0.3.2           | 4.11.3         | N/A        |
 | 0.3.1           | 4.11.2         | 22/05/2017 |
 | 0.3.0           | 4.10.10        | 15/04/2017 |
 | 0.2.3           | 4.9.13         | 09/03/2017 |
@@ -25,7 +25,7 @@
 ### v0.3.2
 ```
 - Fix issue created by reading pidns.
-- Update to kernel version 4.11.2.
+- Update to kernel version 4.11.3.
 ```
 
 ### v0.3.1
