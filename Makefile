@@ -67,9 +67,6 @@ compile_security: copy_change
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
 
-rpm:
-	cd ./build/linux-$(kernel-version) && $(MAKE) rpm
-
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 	cd ./build/camflow-provenance-lib && $(MAKE) clean
@@ -175,7 +172,3 @@ patch: copy_change
 
 prepare_release_travis: rpm
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
-	cp -f /home/travis/rpmbuild/SRPMS/kernel-$(kernel-version)camflow_$(lsm-version)-2.src.rpm camflow-kernel.src.rpm
-	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel.x86_64.rpm
-	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-headers-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel-headers.x86_64.rpm
-	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-devel-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel-devel.x86_64.rpm
