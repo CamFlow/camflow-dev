@@ -1,17 +1,8 @@
-kernel-version=4.11.2
-lsm-version=0.3.1
+kernel-version=4.11.3
+lsm-version=0.3.2
 arch=x86_64
 
 all: config compile
-
-config_ubuntu:
-	cp -f configs/config-ubuntu .config
-
-config_fedora:
-	cp -f configs/config-fedora .config
-
-config_dev:
-	cp -f configs/config-dev .config
 
 prepare: prepare_kernel prepare_us
 
@@ -52,6 +43,7 @@ copy_change:
 	cd ./build/linux-$(kernel-version) && cp -r ../../include .
 
 copy_config:
+	cp -f /boot/config-$(shell uname -r) .config
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 
 config: copy_change copy_config
@@ -60,7 +52,10 @@ config: copy_change copy_config
 	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
 
-config_travis: config_fedora copy_change copy_config
+config_travis: copy_change copy_config
+	cd ./build/linux-$(kernel-version) && ./scripts/kconfig/streamline_config.pl > config_strip
+	cd ./build/linux-$(kernel-version) &&  mv .config config_sav
+	cd ./build/linux-$(kernel-version) &&  mv config_strip .config
 	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
 	cd ./build/linux-$(kernel-version) && $(MAKE) oldconfig
 
@@ -71,9 +66,6 @@ compile_security: copy_change
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
-
-rpm: copy_change
-	cd ./build/linux-$(kernel-version) && $(MAKE) rpm
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -88,6 +80,7 @@ install: install_kernel install_us
 install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
+	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow-$(lsm-version)
 
 install_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) install
@@ -128,7 +121,7 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 
-test_travis: copy_change
+test_travis:
 	@echo "Running sparse..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) C=2 security/provenance/
 	@echo "Running checkpatch..."
@@ -177,9 +170,5 @@ patch: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build && diff -uprN -b -B ./pristine/linux-$(kernel-version) ./linux-$(kernel-version) > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
 
-prepare_release_travis: rpm
+prepare_release_travis:
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
-	cp -f /home/travis/rpmbuild/SRPMS/kernel-$(kernel-version)camflow_$(lsm-version)-2.src.rpm camflow-kernel.src.rpm
-	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel.x86_64.rpm
-	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-headers-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel-headers.x86_64.rpm
-	cp -f /home/travis/rpmbuild/RPMS/x86_64/kernel-devel-$(kernel-version)camflow_$(lsm-version)-2.x86_64.rpm camflow-kernel-devel.x86_64.rpm
