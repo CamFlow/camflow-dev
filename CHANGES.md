@@ -25,7 +25,7 @@
 
 ### v0.3.3
 ```
-- 
+- Use netfilter per net registration.
 - Update to kernel version 4.11.3.
 ```
 

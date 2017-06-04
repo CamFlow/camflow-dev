@@ -10,6 +10,8 @@
  * or (at your option) any later version.
  *
  */
+#include <net/net_namespace.h>
+
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
@@ -57,14 +59,25 @@ static struct nf_hook_ops provenance_nf_ops[] = {
 };
 
 // will initialise the hooks
-static int __init provenance_nf_init(void)
+static int __net_init provenance_nf_register(struct net *net)
 {
-	int err;
-
-	err = nf_register_hooks(provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
-	if (err)
-		panic("Provenance: nf_register_hooks: error %d\n", err);
-	pr_info("Provenance: netfilter ready.\n");
-	return 0;
+	return nf_register_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
 }
-subsys_initcall(provenance_nf_init);
+
+static void __net_exit provenance_nf_unregister(struct net *net)
+{
+	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
+}
+
+static struct pernet_operations provenance_net_ops = {
+	.init = provenance_nf_register,
+	.exit = provenance_nf_unregister,
+};
+
+static int __init provenance_nf_ip_init(void)
+{
+	pr_info("Provenance: registering netfilter hooks.\n");
+	return register_pernet_subsys(&provenance_net_ops);
+}
+
+__initcall(provenance_nf_ip_init);
