@@ -10,6 +10,12 @@ prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
 	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow-$(lsm-version)/g" Makefile
+	cd ./build && git clone https://github.com/CamFlow/information-flow-patch.git
+	cd ./build && mkdir -p ./information-flow-patch/build
+	cd ./build && cp -f linux-$(kernel-version).tar.xz ./information-flow-patch/build/linux-$(kernel-version).tar.xz
+	cd ./build/information-flow-patch/build && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
+	cd ./build/information-flow-patch && $(MAKE) patch
+	cd ./build/linux-$(kernel-version) && patch -p2 < ../information-flow-patch/output/patch-$(kernel-version)-flow-friendly
 
 prepare_provenance:
 	mkdir -p build

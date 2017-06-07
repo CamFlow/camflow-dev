@@ -25,6 +25,7 @@
 
 ### v0.3.3
 ```
+- Improve LSM support for Information Flow see [#41](https://github.com/CamFlow/camflow-dev/issues/41).
 - Use netfilter per net registration.
 - Update to kernel version 4.11.3.
 ```

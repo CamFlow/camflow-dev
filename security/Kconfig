@@ -193,6 +193,14 @@ config STATIC_USERMODEHELPER_PATH
 	  If you wish for all usermode helper programs to be disabled,
 	  specify an empty string here (i.e. "").
 
+config SECURITY_FLOW_FRIENDLY
+	bool "Security hooks for information flow mechanisms."
+	default y
+	help
+		This option adds hooks to support information flow mechanisms. Some
+		information flow are not captured by LSM as it was designed for access
+		control.
+
 source security/selinux/Kconfig
 source security/smack/Kconfig
 source security/tomoyo/Kconfig

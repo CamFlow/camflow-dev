@@ -887,6 +887,15 @@ int security_mmap_addr(unsigned long addr)
 	return call_int_hook(mmap_addr, 0, addr);
 }
 
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+void security_mmap_munmap(struct mm_struct *mm,
+					struct vm_area_struct *vma,
+					unsigned long start, unsigned long end)
+{
+	call_void_hook(mmap_munmap, mm, vma, start, end);
+}
+#endif
+
 int security_file_mprotect(struct vm_area_struct *vma, unsigned long reqprot,
 			    unsigned long prot)
 {
@@ -929,6 +938,14 @@ int security_file_open(struct file *file, const struct cred *cred)
 
 	return fsnotify_perm(file, MAY_OPEN);
 }
+
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+int security_file_splice_pipe_to_pipe(struct file *in,
+						    struct file *out)
+{
+	return call_int_hook(file_splice_pipe_to_pipe, 0, in, out);
+}
+#endif
 
 int security_task_create(unsigned long clone_flags)
 {
@@ -1144,6 +1161,21 @@ int security_msg_queue_msgrcv(struct msg_queue *msq, struct msg_msg *msg,
 	return call_int_hook(msg_queue_msgrcv, 0, msq, msg, target, type, mode);
 }
 
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+int security_mq_timedsend(struct file *mq, size_t msg_len,
+					unsigned long msg_prio,
+					struct timespec *ts)
+{
+	return call_int_hook(mq_timedsend, 0, mq, msg_len, msg_prio, ts);
+}
+
+int security_mq_timedreceive(struct file *mq, size_t msg_len,
+					   struct timespec *ts)
+{
+	return call_int_hook(mq_timedreceive, 0, mq, msg_len, ts);
+}
+#endif
+
 int security_shm_alloc(struct shmid_kernel *shp)
 {
 	return call_int_hook(shm_alloc_security, 0, shp);
@@ -1168,6 +1200,13 @@ int security_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, int shmfl
 {
 	return call_int_hook(shm_shmat, 0, shp, shmaddr, shmflg);
 }
+
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+void security_shm_shmdt(struct shmid_kernel *shp)
+{
+	call_void_hook(shm_shmdt, shp);
+}
+#endif
 
 int security_sem_alloc(struct sem_array *sma)
 {
@@ -1757,6 +1796,9 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.file_free_security),
 	.file_ioctl =	LIST_HEAD_INIT(security_hook_heads.file_ioctl),
 	.mmap_addr =	LIST_HEAD_INIT(security_hook_heads.mmap_addr),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.mmap_munmap =	LIST_HEAD_INIT(security_hook_heads.mmap_munmap),
+#endif
 	.mmap_file =	LIST_HEAD_INIT(security_hook_heads.mmap_file),
 	.file_mprotect =
 		LIST_HEAD_INIT(security_hook_heads.file_mprotect),
@@ -1768,6 +1810,9 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.file_send_sigiotask),
 	.file_receive =	LIST_HEAD_INIT(security_hook_heads.file_receive),
 	.file_open =	LIST_HEAD_INIT(security_hook_heads.file_open),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.file_splice_pipe_to_pipe =	LIST_HEAD_INIT(security_hook_heads.file_splice_pipe_to_pipe),
+#endif
 	.task_create =	LIST_HEAD_INIT(security_hook_heads.task_create),
 	.task_free =	LIST_HEAD_INIT(security_hook_heads.task_free),
 	.cred_alloc_blank =
@@ -1829,6 +1874,10 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.msg_queue_msgsnd),
 	.msg_queue_msgrcv =
 		LIST_HEAD_INIT(security_hook_heads.msg_queue_msgrcv),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.mq_timedsend = LIST_HEAD_INIT(security_hook_heads.mq_timedsend),
+	.mq_timedreceive = LIST_HEAD_INIT(security_hook_heads.mq_timedreceive),
+#endif
 	.shm_alloc_security =
 		LIST_HEAD_INIT(security_hook_heads.shm_alloc_security),
 	.shm_free_security =
@@ -1837,6 +1886,9 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.shm_associate),
 	.shm_shmctl =	LIST_HEAD_INIT(security_hook_heads.shm_shmctl),
 	.shm_shmat =	LIST_HEAD_INIT(security_hook_heads.shm_shmat),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.shm_shmdt =	LIST_HEAD_INIT(security_hook_heads.shm_shmdt),
+#endif
 	.sem_alloc_security =
 		LIST_HEAD_INIT(security_hook_heads.sem_alloc_security),
 	.sem_free_security =

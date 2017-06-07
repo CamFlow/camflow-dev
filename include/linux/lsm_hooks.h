@@ -1459,6 +1459,11 @@ union security_list_options {
 	int (*file_ioctl)(struct file *file, unsigned int cmd,
 				unsigned long arg);
 	int (*mmap_addr)(unsigned long addr);
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	void (*mmap_munmap)(struct mm_struct *mm,
+						struct vm_area_struct *vma,
+						unsigned long start, unsigned long end);
+#endif
 	int (*mmap_file)(struct file *file, unsigned long reqprot,
 				unsigned long prot, unsigned long flags);
 	int (*file_mprotect)(struct vm_area_struct *vma, unsigned long reqprot,
@@ -1471,6 +1476,10 @@ union security_list_options {
 					struct fown_struct *fown, int sig);
 	int (*file_receive)(struct file *file);
 	int (*file_open)(struct file *file, const struct cred *cred);
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	int (*file_splice_pipe_to_pipe)(struct file *in,
+							    struct file *out);
+#endif
 
 	int (*task_create)(unsigned long clone_flags);
 	void (*task_free)(struct task_struct *task);
@@ -1520,6 +1529,13 @@ union security_list_options {
 	int (*msg_queue_msgrcv)(struct msg_queue *msq, struct msg_msg *msg,
 				struct task_struct *target, long type,
 				int mode);
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	int (*mq_timedsend)(struct file *mq, size_t msg_len,
+									unsigned long msg_prio,
+									struct timespec *ts);
+	int (*mq_timedreceive)(struct file *mq, size_t msg_len,
+						   struct timespec *ts);
+#endif
 
 	int (*shm_alloc_security)(struct shmid_kernel *shp);
 	void (*shm_free_security)(struct shmid_kernel *shp);
@@ -1527,6 +1543,9 @@ union security_list_options {
 	int (*shm_shmctl)(struct shmid_kernel *shp, int cmd);
 	int (*shm_shmat)(struct shmid_kernel *shp, char __user *shmaddr,
 				int shmflg);
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	void (*shm_shmdt)(struct shmid_kernel *shp);
+#endif
 
 	int (*sem_alloc_security)(struct sem_array *sma);
 	void (*sem_free_security)(struct sem_array *sma);
@@ -1728,6 +1747,9 @@ struct security_hook_heads {
 	struct list_head file_free_security;
 	struct list_head file_ioctl;
 	struct list_head mmap_addr;
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head mmap_munmap;
+#endif
 	struct list_head mmap_file;
 	struct list_head file_mprotect;
 	struct list_head file_lock;
@@ -1736,6 +1758,9 @@ struct security_hook_heads {
 	struct list_head file_send_sigiotask;
 	struct list_head file_receive;
 	struct list_head file_open;
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head file_splice_pipe_to_pipe;
+#endif
 	struct list_head task_create;
 	struct list_head task_free;
 	struct list_head cred_alloc_blank;
@@ -1772,11 +1797,18 @@ struct security_hook_heads {
 	struct list_head msg_queue_msgctl;
 	struct list_head msg_queue_msgsnd;
 	struct list_head msg_queue_msgrcv;
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head mq_timedsend;
+	struct list_head mq_timedreceive;
+#endif
 	struct list_head shm_alloc_security;
 	struct list_head shm_free_security;
 	struct list_head shm_associate;
 	struct list_head shm_shmctl;
 	struct list_head shm_shmat;
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head shm_shmdt;
+#endif
 	struct list_head sem_alloc_security;
 	struct list_head sem_free_security;
 	struct list_head sem_associate;
