@@ -1229,7 +1229,7 @@ out:
  * @size contains the size of message.
  * Return 0 if permission is granted.
  */
-static int provenance_socket_sendmsg(struct socket *sock,
+static int provenance_socket_sendmsg_always(struct socket *sock,
 				     struct msghdr *msg,
 				     int size)
 {
@@ -1256,7 +1256,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
  * @flags contains the operational flags.
  * Return 0 if permission is granted.
  */
-static int provenance_socket_recvmsg(struct socket *sock,
+static int provenance_socket_recvmsg_always(struct socket *sock,
 				     struct msghdr *msg,
 				     int size,
 				     int flags)
@@ -1482,68 +1482,68 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 
 static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	/* task related hooks */
-	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_free,	      provenance_cred_free),
-	LSM_HOOK_INIT(cred_prepare,	      provenance_cred_prepare),
-	LSM_HOOK_INIT(cred_transfer,	      provenance_cred_transfer),
-	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
+	LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
+	LSM_HOOK_INIT(cred_free, provenance_cred_free),
+	LSM_HOOK_INIT(cred_prepare, provenance_cred_prepare),
+	LSM_HOOK_INIT(cred_transfer, provenance_cred_transfer),
+	LSM_HOOK_INIT(task_fix_setuid, provenance_task_fix_setuid),
 
 	/* inode related hooks */
-	LSM_HOOK_INIT(inode_alloc_security,   provenance_inode_alloc_security),
-	LSM_HOOK_INIT(inode_create,	      provenance_inode_create),
-	LSM_HOOK_INIT(inode_free_security,    provenance_inode_free_security),
-	LSM_HOOK_INIT(inode_permission,	      provenance_inode_permission),
-	LSM_HOOK_INIT(inode_link,	      provenance_inode_link),
-	LSM_HOOK_INIT(inode_rename,	      provenance_inode_rename),
-	LSM_HOOK_INIT(inode_setattr,	      provenance_inode_setattr),
-	LSM_HOOK_INIT(inode_getattr,	      provenance_inode_getattr),
-	LSM_HOOK_INIT(inode_readlink,	      provenance_inode_readlink),
-	LSM_HOOK_INIT(inode_setxattr,	      provenance_inode_setxattr),
-	LSM_HOOK_INIT(inode_post_setxattr,    provenance_inode_post_setxattr),
-	LSM_HOOK_INIT(inode_getxattr,	      provenance_inode_getxattr),
-	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
-	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
-	LSM_HOOK_INIT(inode_getsecurity,      provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_listsecurity,     provenance_inode_listsecurity),
+	LSM_HOOK_INIT(inode_alloc_security, provenance_inode_alloc_security),
+	LSM_HOOK_INIT(inode_create, provenance_inode_create),
+	LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
+	LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
+	LSM_HOOK_INIT(inode_link, provenance_inode_link),
+	LSM_HOOK_INIT(inode_rename, provenance_inode_rename),
+	LSM_HOOK_INIT(inode_setattr, provenance_inode_setattr),
+	LSM_HOOK_INIT(inode_getattr, provenance_inode_getattr),
+	LSM_HOOK_INIT(inode_readlink, provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_setxattr, provenance_inode_setxattr),
+	LSM_HOOK_INIT(inode_post_setxattr, provenance_inode_post_setxattr),
+	LSM_HOOK_INIT(inode_getxattr, provenance_inode_getxattr),
+	LSM_HOOK_INIT(inode_listxattr, provenance_inode_listxattr),
+	LSM_HOOK_INIT(inode_removexattr, provenance_inode_removexattr),
+	LSM_HOOK_INIT(inode_getsecurity, provenance_inode_getsecurity),
+	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
 
 	/* file related hooks */
-	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
-	LSM_HOOK_INIT(mmap_file,	      provenance_mmap_file),
-	LSM_HOOK_INIT(file_ioctl,	      provenance_file_ioctl),
-	LSM_HOOK_INIT(file_open,	      provenance_file_open),
+	LSM_HOOK_INIT(file_permission, provenance_file_permission),
+	LSM_HOOK_INIT(mmap_file, provenance_mmap_file),
+	LSM_HOOK_INIT(file_ioctl, provenance_file_ioctl),
+	LSM_HOOK_INIT(file_open, provenance_file_open),
 
 	/* msg related hooks */
 	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
-	LSM_HOOK_INIT(msg_msg_free_security,  provenance_msg_msg_free_security),
-	LSM_HOOK_INIT(msg_queue_msgsnd,	      provenance_msg_queue_msgsnd),
-	LSM_HOOK_INIT(msg_queue_msgrcv,	      provenance_msg_queue_msgrcv),
+	LSM_HOOK_INIT(msg_msg_free_security, provenance_msg_msg_free_security),
+	LSM_HOOK_INIT(msg_queue_msgsnd, provenance_msg_queue_msgsnd),
+	LSM_HOOK_INIT(msg_queue_msgrcv, provenance_msg_queue_msgrcv),
 
 	/* shared memory related hooks */
-	LSM_HOOK_INIT(shm_alloc_security,     provenance_shm_alloc_security),
-	LSM_HOOK_INIT(shm_free_security,      provenance_shm_free_security),
-	LSM_HOOK_INIT(shm_shmat,	      provenance_shm_shmat),
+	LSM_HOOK_INIT(shm_alloc_security, provenance_shm_alloc_security),
+	LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
+	LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
 
 	/* socket related hooks */
-	LSM_HOOK_INIT(sk_alloc_security,      provenance_sk_alloc_security),
-	LSM_HOOK_INIT(socket_post_create,     provenance_socket_post_create),
-	LSM_HOOK_INIT(socket_bind,	      provenance_socket_bind),
-	LSM_HOOK_INIT(socket_connect,	      provenance_socket_connect),
-	LSM_HOOK_INIT(socket_listen,	      provenance_socket_listen),
-	LSM_HOOK_INIT(socket_accept,	      provenance_socket_accept),
-	LSM_HOOK_INIT(socket_sendmsg,	      provenance_socket_sendmsg),
-	LSM_HOOK_INIT(socket_recvmsg,	      provenance_socket_recvmsg),
-	LSM_HOOK_INIT(socket_sock_rcv_skb,    provenance_socket_sock_rcv_skb),
-	LSM_HOOK_INIT(unix_stream_connect,    provenance_unix_stream_connect),
-	LSM_HOOK_INIT(unix_may_send,	      provenance_unix_may_send),
+	LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
+	LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
+	LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
+	LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
+	LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
+	LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
+	LSM_HOOK_INIT(socket_sendmsg_always, provenance_socket_sendmsg_always),
+	LSM_HOOK_INIT(socket_recvmsg_always, provenance_socket_recvmsg_always),
+	LSM_HOOK_INIT(socket_sock_rcv_skb, provenance_socket_sock_rcv_skb),
+	LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
+	LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_set_creds,	      provenance_bprm_set_creds),
-	LSM_HOOK_INIT(bprm_committing_creds,  provenance_bprm_committing_creds),
+	LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
+	LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
 
 	/* file system related hooks */
-	LSM_HOOK_INIT(sb_alloc_security,      provenance_sb_alloc_security),
-	LSM_HOOK_INIT(sb_free_security,	      provenance_sb_free_security),
-	LSM_HOOK_INIT(sb_kern_mount,	      provenance_sb_kern_mount)
+	LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
+	LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
+	LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
 };
 
 struct kmem_cache *provenance_cache;

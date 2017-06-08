@@ -1586,8 +1586,16 @@ union security_list_options {
 	int (*socket_accept)(struct socket *sock, struct socket *newsock);
 	int (*socket_sendmsg)(struct socket *sock, struct msghdr *msg,
 				int size);
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	int (*socket_sendmsg_always)(struct socket *sock, struct msghdr *msg,
+				int size);
+#endif
 	int (*socket_recvmsg)(struct socket *sock, struct msghdr *msg,
 				int size, int flags);
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	int (*socket_recvmsg_always)(struct socket *sock, struct msghdr *msg,
+				int size, int flags);
+#endif
 	int (*socket_getsockname)(struct socket *sock);
 	int (*socket_getpeername)(struct socket *sock);
 	int (*socket_getsockopt)(struct socket *sock, int level, int optname);
@@ -1836,7 +1844,13 @@ struct security_hook_heads {
 	struct list_head socket_listen;
 	struct list_head socket_accept;
 	struct list_head socket_sendmsg;
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head socket_sendmsg_always;
+#endif
 	struct list_head socket_recvmsg;
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head socket_recvmsg_always;
+#endif
 	struct list_head socket_getsockname;
 	struct list_head socket_getpeername;
 	struct list_head socket_getsockopt;

@@ -1358,11 +1358,26 @@ int security_socket_sendmsg(struct socket *sock, struct msghdr *msg, int size)
 	return call_int_hook(socket_sendmsg, 0, sock, msg, size);
 }
 
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+int security_socket_sendmsg_always(struct socket *sock, struct msghdr *msg, int size)
+{
+	return call_int_hook(socket_sendmsg_always, 0, sock, msg, size);
+}
+#endif
+
 int security_socket_recvmsg(struct socket *sock, struct msghdr *msg,
 			    int size, int flags)
 {
 	return call_int_hook(socket_recvmsg, 0, sock, msg, size, flags);
 }
+
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+int security_socket_recvmsg_always(struct socket *sock, struct msghdr *msg,
+			    int size, int flags)
+{
+	return call_int_hook(socket_recvmsg_always, 0, sock, msg, size, flags);
+}
+#endif
 
 int security_socket_getsockname(struct socket *sock)
 {
@@ -1935,8 +1950,16 @@ struct security_hook_heads security_hook_heads = {
 		LIST_HEAD_INIT(security_hook_heads.socket_accept),
 	.socket_sendmsg =
 		LIST_HEAD_INIT(security_hook_heads.socket_sendmsg),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.socket_sendmsg_always =
+		LIST_HEAD_INIT(security_hook_heads.socket_sendmsg_always),
+#endif
 	.socket_recvmsg =
 		LIST_HEAD_INIT(security_hook_heads.socket_recvmsg),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.socket_recvmsg_always =
+		LIST_HEAD_INIT(security_hook_heads.socket_recvmsg_always),
+#endif
 	.socket_getsockname =
 		LIST_HEAD_INIT(security_hook_heads.socket_getsockname),
 	.socket_getpeername =
