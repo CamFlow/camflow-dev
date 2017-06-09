@@ -1229,9 +1229,15 @@ out:
  * @size contains the size of message.
  * Return 0 if permission is granted.
  */
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_sendmsg_always(struct socket *sock,
 				     struct msghdr *msg,
 				     int size)
+#else /* CONFIG_SECURITY_FLOW_FRIENDLY */
+static int provenance_socket_sendmsg(struct socket *sock,
+				     struct msghdr *msg,
+				     int size)
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
@@ -1256,10 +1262,17 @@ static int provenance_socket_sendmsg_always(struct socket *sock,
  * @flags contains the operational flags.
  * Return 0 if permission is granted.
  */
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_recvmsg_always(struct socket *sock,
 				     struct msghdr *msg,
 				     int size,
 				     int flags)
+#else /* CONFIG_SECURITY_FLOW_FRIENDLY */
+static int provenance_socket_recvmsg(struct socket *sock,
+				     struct msghdr *msg,
+				     int size,
+				     int flags)
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
@@ -1530,8 +1543,13 @@ static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
 	LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
 	LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(socket_sendmsg_always, provenance_socket_sendmsg_always),
 	LSM_HOOK_INIT(socket_recvmsg_always, provenance_socket_recvmsg_always),
+#else /* CONFIG_SECURITY_FLOW_FRIENDLY */
+	LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
+	LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 	LSM_HOOK_INIT(socket_sock_rcv_skb, provenance_socket_sock_rcv_skb),
 	LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
 	LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
