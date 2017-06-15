@@ -1145,6 +1145,7 @@ static int provenance_socket_connect(struct socket *sock,
 	struct provenance *cprov  = current_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct sockaddr_in *ipv4_addr;
+	struct sockaddr_in6 *ipv6_addr;
 	unsigned long irqflags;
 	uint8_t op;
 	int rc = 0;
@@ -1159,8 +1160,18 @@ static int provenance_socket_connect(struct socket *sock,
 
 	/* should we start tracking this socket */
 	if (address->sa_family == AF_INET) {
+		if (addrlen < sizeof(struct sockaddr_in))
+			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+	}
+	if (address->sa_family == AF_INET6) {
+		if (addrlen < SIN6_LEN_RFC2133)
+			return -EINVAL;
+		ipv6_addr = (struct sockaddr_in6 *)address;
+		op = prov_ipv6_egressOP(ipv6_addr->sin6_addr.s6_addr, ipv6_addr->sin6_port);
+	}
+	if (address->sa_family == AF_INET || address->sa_family == AF_INET6) {
 		if ((op & PROV_NET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));

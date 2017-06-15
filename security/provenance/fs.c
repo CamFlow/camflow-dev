@@ -664,7 +664,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct secctx_filters *secctx_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
-	if(IS_ERR(policy_shash_tfm))
+	if (IS_ERR(policy_shash_tfm))
 		return -ENOMEM;
 	pos = crypto_shash_digestsize(policy_shash_tfm);
 	if (count < pos)
@@ -691,14 +691,14 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* LSM version */
-	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
 	if (rc) {
 		pr_err("Provenance: error updating hash.");
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* general policy */
-	rc = crypto_shash_update(hashdesc, (u8*)&prov_policy, sizeof(struct capture_policy));
+	rc = crypto_shash_update(hashdesc, (u8 *)&prov_policy, sizeof(struct capture_policy));
 	if (rc) {
 		pr_err("Provenance: error updating hash.");
 		pos = -EAGAIN;
@@ -707,7 +707,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	/* ingress network policy */
 	list_for_each_safe(listentry, listtmp, &ingress_ipv4filters) {
 		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
+		rc = crypto_shash_update(hashdesc, (u8 *)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
 		if (rc) {
 			pr_err("Provenance: error updating hash.");
 			pos = -EAGAIN;
@@ -717,7 +717,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	/* egress network policy */
 	list_for_each_safe(listentry, listtmp, &egress_ipv4filters) {
 		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
+		rc = crypto_shash_update(hashdesc, (u8 *)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
 		if (rc) {
 			pr_err("Provenance: error updating hash.");
 			pos = -EAGAIN;
@@ -727,7 +727,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	/* namespace policy */
 	list_for_each_safe(listentry, listtmp, &ns_filters) {
 		ns_tmp = list_entry(listentry, struct ns_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ns_tmp->filter, sizeof(struct nsinfo));
+		rc = crypto_shash_update(hashdesc, (u8 *)&ns_tmp->filter, sizeof(struct nsinfo));
 		if (rc) {
 			pr_err("Provenance: error updating hash.");
 			pos = -EAGAIN;
@@ -737,7 +737,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	/* secctx policy */
 	list_for_each_safe(listentry, listtmp, &secctx_filters) {
 		secctx_tmp = list_entry(listentry, struct secctx_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&secctx_tmp->filter, sizeof(struct secinfo));
+		rc = crypto_shash_update(hashdesc, (u8 *)&secctx_tmp->filter, sizeof(struct secinfo));
 		if (rc) {
 			pr_err("Provenance: error updating hash.");
 			pos = -EAGAIN;

@@ -165,15 +165,16 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
 
 static inline uint8_t ipv6_match_filter(struct prov_ipv6_filter filters, uint8_t *ip)
 {
+	uint32_t i;
 	uint8_t *filter_ip = filters.ip;
 	uint8_t *filter_mask = filters.mask;
-	for (uint32_t i = 0; i < 16; i++) {
+	for (i = 0; i < 16; i++) {
 		if ((filter_mask[i] & ip[i]) != (filter_mask[i] & filter_ip[i]))
 			goto out;
 	}
 	return 1;
 out:
-	return 0;	
+	return 0;
 }
 
 static inline uint8_t prov_ipv6_whichOP(struct list_head *filters, uint8_t *ip, uint16_t port)
