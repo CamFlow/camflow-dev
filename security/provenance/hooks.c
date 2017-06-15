@@ -891,6 +891,22 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
 	msg->provenance = NULL;
 }
 
+
+static inline int __mq_msgsnd(struct msg_msg *msg)
+{
+	struct provenance *cprov = current_provenance();
+	struct provenance *mprov = msg->provenance;
+	unsigned long irqflags;
+	int rc;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
+	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
+	rc = flow_from_activity(RL_CREATE, cprov, mprov, NULL);
+	spin_unlock(prov_lock(mprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
 /*
  * Check permission before a message, @msg, is enqueued on the message
  * queue, @msq.
@@ -903,14 +919,26 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq,
 				       struct msg_msg *msg,
 				       int msqflg)
 {
-	struct provenance *cprov = current_provenance();
+	return __mq_msgsnd(msg);
+}
+
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
+				struct timespec *ts)
+{
+	return __mq_msgsnd(msg);
+}
+#endif
+
+static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
+{
 	struct provenance *mprov = msg->provenance;
 	unsigned long irqflags;
 	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
-	rc = flow_from_activity(RL_CREATE, cprov, mprov, NULL);
+	rc = flow_to_activity(RL_READ, mprov, cprov, NULL);
 	spin_unlock(prov_lock(mprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -935,17 +963,17 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
 				       int mode)
 {
 	struct provenance *cprov = target->cred->provenance;
-	struct provenance *mprov = msg->provenance;
-	unsigned long irqflags;
-	int rc;
-
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
-	rc = flow_to_activity(RL_READ, mprov, cprov, NULL);
-	spin_unlock(prov_lock(mprov));
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	return rc;
+	return __mq_msgrcv(cprov, msg);
 }
+
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
+				struct timespec *ts)
+{
+	struct provenance *cprov = current_provenance();
+	return __mq_msgrcv(cprov, msg);
+}
+#endif
 
 /*
  * Allocate and attach a security structure to the shp->shm_perm.security
@@ -1546,6 +1574,8 @@ static struct security_hook_list provenance_hooks[] __ro_after_init = {
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(socket_sendmsg_always, provenance_socket_sendmsg_always),
 	LSM_HOOK_INIT(socket_recvmsg_always, provenance_socket_recvmsg_always),
+	LSM_HOOK_INIT(mq_timedreceive, provenance_mq_timedreceive),
+	LSM_HOOK_INIT(mq_timedsend, provenance_mq_timedsend),
 #else /* CONFIG_SECURITY_FLOW_FRIENDLY */
 	LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
 	LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
