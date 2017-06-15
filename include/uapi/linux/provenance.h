@@ -497,6 +497,14 @@ struct prov_ipv4_filter {
 	uint64_t taint;
 };
 
+struct prov_ipv6_filter {
+	uint8_t ip[16];
+	uint8_t mask[16];
+	uint16_t port;
+	uint8_t op;
+	uint64_t taint;
+};
+
 #define PROV_SEC_TRACKED      0x01
 #define PROV_SEC_OPAQUE       0x02
 #define PROV_SEC_PROPAGATE    0x04

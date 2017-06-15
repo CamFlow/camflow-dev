@@ -1091,7 +1091,6 @@ static int provenance_socket_bind(struct socket *sock,
 	struct sockaddr_in6 *ipv6_addr = NULL;
 	uint8_t op;
 	int rc;
-	int check = 0;
 
 	if (!iprov)
 		return -ENOMEM;
@@ -1104,18 +1103,15 @@ static int provenance_socket_bind(struct socket *sock,
 		if (addrlen < sizeof(struct sockaddr_in))
 			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
-		//op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		op = prov_ingressOP(address->sa_family, (char *)ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		check = 1;
+		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 	}
 	if (address->sa_family == AF_INET6) {
 		if (addrlen < SIN6_LEN_RFC2133)
 			return -EINVAL;
 		ipv6_addr = (struct sockaddr_in6 *)address;
-		op = prov_ingressOP(address->sa_family, (char *)ipv6_addr->sin6_addr.s6_addr, ipv6_addr->sin6_port);
-		check = 1;
+		op = prov_ipv6_ingressOP(ipv6_addr->sin6_addr.s6_addr, ipv6_addr->sin6_port);
 	}
-	if (check) {
+	if (address->sa_family == AF_INET || address->sa_family == AF_INET6) {
 		if ((op & PROV_NET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));

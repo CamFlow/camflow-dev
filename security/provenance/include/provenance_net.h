@@ -134,13 +134,22 @@ struct ipv4_filters {
 	struct prov_ipv4_filter filter;
 };
 
+struct ipv6_filters {
+	struct list_head list;
+	struct prov_ipv6_filter filter;
+};
+
 extern struct list_head ingress_ipv4filters;
 extern struct list_head egress_ipv4filters;
+extern struct list_head ingress_ipv6filters;
+extern struct list_head egress_ipv6filters;
 
 #define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 #define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
+#define prov_ipv6_ingressOP(ip, port) prov_ipv6_whichOP(&ingress_ipv6filters, ip, port)
+#define prov_ipv6_egressOP(ip, port) prov_ipv6_whichOP(&egress_ipv6filters, ip, port)
 
-static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, uint32_t port)
+static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, uint16_t port)
 {
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
@@ -152,6 +161,33 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
 				return tmp->filter.op;
 	}
 	return 0; // do nothing
+}
+
+static inline uint8_t ipv6_match_filter(struct prov_ipv6_filter filters, uint8_t *ip)
+{
+	uint8_t *filter_ip = filters.ip;
+	uint8_t *filter_mask = filters.mask;
+	for (uint32_t i = 0; i < 16; i++) {
+		if ((filter_mask[i] & ip[i]) != (filter_mask[i] & filter_ip[i]))
+			goto out;
+	}
+	return 1;
+out:
+	return 0;	
+}
+
+static inline uint8_t prov_ipv6_whichOP(struct list_head *filters, uint8_t *ip, uint16_t port)
+{
+	struct list_head *listentry, *listtmp;
+	struct ipv6_filters *tmp;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv6_filters, list);
+		if (ipv6_match_filter(tmp->filter, ip))
+			if (tmp->filter.port == 0 || tmp->filter.port == port)
+				return tmp->filter.op;
+	}
+	return 0;
 }
 
 static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_filters *f)
