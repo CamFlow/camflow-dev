@@ -1594,6 +1594,8 @@ struct prov_long_boot_buffer    *long_boot_buffer;
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
+LIST_HEAD(ingress_ipv6filters);
+LIST_HEAD(egress_ipv6filters);
 LIST_HEAD(secctx_filters);
 LIST_HEAD(ns_filters);
 LIST_HEAD(provenance_query_hooks);
