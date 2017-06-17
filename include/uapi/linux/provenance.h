@@ -280,7 +280,7 @@ struct packet_v6_identifier {
 	uint16_t rcv_port;
 	uint8_t next_header;
 	uint32_t seq;
-}
+};
 
 #define PROV_IDENTIFIER_BUFFER_LENGTH sizeof(struct packet_v6_identifier)
 
