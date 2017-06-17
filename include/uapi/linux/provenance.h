@@ -235,6 +235,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)			((node)->node_info.identifier)
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
+#define packet_v6_identifier(packet)  ((packet)->pck_info.identifier.packet_v6_id)
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
 #define node_secid(node)              ((node)->node_info.secid)
@@ -260,6 +261,7 @@ struct relation_identifier {
 
 struct packet_identifier {
 	uint64_t type;
+	uint16_t family;
 	uint16_t id;
 	uint32_t snd_ip;
 	uint32_t rcv_ip;
@@ -269,12 +271,24 @@ struct packet_identifier {
 	uint32_t seq;
 };
 
-#define PROV_IDENTIFIER_BUFFER_LENGTH sizeof(struct node_identifier)
+struct packet_v6_identifier {
+	uint64_t type;
+	uint16_t family;
+	uint8_t snd_ip[16];
+	uint8_t rcv_ip[16];
+	uint16_t snd_port;
+	uint16_t rcv_port;
+	uint8_t next_header;
+	uint32_t seq;
+}
+
+#define PROV_IDENTIFIER_BUFFER_LENGTH sizeof(struct packet_v6_identifier)
 
 union prov_identifier {
 	struct node_identifier node_id;
 	struct relation_identifier relation_id;
 	struct packet_identifier packet_id;
+	struct packet_v6_identifier packet_v6_id;
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 };
 
