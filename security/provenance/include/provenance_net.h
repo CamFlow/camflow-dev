@@ -186,8 +186,8 @@ static inline unsigned int provenance_parse_skb_ipv6(struct sk_buff *skb, union 
 	id->type = ENT_PACKET;
 	// collect IP element of prov identifier
 	id->family = AF_INET6;
-	memcpy((void *) id->snd_ip, (void *) iv6h->saddr, sizeof(uint8_t) * 16);
-	memcpy((void *) id->rcv_ip, (void *) iv6h->daddr, sizeof(uint8_t) * 16);
+	memcpy((void *) id->snd_ip, (void *) iv6h->saddr.s6_addr, sizeof(uint8_t) * 16);
+	memcpy((void *) id->rcv_ip, (void *) iv6h->daddr.s6_addr, sizeof(uint8_t) * 16);
 	id->next_header = iv6h->nexthdr;//TODO: this can show either extension headers or protocol
 	prov->pck_info.length = iv6h->payload_len; // only record payload length; header length of 40 bytes not counted; payload includes extension headers as well
 
