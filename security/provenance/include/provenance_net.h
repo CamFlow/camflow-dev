@@ -289,6 +289,52 @@ static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_fi
 	return 0; // do nothing
 }
 
+static inline uint8_t __ipv6_match_mask(struct prov_ipv6_filter matched, struct prov_ipv6_filter matchee)
+{
+	uint32_t i;
+	uint8_t *matched_mask = matched.mask;
+	uint8_t *matchee_mask = matchee.mask;
+	for (i = 0; i < 16; i++) {
+		if (matched_mask[i] != matchee_mask[i])
+			goto out;
+	}
+	return 1;
+out:
+	return 0;
+}
+
+static inline uint8_t __ipv6_match_ip(struct prov_ipv6_filter matched, struct prov_ipv6_filter matchee)
+{
+	uint32_t i;
+	uint8_t *matched_ip = matched.ip;
+	uint8_t *matchee_ip = matchee.ip;
+	for (i = 0; i < 16; i++) {
+		if (matched_ip[i] != matchee_ip[i])
+			goto out;
+	}
+	return 1;
+out:
+	return 0;
+}
+
+static inline uint8_t prov_ipv6_delete(struct list_head *filters, struct ipv6_filters *f)
+{
+	struct list_head *listentry, *listtmp;
+	struct ipv6_filters *tmp;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv6_filters, list);
+		if (__ipv6_match_mask(tmp->filter, f->filter) &&
+				__ipv6_match_ip(tmp->filter, f->filter) &&
+				tmp->filter.port == f->filter.port) {
+			list_del(listentry);
+			kfree(tmp);
+			return 0; // you should only get one
+		}
+	}
+	return 0;
+}
+
 static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct ipv4_filters *f)
 {
 	struct list_head *listentry, *listtmp;
