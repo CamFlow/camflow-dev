@@ -59,7 +59,6 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 	struct tcphdr *th;
 	int tcpoff;
 
-	//TODO: TCP info only recorded once, the first fragment of an IPv4 packet?
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
 	tcpoff = offset + ihlen(ih); //point to tcp packet
@@ -72,17 +71,13 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 }
 
 static inline void __extract_tcp_info_v6(struct sk_buff *skb,
-							struct ipv6hdr *iv6h,
 							int offset,
 							struct packet_v6_identifier *id)
 {
 	struct tcphdr _tcph;
 	struct tcphdr *th;
-	int tcpoff;
 
-	//TODO: We assume there is no extension headers
-	tcpoff = offset + 40; // IPv6 header length is 40 bytes
-	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
+	th = skb_header_pointer(skb, offset, sizeof(_tcph), &_tcph);
 	if (!th)
 		return;
 	id->snd_port = th->source;
@@ -105,24 +100,22 @@ static inline void __extract_udp_info(struct sk_buff *skb,
 	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
 	if (!uh)
 		return;
+
 	id->snd_port = uh->source;
 	id->rcv_port = uh->dest;
 }
 
 static inline void __extract_udp_info_v6(struct sk_buff *skb,
-							struct ipv6hdr *iv6h,
 							int offset,
 							struct packet_v6_identifier *id)
 {
 	struct udphdr _udph;
 	struct udphdr *uh;
-	int udpoff;
 
-	//TODO: We assume there is no extension headers
-	udpoff = offset + 40;
-	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
+	uh = skb_header_pointer(skb, offset, sizeof(_udph), &_udph);
 	if (!uh)
 		return;
+
 	id->snd_port = uh->source;
 	id->rcv_port = uh->dest;
 }
@@ -172,6 +165,8 @@ static inline unsigned int provenance_parse_skb_ipv6(struct sk_buff *skb, union 
 {
 	struct packet_v6_identifier *id;
 	int offset;
+	uint8_t header;
+	uint16_t frag_off;
 	struct ipv6hdr _ipv6h;
 	struct ipv6hdr *iv6h;
 
@@ -188,17 +183,24 @@ static inline unsigned int provenance_parse_skb_ipv6(struct sk_buff *skb, union 
 	id->family = AF_INET6;
 	memcpy((void *) id->snd_ip, (void *) iv6h->saddr.s6_addr, sizeof(uint8_t) * 16);
 	memcpy((void *) id->rcv_ip, (void *) iv6h->daddr.s6_addr, sizeof(uint8_t) * 16);
+	memcpy((void *) id->flow_label, (void *) iv6h->flow_lbl, sizeof(uint8_t) * 3);
 	id->next_header = iv6h->nexthdr;//TODO: this can show either extension headers or protocol
+	header = iv6h->nexthdr;
 	prov->pck_info.length = iv6h->payload_len; // only record payload length; header length of 40 bytes not counted; payload includes extension headers as well
 
+	offset += sizeof(_ipv6h);
+	offset = ipv6_skip_exthdr(skb, offset, &header, &frag_off);
+	if (offset < 0)
+		return 0;
+	id->protocol = header;
+
 	// now we collect transport information. Old values in IPv4 protocol should still exist for IPv6 nexthdr
-	// TODO: Here we assume that there exists no extension headers
-	switch (iv6h->nexthdr) {
+	switch (header) {
 	case IPPROTO_TCP:
-		__extract_tcp_info_v6(skb, iv6h, offset, id);
+		__extract_tcp_info_v6(skb, offset, id);
 		break;
 	case IPPROTO_UDP:
-		__extract_udp_info_v6(skb, iv6h, offset, id);
+		__extract_udp_info_v6(skb, offset, id);
 		break;
 	default:
 		break;

@@ -279,6 +279,8 @@ struct packet_v6_identifier {
 	uint16_t snd_port;
 	uint16_t rcv_port;
 	uint8_t next_header;
+	uint8_t flow_label[3];
+	uint8_t protocol;
 	uint32_t seq;
 };
 
