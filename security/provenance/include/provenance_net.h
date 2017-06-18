@@ -353,6 +353,24 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 	return 0;
 }
 
+static inline uint8_t prov_ipv6_add_or_update(struct list_head *filters, struct ipv6_filters *f)
+{
+	struct list_head *listentry, *listtmp;
+	struct ipv6_filters *tmp;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, struct ipv6_filters, list);
+		if (__ipv6_match_mask(tmp->filter, f->filter) &&
+		    __ipv6_match_ip(tmp->filter, f->filter &&
+		    tmp->filter.port == f->filter.port) {
+			tmp->filter.op |= f->filter.op;
+			return 0; // you should only get one
+		}
+	}
+	list_add_tail(&(f->list), filters); // not already on the list, we add it
+	return 0;
+}
+
 // incoming packet
 static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *inode)
 {
