@@ -361,7 +361,7 @@ static inline uint8_t prov_ipv6_add_or_update(struct list_head *filters, struct 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, struct ipv6_filters, list);
 		if (__ipv6_match_mask(tmp->filter, f->filter) &&
-		    __ipv6_match_ip(tmp->filter, f->filter &&
+		    __ipv6_match_ip(tmp->filter, f->filter) &&
 		    tmp->filter.port == f->filter.port) {
 			tmp->filter.op |= f->filter.op;
 			return 0; // you should only get one
