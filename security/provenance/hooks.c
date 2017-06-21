@@ -273,7 +273,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if (!iprov)
 		return -ENOMEM;
 	refresh_current_provenance();
-	refresh_inode_provenance(inode);
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -614,7 +613,7 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
 	rc = record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0);
 out:
-	queue_save_provenance(iprov, dentry);;
+	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -1127,7 +1126,11 @@ static int provenance_socket_bind(struct socket *sock,
 		return 0;
 
 	/* should we start tracking this socket */
+<<<<<<< HEAD
 	if (address->sa_family == AF_INET) {
+=======
+	if (address->sa_family == PF_INET) {
+>>>>>>> d2dba0709d31847211a2f98aaadd33d91e921c77
 		if (addrlen < sizeof(struct sockaddr_in))
 			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
@@ -1187,9 +1190,17 @@ static int provenance_socket_connect(struct socket *sock,
 		goto out;
 
 	/* should we start tracking this socket */
+<<<<<<< HEAD
 	if (address->sa_family == AF_INET) {
 		if (addrlen < sizeof(struct sockaddr_in))
 			return -EINVAL;
+=======
+	if (address->sa_family == PF_INET) {
+		if (addrlen < sizeof(struct sockaddr_in)) {
+			rc = -EINVAL;
+			goto out;
+		}
+>>>>>>> d2dba0709d31847211a2f98aaadd33d91e921c77
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 	}
@@ -1543,7 +1554,7 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 	return 0;
 }
 
-static struct security_hook_list provenance_hooks[] __ro_after_init = {
+static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free, provenance_cred_free),

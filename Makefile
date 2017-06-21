@@ -1,5 +1,5 @@
-kernel-version=4.11.5
-lsm-version=0.3.3
+kernel-version=4.12
+lsm-version=0.3.4
 arch=x86_64
 
 all: config compile
@@ -25,8 +25,8 @@ prepare_provenance:
 
 prepare_config:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflow-config.git
-	cd ./build/camflow-config && $(MAKE) prepare
+	cd ./build && git clone https://github.com/CamFlow/camconfd.git
+	cd ./build/camconfd && $(MAKE) prepare
 
 prepare_cli:
 	mkdir -p build
@@ -35,8 +35,8 @@ prepare_cli:
 
 prepare_service:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflow-service.git
-	cd ./build/camflow-service && $(MAKE) prepare
+	cd ./build && git clone https://github.com/CamFlow/camflowd.git
+	cd ./build/camflowd && $(MAKE) prepare
 
 prepare_smatch:
 	mkdir -p build
@@ -91,12 +91,12 @@ install_kernel:
 
 install_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) install
-	cd ./build/camflow-config && $(MAKE) all
-	cd ./build/camflow-config && $(MAKE) install
+	cd ./build/camconfd && $(MAKE) all
+	cd ./build/camconfd && $(MAKE) install
 	cd ./build/camflow-cli && $(MAKE) all
 	cd ./build/camflow-cli && $(MAKE) install
-	cd ./build/camflow-service && $(MAKE) all
-	cd ./build/camflow-service && $(MAKE) install
+	cd ./build/camflowd && $(MAKE) all
+	cd ./build/camflowd && $(MAKE) install
 
 clean: clean_kernel clean_us
 
@@ -106,9 +106,9 @@ clean_kernel:
 
 clean_us:
 	cd ./build/camflow-provenance-lib && $(MAKE) clean
-	cd ./build/camflow-config && $(MAKE) clean
+	cd ./build/camconfd && $(MAKE) clean
 	cd ./build/camflow-cli && $(MAKE) clean
-	cd ./build/camflow-service && $(MAKE) clean
+	cd ./build/camflowd && $(MAKE) clean
 
 delete_kernel:
 	cd ./build && rm -rf ./linux-$(kernel-version)
@@ -127,6 +127,9 @@ test: copy_change
 	@echo "Running smatch..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
+	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 test_travis:
 	@echo "Running sparse..."
@@ -141,6 +144,9 @@ test_travis:
 	@echo "Running smatch..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
+	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
