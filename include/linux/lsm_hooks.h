@@ -1644,6 +1644,22 @@ union security_list_options {
 				struct audit_context *actx);
 	void (*audit_rule_free)(void *lsmrule);
 #endif /* CONFIG_AUDIT */
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+void (*mmap_munmap)(struct mm_struct *mm,
+				struct vm_area_struct *vma,
+				unsigned long start, unsigned long end);
+int (*file_splice_pipe_to_pipe)(struct file *in,
+				struct file *out);
+int (*mq_timedsend)(struct inode *inode, struct msg_msg *msg,
+			struct timespec *ts);
+int (*mq_timedreceive)(struct inode *inode, struct msg_msg *msg,
+			struct timespec *ts);
+void (*shm_shmdt)(struct shmid_kernel *shp);
+int (*socket_sendmsg_always)(struct socket *sock, struct msghdr *msg,
+				int size);
+int (*socket_recvmsg_always)(struct socket *sock, struct msghdr *msg,
+				int size, int flags);
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 };
 
 struct security_hook_heads {
@@ -1857,6 +1873,15 @@ struct security_hook_heads {
 	struct list_head audit_rule_match;
 	struct list_head audit_rule_free;
 #endif /* CONFIG_AUDIT */
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	struct list_head mmap_munmap;
+	struct list_head file_splice_pipe_to_pipe;
+	struct list_head mq_timedsend;
+	struct list_head mq_timedreceive;
+	struct list_head shm_shmdt;
+	struct list_head socket_sendmsg_always;
+	struct list_head socket_recvmsg_always;
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 };
 
 /*

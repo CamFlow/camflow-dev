@@ -1627,6 +1627,49 @@ int security_audit_rule_match(u32 secid, u32 field, u32 op, void *lsmrule,
 }
 #endif /* CONFIG_AUDIT */
 
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+void security_mmap_munmap(struct mm_struct *mm,
+					struct vm_area_struct *vma,
+					unsigned long start, unsigned long end)
+{
+	call_void_hook(mmap_munmap, mm, vma, start, end);
+}
+
+int security_file_splice_pipe_to_pipe(struct file *in,
+						    struct file *out)
+{
+	return call_int_hook(file_splice_pipe_to_pipe, 0, in, out);
+}
+
+int security_mq_timedsend(struct inode *inode, struct msg_msg *msg,
+				struct timespec *ts)
+{
+	return call_int_hook(mq_timedsend, 0, inode, msg, ts);
+}
+
+int security_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
+				struct timespec *ts)
+{
+	return call_int_hook(mq_timedreceive, 0, inode, msg, ts);
+}
+
+void security_shm_shmdt(struct shmid_kernel *shp)
+{
+	call_void_hook(shm_shmdt, shp);
+}
+
+int security_socket_sendmsg_always(struct socket *sock, struct msghdr *msg, int size)
+{
+	return call_int_hook(socket_sendmsg_always, 0, sock, msg, size);
+}
+
+int security_socket_recvmsg_always(struct socket *sock, struct msghdr *msg,
+			    int size, int flags)
+{
+	return call_int_hook(socket_recvmsg_always, 0, sock, msg, size, flags);
+}
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
+
 struct security_hook_heads security_hook_heads = {
 	.binder_set_context_mgr =
 		LIST_HEAD_INIT(security_hook_heads.binder_set_context_mgr),
@@ -1977,4 +2020,16 @@ struct security_hook_heads security_hook_heads = {
 	.audit_rule_free =
 		LIST_HEAD_INIT(security_hook_heads.audit_rule_free),
 #endif /* CONFIG_AUDIT */
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	.mmap_munmap =	LIST_HEAD_INIT(security_hook_heads.mmap_munmap),
+	.file_splice_pipe_to_pipe =
+		LIST_HEAD_INIT(security_hook_heads.file_splice_pipe_to_pipe),
+	.mq_timedsend = LIST_HEAD_INIT(security_hook_heads.mq_timedsend),
+	.mq_timedreceive = LIST_HEAD_INIT(security_hook_heads.mq_timedreceive),
+	.shm_shmdt =	LIST_HEAD_INIT(security_hook_heads.shm_shmdt),
+	.socket_sendmsg_always =
+		LIST_HEAD_INIT(security_hook_heads.socket_sendmsg_always),
+	.socket_recvmsg_always =
+		LIST_HEAD_INIT(security_hook_heads.socket_recvmsg_always),
+#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 };
