@@ -234,8 +234,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 out:
-	if (node)
-		kfree(node);
+	kfree(node);
 	return count;
 }
 declare_file_operations(prov_node_ops, prov_write_node, no_read);

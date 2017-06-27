@@ -614,7 +614,7 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
 	rc = record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0);
 out:
-	queue_save_provenance(iprov, dentry);;
+	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
