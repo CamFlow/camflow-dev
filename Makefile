@@ -128,6 +128,7 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
 	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 test_travis:
@@ -144,6 +145,7 @@ test_travis:
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
 	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
 	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 uncrustify:
