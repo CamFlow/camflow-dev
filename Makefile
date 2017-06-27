@@ -127,6 +127,8 @@ test: copy_change
 	@echo "Running smatch..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 test_travis:
 	@echo "Running sparse..."
@@ -141,6 +143,8 @@ test_travis:
 	@echo "Running smatch..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
