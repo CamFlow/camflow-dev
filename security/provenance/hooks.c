@@ -273,7 +273,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	if (!iprov)
 		return -ENOMEM;
 	refresh_current_provenance();
-	refresh_inode_provenance(inode);
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);

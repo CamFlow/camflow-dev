@@ -26,6 +26,7 @@
 
 ### v0.3.4
 ```
+- Fix sleep in provenance_inode_permission.
 - Update to kernel version 4.11.7.
 ```
 
