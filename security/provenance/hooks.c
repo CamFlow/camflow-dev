@@ -1125,7 +1125,9 @@ static int provenance_socket_bind(struct socket *sock,
 		return 0;
 
 	/* should we start tracking this socket */
-	if (address->sa_family == AF_INET) {
+	if (address->sa_family == PF_INET) {
+		if (addrlen < sizeof(struct sockaddr_in))
+			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_NET_TRACKED) != 0) {
@@ -1174,7 +1176,11 @@ static int provenance_socket_connect(struct socket *sock,
 		goto out;
 
 	/* should we start tracking this socket */
-	if (address->sa_family == AF_INET) {
+	if (address->sa_family == PF_INET) {
+		if (addrlen < sizeof(struct sockaddr_in)) {
+			rc = -EINVAL;
+			goto out;
+		}
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_NET_TRACKED) != 0) {
@@ -1520,7 +1526,7 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 	return 0;
 }
 
-static struct security_hook_list provenance_hooks[] __ro_after_init = {
+static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free, provenance_cred_free),

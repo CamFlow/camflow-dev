@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.4           | 4.11.7         | N/A        |
+| 0.3.4           | 4.12           | N/A        |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
 | 0.3.2           | 4.11.3         | 31/05/2017 |
 | 0.3.1           | 4.11.2         | 22/05/2017 |
@@ -27,7 +27,7 @@
 ### v0.3.4
 ```
 - Fix sleep in provenance_inode_permission.
-- Update to kernel version 4.11.7.
+- Update to kernel version 4.12.
 ```
 
 ### v0.3.3
