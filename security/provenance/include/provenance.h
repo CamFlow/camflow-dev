@@ -163,8 +163,8 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
-	write_node(prov_elt(prov));
 	write_node(&old_prov);
+	write_node(prov_elt(prov));
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
 		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
 	else

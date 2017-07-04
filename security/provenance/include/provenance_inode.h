@@ -26,6 +26,7 @@
 
 static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
+	union prov_elt old_prov;
 	uint64_t type = ENT_INODE_UNKNOWN;
 	unsigned long irqflags;
 
@@ -44,6 +45,23 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
+	if (prov_elt(prov)->inode_info.mode != 0
+			&& prov_elt(prov)->inode_info.mode != mode
+			&& provenance_is_recorded(prov_elt(prov))) {
+		if (filter_update_node(type))
+			return;
+		memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
+		node_identifier(prov_elt(prov)).version++;
+		clear_recorded(prov_elt(prov));
+		write_node(&old_prov);
+		/* we update the info of the new version and record it */
+		prov_elt(prov)->inode_info.mode = mode;
+		prov_type(prov_elt(prov)) = type;
+		write_node(prov_elt(prov));
+		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
+		prov->has_outgoing = false; // we update there is no more outgoing edge
+		prov->saved = false;
+	}
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
