@@ -1126,11 +1126,7 @@ static int provenance_socket_bind(struct socket *sock,
 		return 0;
 
 	/* should we start tracking this socket */
-<<<<<<< HEAD
-	if (address->sa_family == AF_INET) {
-=======
 	if (address->sa_family == PF_INET) {
->>>>>>> d2dba0709d31847211a2f98aaadd33d91e921c77
 		if (addrlen < sizeof(struct sockaddr_in))
 			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
@@ -1190,18 +1186,12 @@ static int provenance_socket_connect(struct socket *sock,
 		goto out;
 
 	/* should we start tracking this socket */
-<<<<<<< HEAD
-	if (address->sa_family == AF_INET) {
-		if (addrlen < sizeof(struct sockaddr_in))
-			return -EINVAL;
-=======
 	if (address->sa_family == PF_INET) {
 		if (addrlen < sizeof(struct sockaddr_in)) {
 			rc = -EINVAL;
 			goto out;
 		}
->>>>>>> d2dba0709d31847211a2f98aaadd33d91e921c77
-		ipv4_addr = (struct sockaddr_in *)address;
+co		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 	}
 	if (address->sa_family == AF_INET6) {
