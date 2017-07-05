@@ -1191,7 +1191,7 @@ static int provenance_socket_connect(struct socket *sock,
 			rc = -EINVAL;
 			goto out;
 		}
-co		ipv4_addr = (struct sockaddr_in *)address;
+		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 	}
 	if (address->sa_family == AF_INET6) {
