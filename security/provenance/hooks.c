@@ -76,8 +76,8 @@ static void cred_init_provenance(void)
 
 	if (!prov)
 		panic("Provenance:  Failed to initialize initial task.\n");
-	prov_elt(prov)->task_info.uid = __kuid_val(cred->euid);
-	prov_elt(prov)->task_info.gid = __kgid_val(cred->egid);
+	node_uid(prov_elt(prov)) = __kuid_val(cred->euid);
+	node_gid(prov_elt(prov)) = __kgid_val(cred->egid);
 	cred->provenance = prov;
 }
 
@@ -94,8 +94,8 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 	if (!prov)
 		return -ENOMEM;
 
-	prov_elt(prov)->task_info.uid = __kuid_val(cred->euid);
-	prov_elt(prov)->task_info.gid = __kgid_val(cred->egid);
+	node_uid(prov_elt(prov)) = __kuid_val(cred->euid);
+	node_gid(prov_elt(prov)) = __kgid_val(cred->egid);
 
 	cred->provenance = prov;
 	return 0;
@@ -132,8 +132,8 @@ static int provenance_cred_prepare(struct cred *new,
 	if (!prov)
 		return -ENOMEM;
 	//task_config_from_file(current);
-	prov_elt(prov)->task_info.uid = __kuid_val(new->euid);
-	prov_elt(prov)->task_info.gid = __kgid_val(new->egid);
+	node_uid(prov_elt(prov)) = __kuid_val(new->euid);
+	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_TASK);
 	prov->has_mmap = old_prov->has_mmap;
 	rc = flow_between_activities(RL_CLONE, old_prov, prov, NULL);
@@ -195,8 +195,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	if (unlikely(!iprov))
 		return -ENOMEM;
 	prov_elt(iprov)->inode_info.ino = inode->i_ino;
-	prov_elt(iprov)->inode_info.uid = __kuid_val(inode->i_uid);
-	prov_elt(iprov)->inode_info.gid = __kgid_val(inode->i_gid);
+	node_uid(prov_elt(iprov)) = __kuid_val(inode->i_uid);
+	node_gid(prov_elt(iprov)) = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_elt(iprov)->inode_info.secid));
 	update_inode_type(inode->i_mode, iprov);
 	sprov = inode->i_sb->s_provenance;
@@ -401,8 +401,8 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 
 	prov_elt(iattrprov)->iattr_info.valid = iattr->ia_valid;
 	prov_elt(iattrprov)->iattr_info.mode = iattr->ia_mode;
-	prov_elt(iattrprov)->iattr_info.uid = __kuid_val(iattr->ia_uid);
-	prov_elt(iattrprov)->iattr_info.gid = __kgid_val(iattr->ia_gid);
+	node_uid(prov_elt(iattrprov)) = __kuid_val(iattr->ia_uid);
+	node_gid(prov_elt(iattrprov)) = __kgid_val(iattr->ia_gid);
 	prov_elt(iattrprov)->iattr_info.size = iattr->ia_size;
 	prov_elt(iattrprov)->iattr_info.atime = iattr->ia_atime.tv_sec;
 	prov_elt(iattrprov)->iattr_info.mtime = iattr->ia_mtime.tv_sec;
@@ -1130,15 +1130,15 @@ static int provenance_socket_bind(struct socket *sock,
 			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		if ((op & PROV_NET_TRACKED) != 0) {
+		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));
 		}
-		if ((op & PROV_NET_PROPAGATE) != 0) {
+		if ((op & PROV_SET_PROPAGATE) != 0) {
 			set_propagate(prov_elt(iprov));
 			set_propagate(prov_elt(cprov));
 		}
-		if ((op & PROV_NET_RECORD) != 0)
+		if ((op & PROV_SET_RECORD) != 0)
 			set_record_packet(prov_elt(iprov));
 	}
 	rc = provenance_record_address(address, addrlen, iprov);
@@ -1183,15 +1183,15 @@ static int provenance_socket_connect(struct socket *sock,
 		}
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		if ((op & PROV_NET_TRACKED) != 0) {
+		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));
 		}
-		if ((op & PROV_NET_PROPAGATE) != 0) {
+		if ((op & PROV_SET_PROPAGATE) != 0) {
 			set_propagate(prov_elt(iprov));
 			set_propagate(prov_elt(cprov));
 		}
-		if ((op & PROV_NET_RECORD) != 0)
+		if ((op & PROV_SET_RECORD) != 0)
 			set_record_packet(prov_elt(iprov));
 	}
 	rc = provenance_record_address(address, addrlen, iprov);
@@ -1608,6 +1608,8 @@ struct prov_long_boot_buffer    *long_boot_buffer;
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
 LIST_HEAD(secctx_filters);
+LIST_HEAD(user_filters);
+LIST_HEAD(group_filters);
 LIST_HEAD(ns_filters);
 LIST_HEAD(provenance_query_hooks);
 

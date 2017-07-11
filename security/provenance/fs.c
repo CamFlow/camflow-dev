@@ -457,7 +457,7 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 	f->filter.ip = f->filter.ip & f->filter.mask;
 
 	// we are not trying to delete something
-	if ((f->filter.op & PROV_NET_DELETE) != PROV_NET_DELETE)
+	if ((f->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ipv4_add_or_update(filters, f);
 	else
 		prov_ipv4_delete(filters, f);
@@ -550,7 +550,7 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 		return -EAGAIN;
 
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
-	if ((s->filter.op & PROV_SEC_DELETE) != PROV_SEC_DELETE)
+	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_secctx_add_or_update(s);
 	else
 		prov_secctx_delete(s);
@@ -594,7 +594,7 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 
 	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo)))
 		return -EAGAIN;
-	if ((s->filter.op & PROV_NS_DELETE) != PROV_NS_DELETE)
+	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ns_add_or_update(s);
 	else
 		prov_ns_delete(s);

@@ -238,6 +238,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
 #define node_secid(node)              ((node)->node_info.secid)
+#define node_uid(node)              	((node)->node_info.uid)
+#define node_gid(node)              	((node)->node_info.gid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -312,7 +314,7 @@ union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
@@ -335,8 +337,6 @@ struct node_struct {
 
 struct task_prov_struct {
 	basic_elements;
-	uint32_t uid;
-	uint32_t gid;
 	uint32_t pid;
 	uint32_t vpid;
 	uint32_t utsns;
@@ -350,8 +350,6 @@ struct task_prov_struct {
 struct inode_prov_struct {
 	basic_elements;
 	uint64_t ino;
-	uint32_t uid;
-	uint32_t gid;
 	uint16_t mode;
 	uint8_t sb_uuid[16];
 };
@@ -360,8 +358,6 @@ struct iattr_prov_struct {
 	basic_elements;
 	uint32_t valid;
 	uint16_t mode;
-	uint32_t uid;
-	uint32_t gid;
 	int64_t size;
 	int64_t atime;
 	int64_t ctime;
@@ -475,19 +471,14 @@ struct prov_filter {
 #define PROV_SET_OPAQUE       0x02
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
+#define PROV_SET_DELETE       0x10
+#define PROV_SET_RECORD       0x20
 
 struct prov_process_config {
 	union prov_elt prov;
 	uint8_t op;
 	uint32_t vpid;
 };
-
-#define PROV_NET_TRACKED      0x01
-#define PROV_NET_OPAQUE       0x02
-#define PROV_NET_PROPAGATE    0x04
-#define PROV_NET_TAINT        0x08
-#define PROV_NET_RECORD       0x10
-#define PROV_NET_DELETE       0x20 // to actually delete a filter from the list
 
 struct prov_ipv4_filter {
 	uint32_t ip;
@@ -497,12 +488,6 @@ struct prov_ipv4_filter {
 	uint64_t taint;
 };
 
-#define PROV_SEC_TRACKED      0x01
-#define PROV_SEC_OPAQUE       0x02
-#define PROV_SEC_PROPAGATE    0x04
-#define PROV_SEC_TAINT        0x08
-#define PROV_SEC_DELETE       0x10 // to actually delete a filter from the list
-
 struct secinfo {
 	uint32_t secid;
 	char secctx[PATH_MAX];
@@ -511,11 +496,18 @@ struct secinfo {
 	uint64_t taint;
 };
 
-#define PROV_NS_TRACKED      0x01
-#define PROV_NS_OPAQUE       0x02
-#define PROV_NS_PROPAGATE    0x04
-#define PROV_NS_TAINT        0x08
-#define PROV_NS_DELETE       0x10 // to actually delete a filter from the list
+struct userinfo {
+	uint32_t uid;
+	uint8_t op;
+	uint64_t taint;
+};
+
+struct groupinfo {
+	uint32_t gid;
+	uint8_t op;
+	uint64_t taint;
+};
+
 #define IGNORE_NS 0
 
 struct nsinfo {

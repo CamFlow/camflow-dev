@@ -26,6 +26,7 @@
 
 ### v0.3.4
 ```
+- Implement UID and GID filtering.
 - Handle properly inode changing type (in practice we observe file -> link).
 - Fix sleep in provenance_inode_permission.
 - Update to kernel version 4.12.

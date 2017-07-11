@@ -18,6 +18,8 @@
 #include "provenance_policy.h"
 #include "provenance_ns.h"
 #include "provenance_secctx.h"
+#include "provenance_user.h"
+#include "provenance_group.h"
 
 #define HIT_FILTER(filter, data) ((filter & data) != 0)
 
@@ -76,6 +78,26 @@ static inline bool should_record_relation(uint64_t type, union prov_elt *from, u
 static inline bool prov_has_secid(union prov_elt *prov)
 {
 	switch (prov_type(prov)) {
+	case ACT_TASK:
+	case ENT_INODE_UNKNOWN:
+	case ENT_INODE_LINK:
+	case ENT_INODE_FILE:
+	case ENT_INODE_DIRECTORY:
+	case ENT_INODE_CHAR:
+	case ENT_INODE_BLOCK:
+	case ENT_INODE_FIFO:
+	case ENT_INODE_SOCKET:
+	case ENT_INODE_MMAP:
+		return true;
+	default: return false;
+	}
+}
+
+static inline bool prov_has_uid_and_gid(union prov_elt *prov)
+{
+	switch (prov_type(prov)) {
+	case ACT_TASK:
+	case ENT_IATTR:
 	case ENT_INODE_UNKNOWN:
 	case ENT_INODE_LINK:
 	case ENT_INODE_FILE:
@@ -92,37 +114,33 @@ static inline bool prov_has_secid(union prov_elt *prov)
 
 static inline void apply_target(union prov_elt *prov)
 {
-	uint8_t op;
+	uint8_t op=0;
 
 	// track based on ns
-	if (prov_type(prov) == ACT_TASK) {
-		op = prov_ns_whichOP(prov->task_info.utsns,
+	if (prov_type(prov) == ACT_TASK)
+		op |= prov_ns_whichOP(prov->task_info.utsns,
 										prov->task_info.ipcns,
 										prov->task_info.mntns,
 										prov->task_info.pidns,
 										prov->task_info.netns,
 										prov->task_info.cgroupns);
-		if (unlikely(op != 0)) {
-			pr_info("Provenance: apply ns filter %u.", op);
-			if ((op & PROV_NS_TRACKED) != 0)
-				set_tracked(prov);
-			if ((op & PROV_NS_PROPAGATE) != 0)
-				set_propagate(prov);
-			if ((op & PROV_NS_OPAQUE) != 0)
-				set_opaque(prov);
-		}
+
+	if (prov_has_secid(prov))
+		op |= prov_secctx_whichOP(node_secid(prov));
+
+	if (prov_has_uid_and_gid(prov)) {
+		op |= prov_uid_whichOP(node_uid(prov));
+		op |= prov_gid_whichOP(node_gid(prov));
 	}
-	if (prov_has_secid(prov)) {
-		op = prov_secctx_whichOP(node_secid(prov));
-		if (unlikely(op != 0)) {
-			pr_info("Provenance: apply secctx filter %u.", op);
-			if ((op & PROV_SEC_TRACKED) != 0)
-				set_tracked(prov);
-			if ((op & PROV_SEC_PROPAGATE) != 0)
-				set_propagate(prov);
-			if ((op & PROV_SEC_OPAQUE) != 0)
-				set_opaque(prov);
-		}
+
+	if (unlikely(op != 0)) {
+		pr_info("Provenance: applying filter %u.", op);
+		if ((op & PROV_SET_TRACKED) != 0)
+			set_tracked(prov);
+		if ((op & PROV_SET_PROPAGATE) != 0)
+			set_propagate(prov);
+		if ((op & PROV_SET_OPAQUE) != 0)
+			set_opaque(prov);
 	}
 }
 #endif

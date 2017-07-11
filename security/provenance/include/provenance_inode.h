@@ -126,8 +126,8 @@ static inline void refresh_inode_provenance(struct inode *inode)
 		return;
 	record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
-	prov_elt(prov)->inode_info.uid = __kuid_val(inode->i_uid);
-	prov_elt(prov)->inode_info.gid = __kgid_val(inode->i_gid);
+	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
+	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_elt(prov)->inode_info.secid));
 }
 
@@ -141,8 +141,8 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
 	if (!prov)
 		return NULL;
 	set_tracked(prov_elt(prov));
-	prov_elt(prov)->inode_info.uid = prov_elt(iprov)->inode_info.uid;
-	prov_elt(prov)->inode_info.gid = prov_elt(iprov)->inode_info.gid;
+	node_uid(prov_elt(prov)) = prov_elt(iprov)->inode_info.uid;
+	node_gid(prov_elt(prov)) = prov_elt(iprov)->inode_info.gid;
 	prov_elt(prov)->inode_info.mode = prov_elt(iprov)->inode_info.mode;
 	prov_elt(prov)->inode_info.ino = prov_elt(iprov)->inode_info.ino;
 	memcpy(prov_elt(prov)->inode_info.sb_uuid, prov_elt(iprov)->inode_info.sb_uuid, 16 * sizeof(uint8_t));
