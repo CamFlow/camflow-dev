@@ -121,8 +121,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_LOG_FILE													"/sys/kernel/security/provenance/log"
 #define PROV_LOGP_FILE												"/sys/kernel/security/provenance/logp"
 #define PROV_POLICY_HASH_FILE									"/sys/kernel/security/provenance/policy_hash"
-#define PROV_UID_FILE													"/sys/kernel/security/provenance/uid"
-#define PROV_GID_FILE													"/sys/kernel/security/provenance/gid"
+#define PROV_UID_FILTER												"/sys/kernel/security/provenance/uid"
+#define PROV_GID_FILTER												"/sys/kernel/security/provenance/gid"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"

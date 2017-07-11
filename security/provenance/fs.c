@@ -60,8 +60,8 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_LOG_FILE);
 	provenance_mark_as_opaque(PROV_LOGP_FILE);
 	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
-	provenance_mark_as_opaque(PROV_UID_FILE);
-	provenance_mark_as_opaque(PROV_GID_FILE);
+	provenance_mark_as_opaque(PROV_UID_FILTER);
+	provenance_mark_as_opaque(PROV_GID_FILTER);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
