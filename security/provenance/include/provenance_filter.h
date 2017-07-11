@@ -17,9 +17,6 @@
 
 #include "provenance_policy.h"
 #include "provenance_ns.h"
-#include "provenance_secctx.h"
-#include "provenance_user.h"
-#include "provenance_group.h"
 
 #define HIT_FILTER(filter, data) ((filter & data) != 0)
 
@@ -111,6 +108,73 @@ static inline bool prov_has_uid_and_gid(union prov_elt *prov)
 	default: return false;
 	}
 }
+
+#define declare_filter_list(filter_name, type)\
+	struct filter_name {\
+		struct list_head list;\
+		struct type filter;\
+	};\
+	extern struct list_head filter_name;
+
+#define declare_filter_whichOP(function_name, type, variable)\
+	static inline uint8_t function_name(uint32_t variable)\
+	{\
+		struct list_head *listentry, *listtmp;\
+		struct type *tmp;\
+		list_for_each_safe(listentry, listtmp, &type) {\
+			tmp = list_entry(listentry, struct type, list);\
+			if (tmp->filter.variable == variable)\
+				return tmp->filter.op;\
+		}\
+		return 0;\
+	}
+
+#define declare_filter_delete(function_name, type, variable)\
+	static inline uint8_t function_name(struct type *f)\
+	{\
+		struct list_head *listentry, *listtmp;\
+		struct type *tmp;\
+		list_for_each_safe(listentry, listtmp, &type) {\
+			tmp = list_entry(listentry, struct type, list);\
+			if (tmp->filter.variable == f->filter.variable) {\
+				list_del(listentry);\
+				kfree(tmp);\
+				return 0;\
+			}\
+		}\
+		return 0;\
+	}
+
+#define declare_filter_add_or_update(function_name, type, variable)\
+	static inline uint8_t function_name(struct type *f)\
+	{\
+		struct list_head *listentry, *listtmp;\
+		struct type *tmp;\
+		list_for_each_safe(listentry, listtmp, &type) {\
+			tmp = list_entry(listentry, struct type, list);\
+			if (tmp->filter.variable == f->filter.variable) {\
+				tmp->filter.op = f->filter.op;\
+				return 0;\
+			}\
+		}\
+		list_add_tail(&(f->list), &type);\
+		return 0;\
+	}
+
+declare_filter_list(secctx_filters, secinfo);
+declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);
+declare_filter_delete(prov_secctx_delete, secctx_filters, secid);
+declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid);
+
+declare_filter_list(user_filters, userinfo);
+declare_filter_whichOP(prov_uid_whichOP, user_filters, uid);
+declare_filter_delete(prov_uid_delete, user_filters, uid);
+declare_filter_add_or_update(prov_uid_add_or_update, user_filters, uid);
+
+declare_filter_list(group_filters, groupinfo);
+declare_filter_whichOP(prov_gid_whichOP, group_filters, gid);
+declare_filter_delete(prov_gid_delete, group_filters, gid);
+declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
 
 static inline void apply_target(union prov_elt *prov)
 {

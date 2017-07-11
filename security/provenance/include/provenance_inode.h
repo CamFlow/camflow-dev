@@ -18,7 +18,7 @@
 #include <linux/xattr.h>
 
 #include "provenance_policy.h"
-#include "provenance_secctx.h"  // for record_inode_name
+#include "provenance_filter.h"
 
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
