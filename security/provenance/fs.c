@@ -60,6 +60,8 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_LOG_FILE);
 	provenance_mark_as_opaque(PROV_LOGP_FILE);
 	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
+	provenance_mark_as_opaque(PROV_UID_FILE);
+	provenance_mark_as_opaque(PROV_GID_FILE);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -534,6 +536,43 @@ out:
 }
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
+#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function)\
+	static ssize_t function_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos)\
+	{\
+		struct filters *s;\
+		if (count < sizeof(struct info))\
+			return -ENOMEM;\
+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);\
+		if (!s)\
+			return -ENOMEM;\
+		if (copy_from_user(&s->filter, buf, sizeof(struct info)))\
+			return -EAGAIN;\
+		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)\
+			add_function(s);\
+		else\
+			delete_function(s);\
+		return 0;\
+	}
+
+#define declare_generic_filter_read(function_name, filters, info)\
+static ssize_t function_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos)\
+{\
+	struct list_head *listentry, *listtmp;\
+	struct filters *tmp;\
+	size_t pos = 0;\
+	if (count < sizeof(struct info))\
+		return -ENOMEM;\
+	list_for_each_safe(listentry, listtmp, &filters) {\
+		tmp = list_entry(listentry, struct filters, list);\
+		if (count < pos + sizeof(struct info))\
+			return -ENOMEM;\
+		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info)))\
+			return -EAGAIN;\
+		pos += sizeof(struct info);\
+	}\
+	return pos;\
+}
+
 static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
 					size_t count, loff_t *ppos)
 {
@@ -557,28 +596,16 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 	return 0;
 }
 
-static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
-				       size_t count, loff_t *ppos)
-{
-	struct list_head *listentry, *listtmp;
-	struct secctx_filters *tmp;
-	size_t pos = 0;
-
-	if (count < sizeof(struct secinfo))
-		return -ENOMEM;
-
-	list_for_each_safe(listentry, listtmp, &secctx_filters) {
-		tmp = list_entry(listentry, struct secctx_filters, list);
-		if (count < pos + sizeof(struct secinfo))
-			return -ENOMEM;
-
-		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct secinfo)))
-			return -EAGAIN;
-		pos += sizeof(struct secinfo);
-	}
-	return pos;
-}
+declare_generic_filter_read(prov_read_secctx_filter, secctx_filters, secinfo);
 declare_file_operations(prov_secctx_filter_ops, prov_write_secctx_filter, prov_read_secctx_filter);
+
+declare_generic_filter_write(prov_write_uid_filter, user_filters, userinfo, prov_uid_add_or_update, prov_uid_delete);
+declare_generic_filter_read(prov_read_uid_filter, user_filters, userinfo);
+declare_file_operations(prov_uid_filter_ops, prov_write_uid_filter, prov_read_uid_filter);
+
+declare_generic_filter_write(prov_write_gid_filter, group_filters, groupinfo, prov_gid_add_or_update, prov_gid_delete);
+declare_generic_filter_read(prov_read_gid_filter, group_filters, groupinfo);
+declare_file_operations(prov_gid_filter_ops, prov_write_gid_filter, prov_read_gid_filter);
 
 static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 					size_t count, loff_t *ppos)
@@ -790,6 +817,8 @@ static int __init init_prov_fs(void)
 	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
 	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
 	securityfs_create_file("policy_hash", 0444, prov_dir, NULL, &prov_policy_hash_ops);
+	securityfs_create_file("uid", 0644, prov_dir, NULL, &prov_uid_filter_ops);
+	securityfs_create_file("gid", 0644, prov_dir, NULL, &prov_gid_filter_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
