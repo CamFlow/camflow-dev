@@ -45,11 +45,11 @@ prepare_smatch:
 
 prepare_ltp:
 	mkdir -p build
-	cd ./build && https://github.com/linux-test-project/ltp.git
+	cd ./build && git clone https://github.com/linux-test-project/ltp.git
 	cd ./build/ltp && $(MAKE) autotools
 	cd ./build/ltp && ./configure
 	cd ./build/ltp && $(MAKE)
-	cd ./build/ltp && $(MAKE) install
+	cd ./build/ltp && sudo $(MAKE) install
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
@@ -140,7 +140,7 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 run_ltp:
-	cd /opt/ltp && ./runltp
+	cd /opt/ltp && sudo ./runltp
 
 test_travis:
 	@echo "Running sparse..."
