@@ -43,6 +43,14 @@ prepare_smatch:
 	cd ./build && git clone git://repo.or.cz/smatch.git
 	cd ./build/smatch && $(MAKE)
 
+prepare_ltp:
+	mkdir -p build
+	cd ./build && https://github.com/linux-test-project/ltp.git
+	cd ./build/ltp && $(MAKE) autotools
+	cd ./build/ltp && ./configure
+	cd ./build/ltp && $(MAKE)
+	cd ./build/ltp && $(MAKE) install
+
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
 copy_change:
@@ -130,6 +138,9 @@ test: copy_change
 	@echo "Running coccinelle"
 	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
 	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
+
+run_ltp:
+	cd /opt/ltp && ./runltp
 
 test_travis:
 	@echo "Running sparse..."
