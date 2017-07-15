@@ -26,6 +26,7 @@
 
 ### v0.3.4
 ```
+- Properly record arguments and environment variables.
 - Implement UID and GID filtering.
 - Handle properly inode changing type (in practice we observe file -> link).
 - Fix sleep in provenance_inode_permission.

@@ -190,12 +190,14 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define RL_LSTXATTR           (RL_USED      | 0x0000000200000000ULL)
 #define RL_NAMED_PROCESS      (RL_USED      | 0x0000000400000000ULL)
 #define RL_SAID								(RL_USED      | 0x0000000800000000ULL)
+#define RL_ARG								(RL_USED      | 0x0000001000000000ULL)
+#define RL_ENV								(RL_USED      | 0x0000002000000000ULL)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000001000000000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000002000000000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000004000000000ULL)
-#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000008000000000ULL)
-#define RL_TERMINATE_PROCESS  (RL_INFORMED  | 0x0000010000000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000004000000000ULL)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000008000000000ULL)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000010000000000ULL)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000020000000000ULL)
+#define RL_TERMINATE_PROCESS  (RL_INFORMED  | 0x0000040000000000ULL)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
@@ -225,6 +227,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
 #define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
 #define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
+#define ENT_ARG								(DM_ENTITY    | 0x0000000002000000ULL)
+#define ENT_ENV								(DM_ENTITY    | 0x0000000004000000ULL)
 
 #define FLOW_ALLOWED        0
 #define FLOW_DISALLOWED     1
@@ -425,6 +429,13 @@ struct pckcnt_struct {
 	uint8_t truncated;
 };
 
+struct arg_struct {
+	basic_elements;
+	char value[PATH_MAX];
+	size_t length;
+	uint8_t truncated;
+};
+
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
@@ -455,6 +466,7 @@ union long_prov_elt {
 	struct iattr_prov_struct iattr_info;
 	struct str_struct str_info;
 	struct file_name_struct file_name_info;
+	struct arg_struct arg_info;
 	struct address_struct address_info;
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;

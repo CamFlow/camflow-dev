@@ -273,7 +273,7 @@ static inline int record_write_xattr(uint64_t type,
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
-		goto out;
+		return -ENOMEM;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	if (value) {

@@ -280,7 +280,7 @@ static inline int terminate_task(struct provenance *tprov)
 }
 
 /* see fs/exec.c */
-static void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
+static inline void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
 {
 	struct mm_struct *mm = current->mm;
 	long diff = (long)(pages - bprm->vma_pages);
@@ -293,7 +293,7 @@ static void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
 }
 
 /* see fs/exec.c */
-static struct page *get_arg_page(struct linux_binprm *bprm,
+static inline struct page *get_arg_page(struct linux_binprm *bprm,
 																				unsigned long pos,
 																				int write)
 {
@@ -372,7 +372,7 @@ fail:
 }
 
 /* see fs/exec.c */
-static int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
+static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 		unsigned long len)
 {
 	int rv = 0;
@@ -412,13 +412,36 @@ out:
 	return rv;
 }
 
-static int prov_record_args(struct provenance *prov,
-																		struct linux_binprm *bprm)
+static inline int prov_record_arg(struct provenance *prov,
+																	uint64_t vtype,
+																	uint64_t etype,
+																	const char *arg,
+																	size_t len)
+{
+	union long_prov_elt *aprov;
+	int rc = 0;
+
+	aprov  = alloc_long_provenance(vtype);
+	if (!aprov)
+		return -ENOMEM;
+	aprov->arg_info.length = len;
+	if( len >= PATH_MAX)
+		aprov->arg_info.truncated = PROV_TRUNCATED;
+	strlcpy(aprov->arg_info.value, arg, PATH_MAX-1);
+	write_node(prov_elt(prov));
+	write_long_node(aprov);
+	rc = write_relation(etype, prov_elt(prov), aprov, NULL);
+	free_long_provenance(aprov);
+	return rc;
+}
+
+static inline int prov_record_args(struct provenance *prov,
+														struct linux_binprm *bprm)
 {
 	char* argv;
 	char* ptr;
 	unsigned long len;
-	unsigned long offset;
+	size_t size;
 	int rc=0;
 	int argc;
 	int envc;
@@ -439,14 +462,14 @@ static int prov_record_args(struct provenance *prov,
 	envc = bprm->envc;
 	ptr = argv;
 	while(argc-- > 0){
-		pr_info("Provenance: argv %s", ptr);
-		ptr += strnlen(ptr, len)+1;
-		len -= strnlen(ptr, len)+1;
+		size = strnlen(ptr, len);
+		prov_record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
+		ptr += size+1;
 	}
 	while(envc-- > 0){
-		pr_info("Provenance: envv %s", ptr);
-		ptr += strnlen(ptr, len)+1;
-		len -= strnlen(ptr, len)+1;
+		size = strnlen(ptr, len);
+		prov_record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
+		ptr += size+1;
 	}
 	kfree(argv);
 	return 0;
