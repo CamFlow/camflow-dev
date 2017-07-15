@@ -420,7 +420,8 @@ static int prov_record_args(struct provenance *prov,
 	unsigned long len;
 	unsigned long offset;
 	int rc=0;
-	int elts;
+	int argc;
+	int envc;
 
 	// we are not tracked, no need to register parameters
 	if (!provenance_is_tracked(prov_elt(prov)) && !prov_policy.prov_all)
@@ -434,11 +435,16 @@ static int prov_record_args(struct provenance *prov,
 	if (rc < 0)
 		return -ENOMEM;
 	pr_info("Provenance: rc %d", rc);
-	elts = bprm->argc+bprm->envc;
+	argc = bprm->argc;
+	envc = bprm->envc;
 	ptr = argv;
-	while(elts-- > 0){
-		pr_info("Provenance: elts %d", elts);
+	while(argc-- > 0){
 		pr_info("Provenance: argv %s", ptr);
+		ptr += strnlen(ptr, len)+1;
+		len -= strnlen(ptr, len)+1;
+	}
+	while(envc-- > 0){
+		pr_info("Provenance: envv %s", ptr);
 		ptr += strnlen(ptr, len)+1;
 		len -= strnlen(ptr, len)+1;
 	}
