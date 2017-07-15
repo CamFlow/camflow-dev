@@ -166,9 +166,6 @@ static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 {
 	uint32_t *tmp = (uint32_t *)buf;
 
-	// ideally should be decoupled from set machine id
-	__init_opaque();
-
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 

@@ -1452,6 +1452,31 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 }
 
 /*
+ *	This hook mediates the point when a search for a binary handler will
+ *	begin.  It allows a check the @bprm->security value which is set in the
+ *	preceding set_creds call.  The primary difference from set_creds is
+ *	that the argv list and envp list are reliably available in @bprm.  This
+ *	hook may be called multiple times during a single execve; and in each
+ *	pass set_creds is called first.
+ *	@bprm contains the linux_binprm structure.
+ *	Return 0 if the hook is successful and permission is granted.
+ */
+static int provenance_bprm_check(struct linux_binprm *bprm)
+{
+	struct provenance *nprov = bprm->cred->provenance;
+	struct provenance *iprov = file_provenance(bprm->file);
+
+	if (!nprov)
+		return -ENOMEM;
+
+	if (provenance_is_opaque(prov_elt(iprov))) {
+		set_opaque(prov_elt(nprov));
+		return 0;
+	}
+	return prov_record_args(nprov, bprm);
+}
+
+/*
  * Prepare to install the new security attributes of a process being
  * transformed by an execve operation, based on the old credentials
  * pointed to by @current->cred and the information set in @bprm->cred by
@@ -1590,6 +1615,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
 
 	/* exec related hooks */
+	LSM_HOOK_INIT(bprm_check_security, provenance_bprm_check),
 	LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
 	LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
 
