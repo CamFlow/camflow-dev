@@ -672,6 +672,18 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
+#define hash_filters(filters, filters_type, tmp, tmp_type)\
+	list_for_each_safe(listentry, listtmp, &filters) {\
+		tmp = list_entry(listentry, struct filters_type, list);\
+		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type));\
+		if (rc) {\
+			pr_err("Provenance: error updating hash.");\
+			pos = -EAGAIN;\
+			goto out;\
+		}\
+	}
+
+
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
@@ -685,6 +697,8 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct ipv4_filters *ipv4_tmp;
 	struct ns_filters *ns_tmp;
 	struct secctx_filters *secctx_tmp;
+	struct user_filters *user_tmp;
+	struct group_filters *group_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
 	if(IS_ERR(policy_shash_tfm))
@@ -728,45 +742,18 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* ingress network policy */
-	list_for_each_safe(listentry, listtmp, &ingress_ipv4filters) {
-		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(ingress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 	/* egress network policy */
-	list_for_each_safe(listentry, listtmp, &egress_ipv4filters) {
-		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(egress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 	/* namespace policy */
-	list_for_each_safe(listentry, listtmp, &ns_filters) {
-		ns_tmp = list_entry(listentry, struct ns_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ns_tmp->filter, sizeof(struct nsinfo));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(ns_filters, ns_filters, ns_tmp, ns_filters);
 	/* secctx policy */
-	list_for_each_safe(listentry, listtmp, &secctx_filters) {
-		secctx_tmp = list_entry(listentry, struct secctx_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&secctx_tmp->filter, sizeof(struct secinfo));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(secctx_filters, secctx_filters, secctx_tmp, secinfo);
+	/* userid policy */
+	hash_filters(user_filters, user_filters, user_tmp, userinfo);
+	/* groupid policy */
+	hash_filters(group_filters, group_filters, group_tmp, groupinfo);
+
 	rc = crypto_shash_final(hashdesc, buff);
 	if (rc) {
 		pr_err("Provenance: error finialising hash.");
