@@ -1295,7 +1295,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = flow_from_activity(RL_SND, cprov, iprov, NULL);
 	if (pprov)
-		rc = flow_to_activity(RL_RCV, iprov, pprov, NULL);
+		rc = flow_to_activity(RL_RCV_UNIX, iprov, pprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1344,7 +1344,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (pprov)
-		rc = flow_from_activity(RL_SND, pprov, iprov, NULL);
+		rc = flow_from_activity(RL_SND_UNIX, pprov, iprov, NULL);
 	rc = flow_to_activity(RL_RCV, iprov, cprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
