@@ -140,7 +140,7 @@ test: copy_change
 	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 run_ltp:
-	cd /opt/ltp && sudo ./runltp
+	cd /opt/ltp && sudo ./runltp -R -o /tmp/ltp.txt -l /tmp/ltp.log -g /tmp/ltp.html -K /tmp/kernel -a tfjmp@seas.harvard.edu 
 
 test_travis:
 	@echo "Running sparse..."
