@@ -189,7 +189,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define RL_GETXATTR           (RL_USED      | 0x0000000100000000ULL)
 #define RL_LSTXATTR           (RL_USED      | 0x0000000200000000ULL)
 #define RL_NAMED_PROCESS      (RL_USED      | 0x0000000400000000ULL)
-#define RL_SAID								(RL_USED      | 0x0000000800000000ULL)
+#define RL_LOG								(RL_USED      | 0x0000000800000000ULL)
 #define RL_ARG								(RL_USED      | 0x0000001000000000ULL)
 #define RL_ENV								(RL_USED      | 0x0000002000000000ULL)
 /* INFORMED SUBTYPES */

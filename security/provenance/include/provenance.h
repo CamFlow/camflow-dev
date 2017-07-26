@@ -143,7 +143,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	str->str_info.length = count;
 	write_node(cprov);
 	write_long_node(str);
-	rc = write_relation(RL_SAID, str, cprov, NULL);
+	rc = write_relation(RL_LOG, str, cprov, NULL);
 out:
 	free_long_provenance(str);
 	if (rc < 0)

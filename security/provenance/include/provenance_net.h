@@ -27,8 +27,11 @@
 
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
-	struct provenance *iprov = SOCK_INODE(sock)->i_provenance;
+	struct inode *inode = SOCK_INODE(sock);
+	struct provenance *iprov=NULL;
 
+	if (inode)
+		iprov = SOCK_INODE(sock)->i_provenance;
 	return iprov;
 }
 
