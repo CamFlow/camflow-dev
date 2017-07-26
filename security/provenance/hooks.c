@@ -1295,6 +1295,8 @@ static int provenance_socket_sendmsg(struct socket *sock,
 						pr_info("pprov is tracked sendmsg.");
 					if (pprov == cprov)
 						pr_info("source dest id? in sendmsg");
+					if (pprov == cprov)
+						pprov = NULL;
 				}
 			}
 		}
@@ -1353,6 +1355,8 @@ static int provenance_socket_recvmsg(struct socket *sock,
 						pr_info("pprov is tracked recvmsg.");
 					if (pprov == cprov)
 						pr_info("source dest id? in recvmsg");
+					if (pprov == cprov)
+						pprov = NULL;
 				}
 			}
 		}
