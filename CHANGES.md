@@ -26,6 +26,7 @@
 
 ### v0.3.4
 ```
+- Non-datagram unix socket generates connected graph.
 - Properly record arguments and environment variables.
 - Implement UID and GID filtering.
 - Handle properly inode changing type (in practice we observe file -> link).

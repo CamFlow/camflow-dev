@@ -1287,18 +1287,8 @@ static int provenance_socket_sendmsg(struct socket *sock,
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);
-			if (provenance_is_tracked(prov_elt(cprov))){
-				pr_info("Tracked sendmsg.");
-				if (pprov) {
-					pr_info("pprov is set sendmsg.");
-					if (provenance_is_tracked(prov_elt(pprov)))
-						pr_info("pprov is tracked sendmsg.");
-					if (pprov == cprov)
-						pr_info("source dest id? in sendmsg");
-					if (pprov == cprov)
-						pprov = NULL;
-				}
-			}
+			if (pprov == cprov)
+				pprov = NULL;
 		}
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
@@ -1347,18 +1337,8 @@ static int provenance_socket_recvmsg(struct socket *sock,
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);
-			if (provenance_is_tracked(prov_elt(cprov))){
-				pr_info("Tracked recvmsg.");
-				if (pprov) {
-					pr_info("pprov is set recvmsg.");
-					if (provenance_is_tracked(prov_elt(pprov)))
-						pr_info("pprov is tracked recvmsg.");
-					if (pprov == cprov)
-						pr_info("source dest id? in recvmsg");
-					if (pprov == cprov)
-						pprov = NULL;
-				}
-			}
+			if (pprov == cprov)
+				pprov = NULL;
 		}
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
