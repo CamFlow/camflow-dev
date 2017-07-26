@@ -1285,7 +1285,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	if (sock->sk->sk_family == PF_UNIX &&
 			sock->sk->sk_type != SOCK_DGRAM) { // datagran handled by unix_may_send
 		peer = unix_peer_get(sock->sk);
-		if (peer){
+		if (peer) {
 			pprov = sk_provenance(peer);
 			if (provenance_is_tracked(prov_elt(cprov))){
 				pr_info("Tracked sendmsg.");
@@ -1303,7 +1303,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = flow_from_activity(RL_SND, cprov, iprov, NULL);
 	if (pprov)
-		rc = flow_to_activity(RL_LOG, iprov, pprov, NULL);
+		rc = flow_to_activity(RL_RCV, iprov, pprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1343,7 +1343,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	if (sock->sk->sk_family == PF_UNIX &&
 			sock->sk->sk_type != SOCK_DGRAM) { // datagran handled by unix_may_send
 		peer = unix_peer_get(sock->sk);
-		if (peer){
+		if (peer) {
 			pprov = sk_provenance(peer);
 			if (provenance_is_tracked(prov_elt(cprov))){
 				pr_info("Tracked recvmsg.");
@@ -1360,7 +1360,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (pprov)
-		rc = flow_from_activity(RL_SH_WRITE, pprov, iprov, NULL);
+		rc = flow_from_activity(RL_SND, pprov, iprov, NULL);
 	rc = flow_to_activity(RL_RCV, iprov, cprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
