@@ -18,7 +18,7 @@
 
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = get_current_provenance();
 	struct provenance *iprov = NULL;
 	union prov_elt pckprov;
 	unsigned long irqflags;
