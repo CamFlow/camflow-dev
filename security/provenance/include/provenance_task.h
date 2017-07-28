@@ -452,14 +452,12 @@ static inline int prov_record_args(struct provenance *prov,
 	if (!provenance_is_tracked(prov_elt(prov)) && !prov_policy.prov_all)
 		return 0;
 	len = bprm->exec - bprm->p;
-	pr_info("Provenance: size %lu", len);
 	argv = kzalloc(len, GFP_KERNEL);
 	if (!argv)
 		return -ENOMEM;
 	rc = copy_argv_bprm(bprm, argv, len);
 	if (rc < 0)
 		return -ENOMEM;
-	pr_info("Provenance: rc %d", rc);
 	argc = bprm->argc;
 	envc = bprm->envc;
 	ptr = argv;
