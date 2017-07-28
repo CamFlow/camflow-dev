@@ -118,18 +118,20 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	return rc;
 }
 
-static inline void refresh_inode_provenance(struct inode *inode)
+static inline void refresh_inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *prov = inode->i_provenance;
 
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	record_inode_name(inode, prov);
+	if(may_sleep)
+		record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
 	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
 	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_elt(prov)->inode_info.secid));
+	update_inode_type(inode->i_mode, prov);
 }
 
 static inline struct provenance *branch_mmap(struct provenance *iprov, struct provenance *cprov)
@@ -206,6 +208,7 @@ static inline struct provenance *inode_provenance(struct inode *inode, bool may_
 	might_sleep_if(may_sleep);
 	if (!prov->initialised && may_sleep)
 		inode_init_provenance(inode, NULL);
+	refresh_inode_provenance(inode, may_sleep);
 	return prov;
 }
 

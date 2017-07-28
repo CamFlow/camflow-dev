@@ -195,15 +195,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
 
 	if (unlikely(!iprov))
 		return -ENOMEM;
-	prov_elt(iprov)->inode_info.ino = inode->i_ino;
-	node_uid(prov_elt(iprov)) = __kuid_val(inode->i_uid);
-	node_gid(prov_elt(iprov)) = __kgid_val(inode->i_gid);
-	security_inode_getsecid(inode, &(prov_elt(iprov)->inode_info.secid));
-	update_inode_type(inode->i_mode, iprov);
 	sprov = inode->i_sb->s_provenance;
 	memcpy(prov_elt(iprov)->inode_info.sb_uuid, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	inode->i_provenance = iprov;
-	refresh_inode_provenance(inode);
+	refresh_inode_provenance(inode, true);
 	return 0;
 }
 
@@ -678,7 +673,6 @@ static int provenance_file_permission(struct file *file, int mask)
 
 	if (!iprov)
 		return -ENOMEM;
-	refresh_inode_provenance(inode);
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
