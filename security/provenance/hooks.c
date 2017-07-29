@@ -409,8 +409,8 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	if (rc < 0)
 		goto out;
 	rc = flow_between_entities(RL_SETATTR, iattrprov, iprov, NULL);
-	queue_save_provenance(iprov, dentry);
 out:
+	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	free_provenance(iattrprov);
@@ -710,8 +710,8 @@ static int provenance_file_permission(struct file *file, int mask)
 				rc = flow_to_activity(RL_EXEC, iprov, cprov, file);
 		}
 	}
-	queue_save_provenance(iprov, file_dentry(file));
 out:
+	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -836,8 +836,8 @@ static int provenance_file_ioctl(struct file *file,
 	if (rc < 0)
 		goto out;
 	rc = flow_to_activity(RL_READ, iprov, cprov, NULL);
-	queue_save_provenance(iprov, file_dentry(file));
 out:
+	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
