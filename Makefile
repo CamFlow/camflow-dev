@@ -20,8 +20,8 @@ prepare_kernel:
 
 prepare_provenance:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflow-provenance-lib.git
-	cd ./build/camflow-provenance-lib && $(MAKE) prepare
+	cd ./build && git clone https://github.com/CamFlow/libprovenance.git
+	cd ./build/libprovenance && $(MAKE) prepare
 
 prepare_config:
 	mkdir -p build
@@ -84,8 +84,8 @@ compile_kernel: copy_change
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
-	cd ./build/camflow-provenance-lib && $(MAKE) clean
-	cd ./build/camflow-provenance-lib && $(MAKE) all
+	cd ./build/libprovenance && $(MAKE) clean
+	cd ./build/libprovenance && $(MAKE) all
 
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -98,7 +98,7 @@ install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow-$(lsm-version)
 
 install_us:
-	cd ./build/camflow-provenance-lib && $(MAKE) install
+	cd ./build/libprovenance && $(MAKE) install
 	cd ./build/camconfd && $(MAKE) all
 	cd ./build/camconfd && $(MAKE) install
 	cd ./build/camflow-cli && $(MAKE) all
@@ -113,7 +113,7 @@ clean_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 
 clean_us:
-	cd ./build/camflow-provenance-lib && $(MAKE) clean
+	cd ./build/libprovenance && $(MAKE) clean
 	cd ./build/camconfd && $(MAKE) clean
 	cd ./build/camflow-cli && $(MAKE) clean
 	cd ./build/camflowd && $(MAKE) clean
