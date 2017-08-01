@@ -775,34 +775,39 @@ out:
 }
 declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
 
+#define prov_create_file(name, perm, fun_ptr)\
+	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);
+
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
 
 	prov_dir = securityfs_create_dir("provenance", NULL);
-	securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
-	securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
-	securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
-	securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
-	securityfs_create_file("self", 0666, prov_dir, NULL, &prov_self_ops);
-	securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
-	securityfs_create_file("boot_id", 0444, prov_dir, NULL, &prov_boot_id_ops);
-	securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
-	securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
-	securityfs_create_file("propagate_node_filter", 0644, prov_dir, NULL, &prov_propagate_node_filter_ops);
-	securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
-	securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
-	securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
-	securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
-	securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
-	securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
-	securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
-	securityfs_create_file("ns", 0644, prov_dir, NULL, &prov_ns_filter_ops);
-	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
-	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
-	securityfs_create_file("policy_hash", 0444, prov_dir, NULL, &prov_policy_hash_ops);
-	securityfs_create_file("uid", 0644, prov_dir, NULL, &prov_uid_filter_ops);
-	securityfs_create_file("gid", 0644, prov_dir, NULL, &prov_gid_filter_ops);
+	prov_create_file("enable", 0644, &prov_enable_ops);
+	prov_create_file("all", 0644, &prov_all_ops);
+	prov_create_file("node", 0666, &prov_node_ops);
+	prov_create_file("relation", 0666, &prov_relation_ops);
+	prov_create_file("self", 0666, &prov_self_ops);
+	prov_create_file("machine_id", 0444, &prov_machine_id_ops);
+	prov_create_file("boot_id", 0444, &prov_boot_id_ops);
+	prov_create_file("node_filter", 0644, &prov_node_filter_ops);
+	prov_create_file("relation_filter", 0644, &prov_relation_filter_ops);
+	prov_create_file("propagate_node_filter", 0644,
+		&prov_propagate_node_filter_ops);
+	prov_create_file("propagate_relation_filter", 0644,
+		&prov_propagate_relation_filter_ops);
+	prov_create_file("flush", 0600, &prov_flush_ops);
+	prov_create_file("process", 0644, &prov_process_ops);
+	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);
+	prov_create_file("ipv4_egress", 0644, &prov_ipv4_egress_filter_ops);
+	prov_create_file("secctx", 0644, &prov_secctx_ops);
+	prov_create_file("secctx_filter", 0644, &prov_secctx_filter_ops);
+	prov_create_file("ns", 0644, &prov_ns_filter_ops);
+	prov_create_file("log", 0666, &prov_log_ops);
+	prov_create_file("logp", 0666, &prov_logp_ops);
+	prov_create_file("policy_hash", 0444, &prov_policy_hash_ops);
+	prov_create_file("uid", 0644, &prov_uid_filter_ops);
+	prov_create_file("gid", 0644, &prov_gid_filter_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
