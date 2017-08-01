@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
- #ifndef __LINUX_CAMFLOW_QUERY_H
- #define __LINUX_CAMFLOW_QUERY_H
+ #ifndef _LINUX_CAMFLOW_QUERY_H
+ #define _LINUX_CAMFLOW_QUERY_H
 
  #include <uapi/linux/provenance.h>
 

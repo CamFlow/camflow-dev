@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef _LINUX_PROVENANCE_FILTER_H
-#define _LINUX_PROVENANCE_FILTER_H
+#ifndef _PROVENANCE_FILTER_H
+#define _PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
 

@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef _LINUX_PROVENANCE_H
-#define _LINUX_PROVENANCE_H
+#ifndef _PROVENANCE_H
+#define _PROVENANCE_H
 
 #include <linux/slab.h>
 #include <linux/types.h>

@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_TASK
-#define CONFIG_SECURITY_PROVENANCE_TASK
+#ifndef _PROVENANCE_TASK_H
+#define _PROVENANCE_TASK_H
 
 #include <linux/cred.h>
 #include <linux/binfmts.h>

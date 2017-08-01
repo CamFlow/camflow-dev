@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_NET
-#define CONFIG_SECURITY_PROVENANCE_NET
+#ifndef _PROVENANCE_NET_H
+#define _PROVENANCE_NET_H
 
 #include <net/sock.h>
 #include <net/ip.h>

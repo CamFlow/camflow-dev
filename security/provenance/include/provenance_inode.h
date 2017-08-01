@@ -10,8 +10,9 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_INODE
-#define CONFIG_SECURITY_PROVENANCE_INODE
+#ifndef _PROVENANCE_INODE_H
+#define _PROVENANCE_INODE_H
+
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/namei.h>

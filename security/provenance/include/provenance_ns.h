@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_NS
-#define CONFIG_SECURITY_PROVENANCE_NS
+#ifndef _PROVENANCE_NS_H
+#define _PROVENANCE_NS_H
 
 struct ns_filters {
 	struct list_head list;
