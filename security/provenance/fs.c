@@ -776,7 +776,7 @@ out:
 declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
 
 #define prov_create_file(name, perm, fun_ptr)\
-	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);
+	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
 
 static int __init init_prov_fs(void)
 {
