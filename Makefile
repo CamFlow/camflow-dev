@@ -74,6 +74,10 @@ config_travis: copy_change copy_config
 	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
 	cd ./build/linux-$(kernel-version) && $(MAKE) oldconfig
 
+config_old: copy_change copy_config
+	 cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
+	 cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
+
 compile: compile_security compile_kernel compile_us
 
 compile_security: copy_change
