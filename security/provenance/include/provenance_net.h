@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_NET
-#define CONFIG_SECURITY_PROVENANCE_NET
+#ifndef _PROVENANCE_NET_H
+#define _PROVENANCE_NET_H
 
 #include <net/sock.h>
 #include <net/ip.h>
@@ -27,8 +27,11 @@
 
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
-	struct provenance *iprov = SOCK_INODE(sock)->i_provenance;
+	struct inode *inode = SOCK_INODE(sock);
+	struct provenance *iprov=NULL;
 
+	if (inode)
+		iprov = SOCK_INODE(sock)->i_provenance;
 	return iprov;
 }
 

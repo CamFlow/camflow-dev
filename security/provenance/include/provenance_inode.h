@@ -10,15 +10,16 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_INODE
-#define CONFIG_SECURITY_PROVENANCE_INODE
+#ifndef _PROVENANCE_INODE_H
+#define _PROVENANCE_INODE_H
+
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/namei.h>
 #include <linux/xattr.h>
 
 #include "provenance_policy.h"
-#include "provenance_secctx.h"  // for record_inode_name
+#include "provenance_filter.h"
 
 #define is_inode_dir(inode) S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
@@ -26,6 +27,7 @@
 
 static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
+	union prov_elt old_prov;
 	uint64_t type = ENT_INODE_UNKNOWN;
 	unsigned long irqflags;
 
@@ -44,8 +46,26 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
+	if (prov_elt(prov)->inode_info.mode != 0
+			&& prov_elt(prov)->inode_info.mode != mode
+			&& provenance_is_recorded(prov_elt(prov))) {
+		if (filter_update_node(type))
+			goto out;
+		memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
+		node_identifier(prov_elt(prov)).version++;
+		clear_recorded(prov_elt(prov));
+		write_node(&old_prov);
+		/* we update the info of the new version and record it */
+		prov_elt(prov)->inode_info.mode = mode;
+		prov_type(prov_elt(prov)) = type;
+		write_node(prov_elt(prov));
+		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
+		prov->has_outgoing = false; // we update there is no more outgoing edge
+		prov->saved = false;
+	}
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
+out:
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
@@ -99,18 +119,20 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	return rc;
 }
 
-static inline void refresh_inode_provenance(struct inode *inode)
+static inline void refresh_inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *prov = inode->i_provenance;
 
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	record_inode_name(inode, prov);
+	if(may_sleep)
+		record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
-	prov_elt(prov)->inode_info.uid = __kuid_val(inode->i_uid);
-	prov_elt(prov)->inode_info.gid = __kgid_val(inode->i_gid);
+	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
+	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_elt(prov)->inode_info.secid));
+	update_inode_type(inode->i_mode, prov);
 }
 
 static inline struct provenance *branch_mmap(struct provenance *iprov, struct provenance *cprov)
@@ -123,8 +145,8 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
 	if (!prov)
 		return NULL;
 	set_tracked(prov_elt(prov));
-	prov_elt(prov)->inode_info.uid = prov_elt(iprov)->inode_info.uid;
-	prov_elt(prov)->inode_info.gid = prov_elt(iprov)->inode_info.gid;
+	node_uid(prov_elt(prov)) = prov_elt(iprov)->inode_info.uid;
+	node_gid(prov_elt(prov)) = prov_elt(iprov)->inode_info.gid;
 	prov_elt(prov)->inode_info.mode = prov_elt(iprov)->inode_info.mode;
 	prov_elt(prov)->inode_info.ino = prov_elt(iprov)->inode_info.ino;
 	memcpy(prov_elt(prov)->inode_info.sb_uuid, prov_elt(iprov)->inode_info.sb_uuid, 16 * sizeof(uint8_t));
@@ -187,6 +209,7 @@ static inline struct provenance *inode_provenance(struct inode *inode, bool may_
 	might_sleep_if(may_sleep);
 	if (!prov->initialised && may_sleep)
 		inode_init_provenance(inode, NULL);
+	refresh_inode_provenance(inode, may_sleep);
 	return prov;
 }
 
@@ -255,7 +278,7 @@ static inline int record_write_xattr(uint64_t type,
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
-		goto out;
+		return -ENOMEM;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	if (value) {

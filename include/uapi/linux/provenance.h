@@ -121,6 +121,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_LOG_FILE													"/sys/kernel/security/provenance/log"
 #define PROV_LOGP_FILE												"/sys/kernel/security/provenance/logp"
 #define PROV_POLICY_HASH_FILE									"/sys/kernel/security/provenance/policy_hash"
+#define PROV_UID_FILTER												"/sys/kernel/security/provenance/uid"
+#define PROV_GID_FILTER												"/sys/kernel/security/provenance/gid"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -151,78 +153,84 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define RL_UNKNOWN            (DM_RELATION | 0x0001000000000000ULL)
 /* DERIVED SUBTYPES */
 #define RL_NAMED              (RL_DERIVED   | 0x0000000000000001ULL)
-#define RL_VERSION            (RL_DERIVED   | 0x0000000000000002ULL)
-#define RL_MMAP               (RL_DERIVED   | 0x0000000000000004ULL)
-#define RL_SND_PACKET         (RL_DERIVED   | 0x0000000000000008ULL)
-#define RL_RCV_PACKET         (RL_DERIVED   | 0x0000000000000010ULL)
-#define RL_CLOSED			        (RL_DERIVED   | 0x0000000000000020ULL)
+#define RL_VERSION            (RL_DERIVED   | 0x0000000000000001ULL<<1)
+#define RL_MMAP               (RL_DERIVED   | 0x0000000000000001ULL<<2)
+#define RL_SND_PACKET         (RL_DERIVED   | 0x0000000000000001ULL<<3)
+#define RL_RCV_PACKET         (RL_DERIVED   | 0x0000000000000001ULL<<4)
+#define RL_CLOSED			        (RL_DERIVED   | 0x0000000000000001ULL<<5)
 /* GENERATED SUBTYPES */
-#define RL_CREATE             (RL_GENERATED | 0x0000000000000040ULL)
-#define RL_WRITE              (RL_GENERATED | 0x0000000000000080ULL)
-#define RL_PERM_WRITE         (RL_GENERATED | 0x0000000000000100ULL)
-#define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000200ULL)
-#define RL_SH_WRITE           (RL_GENERATED | 0x0000000000000400ULL)
-#define RL_CONNECT            (RL_GENERATED | 0x0000000000000800ULL)
-#define RL_LISTEN             (RL_GENERATED | 0x0000000000001000ULL)
-#define RL_BIND               (RL_GENERATED | 0x0000000000002000ULL)
-#define RL_SND                (RL_GENERATED | 0x0000000000004000ULL)
-#define RL_LINK               (RL_GENERATED | 0x0000000000008000ULL)
-#define RL_SETATTR            (RL_GENERATED | 0x0000000000010000ULL)
-#define RL_SETXATTR           (RL_GENERATED | 0x0000000000020000ULL)
-#define RL_RMVXATTR           (RL_GENERATED | 0x0000000000040000ULL)
+#define RL_CREATE             (RL_GENERATED | 0x0000000000000001ULL<<6)
+#define RL_WRITE              (RL_GENERATED | 0x0000000000000001ULL<<7)
+#define RL_PERM_WRITE         (RL_GENERATED | 0x0000000000000001ULL<<8)
+#define RL_MMAP_WRITE         (RL_GENERATED | 0x0000000000000001ULL<<9)
+#define RL_SH_WRITE           (RL_GENERATED | 0x0000000000000001ULL<<10)
+#define RL_CONNECT            (RL_GENERATED | 0x0000000000000001ULL<<11)
+#define RL_LISTEN             (RL_GENERATED | 0x0000000000000001ULL<<12)
+#define RL_BIND               (RL_GENERATED | 0x0000000000000001ULL<<13)
+#define RL_SND                (RL_GENERATED | 0x0000000000000001ULL<<14)
+#define RL_SND_UNIX           (RL_GENERATED | 0x0000000000000001ULL<<15)
+#define RL_LINK               (RL_GENERATED | 0x0000000000000001ULL<<16)
+#define RL_SETATTR            (RL_GENERATED | 0x0000000000000001ULL<<17)
+#define RL_SETXATTR           (RL_GENERATED | 0x0000000000000001ULL<<18)
+#define RL_RMVXATTR           (RL_GENERATED | 0x0000000000000001ULL<<19)
 /* USED SUBTYPES */
-#define RL_READ               (RL_USED      | 0x0000000000080000ULL)
-#define RL_MMAP_READ          (RL_USED      | 0x0000000000100000ULL)
-#define RL_PERM_READ          (RL_USED      | 0x0000000000200000ULL)
-#define RL_SH_READ            (RL_USED      | 0x0000000000400000ULL)
-#define RL_EXEC               (RL_USED      | 0x0000000000800000ULL)
-#define RL_MMAP_EXEC          (RL_USED      | 0x0000000001000000ULL)
-#define RL_PERM_EXEC          (RL_USED      | 0x0000000002000000ULL)
-#define RL_ACCEPT             (RL_USED      | 0x0000000004000000ULL)
-#define RL_RCV                (RL_USED      | 0x0000000008000000ULL)
-#define RL_OPEN               (RL_USED      | 0x0000000010000000ULL)
-#define RL_SEARCH             (RL_USED      | 0x0000000020000000ULL)
-#define RL_GETATTR            (RL_USED      | 0x0000000040000000ULL)
-#define RL_READLINK           (RL_USED      | 0x0000000080000000ULL)
-#define RL_GETXATTR           (RL_USED      | 0x0000000100000000ULL)
-#define RL_LSTXATTR           (RL_USED      | 0x0000000200000000ULL)
-#define RL_NAMED_PROCESS      (RL_USED      | 0x0000000400000000ULL)
-#define RL_SAID								(RL_USED      | 0x0000000800000000ULL)
+#define RL_READ               (RL_USED      | 0x0000000000000001ULL<<20)
+#define RL_MMAP_READ          (RL_USED      | 0x0000000000000001ULL<<21)
+#define RL_PERM_READ          (RL_USED      | 0x0000000000000001ULL<<22)
+#define RL_SH_READ            (RL_USED      | 0x0000000000000001ULL<<23)
+#define RL_EXEC               (RL_USED      | 0x0000000000000001ULL<<24)
+#define RL_MMAP_EXEC          (RL_USED      | 0x0000000000000001ULL<<25)
+#define RL_PERM_EXEC          (RL_USED      | 0x0000000000000001ULL<<26)
+#define RL_ACCEPT             (RL_USED      | 0x0000000000000001ULL<<27)
+#define RL_RCV                (RL_USED      | 0x0000000000000001ULL<<28)
+#define RL_RCV_UNIX           (RL_USED      | 0x0000000000000001ULL<<29)
+#define RL_OPEN               (RL_USED      | 0x0000000000000001ULL<<30)
+#define RL_SEARCH             (RL_USED      | 0x0000000000000001ULL<<31)
+#define RL_GETATTR            (RL_USED      | 0x0000000000000001ULL<<32)
+#define RL_READLINK           (RL_USED      | 0x0000000000000001ULL<<33)
+#define RL_GETXATTR           (RL_USED      | 0x0000000000000001ULL<<34)
+#define RL_LSTXATTR           (RL_USED      | 0x0000000000000001ULL<<35)
+#define RL_NAMED_PROCESS      (RL_USED      | 0x0000000000000001ULL<<36)
+#define RL_LOG								(RL_USED      | 0x0000000000000001ULL<<37)
+#define RL_ARG								(RL_USED      | 0x0000000000000001ULL<<38)
+#define RL_ENV								(RL_USED      | 0x0000000000000001ULL<<39)
 /* INFORMED SUBTYPES */
-#define RL_CLONE              (RL_INFORMED  | 0x0000001000000000ULL)
-#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000002000000000ULL)
-#define RL_CHANGE             (RL_INFORMED  | 0x0000004000000000ULL)
-#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000008000000000ULL)
-#define RL_TERMINATE_PROCESS  (RL_INFORMED  | 0x0000010000000000ULL)
+#define RL_CLONE              (RL_INFORMED  | 0x0000000000000001ULL<<40)
+#define RL_VERSION_PROCESS    (RL_INFORMED  | 0x0000000000000001ULL<<41)
+#define RL_CHANGE             (RL_INFORMED  | 0x0000000000000001ULL<<42)
+#define RL_EXEC_PROCESS       (RL_INFORMED  | 0x0000000000000001ULL<<43)
+#define RL_TERMINATE_PROCESS  (RL_INFORMED  | 0x0000000000000001ULL<<44)
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
-#define ACT_DISC              (DM_ACTIVITY  | 0x0000000000000002ULL)
+#define ACT_DISC              (DM_ACTIVITY  | 0x0000000000000001ULL<<1)
 /* AGENT SUBTYPES */
-#define AGT_USR               (DM_AGENT     | 0x0000000000000004ULL)
-#define AGT_GRP               (DM_AGENT     | 0x0000000000000008ULL)
-#define AGT_DISC              (DM_AGENT     | 0x0000000000000010ULL)
+#define AGT_USR               (DM_AGENT     | 0x0000000000000001ULL<<2)
+#define AGT_GRP               (DM_AGENT     | 0x0000000000000001ULL<<3)
+#define AGT_DISC              (DM_AGENT     | 0x0000000000000001ULL<<4)
 /* ENTITY SUBTYPES */
-#define ENT_STR               (DM_ENTITY    | 0x0000000000000020ULL)
-#define ENT_INODE_UNKNOWN     (DM_ENTITY    | 0x0000000000000040ULL)
-#define ENT_INODE_LINK        (DM_ENTITY    | 0x0000000000000080ULL)
-#define ENT_INODE_FILE        (DM_ENTITY    | 0x0000000000000100ULL)
-#define ENT_INODE_DIRECTORY   (DM_ENTITY    | 0x0000000000000200ULL)
-#define ENT_INODE_CHAR        (DM_ENTITY    | 0x0000000000000400ULL)
-#define ENT_INODE_BLOCK       (DM_ENTITY    | 0x0000000000000800ULL)
-#define ENT_INODE_FIFO        (DM_ENTITY    | 0x0000000000001000ULL)
-#define ENT_INODE_SOCKET      (DM_ENTITY    | 0x0000000000002000ULL)
-#define ENT_INODE_MMAP        (DM_ENTITY    | 0x0000000000004000ULL)
-#define ENT_MSG               (DM_ENTITY    | 0x0000000000008000ULL)
-#define ENT_SHM               (DM_ENTITY    | 0x0000000000010000ULL)
-#define ENT_ADDR              (DM_ENTITY    | 0x0000000000020000ULL)
-#define ENT_SBLCK             (DM_ENTITY    | 0x0000000000040000ULL)
-#define ENT_FILE_NAME         (DM_ENTITY    | 0x0000000000080000ULL)
-#define ENT_PACKET            (DM_ENTITY    | 0x0000000000100000ULL)
-#define ENT_DISC              (DM_ENTITY    | 0x0000000000200000ULL)
-#define ENT_IATTR             (DM_ENTITY    | 0x0000000000400000ULL)
-#define ENT_XATTR             (DM_ENTITY    | 0x0000000000800000ULL)
-#define ENT_PCKCNT						(DM_ENTITY    | 0x0000000001000000ULL)
+#define ENT_STR               (DM_ENTITY    | 0x0000000000000001ULL<<5)
+#define ENT_INODE_UNKNOWN     (DM_ENTITY    | 0x0000000000000001ULL<<6)
+#define ENT_INODE_LINK        (DM_ENTITY    | 0x0000000000000001ULL<<7)
+#define ENT_INODE_FILE        (DM_ENTITY    | 0x0000000000000001ULL<<8)
+#define ENT_INODE_DIRECTORY   (DM_ENTITY    | 0x0000000000000001ULL<<9)
+#define ENT_INODE_CHAR        (DM_ENTITY    | 0x0000000000000001ULL<<10)
+#define ENT_INODE_BLOCK       (DM_ENTITY    | 0x0000000000000001ULL<<11)
+#define ENT_INODE_FIFO        (DM_ENTITY    | 0x0000000000000001ULL<<12)
+#define ENT_INODE_SOCKET      (DM_ENTITY    | 0x0000000000000001ULL<<13)
+#define ENT_INODE_MMAP        (DM_ENTITY    | 0x0000000000000001ULL<<14)
+#define ENT_MSG               (DM_ENTITY    | 0x0000000000000001ULL<<15)
+#define ENT_SHM               (DM_ENTITY    | 0x0000000000000001ULL<<16)
+#define ENT_ADDR              (DM_ENTITY    | 0x0000000000000001ULL<<17)
+#define ENT_SBLCK             (DM_ENTITY    | 0x0000000000000001ULL<<18)
+#define ENT_FILE_NAME         (DM_ENTITY    | 0x0000000000000001ULL<<19)
+#define ENT_PACKET            (DM_ENTITY    | 0x0000000000000001ULL<<20)
+#define ENT_DISC              (DM_ENTITY    | 0x0000000000000001ULL<<21)
+#define ENT_IATTR             (DM_ENTITY    | 0x0000000000000001ULL<<22)
+#define ENT_XATTR             (DM_ENTITY    | 0x0000000000000001ULL<<23)
+#define ENT_PCKCNT						(DM_ENTITY    | 0x0000000000000001ULL<<24)
+#define ENT_ARG								(DM_ENTITY    | 0x0000000000000001ULL<<25)
+#define ENT_ENV								(DM_ENTITY    | 0x0000000000000001ULL<<26)
 
 #define FLOW_ALLOWED        0
 #define FLOW_DISALLOWED     1
@@ -238,6 +246,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
 #define node_secid(node)              ((node)->node_info.secid)
+#define node_uid(node)              	((node)->node_info.uid)
+#define node_gid(node)              	((node)->node_info.gid)
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -312,7 +322,7 @@ union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
@@ -335,8 +345,6 @@ struct node_struct {
 
 struct task_prov_struct {
 	basic_elements;
-	uint32_t uid;
-	uint32_t gid;
 	uint32_t pid;
 	uint32_t vpid;
 	uint32_t utsns;
@@ -350,8 +358,6 @@ struct task_prov_struct {
 struct inode_prov_struct {
 	basic_elements;
 	uint64_t ino;
-	uint32_t uid;
-	uint32_t gid;
 	uint16_t mode;
 	uint8_t sb_uuid[16];
 };
@@ -360,8 +366,6 @@ struct iattr_prov_struct {
 	basic_elements;
 	uint32_t valid;
 	uint16_t mode;
-	uint32_t uid;
-	uint32_t gid;
 	int64_t size;
 	int64_t atime;
 	int64_t ctime;
@@ -427,6 +431,13 @@ struct pckcnt_struct {
 	uint8_t truncated;
 };
 
+struct arg_struct {
+	basic_elements;
+	char value[PATH_MAX];
+	size_t length;
+	uint8_t truncated;
+};
+
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
@@ -457,6 +468,7 @@ union long_prov_elt {
 	struct iattr_prov_struct iattr_info;
 	struct str_struct str_info;
 	struct file_name_struct file_name_info;
+	struct arg_struct arg_info;
 	struct address_struct address_info;
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
@@ -475,19 +487,14 @@ struct prov_filter {
 #define PROV_SET_OPAQUE       0x02
 #define PROV_SET_PROPAGATE    0x04
 #define PROV_SET_TAINT        0x08
+#define PROV_SET_DELETE       0x10
+#define PROV_SET_RECORD       0x20
 
 struct prov_process_config {
 	union prov_elt prov;
 	uint8_t op;
 	uint32_t vpid;
 };
-
-#define PROV_NET_TRACKED      0x01
-#define PROV_NET_OPAQUE       0x02
-#define PROV_NET_PROPAGATE    0x04
-#define PROV_NET_TAINT        0x08
-#define PROV_NET_RECORD       0x10
-#define PROV_NET_DELETE       0x20 // to actually delete a filter from the list
 
 struct prov_ipv4_filter {
 	uint32_t ip;
@@ -497,12 +504,6 @@ struct prov_ipv4_filter {
 	uint64_t taint;
 };
 
-#define PROV_SEC_TRACKED      0x01
-#define PROV_SEC_OPAQUE       0x02
-#define PROV_SEC_PROPAGATE    0x04
-#define PROV_SEC_TAINT        0x08
-#define PROV_SEC_DELETE       0x10 // to actually delete a filter from the list
-
 struct secinfo {
 	uint32_t secid;
 	char secctx[PATH_MAX];
@@ -511,11 +512,18 @@ struct secinfo {
 	uint64_t taint;
 };
 
-#define PROV_NS_TRACKED      0x01
-#define PROV_NS_OPAQUE       0x02
-#define PROV_NS_PROPAGATE    0x04
-#define PROV_NS_TAINT        0x08
-#define PROV_NS_DELETE       0x10 // to actually delete a filter from the list
+struct userinfo {
+	uint32_t uid;
+	uint8_t op;
+	uint64_t taint;
+};
+
+struct groupinfo {
+	uint32_t gid;
+	uint8_t op;
+	uint64_t taint;
+};
+
 #define IGNORE_NS 0
 
 struct nsinfo {

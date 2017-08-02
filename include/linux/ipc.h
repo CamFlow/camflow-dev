@@ -8,8 +8,7 @@
 #define IPCMNI 32768  /* <= MAX_INT limit for ipc arrays (including sysctl changes) */
 
 /* used by in-kernel data structures */
-struct kern_ipc_perm
-{
+struct kern_ipc_perm {
 	spinlock_t	lock;
 	bool		deleted;
 	int		id;
@@ -24,6 +23,6 @@ struct kern_ipc_perm
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void 		*provenance;
 #endif
-};
+} ____cacheline_aligned_in_smp;
 
 #endif /* _LINUX_IPC_H */

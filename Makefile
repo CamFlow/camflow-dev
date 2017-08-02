@@ -1,5 +1,5 @@
-kernel-version=4.11.6
-lsm-version=0.3.3
+kernel-version=4.12.4
+lsm-version=0.3.4
 arch=x86_64
 
 all: config compile
@@ -20,8 +20,8 @@ prepare_kernel:
 
 prepare_provenance:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflow-provenance-lib.git
-	cd ./build/camflow-provenance-lib && $(MAKE) prepare
+	cd ./build && git clone https://github.com/CamFlow/libprovenance.git
+	cd ./build/libprovenance && $(MAKE) prepare
 
 prepare_config:
 	mkdir -p build
@@ -42,6 +42,14 @@ prepare_smatch:
 	mkdir -p build
 	cd ./build && git clone git://repo.or.cz/smatch.git
 	cd ./build/smatch && $(MAKE)
+
+prepare_ltp:
+	mkdir -p build
+	cd ./build && git clone https://github.com/linux-test-project/ltp.git
+	cd ./build/ltp && $(MAKE) autotools
+	cd ./build/ltp && ./configure
+	cd ./build/ltp && $(MAKE)
+	cd ./build/ltp && sudo $(MAKE) install
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
@@ -76,8 +84,8 @@ compile_kernel: copy_change
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
-	cd ./build/camflow-provenance-lib && $(MAKE) clean
-	cd ./build/camflow-provenance-lib && $(MAKE) all
+	cd ./build/libprovenance && $(MAKE) clean
+	cd ./build/libprovenance && $(MAKE) all
 
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
@@ -90,7 +98,7 @@ install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow-$(lsm-version)
 
 install_us:
-	cd ./build/camflow-provenance-lib && $(MAKE) install
+	cd ./build/libprovenance && $(MAKE) install
 	cd ./build/camconfd && $(MAKE) all
 	cd ./build/camconfd && $(MAKE) install
 	cd ./build/camflow-cli && $(MAKE) all
@@ -105,7 +113,7 @@ clean_kernel:
 	cd ./build/linux-$(kernel-version) && $(MAKE) mrproper
 
 clean_us:
-	cd ./build/camflow-provenance-lib && $(MAKE) clean
+	cd ./build/libprovenance && $(MAKE) clean
 	cd ./build/camconfd && $(MAKE) clean
 	cd ./build/camflow-cli && $(MAKE) clean
 	cd ./build/camflowd && $(MAKE) clean
@@ -127,6 +135,12 @@ test: copy_change
 	@echo "Running smatch..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
+	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
+
+run_ltp:
+	cd /opt/ltp && sudo ./runltp -R -o /tmp/ltp.txt -l /tmp/ltp.log -g /tmp/ltp.html -K /tmp/kernel -a tfjmp@seas.harvard.edu
 
 test_travis:
 	@echo "Running sparse..."
@@ -141,6 +155,9 @@ test_travis:
 	@echo "Running smatch..."
 	-cd ./build/linux-$(kernel-version) && $(MAKE) clean
 	-cd ./build/linux-$(kernel-version) && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
+	@echo "Running coccinelle"
+	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
+	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c

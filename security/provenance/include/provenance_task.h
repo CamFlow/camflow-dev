@@ -10,17 +10,19 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_TASK
-#define CONFIG_SECURITY_PROVENANCE_TASK
+#ifndef _PROVENANCE_TASK_H
+#define _PROVENANCE_TASK_H
 
 #include <linux/cred.h>
 #include <linux/binfmts.h>
 #include <linux/sched.h>
 #include <linux/sched/task.h>
 #include <linux/sched/mm.h>
+#include <linux/sched/signal.h>
 #include <linux/utsname.h>
 #include <linux/ipc_namespace.h>
 #include <linux/mnt_namespace.h>
+#include <linux/mm.h> // used for get_page
 #include <net/net_namespace.h>
 #include <linux/pid_namespace.h>
 #include "../../../fs/mount.h" // nasty
@@ -217,14 +219,14 @@ out:
 	return rc;
 }
 
-static inline void refresh_current_provenance(void)
+static inline struct provenance *get_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
 	unsigned long irqflags;
 
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
-		return;
+		goto out;
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
 	if (unlikely(prov_elt(prov)->task_info.pid == 0))
@@ -243,6 +245,8 @@ static inline void refresh_current_provenance(void)
 		prov->updt_mmap = 0;
 	}
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
+out:
+	return prov;
 }
 
 static inline struct provenance *prov_from_vpid(pid_t pid)
@@ -275,5 +279,199 @@ static inline int terminate_task(struct provenance *tprov)
 	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL);
 	tprov->has_outgoing = false;
 	return rc;
+}
+
+/* see fs/exec.c */
+static inline void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
+{
+	struct mm_struct *mm = current->mm;
+	long diff = (long)(pages - bprm->vma_pages);
+
+	if (!mm || !diff)
+		return;
+
+	bprm->vma_pages = pages;
+	add_mm_counter(mm, MM_ANONPAGES, diff);
+}
+
+/* see fs/exec.c */
+static inline struct page *get_arg_page(struct linux_binprm *bprm,
+																				unsigned long pos,
+																				int write)
+{
+	struct page *page;
+	int ret;
+	unsigned int gup_flags = FOLL_FORCE;
+
+#ifdef CONFIG_STACK_GROWSUP
+	if (write) {
+		ret = expand_downwards(bprm->vma, pos);
+		if (ret < 0)
+			return NULL;
+	}
+#endif
+
+	if (write)
+		gup_flags |= FOLL_WRITE;
+
+	/*
+	 * We are doing an exec().  'current' is the process
+	 * doing the exec and bprm->mm is the new process's mm.
+	 */
+	ret = get_user_pages_remote(current, bprm->mm, pos, 1, gup_flags,
+			&page, NULL, NULL);
+	if (ret <= 0)
+		return NULL;
+
+	if (write) {
+		unsigned long size = bprm->vma->vm_end - bprm->vma->vm_start;
+		unsigned long ptr_size;
+		struct rlimit *rlim;
+
+		/*
+		 * Since the stack will hold pointers to the strings, we
+		 * must account for them as well.
+		 *
+		 * The size calculation is the entire vma while each arg page is
+		 * built, so each time we get here it's calculating how far it
+		 * is currently (rather than each call being just the newly
+		 * added size from the arg page).  As a result, we need to
+		 * always add the entire size of the pointers, so that on the
+		 * last call to get_arg_page() we'll actually have the entire
+		 * correct size.
+		 */
+		ptr_size = (bprm->argc + bprm->envc) * sizeof(void *);
+		if (ptr_size > ULONG_MAX - size)
+			goto fail;
+		size += ptr_size;
+
+		acct_arg_size(bprm, size / PAGE_SIZE);
+
+		/*
+		 * We've historically supported up to 32 pages (ARG_MAX)
+		 * of argument strings even with small stacks
+		 */
+		if (size <= ARG_MAX)
+			return page;
+
+		/*
+		 * Limit to 1/4-th the stack size for the argv+env strings.
+		 * This ensures that:
+		 *  - the remaining binfmt code will not run out of stack space,
+		 *  - the program will have a reasonable amount of stack left
+		 *    to work from.
+		 */
+		rlim = current->signal->rlim;
+		if (size > READ_ONCE(rlim[RLIMIT_STACK].rlim_cur) / 4)
+			goto fail;
+	}
+
+	return page;
+
+fail:
+	put_page(page);
+	return NULL;
+}
+
+/* see fs/exec.c */
+static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
+		unsigned long len)
+{
+	int rv = 0;
+	unsigned long ofs, bytes;
+	struct page *page = NULL, *new_page;
+	const char *kaddr;
+	unsigned long src;
+
+	src = bprm->p;
+	ofs = src % PAGE_SIZE;
+	while (len) {
+		new_page = get_arg_page(bprm, src, 0);
+		if (!new_page) {
+			rv = -E2BIG;
+			goto out;
+		}
+		if (page) {
+			kunmap(page);
+			put_page(page);
+		}
+		page = new_page;
+		kaddr = kmap(page);
+		flush_cache_page(bprm->vma, ofs, page_to_pfn(page));
+		bytes = min_t(unsigned int, len, PAGE_SIZE - ofs);
+		memcpy(buff, kaddr + ofs, bytes);
+		src += bytes;
+		buff += bytes;
+		len -= bytes;
+		ofs = 0;
+	}
+	rv = src - bprm->p;
+out:
+	if (page) {
+		kunmap(page);
+		put_page(page);
+	}
+	return rv;
+}
+
+static inline int prov_record_arg(struct provenance *prov,
+																	uint64_t vtype,
+																	uint64_t etype,
+																	const char *arg,
+																	size_t len)
+{
+	union long_prov_elt *aprov;
+	int rc = 0;
+
+	aprov  = alloc_long_provenance(vtype);
+	if (!aprov)
+		return -ENOMEM;
+	aprov->arg_info.length = len;
+	if( len >= PATH_MAX)
+		aprov->arg_info.truncated = PROV_TRUNCATED;
+	strlcpy(aprov->arg_info.value, arg, PATH_MAX-1);
+	write_node(prov_elt(prov));
+	write_long_node(aprov);
+	rc = write_relation(etype, prov_elt(prov), aprov, NULL);
+	free_long_provenance(aprov);
+	return rc;
+}
+
+static inline int prov_record_args(struct provenance *prov,
+														struct linux_binprm *bprm)
+{
+	char* argv;
+	char* ptr;
+	unsigned long len;
+	size_t size;
+	int rc=0;
+	int argc;
+	int envc;
+
+	// we are not tracked, no need to register parameters
+	if (!provenance_is_tracked(prov_elt(prov)) && !prov_policy.prov_all)
+		return 0;
+	len = bprm->exec - bprm->p;
+	argv = kzalloc(len, GFP_KERNEL);
+	if (!argv)
+		return -ENOMEM;
+	rc = copy_argv_bprm(bprm, argv, len);
+	if (rc < 0)
+		return -ENOMEM;
+	argc = bprm->argc;
+	envc = bprm->envc;
+	ptr = argv;
+	while(argc-- > 0){
+		size = strnlen(ptr, len);
+		prov_record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
+		ptr += size+1;
+	}
+	while(envc-- > 0){
+		size = strnlen(ptr, len);
+		prov_record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
+		ptr += size+1;
+	}
+	kfree(argv);
+	return 0;
 }
 #endif

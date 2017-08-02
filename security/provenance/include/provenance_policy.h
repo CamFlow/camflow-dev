@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef CONFIG_SECURITY_PROVENANCE_POLICY
-#define CONFIG_SECURITY_PROVENANCE_POLICY
+#ifndef _PROVENANCE_POLICY_H
+#define _PROVENANCE_POLICY_H
 
 struct capture_policy {
   bool prov_enabled;

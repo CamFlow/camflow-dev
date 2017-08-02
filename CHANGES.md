@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.3.4           | 4.12.4         | 02/08/2017 |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
 | 0.3.2           | 4.11.3         | 31/05/2017 |
 | 0.3.1           | 4.11.2         | 22/05/2017 |
@@ -22,6 +23,16 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.3.4
+```
+- Non-datagram unix socket generates connected graph.
+- Properly record arguments and environment variables.
+- Implement UID and GID filtering.
+- Handle properly inode changing type (in practice we observe file -> link).
+- Fix sleep in provenance_inode_permission.
+- Update to kernel version 4.12.4.
+```
 
 ### v0.3.3
 ```

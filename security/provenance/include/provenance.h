@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
-#ifndef _LINUX_PROVENANCE_H
-#define _LINUX_PROVENANCE_H
+#ifndef _PROVENANCE_H
+#define _PROVENANCE_H
 
 #include <linux/slab.h>
 #include <linux/types.h>
@@ -143,7 +143,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	str->str_info.length = count;
 	write_node(cprov);
 	write_long_node(str);
-	rc = write_relation(RL_SAID, str, cprov, NULL);
+	rc = write_relation(RL_LOG, str, cprov, NULL);
 out:
 	free_long_provenance(str);
 	if (rc < 0)
@@ -163,8 +163,8 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
-	write_node(prov_elt(prov));
 	write_node(&old_prov);
+	write_node(prov_elt(prov));
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
 		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
 	else

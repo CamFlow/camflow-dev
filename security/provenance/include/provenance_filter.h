@@ -10,14 +10,13 @@
  * or (at your option) any later version.
  *
  */
-#ifndef _LINUX_PROVENANCE_FILTER_H
-#define _LINUX_PROVENANCE_FILTER_H
+#ifndef _PROVENANCE_FILTER_H
+#define _PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
 
 #include "provenance_policy.h"
 #include "provenance_ns.h"
-#include "provenance_secctx.h"
 
 #define HIT_FILTER(filter, data) ((filter & data) != 0)
 
@@ -76,6 +75,7 @@ static inline bool should_record_relation(uint64_t type, union prov_elt *from, u
 static inline bool prov_has_secid(union prov_elt *prov)
 {
 	switch (prov_type(prov)) {
+	case ACT_TASK:
 	case ENT_INODE_UNKNOWN:
 	case ENT_INODE_LINK:
 	case ENT_INODE_FILE:
@@ -90,39 +90,121 @@ static inline bool prov_has_secid(union prov_elt *prov)
 	}
 }
 
+static inline bool prov_has_uid_and_gid(union prov_elt *prov)
+{
+	switch (prov_type(prov)) {
+	case ACT_TASK:
+	case ENT_IATTR:
+	case ENT_INODE_UNKNOWN:
+	case ENT_INODE_LINK:
+	case ENT_INODE_FILE:
+	case ENT_INODE_DIRECTORY:
+	case ENT_INODE_CHAR:
+	case ENT_INODE_BLOCK:
+	case ENT_INODE_FIFO:
+	case ENT_INODE_SOCKET:
+	case ENT_INODE_MMAP:
+		return true;
+	default: return false;
+	}
+}
+
+#define declare_filter_list(filter_name, type)\
+	struct filter_name {\
+		struct list_head list;\
+		struct type filter;\
+	};\
+	extern struct list_head filter_name;
+
+#define declare_filter_whichOP(function_name, type, variable)\
+	static inline uint8_t function_name(uint32_t variable)\
+	{\
+		struct list_head *listentry, *listtmp;\
+		struct type *tmp;\
+		list_for_each_safe(listentry, listtmp, &type) {\
+			tmp = list_entry(listentry, struct type, list);\
+			if (tmp->filter.variable == variable)\
+				return tmp->filter.op;\
+		}\
+		return 0;\
+	}
+
+#define declare_filter_delete(function_name, type, variable)\
+	static inline uint8_t function_name(struct type *f)\
+	{\
+		struct list_head *listentry, *listtmp;\
+		struct type *tmp;\
+		list_for_each_safe(listentry, listtmp, &type) {\
+			tmp = list_entry(listentry, struct type, list);\
+			if (tmp->filter.variable == f->filter.variable) {\
+				list_del(listentry);\
+				kfree(tmp);\
+				return 0;\
+			}\
+		}\
+		return 0;\
+	}
+
+#define declare_filter_add_or_update(function_name, type, variable)\
+	static inline uint8_t function_name(struct type *f)\
+	{\
+		struct list_head *listentry, *listtmp;\
+		struct type *tmp;\
+		list_for_each_safe(listentry, listtmp, &type) {\
+			tmp = list_entry(listentry, struct type, list);\
+			if (tmp->filter.variable == f->filter.variable) {\
+				tmp->filter.op = f->filter.op;\
+				return 0;\
+			}\
+		}\
+		list_add_tail(&(f->list), &type);\
+		return 0;\
+	}
+
+declare_filter_list(secctx_filters, secinfo);
+declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);
+declare_filter_delete(prov_secctx_delete, secctx_filters, secid);
+declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid);
+
+declare_filter_list(user_filters, userinfo);
+declare_filter_whichOP(prov_uid_whichOP, user_filters, uid);
+declare_filter_delete(prov_uid_delete, user_filters, uid);
+declare_filter_add_or_update(prov_uid_add_or_update, user_filters, uid);
+
+declare_filter_list(group_filters, groupinfo);
+declare_filter_whichOP(prov_gid_whichOP, group_filters, gid);
+declare_filter_delete(prov_gid_delete, group_filters, gid);
+declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
+
 static inline void apply_target(union prov_elt *prov)
 {
-	uint8_t op;
+	uint8_t op=0;
 
 	// track based on ns
-	if (prov_type(prov) == ACT_TASK) {
-		op = prov_ns_whichOP(prov->task_info.utsns,
+	if (prov_type(prov) == ACT_TASK)
+		op |= prov_ns_whichOP(prov->task_info.utsns,
 										prov->task_info.ipcns,
 										prov->task_info.mntns,
 										prov->task_info.pidns,
 										prov->task_info.netns,
 										prov->task_info.cgroupns);
-		if (unlikely(op != 0)) {
-			pr_info("Provenance: apply ns filter %u.", op);
-			if ((op & PROV_NS_TRACKED) != 0)
-				set_tracked(prov);
-			if ((op & PROV_NS_PROPAGATE) != 0)
-				set_propagate(prov);
-			if ((op & PROV_NS_OPAQUE) != 0)
-				set_opaque(prov);
-		}
+
+	if (prov_has_secid(prov))
+		op |= prov_secctx_whichOP(node_secid(prov));
+
+	if (prov_has_uid_and_gid(prov)) {
+		op |= prov_uid_whichOP(node_uid(prov));
+		op |= prov_gid_whichOP(node_gid(prov));
 	}
-	if (prov_has_secid(prov)) {
-		op = prov_secctx_whichOP(node_secid(prov));
-		if (unlikely(op != 0)) {
-			pr_info("Provenance: apply secctx filter %u.", op);
-			if ((op & PROV_SEC_TRACKED) != 0)
-				set_tracked(prov);
-			if ((op & PROV_SEC_PROPAGATE) != 0)
-				set_propagate(prov);
-			if ((op & PROV_SEC_OPAQUE) != 0)
-				set_opaque(prov);
-		}
+
+	if (unlikely(op != 0)) {
+		pr_info("Provenance: applying filter %u.", op);
+		if ((op & PROV_SET_TRACKED) != 0)
+			set_tracked(prov);
+		if ((op & PROV_SET_PROPAGATE) != 0)
+			set_propagate(prov);
+		if ((op & PROV_SET_OPAQUE) != 0)
+			set_opaque(prov);
 	}
 }
 #endif

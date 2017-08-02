@@ -60,6 +60,8 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_LOG_FILE);
 	provenance_mark_as_opaque(PROV_LOGP_FILE);
 	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
+	provenance_mark_as_opaque(PROV_UID_FILTER);
+	provenance_mark_as_opaque(PROV_GID_FILTER);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -164,9 +166,6 @@ static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 {
 	uint32_t *tmp = (uint32_t *)buf;
 
-	// ideally should be decoupled from set machine id
-	__init_opaque();
-
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -197,7 +196,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = get_current_provenance();
 	union long_prov_elt *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
@@ -234,8 +233,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 
 out:
-	if (node)
-		kfree(node);
+	kfree(node);
 	return count;
 }
 declare_file_operations(prov_node_ops, prov_write_node, no_read);
@@ -292,7 +290,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = current_provenance();
+	struct provenance *prov = get_current_provenance();
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
@@ -307,7 +305,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = get_current_provenance();
 	union prov_elt *tmp = (union prov_elt *)buf;
 
 	if (count < sizeof(struct task_prov_struct))
@@ -458,7 +456,7 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 	f->filter.ip = f->filter.ip & f->filter.mask;
 
 	// we are not trying to delete something
-	if ((f->filter.op & PROV_NET_DELETE) != PROV_NET_DELETE)
+	if ((f->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ipv4_add_or_update(filters, f);
 	else
 		prov_ipv4_delete(filters, f);
@@ -535,6 +533,43 @@ out:
 }
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
+#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function)\
+	static ssize_t function_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos)\
+	{\
+		struct filters *s;\
+		if (count < sizeof(struct info))\
+			return -ENOMEM;\
+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);\
+		if (!s)\
+			return -ENOMEM;\
+		if (copy_from_user(&s->filter, buf, sizeof(struct info)))\
+			return -EAGAIN;\
+		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)\
+			add_function(s);\
+		else\
+			delete_function(s);\
+		return 0;\
+	}
+
+#define declare_generic_filter_read(function_name, filters, info)\
+static ssize_t function_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos)\
+{\
+	struct list_head *listentry, *listtmp;\
+	struct filters *tmp;\
+	size_t pos = 0;\
+	if (count < sizeof(struct info))\
+		return -ENOMEM;\
+	list_for_each_safe(listentry, listtmp, &filters) {\
+		tmp = list_entry(listentry, struct filters, list);\
+		if (count < pos + sizeof(struct info))\
+			return -ENOMEM;\
+		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info)))\
+			return -EAGAIN;\
+		pos += sizeof(struct info);\
+	}\
+	return pos;\
+}
+
 static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
 					size_t count, loff_t *ppos)
 {
@@ -551,35 +586,23 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 		return -EAGAIN;
 
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
-	if ((s->filter.op & PROV_SEC_DELETE) != PROV_SEC_DELETE)
+	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_secctx_add_or_update(s);
 	else
 		prov_secctx_delete(s);
 	return 0;
 }
 
-static ssize_t prov_read_secctx_filter(struct file *filp, char __user *buf,
-				       size_t count, loff_t *ppos)
-{
-	struct list_head *listentry, *listtmp;
-	struct secctx_filters *tmp;
-	size_t pos = 0;
-
-	if (count < sizeof(struct secinfo))
-		return -ENOMEM;
-
-	list_for_each_safe(listentry, listtmp, &secctx_filters) {
-		tmp = list_entry(listentry, struct secctx_filters, list);
-		if (count < pos + sizeof(struct secinfo))
-			return -ENOMEM;
-
-		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct secinfo)))
-			return -EAGAIN;
-		pos += sizeof(struct secinfo);
-	}
-	return pos;
-}
+declare_generic_filter_read(prov_read_secctx_filter, secctx_filters, secinfo);
 declare_file_operations(prov_secctx_filter_ops, prov_write_secctx_filter, prov_read_secctx_filter);
+
+declare_generic_filter_write(prov_write_uid_filter, user_filters, userinfo, prov_uid_add_or_update, prov_uid_delete);
+declare_generic_filter_read(prov_read_uid_filter, user_filters, userinfo);
+declare_file_operations(prov_uid_filter_ops, prov_write_uid_filter, prov_read_uid_filter);
+
+declare_generic_filter_write(prov_write_gid_filter, group_filters, groupinfo, prov_gid_add_or_update, prov_gid_delete);
+declare_generic_filter_read(prov_read_gid_filter, group_filters, groupinfo);
+declare_file_operations(prov_gid_filter_ops, prov_write_gid_filter, prov_read_gid_filter);
 
 static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 					size_t count, loff_t *ppos)
@@ -595,7 +618,7 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 
 	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo)))
 		return -EAGAIN;
-	if ((s->filter.op & PROV_NS_DELETE) != PROV_NS_DELETE)
+	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ns_add_or_update(s);
 	else
 		prov_ns_delete(s);
@@ -627,7 +650,7 @@ declare_file_operations(prov_ns_filter_ops, prov_write_ns_filter, prov_read_ns_f
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = get_current_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return 0;
@@ -639,7 +662,7 @@ declare_file_operations(prov_log_ops, prov_write_log, no_read);
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = get_current_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return 0;
@@ -648,6 +671,18 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 	return record_log(prov_elt(cprov), buf, count);
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
+
+#define hash_filters(filters, filters_type, tmp, tmp_type)\
+	list_for_each_safe(listentry, listtmp, &filters) {\
+		tmp = list_entry(listentry, struct filters_type, list);\
+		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type));\
+		if (rc) {\
+			pr_err("Provenance: error updating hash.");\
+			pos = -EAGAIN;\
+			goto out;\
+		}\
+	}
+
 
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
@@ -662,6 +697,8 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct ipv4_filters *ipv4_tmp;
 	struct ns_filters *ns_tmp;
 	struct secctx_filters *secctx_tmp;
+	struct user_filters *user_tmp;
+	struct group_filters *group_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
 	if(IS_ERR(policy_shash_tfm))
@@ -705,45 +742,18 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* ingress network policy */
-	list_for_each_safe(listentry, listtmp, &ingress_ipv4filters) {
-		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(ingress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 	/* egress network policy */
-	list_for_each_safe(listentry, listtmp, &egress_ipv4filters) {
-		ipv4_tmp = list_entry(listentry, struct ipv4_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ipv4_tmp->filter, sizeof(struct prov_ipv4_filter));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(egress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 	/* namespace policy */
-	list_for_each_safe(listentry, listtmp, &ns_filters) {
-		ns_tmp = list_entry(listentry, struct ns_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&ns_tmp->filter, sizeof(struct nsinfo));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(ns_filters, ns_filters, ns_tmp, ns_filters);
 	/* secctx policy */
-	list_for_each_safe(listentry, listtmp, &secctx_filters) {
-		secctx_tmp = list_entry(listentry, struct secctx_filters, list);
-		rc = crypto_shash_update(hashdesc, (u8*)&secctx_tmp->filter, sizeof(struct secinfo));
-		if (rc) {
-			pr_err("Provenance: error updating hash.");
-			pos = -EAGAIN;
-			goto out;
-		}
-	}
+	hash_filters(secctx_filters, secctx_filters, secctx_tmp, secinfo);
+	/* userid policy */
+	hash_filters(user_filters, user_filters, user_tmp, userinfo);
+	/* groupid policy */
+	hash_filters(group_filters, group_filters, group_tmp, groupinfo);
+
 	rc = crypto_shash_final(hashdesc, buff);
 	if (rc) {
 		pr_err("Provenance: error finialising hash.");
@@ -765,32 +775,39 @@ out:
 }
 declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
 
+#define prov_create_file(name, perm, fun_ptr)\
+	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
+
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
 
 	prov_dir = securityfs_create_dir("provenance", NULL);
-	securityfs_create_file("enable", 0644, prov_dir, NULL, &prov_enable_ops);
-	securityfs_create_file("all", 0644, prov_dir, NULL, &prov_all_ops);
-	securityfs_create_file("node", 0666, prov_dir, NULL, &prov_node_ops);
-	securityfs_create_file("relation", 0666, prov_dir, NULL, &prov_relation_ops);
-	securityfs_create_file("self", 0666, prov_dir, NULL, &prov_self_ops);
-	securityfs_create_file("machine_id", 0444, prov_dir, NULL, &prov_machine_id_ops);
-	securityfs_create_file("boot_id", 0444, prov_dir, NULL, &prov_boot_id_ops);
-	securityfs_create_file("node_filter", 0644, prov_dir, NULL, &prov_node_filter_ops);
-	securityfs_create_file("relation_filter", 0644, prov_dir, NULL, &prov_relation_filter_ops);
-	securityfs_create_file("propagate_node_filter", 0644, prov_dir, NULL, &prov_propagate_node_filter_ops);
-	securityfs_create_file("propagate_relation_filter", 0644, prov_dir, NULL, &prov_propagate_relation_filter_ops);
-	securityfs_create_file("flush", 0600, prov_dir, NULL, &prov_flush_ops);
-	securityfs_create_file("process", 0644, prov_dir, NULL, &prov_process_ops);
-	securityfs_create_file("ipv4_ingress", 0644, prov_dir, NULL, &prov_ipv4_ingress_filter_ops);
-	securityfs_create_file("ipv4_egress", 0644, prov_dir, NULL, &prov_ipv4_egress_filter_ops);
-	securityfs_create_file("secctx", 0644, prov_dir, NULL, &prov_secctx_ops);
-	securityfs_create_file("secctx_filter", 0644, prov_dir, NULL, &prov_secctx_filter_ops);
-	securityfs_create_file("ns", 0644, prov_dir, NULL, &prov_ns_filter_ops);
-	securityfs_create_file("log", 0666, prov_dir, NULL, &prov_log_ops);
-	securityfs_create_file("logp", 0666, prov_dir, NULL, &prov_logp_ops);
-	securityfs_create_file("policy_hash", 0444, prov_dir, NULL, &prov_policy_hash_ops);
+	prov_create_file("enable", 0644, &prov_enable_ops);
+	prov_create_file("all", 0644, &prov_all_ops);
+	prov_create_file("node", 0666, &prov_node_ops);
+	prov_create_file("relation", 0666, &prov_relation_ops);
+	prov_create_file("self", 0666, &prov_self_ops);
+	prov_create_file("machine_id", 0444, &prov_machine_id_ops);
+	prov_create_file("boot_id", 0444, &prov_boot_id_ops);
+	prov_create_file("node_filter", 0644, &prov_node_filter_ops);
+	prov_create_file("relation_filter", 0644, &prov_relation_filter_ops);
+	prov_create_file("propagate_node_filter", 0644,
+		&prov_propagate_node_filter_ops);
+	prov_create_file("propagate_relation_filter", 0644,
+		&prov_propagate_relation_filter_ops);
+	prov_create_file("flush", 0600, &prov_flush_ops);
+	prov_create_file("process", 0644, &prov_process_ops);
+	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);
+	prov_create_file("ipv4_egress", 0644, &prov_ipv4_egress_filter_ops);
+	prov_create_file("secctx", 0644, &prov_secctx_ops);
+	prov_create_file("secctx_filter", 0644, &prov_secctx_filter_ops);
+	prov_create_file("ns", 0644, &prov_ns_filter_ops);
+	prov_create_file("log", 0666, &prov_log_ops);
+	prov_create_file("logp", 0666, &prov_logp_ops);
+	prov_create_file("policy_hash", 0444, &prov_policy_hash_ops);
+	prov_create_file("uid", 0644, &prov_uid_filter_ops);
+	prov_create_file("gid", 0644, &prov_gid_filter_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
