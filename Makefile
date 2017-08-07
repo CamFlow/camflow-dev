@@ -1,5 +1,5 @@
 kernel-version=4.12.5
-lsm-version=0.3.5
+lsm-version=0.3.4
 arch=x86_64
 
 all: config compile
@@ -94,7 +94,7 @@ compile_us:
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 
-install: install_kernel install_us
+install: install_kernel install_header install_us
 
 install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
@@ -104,10 +104,6 @@ install_kernel:
 install_us:
 	cd ./build/libprovenance && $(MAKE) install
 	cd ./build/camconfd && $(MAKE) all
-	cd ./build/camconfd && $(MAKE) install
-	cd ./build/camflow-cli && $(MAKE) all
-	cd ./build/camflow-cli && $(MAKE) install
-	cd ./build/camflowd && $(MAKE) all
 	cd ./build/camflowd && $(MAKE) install
 
 clean: clean_kernel clean_us
