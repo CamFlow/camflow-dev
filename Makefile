@@ -104,6 +104,7 @@ install_kernel:
 install_us:
 	cd ./build/libprovenance && $(MAKE) install
 	cd ./build/camconfd && $(MAKE) all
+	cd ./build/camflowd && $(MAKE) all
 	cd ./build/camflowd && $(MAKE) install
 
 clean: clean_kernel clean_us
