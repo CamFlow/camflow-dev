@@ -1402,18 +1402,15 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					  struct sock *other,
 					  struct sock *newsk)
 {
-	/*struct provenance *cprov  = get_current_provenance();
-	   struct provenance *iprov = sk_inode_provenance(sock);
-	   struct provenance *oprov = sk_inode_provenance(other);
-	   struct provenance *nprov = sk_inode_provenance(newsk);
-	   unsigned long irqflags;
-	   spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-	   spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	   flow_from_activity(RL_CONNECT, cprov, nprov, NULL);
-	   flow_from_activity(RL_CONNECT, iprov, nprov, NULL);
-	   flow_from_activity(RL_CONNECT, oprov, nprov, NULL);
-	   spin_unlock(prov_lock(iprov));
-	   spin_unlock_irqrestore(prov_lock(cprov), irqflags);*/
+	struct provenance *cprov = get_current_provenance();
+	struct provenance *iprov = sk_inode_provenance(sock);
+	unsigned long irqflags;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	flow_from_activity(RL_CONNECT, cprov, iprov, NULL);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
 }
 
