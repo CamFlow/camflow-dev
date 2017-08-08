@@ -300,22 +300,24 @@ static inline int record_write_xattr(uint64_t type,
 	if (rc < 0)
 		goto out;
 	write_node(prov_elt(iprov));
-	rc = write_relation(type, xattr, prov_elt(iprov), NULL);
+	if(type == RL_SETXATTR)
+		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL);
+	else
+		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL);
 	cprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);
 	return rc;
 }
 
-static inline int record_read_xattr(uint64_t type,
-				    struct provenance *cprov,
+static inline int record_read_xattr(struct provenance *cprov,
 				    struct provenance *iprov,
 				    const char *name)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
 
-	if (!should_record_relation(type, prov_elt(iprov), prov_elt(cprov)))
+	if (!should_record_relation(RL_GETXATTR, prov_elt(iprov), prov_elt(cprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
@@ -324,14 +326,14 @@ static inline int record_read_xattr(uint64_t type,
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	write_node(prov_elt(iprov));
 	write_long_node(xattr);
-	rc = write_relation(type, prov_elt(iprov), xattr, NULL);
+	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
-	rc = __update_version(type, cprov);
+	rc = __update_version(RL_GETXATTR, cprov);
 	if (rc < 0)
 		goto out;
 	write_node(prov_elt(cprov));
-	rc = write_relation(type, xattr, prov_elt(cprov), NULL);
+	rc = write_relation(RL_GETXATTR, xattr, prov_elt(cprov), NULL);
 	iprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);

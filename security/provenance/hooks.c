@@ -553,7 +553,7 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 		goto out;
 	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
 		goto out;
-	rc = record_read_xattr(RL_GETXATTR, cprov, iprov, name);
+	rc = record_read_xattr(cprov, iprov, name);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
