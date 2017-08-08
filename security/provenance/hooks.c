@@ -408,7 +408,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	rc = flow_from_activity(RL_SETATTR, cprov, iattrprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_between_entities(RL_SETATTR, iattrprov, iprov, NULL);
+	rc = flow_between_entities(RL_SETATTR_INODE, iattrprov, iprov, NULL);
 out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
