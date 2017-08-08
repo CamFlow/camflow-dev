@@ -430,9 +430,9 @@ static inline int prov_record_arg(struct provenance *prov,
 	if( len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX-1);
-	write_node(prov_elt(prov));
 	write_long_node(aprov);
-	rc = write_relation(etype, prov_elt(prov), aprov, NULL);
+	write_node(prov_elt(prov));
+	rc = write_relation(etype, aprov, prov_elt(prov), NULL);
 	free_long_provenance(aprov);
 	return rc;
 }

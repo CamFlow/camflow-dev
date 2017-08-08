@@ -27,6 +27,7 @@
 
 ### v0.3.5
 ```
+- Fix the direction of arg and envp relationship.
 - Update to kernel version 4.12.5.
 ```
 
