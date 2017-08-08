@@ -1238,7 +1238,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_between_entities(RL_CREATE, iprov, niprov, NULL);
+	rc = flow_between_entities(RL_ACCEPT_SOCKET, iprov, niprov, NULL);
 	if (rc < 0)
 		goto out;
 	rc = flow_to_activity(RL_ACCEPT, niprov, cprov, NULL);
