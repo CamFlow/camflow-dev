@@ -107,6 +107,8 @@ install_us:
 	cd ./build/camconfd && $(MAKE) install
 	cd ./build/camflowd && $(MAKE) all
 	cd ./build/camflowd && $(MAKE) install
+	cd ./build/camflow-cli && $(MAKE) all
+	cd ./build/camflow-cli && $(MAKE) install
 
 clean: clean_kernel clean_us
 
