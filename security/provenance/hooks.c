@@ -986,10 +986,10 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	prov_elt(sprov)->shm_info.mode = shp->shm_perm.mode;
 	shp->shm_perm.provenance = sprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-	rc = flow_to_activity(RL_WRITE, sprov, cprov, NULL);
+	rc = flow_to_activity(RL_READ, sprov, cprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_from_activity(RL_READ, cprov, sprov, NULL);
+	rc = flow_from_activity(RL_WRITE, cprov, sprov, NULL);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;

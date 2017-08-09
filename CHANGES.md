@@ -27,6 +27,7 @@
 
 ### v0.3.5
 ```
+- Fix issue with shm alloc relations.
 - Fix issue with unix_stream_connect not being recorded.
 - Fix issue with xattr related relation types.
 - Fix issue with accept relation type.
