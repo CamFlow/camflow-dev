@@ -9,7 +9,7 @@ prepare: prepare_kernel prepare_us
 prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
-	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow-$(lsm-version)/g" Makefile
+	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow_$(lsm-version)/g" Makefile
 	cd ./build && git clone https://github.com/CamFlow/information-flow-patch.git
 	cd ./build/information-flow-patch && git checkout $(kernel-version)
 	cd ./build && mkdir -p ./information-flow-patch/build
@@ -99,7 +99,7 @@ install: install_kernel install_header install_us
 install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
-	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow-$(lsm-version)
+	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow_$(lsm-version)
 
 install_us:
 	cd ./build/libprovenance && $(MAKE) install
