@@ -1424,14 +1424,14 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	struct provenance *sprov = socket_inode_provenance(sock);
+	struct provenance *sprov = socket_provenance(sock);
 	struct provenance *oprov = socket_inode_provenance(other);
 	unsigned long irqflags;
 	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = flow_between_entities(RL_UNKNOWN, sprov, oprov, NULL);
+	rc = flow_between_entities(RL_SND_UNIX, sprov, oprov, NULL);
 	spin_unlock(prov_lock(oprov));
 	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return rc;
