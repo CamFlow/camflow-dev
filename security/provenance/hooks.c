@@ -343,7 +343,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	rc = generates(RL_LINK, cprov, iprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = derives(RL_LINK, dprov, iprov, NULL);
+	rc = derives(RL_LINK_INODE, dprov, iprov, NULL);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
@@ -1431,7 +1431,7 @@ static int provenance_unix_may_send(struct socket *sock,
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = derives(RL_SND_UNIX, sprov, oprov, NULL);
+	rc = generates(RL_SND_UNIX, sprov, oprov, NULL);
 	spin_unlock(prov_lock(oprov));
 	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return rc;
