@@ -199,7 +199,7 @@ static inline int record_relation(uint64_t type,
 	return rc;
 }
 
-static inline int flow_to_activity(uint64_t type,
+static inline int uses(uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
 				   struct file *file)
@@ -211,7 +211,7 @@ static inline int flow_to_activity(uint64_t type,
 	return rc;
 }
 
-static inline int flow_from_activity(uint64_t type,
+static inline int generates(uint64_t type,
 				     struct provenance *from,
 				     struct provenance *to,
 				     struct file *file)
@@ -219,7 +219,7 @@ static inline int flow_from_activity(uint64_t type,
 	return record_relation(type, from, to, file);
 }
 
-static inline int flow_between_entities(uint64_t type,
+static inline int derives(uint64_t type,
 					struct provenance *from,
 					struct provenance *to,
 					struct file *file)
@@ -227,7 +227,7 @@ static inline int flow_between_entities(uint64_t type,
 	return record_relation(type, from, to, file);
 }
 
-static inline int flow_between_activities(uint64_t type,
+static inline int informs(uint64_t type,
 					  struct provenance *from,
 					  struct provenance *to,
 					  struct file *file)

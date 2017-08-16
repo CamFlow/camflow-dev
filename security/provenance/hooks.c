@@ -137,7 +137,7 @@ static int provenance_cred_prepare(struct cred *new,
 	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_TASK);
 	prov->has_mmap = old_prov->has_mmap;
-	rc = flow_between_activities(RL_CLONE, old_prov, prov, NULL);
+	rc = informs(RL_CLONE, old_prov, prov, NULL);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = prov;
 	return rc;
@@ -176,7 +176,7 @@ static int provenance_task_fix_setuid(struct cred *new,
 	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_TASK);
-	rc = flow_between_activities(RL_CHANGE, old_prov, prov, NULL);
+	rc = informs(RL_CHANGE, old_prov, prov, NULL);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }
@@ -236,7 +236,7 @@ static int provenance_inode_create(struct inode *dir,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
-	rc = flow_from_activity(RL_WRITE, cprov, iprov, NULL);
+	rc = generates(RL_WRITE, cprov, iprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -273,33 +273,33 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (is_inode_dir(inode)) {
 		if ((perms & (DIR__WRITE)) != 0)
-			rc = flow_from_activity(RL_PERM_WRITE, iprov, cprov, NULL);
+			rc = uses(RL_PERM_WRITE, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__READ)) != 0)
-			rc = flow_to_activity(RL_PERM_READ, iprov, cprov, NULL);
+			rc = uses(RL_PERM_READ, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__SEARCH)) != 0)
-			rc = flow_to_activity(RL_PERM_EXEC, iprov, cprov, NULL);
+			rc = uses(RL_PERM_EXEC, iprov, cprov, NULL);
 	} else if (is_inode_socket(inode)) {
 		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0)
-			rc = flow_to_activity(RL_PERM_WRITE, iprov, cprov, NULL);
+			rc = uses(RL_PERM_WRITE, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__READ)) != 0)
-			rc = flow_to_activity(RL_PERM_READ, iprov, cprov, NULL);
+			rc = uses(RL_PERM_READ, iprov, cprov, NULL);
 	} else {
 		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0)
-			rc = flow_to_activity(RL_PERM_WRITE, iprov, cprov, NULL);
+			rc = uses(RL_PERM_WRITE, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__READ)) != 0)
-			rc = flow_to_activity(RL_PERM_READ, iprov, cprov, NULL);
+			rc = uses(RL_PERM_READ, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__EXECUTE)) != 0)
-			rc = flow_to_activity(RL_PERM_EXEC, iprov, cprov, NULL);
+			rc = uses(RL_PERM_EXEC, iprov, cprov, NULL);
 	}
 out:
 	spin_unlock(prov_lock(iprov));
@@ -337,13 +337,13 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_from_activity(RL_LINK, cprov, dprov, NULL);
+	rc = generates(RL_LINK, cprov, dprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_from_activity(RL_LINK, cprov, iprov, NULL);
+	rc = generates(RL_LINK, cprov, iprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_between_entities(RL_LINK, dprov, iprov, NULL);
+	rc = derives(RL_LINK, dprov, iprov, NULL);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
@@ -405,10 +405,10 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_from_activity(RL_SETATTR, cprov, iattrprov, NULL);
+	rc = generates(RL_SETATTR, cprov, iattrprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_between_entities(RL_SETATTR_INODE, iattrprov, iprov, NULL);
+	rc = derives(RL_SETATTR_INODE, iattrprov, iprov, NULL);
 out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
@@ -434,7 +434,7 @@ static int provenance_inode_getattr(const struct path *path)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_to_activity(RL_GETATTR, iprov, cprov, NULL);
+	rc = uses(RL_GETATTR, iprov, cprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -457,7 +457,7 @@ static int provenance_inode_readlink(struct dentry *dentry)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_to_activity(RL_READLINK, iprov, cprov, NULL);
+	rc = uses(RL_READLINK, iprov, cprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -576,7 +576,7 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_to_activity(RL_LSTXATTR, iprov, cprov, NULL);
+	rc = uses(RL_LSTXATTR, iprov, cprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -678,36 +678,36 @@ static int provenance_file_permission(struct file *file, int mask)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (is_inode_dir(inode)) {
 		if ((perms & (DIR__WRITE)) != 0)
-			rc = flow_from_activity(RL_WRITE, cprov, iprov, file);
+			rc = generates(RL_WRITE, cprov, iprov, file);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__READ)) != 0)
-			rc = flow_to_activity(RL_READ, iprov, cprov, file);
+			rc = uses(RL_READ, iprov, cprov, file);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__SEARCH)) != 0)
-			rc = flow_to_activity(RL_SEARCH, iprov, cprov, file);
+			rc = uses(RL_SEARCH, iprov, cprov, file);
 	} else if (is_inode_socket(inode)) {
 		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0)
-			rc = flow_from_activity(RL_SND, cprov, iprov, file);
+			rc = generates(RL_SND, cprov, iprov, file);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__READ)) != 0)
-			rc = flow_to_activity(RL_RCV, iprov, cprov, file);
+			rc = uses(RL_RCV, iprov, cprov, file);
 	} else{
 		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0)
-			rc = flow_from_activity(RL_WRITE, cprov, iprov, file);
+			rc = generates(RL_WRITE, cprov, iprov, file);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__READ)) != 0)
-			rc = flow_to_activity(RL_READ, iprov, cprov, file);
+			rc = uses(RL_READ, iprov, cprov, file);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__EXECUTE)) != 0) {
 			if (provenance_is_opaque(prov_elt(iprov)))
 				set_opaque(prov_elt(cprov));
 			else
-				rc = flow_to_activity(RL_EXEC, iprov, cprov, file);
+				rc = uses(RL_EXEC, iprov, cprov, file);
 		}
 	}
 out:
@@ -733,7 +733,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_to_activity(RL_OPEN, iprov, cprov, file);
+	rc = uses(RL_OPEN, iprov, cprov, file);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -766,38 +766,38 @@ static int provenance_mmap_file(struct file *file,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_to_activity(RL_READ, iprov, cprov, file);
+	rc = uses(RL_READ, iprov, cprov, file);
 	if (rc < 0)
 		goto out;
 	if ((flags & MAP_TYPE) == MAP_SHARED) {
 		cprov->has_mmap = 1;
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = flow_from_activity(RL_MMAP_WRITE, cprov, iprov, file);
+			rc = generates(RL_MMAP_WRITE, cprov, iprov, file);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
-			rc = flow_to_activity(RL_MMAP_READ, iprov, cprov, file);
+			rc = uses(RL_MMAP_READ, iprov, cprov, file);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
-			rc = flow_to_activity(RL_MMAP_EXEC, iprov, cprov, file);
+			rc = uses(RL_MMAP_EXEC, iprov, cprov, file);
 	} else{
 		bprov = branch_mmap(iprov, cprov);
 		if (!bprov)
 			goto out;
-		rc = flow_between_entities(RL_MMAP, iprov, bprov, file);
+		rc = derives(RL_MMAP, iprov, bprov, file);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = flow_from_activity(RL_MMAP_WRITE, cprov, bprov, file);
+			rc = generates(RL_MMAP_WRITE, cprov, bprov, file);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
-			rc = flow_to_activity(RL_MMAP_READ, bprov, cprov, file);
+			rc = uses(RL_MMAP_READ, bprov, cprov, file);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
-			rc = flow_to_activity(RL_MMAP_EXEC, bprov, cprov, file);
+			rc = uses(RL_MMAP_EXEC, bprov, cprov, file);
 	}
 out:
 		spin_unlock(prov_lock(iprov));
@@ -832,10 +832,10 @@ static int provenance_file_ioctl(struct file *file,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_from_activity(RL_WRITE, cprov, iprov, NULL);
+	rc = generates(RL_WRITE, cprov, iprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_to_activity(RL_READ, iprov, cprov, NULL);
+	rc = uses(RL_READ, iprov, cprov, NULL);
 out:
 	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
@@ -867,7 +867,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	prov_elt(mprov)->msg_msg_info.type = msg->m_type;
 	msg->provenance = mprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-	rc = flow_from_activity(RL_CREATE, cprov, mprov, NULL);
+	rc = generates(RL_CREATE, cprov, mprov, NULL);
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
@@ -893,7 +893,7 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
-	rc = flow_from_activity(RL_CREATE, cprov, mprov, NULL);
+	rc = generates(RL_CREATE, cprov, mprov, NULL);
 	spin_unlock(prov_lock(mprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -930,7 +930,7 @@ static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
-	rc = flow_to_activity(RL_READ, mprov, cprov, NULL);
+	rc = uses(RL_READ, mprov, cprov, NULL);
 	spin_unlock(prov_lock(mprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -986,10 +986,10 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	prov_elt(sprov)->shm_info.mode = shp->shm_perm.mode;
 	shp->shm_perm.provenance = sprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-	rc = flow_to_activity(RL_READ, sprov, cprov, NULL);
+	rc = uses(RL_READ, sprov, cprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_from_activity(RL_WRITE, cprov, sprov, NULL);
+	rc = generates(RL_WRITE, cprov, sprov, NULL);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1027,12 +1027,12 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
 	if (shmflg & SHM_RDONLY)
-		rc = flow_to_activity(RL_READ, sprov, cprov, NULL);
+		rc = uses(RL_READ, sprov, cprov, NULL);
 	else {
-		rc = flow_to_activity(RL_READ, sprov, cprov, NULL);
+		rc = uses(RL_READ, sprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
-		rc = flow_from_activity(RL_WRITE, cprov, sprov, NULL);
+		rc = generates(RL_WRITE, cprov, sprov, NULL);
 	}
 out:
 	spin_unlock(prov_lock(sprov));
@@ -1086,7 +1086,7 @@ static int provenance_socket_post_create(struct socket *sock,
 		return 0;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_from_activity(RL_CREATE, cprov, iprov, NULL);
+	rc = generates(RL_CREATE, cprov, iprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -1137,7 +1137,7 @@ static int provenance_socket_bind(struct socket *sock,
 	rc = provenance_record_address(address, addrlen, iprov);
 	if (rc < 0)
 		return rc;
-	rc = flow_from_activity(RL_BIND, cprov, iprov, NULL);
+	rc = generates(RL_BIND, cprov, iprov, NULL);
 	return rc;
 }
 
@@ -1190,7 +1190,7 @@ static int provenance_socket_connect(struct socket *sock,
 	rc = provenance_record_address(address, addrlen, iprov);
 	if (rc < 0)
 		return rc;
-	rc = flow_from_activity(RL_CONNECT, cprov, iprov, NULL);
+	rc = generates(RL_CONNECT, cprov, iprov, NULL);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1214,7 +1214,7 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_from_activity(RL_LISTEN, cprov, iprov, NULL);
+	rc = generates(RL_LISTEN, cprov, iprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -1238,10 +1238,10 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_between_entities(RL_ACCEPT_SOCKET, iprov, niprov, NULL);
+	rc = derives(RL_ACCEPT_SOCKET, iprov, niprov, NULL);
 	if (rc < 0)
 		goto out;
-	rc = flow_to_activity(RL_ACCEPT, niprov, cprov, NULL);
+	rc = uses(RL_ACCEPT, niprov, cprov, NULL);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1285,9 +1285,9 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = flow_from_activity(RL_SND, cprov, iprov, NULL);
+	rc = generates(RL_SND, cprov, iprov, NULL);
 	if (pprov)
-		rc = flow_to_activity(RL_RCV_UNIX, iprov, pprov, NULL);
+		rc = uses(RL_RCV_UNIX, iprov, pprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1336,8 +1336,8 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (pprov)
-		rc = flow_from_activity(RL_SND_UNIX, pprov, iprov, NULL);
-	rc = flow_to_activity(RL_RCV, iprov, cprov, NULL);
+		rc = generates(RL_SND_UNIX, pprov, iprov, NULL);
+	rc = uses(RL_RCV, iprov, cprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1378,7 +1378,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		if (rc < 0)
 			goto out;
 		if (provenance_is_tracked(prov_elt(cprov)))
-			rc = flow_to_activity(RL_RCV, iprov, cprov, NULL);
+			rc = uses(RL_RCV, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if (provenance_records_packet(prov_elt(iprov)))
@@ -1408,7 +1408,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	flow_from_activity(RL_CONNECT, cprov, iprov, NULL);
+	generates(RL_CONNECT, cprov, iprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1431,7 +1431,7 @@ static int provenance_unix_may_send(struct socket *sock,
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = flow_between_entities(RL_SND_UNIX, sprov, oprov, NULL);
+	rc = derives(RL_SND_UNIX, sprov, oprov, NULL);
 	spin_unlock(prov_lock(oprov));
 	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return rc;
@@ -1466,7 +1466,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 		return 0;
 	}
 	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
-	rc = flow_to_activity(RL_EXEC, iprov, nprov, NULL);
+	rc = uses(RL_EXEC, iprov, nprov, NULL);
 	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
 }
@@ -1520,8 +1520,8 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 	record_node_name(cprov, bprm->interp);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	flow_between_activities(RL_EXEC_PROCESS, cprov, nprov, NULL);
-	flow_to_activity(RL_EXEC, iprov, nprov, NULL);
+	informs(RL_EXEC_PROCESS, cprov, nprov, NULL);
+	uses(RL_EXEC, iprov, nprov, NULL);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
