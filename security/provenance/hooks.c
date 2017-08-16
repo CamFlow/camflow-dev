@@ -273,7 +273,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (is_inode_dir(inode)) {
 		if ((perms & (DIR__WRITE)) != 0)
-			rc = flow_to_activity(RL_PERM_WRITE, iprov, cprov, NULL);
+			rc = flow_from_activity(RL_PERM_WRITE, iprov, cprov, NULL);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__READ)) != 0)
