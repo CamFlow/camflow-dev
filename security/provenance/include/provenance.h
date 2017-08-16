@@ -151,7 +151,7 @@ out:
 	return count;
 }
 
-static inline int __update_version(uint64_t type, struct provenance *prov)
+static inline int __update_version(const uint64_t type, struct provenance *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
@@ -174,7 +174,7 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	return rc;
 }
 
-static inline int record_relation(uint64_t type,
+static inline int record_relation(const uint64_t type,
 				  struct provenance *from,
 				  struct provenance *to,
 				  struct file *file)
@@ -211,7 +211,7 @@ static inline int uses(uint64_t type,
 	return rc;
 }
 
-static inline int generates(uint64_t type,
+static inline int generates(const uint64_t type,
 				     struct provenance *from,
 				     struct provenance *to,
 				     struct file *file)
@@ -219,7 +219,7 @@ static inline int generates(uint64_t type,
 	return record_relation(type, from, to, file);
 }
 
-static inline int derives(uint64_t type,
+static inline int derives(const uint64_t type,
 					struct provenance *from,
 					struct provenance *to,
 					struct file *file)
@@ -227,7 +227,7 @@ static inline int derives(uint64_t type,
 	return record_relation(type, from, to, file);
 }
 
-static inline int informs(uint64_t type,
+static inline int informs(const uint64_t type,
 					  struct provenance *from,
 					  struct provenance *to,
 					  struct file *file)

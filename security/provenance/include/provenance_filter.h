@@ -37,7 +37,7 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 }
 
 #define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS) | SUBTYPE(RL_VERSION) | SUBTYPE(RL_NAMED))
-static inline bool filter_update_node(uint64_t relation_type)
+static inline bool filter_update_node(const uint64_t relation_type)
 {
 	if (HIT_FILTER(UPDATE_FILTER, relation_type)) // not update if relation is of above type
 		return true;
@@ -45,7 +45,7 @@ static inline bool filter_update_node(uint64_t relation_type)
 }
 
 /* return either or not the relation should be filtered out */
-static inline bool filter_relation(uint64_t type)
+static inline bool filter_relation(const uint64_t type)
 {
 	// we hit an element of the black list ignore
 	if (HIT_FILTER(prov_policy.prov_relation_filter, type))
@@ -62,7 +62,7 @@ static inline bool filter_propagate_relation(uint64_t type)
 	return false;
 }
 
-static inline bool should_record_relation(uint64_t type, union prov_elt *from, union prov_elt *to)
+static inline bool should_record_relation(const uint64_t type, union prov_elt *from, union prov_elt *to)
 {
 	if (filter_relation(type))
 		return false;
