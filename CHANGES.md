@@ -27,6 +27,7 @@
 
 ### v0.3.5
 ```
+- Capture performance information (CPU, memory usage etc.) for processes.
 - Ensure that uname -r and packages name match.
 - provenance_unix_may_send uses RL_SND_UNIX instead of RL_UNKNOWN.
 - Ensure correct direction of perm_xxx relations.

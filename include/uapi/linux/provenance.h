@@ -251,6 +251,13 @@ struct task_prov_struct {
 	uint32_t pidns;
 	uint32_t netns;
 	uint32_t cgroupns;
+	uint64_t utime;
+	uint64_t stime;
+	uint64_t vm;
+	uint64_t rss;
+	uint64_t rbytes;
+	uint64_t wbytes;
+	uint64_t cancel_wbytes;
 };
 
 struct inode_prov_struct {

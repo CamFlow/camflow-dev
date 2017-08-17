@@ -25,10 +25,15 @@
 #include <linux/mm.h> // used for get_page
 #include <net/net_namespace.h>
 #include <linux/pid_namespace.h>
+#include <linux/sched/cputime.h>
 #include "../../../fs/mount.h" // nasty
 
 #include "provenance_inode.h"
 #include "provenance_policy.h"
+
+#define KB 1024
+#define MB (1024*KB)
+#define KB_MASK (~(KB-1))
 
 #define current_pid() (current->pid)
 static inline uint32_t current_cgroupns(void)
@@ -175,7 +180,8 @@ static inline void current_update_shst(struct provenance *cprov)
 	mmput_async(mm);
 }
 
-static inline int record_task_name(struct task_struct *task, struct provenance *prov)
+static inline int record_task_name(struct task_struct *task,
+																	struct provenance *prov)
 {
 	const struct cred *cred;
 	struct provenance *fprov;
@@ -219,6 +225,13 @@ out:
 	return rc;
 }
 
+static inline void update_task_perf(struct task_struct *task,
+																		struct provenance *prov)
+{
+	task_cputime(task, &prov_elt(prov)->task_info.utime,
+										 &prov_elt(prov)->task_info.stime);
+}
+
 static inline struct provenance *get_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
@@ -244,6 +257,7 @@ static inline struct provenance *get_current_provenance(void)
 		current_update_shst(prov);
 		prov->updt_mmap = 0;
 	}
+	update_task_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
 	return prov;
