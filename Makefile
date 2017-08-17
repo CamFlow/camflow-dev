@@ -80,8 +80,16 @@ config_old: copy_change copy_config
 
 compile: compile_security compile_kernel compile_us
 
-compile_security: copy_change
+on_assertion:
+	sed -i -e "s/\/\/BUILD_BUG_ON/BUILD_BUG_ON/g" ./security/provenance/include/provenance.h
+
+off_assertion:
+	sed -i -e "s/BUILD_BUG_ON/\/\/BUILD_BUG_ON/g" ./security/provenance/include/provenance.h
+
+compile_security_only:
 	cd ./build/linux-$(kernel-version) && $(MAKE) security W=1
+
+compile_security: on_assertion copy_change compile_security_only off_assertion
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
