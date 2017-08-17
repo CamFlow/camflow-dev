@@ -30,6 +30,7 @@
 - Ensure that uname -r and packages name match.
 - provenance_unix_may_send uses RL_SND_UNIX instead of RL_UNKNOWN.
 - Ensure correct direction of perm_xxx relations.
+- Fix issue with link relation type.
 - Fix issue with shm alloc relations.
 - Fix issue with unix_stream_connect not being recorded.
 - Fix issue with xattr related relation types.
