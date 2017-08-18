@@ -229,10 +229,12 @@ static inline void update_task_perf(struct task_struct *task,
 																		struct provenance *prov)
 {
 	struct mm_struct *mm;
+	uint64_t utime;
+	uint64_t stime;
 	/* usec */
-	task_cputime(task, &prov_elt(prov)->task_info.utime,
-										 &prov_elt(prov)->task_info.stime);
-
+	task_cputime(task, &utime, &stime);
+	prov_elt(prov)->task_info.utime = div_u64(utime, NSEC_PER_USEC);
+	prov_elt(prov)->task_info.stime = div_u64(stime, NSEC_PER_USEC);
 	/* KB.usec */
 	prov_elt(prov)->task_info.vm = task->acct_vm_mem1 * PAGE_SIZE;
 	do_div(prov_elt(prov)->task_info.vm, KB);
