@@ -254,10 +254,9 @@ struct task_prov_struct {
 	/* usec */
 	uint64_t utime;
 	uint64_t stime;
-	/* KB.usec */
+	/* KB */
 	uint64_t vm;
 	uint64_t rss;
-	/* KB */
 	uint64_t hw_vm;
 	uint64_t hw_rss;
 	uint64_t rbytes;

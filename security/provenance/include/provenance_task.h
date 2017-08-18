@@ -231,22 +231,24 @@ static inline void update_task_perf(struct task_struct *task,
 	struct mm_struct *mm;
 	uint64_t utime;
 	uint64_t stime;
+
+	/* time */
 	/* usec */
-	task_cputime(task, &utime, &stime);
+	task_cputime_adjusted(task, &utime, &stime);
 	prov_elt(prov)->task_info.utime = div_u64(utime, NSEC_PER_USEC);
 	prov_elt(prov)->task_info.stime = div_u64(stime, NSEC_PER_USEC);
-	/* KB.usec */
-	prov_elt(prov)->task_info.vm = task->acct_vm_mem1 * PAGE_SIZE;
-	do_div(prov_elt(prov)->task_info.vm, KB);
-	prov_elt(prov)->task_info.rss = task->acct_rss_mem1 * PAGE_SIZE;
-	do_div(prov_elt(prov)->task_info.rss, KB);
+
+	/* memory */
 	mm = get_task_mm(current);
   if (mm) {
 		/* KB */
+		prov_elt(prov)->task_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
 		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
 		mmput_async(mm);
 	}
+	/* IO */
 #ifdef CONFIG_TASK_IO_ACCOUNTING
 	/* KB */
 	prov_elt(prov)->task_info.rbytes = task->ioac.read_bytes & KB_MASK;
