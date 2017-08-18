@@ -251,10 +251,13 @@ struct task_prov_struct {
 	uint32_t pidns;
 	uint32_t netns;
 	uint32_t cgroupns;
+	/* usec */
 	uint64_t utime;
 	uint64_t stime;
+	/* KB.usec */
 	uint64_t vm;
 	uint64_t rss;
+	/* KB */
 	uint64_t hw_vm;
 	uint64_t hw_rss;
 	uint64_t rbytes;
