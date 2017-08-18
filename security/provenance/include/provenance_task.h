@@ -228,8 +228,30 @@ out:
 static inline void update_task_perf(struct task_struct *task,
 																		struct provenance *prov)
 {
+	struct mm_struct *mm;
 	task_cputime(task, &prov_elt(prov)->task_info.utime,
 										 &prov_elt(prov)->task_info.stime);
+
+	prov_elt(prov)->task_info.vm = task->acct_vm_mem1 * PAGE_SIZE;
+	do_div(prov_elt(prov)->task_info.vm, 1000*KB);
+	prov_elt(prov)->task_info.rss = task->acct_rss_mem1 * PAGE_SIZE;
+	do_div(prov_elt(prov)->task_info.rss, 1000*KB);
+	mm = get_task_mm(current);
+  if (mm) {
+		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		mmput_async(mm);
+	}
+#ifdef CONFIG_TASK_IO_ACCOUNTING
+	prov_elt(prov)->task_info.rbytes = task->ioac.read_bytes & KB_MASK;
+	prov_elt(prov)->task_info.wbytes = task->ioac.write_bytes & KB_MASK;
+	prov_elt(prov)->task_info.cancel_wbytes =
+									task->ioac.cancelled_write_bytes & KB_MASK;
+#else
+	prov_elt(prov)->task_info.rbytes = task->ioac.rchar & KB_MASK;
+	prov_elt(prov)->task_info.wbytes = task->ioac.wchar & KB_MASK;
+	prov_elt(prov)->task_info.cancel_wbytes = 0;
+#endif
 }
 
 static inline struct provenance *get_current_provenance(void)
