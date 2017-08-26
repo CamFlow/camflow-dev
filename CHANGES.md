@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.5           | 4.12.8         | N/A        |
+| 0.3.5           | 4.12.9         | N/A        |
 | 0.3.4           | 4.12.4         | 02/08/2017 |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
 | 0.3.2           | 4.11.3         | 31/05/2017 |
@@ -37,7 +37,7 @@
 - Fix issue with xattr related relation types.
 - Fix issue with accept relation type.
 - Fix the direction of arg and envp relationship.
-- Update to kernel version 4.12.8.
+- Update to kernel version 4.12.9.
 ```
 
 ### v0.3.4
