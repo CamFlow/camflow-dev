@@ -51,6 +51,15 @@ static inline struct provenance *sk_provenance(struct sock *sk)
 	return prov;
 }
 
+static inline struct provenance *socket_provenance(struct socket *sock)
+{
+	struct sock *sk = sock->sk;
+
+	if (!sk)
+		return NULL;
+	return sk_provenance(sk);
+}
+
 #define ihlen(ih) (ih->ihl * 4)
 
 static inline void __extract_tcp_info(struct sk_buff *skb,

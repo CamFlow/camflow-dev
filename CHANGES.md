@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.3.5           | 4.12.9         | 27/08/2017 |
 | 0.3.4           | 4.12.4         | 02/08/2017 |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
 | 0.3.2           | 4.11.3         | 31/05/2017 |
@@ -23,6 +24,21 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.3.5
+```
+- Capture performance information (CPU, memory usage etc.) for processes.
+- Ensure that uname -r and packages name match.
+- provenance_unix_may_send uses RL_SND_UNIX instead of RL_UNKNOWN.
+- Ensure correct direction of perm_xxx relations.
+- Fix issue with link relation type.
+- Fix issue with shm alloc relations.
+- Fix issue with unix_stream_connect not being recorded.
+- Fix issue with xattr related relation types.
+- Fix issue with accept relation type.
+- Fix the direction of arg and envp relationship.
+- Update to kernel version 4.12.9.
+```
 
 ### v0.3.4
 ```

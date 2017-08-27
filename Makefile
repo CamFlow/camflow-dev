@@ -1,5 +1,5 @@
-kernel-version=4.12.4
-lsm-version=0.3.4
+kernel-version=4.12.9
+lsm-version=0.3.5
 arch=x86_64
 
 all: config compile
@@ -9,7 +9,7 @@ prepare: prepare_kernel prepare_us
 prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
-	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow-$(lsm-version)/g" Makefile
+	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow_$(lsm-version)/g" Makefile
 	cd ./build && git clone https://github.com/CamFlow/information-flow-patch.git
 	cd ./build/information-flow-patch && git checkout $(kernel-version)
 	cd ./build && mkdir -p ./information-flow-patch/build
@@ -74,10 +74,22 @@ config_travis: copy_change copy_config
 	cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
 	cd ./build/linux-$(kernel-version) && $(MAKE) oldconfig
 
+config_old: copy_change copy_config
+	 cd ./build/linux-$(kernel-version) && $(MAKE) olddefconfig
+	 cd ./build/linux-$(kernel-version) && $(MAKE) menuconfig
+
 compile: compile_security compile_kernel compile_us
 
-compile_security: copy_change
+on_assertion:
+	sed -i -e "s/\/\/BUILD_BUG_ON/BUILD_BUG_ON/g" ./security/provenance/include/provenance.h
+
+off_assertion:
+	sed -i -e "s/BUILD_BUG_ON/\/\/BUILD_BUG_ON/g" ./security/provenance/include/provenance.h
+
+compile_security_only:
 	cd ./build/linux-$(kernel-version) && $(MAKE) security W=1
+
+compile_security: on_assertion copy_change compile_security_only off_assertion
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
@@ -90,21 +102,21 @@ compile_us:
 install_header:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 
-install: install_kernel install_us
+install: install_kernel install_header install_us
 
 install_kernel:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) modules_install
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) install
-	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow-$(lsm-version)
+	cd ./build/linux-$(kernel-version) && sudo cp -f .config /boot/config-$(kernel-version)camflow_$(lsm-version)
 
 install_us:
 	cd ./build/libprovenance && $(MAKE) install
 	cd ./build/camconfd && $(MAKE) all
 	cd ./build/camconfd && $(MAKE) install
-	cd ./build/camflow-cli && $(MAKE) all
-	cd ./build/camflow-cli && $(MAKE) install
 	cd ./build/camflowd && $(MAKE) all
 	cd ./build/camflowd && $(MAKE) install
+	cd ./build/camflow-cli && $(MAKE) all
+	cd ./build/camflow-cli && $(MAKE) install
 
 clean: clean_kernel clean_us
 

@@ -25,10 +25,15 @@
 #include <linux/mm.h> // used for get_page
 #include <net/net_namespace.h>
 #include <linux/pid_namespace.h>
+#include <linux/sched/cputime.h>
 #include "../../../fs/mount.h" // nasty
 
 #include "provenance_inode.h"
 #include "provenance_policy.h"
+
+#define KB 1024
+#define MB (1024*KB)
+#define KB_MASK (~(KB-1))
 
 #define current_pid() (current->pid)
 static inline uint32_t current_cgroupns(void)
@@ -175,7 +180,8 @@ static inline void current_update_shst(struct provenance *cprov)
 	mmput_async(mm);
 }
 
-static inline int record_task_name(struct task_struct *task, struct provenance *prov)
+static inline int record_task_name(struct task_struct *task,
+																	struct provenance *prov)
 {
 	const struct cred *cred;
 	struct provenance *fprov;
@@ -219,6 +225,44 @@ out:
 	return rc;
 }
 
+static inline void update_task_perf(struct task_struct *task,
+																		struct provenance *prov)
+{
+	struct mm_struct *mm;
+	uint64_t utime;
+	uint64_t stime;
+
+	/* time */
+	/* usec */
+	task_cputime_adjusted(task, &utime, &stime);
+	prov_elt(prov)->task_info.utime = div_u64(utime, NSEC_PER_USEC);
+	prov_elt(prov)->task_info.stime = div_u64(stime, NSEC_PER_USEC);
+
+	/* memory */
+	mm = get_task_mm(current);
+  if (mm) {
+		/* KB */
+		prov_elt(prov)->task_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
+		mmput_async(mm);
+	}
+	/* IO */
+#ifdef CONFIG_TASK_IO_ACCOUNTING
+	/* KB */
+	prov_elt(prov)->task_info.rbytes = task->ioac.read_bytes & KB_MASK;
+	prov_elt(prov)->task_info.wbytes = task->ioac.write_bytes & KB_MASK;
+	prov_elt(prov)->task_info.cancel_wbytes =
+									task->ioac.cancelled_write_bytes & KB_MASK;
+#else
+	/* KB */
+	prov_elt(prov)->task_info.rbytes = task->ioac.rchar & KB_MASK;
+	prov_elt(prov)->task_info.wbytes = task->ioac.wchar & KB_MASK;
+	prov_elt(prov)->task_info.cancel_wbytes = 0;
+#endif
+}
+
 static inline struct provenance *get_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
@@ -244,6 +288,7 @@ static inline struct provenance *get_current_provenance(void)
 		current_update_shst(prov);
 		prov->updt_mmap = 0;
 	}
+	update_task_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
 	return prov;
@@ -430,9 +475,9 @@ static inline int prov_record_arg(struct provenance *prov,
 	if( len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX-1);
-	write_node(prov_elt(prov));
 	write_long_node(aprov);
-	rc = write_relation(etype, prov_elt(prov), aprov, NULL);
+	write_node(prov_elt(prov));
+	rc = write_relation(etype, aprov, prov_elt(prov), NULL);
 	free_long_provenance(aprov);
 	return rc;
 }

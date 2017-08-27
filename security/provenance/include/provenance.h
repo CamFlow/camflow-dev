@@ -151,7 +151,7 @@ out:
 	return count;
 }
 
-static inline int __update_version(uint64_t type, struct provenance *prov)
+static inline int __update_version(const uint64_t type, struct provenance *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
@@ -174,7 +174,7 @@ static inline int __update_version(uint64_t type, struct provenance *prov)
 	return rc;
 }
 
-static inline int record_relation(uint64_t type,
+static inline int record_relation(const uint64_t type,
 				  struct provenance *from,
 				  struct provenance *to,
 				  struct file *file)
@@ -199,39 +199,43 @@ static inline int record_relation(uint64_t type,
 	return rc;
 }
 
-static inline int flow_to_activity(uint64_t type,
+static inline int uses(uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
 				   struct file *file)
 {
 	int rc = record_relation(type, from, to, file);
+	//BUILD_BUG_ON(!IS_USED(type));
 
 	if (should_record_relation(type, prov_elt(from), prov_elt(to)))
 		to->updt_mmap = 1;
 	return rc;
 }
 
-static inline int flow_from_activity(uint64_t type,
+static inline int generates(const uint64_t type,
 				     struct provenance *from,
 				     struct provenance *to,
 				     struct file *file)
 {
+	//BUILD_BUG_ON(!IS_GENERATED(type));
 	return record_relation(type, from, to, file);
 }
 
-static inline int flow_between_entities(uint64_t type,
+static inline int derives(const uint64_t type,
 					struct provenance *from,
 					struct provenance *to,
 					struct file *file)
 {
+	//BUILD_BUG_ON(!IS_DERIVED(type));
 	return record_relation(type, from, to, file);
 }
 
-static inline int flow_between_activities(uint64_t type,
+static inline int informs(const uint64_t type,
 					  struct provenance *from,
 					  struct provenance *to,
 					  struct file *file)
 {
+	//BUILD_BUG_ON(!IS_INFORMED(type));
 	return record_relation(type, from, to, file);
 }
 #endif

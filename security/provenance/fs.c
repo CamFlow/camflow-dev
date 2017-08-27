@@ -17,6 +17,7 @@
 #include "provenance_inode.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
+#include "provenance_types.h"
 
 #define TMPBUFLEN       12
 
@@ -683,7 +684,6 @@ declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 		}\
 	}
 
-
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 				       size_t count, loff_t *ppos)
 {
@@ -775,6 +775,34 @@ out:
 }
 declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
 
+static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
+				       size_t count, loff_t *ppos)
+{
+	struct prov_type type_info;
+
+	if( count < sizeof(struct prov_type) )
+		return -ENOMEM;
+	if( copy_from_user(&type_info, buf, sizeof(struct prov_type)) )
+		return -EAGAIN;
+	if(type_info.is_relation){
+		if(type_info.id){
+			strncpy(type_info.str, relation_str(type_info.id), 256);
+		}else{
+			type_info.id = relation_id(type_info.str);
+		}
+	}else{
+		if(type_info.id){
+			strncpy(type_info.str, node_str(type_info.id), 256);
+		}else{
+			type_info.id = node_id(type_info.str);
+		}
+	}
+	if( copy_to_user(buf, &type_info, sizeof(struct prov_type)) )
+		return -EAGAIN;
+	return sizeof(struct prov_type);
+}
+declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
+
 #define prov_create_file(name, perm, fun_ptr)\
 	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
 
@@ -808,6 +836,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("policy_hash", 0444, &prov_policy_hash_ops);
 	prov_create_file("uid", 0644, &prov_uid_filter_ops);
 	prov_create_file("gid", 0644, &prov_gid_filter_ops);
+	prov_create_file("type", 0444, &prov_type_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
