@@ -28,6 +28,7 @@
 
 ### v0.3.6
 ```
+- Removed unused relation types.
 - Update to kernel version 4.12.9.
 ```
 
