@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.6           | 4.12.9         | N/A        |
+| 0.3.6           | 4.12.10        | N/A        |
 | 0.3.5           | 4.12.9         | 27/08/2017 |
 | 0.3.4           | 4.12.4         | 02/08/2017 |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
@@ -29,7 +29,7 @@
 ### v0.3.6
 ```
 - Removed unused relation types.
-- Update to kernel version 4.12.9.
+- Update to kernel version 4.12.10.
 ```
 
 ### v0.3.5
