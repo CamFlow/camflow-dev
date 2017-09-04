@@ -20,6 +20,7 @@
 #include <uapi/linux/mman.h>
 #include <uapi/linux/camflow.h>
 #include <uapi/linux/provenance.h>
+#include <uapi/linux/provenance_types.h>
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
 #include <linux/mm.h>

@@ -15,9 +15,7 @@
 
 #ifndef __KERNEL__
 #include <linux/limits.h>
-#include <linux/provenance_types.h>
 #else
-#include <uapi/linux/provenance_types.h>
 #include <linux/socket.h>
 #include <linux/limits.h>
 #include <linux/mutex.h>
