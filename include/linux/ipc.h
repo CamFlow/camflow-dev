@@ -23,6 +23,8 @@ struct kern_ipc_perm {
 #ifdef CONFIG_SECURITY_PROVENANCE
 	void 		*provenance;
 #endif
-} ____cacheline_aligned_in_smp;
+	struct rcu_head rcu;
+	atomic_t refcount;
+} ____cacheline_aligned_in_smp __randomize_layout;
 
 #endif /* _LINUX_IPC_H */

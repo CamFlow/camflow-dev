@@ -1563,8 +1563,8 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 	struct provenance *sbprov = sb->s_provenance;
 
 	for (i = 0; i < 16; i++) {
-		prov_elt(sbprov)->sb_info.uuid[i] = sb->s_uuid[i];
-		c |= sb->s_uuid[i];
+		prov_elt(sbprov)->sb_info.uuid[i] = sb->s_uuid.b[i];
+		c |= sb->s_uuid.b[i];
 	}
 	if (c == 0) // no uuid defined, generate random one
 		get_random_bytes(prov_elt(sbprov)->sb_info.uuid, 16 * sizeof(uint8_t));

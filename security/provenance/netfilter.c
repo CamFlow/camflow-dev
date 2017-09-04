@@ -76,8 +76,12 @@ static struct pernet_operations provenance_net_ops = {
 
 static int __init provenance_nf_ip_init(void)
 {
+	int err;
 	pr_info("Provenance: registering netfilter hooks.\n");
-	return register_pernet_subsys(&provenance_net_ops);
+	err = register_pernet_subsys(&provenance_net_ops);
+	if (err)
+		panic("Provenance: register_pernet_subsys error %d\n", err);
+	return 0;
 }
 
 __initcall(provenance_nf_ip_init);
