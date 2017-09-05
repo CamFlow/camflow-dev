@@ -14,7 +14,6 @@
 #define _UAPI_LINUX_PROVENANCE_TYPES_H
 
 #ifndef __KERNEL__
-#include <string.h>
 #include <stdint.h>
 #endif
 
