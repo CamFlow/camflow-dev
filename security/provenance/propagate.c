@@ -43,7 +43,7 @@ struct provenance_query_hooks hooks = {
 
 static int __init init_prov_propagate(void)
 {
-	register_camflow_query_hook(&hooks);
+	register_provenance_query_hooks(&hooks);
 	pr_info("Provenance: propagate ready.\n");
 	return 0;
 }

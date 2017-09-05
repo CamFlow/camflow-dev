@@ -14,7 +14,7 @@
 
 #include "provenance_query.h"
 
-int register_camflow_query_hook(struct provenance_query_hooks *hook)
+int register_provenance_query_hooks(struct provenance_query_hooks *hook)
 {
 	if (!hook)
 		return -ENOMEM;
@@ -22,11 +22,11 @@ int register_camflow_query_hook(struct provenance_query_hooks *hook)
 	list_add_tail_rcu(&(hook->list), &provenance_query_hooks);
 	return 0;
 }
-EXPORT_SYMBOL_GPL(register_camflow_query_hook);
+EXPORT_SYMBOL_GPL(register_provenance_query_hooks);
 
-int unregister_camflow_query_hook(struct provenance_query_hooks *hook)
+int unregister_provenance_query_hooks(struct provenance_query_hooks *hook)
 {
 	list_del_rcu(&(hook->list));
 	return 0;
 }
-EXPORT_SYMBOL_GPL(unregister_camflow_query_hook);
+EXPORT_SYMBOL_GPL(unregister_provenance_query_hooks);
