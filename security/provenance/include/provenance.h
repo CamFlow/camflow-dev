@@ -157,7 +157,7 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	union prov_elt old_prov;
 	int rc = 0;
 
-	if (!prov->has_outgoing) // there is no outgoing
+	if (!prov->has_outgoing && prov_policy.should_compress) // there is no outgoing
 		return 0;
 	if (filter_update_node(type))
 		return 0;
