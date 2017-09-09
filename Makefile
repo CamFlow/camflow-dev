@@ -42,7 +42,7 @@ prepare_smatch:
 	mkdir -p build
 	cd ./build && git clone git://repo.or.cz/smatch.git
 	cd ./build/smatch && git checkout 1.60
-	cd ./build/smatch && $(MAKE) CC=clang
+	cd ./build/smatch && $(MAKE)
 
 prepare_ltp:
 	mkdir -p build
