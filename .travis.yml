@@ -19,7 +19,6 @@ before_install:
 
 before_script:
   - make prepare_kernel
-  - make prepare_smatch
   - make patch
   - make config_travis
 
