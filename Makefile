@@ -41,6 +41,7 @@ prepare_service:
 prepare_smatch:
 	mkdir -p build
 	cd ./build && git clone git://repo.or.cz/smatch.git
+	cd ./build/smatch && git checkout 1.60
 	cd ./build/smatch && $(MAKE) CC=clang
 
 prepare_ltp:
