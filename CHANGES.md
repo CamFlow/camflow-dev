@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.6           | 4.13           | N/A        |
+| 0.3.6           | 4.13.1         | N/A        |
 | 0.3.5           | 4.12.9         | 27/08/2017 |
 | 0.3.4           | 4.12.4         | 02/08/2017 |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
@@ -28,8 +28,9 @@
 
 ### v0.3.6
 ```
+- Made node compression (introduce in v0.2.2) configurable from userspace.
 - Removed unused relation types.
-- Update to kernel version 4.13.
+- Update to kernel version 4.13.1.
 ```
 
 ### v0.3.5
