@@ -28,8 +28,8 @@
 
 ### v0.3.6
 ```
-- Made node compression (introduce in v0.2.2) configurable from userspace.
-- Removed unused relation types.
+- Made node compression (introduced in v0.2.2) configurable from userspace.
+- Removed unused relation types.  
 - Update to kernel version 4.13.1.
 ```
 
