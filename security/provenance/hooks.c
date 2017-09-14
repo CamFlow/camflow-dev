@@ -46,7 +46,7 @@ free_work:
 
 static struct workqueue_struct *prov_queue;
 static inline void queue_save_provenance(struct provenance *provenance,
-				  struct dentry *dentry)
+					 struct dentry *dentry)
 {
 	struct save_work *work;
 
@@ -64,7 +64,9 @@ static inline void queue_save_provenance(struct provenance *provenance,
 }
 #else
 static inline void queue_save_provenance(struct provenance *provenance,
-					struct dentry *dentry){}
+					 struct dentry *dentry)
+{
+}
 #endif
 
 /*
@@ -800,12 +802,12 @@ static int provenance_mmap_file(struct file *file,
 			rc = uses(RL_MMAP_EXEC, bprov, cprov, file);
 	}
 out:
-		spin_unlock(prov_lock(iprov));
-		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-		if (bprov) {
-			close_inode(bprov);
-			free_provenance(bprov);
-		}
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	if (bprov) {
+		close_inode(bprov);
+		free_provenance(bprov);
+	}
 	return rc;
 }
 
@@ -916,7 +918,7 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq,
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
-				struct timespec *ts)
+				   struct timespec *ts)
 {
 	return __mq_msgsnd(msg);
 }
@@ -955,14 +957,16 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
 				       int mode)
 {
 	struct provenance *cprov = target->cred->provenance;
+
 	return __mq_msgrcv(cprov, msg);
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
-				struct timespec *ts)
+				      struct timespec *ts)
 {
 	struct provenance *cprov = get_current_provenance();
+
 	return __mq_msgrcv(cprov, msg);
 }
 #endif
@@ -1257,8 +1261,8 @@ out:
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_sendmsg_always(struct socket *sock,
-				     struct msghdr *msg,
-				     int size)
+					    struct msghdr *msg,
+					    int size)
 #else /* CONFIG_SECURITY_FLOW_FRIENDLY */
 static int provenance_socket_sendmsg(struct socket *sock,
 				     struct msghdr *msg,
@@ -1275,7 +1279,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	if (!iprov)
 		return -ENOMEM;
 	if (sock->sk->sk_family == PF_UNIX &&
-			sock->sk->sk_type != SOCK_DGRAM) { // datagran handled by unix_may_send
+	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);
@@ -1305,9 +1309,9 @@ static int provenance_socket_sendmsg(struct socket *sock,
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_recvmsg_always(struct socket *sock,
-				     struct msghdr *msg,
-				     int size,
-				     int flags)
+					    struct msghdr *msg,
+					    int size,
+					    int flags)
 #else /* CONFIG_SECURITY_FLOW_FRIENDLY */
 static int provenance_socket_recvmsg(struct socket *sock,
 				     struct msghdr *msg,
@@ -1325,7 +1329,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	if (!iprov)
 		return -ENOMEM;
 	if (sock->sk->sk_family == PF_UNIX &&
-			sock->sk->sk_type != SOCK_DGRAM) { // datagran handled by unix_may_send
+	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);
@@ -1573,76 +1577,76 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
-	LSM_HOOK_INIT(cred_alloc_blank, provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_free, provenance_cred_free),
-	LSM_HOOK_INIT(cred_prepare, provenance_cred_prepare),
-	LSM_HOOK_INIT(cred_transfer, provenance_cred_transfer),
-	LSM_HOOK_INIT(task_fix_setuid, provenance_task_fix_setuid),
+	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
+	LSM_HOOK_INIT(cred_free,	      provenance_cred_free),
+	LSM_HOOK_INIT(cred_prepare,	      provenance_cred_prepare),
+	LSM_HOOK_INIT(cred_transfer,	      provenance_cred_transfer),
+	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
 
 	/* inode related hooks */
-	LSM_HOOK_INIT(inode_alloc_security, provenance_inode_alloc_security),
-	LSM_HOOK_INIT(inode_create, provenance_inode_create),
-	LSM_HOOK_INIT(inode_free_security, provenance_inode_free_security),
-	LSM_HOOK_INIT(inode_permission, provenance_inode_permission),
-	LSM_HOOK_INIT(inode_link, provenance_inode_link),
-	LSM_HOOK_INIT(inode_rename, provenance_inode_rename),
-	LSM_HOOK_INIT(inode_setattr, provenance_inode_setattr),
-	LSM_HOOK_INIT(inode_getattr, provenance_inode_getattr),
-	LSM_HOOK_INIT(inode_readlink, provenance_inode_readlink),
-	LSM_HOOK_INIT(inode_setxattr, provenance_inode_setxattr),
-	LSM_HOOK_INIT(inode_post_setxattr, provenance_inode_post_setxattr),
-	LSM_HOOK_INIT(inode_getxattr, provenance_inode_getxattr),
-	LSM_HOOK_INIT(inode_listxattr, provenance_inode_listxattr),
-	LSM_HOOK_INIT(inode_removexattr, provenance_inode_removexattr),
-	LSM_HOOK_INIT(inode_getsecurity, provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_listsecurity, provenance_inode_listsecurity),
+	LSM_HOOK_INIT(inode_alloc_security,   provenance_inode_alloc_security),
+	LSM_HOOK_INIT(inode_create,	      provenance_inode_create),
+	LSM_HOOK_INIT(inode_free_security,    provenance_inode_free_security),
+	LSM_HOOK_INIT(inode_permission,	      provenance_inode_permission),
+	LSM_HOOK_INIT(inode_link,	      provenance_inode_link),
+	LSM_HOOK_INIT(inode_rename,	      provenance_inode_rename),
+	LSM_HOOK_INIT(inode_setattr,	      provenance_inode_setattr),
+	LSM_HOOK_INIT(inode_getattr,	      provenance_inode_getattr),
+	LSM_HOOK_INIT(inode_readlink,	      provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_setxattr,	      provenance_inode_setxattr),
+	LSM_HOOK_INIT(inode_post_setxattr,    provenance_inode_post_setxattr),
+	LSM_HOOK_INIT(inode_getxattr,	      provenance_inode_getxattr),
+	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
+	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
+	LSM_HOOK_INIT(inode_getsecurity,      provenance_inode_getsecurity),
+	LSM_HOOK_INIT(inode_listsecurity,     provenance_inode_listsecurity),
 
 	/* file related hooks */
-	LSM_HOOK_INIT(file_permission, provenance_file_permission),
-	LSM_HOOK_INIT(mmap_file, provenance_mmap_file),
-	LSM_HOOK_INIT(file_ioctl, provenance_file_ioctl),
-	LSM_HOOK_INIT(file_open, provenance_file_open),
+	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
+	LSM_HOOK_INIT(mmap_file,	      provenance_mmap_file),
+	LSM_HOOK_INIT(file_ioctl,	      provenance_file_ioctl),
+	LSM_HOOK_INIT(file_open,	      provenance_file_open),
 
 	/* msg related hooks */
 	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
-	LSM_HOOK_INIT(msg_msg_free_security, provenance_msg_msg_free_security),
-	LSM_HOOK_INIT(msg_queue_msgsnd, provenance_msg_queue_msgsnd),
-	LSM_HOOK_INIT(msg_queue_msgrcv, provenance_msg_queue_msgrcv),
+	LSM_HOOK_INIT(msg_msg_free_security,  provenance_msg_msg_free_security),
+	LSM_HOOK_INIT(msg_queue_msgsnd,	      provenance_msg_queue_msgsnd),
+	LSM_HOOK_INIT(msg_queue_msgrcv,	      provenance_msg_queue_msgrcv),
 
 	/* shared memory related hooks */
-	LSM_HOOK_INIT(shm_alloc_security, provenance_shm_alloc_security),
-	LSM_HOOK_INIT(shm_free_security, provenance_shm_free_security),
-	LSM_HOOK_INIT(shm_shmat, provenance_shm_shmat),
+	LSM_HOOK_INIT(shm_alloc_security,     provenance_shm_alloc_security),
+	LSM_HOOK_INIT(shm_free_security,      provenance_shm_free_security),
+	LSM_HOOK_INIT(shm_shmat,	      provenance_shm_shmat),
 
 	/* socket related hooks */
-	LSM_HOOK_INIT(sk_alloc_security, provenance_sk_alloc_security),
-	LSM_HOOK_INIT(socket_post_create, provenance_socket_post_create),
-	LSM_HOOK_INIT(socket_bind, provenance_socket_bind),
-	LSM_HOOK_INIT(socket_connect, provenance_socket_connect),
-	LSM_HOOK_INIT(socket_listen, provenance_socket_listen),
-	LSM_HOOK_INIT(socket_accept, provenance_socket_accept),
+	LSM_HOOK_INIT(sk_alloc_security,      provenance_sk_alloc_security),
+	LSM_HOOK_INIT(socket_post_create,     provenance_socket_post_create),
+	LSM_HOOK_INIT(socket_bind,	      provenance_socket_bind),
+	LSM_HOOK_INIT(socket_connect,	      provenance_socket_connect),
+	LSM_HOOK_INIT(socket_listen,	      provenance_socket_listen),
+	LSM_HOOK_INIT(socket_accept,	      provenance_socket_accept),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(socket_sendmsg_always, provenance_socket_sendmsg_always),
-	LSM_HOOK_INIT(socket_recvmsg_always, provenance_socket_recvmsg_always),
-	LSM_HOOK_INIT(mq_timedreceive, provenance_mq_timedreceive),
-	LSM_HOOK_INIT(mq_timedsend, provenance_mq_timedsend),
-#else /* CONFIG_SECURITY_FLOW_FRIENDLY */
-	LSM_HOOK_INIT(socket_sendmsg, provenance_socket_sendmsg),
-	LSM_HOOK_INIT(socket_recvmsg, provenance_socket_recvmsg),
-#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
-	LSM_HOOK_INIT(socket_sock_rcv_skb, provenance_socket_sock_rcv_skb),
-	LSM_HOOK_INIT(unix_stream_connect, provenance_unix_stream_connect),
-	LSM_HOOK_INIT(unix_may_send, provenance_unix_may_send),
+	LSM_HOOK_INIT(socket_sendmsg_always,  provenance_socket_sendmsg_always),
+	LSM_HOOK_INIT(socket_recvmsg_always,  provenance_socket_recvmsg_always),
+	LSM_HOOK_INIT(mq_timedreceive,	      provenance_mq_timedreceive),
+	LSM_HOOK_INIT(mq_timedsend,	      provenance_mq_timedsend),
+#else   /* CONFIG_SECURITY_FLOW_FRIENDLY */
+	LSM_HOOK_INIT(socket_sendmsg,	      provenance_socket_sendmsg),
+	LSM_HOOK_INIT(socket_recvmsg,	      provenance_socket_recvmsg),
+#endif  /* CONFIG_SECURITY_FLOW_FRIENDLY */
+	LSM_HOOK_INIT(socket_sock_rcv_skb,    provenance_socket_sock_rcv_skb),
+	LSM_HOOK_INIT(unix_stream_connect,    provenance_unix_stream_connect),
+	LSM_HOOK_INIT(unix_may_send,	      provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_check_security, provenance_bprm_check),
-	LSM_HOOK_INIT(bprm_set_creds, provenance_bprm_set_creds),
-	LSM_HOOK_INIT(bprm_committing_creds, provenance_bprm_committing_creds),
+	LSM_HOOK_INIT(bprm_check_security,    provenance_bprm_check),
+	LSM_HOOK_INIT(bprm_set_creds,	      provenance_bprm_set_creds),
+	LSM_HOOK_INIT(bprm_committing_creds,  provenance_bprm_committing_creds),
 
 	/* file system related hooks */
-	LSM_HOOK_INIT(sb_alloc_security, provenance_sb_alloc_security),
-	LSM_HOOK_INIT(sb_free_security, provenance_sb_free_security),
-	LSM_HOOK_INIT(sb_kern_mount, provenance_sb_kern_mount)
+	LSM_HOOK_INIT(sb_alloc_security,      provenance_sb_alloc_security),
+	LSM_HOOK_INIT(sb_free_security,	      provenance_sb_free_security),
+	LSM_HOOK_INIT(sb_kern_mount,	      provenance_sb_kern_mount)
 };
 
 struct kmem_cache *provenance_cache;
@@ -1678,8 +1682,8 @@ void __init provenance_add_hooks(void)
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);
 	long_provenance_cache = kmem_cache_create("long_provenance_struct",
-					     sizeof(union long_prov_elt),
-					     0, SLAB_PANIC, NULL);
+						  sizeof(union long_prov_elt),
+						  0, SLAB_PANIC, NULL);
 	/* init relay buffers, to deal with provenance before FS is ready */
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
 	if (unlikely(!boot_buffer))

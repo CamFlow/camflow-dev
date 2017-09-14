@@ -67,7 +67,7 @@ static inline bool should_record_relation(const uint64_t type, union prov_elt *f
 	if (filter_relation(type))
 		return false;
 	// one of the node should not appear in the record, ignore the relation
-	if (filter_node((prov_entry_t *)from) || filter_node((prov_entry_t *)to))
+	if (filter_node((prov_entry_t*)from) || filter_node((prov_entry_t*)to))
 		return false;
 	return true;
 }
@@ -109,56 +109,56 @@ static inline bool prov_has_uid_and_gid(union prov_elt *prov)
 	}
 }
 
-#define declare_filter_list(filter_name, type)\
-	struct filter_name {\
-		struct list_head list;\
-		struct type filter;\
-	};\
+#define declare_filter_list(filter_name, type) \
+	struct filter_name { \
+		struct list_head list; \
+		struct type filter; \
+	}; \
 	extern struct list_head filter_name;
 
-#define declare_filter_whichOP(function_name, type, variable)\
-	static inline uint8_t function_name(uint32_t variable)\
-	{\
-		struct list_head *listentry, *listtmp;\
-		struct type *tmp;\
-		list_for_each_safe(listentry, listtmp, &type) {\
-			tmp = list_entry(listentry, struct type, list);\
-			if (tmp->filter.variable == variable)\
-				return tmp->filter.op;\
-		}\
-		return 0;\
+#define declare_filter_whichOP(function_name, type, variable) \
+	static inline uint8_t function_name(uint32_t variable) \
+	{ \
+		struct list_head *listentry, *listtmp; \
+		struct type *tmp; \
+		list_for_each_safe(listentry, listtmp, &type) { \
+			tmp = list_entry(listentry, struct type, list); \
+			if (tmp->filter.variable == variable) \
+				return tmp->filter.op; \
+		} \
+		return 0; \
 	}
 
-#define declare_filter_delete(function_name, type, variable)\
-	static inline uint8_t function_name(struct type *f)\
-	{\
-		struct list_head *listentry, *listtmp;\
-		struct type *tmp;\
-		list_for_each_safe(listentry, listtmp, &type) {\
-			tmp = list_entry(listentry, struct type, list);\
-			if (tmp->filter.variable == f->filter.variable) {\
-				list_del(listentry);\
-				kfree(tmp);\
-				return 0;\
-			}\
-		}\
-		return 0;\
+#define declare_filter_delete(function_name, type, variable) \
+	static inline uint8_t function_name(struct type *f) \
+	{ \
+		struct list_head *listentry, *listtmp; \
+		struct type *tmp; \
+		list_for_each_safe(listentry, listtmp, &type) { \
+			tmp = list_entry(listentry, struct type, list); \
+			if (tmp->filter.variable == f->filter.variable) { \
+				list_del(listentry); \
+				kfree(tmp); \
+				return 0; \
+			} \
+		} \
+		return 0; \
 	}
 
-#define declare_filter_add_or_update(function_name, type, variable)\
-	static inline uint8_t function_name(struct type *f)\
-	{\
-		struct list_head *listentry, *listtmp;\
-		struct type *tmp;\
-		list_for_each_safe(listentry, listtmp, &type) {\
-			tmp = list_entry(listentry, struct type, list);\
-			if (tmp->filter.variable == f->filter.variable) {\
-				tmp->filter.op = f->filter.op;\
-				return 0;\
-			}\
-		}\
-		list_add_tail(&(f->list), &type);\
-		return 0;\
+#define declare_filter_add_or_update(function_name, type, variable) \
+	static inline uint8_t function_name(struct type *f) \
+	{ \
+		struct list_head *listentry, *listtmp; \
+		struct type *tmp; \
+		list_for_each_safe(listentry, listtmp, &type) { \
+			tmp = list_entry(listentry, struct type, list); \
+			if (tmp->filter.variable == f->filter.variable) { \
+				tmp->filter.op = f->filter.op; \
+				return 0; \
+			} \
+		} \
+		list_add_tail(&(f->list), &type); \
+		return 0; \
 	}
 
 declare_filter_list(secctx_filters, secinfo);
@@ -178,16 +178,16 @@ declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
 
 static inline void apply_target(union prov_elt *prov)
 {
-	uint8_t op=0;
+	uint8_t op = 0;
 
 	// track based on ns
 	if (prov_type(prov) == ACT_TASK)
 		op |= prov_ns_whichOP(prov->task_info.utsns,
-										prov->task_info.ipcns,
-										prov->task_info.mntns,
-										prov->task_info.pidns,
-										prov->task_info.netns,
-										prov->task_info.cgroupns);
+				      prov->task_info.ipcns,
+				      prov->task_info.mntns,
+				      prov->task_info.pidns,
+				      prov->task_info.netns,
+				      prov->task_info.cgroupns);
 
 	if (prov_has_secid(prov))
 		op |= prov_secctx_whichOP(node_secid(prov));

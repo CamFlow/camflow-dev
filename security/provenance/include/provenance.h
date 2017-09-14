@@ -55,7 +55,7 @@ struct provenance {
 
 #define prov_elt(provenance) (&(provenance->msg))
 #define prov_lock(provenance) (&(provenance->lock))
-#define prov_entry(provenance) ((prov_entry_t *)prov_elt(provenance))
+#define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
 
 #define ASSIGN_NODE_ID 0
 
@@ -201,11 +201,12 @@ static inline int record_relation(const uint64_t type,
 }
 
 static inline int uses(uint64_t type,
-				   struct provenance *from,
-				   struct provenance *to,
-				   struct file *file)
+		       struct provenance *from,
+		       struct provenance *to,
+		       struct file *file)
 {
 	int rc = record_relation(type, from, to, file);
+
 	BUILD_BUG_ON(!IS_USED(type));
 
 	if (should_record_relation(type, prov_elt(from), prov_elt(to)))
@@ -214,27 +215,27 @@ static inline int uses(uint64_t type,
 }
 
 static inline int generates(const uint64_t type,
-				     struct provenance *from,
-				     struct provenance *to,
-				     struct file *file)
+			    struct provenance *from,
+			    struct provenance *to,
+			    struct file *file)
 {
 	BUILD_BUG_ON(!IS_GENERATED(type));
 	return record_relation(type, from, to, file);
 }
 
 static inline int derives(const uint64_t type,
-					struct provenance *from,
-					struct provenance *to,
-					struct file *file)
+			  struct provenance *from,
+			  struct provenance *to,
+			  struct file *file)
 {
 	BUILD_BUG_ON(!IS_DERIVED(type));
 	return record_relation(type, from, to, file);
 }
 
 static inline int informs(const uint64_t type,
-					  struct provenance *from,
-					  struct provenance *to,
-					  struct file *file)
+			  struct provenance *from,
+			  struct provenance *to,
+			  struct file *file)
 {
 	BUILD_BUG_ON(!IS_INFORMED(type));
 	return record_relation(type, from, to, file);

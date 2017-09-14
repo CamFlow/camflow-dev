@@ -14,13 +14,13 @@
 #define _PROVENANCE_POLICY_H
 
 struct capture_policy {
-  bool prov_enabled;
-  bool prov_all;
-  bool should_compress;
-  uint64_t prov_node_filter;
-  uint64_t prov_propagate_node_filter;
-  uint64_t prov_relation_filter;
-  uint64_t prov_propagate_relation_filter;
+	bool prov_enabled;
+	bool prov_all;
+	bool should_compress;
+	uint64_t prov_node_filter;
+	uint64_t prov_propagate_node_filter;
+	uint64_t prov_relation_filter;
+	uint64_t prov_propagate_relation_filter;
 };
 
 extern struct capture_policy prov_policy;
