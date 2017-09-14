@@ -165,9 +165,6 @@ test_travis:
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
 	@echo "Running flawfinder..."
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance
-	@echo "Running coccinelle"
-	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
-	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
