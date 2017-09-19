@@ -157,11 +157,14 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	union prov_elt old_prov;
 	int rc = 0;
 
-	if (!prov->has_outgoing && prov_policy.should_compress) // there is no outgoing
+	// there is no outgoing edge and we are compressing
+	if (!prov->has_outgoing && prov_policy.should_compress)
 		return 0;
+	// are we recording this type
 	if (filter_update_node(type))
 		return 0;
-	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
+	if (memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt)) == NULL)
+		return -ENOMEM;
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 	write_node(&old_prov);

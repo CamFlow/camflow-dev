@@ -52,13 +52,15 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		if (filter_update_node(type))
 			goto out;
 		memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
-		node_identifier(prov_elt(prov)).version++;
-		clear_recorded(prov_elt(prov));
-		write_node(&old_prov);
 		/* we update the info of the new version and record it */
 		prov_elt(prov)->inode_info.mode = mode;
 		prov_type(prov_elt(prov)) = type;
+		node_identifier(prov_elt(prov)).version++;
+		clear_recorded(prov_elt(prov));
+		/* we make sure the nodes are recorded */
+		write_node(&old_prov);
 		write_node(prov_elt(prov));
+		/* we record a version edge */
 		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
 		prov->has_outgoing = false; // we update there is no more outgoing edge
 		prov->saved = false;
