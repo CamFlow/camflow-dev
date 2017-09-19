@@ -65,9 +65,9 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		prov->has_outgoing = false; // we update there is no more outgoing edge
 		prov->saved = false;
 	}
+out:
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
-out:
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
