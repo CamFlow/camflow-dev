@@ -96,11 +96,11 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 		return 0;
 	// should not sleep
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-	if (!buffer) {
-		pr_err("Provenance: could not allocate memory\n");
+	if (!buffer)
 		return -ENOMEM;
-	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
+	if (IS_ERR(ptr))
+		return PTR_ERR(ptr);
 	rc = record_node_name(prov, ptr);
 	kfree(buffer);
 	return rc;
