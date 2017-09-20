@@ -103,11 +103,11 @@ static inline int record_node_name(struct provenance *node, const char *name)
 
 	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
 		return 0;
+
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
-	if (!fname_prov) {
-		pr_err("Provenance: recod name failed to allocate memory\n");
+	if (!fname_prov)
 		return -ENOMEM;
-	}
+
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 	// record the nodes
