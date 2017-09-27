@@ -112,9 +112,9 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 	// record the nodes
 	write_long_node(fname_prov);
-	write_node(prov_elt(node));
 	// record the relation
 	spin_lock(prov_lock(node));
+	write_node(prov_elt(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
