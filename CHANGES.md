@@ -28,6 +28,7 @@
 
 ### v0.3.6
 ```
+- Fix bug related to file path recording. 
 - Made node compression (introduced in v0.2.2) configurable from userspace.
 - Removed unused relation types.  
 - Update to kernel version 4.13.4.
