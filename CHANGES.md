@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.6           | 4.13.4         | N/A        |
+| 0.3.6           | 4.13.4         | 28/09/2017 |
 | 0.3.5           | 4.12.9         | 27/08/2017 |
 | 0.3.4           | 4.12.4         | 02/08/2017 |
 | 0.3.3           | 4.11.6         | 23/06/2017 |
@@ -28,7 +28,7 @@
 
 ### v0.3.6
 ```
-- Fix bug related to file path recording. 
+- Fix bug related to file path recording.
 - Made node compression (introduced in v0.2.2) configurable from userspace.
 - Removed unused relation types.  
 - Update to kernel version 4.13.4.
