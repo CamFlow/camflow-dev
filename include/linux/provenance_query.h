@@ -10,13 +10,13 @@
  * or (at your option) any later version.
  *
  */
- #ifndef _LINUX_CAMFLOW_QUERY_H
- #define _LINUX_CAMFLOW_QUERY_H
+ #ifndef _LINUX_PROVENANCE_QUERY_H
+ #define _LINUX_PROVENANCE_QUERY_H
 
  #include <uapi/linux/provenance.h>
 
- #define CAMFLOW_RAISE_WARNING  1
- #define CAMFLOW_PREVENT_FLOW   2
+ #define PROVENANCE_RAISE_WARNING  1
+ #define PROVENANCE_PREVENT_FLOW   2
 
  #define QUERY_HOOK_INIT(HEAD, HOOK) .HEAD=&HOOK
 
@@ -28,6 +28,6 @@ struct provenance_query_hooks {
 
  extern struct list_head provenance_query_hooks;
 
-int register_camflow_query_hook( struct provenance_query_hooks *hook);
-int unregister_camflow_query_hook( struct provenance_query_hooks *hook);
+int register_provenance_query_hooks( struct provenance_query_hooks *hook);
+int unregister_provenance_query_hooks( struct provenance_query_hooks *hook);
 #endif

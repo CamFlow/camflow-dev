@@ -20,6 +20,7 @@
 #include <uapi/linux/mman.h>
 #include <uapi/linux/camflow.h>
 #include <uapi/linux/provenance.h>
+#include <uapi/linux/provenance_types.h>
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
 #include <linux/mm.h>
@@ -54,7 +55,7 @@ struct provenance {
 
 #define prov_elt(provenance) (&(provenance->msg))
 #define prov_lock(provenance) (&(provenance->lock))
-#define prov_entry(provenance) ((prov_entry_t *)prov_elt(provenance))
+#define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
 
 #define ASSIGN_NODE_ID 0
 
@@ -102,25 +103,26 @@ static inline int record_node_name(struct provenance *node, const char *name)
 
 	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
 		return 0;
+
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
-	if (!fname_prov) {
-		pr_err("Provenance: recod name failed to allocate memory\n");
+	if (!fname_prov)
 		return -ENOMEM;
-	}
+
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
+	// record the nodes
 	write_long_node(fname_prov);
+	// record the relation
+	spin_lock(prov_lock(node));
+	write_node(prov_elt(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
-		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_TASK);
 		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
-		spin_unlock(prov_lock(node));
 	} else{
-		spin_lock_nested(prov_lock(node), PROVENANCE_LOCK_INODE);
 		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
-		spin_unlock(prov_lock(node));
 	}
+	spin_unlock(prov_lock(node));
 	free_long_provenance(fname_prov);
 	return rc;
 }
@@ -156,11 +158,14 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	union prov_elt old_prov;
 	int rc = 0;
 
-	if (!prov->has_outgoing) // there is no outgoing
+	// there is no outgoing edge and we are compressing
+	if (!prov->has_outgoing && prov_policy.should_compress)
 		return 0;
+	// are we recording this type
 	if (filter_update_node(type))
 		return 0;
-	memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
+	if (memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt)) == NULL)
+		return -ENOMEM;
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 	write_node(&old_prov);
@@ -200,11 +205,12 @@ static inline int record_relation(const uint64_t type,
 }
 
 static inline int uses(uint64_t type,
-				   struct provenance *from,
-				   struct provenance *to,
-				   struct file *file)
+		       struct provenance *from,
+		       struct provenance *to,
+		       struct file *file)
 {
 	int rc = record_relation(type, from, to, file);
+
 	//BUILD_BUG_ON(!IS_USED(type));
 
 	if (should_record_relation(type, prov_elt(from), prov_elt(to)))
@@ -213,27 +219,27 @@ static inline int uses(uint64_t type,
 }
 
 static inline int generates(const uint64_t type,
-				     struct provenance *from,
-				     struct provenance *to,
-				     struct file *file)
+			    struct provenance *from,
+			    struct provenance *to,
+			    struct file *file)
 {
 	//BUILD_BUG_ON(!IS_GENERATED(type));
 	return record_relation(type, from, to, file);
 }
 
 static inline int derives(const uint64_t type,
-					struct provenance *from,
-					struct provenance *to,
-					struct file *file)
+			  struct provenance *from,
+			  struct provenance *to,
+			  struct file *file)
 {
 	//BUILD_BUG_ON(!IS_DERIVED(type));
 	return record_relation(type, from, to, file);
 }
 
 static inline int informs(const uint64_t type,
-					  struct provenance *from,
-					  struct provenance *to,
-					  struct file *file)
+			  struct provenance *from,
+			  struct provenance *to,
+			  struct file *file)
 {
 	//BUILD_BUG_ON(!IS_INFORMED(type));
 	return record_relation(type, from, to, file);

@@ -47,25 +47,27 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		type = ENT_INODE_SOCKET;
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
 	if (prov_elt(prov)->inode_info.mode != 0
-			&& prov_elt(prov)->inode_info.mode != mode
-			&& provenance_is_recorded(prov_elt(prov))) {
+	    && prov_elt(prov)->inode_info.mode != mode
+	    && provenance_is_recorded(prov_elt(prov))) {
 		if (filter_update_node(type))
 			goto out;
 		memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
-		node_identifier(prov_elt(prov)).version++;
-		clear_recorded(prov_elt(prov));
-		write_node(&old_prov);
 		/* we update the info of the new version and record it */
 		prov_elt(prov)->inode_info.mode = mode;
 		prov_type(prov_elt(prov)) = type;
+		node_identifier(prov_elt(prov)).version++;
+		clear_recorded(prov_elt(prov));
+		/* we make sure the nodes are recorded */
+		write_node(&old_prov);
 		write_node(prov_elt(prov));
+		/* we record a version edge */
 		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
 		prov->has_outgoing = false; // we update there is no more outgoing edge
 		prov->saved = false;
 	}
+out:
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
-out:
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
@@ -94,11 +96,11 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 		return 0;
 	// should not sleep
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-	if (!buffer) {
-		pr_err("Provenance: could not allocate memory\n");
+	if (!buffer)
 		return -ENOMEM;
-	}
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
+	if (IS_ERR(ptr))
+		return PTR_ERR(ptr);
 	rc = record_node_name(prov, ptr);
 	kfree(buffer);
 	return rc;
@@ -126,7 +128,7 @@ static inline void refresh_inode_provenance(struct inode *inode, bool may_sleep)
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	if(may_sleep)
+	if (may_sleep)
 		record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
 	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
@@ -300,7 +302,7 @@ static inline int record_write_xattr(uint64_t type,
 	if (rc < 0)
 		goto out;
 	write_node(prov_elt(iprov));
-	if(type == RL_SETXATTR)
+	if (type == RL_SETXATTR)
 		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL);
 	else
 		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL);
@@ -351,7 +353,7 @@ static inline int close_inode(struct provenance *iprov)
 		return 0;
 	// persistent
 	if (prov_type(prov_entry(iprov)) == ENT_INODE_FILE ||
-			prov_type(prov_entry(iprov)) == ENT_INODE_DIRECTORY)
+	    prov_type(prov_entry(iprov)) == ENT_INODE_DIRECTORY)
 		return 0;
 	memcpy(&old_prov, prov_elt(iprov), sizeof(union prov_elt));
 	node_identifier(prov_elt(iprov)).version++;

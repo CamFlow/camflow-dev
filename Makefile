@@ -1,5 +1,5 @@
-kernel-version=4.12.9
-lsm-version=0.3.5
+kernel-version=4.13.4
+lsm-version=0.3.6
 arch=x86_64
 
 all: config compile
@@ -41,6 +41,7 @@ prepare_service:
 prepare_smatch:
 	mkdir -p build
 	cd ./build && git clone git://repo.or.cz/smatch.git
+	cd ./build/smatch && git checkout 1.60
 	cd ./build/smatch && $(MAKE)
 
 prepare_ltp:
@@ -164,28 +165,25 @@ test_travis:
 	-cd ./build/linux-$(kernel-version) && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
 	@echo "Running flawfinder..."
 	-cd ./build/linux-$(kernel-version) && flawfinder ./security/provenance
-	@echo "Running coccinelle"
-	-cd ./build/linux-$(kernel-version) && sed -i '/options = --use-gitgrep/d' .cocciconfig
-	-cd ./build/linux-$(kernel-version) && $(MAKE) coccicheck MODE=report M=security/provenance
 
 uncrustify:
-	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/propagate.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/query.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/type.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/av_utils.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_cgroup.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_long.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_ns.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_policy.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_secctx.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_types.h
 
 patch: copy_change
 	cd build && mkdir -p pristine

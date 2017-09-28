@@ -32,8 +32,8 @@
 #include "provenance_policy.h"
 
 #define KB 1024
-#define MB (1024*KB)
-#define KB_MASK (~(KB-1))
+#define MB (1024 * KB)
+#define KB_MASK (~(KB - 1))
 
 #define current_pid() (current->pid)
 static inline uint32_t current_cgroupns(void)
@@ -133,9 +133,8 @@ static inline uint32_t current_pidns(void)
 
 	task_lock(current);
 	ns = task_active_pid_ns(current);
-	if (ns) {
+	if (ns)
 		id = ns->ns.inum;
-	}
 	task_unlock(current);
 	return id;
 }
@@ -181,7 +180,7 @@ static inline void current_update_shst(struct provenance *cprov)
 }
 
 static inline int record_task_name(struct task_struct *task,
-																	struct provenance *prov)
+				   struct provenance *prov)
 {
 	const struct cred *cred;
 	struct provenance *fprov;
@@ -226,7 +225,7 @@ out:
 }
 
 static inline void update_task_perf(struct task_struct *task,
-																		struct provenance *prov)
+				    struct provenance *prov)
 {
 	struct mm_struct *mm;
 	uint64_t utime;
@@ -240,7 +239,7 @@ static inline void update_task_perf(struct task_struct *task,
 
 	/* memory */
 	mm = get_task_mm(current);
-  if (mm) {
+	if (mm) {
 		/* KB */
 		prov_elt(prov)->task_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
 		prov_elt(prov)->task_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
@@ -254,7 +253,7 @@ static inline void update_task_perf(struct task_struct *task,
 	prov_elt(prov)->task_info.rbytes = task->ioac.read_bytes & KB_MASK;
 	prov_elt(prov)->task_info.wbytes = task->ioac.write_bytes & KB_MASK;
 	prov_elt(prov)->task_info.cancel_wbytes =
-									task->ioac.cancelled_write_bytes & KB_MASK;
+		task->ioac.cancelled_write_bytes & KB_MASK;
 #else
 	/* KB */
 	prov_elt(prov)->task_info.rbytes = task->ioac.rchar & KB_MASK;
@@ -312,6 +311,7 @@ static inline int terminate_task(struct provenance *tprov)
 {
 	union prov_elt old_prov;
 	int rc;
+
 	if (!provenance_is_tracked(prov_elt(tprov)) && !prov_policy.prov_all)
 		return 0;
 	if (filter_node(prov_entry(tprov)))
@@ -341,8 +341,8 @@ static inline void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
 
 /* see fs/exec.c */
 static inline struct page *get_arg_page(struct linux_binprm *bprm,
-																				unsigned long pos,
-																				int write)
+					unsigned long pos,
+					int write)
 {
 	struct page *page;
 	int ret;
@@ -364,7 +364,7 @@ static inline struct page *get_arg_page(struct linux_binprm *bprm,
 	 * doing the exec and bprm->mm is the new process's mm.
 	 */
 	ret = get_user_pages_remote(current, bprm->mm, pos, 1, gup_flags,
-			&page, NULL, NULL);
+				    &page, NULL, NULL);
 	if (ret <= 0)
 		return NULL;
 
@@ -420,7 +420,7 @@ fail:
 
 /* see fs/exec.c */
 static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
-		unsigned long len)
+				 unsigned long len)
 {
 	int rv = 0;
 	unsigned long ofs, bytes;
@@ -460,10 +460,10 @@ out:
 }
 
 static inline int prov_record_arg(struct provenance *prov,
-																	uint64_t vtype,
-																	uint64_t etype,
-																	const char *arg,
-																	size_t len)
+				  uint64_t vtype,
+				  uint64_t etype,
+				  const char *arg,
+				  size_t len)
 {
 	union long_prov_elt *aprov;
 	int rc = 0;
@@ -472,9 +472,9 @@ static inline int prov_record_arg(struct provenance *prov,
 	if (!aprov)
 		return -ENOMEM;
 	aprov->arg_info.length = len;
-	if( len >= PATH_MAX)
+	if ( len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
-	strlcpy(aprov->arg_info.value, arg, PATH_MAX-1);
+	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
 	write_long_node(aprov);
 	write_node(prov_elt(prov));
 	rc = write_relation(etype, aprov, prov_elt(prov), NULL);
@@ -483,13 +483,13 @@ static inline int prov_record_arg(struct provenance *prov,
 }
 
 static inline int prov_record_args(struct provenance *prov,
-														struct linux_binprm *bprm)
+				   struct linux_binprm *bprm)
 {
 	char* argv;
 	char* ptr;
 	unsigned long len;
 	size_t size;
-	int rc=0;
+	int rc = 0;
 	int argc;
 	int envc;
 
@@ -506,15 +506,15 @@ static inline int prov_record_args(struct provenance *prov,
 	argc = bprm->argc;
 	envc = bprm->envc;
 	ptr = argv;
-	while(argc-- > 0){
+	while (argc-- > 0) {
 		size = strnlen(ptr, len);
 		prov_record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
-		ptr += size+1;
+		ptr += size + 1;
 	}
-	while(envc-- > 0){
+	while (envc-- > 0) {
 		size = strnlen(ptr, len);
 		prov_record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
-		ptr += size+1;
+		ptr += size + 1;
 	}
 	kfree(argv);
 	return 0;
