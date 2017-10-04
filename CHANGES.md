@@ -29,7 +29,7 @@
 
 ### v0.3.7
 ```
-- Change the synthax of the version number to make debian happy.
+- Change the syntax of the version number to make debian happy.
 ```
 
 ### v0.3.6
