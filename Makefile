@@ -9,7 +9,7 @@ prepare: prepare_kernel prepare_us
 prepare_kernel:
 	mkdir -p build
 	cd ./build && wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$(kernel-version).tar.xz && tar -xJf linux-$(kernel-version).tar.xz && cd ./linux-$(kernel-version) && $(MAKE) mrproper
-	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow_$(lsm-version)/g" Makefile
+	cd ./build/linux-$(kernel-version) && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
 	cd ./build && git clone https://github.com/CamFlow/information-flow-patch.git
 	cd ./build/information-flow-patch && git checkout $(kernel-version)
 	cd ./build && mkdir -p ./information-flow-patch/build
