@@ -64,6 +64,8 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
 	provenance_mark_as_opaque(PROV_UID_FILTER);
 	provenance_mark_as_opaque(PROV_GID_FILTER);
+	provenance_mark_as_opaque(PROV_TYPE);
+	provenance_mark_as_opaque(PROV_VERSION);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -806,6 +808,18 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 
+static ssize_t prov_read_version(struct file *filp, char __user *buf,
+				   size_t count, loff_t *ppos)
+{
+	size_t len = strlen(CAMFLOW_VERSION_STR);
+	if ( count < len )
+		return -ENOMEM;
+	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
+		return -EAGAIN;
+	return sizeof(struct prov_type);
+}
+declare_file_operations(prov_version, no_write, prov_read_version);
+
 #define prov_create_file(name, perm, fun_ptr) \
 	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
 
@@ -841,6 +855,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("uid", 0644, &prov_uid_filter_ops);
 	prov_create_file("gid", 0644, &prov_gid_filter_ops);
 	prov_create_file("type", 0444, &prov_type_ops);
+	prov_create_file("version", 0444, &prov_version);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
