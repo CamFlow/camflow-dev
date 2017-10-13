@@ -814,6 +814,7 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 	size_t len = strlen(CAMFLOW_VERSION_STR);
 	if ( count < len )
 		return -ENOMEM;
+	memset(buf, 0, count);
 	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
 		return -EAGAIN;
 	return sizeof(struct prov_type);
