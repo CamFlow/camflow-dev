@@ -20,8 +20,8 @@
 #define LONG_PROV_BASE_NAME "long_provenance"
 
 /* global variable, extern in provenance.h */
-struct rchan *prov_chan;
-struct rchan *long_prov_chan;
+static struct rchan *prov_chan;
+static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
