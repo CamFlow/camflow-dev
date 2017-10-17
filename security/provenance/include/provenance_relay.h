@@ -28,6 +28,22 @@
 
 extern bool relay_ready;
 
+struct relay_list {
+	struct list_head list;
+	struct rchan *prov;
+	struct rchan *long_prov;
+};
+
+extern struct list_head relay_list;
+
+static inline void prov_add_relay(struct rchan *prov, struct rchan *long_prov){
+	struct relay_list *list;
+	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
+	list->prov = prov;
+	list->long_prov = long_prov;
+	list_add_tail(&(list->list), &relay_list);
+}
+
 struct prov_boot_buffer {
 	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];
 	uint32_t nb_entry;
@@ -39,10 +55,12 @@ struct prov_long_boot_buffer {
 };
 
 extern struct prov_boot_buffer *boot_buffer;
-extern struct rchan *prov_chan;
 
 static inline void prov_write(union prov_elt *msg)
 {
+	struct list_head *listentry, *listtmp;
+	struct relay_list *tmp;
+
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
@@ -50,31 +68,49 @@ static inline void prov_write(union prov_elt *msg)
 			boot_buffer->nb_entry++;
 		} else
 			pr_err("Provenance: boot buffer is full.\n");
-	} else
-		relay_write(prov_chan, msg, sizeof(union prov_elt));
+	} else {
+		list_for_each_safe(listentry, listtmp, &relay_list) {
+			tmp = list_entry(listentry, struct relay_list, list);
+			relay_write(tmp->prov, msg, sizeof(union prov_elt));
+		}
+	}
 }
 
 
 extern struct prov_long_boot_buffer *long_boot_buffer;
-extern struct rchan *long_prov_chan;
 
 static inline void long_prov_write(union long_prov_elt *msg)
 {
+	struct list_head *listentry, *listtmp;
+	struct relay_list *tmp;
+
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
 			memcpy(&(long_boot_buffer->buffer[long_boot_buffer->nb_entry++]), msg, sizeof(union long_prov_elt));
 		else
 			pr_err("Provenance: long boot buffer is full.\n");
-	} else
-		relay_write(long_prov_chan, msg, sizeof(union long_prov_elt));
+	} else {
+		list_for_each_safe(listentry, listtmp, &relay_list) {
+			tmp = list_entry(listentry, struct relay_list, list);
+			relay_write(tmp->long_prov, msg, sizeof(union prov_elt));
+		}
+	}
 }
 
 /* force sub-buffer switch */
 static inline void prov_flush(void)
 {
-	relay_flush(prov_chan);
-	relay_flush(long_prov_chan);
+	struct list_head *listentry, *listtmp;
+	struct relay_list *tmp;
+	
+	if (unlikely(!relay_ready)) {
+		list_for_each_safe(listentry, listtmp, &relay_list) {
+			tmp = list_entry(listentry, struct relay_list, list);
+			relay_flush(tmp->prov);
+			relay_flush(tmp->long_prov);
+		}
+	}
 }
 
 extern atomic64_t prov_relation_id;

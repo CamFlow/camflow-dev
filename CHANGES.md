@@ -30,6 +30,7 @@
 
 ### v0.3.8
 ```
+- Add support for multiple relay channel.
 - Expose version number via pseudofile.
 - Update to kernel version 4.13.6.
 ```

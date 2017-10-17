@@ -1662,6 +1662,7 @@ LIST_HEAD(user_filters);
 LIST_HEAD(group_filters);
 LIST_HEAD(ns_filters);
 LIST_HEAD(provenance_query_hooks);
+LIST_HEAD(relay_list);
 
 struct capture_policy prov_policy;
 
