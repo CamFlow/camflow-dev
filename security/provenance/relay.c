@@ -73,9 +73,16 @@ bool relay_ready;
 extern struct workqueue_struct *prov_queue;
 
 int prov_create_channel(char *buffer, size_t len){
+	struct relay_list *tmp;
 	char long_name[PATH_MAX];
 	struct rchan *chan;
 	struct rchan *long_chan;
+
+	// test if channel already exists
+	list_for_each_entry(tmp, &relay_list, list) {
+		if (strcmp(tmp->name, buffer)==0)
+			return -EFAULT;
+	}
 
 	if(strlen(buffer)>len)
 		return -ENOMEM;
@@ -86,7 +93,7 @@ int prov_create_channel(char *buffer, size_t len){
 	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!long_chan)
 		return -EFAULT;
-	prov_add_relay(chan, long_chan);
+	prov_add_relay(buffer, chan, long_chan);
 	return 0;
 }
 
@@ -99,7 +106,7 @@ static int __init relay_prov_init(void)
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
-	prov_add_relay(prov_chan, long_prov_chan);
+	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
 	relay_ready = true;
 	// relay buffer are ready, we can write down the boot buffer
 	write_boot_buffer();
