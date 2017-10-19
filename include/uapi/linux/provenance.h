@@ -126,9 +126,11 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_GID_FILTER												"/sys/kernel/security/provenance/gid"
 #define PROV_TYPE															"/sys/kernel/security/provenance/type"
 #define PROV_VERSION													"/sys/kernel/security/provenance/version"
+#define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
+#define PROV_CHANNEL_ROOT											"/sys/kernel/debug/"
 
 #define FLOW_ALLOWED        0
 #define FLOW_DISALLOWED     1

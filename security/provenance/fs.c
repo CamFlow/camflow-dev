@@ -66,6 +66,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_GID_FILTER);
 	provenance_mark_as_opaque(PROV_TYPE);
 	provenance_mark_as_opaque(PROV_VERSION);
+	provenance_mark_as_opaque(PROV_CHANNEL);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -661,7 +662,7 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 	struct provenance *cprov = get_current_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
-		return 0;
+		return -ENOMEM;
 	set_tracked(prov_elt(cprov));
 	return record_log(prov_elt(cprov), buf, count);
 }
@@ -673,7 +674,7 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 	struct provenance *cprov = get_current_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
-		return 0;
+		return -ENOMEM;
 	set_tracked(prov_elt(cprov));
 	set_propagate(prov_elt(cprov));
 	return record_log(prov_elt(cprov), buf, count);
@@ -821,6 +822,25 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_version, no_write, prov_read_version);
 
+static ssize_t prov_write_channel(struct file *file, const char __user *buf,
+			      size_t count, loff_t *ppos)
+{
+	int rc;
+	char buffer[PATH_MAX];
+
+	if (count <= 0 || count > PATH_MAX)
+		return -ENOMEM;
+	if (copy_from_user(buffer, buf, count))
+		return -ENOMEM;
+	if (strlen(buffer) > count) // null terminated?
+		return -ENOMEM;
+	rc = prov_create_channel(buffer, strlen(buffer));
+	if (rc < 0)
+		return rc;
+	return strlen(buf);
+}
+declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
+
 #define prov_create_file(name, perm, fun_ptr) \
 	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
 
@@ -857,6 +877,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("gid", 0644, &prov_gid_filter_ops);
 	prov_create_file("type", 0444, &prov_type_ops);
 	prov_create_file("version", 0444, &prov_version);
+	prov_create_file("channel", 0644, &prov_channel_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }

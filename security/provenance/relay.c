@@ -72,6 +72,24 @@ static void write_boot_buffer(void)
 bool relay_ready;
 extern struct workqueue_struct *prov_queue;
 
+int prov_create_channel(char *buffer, size_t len){
+	char long_name[PATH_MAX];
+	struct rchan *chan;
+	struct rchan *long_chan;
+
+	if(strlen(buffer)>len)
+		return -ENOMEM;
+	snprintf (long_name, PATH_MAX, "long_%s", buffer);
+	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	if (!chan)
+		return -EFAULT;
+	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	if (!long_chan)
+		return -EFAULT;
+	prov_add_relay(chan, long_chan);
+	return 0;
+}
+
 static int __init relay_prov_init(void)
 {
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);

@@ -36,6 +36,8 @@ struct relay_list {
 
 extern struct list_head relay_list;
 
+int prov_create_channel(char *buffer, size_t len);
+
 static inline void prov_add_relay(struct rchan *prov, struct rchan *long_prov){
 	struct relay_list *list;
 	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
