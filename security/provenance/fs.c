@@ -834,10 +834,7 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 		return -ENOMEM;
 	if (strlen(buffer) > count) // null terminated?
 		return -ENOMEM;
-	rc = prov_create_channel(buffer, strlen(buffer));
-	if (rc < 0)
-		return rc;
-	return strlen(buf);
+	return prov_create_channel(buffer, strlen(buffer));
 }
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
