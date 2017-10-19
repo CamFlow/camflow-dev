@@ -58,7 +58,6 @@ extern struct prov_boot_buffer *boot_buffer;
 
 static inline void prov_write(union prov_elt *msg)
 {
-	struct list_head *listentry, *listtmp;
 	struct relay_list *tmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
@@ -69,8 +68,7 @@ static inline void prov_write(union prov_elt *msg)
 		} else
 			pr_err("Provenance: boot buffer is full.\n");
 	} else {
-		list_for_each_safe(listentry, listtmp, &relay_list) {
-			tmp = list_entry(listentry, struct relay_list, list);
+		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->prov, msg, sizeof(union prov_elt));
 		}
 	}
@@ -81,7 +79,6 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 
 static inline void long_prov_write(union long_prov_elt *msg)
 {
-	struct list_head *listentry, *listtmp;
 	struct relay_list *tmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
@@ -91,8 +88,7 @@ static inline void long_prov_write(union long_prov_elt *msg)
 		else
 			pr_err("Provenance: long boot buffer is full.\n");
 	} else {
-		list_for_each_safe(listentry, listtmp, &relay_list) {
-			tmp = list_entry(listentry, struct relay_list, list);
+		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->long_prov, msg, sizeof(union prov_elt));
 		}
 	}
@@ -101,12 +97,10 @@ static inline void long_prov_write(union long_prov_elt *msg)
 /* force sub-buffer switch */
 static inline void prov_flush(void)
 {
-	struct list_head *listentry, *listtmp;
 	struct relay_list *tmp;
-	
+
 	if (unlikely(!relay_ready)) {
-		list_for_each_safe(listentry, listtmp, &relay_list) {
-			tmp = list_entry(listentry, struct relay_list, list);
+		list_for_each_entry(tmp, &relay_list, list) {
 			relay_flush(tmp->prov);
 			relay_flush(tmp->long_prov);
 		}
