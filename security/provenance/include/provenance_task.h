@@ -272,10 +272,10 @@ static inline struct provenance *get_current_provenance(void)
 		goto out;
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
-	if (unlikely(prov_elt(prov)->task_info.pid == 0))
-		prov_elt(prov)->task_info.pid = task_pid_nr(current);
-	if (unlikely(prov_elt(prov)->task_info.vpid == 0))
-		prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	prov_elt(prov)->task_info.pid = task_pid_nr(current);
+	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	prov_elt(prov)->task_info.ppid = task_ppid_nr(current);
+	prov_elt(prov)->task_info.tgid = task_tgid_nr(current);
 	prov_elt(prov)->task_info.utsns = current_utsns();
 	prov_elt(prov)->task_info.ipcns = current_ipcns();
 	prov_elt(prov)->task_info.mntns = current_mntns();

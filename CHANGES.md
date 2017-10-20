@@ -30,6 +30,7 @@
 
 ### v0.3.8
 ```
+- Process node more detailed (pid, vpid, ppid, tgid).
 - Add support for multiple relay channel.
 - Expose version number via pseudofile.
 - Update to kernel version 4.13.8.

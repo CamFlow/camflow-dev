@@ -247,6 +247,8 @@ struct task_prov_struct {
 	basic_elements;
 	uint32_t pid;
 	uint32_t vpid;
+	uint32_t ppid;
+	uint32_t tgid;
 	uint32_t utsns;
 	uint32_t ipcns;
 	uint32_t mntns;
