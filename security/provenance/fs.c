@@ -825,7 +825,6 @@ declare_file_operations(prov_version, no_write, prov_read_version);
 static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	int rc;
 	char *buffer = kzalloc(count, GFP_KERNEL);
 
 	if (count <= 0 || count > PATH_MAX)
