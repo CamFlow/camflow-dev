@@ -60,6 +60,7 @@ copy_change:
 
 copy_config:
 	cp -f /boot/config-$(shell uname -r) .config
+	sed -i -e "s/CONFIG_DRM_VBOXVIDEO=m/# CONFIG_DRM_VBOXVIDEO is not set/g" ./.config
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 
 config: copy_change copy_config
