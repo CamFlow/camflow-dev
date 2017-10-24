@@ -30,6 +30,7 @@
 
 ### v0.3.8
 ```
+- Handle security context recording when security_secid_to_secctx is not supported.
 - Process node more detailed (pid, vpid, ppid, tgid).
 - Add support for multiple relay channel.
 - Expose version number via pseudofile.
