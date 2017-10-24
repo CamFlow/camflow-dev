@@ -75,27 +75,36 @@ extern struct workqueue_struct *prov_queue;
 int prov_create_channel(char *buffer, size_t len)
 {
 	struct relay_list *tmp;
-	char long_name[PATH_MAX];
+	char *long_name = kzalloc(PATH_MAX, GFP_KERNEL);
 	struct rchan *chan;
 	struct rchan *long_chan;
+	int rc = 0;
 
 	// test if channel already exists
 	list_for_each_entry(tmp, &relay_list, list) {
-		if (strcmp(tmp->name, buffer) == 0)
-			return -EFAULT;
+		if (strcmp(tmp->name, buffer) == 0){
+			rc = -EFAULT;
+			goto out;
+		}
 	}
 
 	if (strlen(buffer) > len)
 		return -ENOMEM;
 	snprintf(long_name, PATH_MAX, "long_%s", buffer);
 	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (!chan)
-		return -EFAULT;
+	if (!chan){
+		rc = -EFAULT;
+		goto out;
+	}
 	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (!long_chan)
-		return -EFAULT;
+	if (!long_chan){
+		rc = -EFAULT;
+		goto out;
+	}
 	prov_add_relay(buffer, chan, long_chan);
-	return 0;
+out:
+	kfree(long_name);
+	return rc;
 }
 
 static int __init relay_prov_init(void)
