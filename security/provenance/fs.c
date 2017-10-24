@@ -315,7 +315,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = get_current_provenance();
-	union prov_elt *tmp = (union prov_elt *)buf;
+	union prov_elt *tmp = (union prov_elt*)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
@@ -339,7 +339,7 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_filter))
 		return -ENOMEM;
 
-	setting = (struct prov_filter *)buf;
+	setting = (struct prov_filter*)buf;
 
 	if (setting->add != 0)
 		(*filter) |= setting->filter & setting->mask;
@@ -367,7 +367,7 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	}
 #define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
 	{ \
-		return __read_filter(filp, buf, count, filter); \
+		return __read_filter(filp, buf, count, filter);	\
 	}
 
 declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
@@ -431,7 +431,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config *)buf;
+	msg = (struct prov_process_config*)buf;
 
 	prov = prov_from_vpid(msg->vpid);
 	if (!prov)
@@ -522,10 +522,10 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
-	data = (struct secinfo *)buf;
+	data = (struct secinfo*)buf;
 
-	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
-	if (rtn == -EOPNOTSUPP){ // this is not supported by the main LSM
+	rtn = security_secid_to_secctx(data->secid, &ctx, &len);        // read secctx
+	if (rtn == -EOPNOTSUPP) {                                       // this is not supported by the main LSM
 		snprintf(data->secctx, PATH_MAX, "%d", data->secid);
 		rtn = 0;
 		goto out;
@@ -551,12 +551,12 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 	{ \
 		struct filters *s; \
 		if (count < sizeof(struct info)) \
-			return -ENOMEM; \
+			return -ENOMEM;	\
 		s = kzalloc(sizeof(struct filters), GFP_KERNEL); \
-		if (!s) \
-			return -ENOMEM; \
+		if (!s)	\
+			return -ENOMEM;	\
 		if (copy_from_user(&s->filter, buf, sizeof(struct info))) \
-			return -EAGAIN; \
+			return -EAGAIN;	\
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
 			add_function(s); \
 		else \
@@ -569,15 +569,15 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct filters *tmp; \
-		size_t pos = 0; \
+		size_t pos = 0;	\
 		if (count < sizeof(struct info)) \
-			return -ENOMEM; \
+			return -ENOMEM;	\
 		list_for_each_safe(listentry, listtmp, &filters) { \
 			tmp = list_entry(listentry, struct filters, list); \
 			if (count < pos + sizeof(struct info)) \
-				return -ENOMEM; \
+				return -ENOMEM;	\
 			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) \
-				return -EAGAIN; \
+				return -EAGAIN;	\
 			pos += sizeof(struct info); \
 		} \
 		return pos; \
@@ -687,8 +687,8 @@ declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
 #define hash_filters(filters, filters_type, tmp, tmp_type) \
 	list_for_each_safe(listentry, listtmp, &filters) { \
-		tmp = list_entry(listentry, struct filters_type, list); \
-		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type)); \
+		tmp = list_entry(listentry, struct filters_type, list);	\
+		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type));	\
 		if (rc) { \
 			pr_err("Provenance: error updating hash."); \
 			pos = -EAGAIN; \
@@ -814,9 +814,10 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 
 static ssize_t prov_read_version(struct file *filp, char __user *buf,
-				   size_t count, loff_t *ppos)
+				 size_t count, loff_t *ppos)
 {
 	size_t len = strlen(CAMFLOW_VERSION_STR);
+
 	if ( count < len )
 		return -ENOMEM;
 	memset(buf, 0, count);
@@ -827,7 +828,7 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 declare_file_operations(prov_version, no_write, prov_read_version);
 
 static ssize_t prov_write_channel(struct file *file, const char __user *buf,
-			      size_t count, loff_t *ppos)
+				  size_t count, loff_t *ppos)
 {
 	char *buffer = kzalloc(count, GFP_KERNEL);
 

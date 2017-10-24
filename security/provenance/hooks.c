@@ -74,7 +74,7 @@ static inline void queue_save_provenance(struct provenance *provenance,
  */
 static void cred_init_provenance(void)
 {
-	struct cred *cred = (struct cred *)current->real_cred;
+	struct cred *cred = (struct cred*)current->real_cred;
 	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 
 	if (!prov)
@@ -478,7 +478,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 		if (size != sizeof(union prov_elt))
 			return -ENOMEM;
 		prov = dentry_provenance(dentry);
-		setting = (union prov_elt *)value;
+		setting = (union prov_elt*)value;
 
 		if (provenance_is_tracked(setting))
 			set_tracked(prov_elt(prov));
@@ -1125,7 +1125,7 @@ static int provenance_socket_bind(struct socket *sock,
 	if (address->sa_family == PF_INET) {
 		if (addrlen < sizeof(struct sockaddr_in))
 			return -EINVAL;
-		ipv4_addr = (struct sockaddr_in *)address;
+		ipv4_addr = (struct sockaddr_in*)address;
 		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
@@ -1178,7 +1178,7 @@ static int provenance_socket_connect(struct socket *sock,
 			rc = -EINVAL;
 			goto out;
 		}
-		ipv4_addr = (struct sockaddr_in *)address;
+		ipv4_addr = (struct sockaddr_in*)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));

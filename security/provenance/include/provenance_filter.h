@@ -121,8 +121,8 @@ static inline bool prov_has_uid_and_gid(union prov_elt *prov)
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) { \
-			tmp = list_entry(listentry, struct type, list); \
+		list_for_each_safe(listentry, listtmp, &type) {	\
+			tmp = list_entry(listentry, struct type, list);	\
 			if (tmp->filter.variable == variable) \
 				return tmp->filter.op; \
 		} \
@@ -134,8 +134,8 @@ static inline bool prov_has_uid_and_gid(union prov_elt *prov)
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) { \
-			tmp = list_entry(listentry, struct type, list); \
+		list_for_each_safe(listentry, listtmp, &type) {	\
+			tmp = list_entry(listentry, struct type, list);	\
 			if (tmp->filter.variable == f->filter.variable) { \
 				list_del(listentry); \
 				kfree(tmp); \
@@ -150,8 +150,8 @@ static inline bool prov_has_uid_and_gid(union prov_elt *prov)
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) { \
-			tmp = list_entry(listentry, struct type, list); \
+		list_for_each_safe(listentry, listtmp, &type) {	\
+			tmp = list_entry(listentry, struct type, list);	\
 			if (tmp->filter.variable == f->filter.variable) { \
 				tmp->filter.op = f->filter.op; \
 				return 0; \
