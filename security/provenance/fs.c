@@ -525,7 +525,11 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	data = (struct secinfo *)buf;
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
-	if (rtn < 0)
+	if (rtn == -EOPNOTSUPP){ // this is not supported by the main LSM
+		snprintf(data->secctx, PATH_MAX, "%d", data->secid);
+		rtn = 0;
+		goto out;
+	}else if (rtn < 0)
 		goto out;
 	if (len < PATH_MAX) {
 		if (copy_to_user(data->secctx, ctx, len)) {
