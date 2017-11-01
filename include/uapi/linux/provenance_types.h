@@ -125,8 +125,7 @@
 #define ENT_ARG               (DM_ENTITY    | (0x0000000000000001ULL<<25))
 #define ENT_ENV               (DM_ENTITY    | (0x0000000000000001ULL<<26))
 
-#define IS_RELATION(val) ((val&DM_RELATION)==DM_RELATION)
-#define IS_TYPE(val, type) ( IS_RELATION(val) && (val&type)==type )
+#define IS_TYPE(val, type) ((val&type)==type)
 #define IS_USED(val) IS_TYPE(type, RL_USED)
 #define IS_INFORMED(val) IS_TYPE(val, RL_INFORMED)
 #define IS_GENERATED(val) IS_TYPE(val, RL_GENERATED)
