@@ -222,7 +222,7 @@ union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
 
 struct msg_struct {
 	basic_elements;
