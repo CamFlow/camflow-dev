@@ -57,9 +57,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		prov_type(prov_elt(prov)) = type;
 		node_identifier(prov_elt(prov)).version++;
 		clear_recorded(prov_elt(prov));
-		/* we make sure the nodes are recorded */
-		write_node(&old_prov);
-		write_node(prov_elt(prov));
+
 		/* we record a version edge */
 		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
 		prov->has_outgoing = false; // we update there is no more outgoing edge
@@ -276,7 +274,7 @@ static inline int record_write_xattr(uint64_t type,
 	union long_prov_elt *xattr;
 	int rc = 0;
 
-	if (!should_record_relation(type, prov_elt(cprov), prov_elt(iprov)))
+	if (!should_record_relation(type, prov_entry(cprov), prov_entry(iprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
@@ -293,15 +291,14 @@ static inline int record_write_xattr(uint64_t type,
 		}
 		xattr->xattr_info.flags = flags;
 	}
-	write_node(prov_elt(cprov));
-	write_long_node(xattr);
+
 	rc = write_relation(type, prov_elt(cprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(type, iprov);
 	if (rc < 0)
 		goto out;
-	write_node(prov_elt(iprov));
+
 	if (type == RL_SETXATTR)
 		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL);
 	else
@@ -319,22 +316,21 @@ static inline int record_read_xattr(struct provenance *cprov,
 	union long_prov_elt *xattr;
 	int rc = 0;
 
-	if (!should_record_relation(RL_GETXATTR, prov_elt(iprov), prov_elt(cprov)))
+	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
 		goto out;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
-	write_node(prov_elt(iprov));
-	write_long_node(xattr);
+
 	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(RL_GETXATTR, cprov);
 	if (rc < 0)
 		goto out;
-	write_node(prov_elt(cprov));
+
 	rc = write_relation(RL_GETXATTR, xattr, prov_elt(cprov), NULL);
 	iprov->has_outgoing = true;
 out:
@@ -358,8 +354,7 @@ static inline int close_inode(struct provenance *iprov)
 	memcpy(&old_prov, prov_elt(iprov), sizeof(union prov_elt));
 	node_identifier(prov_elt(iprov)).version++;
 	clear_recorded(prov_elt(iprov));
-	write_node(&old_prov);
-	write_node(prov_elt(iprov));
+
 	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL);
 	iprov->has_outgoing = false;
 	return rc;

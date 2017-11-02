@@ -121,22 +121,17 @@ extern uint32_t prov_boot_id;
 #define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
 #define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
 
-static inline void write_node(union prov_elt *node)
+static inline void __write_node(prov_entry_t *node)
 {
-	if (filter_node((prov_entry_t*)node) || provenance_is_recorded(node))   // filtered or already recorded
+	if (filter_node(node) || provenance_is_recorded(node))   // filtered or already recorded
 		return;
 	set_recorded(node);
 	if (unlikely(node_identifier(node).machine_id != prov_machine_id))
 		node_identifier(node).machine_id = prov_machine_id;
-	prov_write(node);
-}
-
-static inline void write_long_node(union long_prov_elt *node)
-{
-	if (provenance_is_recorded(node))
-		return;
-	set_recorded(node);
-	long_prov_write(node);
+	if( provenance_is_long(node) )
+		long_prov_write(node);
+	else
+		prov_write((union prov_elt*)node);
 }
 
 static inline void copy_identifier(union prov_identifier *dest, union prov_identifier *src)
@@ -153,6 +148,12 @@ static inline int write_relation(const uint64_t type,
 	prov_entry_t *f = from;
 	prov_entry_t *t = to;
 	int rc = 0;
+
+	if (!should_record_relation(type, f, t))
+		return 0;
+
+	__write_node(f);
+	__write_node(t);
 
 	memset(&relation, 0, sizeof(union prov_elt));
 	prov_type(&relation) = type;

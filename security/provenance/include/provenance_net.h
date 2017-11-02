@@ -211,13 +211,12 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 		return 0;
 	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(RL_RCV_PACKET, pck, prov_elt(inode)))
+	if (!should_record_relation(RL_RCV_PACKET, (prov_entry_t*)pck, prov_entry(inode)))
 		return 0;
 	rc = __update_version(RL_RCV_PACKET, inode);
 	if (rc < 0)
 		return rc;
-	write_node(prov_elt(inode));
-	prov_write(pck);
+
 	rc = write_relation(RL_RCV_PACKET, pck, prov_elt(inode), NULL);
 	return rc;
 }
@@ -231,10 +230,9 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 		return 0;
 	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(RL_SND_PACKET, prov_elt(inode), pck))
+	if (!should_record_relation(RL_SND_PACKET, prov_entry(inode), (prov_entry_t*)pck))
 		return 0;
-	write_node(prov_elt(inode));
-	prov_write(pck);
+
 	rc = write_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL);
 	inode->has_outgoing = true;
 	return rc;
@@ -254,7 +252,7 @@ static inline int provenance_record_address(struct sockaddr *address, int addrle
 	}
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
-	write_long_node(addr_info);
+
 	rc = write_relation(RL_NAMED, addr_info, prov_elt(prov), NULL);
 	set_name_recorded(prov_elt(prov));
 out:
@@ -273,7 +271,7 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
 	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
-	write_long_node(cnt);
+
 	rc = write_relation(RL_READ, cnt, pck, NULL);
 	free_long_provenance(cnt);
 	return rc;

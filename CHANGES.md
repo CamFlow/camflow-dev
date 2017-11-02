@@ -30,6 +30,7 @@
 
 ### v0.3.8
 ```
+- Rework recording and filtering internal logic.
 - Process node more detailed (pid, vpid, ppid, tgid).
 - Add support for multiple relay channel.
 - Expose version number via pseudofile.

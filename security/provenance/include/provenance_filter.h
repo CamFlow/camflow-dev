@@ -62,12 +62,14 @@ static inline bool filter_propagate_relation(uint64_t type)
 	return false;
 }
 
-static inline bool should_record_relation(const uint64_t type, union prov_elt *from, union prov_elt *to)
+static inline bool should_record_relation(const uint64_t type,
+																					prov_entry_t *from,
+																					prov_entry_t *to)
 {
 	if (filter_relation(type))
 		return false;
 	// one of the node should not appear in the record, ignore the relation
-	if (filter_node((prov_entry_t*)from) || filter_node((prov_entry_t*)to))
+	if (filter_node(from) || filter_node(to))
 		return false;
 	return true;
 }

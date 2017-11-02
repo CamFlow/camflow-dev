@@ -88,6 +88,7 @@ static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 	node_identifier(tmp).id = prov_next_node_id();
 	node_identifier(tmp).boot_id = prov_boot_id;
 	node_identifier(tmp).machine_id = prov_machine_id;
+	set_is_long(tmp);
 	return tmp;
 }
 
@@ -110,11 +111,9 @@ static inline int record_node_name(struct provenance *node, const char *name)
 
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
-	// record the nodes
-	write_long_node(fname_prov);
+
 	// record the relation
 	spin_lock(prov_lock(node));
-	write_node(prov_elt(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
 		set_name_recorded(prov_elt(node));
@@ -143,8 +142,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	}
 	str->str_info.str[count] = '\0'; // make sure the string is null terminated
 	str->str_info.length = count;
-	write_node(cprov);
-	write_long_node(str);
+
 	rc = write_relation(RL_LOG, str, cprov, NULL);
 out:
 	free_long_provenance(str);
@@ -168,8 +166,7 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 		return -ENOMEM;
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
-	write_node(&old_prov);
-	write_node(prov_elt(prov));
+
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
 		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
 	else
@@ -192,13 +189,12 @@ static inline int record_relation(const uint64_t type,
 
 	if (!provenance_is_tracked(prov_elt(from)) && !provenance_is_tracked(prov_elt(to)) && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(type, prov_elt(from), prov_elt(to)))
+	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
-	write_node(prov_elt(from));
-	write_node(prov_elt(to));
+
 	rc = write_relation(type, prov_elt(from), prov_elt(to), file);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
@@ -213,7 +209,7 @@ static inline int uses(uint64_t type,
 
 	//BUILD_BUG_ON(!IS_USED(type));
 
-	if (should_record_relation(type, prov_elt(from), prov_elt(to)))
+	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
 		to->updt_mmap = 1;
 	return rc;
 }
