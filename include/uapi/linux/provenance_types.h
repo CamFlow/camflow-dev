@@ -125,11 +125,17 @@
 #define ENT_ARG               (DM_ENTITY    | (0x0000000000000001ULL<<25))
 #define ENT_ENV               (DM_ENTITY    | (0x0000000000000001ULL<<26))
 
-#define IS_TYPE(val, type) ((val&type)==type)
-#define IS_USED(val) IS_TYPE(type, RL_USED)
-#define IS_INFORMED(val) IS_TYPE(val, RL_INFORMED)
-#define IS_GENERATED(val) IS_TYPE(val, RL_GENERATED)
-#define IS_DERIVED(val) IS_TYPE(val, RL_DERIVED)
+#define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
+#define node_type(node) prov_type(node)
+#define edge_type(edge) prov_type(edge)
+#define prov_is_relation(prov) ((relation_identifier(prov).type & DM_RELATION) != 0)
+#define prov_is_node(prov) ((node_identifier(prov).type & DM_RELATION) == 0)
+
+#define prov_is_type(val, type) ((val&type)==type)
+#define prov_is_used(val) prov_is_type(type, RL_USED)
+#define prov_is_informed(val) prov_is_type(val, RL_INFORMED)
+#define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
+#define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
 
 struct prov_type{
   uint64_t id;

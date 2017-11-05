@@ -135,16 +135,11 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define FLOW_ALLOWED        0
 #define FLOW_DISALLOWED     1
 
-#define prov_type(prov)               ((prov)->node_info.identifier.node_id.type)
-#define node_type(node) prov_type(node)
-#define edge_type(edge) prov_type(edge)
 #define prov_id_buffer(prov)          ((prov)->node_info.identifier.buffer)
 #define node_identifier(node)         ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)			((node)->node_info.identifier)
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
-#define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
-#define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
 #define node_secid(node)              ((node)->node_info.secid)
 #define node_uid(node)              	((node)->node_info.uid)
 #define node_gid(node)              	((node)->node_info.gid)

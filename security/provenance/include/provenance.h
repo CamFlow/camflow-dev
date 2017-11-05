@@ -207,7 +207,7 @@ static __always_inline int uses(uint64_t type,
 {
 	int rc = record_relation(type, from, to, file);
 
-	BUILD_BUG_ON(!IS_USED(type));
+	BUILD_BUG_ON(!prov_is_used(type));
 
 	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
 		to->updt_mmap = 1;
@@ -219,7 +219,7 @@ static __always_inline int generates(const uint64_t type,
 			    struct provenance *to,
 			    struct file *file)
 {
-	BUILD_BUG_ON(!IS_GENERATED(type));
+	BUILD_BUG_ON(!prov_is_generated(type));
 	return record_relation(type, from, to, file);
 }
 
@@ -228,7 +228,7 @@ static __always_inline int derives(const uint64_t type,
 			  struct provenance *to,
 			  struct file *file)
 {
-	BUILD_BUG_ON(!IS_DERIVED(type));
+	BUILD_BUG_ON(!prov_is_derived(type));
 	return record_relation(type, from, to, file);
 }
 
@@ -237,7 +237,7 @@ static __always_inline int informs(const uint64_t type,
 			  struct provenance *to,
 			  struct file *file)
 {
-	BUILD_BUG_ON(!IS_INFORMED(type));
+	BUILD_BUG_ON(!prov_is_informed(type));
 	return record_relation(type, from, to, file);
 }
 #endif
