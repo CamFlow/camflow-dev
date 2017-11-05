@@ -152,9 +152,6 @@ static inline int write_relation(const uint64_t type,
 	if (!should_record_relation(type, f, t))
 		return 0;
 
-	__write_node(f);
-	__write_node(t);
-
 	memset(&relation, 0, sizeof(union prov_elt));
 	prov_type(&relation) = type;
 	relation_identifier(&relation).id = prov_next_relation_id();
@@ -167,6 +164,8 @@ static inline int write_relation(const uint64_t type,
 		relation.relation_info.offset = file->f_pos;
 	}
 	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
+	__write_node(f);
+	__write_node(t);
 	prov_write(&relation);
 	return rc;
 }
