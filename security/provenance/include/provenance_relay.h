@@ -126,8 +126,6 @@ static inline void __write_node(prov_entry_t *node)
 	if (filter_node(node) || provenance_is_recorded(node))   // filtered or already recorded
 		return;
 	set_recorded(node);
-	if(node_type(node)!=ENT_PACKET)
-		node_identifier(node).machine_id = prov_machine_id;
 	if( provenance_is_long(node) )
 		long_prov_write(node);
 	else
