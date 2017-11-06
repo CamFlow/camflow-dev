@@ -15,6 +15,7 @@
 
 #ifndef __KERNEL__
 #include <stdint.h>
+#include <stdbool.h>
 #endif
 
 
@@ -136,6 +137,59 @@
 #define prov_is_informed(val) prov_is_type(val, RL_INFORMED)
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
 #define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
+
+static inline bool prov_has_uidgid(uint64_t type)
+{
+	switch (type) {
+  	case ACT_TASK:
+  	case ENT_INODE_UNKNOWN:
+  	case ENT_INODE_LINK:
+  	case ENT_INODE_FILE:
+  	case ENT_INODE_DIRECTORY:
+  	case ENT_INODE_CHAR:
+  	case ENT_INODE_BLOCK:
+  	case ENT_INODE_FIFO:
+  	case ENT_INODE_SOCKET:
+  	case ENT_INODE_MMAP:
+  		return true;
+  	default: return false;
+	}
+}
+
+static inline bool prov_is_inode(uint64_t type)
+{
+	switch (type) {
+  	case ENT_INODE_UNKNOWN:
+  	case ENT_INODE_LINK:
+  	case ENT_INODE_FILE:
+  	case ENT_INODE_DIRECTORY:
+  	case ENT_INODE_CHAR:
+  	case ENT_INODE_BLOCK:
+  	case ENT_INODE_FIFO:
+  	case ENT_INODE_SOCKET:
+  	case ENT_INODE_MMAP:
+  		return true;
+  	default: return false;
+	}
+}
+
+static inline bool prov_has_secid(uint64_t type)
+{
+	switch (type) {
+	case ACT_TASK:
+	case ENT_INODE_UNKNOWN:
+	case ENT_INODE_LINK:
+	case ENT_INODE_FILE:
+	case ENT_INODE_DIRECTORY:
+	case ENT_INODE_CHAR:
+	case ENT_INODE_BLOCK:
+	case ENT_INODE_FIFO:
+	case ENT_INODE_SOCKET:
+	case ENT_INODE_MMAP:
+		return true;
+	default: return false;
+	}
+}
 
 struct prov_type{
   uint64_t id;
