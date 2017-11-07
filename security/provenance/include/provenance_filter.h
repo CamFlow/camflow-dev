@@ -163,7 +163,6 @@ static inline void apply_target(union prov_elt *prov)
 	}
 
 	if (unlikely(op != 0)) {
-		pr_info("Provenance: applying filter %u.", op);
 		if ((op & PROV_SET_TRACKED) != 0)
 			set_tracked(prov);
 		if ((op & PROV_SET_PROPAGATE) != 0)
