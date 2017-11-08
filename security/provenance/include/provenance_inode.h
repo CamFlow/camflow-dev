@@ -220,9 +220,7 @@ static inline struct provenance *dentry_provenance(struct dentry *dentry)
 
 	if (!inode)
 		return NULL;
-	prov = inode->i_provenance;
-	inode_init_provenance(inode, dentry);
-	return prov;
+	return inode_provenance(inode, true);
 }
 
 static inline struct provenance *file_provenance(struct file *file)

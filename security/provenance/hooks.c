@@ -336,6 +336,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	dprov = dir->i_provenance;
 	if (!dprov)
 		return -ENOMEM;
+
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -350,7 +351,6 @@ out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	record_inode_name_from_dentry(new_dentry, iprov);
 	return rc;
 }
 
