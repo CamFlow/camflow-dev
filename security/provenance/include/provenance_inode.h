@@ -216,7 +216,6 @@ static inline struct provenance *inode_provenance(struct inode *inode, bool may_
 static inline struct provenance *dentry_provenance(struct dentry *dentry)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	struct provenance *prov;
 
 	if (!inode)
 		return NULL;

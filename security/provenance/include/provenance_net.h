@@ -24,6 +24,7 @@
 
 #include "provenance.h"
 #include "provenance_policy.h"
+#include "provenance_inode.h"
 
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
@@ -31,7 +32,7 @@ static inline struct provenance *socket_inode_provenance(struct socket *sock)
 	struct provenance *iprov = NULL;
 
 	if (inode)
-		iprov = SOCK_INODE(sock)->i_provenance;
+		iprov = inode_provenance(SOCK_INODE(sock), false);
 	return iprov;
 }
 

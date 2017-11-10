@@ -230,7 +230,7 @@ static int provenance_inode_create(struct inode *dir,
 				   umode_t mode)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dir->i_provenance;
+	struct provenance *iprov = inode_provenance(dir, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -333,7 +333,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	if (!iprov)
 		return -ENOMEM;
 
-	dprov = dir->i_provenance;
+	dprov = inode_provenance(dir, true);
 	if (!dprov)
 		return -ENOMEM;
 
