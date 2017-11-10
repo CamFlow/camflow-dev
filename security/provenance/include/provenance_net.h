@@ -203,6 +203,8 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 	return 0;
 }
 
+// TODO record_pck_to_inode and record_inode_to_pck need a rewrite
+
 // incoming packet
 static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *inode)
 {
@@ -210,6 +212,10 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 
 	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
+
+	apply_target(prov_elt(inode));
+	apply_target(pck);
+
 	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(RL_RCV_PACKET, (prov_entry_t*)pck, prov_entry(inode)))
@@ -229,6 +235,10 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 
 	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
+
+	apply_target(prov_elt(inode));
+	apply_target(pck);
+
 	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(RL_SND_PACKET, prov_entry(inode), (prov_entry_t*)pck))
