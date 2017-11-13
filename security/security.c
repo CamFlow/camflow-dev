@@ -356,11 +356,6 @@ void security_bprm_committed_creds(struct linux_binprm *bprm)
 	call_void_hook(bprm_committed_creds, bprm);
 }
 
-int security_bprm_secureexec(struct linux_binprm *bprm)
-{
-	return call_int_hook(bprm_secureexec, 0, bprm);
-}
-
 int security_sb_alloc(struct super_block *sb)
 {
 	return call_int_hook(sb_alloc_security, 0, sb);
@@ -982,11 +977,6 @@ int security_file_open(struct file *file, const struct cred *cred)
 		return ret;
 
 	return fsnotify_perm(file, MAY_OPEN);
-}
-
-int security_task_create(unsigned long clone_flags)
-{
-	return call_int_hook(task_create, 0, clone_flags);
 }
 
 int security_task_alloc(struct task_struct *task, unsigned long clone_flags)
@@ -1734,13 +1724,13 @@ int security_file_splice_pipe_to_pipe(struct file *in,
 }
 
 int security_mq_timedsend(struct inode *inode, struct msg_msg *msg,
-				size_t msg_len, struct timespec *ts)
+				size_t msg_len, struct timespec64 *ts)
 {
 	return call_int_hook(mq_timedsend, 0, inode, msg, ts);
 }
 
 int security_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
-				size_t msg_len, struct timespec *ts)
+				size_t msg_len, struct timespec64 *ts)
 {
 	return call_int_hook(mq_timedreceive, 0, inode, msg, ts);
 }
