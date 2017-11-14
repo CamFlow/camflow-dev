@@ -163,7 +163,7 @@ static inline void current_update_shst(struct provenance *cprov)
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			flags = vma->vm_flags;
-			mmprov = file_inode(mmapf)->i_provenance;
+			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
 				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
@@ -202,7 +202,7 @@ static inline int record_task_name(struct task_struct *task,
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
-		fprov = file_inode(exe_file)->i_provenance;
+		fprov = file_provenance(exe_file, false);
 		if (provenance_is_opaque(prov_elt(fprov))) {
 			set_opaque(prov_elt(prov));
 			goto out;

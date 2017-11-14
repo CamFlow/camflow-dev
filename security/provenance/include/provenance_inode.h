@@ -213,36 +213,32 @@ static inline struct provenance *inode_provenance(struct inode *inode, bool may_
 	return prov;
 }
 
-static inline struct provenance *dentry_provenance(struct dentry *dentry)
+static inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, true);
+	return inode_provenance(inode, may_sleep);
 }
 
-static inline struct provenance *file_provenance(struct file *file)
+static inline struct provenance *file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, true);
+	return inode_provenance(inode, may_sleep);
 }
 
 static inline void save_provenance(struct dentry *dentry)
 {
-	struct inode *inode;
 	struct provenance *prov;
 	union prov_elt buf;
 
 	if (!dentry)
 		return;
-	inode = d_backing_inode(dentry);
-	if (!inode)
-		return;
-	prov = inode->i_provenance;
+	prov = dentry_provenance(dentry, false);
 	if (!prov)
 		return;
 	spin_lock(prov_lock(prov));

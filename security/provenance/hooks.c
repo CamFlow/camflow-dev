@@ -329,7 +329,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	unsigned long irqflags;
 	int rc;
 
-	iprov = dentry_provenance(old_dentry);
+	iprov = dentry_provenance(old_dentry, true);
 	if (!iprov)
 		return -ENOMEM;
 
@@ -389,7 +389,7 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 	unsigned long irqflags;
 	int rc;
 
-	iprov = dentry_provenance(dentry);
+	iprov = dentry_provenance(dentry, true);
 	if (!iprov)
 		return -ENOMEM;
 	iattrprov = alloc_provenance(ENT_IATTR, GFP_KERNEL);
@@ -427,7 +427,7 @@ out:
 static int provenance_inode_getattr(const struct path *path)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dentry_provenance(path->dentry);
+	struct provenance *iprov = dentry_provenance(path->dentry, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -450,7 +450,7 @@ static int provenance_inode_getattr(const struct path *path)
 static int provenance_inode_readlink(struct dentry *dentry)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dentry_provenance(dentry);
+	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -477,7 +477,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0) { // provenance xattr
 		if (size != sizeof(union prov_elt))
 			return -ENOMEM;
-		prov = dentry_provenance(dentry);
+		prov = dentry_provenance(dentry, true);
 		setting = (union prov_elt*)value;
 
 		if (provenance_is_tracked(setting))
@@ -511,7 +511,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 					   int flags)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dentry_provenance(dentry);
+	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 
 	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0)
@@ -540,7 +540,7 @@ out:
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dentry_provenance(dentry);
+	struct provenance *iprov = dentry_provenance(dentry, true);
 	int rc = 0;
 	unsigned long irqflags;
 
@@ -570,7 +570,7 @@ out:
 static int provenance_inode_listxattr(struct dentry *dentry)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dentry_provenance(dentry);
+	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -592,7 +592,7 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = dentry_provenance(dentry);
+	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -667,7 +667,7 @@ static int provenance_inode_listsecurity(struct inode *inode,
 static int provenance_file_permission(struct file *file, int mask)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = file_provenance(file);
+	struct provenance *iprov = file_provenance(file, true);
 	struct inode *inode = file_inode(file);
 	uint32_t perms;
 	unsigned long irqflags;
@@ -727,7 +727,7 @@ out:
 static int provenance_file_open(struct file *file, const struct cred *cred)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = file_provenance(file);
+	struct provenance *iprov = file_provenance(file, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -763,7 +763,7 @@ static int provenance_mmap_file(struct file *file,
 
 	if (unlikely(!file))
 		return 0;
-	iprov = file_provenance(file);
+	iprov = file_provenance(file, true);
 	if (!iprov)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
@@ -826,7 +826,7 @@ static int provenance_file_ioctl(struct file *file,
 				 unsigned long arg)
 {
 	struct provenance *cprov = get_current_provenance();
-	struct provenance *iprov = file_provenance(file);
+	struct provenance *iprov = file_provenance(file, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -1458,7 +1458,7 @@ static int provenance_unix_may_send(struct socket *sock,
 static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = file_provenance(bprm->file);
+	struct provenance *iprov = file_provenance(bprm->file, true);
 	unsigned long irqflags;
 	int rc;
 
@@ -1488,7 +1488,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 static int provenance_bprm_check(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = file_provenance(bprm->file);
+	struct provenance *iprov = file_provenance(bprm->file, true);
 
 	if (!nprov)
 		return -ENOMEM;
@@ -1514,7 +1514,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct provenance *cprov  = get_current_provenance();
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = file_provenance(bprm->file);
+	struct provenance *iprov = file_provenance(bprm->file, true);
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(iprov))) {
