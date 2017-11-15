@@ -59,7 +59,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		clear_recorded(prov_elt(prov));
 
 		/* we record a version edge */
-		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
+		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
 		prov->has_outgoing = false; // we update there is no more outgoing edge
 		prov->saved = false;
 	}
@@ -282,10 +282,9 @@ static inline int record_write_xattr(uint64_t type,
 			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
 			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
 		}
-		xattr->xattr_info.flags = flags;
 	}
 
-	rc = write_relation(type, prov_elt(cprov), xattr, NULL);
+	rc = write_relation(type, prov_elt(cprov), xattr, NULL, flags);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(type, iprov);
@@ -293,9 +292,9 @@ static inline int record_write_xattr(uint64_t type,
 		goto out;
 
 	if (type == RL_SETXATTR)
-		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL);
+		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
 	else
-		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL);
+		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
 	cprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);
@@ -317,14 +316,14 @@ static inline int record_read_xattr(struct provenance *cprov,
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 
-	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL);
+	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(RL_GETXATTR, cprov);
 	if (rc < 0)
 		goto out;
 
-	rc = write_relation(RL_GETXATTR, xattr, prov_elt(cprov), NULL);
+	rc = write_relation(RL_GETXATTR, xattr, prov_elt(cprov), NULL, 0);
 	iprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);
@@ -348,7 +347,7 @@ static inline int close_inode(struct provenance *iprov)
 	node_identifier(prov_elt(iprov)).version++;
 	clear_recorded(prov_elt(iprov));
 
-	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL);
+	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL, 0);
 	iprov->has_outgoing = false;
 	return rc;
 }

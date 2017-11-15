@@ -115,10 +115,10 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	// record the relation
 	spin_lock(prov_lock(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
-		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL);
+		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
 	} else{
-		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL);
+		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
 	}
 	spin_unlock(prov_lock(node));
@@ -143,7 +143,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 	str->str_info.str[count] = '\0'; // make sure the string is null terminated
 	str->str_info.length = count;
 
-	rc = write_relation(RL_LOG, str, cprov, NULL);
+	rc = write_relation(RL_LOG, str, cprov, NULL, 0);
 out:
 	free_long_provenance(str);
 	if (rc < 0)
@@ -168,9 +168,9 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	clear_recorded(prov_elt(prov));
 
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
-		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL);
+		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL, 0);
 	else
-		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
+		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
 	prov->has_outgoing = false; // we update there is no more outgoing edge
 	prov->saved = false;
 	return rc;
@@ -179,7 +179,8 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 static inline int record_relation(const uint64_t type,
 				  struct provenance *from,
 				  struct provenance *to,
-				  struct file *file)
+				  struct file *file,
+					uint64_t flags)
 {
 	int rc = 0;
 
@@ -195,17 +196,18 @@ static inline int record_relation(const uint64_t type,
 	if (rc < 0)
 		return rc;
 
-	rc = write_relation(type, prov_elt(from), prov_elt(to), file);
+	rc = write_relation(type, prov_elt(from), prov_elt(to), file, flags);
 	from->has_outgoing = true; // there is an outgoing edge
 	return rc;
 }
 
 static __always_inline int uses(uint64_t type,
-		       struct provenance *from,
-		       struct provenance *to,
-		       struct file *file)
+	       	struct provenance *from,
+	       	struct provenance *to,
+				 	struct file *file,
+ 					uint64_t flags)
 {
-	int rc = record_relation(type, from, to, file);
+	int rc = record_relation(type, from, to, file, flags);
 
 	BUILD_BUG_ON(!prov_is_used(type));
 
@@ -217,27 +219,30 @@ static __always_inline int uses(uint64_t type,
 static __always_inline int generates(const uint64_t type,
 			    struct provenance *from,
 			    struct provenance *to,
-			    struct file *file)
+			    struct file *file,
+					uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_generated(type));
-	return record_relation(type, from, to, file);
+	return record_relation(type, from, to, file, flags);
 }
 
 static __always_inline int derives(const uint64_t type,
 			  struct provenance *from,
 			  struct provenance *to,
-			  struct file *file)
+			  struct file *file,
+				uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_derived(type));
-	return record_relation(type, from, to, file);
+	return record_relation(type, from, to, file, flags);
 }
 
 static __always_inline int informs(const uint64_t type,
 			  struct provenance *from,
 			  struct provenance *to,
-			  struct file *file)
+			  struct file *file,
+				uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_informed(type));
-	return record_relation(type, from, to, file);
+	return record_relation(type, from, to, file, flags);
 }
 #endif

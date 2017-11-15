@@ -168,9 +168,9 @@ static inline void current_update_shst(struct provenance *cprov)
 				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
-					record_relation(RL_SH_READ, mmprov, cprov, NULL);
+					record_relation(RL_SH_READ, mmprov, cprov, NULL, 0);
 				if (vm_write_mayshare(flags))
-					record_relation(RL_SH_WRITE, cprov, mmprov, NULL);
+					record_relation(RL_SH_WRITE, cprov, mmprov, NULL, 0);
 				spin_unlock(prov_lock(mmprov));
 			}
 		}
@@ -320,7 +320,7 @@ static inline int terminate_task(struct provenance *tprov)
 	node_identifier(prov_elt(tprov)).version++;
 	clear_recorded(prov_elt(tprov));
 
-	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL);
+	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL, 0);
 	tprov->has_outgoing = false;
 	return rc;
 }
@@ -475,7 +475,7 @@ static inline int prov_record_arg(struct provenance *prov,
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
 
-	rc = write_relation(etype, aprov, prov_elt(prov), NULL);
+	rc = write_relation(etype, aprov, prov_elt(prov), NULL, 0);
 	free_long_provenance(aprov);
 	return rc;
 }

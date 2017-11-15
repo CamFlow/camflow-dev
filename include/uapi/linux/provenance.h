@@ -237,6 +237,7 @@ struct relation_struct {
 	union prov_identifier rcv;
 	uint8_t set;
 	int64_t offset;
+	uint64_t flags;
 };
 
 struct node_struct {
@@ -356,7 +357,6 @@ struct arg_struct {
 struct xattr_prov_struct {
 	basic_elements;
 	char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
-	int32_t flags;
 	uint8_t value[PROV_XATTR_VALUE_SIZE];
 	size_t size;
 };

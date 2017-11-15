@@ -138,9 +138,10 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 }
 
 static inline int write_relation(const uint64_t type,
-				 void *from,
-				 void *to,
-				 struct file *file)
+				void *from,
+				void *to,
+				struct file *file,
+			 	uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;
@@ -161,6 +162,7 @@ static inline int write_relation(const uint64_t type,
 		relation.relation_info.set = FILE_INFO_SET;
 		relation.relation_info.offset = file->f_pos;
 	}
+	relation.relation_info.flags=flags;
 	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
 	__write_node(f);
 	__write_node(t);

@@ -30,6 +30,8 @@
 
 ### v0.3.8
 ```
+- Capture flags value on relations.
+- No more flags on xattr (value is now part of relation).
 - Rework recording and filtering internal logic.
 - Process node more detailed (pid, vpid, ppid, tgid).
 - Add support for multiple relay channel.
