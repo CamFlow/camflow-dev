@@ -162,7 +162,7 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	// are we recording this type
 	if (filter_update_node(type))
 		return 0;
-	if (memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt)) == NULL)
+	if (memcpy(&old_prov, prov_elt(prov), sizeof(old_prov)) == NULL)
 		return -ENOMEM;
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
@@ -207,8 +207,9 @@ static __always_inline int uses(const uint64_t type,
 				const struct file *file,
 				const uint64_t flags)
 {
+	int rc;
 	BUILD_BUG_ON(!prov_is_used(type));
-	int rc = record_relation(type, from, to, file, flags);
+	rc = record_relation(type, from, to, file, flags);
 	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
 		to->updt_mmap = 1;
 	return rc;

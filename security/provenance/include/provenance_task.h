@@ -316,7 +316,7 @@ static inline int terminate_task(struct provenance *tprov)
 		return 0;
 	if (filter_node(prov_entry(tprov)))
 		return 0;
-	memcpy(&old_prov, prov_elt(tprov), sizeof(union prov_elt));
+	memcpy(&old_prov, prov_elt(tprov), sizeof(old_prov));
 	node_identifier(prov_elt(tprov)).version++;
 	clear_recorded(prov_elt(tprov));
 

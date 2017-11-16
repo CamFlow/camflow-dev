@@ -51,7 +51,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	    && provenance_is_recorded(prov_elt(prov))) {
 		if (filter_update_node(type))
 			goto out;
-		memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
+		memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
 		/* we update the info of the new version and record it */
 		prov_elt(prov)->inode_info.mode = mode;
 		prov_type(prov_elt(prov)) = type;
@@ -343,7 +343,7 @@ static inline int close_inode(struct provenance *iprov)
 	if (prov_type(prov_entry(iprov)) == ENT_INODE_FILE ||
 	    prov_type(prov_entry(iprov)) == ENT_INODE_DIRECTORY)
 		return 0;
-	memcpy(&old_prov, prov_elt(iprov), sizeof(union prov_elt));
+	memcpy(&old_prov, prov_elt(iprov), sizeof(old_prov));
 	node_identifier(prov_elt(iprov)).version++;
 	clear_recorded(prov_elt(iprov));
 

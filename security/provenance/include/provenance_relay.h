@@ -65,11 +65,13 @@ extern struct prov_boot_buffer *boot_buffer;
 static inline void prov_write(union prov_elt *msg)
 {
 	struct relay_list *tmp;
+	union prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
 		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
-			memcpy(&(boot_buffer->buffer[boot_buffer->nb_entry]), msg, sizeof(union prov_elt));
+			provtmp = &(boot_buffer->buffer[boot_buffer->nb_entry]);
+			memcpy(provtmp, msg, sizeof(union prov_elt));
 			boot_buffer->nb_entry++;
 		} else
 			pr_err("Provenance: boot buffer is full.\n");
@@ -86,12 +88,15 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 static inline void long_prov_write(union long_prov_elt *msg)
 {
 	struct relay_list *tmp;
+	union long_prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE))
-			memcpy(&(long_boot_buffer->buffer[long_boot_buffer->nb_entry++]), msg, sizeof(union long_prov_elt));
-		else
+		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE)) {
+			provtmp = &(long_boot_buffer->buffer[long_boot_buffer->nb_entry]);
+			memcpy(provtmp, msg, sizeof(union long_prov_elt));
+			long_boot_buffer->nb_entry++;
+		} else
 			pr_err("Provenance: long boot buffer is full.\n");
 	} else {
 		list_for_each_entry(tmp, &relay_list, list) {
