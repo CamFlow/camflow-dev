@@ -126,7 +126,7 @@ static inline void __write_node(prov_entry_t *node)
 	if (filter_node(node) || provenance_is_recorded(node))   // filtered or already recorded
 		return;
 	set_recorded(node);
-	if( provenance_is_long(node) )
+	if ( provenance_is_long(node) )
 		long_prov_write(node);
 	else
 		prov_write((union prov_elt*)node);
@@ -138,10 +138,10 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 }
 
 static inline int write_relation(const uint64_t type,
-				void *from,
-				void *to,
-				const struct file *file,
-			 	const uint64_t flags)
+				 void *from,
+				 void *to,
+				 const struct file *file,
+				 const uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;
@@ -162,7 +162,7 @@ static inline int write_relation(const uint64_t type,
 		relation.relation_info.set = FILE_INFO_SET;
 		relation.relation_info.offset = file->f_pos;
 	}
-	relation.relation_info.flags=flags;
+	relation.relation_info.flags = flags;
 	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
 	__write_node(f);
 	__write_node(t);

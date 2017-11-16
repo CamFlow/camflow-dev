@@ -180,7 +180,7 @@ static inline int record_relation(const uint64_t type,
 				  struct provenance *from,
 				  struct provenance *to,
 				  const struct file *file,
-					const uint64_t flags)
+				  const uint64_t flags)
 {
 	int rc = 0;
 
@@ -202,10 +202,10 @@ static inline int record_relation(const uint64_t type,
 }
 
 static __always_inline int uses(uint64_t type,
-	       	struct provenance *from,
-	       	struct provenance *to,
-				 	const struct file *file,
- 					const uint64_t flags)
+				struct provenance *from,
+				struct provenance *to,
+				const struct file *file,
+				const uint64_t flags)
 {
 	int rc = record_relation(type, from, to, file, flags);
 
@@ -217,30 +217,30 @@ static __always_inline int uses(uint64_t type,
 }
 
 static __always_inline int generates(const uint64_t type,
-			    struct provenance *from,
-			    struct provenance *to,
-			    const struct file *file,
-					const uint64_t flags)
+				     struct provenance *from,
+				     struct provenance *to,
+				     const struct file *file,
+				     const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_generated(type));
 	return record_relation(type, from, to, file, flags);
 }
 
 static __always_inline int derives(const uint64_t type,
-			  struct provenance *from,
-			  struct provenance *to,
-			  const struct file *file,
-				const uint64_t flags)
+				   struct provenance *from,
+				   struct provenance *to,
+				   const struct file *file,
+				   const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_derived(type));
 	return record_relation(type, from, to, file, flags);
 }
 
 static __always_inline int informs(const uint64_t type,
-			  struct provenance *from,
-			  struct provenance *to,
-			  const struct file *file,
-				const uint64_t flags)
+				   struct provenance *from,
+				   struct provenance *to,
+				   const struct file *file,
+				   const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_informed(type));
 	return record_relation(type, from, to, file, flags);

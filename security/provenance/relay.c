@@ -82,7 +82,7 @@ int prov_create_channel(char *buffer, size_t len)
 
 	// test if channel already exists
 	list_for_each_entry(tmp, &relay_list, list) {
-		if (strcmp(tmp->name, buffer) == 0){
+		if (strcmp(tmp->name, buffer) == 0) {
 			rc = -EFAULT;
 			goto out;
 		}
@@ -92,12 +92,12 @@ int prov_create_channel(char *buffer, size_t len)
 		return -ENOMEM;
 	snprintf(long_name, PATH_MAX, "long_%s", buffer);
 	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (!chan){
+	if (!chan) {
 		rc = -EFAULT;
 		goto out;
 	}
 	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-	if (!long_chan){
+	if (!long_chan) {
 		rc = -EFAULT;
 		goto out;
 	}
