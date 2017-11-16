@@ -201,16 +201,14 @@ static inline int record_relation(const uint64_t type,
 	return rc;
 }
 
-static __always_inline int uses(uint64_t type,
+static __always_inline int uses(const uint64_t type,
 				struct provenance *from,
 				struct provenance *to,
 				const struct file *file,
 				const uint64_t flags)
 {
-	int rc = record_relation(type, from, to, file, flags);
-
 	BUILD_BUG_ON(!prov_is_used(type));
-
+	int rc = record_relation(type, from, to, file, flags);
 	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
 		to->updt_mmap = 1;
 	return rc;
