@@ -140,8 +140,8 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 static inline int write_relation(const uint64_t type,
 				void *from,
 				void *to,
-				struct file *file,
-			 	uint64_t flags)
+				const struct file *file,
+			 	const uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;

@@ -262,7 +262,7 @@ static inline int record_write_xattr(uint64_t type,
 				     const char *name,
 				     const void *value,
 				     size_t size,
-				     int flags)
+				     const uint64_t flags)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
