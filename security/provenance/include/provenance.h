@@ -203,6 +203,7 @@ static inline int record_relation(const uint64_t type,
 	return rc;
 }
 
+// from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
 				struct provenance *from,
 				struct provenance *to,
@@ -217,6 +218,7 @@ static __always_inline int uses(const uint64_t type,
 	return rc;
 }
 
+// from (activity) to (entity)
 static __always_inline int generates(const uint64_t type,
 				     struct provenance *from,
 				     struct provenance *to,
@@ -227,6 +229,7 @@ static __always_inline int generates(const uint64_t type,
 	return record_relation(type, from, to, file, flags);
 }
 
+// from (entity) to (entity)
 static __always_inline int derives(const uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
@@ -237,6 +240,7 @@ static __always_inline int derives(const uint64_t type,
 	return record_relation(type, from, to, file, flags);
 }
 
+// from (activity) to (activity)
 static __always_inline int informs(const uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
