@@ -22,6 +22,7 @@
 #include <linux/workqueue.h>
 
 #include "provenance.h"
+#include "provenance_record.h"
 #include "provenance_net.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"

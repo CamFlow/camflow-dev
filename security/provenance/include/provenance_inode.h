@@ -18,6 +18,7 @@
 #include <linux/namei.h>
 #include <linux/xattr.h>
 
+#include "provenance_record.h"
 #include "provenance_policy.h"
 #include "provenance_filter.h"
 

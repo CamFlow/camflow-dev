@@ -15,6 +15,7 @@
 #include <linux/debugfs.h>
 
 #include "provenance.h"
+#include "provenance_relay.h"
 
 #define PROV_BASE_NAME "provenance"
 #define LONG_PROV_BASE_NAME "long_provenance"

@@ -29,7 +29,6 @@
 #include "provenance_core.h"
 #include "provenance_policy.h"
 #include "provenance_filter.h"
-#include "provenance_relay.h"
 
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
@@ -70,59 +69,5 @@ static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 static inline void free_long_provenance(union long_prov_elt *prov)
 {
 	kmem_cache_free(long_provenance_cache, prov);
-}
-
-static inline int record_node_name(struct provenance *node, const char *name)
-{
-	union long_prov_elt *fname_prov;
-	int rc;
-
-	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
-		return 0;
-
-	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
-	if (!fname_prov)
-		return -ENOMEM;
-
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
-
-	// record the relation
-	spin_lock(prov_lock(node));
-	if (prov_type(prov_elt(node)) == ACT_TASK) {
-		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	} else{
-		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	}
-	spin_unlock(prov_lock(node));
-	free_long_provenance(fname_prov);
-	return rc;
-}
-
-static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
-{
-	union long_prov_elt *str;
-	int rc = 0;
-
-	str = alloc_long_provenance(ENT_STR);
-	if (!str) {
-		rc = -ENOMEM;
-		goto out;
-	}
-	if (copy_from_user(str->str_info.str, buf, count)) {
-		rc = -EAGAIN;
-		goto out;
-	}
-	str->str_info.str[count] = '\0'; // make sure the string is null terminated
-	str->str_info.length = count;
-
-	rc = write_relation(RL_LOG, str, cprov, NULL, 0);
-out:
-	free_long_provenance(str);
-	if (rc < 0)
-		return rc;
-	return count;
 }
 #endif

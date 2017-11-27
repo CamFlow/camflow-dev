@@ -17,6 +17,7 @@
 #include <linux/spinlock.h>
 #include <linux/jiffies.h>
 
+#include "provenance_core.h"
 #include "provenance_filter.h"
 #include "provenance_query.h"
 
@@ -118,14 +119,6 @@ static inline void prov_flush(void)
 	}
 }
 
-extern atomic64_t prov_relation_id;
-extern atomic64_t prov_node_id;
-extern uint32_t prov_machine_id;
-extern uint32_t prov_boot_id;
-
-#define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
-#define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
-
 static inline void __write_node(prov_entry_t *node)
 {
 	if (filter_node(node) || provenance_is_recorded(node))   // filtered or already recorded
@@ -173,111 +166,5 @@ static inline int write_relation(const uint64_t type,
 	__write_node(t);
 	prov_write(&relation);
 	return rc;
-}
-
-static inline int __update_version(const uint64_t type, struct provenance *prov)
-{
-	union prov_elt old_prov;
-	int rc = 0;
-
-	// there is no outgoing edge and we are compressing
-	if (!prov->has_outgoing && prov_policy.should_compress)
-		return 0;
-	// are we recording this type
-	if (filter_update_node(type))
-		return 0;
-	// copy provenance to old
-	memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
-	// update version
-	node_identifier(prov_elt(prov)).version++;
-	clear_recorded(prov_elt(prov));
-
-	// record version relation between version
-	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
-		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL, 0);
-	else
-		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
-	prov->has_outgoing = false; // we update there is no more outgoing edge
-	prov->saved = false; // for inode prov persistance
-	return rc;
-}
-
-static inline int record_relation(const uint64_t type,
-				  struct provenance *from,
-				  struct provenance *to,
-				  const struct file *file,
-				  const uint64_t flags)
-{
-	int rc = 0;
-
-	// check if the nodes match some capture options
-	apply_target(prov_elt(from));
-	apply_target(prov_elt(to));
-
-	if (!provenance_is_tracked(prov_elt(from)) && !provenance_is_tracked(prov_elt(to)) && !prov_policy.prov_all)
-		return 0;
-	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
-		return 0;
-	rc = __update_version(type, to);
-	if (rc < 0)
-		return rc;
-
-	rc = write_relation(type, prov_elt(from), prov_elt(to), file, flags);
-	from->has_outgoing = true; // there is an outgoing edge
-	return rc;
-}
-
-static inline void current_update_shst(struct provenance *cprov, bool write);
-
-// from (entity) to (activity)
-static __always_inline int uses(const uint64_t type,
-				struct provenance *from,
-				struct provenance *to,
-				const struct file *file,
-				const uint64_t flags)
-{
-	BUILD_BUG_ON(!prov_is_used(type));
-	if (should_record_relation(type, prov_entry(from), prov_entry(to))
-			&& from->has_mmap)
-		current_update_shst(from, false);
-	return record_relation(type, from, to, file, flags);
-}
-
-// from (activity) to (entity)
-static __always_inline int generates(const uint64_t type,
-				     struct provenance *from,
-				     struct provenance *to,
-				     const struct file *file,
-				     const uint64_t flags)
-{
-	int rc;
-	BUILD_BUG_ON(!prov_is_generated(type));
-	rc = record_relation(type, from, to, file, flags);
-	if (should_record_relation(type, prov_entry(from), prov_entry(to))
-			&& to->has_mmap)
-		current_update_shst(to, true);
-	return rc;
-}
-
-// from (entity) to (entity)
-static __always_inline int derives(const uint64_t type,
-				   struct provenance *from,
-				   struct provenance *to,
-				   const struct file *file,
-				   const uint64_t flags)
-{
-	BUILD_BUG_ON(!prov_is_derived(type));
-	return record_relation(type, from, to, file, flags);
-}
-
-// from (activity) to (activity)
-static __always_inline int informs(const uint64_t type,
-				   struct provenance *from,
-				   struct provenance *to,
-				   const struct file *file,
-				   const uint64_t flags)
-{
-	BUILD_BUG_ON(!prov_is_informed(type));
-	return record_relation(type, from, to, file, flags);
 }
 #endif

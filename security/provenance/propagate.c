@@ -10,7 +10,9 @@
  * or (at your option) any later version.
  *
  */
+
 #include "provenance.h"
+#include "provenance_query.h"
 
 static int out_edge(prov_entry_t *node, prov_entry_t *edge)
 {
