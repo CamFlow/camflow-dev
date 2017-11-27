@@ -26,38 +26,13 @@
 #include <linux/mm.h>
 #include <linux/xattr.h>
 
+#include "provenance_core.h"
 #include "provenance_policy.h"
 #include "provenance_filter.h"
 #include "provenance_relay.h"
 
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
-
-enum {
-	PROVENANCE_LOCK_TASK,
-	PROVENANCE_LOCK_DIR,
-	PROVENANCE_LOCK_INODE,
-	PROVENANCE_LOCK_MSG,
-	PROVENANCE_LOCK_SHM,
-	PROVENANCE_LOCK_SOCKET,
-	PROVENANCE_LOCK_SOCK
-};
-
-struct provenance {
-	union prov_elt msg;
-	spinlock_t lock;
-	uint8_t updt_mmap;
-	uint8_t has_mmap;
-	bool has_outgoing;
-	bool initialised;
-	bool saved;
-};
-
-#define prov_elt(provenance) (&(provenance->msg))
-#define prov_lock(provenance) (&(provenance->lock))
-#define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
-
-#define ASSIGN_NODE_ID 0
 
 static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
@@ -203,6 +178,8 @@ static inline int record_relation(const uint64_t type,
 	return rc;
 }
 
+static inline void current_update_shst(struct provenance *cprov, bool write);
+
 // from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
 				struct provenance *from,
@@ -210,12 +187,11 @@ static __always_inline int uses(const uint64_t type,
 				const struct file *file,
 				const uint64_t flags)
 {
-	int rc;
 	BUILD_BUG_ON(!prov_is_used(type));
-	rc = record_relation(type, from, to, file, flags);
-	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
-		to->updt_mmap = 1;
-	return rc;
+	if (should_record_relation(type, prov_entry(from), prov_entry(to))
+			&& from->has_mmap)
+		current_update_shst(from, false);
+	return record_relation(type, from, to, file, flags);
 }
 
 // from (activity) to (entity)
@@ -225,8 +201,13 @@ static __always_inline int generates(const uint64_t type,
 				     const struct file *file,
 				     const uint64_t flags)
 {
+	int rc;
 	BUILD_BUG_ON(!prov_is_generated(type));
-	return record_relation(type, from, to, file, flags);
+	rc = record_relation(type, from, to, file, flags);
+	if (should_record_relation(type, prov_entry(from), prov_entry(to))
+			&& to->has_mmap)
+		current_update_shst(to, true);
+	return rc;
 }
 
 // from (entity) to (entity)

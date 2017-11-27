@@ -28,6 +28,7 @@
 #include <linux/sched/cputime.h>
 #include "../../../fs/mount.h" // nasty
 
+#include "provenance_core.h"
 #include "provenance_inode.h"
 #include "provenance_policy.h"
 
@@ -146,8 +147,8 @@ static inline uint32_t current_pidns(void)
 #define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
-
-static inline void current_update_shst(struct provenance *cprov)
+// write <- are we reading or writting from shared state
+static inline void current_update_shst(struct provenance *cprov, bool write)
 {
 	struct mm_struct *mm = get_task_mm(current);
 	struct vm_area_struct *vma;
@@ -167,9 +168,9 @@ static inline void current_update_shst(struct provenance *cprov)
 			if (mmprov) {
 				cprov->has_mmap = 1;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
-				if (vm_read_exec_mayshare(flags))
+				if (vm_read_exec_mayshare(flags) && !write)
 					record_relation(RL_SH_READ, mmprov, cprov, NULL, 0);
-				if (vm_write_mayshare(flags))
+				if (vm_write_mayshare(flags) && write)
 					record_relation(RL_SH_WRITE, cprov, mmprov, NULL, 0);
 				spin_unlock(prov_lock(mmprov));
 			}
@@ -283,10 +284,6 @@ static inline struct provenance *get_current_provenance(void)
 	prov_elt(prov)->task_info.netns = current_netns();
 	prov_elt(prov)->task_info.cgroupns = current_cgroupns();
 	security_task_getsecid(current, &(prov_elt(prov)->task_info.secid));
-	if (prov->updt_mmap && prov->has_mmap) {
-		current_update_shst(prov);
-		prov->updt_mmap = 0;
-	}
 	update_task_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
