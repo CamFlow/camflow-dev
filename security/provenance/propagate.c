@@ -10,7 +10,6 @@
  * or (at your option) any later version.
  *
  */
-
 #include "provenance.h"
 #include "provenance_query.h"
 
