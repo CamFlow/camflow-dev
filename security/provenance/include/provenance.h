@@ -162,17 +162,19 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	// are we recording this type
 	if (filter_update_node(type))
 		return 0;
-	if (memcpy(&old_prov, prov_elt(prov), sizeof(old_prov)) == NULL)
-		return -ENOMEM;
+	// copy provenance to old
+	memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+	// update version
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 
+	// record version relation between version
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
 		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL, 0);
 	else
 		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
 	prov->has_outgoing = false; // we update there is no more outgoing edge
-	prov->saved = false;
+	prov->saved = false; // for inode prov persistance
 	return rc;
 }
 
