@@ -811,6 +811,32 @@ out:
 	return rc;
 }
 
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+static void provenance_mmap_munmap(struct mm_struct *mm,
+				struct vm_area_struct *vma,
+			  unsigned long start,
+				unsigned long end) {
+	struct provenance *cprov = get_current_provenance();
+	struct provenance *iprov = NULL;
+	struct file *mmapf;
+	unsigned long irqflags;
+	vm_flags_t flags = vma->vm_flags;
+
+	// it is a shared mmap
+	if ( vm_mayshare(flags) ) {
+		mmapf = vma->vm_file;
+		if (mmapf) {
+			iprov = file_provenance(mmapf, false);
+			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
+			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+			generates(RL_MUNMAP, cprov, iprov, mmapf, flags);
+			spin_unlock(prov_lock(iprov));
+			spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+		}
+	}
+}
+#endif
+
 /*
  * @file contains the file structure.
  * @cmd contains the operation to perform.
@@ -1604,6 +1630,9 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
 	LSM_HOOK_INIT(mmap_file,	      provenance_mmap_file),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	LSM_HOOK_INIT(mmap_munmap,	      provenance_mmap_munmap),
+#endif
 	LSM_HOOK_INIT(file_ioctl,	      provenance_file_ioctl),
 	LSM_HOOK_INIT(file_open,	      provenance_file_open),
 

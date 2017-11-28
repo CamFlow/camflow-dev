@@ -30,6 +30,7 @@
 
 ### v0.3.8
 ```
+- Record munmap events.
 - Capture flags value on relations.
 - No more flags on xattr (value is now part of relation).
 - Rework recording and filtering internal logic.
