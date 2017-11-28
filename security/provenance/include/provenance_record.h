@@ -122,7 +122,7 @@ static inline int record_relation(const uint64_t type,
 	return rc;
 }
 
-static inline void current_update_shst(struct provenance *cprov, bool write);
+static inline void current_update_shst(struct provenance *cprov);
 
 // from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
@@ -131,11 +131,12 @@ static __always_inline int uses(const uint64_t type,
 				const struct file *file,
 				const uint64_t flags)
 {
+	int rc;
 	BUILD_BUG_ON(!prov_is_used(type));
-	if (should_record_relation(type, prov_entry(from), prov_entry(to))
-			&& from->has_mmap)
-		current_update_shst(from, false);
-	return record_relation(type, from, to, file, flags);
+	rc = record_relation(type, from, to, file, flags);
+	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
+		to->updt_mmap = true;
+	return rc;
 }
 
 // from (activity) to (entity)
@@ -145,13 +146,8 @@ static __always_inline int generates(const uint64_t type,
 				     const struct file *file,
 				     const uint64_t flags)
 {
-	int rc;
 	BUILD_BUG_ON(!prov_is_generated(type));
-	rc = record_relation(type, from, to, file, flags);
-	if (should_record_relation(type, prov_entry(from), prov_entry(to))
-			&& to->has_mmap)
-		current_update_shst(to, true);
-	return rc;
+	return record_relation(type, from, to, file, flags);
 }
 
 // from (entity) to (entity)

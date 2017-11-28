@@ -149,7 +149,7 @@ static inline uint32_t current_pidns(void)
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
 // write <- are we reading or writting from shared state
-static inline void current_update_shst(struct provenance *cprov, bool write)
+static inline void current_update_shst(struct provenance *cprov)
 {
 	struct mm_struct *mm = get_task_mm(current);
 	struct vm_area_struct *vma;
@@ -159,7 +159,7 @@ static inline void current_update_shst(struct provenance *cprov, bool write)
 
 	if (!mm)
 		return;
-	cprov->has_mmap = 0;
+	cprov->has_mmap = false;
 	vma = mm->mmap;
 	while (vma) { // we go through mmaped files
 		mmapf = vma->vm_file;
@@ -167,12 +167,12 @@ static inline void current_update_shst(struct provenance *cprov, bool write)
 			flags = vma->vm_flags;
 			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
-				cprov->has_mmap = 1;
+				cprov->has_mmap = true;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
-				if (vm_read_exec_mayshare(flags) && !write)
-					record_relation(RL_SH_READ, mmprov, cprov, NULL, 0);
-				if (vm_write_mayshare(flags) && write)
-					record_relation(RL_SH_WRITE, cprov, mmprov, NULL, 0);
+				if (vm_read_exec_mayshare(flags))
+					record_relation(RL_SH_READ, mmprov, cprov, NULL, flags);
+				if (vm_write_mayshare(flags))
+					record_relation(RL_SH_WRITE, cprov, mmprov, NULL, flags);
 				spin_unlock(prov_lock(mmprov));
 			}
 		}
@@ -286,6 +286,10 @@ static inline struct provenance *get_current_provenance(void)
 	prov_elt(prov)->task_info.cgroupns = current_cgroupns();
 	security_task_getsecid(current, &(prov_elt(prov)->task_info.secid));
 	update_task_perf(current, prov);
+	if (prov->updt_mmap && prov->has_mmap) {
+		current_update_shst(prov);
+		prov->updt_mmap = false;
+	}
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
 	return prov;

@@ -772,7 +772,7 @@ static int provenance_mmap_file(struct file *file,
 	if (rc < 0)
 		goto out;
 	if ((flags & MAP_TYPE) == MAP_SHARED) {
-		cprov->has_mmap = 1;
+		cprov->has_mmap = true;
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = generates(RL_MMAP_WRITE, cprov, iprov, file, flags);
 		if (rc < 0)
