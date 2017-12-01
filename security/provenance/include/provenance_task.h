@@ -28,7 +28,6 @@
 #include <linux/sched/cputime.h>
 #include "../../../fs/mount.h" // nasty
 
-#include "provenance_core.h"
 #include "provenance_relay.h"
 #include "provenance_inode.h"
 #include "provenance_policy.h"

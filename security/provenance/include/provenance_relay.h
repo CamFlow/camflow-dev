@@ -17,7 +17,6 @@
 #include <linux/spinlock.h>
 #include <linux/jiffies.h>
 
-#include "provenance_core.h"
 #include "provenance_filter.h"
 #include "provenance_query.h"
 
