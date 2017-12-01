@@ -113,6 +113,18 @@ static inline int record_relation(const uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
+
+	if (prov_policy.should_compress_edge){
+		// we compress edges, do not record same edge type twice
+		if(to->previous_id == node_identifier(prov_entry(from)).id
+				&& to->previous_type == type){
+			return 0;
+		} else { // if not we save those information
+			to->previous_id = node_identifier(prov_entry(from)).id;
+			to->previous_type = type;
+		}
+	}
+
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;

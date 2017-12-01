@@ -55,6 +55,8 @@ struct provenance {
 	bool has_outgoing;
 	bool initialised;
 	bool saved;
+	uint64_t previous_id;
+	uint64_t previous_type;
 };
 
 #define prov_elt(provenance) (&(provenance->msg))
