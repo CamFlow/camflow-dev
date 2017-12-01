@@ -76,7 +76,7 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	int rc = 0;
 
 	// there is no outgoing edge and we are compressing
-	if (!prov->has_outgoing && prov_policy.should_compress)
+	if (!prov->has_outgoing && prov_policy.should_compress_node)
 		return 0;
 	// are we recording this type
 	if (filter_update_node(type))

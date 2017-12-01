@@ -134,8 +134,8 @@ declare_write_flag_fcn(prov_write_all, prov_policy.prov_all);
 declare_read_flag_fcn(prov_read_all, prov_policy.prov_all);
 declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 
-declare_write_flag_fcn(prov_write_compress, prov_policy.should_compress);
-declare_read_flag_fcn(prov_read_compress, prov_policy.should_compress);
+declare_write_flag_fcn(prov_write_compress, prov_policy.should_compress_node);
+declare_read_flag_fcn(prov_read_compress, prov_policy.should_compress_node);
 declare_file_operations(prov_compress_ops, prov_write_compress, prov_read_compress);
 
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
