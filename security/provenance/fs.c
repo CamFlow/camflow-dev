@@ -43,7 +43,8 @@ static inline void __init_opaque(void)
 {
 	provenance_mark_as_opaque(PROV_ENABLE_FILE);
 	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_COMPRESS_FILE);
+	provenance_mark_as_opaque(PROV_COMPRESS_NODE_FILE);
+	provenance_mark_as_opaque(PROV_COMPRESS_EDGE_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
@@ -134,9 +135,14 @@ declare_write_flag_fcn(prov_write_all, prov_policy.prov_all);
 declare_read_flag_fcn(prov_read_all, prov_policy.prov_all);
 declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 
-declare_write_flag_fcn(prov_write_compress, prov_policy.should_compress_node);
-declare_read_flag_fcn(prov_read_compress, prov_policy.should_compress_node);
-declare_file_operations(prov_compress_ops, prov_write_compress, prov_read_compress);
+declare_write_flag_fcn(prov_write_compress_node, prov_policy.should_compress_node);
+declare_read_flag_fcn(prov_read_compress_node, prov_policy.should_compress_node);
+declare_file_operations(prov_compress_node_ops, prov_write_compress_node, prov_read_compress_node);
+
+declare_write_flag_fcn(prov_write_compress_edge, prov_policy.should_compress_edge);
+declare_read_flag_fcn(prov_read_compress_edge, prov_policy.should_compress_edge);
+declare_file_operations(prov_compress_edge_ops, prov_write_compress_edge, prov_read_compress_edge);
+
 
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
@@ -849,7 +855,8 @@ static int __init init_prov_fs(void)
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	prov_create_file("enable", 0644, &prov_enable_ops);
 	prov_create_file("all", 0644, &prov_all_ops);
-	prov_create_file("compress", 0644, &prov_compress_ops);
+	prov_create_file("compress_node", 0644, &prov_compress_node_ops);
+	prov_create_file("compress_edge", 0644, &prov_compress_edge_ops);
 	prov_create_file("node", 0666, &prov_node_ops);
 	prov_create_file("relation", 0666, &prov_relation_ops);
 	prov_create_file("self", 0666, &prov_self_ops);
