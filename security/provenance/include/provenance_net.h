@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
- * Copyright (C) 2016 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -24,6 +24,7 @@
 
 #include "provenance.h"
 #include "provenance_policy.h"
+#include "provenance_inode.h"
 
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
@@ -31,7 +32,7 @@ static inline struct provenance *socket_inode_provenance(struct socket *sock)
 	struct provenance *iprov = NULL;
 
 	if (inode)
-		iprov = SOCK_INODE(sock)->i_provenance;
+		iprov = inode_provenance(SOCK_INODE(sock), false);
 	return iprov;
 }
 
@@ -202,6 +203,8 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 	return 0;
 }
 
+// TODO record_pck_to_inode and record_inode_to_pck need a rewrite
+
 // incoming packet
 static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *inode)
 {
@@ -209,16 +212,19 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 
 	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
+
+	apply_target(prov_elt(inode));
+	apply_target(pck);
+
 	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(RL_RCV_PACKET, pck, prov_elt(inode)))
+	if (!should_record_relation(RL_RCV_PACKET, (prov_entry_t*)pck, prov_entry(inode)))
 		return 0;
 	rc = __update_version(RL_RCV_PACKET, inode);
 	if (rc < 0)
 		return rc;
-	write_node(prov_elt(inode));
-	prov_write(pck);
-	rc = write_relation(RL_RCV_PACKET, pck, prov_elt(inode), NULL);
+
+	rc = write_relation(RL_RCV_PACKET, pck, prov_elt(inode), NULL, 0);
 	return rc;
 }
 
@@ -229,13 +235,16 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 
 	if (unlikely(!pck || !inode)) // should not occur
 		return 0;
+
+	apply_target(prov_elt(inode));
+	apply_target(pck);
+
 	if (!provenance_is_tracked(prov_elt(inode)) && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(RL_SND_PACKET, prov_elt(inode), pck))
+	if (!should_record_relation(RL_SND_PACKET, prov_entry(inode), (prov_entry_t*)pck))
 		return 0;
-	write_node(prov_elt(inode));
-	prov_write(pck);
-	rc = write_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL);
+
+	rc = write_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL, 0);
 	inode->has_outgoing = true;
 	return rc;
 }
@@ -254,8 +263,8 @@ static inline int provenance_record_address(struct sockaddr *address, int addrle
 	}
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
-	write_long_node(addr_info);
-	rc = write_relation(RL_NAMED, addr_info, prov_elt(prov), NULL);
+
+	rc = write_relation(RL_NAMED, addr_info, prov_elt(prov), NULL, 0);
 	set_name_recorded(prov_elt(prov));
 out:
 	free_long_provenance(addr_info);
@@ -273,8 +282,8 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
 	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
-	write_long_node(cnt);
-	rc = write_relation(RL_READ, cnt, pck, NULL);
+
+	rc = write_relation(RL_READ, cnt, pck, NULL, 0);
 	free_long_provenance(cnt);
 	return rc;
 }

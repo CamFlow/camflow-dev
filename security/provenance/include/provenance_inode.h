@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
- * Copyright (C) 2016 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -18,6 +18,7 @@
 #include <linux/namei.h>
 #include <linux/xattr.h>
 
+#include "provenance_record.h"
 #include "provenance_policy.h"
 #include "provenance_filter.h"
 
@@ -51,17 +52,15 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	    && provenance_is_recorded(prov_elt(prov))) {
 		if (filter_update_node(type))
 			goto out;
-		memcpy(&old_prov, prov_elt(prov), sizeof(union prov_elt));
+		memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
 		/* we update the info of the new version and record it */
 		prov_elt(prov)->inode_info.mode = mode;
 		prov_type(prov_elt(prov)) = type;
 		node_identifier(prov_elt(prov)).version++;
 		clear_recorded(prov_elt(prov));
-		/* we make sure the nodes are recorded */
-		write_node(&old_prov);
-		write_node(prov_elt(prov));
+
 		/* we record a version edge */
-		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL);
+		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
 		prov->has_outgoing = false; // we update there is no more outgoing edge
 		prov->saved = false;
 	}
@@ -215,39 +214,32 @@ static inline struct provenance *inode_provenance(struct inode *inode, bool may_
 	return prov;
 }
 
-static inline struct provenance *dentry_provenance(struct dentry *dentry)
+static inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
-	struct provenance *prov;
 
 	if (!inode)
 		return NULL;
-	prov = inode->i_provenance;
-	inode_init_provenance(inode, dentry);
-	return prov;
+	return inode_provenance(inode, may_sleep);
 }
 
-static inline struct provenance *file_provenance(struct file *file)
+static inline struct provenance *file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, true);
+	return inode_provenance(inode, may_sleep);
 }
 
 static inline void save_provenance(struct dentry *dentry)
 {
-	struct inode *inode;
 	struct provenance *prov;
 	union prov_elt buf;
 
 	if (!dentry)
 		return;
-	inode = d_backing_inode(dentry);
-	if (!inode)
-		return;
-	prov = inode->i_provenance;
+	prov = dentry_provenance(dentry, false);
 	if (!prov)
 		return;
 	spin_lock(prov_lock(prov));
@@ -271,12 +263,12 @@ static inline int record_write_xattr(uint64_t type,
 				     const char *name,
 				     const void *value,
 				     size_t size,
-				     int flags)
+				     const uint64_t flags)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
 
-	if (!should_record_relation(type, prov_elt(cprov), prov_elt(iprov)))
+	if (!should_record_relation(type, prov_entry(cprov), prov_entry(iprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
@@ -291,21 +283,19 @@ static inline int record_write_xattr(uint64_t type,
 			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
 			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
 		}
-		xattr->xattr_info.flags = flags;
 	}
-	write_node(prov_elt(cprov));
-	write_long_node(xattr);
-	rc = write_relation(type, prov_elt(cprov), xattr, NULL);
+
+	rc = write_relation(type, prov_elt(cprov), xattr, NULL, flags);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(type, iprov);
 	if (rc < 0)
 		goto out;
-	write_node(prov_elt(iprov));
+
 	if (type == RL_SETXATTR)
-		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL);
+		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
 	else
-		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL);
+		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
 	cprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);
@@ -319,23 +309,22 @@ static inline int record_read_xattr(struct provenance *cprov,
 	union long_prov_elt *xattr;
 	int rc = 0;
 
-	if (!should_record_relation(RL_GETXATTR, prov_elt(iprov), prov_elt(cprov)))
+	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
 		goto out;
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
-	write_node(prov_elt(iprov));
-	write_long_node(xattr);
-	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL);
+
+	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = __update_version(RL_GETXATTR, cprov);
 	if (rc < 0)
 		goto out;
-	write_node(prov_elt(cprov));
-	rc = write_relation(RL_GETXATTR, xattr, prov_elt(cprov), NULL);
+
+	rc = write_relation(RL_GETXATTR, xattr, prov_elt(cprov), NULL, 0);
 	iprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);
@@ -355,12 +344,11 @@ static inline int close_inode(struct provenance *iprov)
 	if (prov_type(prov_entry(iprov)) == ENT_INODE_FILE ||
 	    prov_type(prov_entry(iprov)) == ENT_INODE_DIRECTORY)
 		return 0;
-	memcpy(&old_prov, prov_elt(iprov), sizeof(union prov_elt));
+	memcpy(&old_prov, prov_elt(iprov), sizeof(old_prov));
 	node_identifier(prov_elt(iprov)).version++;
 	clear_recorded(prov_elt(iprov));
-	write_node(&old_prov);
-	write_node(prov_elt(iprov));
-	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL);
+
+	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL, 0);
 	iprov->has_outgoing = false;
 	return rc;
 }

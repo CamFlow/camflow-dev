@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
- * Copyright (C) 2017 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -16,7 +16,8 @@
 struct capture_policy {
 	bool prov_enabled;
 	bool prov_all;
-	bool should_compress;
+	bool should_compress_node;
+	bool should_compress_edge;
 	uint64_t prov_node_filter;
 	uint64_t prov_propagate_node_filter;
 	uint64_t prov_relation_filter;

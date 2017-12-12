@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
- * Copyright (C) 2016 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -62,51 +62,16 @@ static inline bool filter_propagate_relation(uint64_t type)
 	return false;
 }
 
-static inline bool should_record_relation(const uint64_t type, union prov_elt *from, union prov_elt *to)
+static inline bool should_record_relation(const uint64_t type,
+					  prov_entry_t *from,
+					  prov_entry_t *to)
 {
 	if (filter_relation(type))
 		return false;
 	// one of the node should not appear in the record, ignore the relation
-	if (filter_node((prov_entry_t*)from) || filter_node((prov_entry_t*)to))
+	if (filter_node(from) || filter_node(to))
 		return false;
 	return true;
-}
-
-static inline bool prov_has_secid(union prov_elt *prov)
-{
-	switch (prov_type(prov)) {
-	case ACT_TASK:
-	case ENT_INODE_UNKNOWN:
-	case ENT_INODE_LINK:
-	case ENT_INODE_FILE:
-	case ENT_INODE_DIRECTORY:
-	case ENT_INODE_CHAR:
-	case ENT_INODE_BLOCK:
-	case ENT_INODE_FIFO:
-	case ENT_INODE_SOCKET:
-	case ENT_INODE_MMAP:
-		return true;
-	default: return false;
-	}
-}
-
-static inline bool prov_has_uid_and_gid(union prov_elt *prov)
-{
-	switch (prov_type(prov)) {
-	case ACT_TASK:
-	case ENT_IATTR:
-	case ENT_INODE_UNKNOWN:
-	case ENT_INODE_LINK:
-	case ENT_INODE_FILE:
-	case ENT_INODE_DIRECTORY:
-	case ENT_INODE_CHAR:
-	case ENT_INODE_BLOCK:
-	case ENT_INODE_FIFO:
-	case ENT_INODE_SOCKET:
-	case ENT_INODE_MMAP:
-		return true;
-	default: return false;
-	}
 }
 
 #define declare_filter_list(filter_name, type) \
@@ -189,16 +154,15 @@ static inline void apply_target(union prov_elt *prov)
 				      prov->task_info.netns,
 				      prov->task_info.cgroupns);
 
-	if (prov_has_secid(prov))
+	if (prov_has_secid(node_type(prov)))
 		op |= prov_secctx_whichOP(node_secid(prov));
 
-	if (prov_has_uid_and_gid(prov)) {
+	if (prov_has_uidgid(node_type(prov))) {
 		op |= prov_uid_whichOP(node_uid(prov));
 		op |= prov_gid_whichOP(node_gid(prov));
 	}
 
 	if (unlikely(op != 0)) {
-		pr_info("Provenance: applying filter %u.", op);
 		if ((op & PROV_SET_TRACKED) != 0)
 			set_tracked(prov);
 		if ((op & PROV_SET_PROPAGATE) != 0)

@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.3.8           | 4.14.5         | 12/12/2017 |
 | 0.3.7           | 4.13.4         | 04/10/2017 |
 | 0.3.6           | 4.13.4         | 28/09/2017 |
 | 0.3.5           | 4.12.9         | 27/08/2017 |
@@ -26,6 +27,18 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.3.8
+```
+- Record munmap events.
+- Capture flags value on relations.
+- No more flags on xattr (value is now part of relation).
+- Rework recording and filtering internal logic.
+- Process node more detailed (pid, vpid, ppid, tgid).
+- Add support for multiple relay channel.
+- Expose version number via pseudofile.
+- Update to kernel version 4.14.5.
+```
 
 ### v0.3.7
 ```

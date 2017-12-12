@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@g.harvard.edu>
  *
- * Copyright (C) 2017 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -11,6 +11,7 @@
  *
  */
 #include "provenance.h"
+#include "provenance_query.h"
 
 static int out_edge(prov_entry_t *node, prov_entry_t *edge)
 {

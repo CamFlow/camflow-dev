@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
  *
- * Copyright (C) 2015 University of Cambridge
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -14,6 +14,7 @@
 #include <crypto/hash.h>
 
 #include "provenance.h"
+#include "provenance_record.h"
 #include "provenance_inode.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
@@ -42,7 +43,8 @@ static inline void __init_opaque(void)
 {
 	provenance_mark_as_opaque(PROV_ENABLE_FILE);
 	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_COMPRESS_FILE);
+	provenance_mark_as_opaque(PROV_COMPRESS_NODE_FILE);
+	provenance_mark_as_opaque(PROV_COMPRESS_EDGE_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILE);
 	provenance_mark_as_opaque(PROV_RELATION_FILE);
 	provenance_mark_as_opaque(PROV_SELF_FILE);
@@ -64,6 +66,9 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
 	provenance_mark_as_opaque(PROV_UID_FILTER);
 	provenance_mark_as_opaque(PROV_GID_FILTER);
+	provenance_mark_as_opaque(PROV_TYPE);
+	provenance_mark_as_opaque(PROV_VERSION);
+	provenance_mark_as_opaque(PROV_CHANNEL);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
@@ -130,9 +135,14 @@ declare_write_flag_fcn(prov_write_all, prov_policy.prov_all);
 declare_read_flag_fcn(prov_read_all, prov_policy.prov_all);
 declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 
-declare_write_flag_fcn(prov_write_compress, prov_policy.should_compress);
-declare_read_flag_fcn(prov_read_compress, prov_policy.should_compress);
-declare_file_operations(prov_compress_ops, prov_write_compress, prov_read_compress);
+declare_write_flag_fcn(prov_write_compress_node, prov_policy.should_compress_node);
+declare_read_flag_fcn(prov_read_compress_node, prov_policy.should_compress_node);
+declare_file_operations(prov_compress_node_ops, prov_write_compress_node, prov_read_compress_node);
+
+declare_write_flag_fcn(prov_write_compress_edge, prov_policy.should_compress_edge);
+declare_read_flag_fcn(prov_read_compress_edge, prov_policy.should_compress_edge);
+declare_file_operations(prov_compress_edge_ops, prov_write_compress_edge, prov_read_compress_edge);
+
 
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
@@ -221,13 +231,13 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-		write_node(prov_elt(cprov));
+		__write_node(prov_entry(cprov));
 		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
 		node_identifier(node).machine_id = prov_machine_id;
-		long_prov_write(node);
+		__write_node(node);
 	} else{ // the node is not of disclosed type
 		count = -EINVAL;
 		goto out;
@@ -312,7 +322,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = get_current_provenance();
-	union prov_elt *tmp = (union prov_elt *)buf;
+	union prov_elt *tmp = (union prov_elt*)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
@@ -336,7 +346,7 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_filter))
 		return -ENOMEM;
 
-	setting = (struct prov_filter *)buf;
+	setting = (struct prov_filter*)buf;
 
 	if (setting->add != 0)
 		(*filter) |= setting->filter & setting->mask;
@@ -428,7 +438,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config *)buf;
+	msg = (struct prov_process_config*)buf;
 
 	prov = prov_from_vpid(msg->vpid);
 	if (!prov)
@@ -519,11 +529,11 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
-	data = (struct secinfo *)buf;
+	data = (struct secinfo*)buf;
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)
-		goto out;
+		return rtn;
 	if (len < PATH_MAX) {
 		if (copy_to_user(data->secctx, ctx, len)) {
 			rtn = -ENOMEM;
@@ -659,7 +669,7 @@ static ssize_t prov_write_log(struct file *file, const char __user *buf,
 	struct provenance *cprov = get_current_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
-		return 0;
+		return -ENOMEM;
 	set_tracked(prov_elt(cprov));
 	return record_log(prov_elt(cprov), buf, count);
 }
@@ -671,7 +681,7 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 	struct provenance *cprov = get_current_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
-		return 0;
+		return -ENOMEM;
 	set_tracked(prov_elt(cprov));
 	set_propagate(prov_elt(cprov));
 	return record_log(prov_elt(cprov), buf, count);
@@ -806,6 +816,35 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 
+static ssize_t prov_read_version(struct file *filp, char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	size_t len = strlen(CAMFLOW_VERSION_STR);
+
+	if ( count < len )
+		return -ENOMEM;
+	memset(buf, 0, count);
+	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
+		return -EAGAIN;
+	return sizeof(struct prov_type);
+}
+declare_file_operations(prov_version, no_write, prov_read_version);
+
+static ssize_t prov_write_channel(struct file *file, const char __user *buf,
+				  size_t count, loff_t *ppos)
+{
+	char *buffer = kzalloc(count, GFP_KERNEL);
+
+	if (count <= 0 || count > PATH_MAX)
+		return -ENOMEM;
+	if (strlen(buf) > count) // null terminated?
+		return -ENOMEM;
+	if (copy_from_user(buffer, buf, count))
+		return -ENOMEM;
+	return prov_create_channel(buffer, strlen(buffer));
+}
+declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
+
 #define prov_create_file(name, perm, fun_ptr) \
 	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
 
@@ -816,7 +855,8 @@ static int __init init_prov_fs(void)
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	prov_create_file("enable", 0644, &prov_enable_ops);
 	prov_create_file("all", 0644, &prov_all_ops);
-	prov_create_file("compress", 0644, &prov_compress_ops);
+	prov_create_file("compress_node", 0644, &prov_compress_node_ops);
+	prov_create_file("compress_edge", 0644, &prov_compress_edge_ops);
 	prov_create_file("node", 0666, &prov_node_ops);
 	prov_create_file("relation", 0666, &prov_relation_ops);
 	prov_create_file("self", 0666, &prov_self_ops);
@@ -841,6 +881,8 @@ static int __init init_prov_fs(void)
 	prov_create_file("uid", 0644, &prov_uid_filter_ops);
 	prov_create_file("gid", 0644, &prov_gid_filter_ops);
 	prov_create_file("type", 0444, &prov_type_ops);
+	prov_create_file("version", 0444, &prov_version);
+	prov_create_file("channel", 0644, &prov_channel_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }

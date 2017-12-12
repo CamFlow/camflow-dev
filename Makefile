@@ -1,5 +1,5 @@
-kernel-version=4.13.4
-lsm-version=0.3.7
+kernel-version=4.14.5
+lsm-version=0.3.8
 arch=x86_64
 
 all: config compile
@@ -60,6 +60,7 @@ copy_change:
 
 copy_config:
 	cp -f /boot/config-$(shell uname -r) .config
+	sed -i -e "s/CONFIG_DRM_VBOXVIDEO=m/# CONFIG_DRM_VBOXVIDEO is not set/g" ./.config
 	cd ./build/linux-$(kernel-version) && cp ../../.config .config
 
 config: copy_change copy_config
@@ -81,16 +82,10 @@ config_old: copy_change copy_config
 
 compile: compile_security compile_kernel compile_us
 
-on_assertion:
-	sed -i -e "s/\/\/BUILD_BUG_ON/BUILD_BUG_ON/g" ./security/provenance/include/provenance.h
-
-off_assertion:
-	sed -i -e "s/BUILD_BUG_ON/\/\/BUILD_BUG_ON/g" ./security/provenance/include/provenance.h
-
 compile_security_only:
 	cd ./build/linux-$(kernel-version) && $(MAKE) security W=1
 
-compile_security: on_assertion copy_change compile_security_only off_assertion
+compile_security: copy_change compile_security_only
 
 compile_kernel: copy_change
 	cd ./build/linux-$(kernel-version) && $(MAKE) -j4

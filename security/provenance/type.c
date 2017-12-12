@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@g.harvard.edu>
  *
- * Copyright (C) 2017 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -10,7 +10,6 @@
  * or (at your option) any later version.
  *
  */
-
 #include "provenance.h"
 #include "provenance_types.h"
 
@@ -29,6 +28,7 @@ static const char RL_STR_ACCEPT[]                = "accept";
 static const char RL_STR_OPEN[]                  = "open";
 static const char RL_STR_VERSION[]               = "version_entity";
 static const char RL_STR_MMAP[]                  = "mmap";
+static const char RL_STR_MUNMAP[]                = "munmap";
 static const char RL_STR_LINK[]                  = "link";
 static const char RL_STR_LINK_INODE[]            = "link_inode";
 static const char RL_STR_SETATTR[]               = "setattr";
@@ -59,42 +59,42 @@ static const char RL_STR_SND_UNIX[]              = "send_unix";
 static const char RL_STR_RCV[]                   = "receive";
 static const char RL_STR_RCV_PACKET[]            = "receive_packet";
 static const char RL_STR_RCV_UNIX[]              = "receive_unix";
-static const char RL_STR_PERM_READ[]              = "perm_read";
-static const char RL_STR_PERM_WRITE[]             = "perm_write";
-static const char RL_STR_PERM_EXEC[]              = "perm_exec";
-static const char RL_STR_TERMINATE_PROCESS[]      = "terminate";
-static const char RL_STR_CLOSED[]                                                     = "closed";
-static const char RL_STR_ARG[]                                                  = "arg";
-static const char RL_STR_ENV[]                                                    = "env";
-static const char RL_STR_LOG[]                                                    = "log";
+static const char RL_STR_PERM_READ[]             = "perm_read";
+static const char RL_STR_PERM_WRITE[]            = "perm_write";
+static const char RL_STR_PERM_EXEC[]             = "perm_exec";
+static const char RL_STR_TERMINATE_PROCESS[]     = "terminate";
+static const char RL_STR_CLOSED[]                = "closed";
+static const char RL_STR_ARG[]                   = "arg";
+static const char RL_STR_ENV[]                   = "env";
+static const char RL_STR_LOG[]                   = "log";
 
 /* node string name */
-static const char ND_STR_UNKNOWN[] =           "unknown";
-static const char ND_STR_STR[] =               "string";
-static const char ND_STR_TASK[] =              "task";
-static const char ND_STR_INODE_UNKNOWN[] =     "inode_unknown";
-static const char ND_STR_INODE_LINK[] =        "link";
-static const char ND_STR_INODE_FILE[] =        "file";
-static const char ND_STR_INODE_DIRECTORY[] =   "directory";
-static const char ND_STR_INODE_CHAR[] =        "char";
-static const char ND_STR_INODE_BLOCK[] =       "block";
-static const char ND_STR_INODE_FIFO[] =        "fifo";
-static const char ND_STR_INODE_SOCKET[] =      "socket";
-static const char ND_STR_MSG[] =               "msg";
-static const char ND_STR_SHM[] =               "shm";
-static const char ND_STR_ADDR[] =              "address";
-static const char ND_STR_SB[] =                "sb";
-static const char ND_STR_FILE_NAME[] =         "file_name";
-static const char ND_STR_DISC_ENTITY[] =       "disc_entity";
-static const char ND_STR_DISC_ACTIVITY[] =     "disc_activity";
-static const char ND_STR_DISC_AGENT[] =        "disc_agent";
-static const char ND_STR_PACKET[] =            "packet";
-static const char ND_STR_INODE_MMAP[] =        "mmaped_file";
-static const char ND_STR_IATTR[] =             "iattr";
-static const char ND_STR_XATTR[] =             "xattr";
-static const char ND_STR_PCKCNT[] =            "packet_content";
-static const char ND_STR_ARG[] =               "argv";
-static const char ND_STR_ENV[] =               "envp";
+static const char ND_STR_UNKNOWN[]							= "unknown";
+static const char ND_STR_STR[]									= "string";
+static const char ND_STR_TASK[]									= "task";
+static const char ND_STR_INODE_UNKNOWN[]				= "inode_unknown";
+static const char ND_STR_INODE_LINK[]						= "link";
+static const char ND_STR_INODE_FILE[]						= "file";
+static const char ND_STR_INODE_DIRECTORY[]			= "directory";
+static const char ND_STR_INODE_CHAR[]						= "char";
+static const char ND_STR_INODE_BLOCK[]					= "block";
+static const char ND_STR_INODE_FIFO[]						= "fifo";
+static const char ND_STR_INODE_SOCKET[]					= "socket";
+static const char ND_STR_MSG[]									= "msg";
+static const char ND_STR_SHM[]									= "shm";
+static const char ND_STR_ADDR[]									= "address";
+static const char ND_STR_SB[]										= "sb";
+static const char ND_STR_FILE_NAME[]						= "file_name";
+static const char ND_STR_DISC_ENTITY[]					= "disc_entity";
+static const char ND_STR_DISC_ACTIVITY[]				= "disc_activity";
+static const char ND_STR_DISC_AGENT[]						= "disc_agent";
+static const char ND_STR_PACKET[]								= "packet";
+static const char ND_STR_INODE_MMAP[]						= "mmaped_file";
+static const char ND_STR_IATTR[]								= "iattr";
+static const char ND_STR_XATTR[]								= "xattr";
+static const char ND_STR_PCKCNT[]								= "packet_content";
+static const char ND_STR_ARG[]									= "argv";
+static const char ND_STR_ENV[]									= "envp";
 
 #define MATCH_AND_RETURN(str1, str2, v) if (strcmp(str1, str2) == 0) return v
 /* transform from relation ID to string representation */
@@ -125,6 +125,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_VERSION;
 	case RL_MMAP:
 		return RL_STR_MMAP;
+	case RL_MUNMAP:
+		return RL_STR_MUNMAP;
 	case RL_LINK:
 		return RL_STR_LINK;
 	case RL_LINK_INODE:
@@ -224,6 +226,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_OPEN, RL_OPEN);
 	MATCH_AND_RETURN(str, RL_STR_VERSION, RL_VERSION);
 	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
+	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
 	MATCH_AND_RETURN(str, RL_STR_LINK_INODE, RL_LINK_INODE);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR, RL_SETATTR);

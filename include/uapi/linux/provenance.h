@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
  *
- * Copyright (C) 2015 University of Cambridge
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -102,7 +102,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
-#define PROV_COMPRESS_FILE                    "/sys/kernel/security/provenance/compress"
+#define PROV_COMPRESS_NODE_FILE               "/sys/kernel/security/provenance/compress_node"
+#define PROV_COMPRESS_EDGE_FILE               "/sys/kernel/security/provenance/compress_edge"
 #define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"
 #define PROV_RELATION_FILE                    "/sys/kernel/security/provenance/relation"
 #define PROV_SELF_FILE                        "/sys/kernel/security/provenance/self"
@@ -125,23 +126,21 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_UID_FILTER												"/sys/kernel/security/provenance/uid"
 #define PROV_GID_FILTER												"/sys/kernel/security/provenance/gid"
 #define PROV_TYPE															"/sys/kernel/security/provenance/type"
+#define PROV_VERSION													"/sys/kernel/security/provenance/version"
+#define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
+#define PROV_CHANNEL_ROOT											"/sys/kernel/debug/"
 
 #define FLOW_ALLOWED        0
 #define FLOW_DISALLOWED     1
 
-#define prov_type(prov)               ((prov)->node_info.identifier.node_id.type)
-#define node_type(node) prov_type(node)
-#define edge_type(edge) prov_type(edge)
 #define prov_id_buffer(prov)          ((prov)->node_info.identifier.buffer)
 #define node_identifier(node)         ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation) ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)			((node)->node_info.identifier)
 #define packet_identifier(packet)     ((packet)->pck_info.identifier.packet_id)
-#define prov_is_relation(prov)        ((relation_identifier(prov).type & DM_RELATION) != 0)
-#define prov_is_node(prov)            ((node_identifier(prov).type & DM_RELATION) == 0)
 #define node_secid(node)              ((node)->node_info.secid)
 #define node_uid(node)              	((node)->node_info.uid)
 #define node_gid(node)              	((node)->node_info.gid)
@@ -219,7 +218,12 @@ union prov_identifier {
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES]
+#define LONG_BIT 6
+#define set_is_long(node)							prov_set_flag(node, LONG_BIT)
+#define clear_is_long(node)						prov_clear_flag(node, LONG_BIT)
+#define provenance_is_long(node)			prov_check_flag(node, LONG_BIT)
+
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
 
 struct msg_struct {
 	basic_elements;
@@ -234,6 +238,7 @@ struct relation_struct {
 	union prov_identifier rcv;
 	uint8_t set;
 	int64_t offset;
+	uint64_t flags;
 };
 
 struct node_struct {
@@ -244,6 +249,8 @@ struct task_prov_struct {
 	basic_elements;
 	uint32_t pid;
 	uint32_t vpid;
+	uint32_t ppid;
+	uint32_t tgid;
 	uint32_t utsns;
 	uint32_t ipcns;
 	uint32_t mntns;
@@ -351,7 +358,6 @@ struct arg_struct {
 struct xattr_prov_struct {
 	basic_elements;
 	char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
-	int32_t flags;
 	uint8_t value[PROV_XATTR_VALUE_SIZE];
 	size_t size;
 };

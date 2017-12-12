@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
  *
- * Copyright (C) 2015 University of Cambridge
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -15,13 +15,14 @@
 #include <linux/debugfs.h>
 
 #include "provenance.h"
+#include "provenance_relay.h"
 
 #define PROV_BASE_NAME "provenance"
 #define LONG_PROV_BASE_NAME "long_provenance"
 
 /* global variable, extern in provenance.h */
-struct rchan *prov_chan;
-struct rchan *long_prov_chan;
+static struct rchan *prov_chan;
+static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
@@ -72,6 +73,41 @@ static void write_boot_buffer(void)
 bool relay_ready;
 extern struct workqueue_struct *prov_queue;
 
+int prov_create_channel(char *buffer, size_t len)
+{
+	struct relay_list *tmp;
+	char *long_name = kzalloc(PATH_MAX, GFP_KERNEL);
+	struct rchan *chan;
+	struct rchan *long_chan;
+	int rc = 0;
+
+	// test if channel already exists
+	list_for_each_entry(tmp, &relay_list, list) {
+		if (strcmp(tmp->name, buffer) == 0) {
+			rc = -EFAULT;
+			goto out;
+		}
+	}
+
+	if (strlen(buffer) > len)
+		return -ENOMEM;
+	snprintf(long_name, PATH_MAX, "long_%s", buffer);
+	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	if (!chan) {
+		rc = -EFAULT;
+		goto out;
+	}
+	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	if (!long_chan) {
+		rc = -EFAULT;
+		goto out;
+	}
+	prov_add_relay(buffer, chan, long_chan);
+out:
+	kfree(long_name);
+	return rc;
+}
+
 static int __init relay_prov_init(void)
 {
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
@@ -81,6 +117,7 @@ static int __init relay_prov_init(void)
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
+	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
 	relay_ready = true;
 	// relay buffer are ready, we can write down the boot buffer
 	write_boot_buffer();

@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <tfjmp@seas.harvard.edu>
  *
- * Copyright (C) 2016 Harvard University
+ * Copyright (C) 2015-2017 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -28,6 +28,7 @@
 #include <linux/sched/cputime.h>
 #include "../../../fs/mount.h" // nasty
 
+#include "provenance_relay.h"
 #include "provenance_inode.h"
 #include "provenance_policy.h"
 
@@ -146,7 +147,7 @@ static inline uint32_t current_pidns(void)
 #define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
-
+// write <- are we reading or writting from shared state
 static inline void current_update_shst(struct provenance *cprov)
 {
 	struct mm_struct *mm = get_task_mm(current);
@@ -157,20 +158,20 @@ static inline void current_update_shst(struct provenance *cprov)
 
 	if (!mm)
 		return;
-	cprov->has_mmap = 0;
+	cprov->has_mmap = false;
 	vma = mm->mmap;
 	while (vma) { // we go through mmaped files
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			flags = vma->vm_flags;
-			mmprov = file_inode(mmapf)->i_provenance;
+			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
-				cprov->has_mmap = 1;
+				cprov->has_mmap = true;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
-					record_relation(RL_SH_READ, mmprov, cprov, NULL);
+					record_relation(RL_SH_READ, mmprov, cprov, mmapf, flags);
 				if (vm_write_mayshare(flags))
-					record_relation(RL_SH_WRITE, cprov, mmprov, NULL);
+					record_relation(RL_SH_WRITE, cprov, mmprov, mmapf, flags);
 				spin_unlock(prov_lock(mmprov));
 			}
 		}
@@ -202,7 +203,7 @@ static inline int record_task_name(struct task_struct *task,
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
-		fprov = file_inode(exe_file)->i_provenance;
+		fprov = file_provenance(exe_file, false);
 		if (provenance_is_opaque(prov_elt(fprov))) {
 			set_opaque(prov_elt(prov));
 			goto out;
@@ -272,10 +273,10 @@ static inline struct provenance *get_current_provenance(void)
 		goto out;
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
-	if (unlikely(prov_elt(prov)->task_info.pid == 0))
-		prov_elt(prov)->task_info.pid = task_pid_nr(current);
-	if (unlikely(prov_elt(prov)->task_info.vpid == 0))
-		prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	prov_elt(prov)->task_info.pid = task_pid_nr(current);
+	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	prov_elt(prov)->task_info.ppid = task_ppid_nr(current);
+	prov_elt(prov)->task_info.tgid = task_tgid_nr(current);
 	prov_elt(prov)->task_info.utsns = current_utsns();
 	prov_elt(prov)->task_info.ipcns = current_ipcns();
 	prov_elt(prov)->task_info.mntns = current_mntns();
@@ -283,11 +284,11 @@ static inline struct provenance *get_current_provenance(void)
 	prov_elt(prov)->task_info.netns = current_netns();
 	prov_elt(prov)->task_info.cgroupns = current_cgroupns();
 	security_task_getsecid(current, &(prov_elt(prov)->task_info.secid));
+	update_task_perf(current, prov);
 	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
-		prov->updt_mmap = 0;
+		prov->updt_mmap = false;
 	}
-	update_task_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
 	return prov;
@@ -316,12 +317,11 @@ static inline int terminate_task(struct provenance *tprov)
 		return 0;
 	if (filter_node(prov_entry(tprov)))
 		return 0;
-	memcpy(&old_prov, prov_elt(tprov), sizeof(union prov_elt));
+	memcpy(&old_prov, prov_elt(tprov), sizeof(old_prov));
 	node_identifier(prov_elt(tprov)).version++;
 	clear_recorded(prov_elt(tprov));
-	write_node(&old_prov);
-	write_node(prov_elt(tprov));
-	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL);
+
+	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL, 0);
 	tprov->has_outgoing = false;
 	return rc;
 }
@@ -475,9 +475,8 @@ static inline int prov_record_arg(struct provenance *prov,
 	if ( len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
-	write_long_node(aprov);
-	write_node(prov_elt(prov));
-	rc = write_relation(etype, aprov, prov_elt(prov), NULL);
+
+	rc = write_relation(etype, aprov, prov_elt(prov), NULL, 0);
 	free_long_provenance(aprov);
 	return rc;
 }
