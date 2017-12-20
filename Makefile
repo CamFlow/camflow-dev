@@ -201,8 +201,7 @@ prepare_release_travis:
 
 prepare_git:
 	mkdir -p build
-	cd build && git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-	cd ./build/linux-stable && git checkout v$(kernel-version)
+	cd build && git clone -b v$(kernel-version) git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
