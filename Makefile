@@ -210,8 +210,8 @@ prepare_git:
 	cd ./build/linux-stable && cp -r ../../include .
 
 patch_git:
-	cd ./build/linuxkit && git config --global user.email $(cont-email)
-	cd ./build/linuxkit && git config --global user.name $(cont-name)
+	git config --global user.email $(cont-email)
+	git config --global user.name $(cont-name)
 	cd ./build/linux-stable && git add .
 	cd ./build/linux-stable && git commit -a -m 'camflow patch $(lsm-version)'
 	cd ./build/linux-stable && git format-patch HEAD~ -s
