@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
- #ifndef _PROVENANCE_TYPES_H
- #define _PROVENANCE_TYPES_H
+#ifndef _PROVENANCE_TYPES_H
+#define _PROVENANCE_TYPES_H
 
 const char* relation_str(uint64_t type);
 uint64_t relation_id(const char* str);
