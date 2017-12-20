@@ -368,6 +368,7 @@ static inline void put_cred(const struct cred *_cred)
 #define current_cap()		(current_cred_xxx(cap_effective))
 #define current_user()		(current_cred_xxx(user))
 #define current_security()	(current_cred_xxx(security))
+#define current_provenance() (current_cred_xxx(provenance))
 
 extern struct user_namespace init_user_ns;
 #ifdef CONFIG_USER_NS
