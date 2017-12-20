@@ -2,6 +2,10 @@ kernel-version=4.14.7
 lsm-version=0.3.9
 arch=x86_64
 
+
+cont-email != $(git log --format="%ae" HEAD^!)
+cont-name != $(git log --format="%ae" HEAD^!)
+
 all: config compile
 
 prepare: prepare_kernel prepare_us
@@ -207,6 +211,8 @@ prepare_git:
 
 patch_git:
 	cd ./build/linux-stable && git add .
+	git config --global user.email $(cont-email)
+	git config --global user.name $(cont-name)
 	cd ./build/linux-stable && git commit -a -m 'camflow patch $(lsm-version)'
 	cd ./build/linux-stable && git format-patch HEAD~ -s
 
@@ -214,6 +220,4 @@ update_linuxkit:
 	cd ./build && git clone https://github.com/CamFlow/linuxkit.git
 	cp ./build/linux-stable/0001-camflow-patch-$(lsm-version).patch ./build/linuxkit/kernel/patches-4.14.x/0002-camflow-patch-$(lsm-version).patch
 	cd ./build/linuxkit && git add .
-	cd ./build/linuxkit && git config --global user.email "travis@travis-ci.org"
-	cd ./build/linuxkit && git config --global user.name "Travis CI"
 	cd ./build/linuxkit && git commit -a -m "Travis updated camflow patch $(shell date --iso=seconds)"
