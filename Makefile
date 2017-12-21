@@ -206,18 +206,24 @@ prepare_release_travis:
 prepare_git:
 	mkdir -p build
 	cd build && git clone -b v$(kernel-version) git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-	cd ./build/linux-stable && cp -r ../../security .
-	cd ./build/linux-stable && cp -r ../../include .
+
 
 patch_git:
 	git config --global user.email $(cont-email)
 	git config --global user.name $(cont-name)
+	cd ./build/linux-stable && patch -p2 < ../information-flow-patch/output/patch-$(kernel-version)-flow-friendly
 	cd ./build/linux-stable && git add .
-	cd ./build/linux-stable && git commit -a -m 'camflow patch $(lsm-version)'
-	cd ./build/linux-stable && git format-patch HEAD~ -s
+	cd ./build/linux-stable && git commit -a -m 'information flow patch'
+	cd ./build/linux-stable && cp -r ../../security .
+	cd ./build/linux-stable && cp -r ../../include .
+	cd ./build/linux-stable && git add .
+	cd ./build/linux-stable && git commit -a -m 'camflow patch'
+	cd ./build/linux-stable && git format-patch HEAD~~ -s
 
 update_linuxkit:
 	cd ./build && git clone https://github.com/CamFlow/linuxkit.git
-	cp ./build/linux-stable/0001-camflow-patch-$(lsm-version).patch ./build/linuxkit/kernel/patches-4.14.x/0002-camflow-patch-$(lsm-version).patch
+	mkdir -p ./build/linuxkit/projects/camflow/kernel/patches-4.14.x
+	cp ./build/linux-stable/0001-information-flow-patch.patch ./build/linuxkit/projects/camflow/kernel/patches-4.14.x/0001-information-flow-patch.patch
+	cp ./build/linux-stable/0002-camflow-patch.patch ./build/linuxkit/projects/camflow/kernel/patches-4.14.x/0002-camflow-patch.patch
 	cd ./build/linuxkit && git add .
 	cd ./build/linuxkit && git commit -a -m "Travis updated camflow patch $(shell date --iso=seconds)"
