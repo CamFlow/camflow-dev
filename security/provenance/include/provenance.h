@@ -29,13 +29,11 @@
 #include "provenance_policy.h"
 #include "provenance_filter.h"
 
-extern atomic64_t prov_relation_id;
-extern atomic64_t prov_node_id;
+extern atomic64_t prov_id;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 
-#define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
-#define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
+#define prov_next_id() ((uint64_t)atomic64_inc_return(&prov_id))
 
 enum {
 	PROVENANCE_LOCK_TASK,
@@ -76,7 +74,7 @@ static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 		return NULL;
 	spin_lock_init(prov_lock(prov));
 	prov_type(prov_elt(prov)) = ntype;
-	node_identifier(prov_elt(prov)).id = prov_next_node_id();
+	node_identifier(prov_elt(prov)).id = prov_next_id();
 	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;
 	node_identifier(prov_elt(prov)).machine_id = prov_machine_id;
 	return prov;
@@ -94,7 +92,7 @@ static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 	if (!tmp)
 		return NULL;
 	prov_type(tmp) = ntype;
-	node_identifier(tmp).id = prov_next_node_id();
+	node_identifier(tmp).id = prov_next_id();
 	node_identifier(tmp).boot_id = prov_boot_id;
 	node_identifier(tmp).machine_id = prov_machine_id;
 	set_is_long(tmp);

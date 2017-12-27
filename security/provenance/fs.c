@@ -234,7 +234,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		__write_node(prov_entry(cprov));
 		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));
-		node_identifier(node).id = prov_next_node_id();
+		node_identifier(node).id = prov_next_id();
 		node_identifier(node).boot_id = prov_boot_id;
 		node_identifier(node).machine_id = prov_machine_id;
 		__write_node(node);
