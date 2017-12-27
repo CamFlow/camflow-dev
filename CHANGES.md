@@ -31,6 +31,7 @@
 
 ### v0.3.9
 ```
+- Log machine and boot ID when set.
 - Single source of ID.
 - Generate git patch for linuxkit.
 - Update to kernel version 4.14.9.

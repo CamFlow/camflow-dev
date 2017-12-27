@@ -161,6 +161,7 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	if (copy_from_user(&prov_machine_id, tmp, sizeof(uint32_t)))
 		return -EAGAIN;
 
+	pr_info("Provenance: machine ID %d\n", prov_machine_id);
 	return count; // read only
 }
 
@@ -191,6 +192,7 @@ static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 	if (copy_from_user(&prov_boot_id, tmp, sizeof(uint32_t)))
 		return -EAGAIN;
 
+	pr_info("Provenance: boot ID %d\n", prov_boot_id);
 	return count; // read only
 }
 
