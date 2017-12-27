@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.9           | 4.14.9         | N/A        |
+| 0.3.9           | 4.14.9         | 27/12/2017 |
 | 0.3.8           | 4.14.5         | 12/12/2017 |
 | 0.3.7           | 4.13.4         | 04/10/2017 |
 | 0.3.6           | 4.13.4         | 28/09/2017 |
@@ -31,7 +31,7 @@
 
 ### v0.3.9
 ```
-- Fix bug with machine ID not always being properly set.
+- Fix bug with machine ID not always being properly associated with nodes.
 - Log machine and boot ID when set.
 - Single source of ID.
 - Generate git patch for linuxkit.
