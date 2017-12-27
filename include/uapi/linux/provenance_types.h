@@ -132,6 +132,7 @@
 #define edge_type(edge) prov_type(edge)
 #define prov_is_relation(prov) ((relation_identifier(prov).type & DM_RELATION) != 0)
 #define prov_is_node(prov) ((node_identifier(prov).type & DM_RELATION) == 0)
+#define prov_is_packet(prov) (node_type(prov) == ENT_PACKET)
 
 #define prov_is_type(val, type) ((val&type)==type)
 #define prov_is_used(val) prov_is_type(type, RL_USED)
