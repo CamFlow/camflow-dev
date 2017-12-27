@@ -31,6 +31,7 @@
 
 ### v0.3.9
 ```
+- Fix bug with machine ID not always being properly set.
 - Log machine and boot ID when set.
 - Single source of ID.
 - Generate git patch for linuxkit.
