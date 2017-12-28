@@ -37,6 +37,7 @@ after_success:
   - git remote add to_push https://${GITHUB_KEY}@github.com/CamFlow/linuxkit.git > /dev/null 2>&1
   - git pull --allow-unrelated-histories
   - git push --set-upstream to_push master
+  - cd ../..
 
 deploy:
   provider: releases
