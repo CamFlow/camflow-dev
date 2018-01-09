@@ -720,6 +720,27 @@ out:
 	return rc;
 }
 
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
+{
+	struct provenance *inprov = file_provenance(in, true);
+	struct provenance *outprov = file_provenance(out, true);
+	unsigned long irqflags;
+	int rc;
+
+	if (!inprov || !outprov)
+		return -ENOMEM;
+
+	spin_lock_irqsave_nested(prov_lock(inprov), irqflags, PROVENANCE_LOCK_INODE);
+	spin_lock_nested(prov_lock(outprov), PROVENANCE_LOCK_INODE);
+	rc = derives(RL_SPLICE, inprov, outprov, NULL, 0);
+	spin_unlock(prov_lock(outprov));
+	spin_unlock_irqrestore(prov_lock(inprov), irqflags);
+
+	return rc;
+}
+#endif
+
 /*
  * Save open-time permission checking state for later use upon
  * file_permission, and recheck access if anything has changed
@@ -1635,6 +1656,10 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 #endif
 	LSM_HOOK_INIT(file_ioctl,	      provenance_file_ioctl),
 	LSM_HOOK_INIT(file_open,	      provenance_file_open),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+	LSM_HOOK_INIT(file_splice_pipe_to_pipe,
+								provenance_file_splice_pipe_to_pipe),
+#endif
 
 	/* msg related hooks */
 	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
