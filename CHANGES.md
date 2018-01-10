@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.10          | 4.14.12        | N/A        |
+| 0.3.10          | 4.14.13        | N/A        |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
 | 0.3.8           | 4.14.5         | 12/12/2017 |
 | 0.3.7           | 4.13.4         | 04/10/2017 |
@@ -33,7 +33,7 @@
 ### v0.3.10
 ```
 - Add support for pipe to pipe slice.
-- Update to kernel version 4.14.12.
+- Update to kernel version 4.14.13.
 ```
 
 ### v0.3.9
