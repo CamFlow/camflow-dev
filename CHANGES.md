@@ -32,6 +32,7 @@
 
 ### v0.3.10
 ```
+- Add support for shmdt.
 - Add support for pipe to pipe slice.
 - Update to kernel version 4.14.13.
 ```
