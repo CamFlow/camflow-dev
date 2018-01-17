@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.10          | 4.14.13        | N/A        |
+| 0.3.10          | 4.14.14        | N/A        |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
 | 0.3.8           | 4.14.5         | 12/12/2017 |
 | 0.3.7           | 4.13.4         | 04/10/2017 |
@@ -34,7 +34,7 @@
 ```
 - Add support for shmdt.
 - Add support for pipe to pipe slice.
-- Update to kernel version 4.14.13.
+- Update to kernel version 4.14.14.
 ```
 
 ### v0.3.9
