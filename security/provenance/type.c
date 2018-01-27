@@ -1,8 +1,8 @@
 /*
  *
- * Author: Thomas Pasquier <tfjmp@g.harvard.edu>
+ * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
  *
- * Copyright (C) 2015-2017 University of Cambridge, Harvard University
+ * Copyright (C) 2015-2018 University of Cambridge, Harvard University
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -29,8 +29,10 @@ static const char RL_STR_OPEN[]                  = "open";
 static const char RL_STR_VERSION[]               = "version_entity";
 static const char RL_STR_MMAP[]                  = "mmap";
 static const char RL_STR_MUNMAP[]                = "munmap";
+static const char RL_STR_SHMDT[]                 = "shmdt";
 static const char RL_STR_LINK[]                  = "link";
 static const char RL_STR_LINK_INODE[]            = "link_inode";
+static const char RL_STR_SPLICE[]		             = "splice";
 static const char RL_STR_SETATTR[]               = "setattr";
 static const char RL_STR_SETATTR_INODE[]         = "setattr_inode";
 static const char RL_STR_ACCEPT_SOCKET[]         = "accept_socket";
@@ -127,10 +129,14 @@ const char* relation_str(uint64_t type)
 		return RL_STR_MMAP;
 	case RL_MUNMAP:
 		return RL_STR_MUNMAP;
+	case RL_SHMDT:
+		return RL_STR_SHMDT;
 	case RL_LINK:
 		return RL_STR_LINK;
 	case RL_LINK_INODE:
 		return RL_STR_LINK_INODE;
+	case RL_SPLICE:
+		return RL_STR_SPLICE;
 	case RL_SETATTR:
 		return RL_STR_SETATTR;
 	case RL_SETATTR_INODE:
@@ -227,8 +233,10 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_VERSION, RL_VERSION);
 	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
+	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
 	MATCH_AND_RETURN(str, RL_STR_LINK_INODE, RL_LINK_INODE);
+	MATCH_AND_RETURN(str, RL_STR_SPLICE, RL_SPLICE);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR, RL_SETATTR);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR_INODE, RL_SETATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_ACCEPT_SOCKET, RL_ACCEPT_SOCKET);
