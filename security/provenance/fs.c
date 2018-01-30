@@ -340,7 +340,7 @@ declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 				     size_t count, uint64_t *filter)
 {
-	struct prov_filter *setting;
+	struct prov_filter setting;
 
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
@@ -348,12 +348,13 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_filter))
 		return -ENOMEM;
 
-	setting = (struct prov_filter*)buf;
+	if (copy_from_user(&setting, buf, sizeof(struct prov_filter)))
+		return -ENOMEM;
 
-	if (setting->add != 0)
-		(*filter) |= setting->filter & setting->mask;
+	if (setting.add != 0)
+		(*filter) |= setting.filter & setting.mask;
 	else
-		(*filter) &=  ~(setting->filter & setting->mask);
+		(*filter) &=  ~(setting.filter & setting.mask);
 
 	return count;
 }
@@ -825,7 +826,6 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 
 	if ( count < len )
 		return -ENOMEM;
-	memset(buf, 0, count);
 	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
 		return -EAGAIN;
 	return sizeof(struct prov_type);
