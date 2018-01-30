@@ -147,8 +147,6 @@ declare_file_operations(prov_compress_edge_ops, prov_write_compress_edge, prov_r
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t*)buf;
-
 	// ideally should be decoupled from set machine id
 	__init_opaque();
 
@@ -158,7 +156,7 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	if (count < sizeof(uint32_t))
 		return -ENOMEM;
 
-	if (copy_from_user(&prov_machine_id, tmp, sizeof(uint32_t)))
+	if (copy_from_user(&prov_machine_id, buf, sizeof(uint32_t)))
 		return -EAGAIN;
 
 	pr_info("Provenance: machine ID %d\n", prov_machine_id);
@@ -181,15 +179,13 @@ declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_ma
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t*)buf;
-
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
 	if (count < sizeof(uint32_t))
 		return -ENOMEM;
 
-	if (copy_from_user(&prov_boot_id, tmp, sizeof(uint32_t)))
+	if (copy_from_user(&prov_boot_id, buf, sizeof(uint32_t)))
 		return -EAGAIN;
 
 	pr_info("Provenance: boot ID %d\n", prov_boot_id);
@@ -324,13 +320,12 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = get_current_provenance();
-	union prov_elt *tmp = (union prov_elt*)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(tmp, prov_elt(cprov), sizeof(union prov_elt)))
+	if (copy_to_user(buf, prov_elt(cprov), sizeof(union prov_elt)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
@@ -434,23 +429,27 @@ static ssize_t prov_write_process(struct file *file, const char __user *buf,
 static ssize_t prov_read_process(struct file *filp, char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	struct prov_process_config *msg;
+	struct prov_process_config *msg = kzalloc(sizeof(struct prov_process_config), GFP_KERNEL);
 	struct provenance *prov;
 	int rtn = sizeof(struct prov_process_config);
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config*)buf;
+	if (copy_from_user(msg, buf, sizeof(struct prov_process_config)))
+		return -ENOMEM;
 
 	prov = prov_from_vpid(msg->vpid);
 	if (!prov)
 		return -EINVAL;
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(&msg->prov, prov_elt(prov), sizeof(union prov_elt)))
+	if (memcpy(&msg->prov, prov_elt(prov), sizeof(union prov_elt)))
 		rtn = -ENOMEM;
 	spin_unlock(prov_lock(prov));
+
+	if (copy_to_user(buf, msg, sizeof(struct prov_process_config)))
+		return -ENOMEM;
 	return rtn;
 }
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
@@ -530,24 +529,31 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	struct secinfo *data;
 	int rtn = 0;
 
+	data = kzalloc(sizeof(struct secinfo), GFP_KERNEL);
+
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
-	data = (struct secinfo*)buf;
+
+	if (copy_from_user(data, buf, sizeof(struct secinfo)))
+		return -EAGAIN;
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)
 		return rtn;
 	if (len < PATH_MAX) {
-		if (copy_to_user(data->secctx, ctx, len)) {
+		if (memcpy(data->secctx, ctx, len)) {
 			rtn = -ENOMEM;
 			goto out;
 		}
 		data->secctx[len] = '\0'; // maybe unecessary
 		data->len = len;
-	} else
+	} else {
 		rtn = -ENOMEM;
+	}
 out:
 	security_release_secctx(ctx, len); // security module dealloc
+	if ( copy_to_user(buf, data, sizeof(struct secinfo)) )
+		return -EAGAIN;
 	return rtn;
 }
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
