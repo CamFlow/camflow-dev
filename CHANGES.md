@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.11          | 4.14.15        | N/A        |
+| 0.3.11          | 4.14.16        | N/A        |
 | 0.3.10          | 4.14.15        | 27/01/2018 |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
 | 0.3.8           | 4.14.5         | 12/12/2017 |
@@ -34,7 +34,7 @@
 ### v0.3.11
 ```
 - Fix issue with user buffer in fs interface.
-- Update to kernel version 4.14.15.
+- Update to kernel version 4.14.16.
 ```
 
 ### v0.3.10
