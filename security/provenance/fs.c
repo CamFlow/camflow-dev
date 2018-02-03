@@ -842,12 +842,11 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
 	char *buffer = kzalloc(count, GFP_KERNEL);
-
 	if (count <= 0 || count > PATH_MAX)
 		return -ENOMEM;
-	if (strlen(buf) > count) // null terminated?
-		return -ENOMEM;
 	if (copy_from_user(buffer, buf, count))
+		return -ENOMEM;
+	if (strlen(buffer) > count) // null terminated?
 		return -ENOMEM;
 	return prov_create_channel(buffer, strlen(buffer));
 }
