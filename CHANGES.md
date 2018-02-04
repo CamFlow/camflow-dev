@@ -33,6 +33,7 @@
 
 ### v0.3.11
 ```
+- RL_SND_UNIX and RL_RCV_UNIX replace by simply RL_SND and RL_RCV.
 - Fix issue with user buffer in fs interface.
 - Update to kernel version 4.14.16.
 ```
