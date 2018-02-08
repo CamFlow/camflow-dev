@@ -529,17 +529,19 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	struct secinfo *data;
 	int rtn = 0;
 
-	data = kzalloc(sizeof(struct secinfo), GFP_KERNEL);
-
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
 
-	if (copy_from_user(data, buf, sizeof(struct secinfo)))
-		return -EAGAIN;
+	data = kzalloc(sizeof(struct secinfo), GFP_KERNEL);
+
+	if (copy_from_user(data, buf, sizeof(struct secinfo))){
+		rtn = -EAGAIN;
+		goto out;
+	}
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)
-		return rtn;
+		goto out;
 	if (len < PATH_MAX) {
 		if (memcpy(data->secctx, ctx, len)) {
 			rtn = -ENOMEM;
