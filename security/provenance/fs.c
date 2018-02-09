@@ -468,27 +468,18 @@ static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 {
 	struct ipv4_filters *f;
 
-	pr_info("Provenance write ip 1");
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
-
-	pr_info("Provenance write ip 2");
 	if (count < sizeof(struct prov_ipv4_filter))
 		return -ENOMEM;
-
-	pr_info("Provenance write ip 3");
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if (!f)
 		return -ENOMEM;
-
-	pr_info("Provenance write ip 4");
 	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))){
 		kfree(f);
 		return -EAGAIN;
 	}
 	f->filter.ip = f->filter.ip & f->filter.mask;
-
-	pr_info("Provenance write ip 5");
 	// we are not trying to delete something
 	if ((f->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ipv4_add_or_update(filters, f);
