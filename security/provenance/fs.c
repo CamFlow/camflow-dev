@@ -147,8 +147,6 @@ declare_file_operations(prov_compress_edge_ops, prov_write_compress_edge, prov_r
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t*)buf;
-
 	// ideally should be decoupled from set machine id
 	__init_opaque();
 
@@ -158,7 +156,7 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	if (count < sizeof(uint32_t))
 		return -ENOMEM;
 
-	if (copy_from_user(&prov_machine_id, tmp, sizeof(uint32_t)))
+	if (copy_from_user(&prov_machine_id, buf, sizeof(uint32_t)))
 		return -EAGAIN;
 
 	pr_info("Provenance: machine ID %d\n", prov_machine_id);
@@ -181,15 +179,13 @@ declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_ma
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	uint32_t *tmp = (uint32_t*)buf;
-
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
 	if (count < sizeof(uint32_t))
 		return -ENOMEM;
 
-	if (copy_from_user(&prov_boot_id, tmp, sizeof(uint32_t)))
+	if (copy_from_user(&prov_boot_id, buf, sizeof(uint32_t)))
 		return -EAGAIN;
 
 	pr_info("Provenance: boot ID %d\n", prov_boot_id);
@@ -324,13 +320,12 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *cprov = get_current_provenance();
-	union prov_elt *tmp = (union prov_elt*)buf;
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
 	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(tmp, prov_elt(cprov), sizeof(union prov_elt)))
+	if (copy_to_user(buf, prov_elt(cprov), sizeof(union prov_elt)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
 	return count; // write only
@@ -340,7 +335,7 @@ declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
 static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 				     size_t count, uint64_t *filter)
 {
-	struct prov_filter *setting;
+	struct prov_filter setting;
 
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
@@ -348,12 +343,13 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 	if (count < sizeof(struct prov_filter))
 		return -ENOMEM;
 
-	setting = (struct prov_filter*)buf;
+	if (copy_from_user(&setting, buf, sizeof(struct prov_filter)))
+		return -ENOMEM;
 
-	if (setting->add != 0)
-		(*filter) |= setting->filter & setting->mask;
+	if (setting.add != 0)
+		(*filter) |= setting.filter & setting.mask;
 	else
-		(*filter) &=  ~(setting->filter & setting->mask);
+		(*filter) &=  ~(setting.filter & setting.mask);
 
 	return count;
 }
@@ -440,39 +436,50 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = (struct prov_process_config*)buf;
+	msg = kzalloc(sizeof(struct prov_process_config), GFP_KERNEL);
+	if (!msg)
+		return -ENOMEM;
+
+	if (copy_from_user(msg, buf, sizeof(struct prov_process_config))) {
+		rtn = -ENOMEM;
+		goto out;
+	}
 
 	prov = prov_from_vpid(msg->vpid);
-	if (!prov)
-		return -EINVAL;
+	if (!prov) {
+		rtn = -EINVAL;
+		goto out;
+	}
 
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
-	if (copy_to_user(&msg->prov, prov_elt(prov), sizeof(union prov_elt)))
-		rtn = -ENOMEM;
+	memcpy(&msg->prov, prov_elt(prov), sizeof(union prov_elt));
 	spin_unlock(prov_lock(prov));
+
+	if (copy_to_user(buf, msg, sizeof(struct prov_process_config)))
+		rtn = -ENOMEM;
+out:
+	kfree(msg);
 	return rtn;
 }
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
-static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
+static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 					  size_t count, struct list_head *filters)
 {
-	struct ipv4_filters     *f;
+	struct ipv4_filters *f;
 
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
-
 	if (count < sizeof(struct prov_ipv4_filter))
 		return -ENOMEM;
-
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if (!f)
 		return -ENOMEM;
-
-	if (copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter)))
+	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))){
+		kfree(f);
 		return -EAGAIN;
+	}
 	f->filter.ip = f->filter.ip & f->filter.mask;
-
 	// we are not trying to delete something
 	if ((f->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ipv4_add_or_update(filters, f);
@@ -481,7 +488,7 @@ static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *
 	return sizeof(struct prov_ipv4_filter);
 }
 
-static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
+static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 					 size_t count, struct list_head *filters)
 {
 	struct list_head *listentry, *listtmp;
@@ -531,22 +538,34 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
-	data = (struct secinfo*)buf;
+
+	data = kzalloc(sizeof(struct secinfo), GFP_KERNEL);
+	if (!data)
+		return -ENOMEM;
+
+	if (copy_from_user(data, buf, sizeof(struct secinfo))){
+		rtn = -EAGAIN;
+		goto dealloc;
+	}
+	// in case US does not check returned value
+	data->secctx[0] = '\0';
+	data->len = 0;
 
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)
-		return rtn;
-	if (len < PATH_MAX) {
-		if (copy_to_user(data->secctx, ctx, len)) {
-			rtn = -ENOMEM;
-			goto out;
-		}
-		data->secctx[len] = '\0'; // maybe unecessary
-		data->len = len;
-	} else
+		goto out;
+	if (len >= PATH_MAX){
 		rtn = -ENOMEM;
+		goto out;
+	}
+	memcpy(data->secctx, ctx, len);
+	data->len = len;
 out:
 	security_release_secctx(ctx, len); // security module dealloc
+	if ( copy_to_user(buf, data, sizeof(struct secinfo)) )
+		rtn = -EAGAIN;
+dealloc:
+	kfree(data);
 	return rtn;
 }
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
@@ -560,13 +579,15 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 		s = kzalloc(sizeof(struct filters), GFP_KERNEL); \
 		if (!s) \
 			return -ENOMEM; \
-		if (copy_from_user(&s->filter, buf, sizeof(struct info))) \
+		if (copy_from_user(&s->filter, buf, sizeof(struct info))) { \
+			kfree(s); \
 			return -EAGAIN; \
+		}\
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
 			add_function(s); \
 		else \
 			delete_function(s); \
-		return 0; \
+		return sizeof(struct filters); \
 	}
 
 #define declare_generic_filter_read(function_name, filters, info) \
@@ -600,15 +621,17 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo)))
+	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo))){
+		kfree(s);
 		return -EAGAIN;
+	}
 
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
 	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_secctx_add_or_update(s);
 	else
 		prov_secctx_delete(s);
-	return 0;
+	return sizeof(struct secinfo);
 }
 
 declare_generic_filter_read(prov_read_secctx_filter, secctx_filters, secinfo);
@@ -634,13 +657,16 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo)))
+	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo))){
+		kfree(s);
 		return -EAGAIN;
+	}
+
 	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ns_add_or_update(s);
 	else
 		prov_ns_delete(s);
-	return 0;
+	return sizeof(struct nsinfo);
 }
 
 static ssize_t prov_read_ns_filter(struct file *filp, char __user *buf,
@@ -725,14 +751,12 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		return -ENOMEM;
 	buff = kzalloc(pos, GFP_KERNEL);
 	if (!buff) {
-		pr_err("Provenance: error allocating hash buffer.");
 		pos = -ENOMEM;
 		goto out;
 	}
 	size = sizeof(struct shash_desc) + crypto_shash_descsize(policy_shash_tfm);
 	hashdesc = kzalloc(size, GFP_KERNEL);
 	if (!hashdesc) {
-		pr_err("Provenance: error allocating hash desc.");
 		pos = -ENOMEM;
 		goto out;
 	}
@@ -740,21 +764,18 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	hashdesc->flags = 0x0;
 	rc = crypto_shash_init(hashdesc);
 	if (rc) {
-		pr_err("Provenance: error initialising hash.");
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* LSM version */
 	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
 	if (rc) {
-		pr_err("Provenance: error updating hash.");
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* general policy */
 	rc = crypto_shash_update(hashdesc, (u8*)&prov_policy, sizeof(struct capture_policy));
 	if (rc) {
-		pr_err("Provenance: error updating hash.");
 		pos = -EAGAIN;
 		goto out;
 	}
@@ -773,12 +794,10 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 
 	rc = crypto_shash_final(hashdesc, buff);
 	if (rc) {
-		pr_err("Provenance: error finialising hash.");
 		pos = -EAGAIN;
 		goto out;
 	}
 	if (copy_to_user(buf, buff, pos)) {
-		pr_err("Provenance: error copying hash to user.");
 		pos = -EAGAIN;
 		goto out;
 	}
@@ -825,7 +844,6 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 
 	if ( count < len )
 		return -ENOMEM;
-	memset(buf, 0, count);
 	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
 		return -EAGAIN;
 	return sizeof(struct prov_type);
@@ -835,15 +853,27 @@ declare_file_operations(prov_version, no_write, prov_read_version);
 static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	char *buffer = kzalloc(count, GFP_KERNEL);
+	char *buffer;
+	int rtn = 0;
 
 	if (count <= 0 || count > PATH_MAX)
 		return -ENOMEM;
-	if (strlen(buf) > count) // null terminated?
+	buffer = kzalloc(count, GFP_KERNEL);
+	if(!buffer)
 		return -ENOMEM;
-	if (copy_from_user(buffer, buf, count))
-		return -ENOMEM;
-	return prov_create_channel(buffer, strlen(buffer));
+
+	if (copy_from_user(buffer, buf, count)){
+		rtn = -ENOMEM;
+		goto out;
+	}
+	if (strlen(buffer) > count){
+		rtn = -ENOMEM;
+		goto out;
+	}
+	rtn = prov_create_channel(buffer, strlen(buffer));
+out:
+	kfree(buffer);
+	return rtn;
 }
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 

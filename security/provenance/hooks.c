@@ -1354,7 +1354,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SND, cprov, iprov, NULL, 0);
 	if (pprov)
-		rc = uses(RL_RCV_UNIX, iprov, pprov, NULL, 0);
+		rc = uses(RL_RCV, iprov, pprov, NULL, 0);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1403,7 +1403,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (pprov)
-		rc = generates(RL_SND_UNIX, pprov, iprov, NULL, flags);
+		rc = generates(RL_SND, pprov, iprov, NULL, flags);
 	rc = uses(RL_RCV, iprov, cprov, NULL, flags);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1498,7 +1498,7 @@ static int provenance_unix_may_send(struct socket *sock,
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = generates(RL_SND_UNIX, sprov, oprov, NULL, 0);
+	rc = generates(RL_SND, sprov, oprov, NULL, 0);
 	spin_unlock(prov_lock(oprov));
 	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return rc;
