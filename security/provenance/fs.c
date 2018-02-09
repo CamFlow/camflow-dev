@@ -463,39 +463,41 @@ out:
 }
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
-static inline ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
+static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 					  size_t count, struct list_head *filters)
 {
-	struct ipv4_filters     *f;
-	int rtn = sizeof(struct prov_ipv4_filter);
+	struct ipv4_filters *f;
 
+	pr_info("Provenance write ip 1");
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
+	pr_info("Provenance write ip 2");
 	if (count < sizeof(struct prov_ipv4_filter))
 		return -ENOMEM;
 
+	pr_info("Provenance write ip 3");
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if (!f)
 		return -ENOMEM;
 
-	if (copy_from_user(&f->filter, buf, sizeof(struct prov_ipv4_filter))){
-		rtn = -EAGAIN;
-		goto out;
+	pr_info("Provenance write ip 4");
+	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))){
+		kfree(f);
+		return -EAGAIN;
 	}
 	f->filter.ip = f->filter.ip & f->filter.mask;
 
+	pr_info("Provenance write ip 5");
 	// we are not trying to delete something
 	if ((f->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ipv4_add_or_update(filters, f);
 	else
 		prov_ipv4_delete(filters, f);
-out:
-	kfree(f);
-	return rtn;
+	return sizeof(struct prov_ipv4_filter);
 }
 
-static inline ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
+static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 					 size_t count, struct list_head *filters)
 {
 	struct list_head *listentry, *listtmp;
@@ -581,23 +583,20 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 	static ssize_t function_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
 	{ \
 		struct filters *s; \
-		int rtn = 0;\
 		if (count < sizeof(struct info)) \
 			return -ENOMEM; \
 		s = kzalloc(sizeof(struct filters), GFP_KERNEL); \
 		if (!s) \
 			return -ENOMEM; \
-		if (copy_from_user(&s->filter, buf, sizeof(struct info))){ \
-			rtn = -EAGAIN; \
-			goto out;\
+		if (copy_from_user(&s->filter, buf, sizeof(struct info))) { \
+			kfree(s); \
+			return -EAGAIN; \
 		}\
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
 			add_function(s); \
 		else \
 			delete_function(s); \
-out:\
-		kfree(s);\
-		return rtn; \
+		return sizeof(struct filters); \
 	}
 
 #define declare_generic_filter_read(function_name, filters, info) \
@@ -623,7 +622,6 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 					size_t count, loff_t *ppos)
 {
 	struct secctx_filters *s;
-	int rtn=0;
 
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
@@ -633,8 +631,8 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 		return -ENOMEM;
 
 	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo))){
-		rtn = -EAGAIN;
-		goto out;
+		kfree(s);
+		return -EAGAIN;
 	}
 
 	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
@@ -642,9 +640,7 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 		prov_secctx_add_or_update(s);
 	else
 		prov_secctx_delete(s);
-out:
-	kfree(s);
-	return rtn;
+	return sizeof(struct secinfo);
 }
 
 declare_generic_filter_read(prov_read_secctx_filter, secctx_filters, secinfo);
@@ -662,7 +658,6 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 				    size_t count, loff_t *ppos)
 {
 	struct ns_filters *s;
-	int rtn = 0;
 
 	if (count < sizeof(struct nsinfo))
 		return -ENOMEM;
@@ -672,16 +667,15 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo))){
-		rtn = -EAGAIN;
-		goto out;
+		kfree(s);
+		return -EAGAIN;
 	}
+
 	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_ns_add_or_update(s);
 	else
 		prov_ns_delete(s);
-out:
-	kfree(s);
-	return rtn;
+	return sizeof(struct nsinfo);
 }
 
 static ssize_t prov_read_ns_filter(struct file *filp, char __user *buf,
