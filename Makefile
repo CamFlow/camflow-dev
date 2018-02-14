@@ -92,7 +92,7 @@ compile_security_only:
 compile_security: copy_change compile_security_only
 
 compile_kernel: copy_change
-	cd ./build/linux-$(kernel-version) && $(MAKE) -j4
+	cd ./build/linux-$(kernel-version) && $(MAKE) -j16
 
 compile_us:
 	cd ./build/linux-$(kernel-version) && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
