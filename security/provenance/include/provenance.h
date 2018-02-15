@@ -36,6 +36,7 @@ extern uint32_t prov_boot_id;
 #define prov_next_id() ((uint64_t)atomic64_inc_return(&prov_id))
 
 enum {
+	PROVENANCE_LOCK_PROC,
 	PROVENANCE_LOCK_TASK,
 	PROVENANCE_LOCK_DIR,
 	PROVENANCE_LOCK_INODE,

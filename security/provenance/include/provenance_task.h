@@ -272,7 +272,7 @@ static inline struct provenance *get_cred_provenance(void)
 	if (provenance_is_opaque(prov_elt(prov)))
 		goto out;
 	record_task_name(current, prov);
-	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
+	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
 	prov_elt(prov)->proc_info.utsns = current_utsns();
 	prov_elt(prov)->proc_info.ipcns = current_ipcns();
