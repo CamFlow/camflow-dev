@@ -74,12 +74,16 @@ static inline void queue_save_provenance(struct provenance *provenance,
 static int provenance_task_alloc(struct task_struct *task,
 				      unsigned long clone_flags)
 {
+	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
+	task->provenance = prov;
 	return 0;
 }
 
 static void provenance_task_free(struct task_struct *task)
 {
-
+	if (task->provenance)
+		free_provenance(task->provenance);
+	task->provenance = NULL;
 }
 
 /*
