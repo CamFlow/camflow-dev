@@ -246,6 +246,7 @@ static int provenance_inode_create(struct inode *dir,
 				   umode_t mode)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = inode_provenance(dir, true);
 	unsigned long irqflags;
 	int rc;
@@ -254,7 +255,11 @@ static int provenance_inode_create(struct inode *dir,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
-	rc = generates(RL_WRITE, cprov, iprov, NULL, mode);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_WRITE, tprov, iprov, NULL, mode);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -274,6 +279,7 @@ static int provenance_inode_create(struct inode *dir,
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
 	uint32_t perms;
 	unsigned long irqflags;
@@ -291,33 +297,42 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (is_inode_dir(inode)) {
 		if ((perms & (DIR__WRITE)) != 0)
-			rc = uses(RL_PERM_WRITE, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_WRITE, iprov, tprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__READ)) != 0)
-			rc = uses(RL_PERM_READ, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_READ, iprov, tprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 		if ((perms & (DIR__SEARCH)) != 0)
-			rc = uses(RL_PERM_EXEC, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_EXEC, iprov, tprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+		rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
 	} else if (is_inode_socket(inode)) {
 		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0)
-			rc = uses(RL_PERM_WRITE, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_WRITE, iprov, tprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__READ)) != 0)
-			rc = uses(RL_PERM_READ, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_READ, iprov, tprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+		rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
 	} else {
 		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0)
-			rc = uses(RL_PERM_WRITE, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_WRITE, iprov, tprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__READ)) != 0)
-			rc = uses(RL_PERM_READ, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_READ, iprov, tprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 		if ((perms & (FILE__EXECUTE)) != 0)
-			rc = uses(RL_PERM_EXEC, iprov, cprov, NULL, mask);
+			rc = uses(RL_PERM_EXEC, iprov, tprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+		rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
 	}
 out:
 	spin_unlock(prov_lock(iprov));
@@ -340,6 +355,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
 				 struct dentry *new_dentry)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *dprov = NULL;
 	struct provenance *iprov;
 	unsigned long irqflags;
@@ -356,10 +372,13 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_LINK, cprov, dprov, NULL, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = generates(RL_LINK, cprov, iprov, NULL, 0);
+	rc = generates(RL_LINK, tprov, dprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_LINK, tprov, iprov, NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = derives(RL_LINK_INODE, dprov, iprov, NULL, 0);
@@ -400,6 +419,7 @@ static int provenance_inode_rename(struct inode *old_dir,
 static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov;
 	struct provenance *iattrprov;
 	unsigned long irqflags;
@@ -423,7 +443,10 @@ static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SETATTR, cprov, iattrprov, NULL, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SETATTR, tprov, iattrprov, NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = derives(RL_SETATTR_INODE, iattrprov, iprov, NULL, 0);
@@ -443,6 +466,7 @@ out:
 static int provenance_inode_getattr(const struct path *path)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(path->dentry, true);
 	unsigned long irqflags;
 	int rc;
@@ -452,7 +476,11 @@ static int provenance_inode_getattr(const struct path *path)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = uses(RL_GETATTR, iprov, cprov, NULL, 0);
+	rc = uses(RL_GETATTR, iprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -466,6 +494,7 @@ static int provenance_inode_getattr(const struct path *path)
 static int provenance_inode_readlink(struct dentry *dentry)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 	int rc;
@@ -475,7 +504,11 @@ static int provenance_inode_readlink(struct dentry *dentry)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = uses(RL_READLINK, iprov, cprov, NULL, 0);
+	rc = uses(RL_READLINK, iprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -527,6 +560,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 					   int flags)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 
@@ -541,7 +575,8 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 		goto out;
 	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
 		goto out;
-	record_write_xattr(RL_SETXATTR, iprov, cprov, name, value, size, flags);
+	uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	record_write_xattr(RL_SETXATTR, iprov, tprov, name, value, size, flags);
 out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
@@ -556,6 +591,7 @@ out:
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(dentry, true);
 	int rc = 0;
 	unsigned long irqflags;
@@ -571,7 +607,10 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 		goto out;
 	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
 		goto out;
-	rc = record_read_xattr(cprov, iprov, name);
+	rc = record_read_xattr(tprov, iprov, name);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -586,6 +625,7 @@ out:
 static int provenance_inode_listxattr(struct dentry *dentry)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 	int rc;
@@ -595,6 +635,10 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = uses(RL_LSTXATTR, iprov, cprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -608,6 +652,7 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
 	int rc = 0;
@@ -624,7 +669,10 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 		goto out;
 	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
 		goto out;
-	rc = record_write_xattr(RL_RMVXATTR, iprov, cprov, name, NULL, 0, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = record_write_xattr(RL_RMVXATTR, iprov, tprov, name, NULL, 0, 0);
 out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
