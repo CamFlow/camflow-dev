@@ -294,6 +294,11 @@ out:
 	return prov;
 }
 
+static inline struct provenance *get_task_provenance( void )
+{
+	return current->provenance;
+}
+
 static inline struct provenance *prov_from_vpid(pid_t pid)
 {
 	struct provenance *tprov;
