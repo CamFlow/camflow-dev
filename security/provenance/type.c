@@ -95,6 +95,7 @@ static const char ND_STR_XATTR[]								= "xattr";
 static const char ND_STR_PCKCNT[]								= "packet_content";
 static const char ND_STR_ARG[]									= "argv";
 static const char ND_STR_ENV[]									= "envp";
+static const char ND_STR_PROC[]									= "process";
 
 #define MATCH_AND_RETURN(str1, str2, v) if (strcmp(str1, str2) == 0) return v
 /* transform from relation ID to string representation */
@@ -324,6 +325,8 @@ const char* node_str(uint64_t type)
 		return ND_STR_ARG;
 	case ENT_ENV:
 		return ND_STR_ENV;
+	case ENT_PROC:
+		return ND_STR_PROC;
 	default:
 		return ND_STR_UNKNOWN;
 	}
@@ -357,6 +360,7 @@ uint64_t node_id(const char* str)
 	MATCH_AND_RETURN(str, ND_STR_PCKCNT, ENT_PCKCNT);
 	MATCH_AND_RETURN(str, ND_STR_ARG, ENT_ARG);
 	MATCH_AND_RETURN(str, ND_STR_ENV, ENT_ENV);
+	MATCH_AND_RETURN(str, ND_STR_PROC, ENT_PROC);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(node_id);
