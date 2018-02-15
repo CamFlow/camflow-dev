@@ -210,7 +210,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 	union long_prov_elt *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
@@ -304,7 +304,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = get_current_provenance();
+	struct provenance *prov = get_cred_provenance();
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
@@ -319,7 +319,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
@@ -694,7 +694,7 @@ declare_file_operations(prov_ns_filter_ops, prov_write_ns_filter, prov_read_ns_f
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
@@ -706,7 +706,7 @@ declare_file_operations(prov_log_ops, prov_write_log, no_read);
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;

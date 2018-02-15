@@ -263,7 +263,7 @@ static inline void update_task_perf(struct task_struct *task,
 #endif
 }
 
-static inline struct provenance *get_current_provenance(void)
+static inline struct provenance *get_cred_provenance(void)
 {
 	struct provenance *prov = current_provenance();
 	unsigned long irqflags;
