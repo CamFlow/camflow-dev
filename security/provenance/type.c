@@ -10,8 +10,8 @@
  * or (at your option) any later version.
  *
  */
+#include <linux/provenance_types.h>
 #include "provenance.h"
-#include "provenance_types.h"
 
 /* reation string name */
 static const char RL_STR_UNKNOWN[]               = "unknown";

@@ -11,6 +11,7 @@
  *
  */
 #include <linux/security.h>
+#include <linux/provenance_types.h>
 #include <crypto/hash.h>
 
 #include "provenance.h"
@@ -18,7 +19,6 @@
 #include "provenance_inode.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
-#include "provenance_types.h"
 
 #define TMPBUFLEN       12
 
