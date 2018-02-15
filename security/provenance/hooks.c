@@ -70,6 +70,18 @@ static inline void queue_save_provenance(struct provenance *provenance,
 }
 #endif
 
+
+static int provenance_task_alloc(struct task_struct *task,
+				      unsigned long clone_flags)
+{
+	return 0;
+}
+
+static void provenance_task_free(struct task_struct *task)
+{
+
+}
+
 /*
  * initialise the security for the init task
  */
@@ -1640,6 +1652,9 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
+	LSM_HOOK_INIT(task_alloc,	      			provenance_task_alloc),
+	LSM_HOOK_INIT(task_free,	      			provenance_task_free),
+	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
 	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
 	LSM_HOOK_INIT(cred_prepare,	      		provenance_cred_prepare),
