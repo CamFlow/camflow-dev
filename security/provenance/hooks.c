@@ -1378,6 +1378,7 @@ static int provenance_socket_connect(struct socket *sock,
 				     int addrlen)
 {
 	struct provenance *cprov  = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct sockaddr_in *ipv4_addr;
 	unsigned long irqflags;
@@ -1414,7 +1415,10 @@ static int provenance_socket_connect(struct socket *sock,
 	rc = provenance_record_address(address, addrlen, iprov);
 	if (rc < 0)
 		return rc;
-	rc = generates(RL_CONNECT, cprov, iprov, NULL, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_CONNECT, tprov, iprov, NULL, 0);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1430,6 +1434,7 @@ out:
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
 	struct provenance *cprov  = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	unsigned long irqflags;
 	int rc;
@@ -1438,7 +1443,11 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_LISTEN, cprov, iprov, NULL, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_LISTEN, tprov, iprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -1455,6 +1464,7 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
 	struct provenance *cprov  = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct provenance *niprov = socket_inode_provenance(newsock);
 	unsigned long irqflags;
@@ -1465,7 +1475,10 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 	rc = derives(RL_ACCEPT_SOCKET, iprov, niprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = uses(RL_ACCEPT, niprov, cprov, NULL, 0);
+	rc = uses(RL_ACCEPT, niprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1490,6 +1503,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct provenance *pprov = NULL;
 	struct sock *peer = NULL;
@@ -1509,9 +1523,13 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SND, cprov, iprov, NULL, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SND, tprov, iprov, NULL, 0);
 	if (pprov)
 		rc = uses(RL_RCV, iprov, pprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1540,6 +1558,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct provenance *pprov = NULL;
 	struct sock *peer = NULL;
@@ -1561,7 +1580,11 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (pprov)
 		rc = generates(RL_SND, pprov, iprov, NULL, flags);
-	rc = uses(RL_RCV, iprov, cprov, NULL, flags);
+	rc = uses(RL_RCV, iprov, tprov, NULL, flags);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SH_WRITE, tprov, cprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
@@ -1627,15 +1650,21 @@ static int provenance_unix_stream_connect(struct sock *sock,
 					  struct sock *newsk)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = sk_inode_provenance(sock);
 	unsigned long irqflags;
+	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	generates(RL_CONNECT, cprov, iprov, NULL, 0);
+	rc = uses(RL_SH_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_CONNECT, tprov, iprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	return 0;
+	return rc;
 }
 
 /*
