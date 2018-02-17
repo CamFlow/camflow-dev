@@ -43,6 +43,10 @@
 #define RL_NAMED              (RL_DERIVED   | 0x0000000000000001ULL)
 #define RL_VERSION            (RL_DERIVED   | (0x0000000000000001ULL<<1))
 #define RL_MMAP               (RL_DERIVED   | (0x0000000000000001ULL<<2))
+#define RL_MMAP_WRITE         (RL_DERIVED   | (0x0000000000000001ULL<<15))
+#define RL_MMAP_READ          (RL_DERIVED   | (0x0000000000000001ULL<<28))
+#define RL_MMAP_EXEC          (RL_DERIVED   | (0x0000000000000001ULL<<31))
+#define RL_MUNMAP          		(RL_DERIVED   | (0x0000000000000001ULL<<25))
 #define RL_SND_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<3))
 #define RL_RCV_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<4))
 #define RL_CLOSED             (RL_DERIVED   | (0x0000000000000001ULL<<5))
@@ -53,10 +57,10 @@
 #define RL_RMVXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<10))
 #define RL_LINK_INODE         (RL_DERIVED   | (0x0000000000000001ULL<<11))
 #define RL_SPLICE							(RL_DERIVED   | (0x0000000000000001ULL<<12))
+#define RL_EXEC               (RL_DERIVED   | (0x0000000000000001ULL<<30))
 /* GENERATED SUBTYPES */
 #define RL_CREATE             (RL_GENERATED | (0x0000000000000001ULL<<13))
 #define RL_WRITE              (RL_GENERATED | (0x0000000000000001ULL<<14))
-#define RL_MMAP_WRITE         (RL_GENERATED | (0x0000000000000001ULL<<15))
 #define RL_SH_WRITE           (RL_GENERATED | (0x0000000000000001ULL<<16))
 #define RL_CONNECT            (RL_GENERATED | (0x0000000000000001ULL<<17))
 #define RL_LISTEN             (RL_GENERATED | (0x0000000000000001ULL<<18))
@@ -66,14 +70,10 @@
 #define RL_SETATTR            (RL_GENERATED | (0x0000000000000001ULL<<22))
 #define RL_SETXATTR           (RL_GENERATED | (0x0000000000000001ULL<<23))
 #define RL_RMVXATTR           (RL_GENERATED | (0x0000000000000001ULL<<24))
-#define RL_MUNMAP          		(RL_GENERATED | (0x0000000000000001ULL<<25))
 #define RL_SHMDT		        	(RL_GENERATED | (0x0000000000000001ULL<<26))
 /* USED SUBTYPES */
 #define RL_READ               (RL_USED      | (0x0000000000000001ULL<<27))
-#define RL_MMAP_READ          (RL_USED      | (0x0000000000000001ULL<<28))
 #define RL_SH_READ            (RL_USED      | (0x0000000000000001ULL<<29))
-#define RL_EXEC               (RL_USED      | (0x0000000000000001ULL<<30))
-#define RL_MMAP_EXEC          (RL_USED      | (0x0000000000000001ULL<<31))
 #define RL_ACCEPT             (RL_USED      | (0x0000000000000001ULL<<32))
 #define RL_RCV                (RL_USED      | (0x0000000000000001ULL<<33))
 #define RL_OPEN               (RL_USED      | (0x0000000000000001ULL<<34))
@@ -145,7 +145,7 @@
 static inline bool prov_has_uidgid(uint64_t type)
 {
 	switch (type) {
-  	case ACT_TASK:
+  	case ENT_PROC:
   	case ENT_INODE_UNKNOWN:
   	case ENT_INODE_LINK:
   	case ENT_INODE_FILE:
@@ -180,7 +180,7 @@ static inline bool prov_is_inode(uint64_t type)
 static inline bool prov_has_secid(uint64_t type)
 {
 	switch (type) {
-	case ACT_TASK:
+	case ENT_PROC:
 	case ENT_INODE_UNKNOWN:
 	case ENT_INODE_LINK:
 	case ENT_INODE_FILE:
