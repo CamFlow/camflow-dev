@@ -470,7 +470,8 @@ struct sock {
 #ifdef CONFIG_SECURITY
 	void			*sk_security;
 #ifdef CONFIG_SECURITY_PROVENANCE
-	void 			*sk_provenance;
+	void 			*sk_cprov;
+	void 			*sk_tprov;
 #endif
 #endif
 	struct sock_cgroup_data	sk_cgrp_data;

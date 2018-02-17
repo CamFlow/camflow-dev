@@ -45,20 +45,32 @@ static inline struct provenance *sk_inode_provenance(struct sock *sk)
 	return socket_inode_provenance(sock);
 }
 
-static inline struct provenance *sk_provenance(struct sock *sk)
+static inline struct provenance *sk_cprov(struct sock *sk)
 {
-	struct provenance *prov = sk->sk_provenance;
-
-	return prov;
+	return sk->sk_cprov;
 }
 
-static inline struct provenance *socket_provenance(struct socket *sock)
+static inline struct provenance *sk_tprov(struct sock *sk)
+{
+	return sk->sk_cprov;
+}
+
+static inline struct provenance *socket_cprov(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 
 	if (!sk)
 		return NULL;
-	return sk_provenance(sk);
+	return sk_cprov(sk);
+}
+
+static inline struct provenance *socket_tprov(struct socket *sock)
+{
+	struct sock *sk = sock->sk;
+
+	if (!sk)
+		return NULL;
+	return sk_tprov(sk);
 }
 
 #define ihlen(ih) (ih->ihl * 4)
