@@ -18,7 +18,7 @@
 
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
-	struct provenance *cprov = current_provenance();
+	/*struct provenance *cprov = current_provenance();
 	struct provenance *iprov = NULL;
 	union prov_elt pckprov;
 	unsigned long irqflags;
@@ -38,7 +38,7 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 			record_packet_content(&pckprov, skb);
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	}
+	}*/
 	return NF_ACCEPT;
 }
 
