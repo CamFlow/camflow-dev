@@ -158,7 +158,7 @@ static int provenance_cred_prepare(struct cred *new,
 	struct provenance *old_prov = old->provenance;
 	struct provenance *prov = alloc_provenance(ENT_PROC, gfp);
 	unsigned long irqflags;
-	int rc;
+	int rc=0;
 
 	if (!prov)
 		return -ENOMEM;
@@ -167,7 +167,12 @@ static int provenance_cred_prepare(struct cred *new,
 	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov->has_mmap = old_prov->has_mmap;
-	rc = informs(RL_CLONE, old_prov, prov, NULL, 0);
+	if (current != NULL) {
+		if (current->provenance !=NULL)
+			rc = generates(RL_CREATE, old_prov, current->provenance, prov, NULL, 0);
+	} else {
+		rc = informs(RL_CLONE, old_prov, prov, NULL, 0);
+	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = prov;
 	return rc;
