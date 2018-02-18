@@ -70,12 +70,22 @@ static inline void queue_save_provenance(struct provenance *provenance,
 }
 #endif
 
-
 static int provenance_task_alloc(struct task_struct *task,
 				      unsigned long clone_flags)
 {
 	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
+	const struct cred *cred;
+	struct task_struct *t = current;
 	task->provenance = prov;
+	if (t!=NULL){
+		cred = t->real_cred;
+		if (cred!=NULL) {
+			if (t->provenance!=NULL && cred->provenance!=NULL) {
+				informs(RL_CLONE, cred->provenance, t->provenance, NULL, clone_flags);
+				informs(RL_CLONE, t->provenance, prov, NULL, clone_flags);
+			}
+		}
+	}
 	return 0;
 }
 
