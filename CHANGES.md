@@ -34,6 +34,7 @@
 
 ### v0.3.12
 ```
+- Revert single source of ID change.
 - Update to kernel version 4.14.19.
 ```
 

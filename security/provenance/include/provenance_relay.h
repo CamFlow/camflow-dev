@@ -153,7 +153,7 @@ static inline int write_relation(const uint64_t type,
 
 	memset(&relation, 0, sizeof(union prov_elt));
 	prov_type(&relation) = type;
-	relation_identifier(&relation).id = prov_next_id();
+	relation_identifier(&relation).id = prov_next_relation_id();
 	relation_identifier(&relation).boot_id = prov_boot_id;
 	relation_identifier(&relation).machine_id = prov_machine_id;
 	copy_identifier(&relation.relation_info.snd, &get_prov_identifier(f));
