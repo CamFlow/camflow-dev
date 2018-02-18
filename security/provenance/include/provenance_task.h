@@ -313,6 +313,23 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
 	return tprov;
 }
 
+static inline int terminate_proc(struct provenance *cprov)
+{
+	union prov_elt old_prov;
+	int rc;
+
+	if (!provenance_is_tracked(prov_elt(cprov)) && !prov_policy.prov_all)
+		return 0;
+	if (filter_node(prov_entry(cprov)))
+		return 0;
+	memcpy(&old_prov, prov_elt(cprov), sizeof(old_prov));
+	node_identifier(prov_elt(cprov)).version++;
+	clear_recorded(prov_elt(cprov));
+
+	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(cprov), NULL, 0);
+	return rc;
+}
+
 static inline int terminate_task(struct provenance *tprov)
 {
 	union prov_elt old_prov;
@@ -327,7 +344,6 @@ static inline int terminate_task(struct provenance *tprov)
 	clear_recorded(prov_elt(tprov));
 
 	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL, 0);
-	tprov->has_outgoing = false;
 	return rc;
 }
 

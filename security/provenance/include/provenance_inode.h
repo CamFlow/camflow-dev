@@ -360,7 +360,6 @@ static inline int close_inode(struct provenance *iprov)
 	clear_recorded(prov_elt(iprov));
 
 	rc = write_relation(RL_CLOSED, &old_prov, prov_elt(iprov), NULL, 0);
-	iprov->has_outgoing = false;
 	return rc;
 }
 
