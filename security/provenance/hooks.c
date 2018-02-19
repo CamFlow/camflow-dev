@@ -1531,20 +1531,14 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (provenance_is_tracked(prov_elt(iprov)) ||
 	    provenance_is_tracked(prov_elt(cprov))) {
 		provenance_parse_skb_ipv4(skb, &pckprov);
-		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		rc = record_pck_to_inode(&pckprov, iprov);
-		if (rc < 0)
-			goto out;
-		if (provenance_is_tracked(prov_elt(cprov)))
-			rc = derives(RL_RCV_PACKET, iprov, cprov, NULL, 0);
 		if (rc < 0)
 			goto out;
 		if (provenance_records_packet(prov_elt(iprov)))
 			rc = record_packet_content(&pckprov, skb);
 out:
-		spin_unlock(prov_lock(iprov));
-		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
 	return rc;
 }
