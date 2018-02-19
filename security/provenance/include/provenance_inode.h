@@ -308,7 +308,7 @@ out:
 }
 
 static inline int record_read_xattr(struct provenance *cprov,
-						struct provenance *tprov,
+				    struct provenance *tprov,
 				    struct provenance *iprov,
 				    const char *name)
 {

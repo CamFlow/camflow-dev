@@ -71,16 +71,17 @@ static inline void queue_save_provenance(struct provenance *provenance,
 #endif
 
 static int provenance_task_alloc(struct task_struct *task,
-				      unsigned long clone_flags)
+				 unsigned long clone_flags)
 {
 	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 	const struct cred *cred;
 	struct task_struct *t = current;
+
 	task->provenance = prov;
-	if (t!=NULL){
+	if (t != NULL) {
 		cred = t->real_cred;
-		if (cred!=NULL) {
-			if (t->provenance!=NULL && cred->provenance!=NULL) {
+		if (cred != NULL) {
+			if (t->provenance != NULL && cred->provenance != NULL) {
 				informs(RL_CLONE, cred->provenance, t->provenance, NULL, clone_flags);
 				informs(RL_CLONE, t->provenance, prov, NULL, clone_flags);
 			}
@@ -158,7 +159,7 @@ static int provenance_cred_prepare(struct cred *new,
 	struct provenance *old_prov = old->provenance;
 	struct provenance *prov = alloc_provenance(ENT_PROC, gfp);
 	unsigned long irqflags;
-	int rc=0;
+	int rc = 0;
 
 	if (!prov)
 		return -ENOMEM;
@@ -168,11 +169,10 @@ static int provenance_cred_prepare(struct cred *new,
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov->has_mmap = old_prov->has_mmap;
 	if (current != NULL) {
-		if (current->provenance !=NULL)
+		if (current->provenance != NULL)
 			rc = generates(RL_CREATE, old_prov, current->provenance, prov, NULL, 0);
-	} else {
+	} else
 		rc = informs(RL_CLONE, old_prov, prov, NULL, 0);
-	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = prov;
 	return rc;
@@ -775,11 +775,10 @@ static int provenance_file_permission(struct file *file, int mask)
 				goto out;
 		}
 		if ((perms & (FILE__EXECUTE)) != 0) {
-			if (provenance_is_opaque(prov_elt(iprov))) {
+			if (provenance_is_opaque(prov_elt(iprov)))
 				set_opaque(prov_elt(cprov));
-			} else {
+			else
 				rc = derives(RL_EXEC, iprov, cprov, file, mask);
-			}
 		}
 	}
 out:
@@ -904,9 +903,10 @@ out:
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static void provenance_mmap_munmap(struct mm_struct *mm,
-				struct vm_area_struct *vma,
-			  unsigned long start,
-				unsigned long end) {
+				   struct vm_area_struct *vma,
+				   unsigned long start,
+				   unsigned long end)
+{
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *iprov = NULL;
 	struct file *mmapf;
@@ -1153,9 +1153,9 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
-	if (shmflg & SHM_RDONLY) {
+	if (shmflg & SHM_RDONLY)
 		rc = uses(RL_READ, sprov, tprov, cprov, NULL, shmflg);
-	} else {
+	else {
 		rc = uses(RL_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
@@ -1168,7 +1168,8 @@ out:
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-static void provenance_shm_shmdt(struct shmid_kernel *shp){
+static void provenance_shm_shmdt(struct shmid_kernel *shp)
+{
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *sprov = shp->shm_perm.provenance;
@@ -1418,40 +1419,40 @@ static int provenance_socket_sendmsg(struct socket *sock,
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	/*struct provenance *cprov = get_cred_provenance();
-	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = socket_inode_provenance(sock);
-	struct provenance *pcprov = NULL;
-	struct provenance *ptprov = NULL;
-	struct sock *peer = NULL;
-	unsigned long irqflags;
-	int rc;
+	   struct provenance *tprov = get_task_provenance();
+	   struct provenance *iprov = socket_inode_provenance(sock);
+	   struct provenance *pcprov = NULL;
+	   struct provenance *ptprov = NULL;
+	   struct sock *peer = NULL;
+	   unsigned long irqflags;
+	   int rc;
 
-	if (!iprov)
-		return -ENOMEM;
-	if (sock->sk->sk_family == PF_UNIX &&
+	   if (!iprov)
+	        return -ENOMEM;
+	   if (sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
-		peer = unix_peer_get(sock->sk);
-		if (peer) {
-			pcprov = sk_cprov(peer);
-			if (pcprov == cprov)
-				pcprov = NULL;
-			ptprov = sk_tprov(peer);
-			if (ptprov == tprov)
-				ptprov = NULL;
-		}
-	}
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SND, cprov, tprov, iprov, NULL, 0);
-	if (rc < 0)
-		goto out;
-	if (ptprov)
-		rc = uses(RL_RCV, iprov, ptprov, pcprov, NULL, 0);
-out:
-	spin_unlock(prov_lock(iprov));
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	if (peer)
-		sock_put(peer);*/
+	        peer = unix_peer_get(sock->sk);
+	        if (peer) {
+	                pcprov = sk_cprov(peer);
+	                if (pcprov == cprov)
+	                        pcprov = NULL;
+	                ptprov = sk_tprov(peer);
+	                if (ptprov == tprov)
+	                        ptprov = NULL;
+	        }
+	   }
+	   spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	   spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	   rc = generates(RL_SND, cprov, tprov, iprov, NULL, 0);
+	   if (rc < 0)
+	        goto out;
+	   if (ptprov)
+	        rc = uses(RL_RCV, iprov, ptprov, pcprov, NULL, 0);
+	   out:
+	   spin_unlock(prov_lock(iprov));
+	   spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	   if (peer)
+	        sock_put(peer);*/
 	return 0;
 }
 
@@ -1476,41 +1477,41 @@ static int provenance_socket_recvmsg(struct socket *sock,
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	/*struct provenance *cprov = get_cred_provenance();
-	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = socket_inode_provenance(sock);
-	struct provenance *pcprov = NULL;
-	struct provenance *ptprov = NULL;
-	struct sock *peer = NULL;
-	unsigned long irqflags;
-	int rc;
+	   struct provenance *tprov = get_task_provenance();
+	   struct provenance *iprov = socket_inode_provenance(sock);
+	   struct provenance *pcprov = NULL;
+	   struct provenance *ptprov = NULL;
+	   struct sock *peer = NULL;
+	   unsigned long irqflags;
+	   int rc;
 
-	if (!iprov)
-		return -ENOMEM;
-	if (sock->sk->sk_family == PF_UNIX &&
+	   if (!iprov)
+	        return -ENOMEM;
+	   if (sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
-		peer = unix_peer_get(sock->sk);
-		if (peer) {
-			pcprov = sk_cprov(peer);
-			if (pcprov == cprov)
-				pcprov = NULL;
-			ptprov = sk_tprov(peer);
-			if (ptprov == tprov)
-				ptprov = NULL;
-		}
-	}
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (ptprov) {
-		rc = generates(RL_SND, pcprov, ptprov, iprov, NULL, flags);
-		if (rc < 0)
-			goto out;
-	}
-	rc = uses(RL_RCV, iprov, tprov, cprov, NULL, flags);
-out:
-	spin_unlock(prov_lock(iprov));
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	if (peer)
-		sock_put(peer);*/
+	        peer = unix_peer_get(sock->sk);
+	        if (peer) {
+	                pcprov = sk_cprov(peer);
+	                if (pcprov == cprov)
+	                        pcprov = NULL;
+	                ptprov = sk_tprov(peer);
+	                if (ptprov == tprov)
+	                        ptprov = NULL;
+	        }
+	   }
+	   spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	   spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	   if (ptprov) {
+	        rc = generates(RL_SND, pcprov, ptprov, iprov, NULL, flags);
+	        if (rc < 0)
+	                goto out;
+	   }
+	   rc = uses(RL_RCV, iprov, tprov, cprov, NULL, flags);
+	   out:
+	   spin_unlock(prov_lock(iprov));
+	   spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	   if (peer)
+	        sock_put(peer);*/
 	return 0;
 }
 
@@ -1525,38 +1526,38 @@ out:
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
 	/*struct provenance *cprov = sk_cprov(sk);
-	struct provenance *tprov = sk_tprov(sk);
-	struct provenance *iprov;
-	union prov_elt pckprov;
-	uint16_t family = sk->sk_family;
-	unsigned long irqflags;
-	int rc = 0;
+	   struct provenance *tprov = sk_tprov(sk);
+	   struct provenance *iprov;
+	   union prov_elt pckprov;
+	   uint16_t family = sk->sk_family;
+	   unsigned long irqflags;
+	   int rc = 0;
 
-	if (!cprov)
-		return 0;
-	if (family != PF_INET)
-		return 0;
-	iprov = sk_inode_provenance(sk);
-	if (!iprov)
-		return 0;
-	if (provenance_is_tracked(prov_elt(iprov)) ||
+	   if (!cprov)
+	        return 0;
+	   if (family != PF_INET)
+	        return 0;
+	   iprov = sk_inode_provenance(sk);
+	   if (!iprov)
+	        return 0;
+	   if (provenance_is_tracked(prov_elt(iprov)) ||
 	    provenance_is_tracked(prov_elt(cprov))) {
-		provenance_parse_skb_ipv4(skb, &pckprov);
-		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-		rc = record_pck_to_inode(&pckprov, iprov);
-		if (rc < 0)
-			goto out;
-		if (provenance_is_tracked(prov_elt(cprov)))
-			rc = uses(RL_RCV, iprov, tprov, cprov, NULL, 0);
-		if (rc < 0)
-			goto out;
-		if (provenance_records_packet(prov_elt(iprov)))
-			rc = record_packet_content(&pckprov, skb);
-out:
-		spin_unlock(prov_lock(iprov));
-		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	}*/
+	        provenance_parse_skb_ipv4(skb, &pckprov);
+	        spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	        spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	        rc = record_pck_to_inode(&pckprov, iprov);
+	        if (rc < 0)
+	                goto out;
+	        if (provenance_is_tracked(prov_elt(cprov)))
+	                rc = uses(RL_RCV, iprov, tprov, cprov, NULL, 0);
+	        if (rc < 0)
+	                goto out;
+	        if (provenance_records_packet(prov_elt(iprov)))
+	                rc = record_packet_content(&pckprov, skb);
+	   out:
+	        spin_unlock(prov_lock(iprov));
+	        spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	   }*/
 	return 0;
 }
 
@@ -1597,16 +1598,16 @@ static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
 	/*struct provenance *scprov = socket_cprov(sock);
-	struct provenance *stprov = socket_tprov(sock);
-	struct provenance *oprov = socket_inode_provenance(other);
-	unsigned long irqflags;
-	int rc;
+	   struct provenance *stprov = socket_tprov(sock);
+	   struct provenance *oprov = socket_inode_provenance(other);
+	   unsigned long irqflags;
+	   int rc;
 
-	spin_lock_irqsave_nested(prov_lock(scprov), irqflags, PROVENANCE_LOCK_SOCKET);
-	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = generates(RL_SND, scprov, stprov, oprov, NULL, 0);
-	spin_unlock(prov_lock(oprov));
-	spin_unlock_irqrestore(prov_lock(scprov), irqflags);*/
+	   spin_lock_irqsave_nested(prov_lock(scprov), irqflags, PROVENANCE_LOCK_SOCKET);
+	   spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
+	   rc = generates(RL_SND, scprov, stprov, oprov, NULL, 0);
+	   spin_unlock(prov_lock(oprov));
+	   spin_unlock_irqrestore(prov_lock(scprov), irqflags);*/
 	return 0;
 }
 
@@ -1746,87 +1747,87 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
-	LSM_HOOK_INIT(task_alloc,	      			provenance_task_alloc),
-	LSM_HOOK_INIT(task_free,	      			provenance_task_free),
-	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
-	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
-	LSM_HOOK_INIT(cred_prepare,	      		provenance_cred_prepare),
-	LSM_HOOK_INIT(cred_transfer,	      	provenance_cred_transfer),
-	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
+	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
+	LSM_HOOK_INIT(task_free,			    provenance_task_free),
+	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
+	LSM_HOOK_INIT(cred_alloc_blank,			    provenance_cred_alloc_blank),
+	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
+	LSM_HOOK_INIT(cred_prepare,			    provenance_cred_prepare),
+	LSM_HOOK_INIT(cred_transfer,			    provenance_cred_transfer),
+	LSM_HOOK_INIT(task_fix_setuid,			    provenance_task_fix_setuid),
 
 	/* inode related hooks */
-	LSM_HOOK_INIT(inode_alloc_security,   provenance_inode_alloc_security),
-	LSM_HOOK_INIT(inode_create,	      		provenance_inode_create),
-	LSM_HOOK_INIT(inode_free_security,    provenance_inode_free_security),
-	LSM_HOOK_INIT(inode_permission,	      provenance_inode_permission),
-	LSM_HOOK_INIT(inode_link,	      			provenance_inode_link),
-	LSM_HOOK_INIT(inode_rename,	      		provenance_inode_rename),
-	LSM_HOOK_INIT(inode_setattr,	      	provenance_inode_setattr),
-	LSM_HOOK_INIT(inode_getattr,	      	provenance_inode_getattr),
-	LSM_HOOK_INIT(inode_readlink,	      	provenance_inode_readlink),
-	LSM_HOOK_INIT(inode_setxattr,	      	provenance_inode_setxattr),
-	LSM_HOOK_INIT(inode_post_setxattr,    provenance_inode_post_setxattr),
-	LSM_HOOK_INIT(inode_getxattr,	      	provenance_inode_getxattr),
-	LSM_HOOK_INIT(inode_listxattr,	      provenance_inode_listxattr),
-	LSM_HOOK_INIT(inode_removexattr,      provenance_inode_removexattr),
-	LSM_HOOK_INIT(inode_getsecurity,      provenance_inode_getsecurity),
-	LSM_HOOK_INIT(inode_listsecurity,     provenance_inode_listsecurity),
+	LSM_HOOK_INIT(inode_alloc_security,		    provenance_inode_alloc_security),
+	LSM_HOOK_INIT(inode_create,			    provenance_inode_create),
+	LSM_HOOK_INIT(inode_free_security,		    provenance_inode_free_security),
+	LSM_HOOK_INIT(inode_permission,			    provenance_inode_permission),
+	LSM_HOOK_INIT(inode_link,			    provenance_inode_link),
+	LSM_HOOK_INIT(inode_rename,			    provenance_inode_rename),
+	LSM_HOOK_INIT(inode_setattr,			    provenance_inode_setattr),
+	LSM_HOOK_INIT(inode_getattr,			    provenance_inode_getattr),
+	LSM_HOOK_INIT(inode_readlink,			    provenance_inode_readlink),
+	LSM_HOOK_INIT(inode_setxattr,			    provenance_inode_setxattr),
+	LSM_HOOK_INIT(inode_post_setxattr,		    provenance_inode_post_setxattr),
+	LSM_HOOK_INIT(inode_getxattr,			    provenance_inode_getxattr),
+	LSM_HOOK_INIT(inode_listxattr,			    provenance_inode_listxattr),
+	LSM_HOOK_INIT(inode_removexattr,		    provenance_inode_removexattr),
+	LSM_HOOK_INIT(inode_getsecurity,		    provenance_inode_getsecurity),
+	LSM_HOOK_INIT(inode_listsecurity,		    provenance_inode_listsecurity),
 
 	/* file related hooks */
-	LSM_HOOK_INIT(file_permission,	      provenance_file_permission),
-	LSM_HOOK_INIT(mmap_file,	      			provenance_mmap_file),
+	LSM_HOOK_INIT(file_permission,			    provenance_file_permission),
+	LSM_HOOK_INIT(mmap_file,			    provenance_mmap_file),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(mmap_munmap,	      		provenance_mmap_munmap),
+	LSM_HOOK_INIT(mmap_munmap,			    provenance_mmap_munmap),
 #endif
-	LSM_HOOK_INIT(file_ioctl,	      			provenance_file_ioctl),
-	LSM_HOOK_INIT(file_open,	      			provenance_file_open),
+	LSM_HOOK_INIT(file_ioctl,			    provenance_file_ioctl),
+	LSM_HOOK_INIT(file_open,			    provenance_file_open),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(file_splice_pipe_to_pipe,
-								provenance_file_splice_pipe_to_pipe),
+		      provenance_file_splice_pipe_to_pipe),
 #endif
 
 	/* msg related hooks */
-	LSM_HOOK_INIT(msg_msg_alloc_security, provenance_msg_msg_alloc_security),
-	LSM_HOOK_INIT(msg_msg_free_security,  provenance_msg_msg_free_security),
-	LSM_HOOK_INIT(msg_queue_msgsnd,	      provenance_msg_queue_msgsnd),
-	LSM_HOOK_INIT(msg_queue_msgrcv,	      provenance_msg_queue_msgrcv),
+	LSM_HOOK_INIT(msg_msg_alloc_security,		    provenance_msg_msg_alloc_security),
+	LSM_HOOK_INIT(msg_msg_free_security,		    provenance_msg_msg_free_security),
+	LSM_HOOK_INIT(msg_queue_msgsnd,			    provenance_msg_queue_msgsnd),
+	LSM_HOOK_INIT(msg_queue_msgrcv,			    provenance_msg_queue_msgrcv),
 
 	/* shared memory related hooks */
-	LSM_HOOK_INIT(shm_alloc_security,     provenance_shm_alloc_security),
-	LSM_HOOK_INIT(shm_free_security,      provenance_shm_free_security),
-	LSM_HOOK_INIT(shm_shmat,	      			provenance_shm_shmat),
-	LSM_HOOK_INIT(shm_shmdt,	      			provenance_shm_shmdt),
+	LSM_HOOK_INIT(shm_alloc_security,		    provenance_shm_alloc_security),
+	LSM_HOOK_INIT(shm_free_security,		    provenance_shm_free_security),
+	LSM_HOOK_INIT(shm_shmat,			    provenance_shm_shmat),
+	LSM_HOOK_INIT(shm_shmdt,			    provenance_shm_shmdt),
 
 	/* socket related hooks */
-	LSM_HOOK_INIT(sk_alloc_security,      provenance_sk_alloc_security),
-	LSM_HOOK_INIT(socket_post_create,     provenance_socket_post_create),
-	LSM_HOOK_INIT(socket_bind,	      		provenance_socket_bind),
-	LSM_HOOK_INIT(socket_connect,	      	provenance_socket_connect),
-	LSM_HOOK_INIT(socket_listen,	      	provenance_socket_listen),
-	LSM_HOOK_INIT(socket_accept,	      	provenance_socket_accept),
+	LSM_HOOK_INIT(sk_alloc_security,		    provenance_sk_alloc_security),
+	LSM_HOOK_INIT(socket_post_create,		    provenance_socket_post_create),
+	LSM_HOOK_INIT(socket_bind,			    provenance_socket_bind),
+	LSM_HOOK_INIT(socket_connect,			    provenance_socket_connect),
+	LSM_HOOK_INIT(socket_listen,			    provenance_socket_listen),
+	LSM_HOOK_INIT(socket_accept,			    provenance_socket_accept),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(socket_sendmsg_always,  provenance_socket_sendmsg_always),
-	LSM_HOOK_INIT(socket_recvmsg_always,  provenance_socket_recvmsg_always),
-	LSM_HOOK_INIT(mq_timedreceive,	      provenance_mq_timedreceive),
-	LSM_HOOK_INIT(mq_timedsend,	      		provenance_mq_timedsend),
+	LSM_HOOK_INIT(socket_sendmsg_always,		    provenance_socket_sendmsg_always),
+	LSM_HOOK_INIT(socket_recvmsg_always,		    provenance_socket_recvmsg_always),
+	LSM_HOOK_INIT(mq_timedreceive,			    provenance_mq_timedreceive),
+	LSM_HOOK_INIT(mq_timedsend,			    provenance_mq_timedsend),
 #else   /* CONFIG_SECURITY_FLOW_FRIENDLY */
-	LSM_HOOK_INIT(socket_sendmsg,	      	provenance_socket_sendmsg),
-	LSM_HOOK_INIT(socket_recvmsg,	      	provenance_socket_recvmsg),
+	LSM_HOOK_INIT(socket_sendmsg,			    provenance_socket_sendmsg),
+	LSM_HOOK_INIT(socket_recvmsg,			    provenance_socket_recvmsg),
 #endif  /* CONFIG_SECURITY_FLOW_FRIENDLY */
-	LSM_HOOK_INIT(socket_sock_rcv_skb,    provenance_socket_sock_rcv_skb),
-	LSM_HOOK_INIT(unix_stream_connect,    provenance_unix_stream_connect),
-	LSM_HOOK_INIT(unix_may_send,	      	provenance_unix_may_send),
+	LSM_HOOK_INIT(socket_sock_rcv_skb,		    provenance_socket_sock_rcv_skb),
+	LSM_HOOK_INIT(unix_stream_connect,		    provenance_unix_stream_connect),
+	LSM_HOOK_INIT(unix_may_send,			    provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_check_security,    provenance_bprm_check),
-	LSM_HOOK_INIT(bprm_set_creds,	      	provenance_bprm_set_creds),
-	LSM_HOOK_INIT(bprm_committing_creds,  provenance_bprm_committing_creds),
+	LSM_HOOK_INIT(bprm_check_security,		    provenance_bprm_check),
+	LSM_HOOK_INIT(bprm_set_creds,			    provenance_bprm_set_creds),
+	LSM_HOOK_INIT(bprm_committing_creds,		    provenance_bprm_committing_creds),
 
 	/* file system related hooks */
-	LSM_HOOK_INIT(sb_alloc_security,      provenance_sb_alloc_security),
-	LSM_HOOK_INIT(sb_free_security,	      provenance_sb_free_security),
-	LSM_HOOK_INIT(sb_kern_mount,	      	provenance_sb_kern_mount)
+	LSM_HOOK_INIT(sb_alloc_security,		    provenance_sb_alloc_security),
+	LSM_HOOK_INIT(sb_free_security,			    provenance_sb_free_security),
+	LSM_HOOK_INIT(sb_kern_mount,			    provenance_sb_kern_mount)
 };
 
 struct kmem_cache *provenance_cache;

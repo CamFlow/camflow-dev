@@ -92,8 +92,8 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL, 0);
 	else
 		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
-	prov->has_outgoing = false; // we update there is no more outgoing edge
-	prov->saved = false; // for inode prov persistance
+	prov->has_outgoing = false;     // we update there is no more outgoing edge
+	prov->saved = false;            // for inode prov persistance
 	return rc;
 }
 
@@ -105,12 +105,12 @@ static inline int record_relation(const uint64_t type,
 {
 	int rc = 0;
 
-	if (prov_policy.should_compress_edge){
+	if (prov_policy.should_compress_edge) {
 		// we compress edges, do not record same edge type twice
-		if(to->previous_id == node_identifier(prov_entry(from)).id
-				&& to->previous_type == type){
+		if (to->previous_id == node_identifier(prov_entry(from)).id
+		    && to->previous_type == type)
 			return 0;
-		} else { // if not we save those information
+		else {   // if not we save those information
 			to->previous_id = node_identifier(prov_entry(from)).id;
 			to->previous_type = type;
 		}
@@ -136,6 +136,7 @@ static __always_inline int uses(const uint64_t type,
 				const uint64_t flags)
 {
 	int rc;
+
 	BUILD_BUG_ON(!prov_is_used(type));
 
 	// check if the nodes match some capture options
@@ -144,9 +145,9 @@ static __always_inline int uses(const uint64_t type,
 	apply_target(prov_elt(cprov));
 
 	if (!provenance_is_tracked(prov_elt(from))
-			&& !provenance_is_tracked(prov_elt(tprov))
-			&& !provenance_is_tracked(prov_elt(cprov))
-			&& !prov_policy.prov_all)
+	    && !provenance_is_tracked(prov_elt(tprov))
+	    && !provenance_is_tracked(prov_elt(cprov))
+	    && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(type, prov_entry(from), prov_entry(tprov)))
 		return 0;
@@ -163,13 +164,14 @@ out:
 
 // from (activity) to (entity)
 static __always_inline int generates(const uint64_t type,
-						 struct provenance *cprov,
-						 struct provenance *tprov,
+				     struct provenance *cprov,
+				     struct provenance *tprov,
 				     struct provenance *to,
 				     const struct file *file,
 				     const uint64_t flags)
 {
 	int rc;
+
 	BUILD_BUG_ON(!prov_is_generated(type));
 
 	// check if the nodes match some capture options
@@ -178,9 +180,9 @@ static __always_inline int generates(const uint64_t type,
 	apply_target(prov_elt(to));
 
 	if (!provenance_is_tracked(prov_elt(cprov))
-			&& !provenance_is_tracked(prov_elt(tprov))
-			&& !provenance_is_tracked(prov_elt(to))
-			&& !prov_policy.prov_all)
+	    && !provenance_is_tracked(prov_elt(tprov))
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(type, prov_entry(tprov), prov_entry(to)))
 		return 0;
@@ -207,8 +209,8 @@ static __always_inline int derives(const uint64_t type,
 	apply_target(prov_elt(to));
 
 	if (!provenance_is_tracked(prov_elt(from))
-			&& !provenance_is_tracked(prov_elt(to))
-			&& !prov_policy.prov_all)
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
@@ -230,8 +232,8 @@ static __always_inline int informs(const uint64_t type,
 	apply_target(prov_elt(to));
 
 	if (!provenance_is_tracked(prov_elt(from))
-			&& !provenance_is_tracked(prov_elt(to))
-			&& !prov_policy.prov_all)
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
 		return 0;
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;

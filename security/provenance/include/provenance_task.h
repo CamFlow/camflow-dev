@@ -294,6 +294,7 @@ out:
 static inline struct provenance *get_task_provenance( void )
 {
 	struct provenance *prov = current->provenance;
+
 	prov_elt(prov)->task_info.pid = task_pid_nr(current);
 	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
 	return prov;

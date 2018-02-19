@@ -464,7 +464,7 @@ out:
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
 static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
-					  size_t count, struct list_head *filters)
+				   size_t count, struct list_head *filters)
 {
 	struct ipv4_filters *f;
 
@@ -475,7 +475,7 @@ static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if (!f)
 		return -ENOMEM;
-	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))){
+	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))) {
 		kfree(f);
 		return -EAGAIN;
 	}
@@ -489,7 +489,7 @@ static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 }
 
 static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
-					 size_t count, struct list_head *filters)
+				  size_t count, struct list_head *filters)
 {
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
@@ -543,7 +543,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	if (!data)
 		return -ENOMEM;
 
-	if (copy_from_user(data, buf, sizeof(struct secinfo))){
+	if (copy_from_user(data, buf, sizeof(struct secinfo))) {
 		rtn = -EAGAIN;
 		goto dealloc;
 	}
@@ -554,7 +554,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)
 		goto out;
-	if (len >= PATH_MAX){
+	if (len >= PATH_MAX) {
 		rtn = -ENOMEM;
 		goto out;
 	}
@@ -582,7 +582,7 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 		if (copy_from_user(&s->filter, buf, sizeof(struct info))) { \
 			kfree(s); \
 			return -EAGAIN; \
-		}\
+		} \
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
 			add_function(s); \
 		else \
@@ -621,7 +621,7 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo))){
+	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo))) {
 		kfree(s);
 		return -EAGAIN;
 	}
@@ -657,7 +657,7 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo))){
+	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo))) {
 		kfree(s);
 		return -EAGAIN;
 	}
@@ -859,14 +859,14 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 	if (count <= 0 || count > PATH_MAX)
 		return -ENOMEM;
 	buffer = kzalloc(count, GFP_KERNEL);
-	if(!buffer)
+	if (!buffer)
 		return -ENOMEM;
 
-	if (copy_from_user(buffer, buf, count)){
+	if (copy_from_user(buffer, buf, count)) {
 		rtn = -ENOMEM;
 		goto out;
 	}
-	if (strlen(buffer) > count){
+	if (strlen(buffer) > count) {
 		rtn = -ENOMEM;
 		goto out;
 	}
