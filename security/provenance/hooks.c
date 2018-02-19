@@ -1418,42 +1418,42 @@ static int provenance_socket_sendmsg(struct socket *sock,
 				     int size)
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
-	/*struct provenance *cprov = get_cred_provenance();
-	   struct provenance *tprov = get_task_provenance();
-	   struct provenance *iprov = socket_inode_provenance(sock);
-	   struct provenance *pcprov = NULL;
-	   struct provenance *ptprov = NULL;
-	   struct sock *peer = NULL;
-	   unsigned long irqflags;
-	   int rc;
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = socket_inode_provenance(sock);
+	struct provenance *pcprov = NULL;
+	struct provenance *ptprov = NULL;
+	struct sock *peer = NULL;
+	unsigned long irqflags;
+	int rc;
 
-	   if (!iprov)
-	        return -ENOMEM;
-	   if (sock->sk->sk_family == PF_UNIX &&
+	if (!iprov)
+		return -ENOMEM;
+	if (sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
-	        peer = unix_peer_get(sock->sk);
-	        if (peer) {
-	                pcprov = sk_cprov(peer);
-	                if (pcprov == cprov)
-	                        pcprov = NULL;
-	                ptprov = sk_tprov(peer);
-	                if (ptprov == tprov)
-	                        ptprov = NULL;
-	        }
-	   }
-	   spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	   spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	   rc = generates(RL_SND, cprov, tprov, iprov, NULL, 0);
-	   if (rc < 0)
-	        goto out;
-	   if (ptprov)
-	        rc = uses(RL_RCV, iprov, ptprov, pcprov, NULL, 0);
-	   out:
-	   spin_unlock(prov_lock(iprov));
-	   spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	   if (peer)
-	        sock_put(peer);*/
-	return 0;
+		peer = unix_peer_get(sock->sk);
+		if (peer) {
+			pcprov = sk_cprov(peer);
+			if (pcprov == cprov)
+				pcprov = NULL;
+			ptprov = sk_tprov(peer);
+			if (ptprov == tprov)
+				ptprov = NULL;
+		}
+	}
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_SND, cprov, tprov, iprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	if (ptprov)
+		rc = uses(RL_RCV, iprov, ptprov, pcprov, NULL, 0);
+out:
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	if (peer)
+		sock_put(peer);
+	return rc;
 }
 
 /*
@@ -1476,43 +1476,43 @@ static int provenance_socket_recvmsg(struct socket *sock,
 				     int flags)
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
-	/*struct provenance *cprov = get_cred_provenance();
-	   struct provenance *tprov = get_task_provenance();
-	   struct provenance *iprov = socket_inode_provenance(sock);
-	   struct provenance *pcprov = NULL;
-	   struct provenance *ptprov = NULL;
-	   struct sock *peer = NULL;
-	   unsigned long irqflags;
-	   int rc;
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = socket_inode_provenance(sock);
+	struct provenance *pcprov = NULL;
+	struct provenance *ptprov = NULL;
+	struct sock *peer = NULL;
+	unsigned long irqflags;
+	int rc;
 
-	   if (!iprov)
-	        return -ENOMEM;
-	   if (sock->sk->sk_family == PF_UNIX &&
+	if (!iprov)
+		return -ENOMEM;
+	if (sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
-	        peer = unix_peer_get(sock->sk);
-	        if (peer) {
-	                pcprov = sk_cprov(peer);
-	                if (pcprov == cprov)
-	                        pcprov = NULL;
-	                ptprov = sk_tprov(peer);
-	                if (ptprov == tprov)
-	                        ptprov = NULL;
-	        }
-	   }
-	   spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	   spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	   if (ptprov) {
-	        rc = generates(RL_SND, pcprov, ptprov, iprov, NULL, flags);
-	        if (rc < 0)
-	                goto out;
-	   }
-	   rc = uses(RL_RCV, iprov, tprov, cprov, NULL, flags);
-	   out:
-	   spin_unlock(prov_lock(iprov));
-	   spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	   if (peer)
-	        sock_put(peer);*/
-	return 0;
+		peer = unix_peer_get(sock->sk);
+		if (peer) {
+			pcprov = sk_cprov(peer);
+			if (pcprov == cprov)
+				pcprov = NULL;
+			ptprov = sk_tprov(peer);
+			if (ptprov == tprov)
+				ptprov = NULL;
+		}
+	}
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	if (ptprov) {
+		rc = generates(RL_SND, pcprov, ptprov, iprov, NULL, flags);
+		if (rc < 0)
+			goto out;
+	}
+	rc = uses(RL_RCV, iprov, tprov, cprov, NULL, flags);
+out:
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	if (peer)
+		sock_put(peer);
+	return rc;
 }
 
 /*
@@ -1525,40 +1525,40 @@ static int provenance_socket_recvmsg(struct socket *sock,
  */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-	/*struct provenance *cprov = sk_cprov(sk);
-	   struct provenance *tprov = sk_tprov(sk);
-	   struct provenance *iprov;
-	   union prov_elt pckprov;
-	   uint16_t family = sk->sk_family;
-	   unsigned long irqflags;
-	   int rc = 0;
+	struct provenance *cprov = sk_cprov(sk);
+	struct provenance *tprov = sk_tprov(sk);
+	struct provenance *iprov;
+	union prov_elt pckprov;
+	uint16_t family = sk->sk_family;
+	unsigned long irqflags;
+	int rc = 0;
 
-	   if (!cprov)
-	        return 0;
-	   if (family != PF_INET)
-	        return 0;
-	   iprov = sk_inode_provenance(sk);
-	   if (!iprov)
-	        return 0;
-	   if (provenance_is_tracked(prov_elt(iprov)) ||
+	if (!cprov)
+		return 0;
+	if (family != PF_INET)
+		return 0;
+	iprov = sk_inode_provenance(sk);
+	if (!iprov)
+		return 0;
+	if (provenance_is_tracked(prov_elt(iprov)) ||
 	    provenance_is_tracked(prov_elt(cprov))) {
-	        provenance_parse_skb_ipv4(skb, &pckprov);
-	        spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	        spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	        rc = record_pck_to_inode(&pckprov, iprov);
-	        if (rc < 0)
-	                goto out;
-	        if (provenance_is_tracked(prov_elt(cprov)))
-	                rc = uses(RL_RCV, iprov, tprov, cprov, NULL, 0);
-	        if (rc < 0)
-	                goto out;
-	        if (provenance_records_packet(prov_elt(iprov)))
-	                rc = record_packet_content(&pckprov, skb);
-	   out:
-	        spin_unlock(prov_lock(iprov));
-	        spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	   }*/
-	return 0;
+		provenance_parse_skb_ipv4(skb, &pckprov);
+		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+		rc = record_pck_to_inode(&pckprov, iprov);
+		if (rc < 0)
+			goto out;
+		if (provenance_is_tracked(prov_elt(cprov)))
+			rc = uses(RL_RCV, iprov, tprov, cprov, NULL, 0);
+		if (rc < 0)
+			goto out;
+		if (provenance_records_packet(prov_elt(iprov)))
+			rc = record_packet_content(&pckprov, skb);
+out:
+		spin_unlock(prov_lock(iprov));
+		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	}
+	return rc;
 }
 
 /*
@@ -1597,18 +1597,18 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	/*struct provenance *scprov = socket_cprov(sock);
-	   struct provenance *stprov = socket_tprov(sock);
-	   struct provenance *oprov = socket_inode_provenance(other);
-	   unsigned long irqflags;
-	   int rc;
+	struct provenance *scprov = socket_cprov(sock);
+	struct provenance *stprov = socket_tprov(sock);
+	struct provenance *oprov = socket_inode_provenance(other);
+	unsigned long irqflags;
+	int rc;
 
-	   spin_lock_irqsave_nested(prov_lock(scprov), irqflags, PROVENANCE_LOCK_SOCKET);
-	   spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	   rc = generates(RL_SND, scprov, stprov, oprov, NULL, 0);
-	   spin_unlock(prov_lock(oprov));
-	   spin_unlock_irqrestore(prov_lock(scprov), irqflags);*/
-	return 0;
+	spin_lock_irqsave_nested(prov_lock(scprov), irqflags, PROVENANCE_LOCK_SOCKET);
+	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
+	rc = generates(RL_SND, scprov, stprov, oprov, NULL, 0);
+	spin_unlock(prov_lock(oprov));
+	spin_unlock_irqrestore(prov_lock(scprov), irqflags);
+	return rc;
 }
 
 /* outdated description */
