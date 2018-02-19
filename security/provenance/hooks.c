@@ -1440,7 +1440,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	if (rc < 0)
 		goto out;
 	if (pprov)
-		rc = uses(RL_RCV, iprov, pprov, NULL, 0);
+		rc = derives(RL_RCV_PACKET, iprov, pprov, NULL, 0);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1491,7 +1491,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (pprov) {
-		rc = derives(RL_SND, pprov, iprov, NULL, flags);
+		rc = derives(RL_SND_PACKET, pprov, iprov, NULL, flags);
 		if (rc < 0)
 			goto out;
 	}
@@ -1537,7 +1537,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		if (rc < 0)
 			goto out;
 		if (provenance_is_tracked(prov_elt(cprov)))
-			rc = uses(RL_RCV, iprov, cprov, NULL, 0);
+			rc = derives(RL_RCV_PACKET, iprov, cprov, NULL, 0);
 		if (rc < 0)
 			goto out;
 		if (provenance_records_packet(prov_elt(iprov)))
@@ -1592,7 +1592,7 @@ static int provenance_unix_may_send(struct socket *sock,
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = generates(RL_SND, sprov, oprov, NULL, 0);
+	rc = derives(RL_SND_PACKET, sprov, oprov, NULL, 0);
 	spin_unlock(prov_lock(oprov));
 	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
 	return rc;
