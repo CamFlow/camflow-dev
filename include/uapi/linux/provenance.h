@@ -21,6 +21,16 @@
 #include <linux/mutex.h>
 #endif
 
+#define xstr(s) str(s)
+#define str(s) # s
+
+#define CAMFLOW_VERSION_MAJOR     0
+#define CAMFLOW_VERSION_MINOR     3
+#define CAMFLOW_VERSION_PATCH     12
+#define CAMFLOW_VERSION_STR "v"xstr(CAMFLOW_VERSION_MAJOR)\
+  "."xstr(CAMFLOW_VERSION_MINOR)\
+  "."xstr(CAMFLOW_VERSION_PATCH)\
+
 #define PROVENANCE_HASH "sha256"
 
 #define PROV_GOLDEN_RATIO_64 0x61C8864680B583EBUL

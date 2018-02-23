@@ -21,7 +21,6 @@
 #include <linux/integrity.h>
 #include <linux/ima.h>
 #include <linux/evm.h>
-#include <linux/camflow.h>
 #include <linux/fsnotify.h>
 #include <linux/mman.h>
 #include <linux/mount.h>

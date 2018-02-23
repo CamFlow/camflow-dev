@@ -18,7 +18,6 @@
 #include <linux/bug.h>
 #include <linux/socket.h>
 #include <uapi/linux/mman.h>
-#include <uapi/linux/camflow.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/provenance_types.h>
 #include <uapi/linux/stat.h>
