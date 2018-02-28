@@ -205,7 +205,7 @@ static int provenance_task_fix_setuid(struct cred *new,
 	unsigned long irqflags;
 	int rc;
 
-	if (info == 1 || SI_FROMKERNEL(info)) // from kernel let it be
+	if (SI_FROMKERNEL(info)) // from kernel let it be
 		return 0;
 	cprov = get_current_provenance();
 	if (unlikely(!cprov))
@@ -1681,6 +1681,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(cred_prepare,	      		provenance_cred_prepare),
 	LSM_HOOK_INIT(cred_transfer,	      	provenance_cred_transfer),
 	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
+	LSM_HOOK_INIT(task_kill,				      provenance_task_kill),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,   provenance_inode_alloc_security),
