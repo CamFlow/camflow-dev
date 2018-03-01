@@ -34,6 +34,7 @@
 
 ### v0.3.12
 ```
+- Handle signal.
 - Update to kernel version 4.14.22.
 ```
 
