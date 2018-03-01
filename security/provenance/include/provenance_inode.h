@@ -30,7 +30,6 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
 	union prov_elt old_prov;
 	uint64_t type = ENT_INODE_UNKNOWN;
-	unsigned long irqflags;
 
 	if (S_ISBLK(mode))
 		type = ENT_INODE_BLOCK;
@@ -46,7 +45,6 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		type = ENT_INODE_FILE;
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
-	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
 	if (prov_elt(prov)->inode_info.mode != 0
 	    && prov_elt(prov)->inode_info.mode != mode
 	    && provenance_is_recorded(prov_elt(prov))) {
@@ -67,7 +65,6 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 out:
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
-	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
 static inline void provenance_mark_as_opaque(const char *name)
@@ -163,13 +160,11 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 
 	if (prov->initialised)
 		return 0;
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if (prov->initialised) {
-		spin_unlock(prov_lock(prov));
+	if (prov->initialised)
 		return 0;
-	}       else
+	else
 		prov->initialised = true;
-	spin_unlock(prov_lock(prov));
+
 	update_inode_type(inode->i_mode, prov);
 	if (!(inode->i_opflags & IOP_XATTR)) // xattr not supported on this inode
 		return 0;
@@ -242,14 +237,10 @@ static inline void save_provenance(struct dentry *dentry)
 	prov = dentry_provenance(dentry, false);
 	if (!prov)
 		return;
-	spin_lock(prov_lock(prov));
-	if (!prov->initialised || prov->saved) { // not initialised or already saved
-		spin_unlock(prov_lock(prov));
+	if (!prov->initialised || prov->saved)
 		return;
-	}
 	memcpy(&buf, prov_elt(prov), sizeof(union prov_elt));
 	prov->saved = true;
-	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
 	clear_name_recorded(&buf);
 	if (!dentry)

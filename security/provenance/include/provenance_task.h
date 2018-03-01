@@ -167,12 +167,10 @@ static inline void current_update_shst(struct provenance *cprov)
 			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
 				cprov->has_mmap = true;
-				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
 					record_relation(RL_SH_READ, mmprov, cprov, mmapf, flags);
 				if (vm_write_mayshare(flags))
 					record_relation(RL_SH_WRITE, cprov, mmprov, mmapf, flags);
-				spin_unlock(prov_lock(mmprov));
 			}
 		}
 		vma = vma->vm_next;
@@ -266,13 +264,11 @@ static inline void update_task_perf(struct task_struct *task,
 static inline struct provenance *get_current_provenance(void)
 {
 	struct provenance *prov = current_provenance();
-	unsigned long irqflags;
 
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		goto out;
 	record_task_name(current, prov);
-	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
 	prov_elt(prov)->task_info.pid = task_pid_nr(current);
 	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
 	prov_elt(prov)->task_info.ppid = task_ppid_nr(current);
@@ -289,7 +285,6 @@ static inline struct provenance *get_current_provenance(void)
 		current_update_shst(prov);
 		prov->updt_mmap = false;
 	}
-	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
 	return prov;
 }

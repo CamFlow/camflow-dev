@@ -228,10 +228,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
-		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 		__write_node(prov_entry(cprov));
 		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
-		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id = prov_next_id();
 		node_identifier(node).boot_id = prov_boot_id;
 		node_identifier(node).machine_id = prov_machine_id;
@@ -273,7 +271,6 @@ declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
 static inline void update_prov_config(union prov_elt *setting, uint8_t op, struct provenance *prov)
 {
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
 			set_tracked(prov_elt(prov));
@@ -297,7 +294,6 @@ static inline void update_prov_config(union prov_elt *setting, uint8_t op, struc
 
 	if ((op & PROV_SET_TAINT) != 0)
 		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
-	spin_unlock(prov_lock(prov));
 }
 
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
@@ -324,10 +320,8 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
-	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
 	if (copy_to_user(buf, prov_elt(cprov), sizeof(union prov_elt)))
 		count = -EAGAIN;
-	spin_unlock(prov_lock(cprov));
 	return count; // write only
 }
 declare_file_operations(prov_self_ops, prov_write_self, prov_read_self);
@@ -450,10 +444,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		rtn = -EINVAL;
 		goto out;
 	}
-
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
 	memcpy(&msg->prov, prov_elt(prov), sizeof(union prov_elt));
-	spin_unlock(prov_lock(prov));
 
 	if (copy_to_user(buf, msg, sizeof(struct prov_process_config)))
 		rtn = -ENOMEM;
