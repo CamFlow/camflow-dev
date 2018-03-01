@@ -30,7 +30,6 @@ script:
 
 after_success:
   - make prepare_release_travis
-  - ./linuxkit.sh
 
 deploy:
   provider: releases
