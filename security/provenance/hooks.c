@@ -217,6 +217,42 @@ static int provenance_task_fix_setuid(struct cred *new,
 }
 
 /*
+ *	Check permission before sending signal @sig to @p.  @info can be NULL,
+ *	the constant 1, or a pointer to a siginfo structure.  If @info is 1 or
+ *	SI_FROMKERNEL(info) is true, then the signal should be viewed as coming
+ *	from the kernel and should typically be permitted.
+ *	SIGIO signals are handled separately by the send_sigiotask hook in
+ *	file_security_ops.
+ *	@p contains the task_struct for process.
+ *	@info contains the signal information.
+ *	@sig contains the signal value.
+ *	@secid contains the sid of the process where the signal originated
+ *	Return 0 if permission is granted.
+ */
+ static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
+ 				int sig, u32 secid)
+ {
+	struct provenance *cprov;
+	struct provenance *tprov;
+	unsigned long irqflags;
+	int rc;
+
+	if (SI_FROMKERNEL(info)) // from kernel let it be
+		return 0;
+	cprov = get_current_provenance();
+	if (unlikely(!cprov))
+		return -ENOMEM;
+	tprov = p->real_cred->provenance;
+	if (unlikely(!tprov))
+		return -ENOMEM;
+	spin_lock_irqsave(prov_lock(cprov), irqflags);
+	// TODO replace change
+	rc = informs(RL_CHANGE, cprov, tprov, NULL, sig);
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+ 	return rc;
+ }
+
+/*
  * Allocate and attach a security structure to @inode->i_security.  The
  * i_security field is initialized to NULL when the inode structure is
  * allocated.
@@ -1728,6 +1764,7 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
+<<<<<<< HEAD
 	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,			    provenance_task_free),
 	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
@@ -1736,6 +1773,14 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(cred_prepare,			    provenance_cred_prepare),
 	LSM_HOOK_INIT(cred_transfer,			    provenance_cred_transfer),
 	LSM_HOOK_INIT(task_fix_setuid,			    provenance_task_fix_setuid),
+=======
+	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
+	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
+	LSM_HOOK_INIT(cred_prepare,	      		provenance_cred_prepare),
+	LSM_HOOK_INIT(cred_transfer,	      	provenance_cred_transfer),
+	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
+	LSM_HOOK_INIT(task_kill,				      provenance_task_kill),
+>>>>>>> 8c99bd8e0836b086121e9104f810bb5d87fd9cf5
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,		    provenance_inode_alloc_security),
