@@ -239,7 +239,7 @@ static int provenance_task_fix_setuid(struct cred *new,
 
 	if (SI_FROMKERNEL(info)) // from kernel let it be
 		return 0;
-	cprov = get_current_provenance();
+	cprov = get_task_provenance();
 	if (unlikely(!cprov))
 		return -ENOMEM;
 	tprov = p->real_cred->provenance;
@@ -1764,23 +1764,15 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
-<<<<<<< HEAD
-	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
-	LSM_HOOK_INIT(task_free,			    provenance_task_free),
 	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
 	LSM_HOOK_INIT(cred_alloc_blank,			    provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
 	LSM_HOOK_INIT(cred_prepare,			    provenance_cred_prepare),
 	LSM_HOOK_INIT(cred_transfer,			    provenance_cred_transfer),
+	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
+	LSM_HOOK_INIT(task_free,			    provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,			    provenance_task_fix_setuid),
-=======
-	LSM_HOOK_INIT(cred_alloc_blank,	      provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_free,	      			provenance_cred_free),
-	LSM_HOOK_INIT(cred_prepare,	      		provenance_cred_prepare),
-	LSM_HOOK_INIT(cred_transfer,	      	provenance_cred_transfer),
-	LSM_HOOK_INIT(task_fix_setuid,	      provenance_task_fix_setuid),
 	LSM_HOOK_INIT(task_kill,				      provenance_task_kill),
->>>>>>> 8c99bd8e0836b086121e9104f810bb5d87fd9cf5
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,		    provenance_inode_alloc_security),
