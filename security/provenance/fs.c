@@ -51,9 +51,15 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
 	provenance_mark_as_opaque(PROV_BOOT_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_DERIVED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_GENERATED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_USED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_INFORMED_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_RELATION_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_DERIVED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_GENERATED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_USED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_INFORMED_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
 	provenance_mark_as_opaque(PROV_PROCESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
@@ -379,17 +385,41 @@ declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
 declare_reader_filter_fcn(prov_read_node_filter, prov_policy.prov_node_filter);
 declare_file_operations(prov_node_filter_ops, prov_write_node_filter, prov_read_node_filter);
 
-declare_write_filter_fcn(prov_write_relation_filter, prov_policy.prov_relation_filter);
-declare_reader_filter_fcn(prov_read_relation_filter, prov_policy.prov_relation_filter);
-declare_file_operations(prov_relation_filter_ops, prov_write_relation_filter, prov_read_relation_filter);
+declare_write_filter_fcn(prov_write_derived_filter, prov_policy.prov_derived_filter);
+declare_reader_filter_fcn(prov_read_derived_filter, prov_policy.prov_derived_filter);
+declare_file_operations(prov_derived_filter_ops, prov_write_derived_filter, prov_read_derived_filter);
+
+declare_write_filter_fcn(prov_write_generated_filter, prov_policy.prov_generated_filter);
+declare_reader_filter_fcn(prov_read_generated_filter, prov_policy.prov_generated_filter);
+declare_file_operations(prov_generated_filter_ops, prov_write_generated_filter, prov_read_generated_filter);
+
+declare_write_filter_fcn(prov_write_used_filter, prov_policy.prov_used_filter);
+declare_reader_filter_fcn(prov_read_used_filter, prov_policy.prov_used_filter);
+declare_file_operations(prov_used_filter_ops, prov_write_used_filter, prov_read_used_filter);
+
+declare_write_filter_fcn(prov_write_informed_filter, prov_policy.prov_informed_filter);
+declare_reader_filter_fcn(prov_read_informed_filter, prov_policy.prov_informed_filter);
+declare_file_operations(prov_informed_filter_ops, prov_write_informed_filter, prov_read_informed_filter);
 
 declare_write_filter_fcn(prov_write_propagate_node_filter, prov_policy.prov_propagate_node_filter);
 declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_policy.prov_propagate_node_filter);
 declare_file_operations(prov_propagate_node_filter_ops, prov_write_propagate_node_filter, prov_read_propagate_node_filter);
 
-declare_write_filter_fcn(prov_write_propagate_relation_filter, prov_policy.prov_propagate_relation_filter);
-declare_reader_filter_fcn(prov_read_propagate_relation_filter, prov_policy.prov_propagate_relation_filter);
-declare_file_operations(prov_propagate_relation_filter_ops, prov_write_propagate_relation_filter, prov_read_propagate_relation_filter);
+declare_write_filter_fcn(prov_write_propagate_derived_filter, prov_policy.prov_propagate_derived_filter);
+declare_reader_filter_fcn(prov_read_propagate_derived_filter, prov_policy.prov_propagate_derived_filter);
+declare_file_operations(prov_propagate_derived_filter_ops, prov_write_propagate_derived_filter, prov_read_propagate_derived_filter);
+
+declare_write_filter_fcn(prov_write_propagate_generated_filter, prov_policy.prov_propagate_generated_filter);
+declare_reader_filter_fcn(prov_read_propagate_generated_filter, prov_policy.prov_propagate_generated_filter);
+declare_file_operations(prov_propagate_generated_filter_ops, prov_write_propagate_generated_filter, prov_read_propagate_generated_filter);
+
+declare_write_filter_fcn(prov_write_propagate_used_filter, prov_policy.prov_propagate_used_filter);
+declare_reader_filter_fcn(prov_read_propagate_used_filter, prov_policy.prov_propagate_used_filter);
+declare_file_operations(prov_propagate_used_filter_ops, prov_write_propagate_used_filter, prov_read_propagate_used_filter);
+
+declare_write_filter_fcn(prov_write_propagate_informed_filter, prov_policy.prov_propagate_informed_filter);
+declare_reader_filter_fcn(prov_read_propagate_informed_filter, prov_policy.prov_propagate_informed_filter);
+declare_file_operations(prov_propagate_informed_filter_ops, prov_write_propagate_informed_filter, prov_read_propagate_informed_filter);
 
 static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
@@ -895,11 +925,16 @@ static int __init init_prov_fs(void)
 	prov_create_file("machine_id", 0444, &prov_machine_id_ops);
 	prov_create_file("boot_id", 0444, &prov_boot_id_ops);
 	prov_create_file("node_filter", 0644, &prov_node_filter_ops);
-	prov_create_file("relation_filter", 0644, &prov_relation_filter_ops);
+	prov_create_file("derived_filter", 0644, &prov_derived_filter_ops);
+	prov_create_file("generated_filter", 0644, &prov_generated_filter_ops);
+	prov_create_file("used_filter", 0644, &prov_used_filter_ops);
+	prov_create_file("informed_filter", 0644, &prov_informed_filter_ops);
 	prov_create_file("propagate_node_filter", 0644,
 			 &prov_propagate_node_filter_ops);
-	prov_create_file("propagate_relation_filter", 0644,
-			 &prov_propagate_relation_filter_ops);
+	prov_create_file("propagate_derived_filter", 0644, &prov_propagate_derived_filter_ops);
+ 	prov_create_file("propagate_generated_filter", 0644, &prov_propagate_generated_filter_ops);
+ 	prov_create_file("propagate_used_filter", 0644, &prov_propagate_used_filter_ops);
+ 	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
 	prov_create_file("flush", 0600, &prov_flush_ops);
 	prov_create_file("process", 0644, &prov_process_ops);
 	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);

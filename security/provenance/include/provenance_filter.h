@@ -48,8 +48,19 @@ static inline bool filter_update_node(const uint64_t relation_type)
 static inline bool filter_relation(const uint64_t type)
 {
 	// we hit an element of the black list ignore
-	if (HIT_FILTER(prov_policy.prov_relation_filter, type))
-		return true;
+	if (prov_is_derived(type)) {
+		if (HIT_FILTER(prov_policy.prov_derived_filter, type))
+			return true;
+	} else if (prov_is_generated(type)) {
+		if (HIT_FILTER(prov_policy.prov_generated_filter, type))
+			return true;
+	} else if (prov_is_used(type)) {
+		if (HIT_FILTER(prov_policy.prov_used_filter, type))
+			return true;
+	} else if (prov_is_informed(type)) {
+		if (HIT_FILTER(prov_policy.prov_informed_filter, type))
+			return true;
+	}
 	return false;
 }
 
@@ -57,8 +68,20 @@ static inline bool filter_relation(const uint64_t type)
 static inline bool filter_propagate_relation(uint64_t type)
 {
 	// the relation does not allow tracking propagation
-	if (HIT_FILTER(prov_policy.prov_propagate_relation_filter, type))
-		return true;
+	// we hit an element of the black list ignore
+	if (prov_is_derived(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_derived_filter, type))
+			return true;
+	} else if (prov_is_generated(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter, type))
+			return true;
+	} else if (prov_is_used(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_used_filter, type))
+			return true;
+	} else if (prov_is_informed(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter, type))
+			return true;
+	}
 	return false;
 }
 

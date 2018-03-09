@@ -137,7 +137,7 @@
 #define prov_is_packet(prov) (node_type(prov) == ENT_PACKET)
 
 #define prov_is_type(val, type) ((val&type)==type)
-#define prov_is_used(val) prov_is_type(type, RL_USED)
+#define prov_is_used(val) prov_is_type(val, RL_USED)
 #define prov_is_informed(val) prov_is_type(val, RL_INFORMED)
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
 #define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
