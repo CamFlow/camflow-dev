@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.12          | 4.14.22        | N/A        |
+| 0.3.12          | 4.14.24        | N/A        |
 | 0.3.11          | 4.14.18        | 09/02/2018 |
 | 0.3.10          | 4.14.15        | 27/01/2018 |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
@@ -36,7 +36,7 @@
 ```
 - Handle signal.
 - Revert single source of ID change.
-- Update to kernel version 4.14.22.
+- Update to kernel version 4.14.24.
 ```
 
 ### v0.3.11
