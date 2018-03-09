@@ -229,28 +229,11 @@ static int provenance_task_fix_setuid(struct cred *new,
  *	@secid contains the sid of the process where the signal originated
  *	Return 0 if permission is granted.
  */
- static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
- 				int sig, u32 secid)
- {
-	struct provenance *cprov;
-	struct provenance *tprov;
-	unsigned long irqflags;
-	int rc;
-
-	if (SI_FROMKERNEL(info)) // from kernel let it be
-		return 0;
-	cprov = get_task_provenance();
-	if (unlikely(!cprov))
-		return -ENOMEM;
-	tprov = p->real_cred->provenance;
-	if (unlikely(!tprov))
-		return -ENOMEM;
-	spin_lock_irqsave(prov_lock(cprov), irqflags);
-	// TODO replace change
-	rc = informs(RL_CHANGE, cprov, tprov, NULL, sig);
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
- 	return rc;
- }
+static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
+				int sig, u32 secid)
+{
+	return 0;
+}
 
 /*
  * Allocate and attach a security structure to @inode->i_security.  The
@@ -1772,7 +1755,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,			    provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,			    provenance_task_fix_setuid),
-	LSM_HOOK_INIT(task_kill,				      provenance_task_kill),
+	LSM_HOOK_INIT(task_kill,			    provenance_task_kill),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,		    provenance_inode_alloc_security),
