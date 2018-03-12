@@ -1533,22 +1533,18 @@ out:
  */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
-	struct provenance *cprov = sk_provenance(sk);
 	struct provenance *iprov;
 	union prov_elt pckprov;
 	uint16_t family = sk->sk_family;
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!cprov)
-		return 0;
 	if (family != PF_INET)
 		return 0;
 	iprov = sk_inode_provenance(sk);
 	if (!iprov)
 		return 0;
-	if (provenance_is_tracked(prov_elt(iprov)) ||
-	    provenance_is_tracked(prov_elt(cprov))) {
+	if (provenance_is_tracked(prov_elt(iprov))) {
 		provenance_parse_skb_ipv4(skb, &pckprov);
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		rc = record_pck_to_inode(&pckprov, iprov);
