@@ -35,6 +35,7 @@
 ### v0.3.12
 ```
 - Increased the maximum number of relation type supported.
+- Protect (ro) a number of pointers after init.
 - Handle signal.
 - Revert single source of ID change.
 - Update to kernel version 4.14.24.

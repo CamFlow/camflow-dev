@@ -52,7 +52,6 @@ static int remove_buf_file_handler(struct dentry *dentry)
  * relay interface callbacks
  */
 static struct rchan_callbacks relay_callbacks = {
-
 	.create_buf_file	= create_buf_file_handler,
 	.remove_buf_file	= remove_buf_file_handler,
 };

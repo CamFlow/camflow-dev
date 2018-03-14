@@ -45,7 +45,7 @@ free_work:
 	kfree(w);
 }
 
-static struct workqueue_struct *prov_queue;
+static struct workqueue_struct *prov_queue __ro_after_init;
 static inline void queue_save_provenance(struct provenance *provenance,
 					 struct dentry *dentry)
 {
@@ -1827,8 +1827,8 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(sb_kern_mount,			    provenance_sb_kern_mount)
 };
 
-struct kmem_cache *provenance_cache;
-struct kmem_cache *long_provenance_cache;
+struct kmem_cache *provenance_cache __ro_after_init;
+struct kmem_cache *long_provenance_cache __ro_after_init;
 
 struct prov_boot_buffer         *boot_buffer;
 struct prov_long_boot_buffer    *long_boot_buffer;
