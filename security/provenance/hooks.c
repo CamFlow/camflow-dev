@@ -291,7 +291,7 @@ static int provenance_inode_create(struct inode *dir,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
-	rc = generates(RL_WRITE, cprov, tprov, iprov, NULL, mode);
+	rc = generates(RL_INODE_CREATE, cprov, tprov, iprov, NULL, mode);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
