@@ -17,6 +17,7 @@
 static const char RL_STR_UNKNOWN[]               = "unknown";
 static const char RL_STR_READ[]                  = "read";
 static const char RL_STR_WRITE[]                 = "write";
+static const char RL_STR_CLONE_MEM[]             = "clone_mem";
 static const char RL_STR_CREATE[]                = "create";
 static const char RL_STR_SOCKET_CREATE[]         = "socket_create";
 static const char RL_STR_CHANGE[]                = "change";
@@ -111,6 +112,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_READ;
 	case RL_WRITE:
 		return RL_STR_WRITE;
+	case RL_CLONE_MEM:
+		return RL_STR_CLONE_MEM;
 	case RL_CREATE:
 		return RL_STR_CREATE;
 	case RL_SOCKET_CREATE:
@@ -232,6 +235,7 @@ uint64_t relation_id(const char* str)
 {
 	MATCH_AND_RETURN(str, RL_STR_READ, RL_READ);
 	MATCH_AND_RETURN(str, RL_STR_WRITE, RL_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_CLONE_MEM, RL_CLONE_MEM);
 	MATCH_AND_RETURN(str, RL_STR_CREATE, RL_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SOCKET_CREATE, RL_SOCKET_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_CHANGE, RL_CHANGE);

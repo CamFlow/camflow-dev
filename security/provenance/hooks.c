@@ -170,7 +170,7 @@ static int provenance_cred_prepare(struct cred *new,
 	prov->has_mmap = old_prov->has_mmap;
 	if (current != NULL) {
 		if (current->provenance != NULL)
-			rc = generates(RL_CREATE, old_prov, current->provenance, prov, NULL, 0);
+			rc = generates(RL_CLONE_MEM, old_prov, current->provenance, prov, NULL, 0);
 	} else
 		rc = informs(RL_CLONE, old_prov, prov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);

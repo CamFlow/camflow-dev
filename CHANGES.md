@@ -34,6 +34,7 @@
 
 ### v0.3.12
 ```
+- Added new relation type: RL_CLONE_MEM.
 - Added new relation type: RL_SOCKET_CREATE.
 - Re-introduce RL_SND_UNIX and RL_RCV_UNIX now that we have space.
 - Added new relation type: RL_PROC_WRITE and RL_PROC_READ.
