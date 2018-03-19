@@ -96,7 +96,7 @@
 #define RL_OPEN               (RL_USED      | (0x0000000000000001ULL<<9))
 #define RL_SEARCH             (RL_USED      | (0x0000000000000001ULL<<10))
 #define RL_GETATTR            (RL_USED      | (0x0000000000000001ULL<<11))
-#define RL_READLINK           (RL_USED      | (0x0000000000000001ULL<<12))
+#define RL_READ_LINK           (RL_USED      | (0x0000000000000001ULL<<12))
 #define RL_GETXATTR           (RL_USED      | (0x0000000000000001ULL<<13))
 #define RL_LSTXATTR           (RL_USED      | (0x0000000000000001ULL<<14))
 #define RL_NAMED_PROCESS      (RL_USED      | (0x0000000000000001ULL<<15))

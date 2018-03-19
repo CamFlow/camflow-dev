@@ -57,7 +57,7 @@ static const char RL_STR_GETATTR[]               = "getattr";
 static const char RL_STR_GETXATTR[]              = "getxattr";
 static const char RL_STR_GETXATTR_INODE[]        = "getxattr_inode";
 static const char RL_STR_LSTXATTR[]              = "listxattr";
-static const char RL_STR_READLINK[]              = "readlink";
+static const char RL_STR_READ_LINK[]              = "READ_LINK";
 static const char RL_STR_MMAP_READ[]             = "mmap_read";
 static const char RL_STR_SH_READ[]               = "sh_read";
 static const char RL_STR_PROC_READ[]             = "proc_read";
@@ -195,8 +195,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_GETXATTR_INODE;
 	case RL_LSTXATTR:
 		return RL_STR_LSTXATTR;
-	case RL_READLINK:
-		return RL_STR_READLINK;
+	case RL_READ_LINK:
+		return RL_STR_READ_LINK;
 	case RL_MMAP_READ:
 		return RL_STR_MMAP_READ;
 	case RL_MMAP_EXEC:
@@ -283,7 +283,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SETXATTR_INODE, RL_SETXATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_RMVXATTR, RL_RMVXATTR);
 	MATCH_AND_RETURN(str, RL_STR_RMVXATTR_INODE, RL_RMVXATTR_INODE);
-	MATCH_AND_RETURN(str, RL_STR_READLINK, RL_READLINK);
+	MATCH_AND_RETURN(str, RL_STR_READ_LINK, RL_READ_LINK);
 	MATCH_AND_RETURN(str, RL_STR_NAMED, RL_NAMED);
 	MATCH_AND_RETURN(str, RL_STR_NAMED_PROCESS, RL_NAMED_PROCESS);
 	MATCH_AND_RETURN(str, RL_STR_EXEC, RL_EXEC);

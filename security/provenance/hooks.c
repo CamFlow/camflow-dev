@@ -531,7 +531,7 @@ static int provenance_inode_readlink(struct dentry *dentry)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = uses(RL_READLINK, iprov, tprov, cprov, NULL, 0);
+	rc = uses(RL_READ_LINK, iprov, tprov, cprov, NULL, 0);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
