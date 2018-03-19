@@ -155,7 +155,7 @@ static __always_inline int uses(const uint64_t type,
 	rc = record_relation(type, from, tprov, file, flags);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(RL_SH_WRITE, tprov, cprov, NULL, 0);
+	rc = record_relation(RL_PROC_WRITE, tprov, cprov, NULL, 0);
 out:
 	if (should_record_relation(type, prov_entry(from), prov_entry(tprov)))
 		cprov->updt_mmap = true;
@@ -187,7 +187,7 @@ static __always_inline int generates(const uint64_t type,
 	if (!should_record_relation(type, prov_entry(tprov), prov_entry(to)))
 		return 0;
 
-	rc = record_relation(RL_SH_READ, cprov, tprov, NULL, 0);
+	rc = record_relation(RL_PROC_READ, cprov, tprov, NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = record_relation(type, tprov, to, file, flags);

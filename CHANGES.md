@@ -34,6 +34,7 @@
 
 ### v0.3.12
 ```
+- Added new relation type: RL_PROC_WRITE and RL_PROC_READ.
 - Increased the maximum number of relation type supported.
 - Protect (ro) a number of pointers after init.
 - Handle signal.

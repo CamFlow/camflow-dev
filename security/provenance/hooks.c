@@ -1131,10 +1131,10 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	prov_elt(sprov)->shm_info.mode = shp->shm_perm.mode;
 	shp->shm_perm.provenance = sprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	rc = uses(RL_READ, sprov, tprov, cprov, NULL, 0);
+	rc = uses(RL_SH_READ, sprov, tprov, cprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = generates(RL_WRITE, cprov, tprov, sprov, NULL, 0);
+	rc = generates(RL_SH_WRITE, cprov, tprov, sprov, NULL, 0);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1173,12 +1173,12 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
 	if (shmflg & SHM_RDONLY)
-		rc = uses(RL_READ, sprov, tprov, cprov, NULL, shmflg);
+		rc = uses(RL_SH_READ, sprov, tprov, cprov, NULL, shmflg);
 	else {
-		rc = uses(RL_READ, sprov, tprov, cprov, NULL, shmflg);
+		rc = uses(RL_SH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = generates(RL_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = generates(RL_SH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));

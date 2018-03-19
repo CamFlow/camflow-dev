@@ -21,6 +21,7 @@ static const char RL_STR_CREATE[]                = "create";
 static const char RL_STR_CHANGE[]                = "change";
 static const char RL_STR_MMAP_WRITE[]            = "mmap_write";
 static const char RL_STR_SH_WRITE[]              = "sh_write";
+static const char RL_STR_PROC_WRITE[]            = "proc_write";
 static const char RL_STR_BIND[]                  = "bind";
 static const char RL_STR_CONNECT[]               = "connect";
 static const char RL_STR_LISTEN[]                = "listen";
@@ -54,6 +55,7 @@ static const char RL_STR_LSTXATTR[]              = "listxattr";
 static const char RL_STR_READLINK[]              = "readlink";
 static const char RL_STR_MMAP_READ[]             = "mmap_read";
 static const char RL_STR_SH_READ[]               = "sh_read";
+static const char RL_STR_PROC_READ[]             = "proc_read";
 static const char RL_STR_MMAP_EXEC[]             = "mmap_exec";
 static const char RL_STR_SND[]                   = "send";
 static const char RL_STR_SND_PACKET[]            = "send_packet";
@@ -192,8 +194,12 @@ const char* relation_str(uint64_t type)
 		return RL_STR_PERM_WRITE;
 	case RL_SH_READ:
 		return RL_STR_SH_READ;
+	case RL_PROC_READ:
+		return RL_STR_PROC_READ;
 	case RL_SH_WRITE:
 		return RL_STR_SH_WRITE;
+	case RL_PROC_WRITE:
+		return RL_STR_PROC_WRITE;
 	case RL_PERM_EXEC:
 		return RL_STR_PERM_EXEC;
 	case RL_TERMINATE_PROCESS:
@@ -261,7 +267,9 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_PERM_WRITE, RL_PERM_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_PERM_EXEC, RL_PERM_EXEC);
 	MATCH_AND_RETURN(str, RL_STR_SH_READ, RL_SH_READ);
+	MATCH_AND_RETURN(str, RL_STR_PROC_READ, RL_PROC_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_WRITE, RL_SH_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_PROC_WRITE, RL_PROC_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_TERMINATE_PROCESS, RL_TERMINATE_PROCESS);
 	MATCH_AND_RETURN(str, RL_STR_CLOSED, RL_CLOSED);
 	MATCH_AND_RETURN(str, RL_STR_ARG, RL_ARG);
