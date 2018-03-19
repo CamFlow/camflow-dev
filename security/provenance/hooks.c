@@ -1455,7 +1455,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SND, cprov, tprov, iprov, NULL, 0);
+	rc = generates(RL_SND_MSG, cprov, tprov, iprov, NULL, 0);
 	if (rc < 0)
 		goto out;
 	if (pprov)
@@ -1514,7 +1514,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 		if (rc < 0)
 			goto out;
 	}
-	rc = uses(RL_RCV, iprov, tprov, cprov, NULL, flags);
+	rc = uses(RL_RCV_MSG, iprov, tprov, cprov, NULL, flags);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
