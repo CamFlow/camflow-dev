@@ -1251,7 +1251,7 @@ static int provenance_socket_post_create(struct socket *sock,
 		return 0;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_CREATE, cprov, tprov, iprov, NULL, 0);
+	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;

@@ -18,6 +18,7 @@ static const char RL_STR_UNKNOWN[]               = "unknown";
 static const char RL_STR_READ[]                  = "read";
 static const char RL_STR_WRITE[]                 = "write";
 static const char RL_STR_CREATE[]                = "create";
+static const char RL_STR_SOCKET_CREATE[]         = "socket_create";
 static const char RL_STR_CHANGE[]                = "change";
 static const char RL_STR_MMAP_WRITE[]            = "mmap_write";
 static const char RL_STR_SH_WRITE[]              = "sh_write";
@@ -112,6 +113,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_WRITE;
 	case RL_CREATE:
 		return RL_STR_CREATE;
+	case RL_SOCKET_CREATE:
+		return RL_STR_SOCKET_CREATE;
 	case RL_CHANGE:
 		return RL_STR_CHANGE;
 	case RL_MMAP_WRITE:
@@ -230,6 +233,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_READ, RL_READ);
 	MATCH_AND_RETURN(str, RL_STR_WRITE, RL_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_CREATE, RL_CREATE);
+	MATCH_AND_RETURN(str, RL_STR_SOCKET_CREATE, RL_SOCKET_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_CHANGE, RL_CHANGE);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
