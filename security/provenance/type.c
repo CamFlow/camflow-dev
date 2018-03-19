@@ -16,7 +16,9 @@
 /* reation string name */
 static const char RL_STR_UNKNOWN[]               = "unknown";
 static const char RL_STR_READ[]                  = "read";
+static const char RL_STR_READ_IOCTL[]            = "read_ioctl";
 static const char RL_STR_WRITE[]                 = "write";
+static const char RL_STR_WRITE_IOCTL[]                 = "write";
 static const char RL_STR_CLONE_MEM[]             = "clone_mem";
 static const char RL_STR_MSG_CREATE[]            = "msg_create";
 static const char RL_STR_SOCKET_CREATE[]         = "socket_create";
@@ -114,8 +116,12 @@ const char* relation_str(uint64_t type)
 	switch (type) {
 	case RL_READ:
 		return RL_STR_READ;
+	case RL_READ_IOCTL:
+		return RL_STR_READ_IOCTL;
 	case RL_WRITE:
 		return RL_STR_WRITE;
+	case RL_WRITE_IOCTL:
+		return RL_STR_WRITE_IOCTL;
 	case RL_CLONE_MEM:
 		return RL_STR_CLONE_MEM;
 	case RL_MSG_CREATE:
@@ -246,7 +252,9 @@ EXPORT_SYMBOL_GPL(relation_str);
 uint64_t relation_id(const char* str)
 {
 	MATCH_AND_RETURN(str, RL_STR_READ, RL_READ);
+	MATCH_AND_RETURN(str, RL_STR_READ_IOCTL, RL_READ_IOCTL);
 	MATCH_AND_RETURN(str, RL_STR_WRITE, RL_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_WRITE_IOCTL, RL_WRITE_IOCTL);
 	MATCH_AND_RETURN(str, RL_STR_CLONE_MEM, RL_CLONE_MEM);
 	MATCH_AND_RETURN(str, RL_STR_MSG_CREATE, RL_MSG_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SOCKET_CREATE, RL_SOCKET_CREATE);

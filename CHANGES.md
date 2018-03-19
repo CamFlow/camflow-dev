@@ -34,6 +34,7 @@
 
 ### v0.3.12
 ```
+- Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.
 - Added new relation type: RL_SND_MSG_Q and RL_RCV_MSG_Q.
 - Added new relation type: RL_SND_MSG and RL_RCV_MSG.
 - Added new relation type: RL_CLONE_MEM.

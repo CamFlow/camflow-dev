@@ -971,10 +971,10 @@ static int provenance_file_ioctl(struct file *file,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_WRITE, cprov, tprov, iprov, NULL, 0);
+	rc = generates(RL_WRITE_IOCTL, cprov, tprov, iprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = uses(RL_READ, iprov, tprov, cprov, NULL, 0);
+	rc = uses(RL_READ_IOCTL, iprov, tprov, cprov, NULL, 0);
 out:
 	queue_save_provenance(iprov, file_dentry(file));
 	spin_unlock(prov_lock(iprov));
