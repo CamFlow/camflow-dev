@@ -63,10 +63,12 @@ static const char RL_STR_SND[]                   = "send";
 static const char RL_STR_SND_PACKET[]            = "send_packet";
 static const char RL_STR_SND_UNIX[]            	 = "send_unix";
 static const char RL_STR_SND_MSG[]            	 = "send_msg";
+static const char RL_STR_SND_MSG_Q[]             = "send_msg_queue";
 static const char RL_STR_RCV[]                   = "receive";
 static const char RL_STR_RCV_PACKET[]            = "receive_packet";
 static const char RL_STR_RCV_UNIX[]            	 = "receive_unix";
 static const char RL_STR_RCV_MSG[]            	 = "receive_msg";
+static const char RL_STR_RCV_MSG_Q[]						 = "receive_msg_queue";
 static const char RL_STR_PERM_READ[]             = "perm_read";
 static const char RL_STR_PERM_WRITE[]            = "perm_write";
 static const char RL_STR_PERM_EXEC[]             = "perm_exec";
@@ -198,6 +200,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SND_UNIX;
 	case RL_SND_MSG:
 		return RL_STR_SND_MSG;
+	case RL_SND_MSG_Q:
+		return RL_STR_SND_MSG_Q;
 	case RL_RCV:
 		return RL_STR_RCV;
 	case RL_RCV_PACKET:
@@ -206,6 +210,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_RCV_UNIX;
 	case RL_RCV_MSG:
 		return RL_STR_RCV_MSG;
+	case RL_RCV_MSG_Q:
+		return RL_STR_RCV_MSG_Q;
 	case RL_PERM_READ:
 		return RL_STR_PERM_READ;
 	case RL_PERM_WRITE:
@@ -283,10 +289,12 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SND_PACKET, RL_SND_PACKET);
 	MATCH_AND_RETURN(str, RL_STR_SND_UNIX, RL_SND_UNIX);
 	MATCH_AND_RETURN(str, RL_STR_SND_MSG, RL_SND_MSG);
+	MATCH_AND_RETURN(str, RL_STR_SND_MSG_Q, RL_SND_MSG_Q);
 	MATCH_AND_RETURN(str, RL_STR_RCV, RL_RCV);
 	MATCH_AND_RETURN(str, RL_STR_RCV_PACKET, RL_RCV_PACKET);
 	MATCH_AND_RETURN(str, RL_STR_RCV_UNIX, RL_RCV_UNIX);
 	MATCH_AND_RETURN(str, RL_STR_RCV_MSG, RL_RCV_MSG);
+	MATCH_AND_RETURN(str, RL_STR_RCV_MSG_Q, RL_RCV_MSG_Q);
 	MATCH_AND_RETURN(str, RL_STR_PERM_READ, RL_PERM_READ);
 	MATCH_AND_RETURN(str, RL_STR_PERM_WRITE, RL_PERM_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_PERM_EXEC, RL_PERM_EXEC);

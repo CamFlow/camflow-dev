@@ -1034,7 +1034,7 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
-	rc = generates(RL_CREATE, cprov, tprov, mprov, NULL, 0);
+	rc = generates(RL_SND_MSG_Q, cprov, tprov, mprov, NULL, 0);
 	spin_unlock(prov_lock(mprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -1072,7 +1072,7 @@ static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
-	rc = uses(RL_READ, mprov, tprov, cprov, NULL, 0);
+	rc = uses(RL_RCV_MSG_Q, mprov, tprov, cprov, NULL, 0);
 	spin_unlock(prov_lock(mprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
