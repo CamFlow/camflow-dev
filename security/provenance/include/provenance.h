@@ -35,8 +35,19 @@ extern uint32_t prov_boot_id;
 
 #define prov_next_id() ((uint64_t)atomic64_inc_return(&prov_id))
 
+enum {
+	PROVENANCE_LOCK_TASK,
+	PROVENANCE_LOCK_DIR,
+	PROVENANCE_LOCK_INODE,
+	PROVENANCE_LOCK_MSG,
+	PROVENANCE_LOCK_SHM,
+	PROVENANCE_LOCK_SOCKET,
+	PROVENANCE_LOCK_SOCK
+};
+
 struct provenance {
 	union prov_elt msg;
+	spinlock_t lock;
 	bool has_mmap;
 	bool updt_mmap;
 	bool has_outgoing;
@@ -47,6 +58,7 @@ struct provenance {
 };
 
 #define prov_elt(provenance) (&(provenance->msg))
+#define prov_lock(provenance) (&(provenance->lock))
 #define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
 
 #define ASSIGN_NODE_ID 0
@@ -60,6 +72,7 @@ static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 
 	if (!prov)
 		return NULL;
+	spin_lock_init(prov_lock(prov));
 	prov_type(prov_elt(prov)) = ntype;
 	node_identifier(prov_elt(prov)).id = prov_next_id();
 	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;

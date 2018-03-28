@@ -32,6 +32,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
 	// record the relation
+	spin_lock(prov_lock(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
@@ -39,6 +40,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
 		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
 	}
+	spin_unlock(prov_lock(node));
 	free_long_provenance(fname_prov);
 	return rc;
 }
