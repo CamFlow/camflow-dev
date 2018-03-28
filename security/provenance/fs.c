@@ -11,6 +11,7 @@
  *
  */
 #include <linux/security.h>
+#include <linux/provenance_types.h>
 #include <crypto/hash.h>
 
 #include "provenance.h"
@@ -18,7 +19,6 @@
 #include "provenance_inode.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
-#include "provenance_types.h"
 
 #define TMPBUFLEN       12
 
@@ -51,9 +51,15 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
 	provenance_mark_as_opaque(PROV_BOOT_ID_FILE);
 	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_RELATION_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_DERIVED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_GENERATED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_USED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_INFORMED_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_RELATION_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_DERIVED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_GENERATED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_USED_FILTER_FILE);
+	provenance_mark_as_opaque(PROV_PROPAGATE_INFORMED_FILTER_FILE);
 	provenance_mark_as_opaque(PROV_FLUSH_FILE);
 	provenance_mark_as_opaque(PROV_PROCESS_FILE);
 	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
@@ -210,7 +216,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 	union long_prov_elt *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
@@ -228,11 +234,11 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
-		spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
+		spin_lock(prov_lock(cprov));
 		__write_node(prov_entry(cprov));
 		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));
-		node_identifier(node).id = prov_next_id();
+		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
 		node_identifier(node).machine_id = prov_machine_id;
 		__write_node(node);
@@ -273,7 +279,7 @@ declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
 static inline void update_prov_config(union prov_elt *setting, uint8_t op, struct provenance *prov)
 {
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
+	spin_lock(prov_lock(prov));
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
 			set_tracked(prov_elt(prov));
@@ -304,7 +310,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = get_current_provenance();
+	struct provenance *prov = get_cred_provenance();
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
@@ -319,12 +325,12 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
 
-	spin_lock_nested(prov_lock(cprov), PROVENANCE_LOCK_TASK);
+	spin_lock(prov_lock(cprov));
 	if (copy_to_user(buf, prov_elt(cprov), sizeof(union prov_elt)))
 		count = -EAGAIN;
 	spin_unlock(prov_lock(cprov));
@@ -379,17 +385,41 @@ declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
 declare_reader_filter_fcn(prov_read_node_filter, prov_policy.prov_node_filter);
 declare_file_operations(prov_node_filter_ops, prov_write_node_filter, prov_read_node_filter);
 
-declare_write_filter_fcn(prov_write_relation_filter, prov_policy.prov_relation_filter);
-declare_reader_filter_fcn(prov_read_relation_filter, prov_policy.prov_relation_filter);
-declare_file_operations(prov_relation_filter_ops, prov_write_relation_filter, prov_read_relation_filter);
+declare_write_filter_fcn(prov_write_derived_filter, prov_policy.prov_derived_filter);
+declare_reader_filter_fcn(prov_read_derived_filter, prov_policy.prov_derived_filter);
+declare_file_operations(prov_derived_filter_ops, prov_write_derived_filter, prov_read_derived_filter);
+
+declare_write_filter_fcn(prov_write_generated_filter, prov_policy.prov_generated_filter);
+declare_reader_filter_fcn(prov_read_generated_filter, prov_policy.prov_generated_filter);
+declare_file_operations(prov_generated_filter_ops, prov_write_generated_filter, prov_read_generated_filter);
+
+declare_write_filter_fcn(prov_write_used_filter, prov_policy.prov_used_filter);
+declare_reader_filter_fcn(prov_read_used_filter, prov_policy.prov_used_filter);
+declare_file_operations(prov_used_filter_ops, prov_write_used_filter, prov_read_used_filter);
+
+declare_write_filter_fcn(prov_write_informed_filter, prov_policy.prov_informed_filter);
+declare_reader_filter_fcn(prov_read_informed_filter, prov_policy.prov_informed_filter);
+declare_file_operations(prov_informed_filter_ops, prov_write_informed_filter, prov_read_informed_filter);
 
 declare_write_filter_fcn(prov_write_propagate_node_filter, prov_policy.prov_propagate_node_filter);
 declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_policy.prov_propagate_node_filter);
 declare_file_operations(prov_propagate_node_filter_ops, prov_write_propagate_node_filter, prov_read_propagate_node_filter);
 
-declare_write_filter_fcn(prov_write_propagate_relation_filter, prov_policy.prov_propagate_relation_filter);
-declare_reader_filter_fcn(prov_read_propagate_relation_filter, prov_policy.prov_propagate_relation_filter);
-declare_file_operations(prov_propagate_relation_filter_ops, prov_write_propagate_relation_filter, prov_read_propagate_relation_filter);
+declare_write_filter_fcn(prov_write_propagate_derived_filter, prov_policy.prov_propagate_derived_filter);
+declare_reader_filter_fcn(prov_read_propagate_derived_filter, prov_policy.prov_propagate_derived_filter);
+declare_file_operations(prov_propagate_derived_filter_ops, prov_write_propagate_derived_filter, prov_read_propagate_derived_filter);
+
+declare_write_filter_fcn(prov_write_propagate_generated_filter, prov_policy.prov_propagate_generated_filter);
+declare_reader_filter_fcn(prov_read_propagate_generated_filter, prov_policy.prov_propagate_generated_filter);
+declare_file_operations(prov_propagate_generated_filter_ops, prov_write_propagate_generated_filter, prov_read_propagate_generated_filter);
+
+declare_write_filter_fcn(prov_write_propagate_used_filter, prov_policy.prov_propagate_used_filter);
+declare_reader_filter_fcn(prov_read_propagate_used_filter, prov_policy.prov_propagate_used_filter);
+declare_file_operations(prov_propagate_used_filter_ops, prov_write_propagate_used_filter, prov_read_propagate_used_filter);
+
+declare_write_filter_fcn(prov_write_propagate_informed_filter, prov_policy.prov_propagate_informed_filter);
+declare_reader_filter_fcn(prov_read_propagate_informed_filter, prov_policy.prov_propagate_informed_filter);
+declare_file_operations(prov_propagate_informed_filter_ops, prov_write_propagate_informed_filter, prov_read_propagate_informed_filter);
 
 static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
@@ -451,7 +481,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 		goto out;
 	}
 
-	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_TASK);
+	spin_lock(prov_lock(prov));
 	memcpy(&msg->prov, prov_elt(prov), sizeof(union prov_elt));
 	spin_unlock(prov_lock(prov));
 
@@ -464,7 +494,7 @@ out:
 declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
 
 static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
-					  size_t count, struct list_head *filters)
+				   size_t count, struct list_head *filters)
 {
 	struct ipv4_filters *f;
 
@@ -475,7 +505,7 @@ static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 	f = kzalloc(sizeof(struct ipv4_filters), GFP_KERNEL);
 	if (!f)
 		return -ENOMEM;
-	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))){
+	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))) {
 		kfree(f);
 		return -EAGAIN;
 	}
@@ -489,7 +519,7 @@ static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 }
 
 static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
-					 size_t count, struct list_head *filters)
+				  size_t count, struct list_head *filters)
 {
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
@@ -543,7 +573,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	if (!data)
 		return -ENOMEM;
 
-	if (copy_from_user(data, buf, sizeof(struct secinfo))){
+	if (copy_from_user(data, buf, sizeof(struct secinfo))) {
 		rtn = -EAGAIN;
 		goto dealloc;
 	}
@@ -554,7 +584,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	rtn = security_secid_to_secctx(data->secid, &ctx, &len); // read secctx
 	if (rtn < 0)
 		goto out;
-	if (len >= PATH_MAX){
+	if (len >= PATH_MAX) {
 		rtn = -ENOMEM;
 		goto out;
 	}
@@ -582,7 +612,7 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 		if (copy_from_user(&s->filter, buf, sizeof(struct info))) { \
 			kfree(s); \
 			return -EAGAIN; \
-		}\
+		} \
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
 			add_function(s); \
 		else \
@@ -621,7 +651,7 @@ static ssize_t prov_write_secctx_filter(struct file *file, const char __user *bu
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo))){
+	if (copy_from_user(&s->filter, buf, sizeof(struct secinfo))) {
 		kfree(s);
 		return -EAGAIN;
 	}
@@ -657,7 +687,7 @@ static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 	if (!s)
 		return -ENOMEM;
 
-	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo))){
+	if (copy_from_user(&s->filter, buf, sizeof(struct nsinfo))) {
 		kfree(s);
 		return -EAGAIN;
 	}
@@ -694,7 +724,7 @@ declare_file_operations(prov_ns_filter_ops, prov_write_ns_filter, prov_read_ns_f
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
@@ -706,7 +736,7 @@ declare_file_operations(prov_log_ops, prov_write_log, no_read);
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_current_provenance();
+	struct provenance *cprov = get_cred_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
@@ -859,14 +889,14 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 	if (count <= 0 || count > PATH_MAX)
 		return -ENOMEM;
 	buffer = kzalloc(count, GFP_KERNEL);
-	if(!buffer)
+	if (!buffer)
 		return -ENOMEM;
 
-	if (copy_from_user(buffer, buf, count)){
+	if (copy_from_user(buffer, buf, count)) {
 		rtn = -ENOMEM;
 		goto out;
 	}
-	if (strlen(buffer) > count){
+	if (strlen(buffer) > count) {
 		rtn = -ENOMEM;
 		goto out;
 	}
@@ -895,11 +925,16 @@ static int __init init_prov_fs(void)
 	prov_create_file("machine_id", 0444, &prov_machine_id_ops);
 	prov_create_file("boot_id", 0444, &prov_boot_id_ops);
 	prov_create_file("node_filter", 0644, &prov_node_filter_ops);
-	prov_create_file("relation_filter", 0644, &prov_relation_filter_ops);
+	prov_create_file("derived_filter", 0644, &prov_derived_filter_ops);
+	prov_create_file("generated_filter", 0644, &prov_generated_filter_ops);
+	prov_create_file("used_filter", 0644, &prov_used_filter_ops);
+	prov_create_file("informed_filter", 0644, &prov_informed_filter_ops);
 	prov_create_file("propagate_node_filter", 0644,
 			 &prov_propagate_node_filter_ops);
-	prov_create_file("propagate_relation_filter", 0644,
-			 &prov_propagate_relation_filter_ops);
+	prov_create_file("propagate_derived_filter", 0644, &prov_propagate_derived_filter_ops);
+ 	prov_create_file("propagate_generated_filter", 0644, &prov_propagate_generated_filter_ops);
+ 	prov_create_file("propagate_used_filter", 0644, &prov_propagate_used_filter_ops);
+ 	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
 	prov_create_file("flush", 0600, &prov_flush_ops);
 	prov_create_file("process", 0644, &prov_process_ops);
 	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);

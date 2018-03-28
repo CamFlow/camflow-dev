@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.3.12          | 4.14.23        | N/A        |
+| 0.3.12          | 4.14.30        | N/A        |
 | 0.3.11          | 4.14.18        | 09/02/2018 |
 | 0.3.10          | 4.14.15        | 27/01/2018 |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
@@ -34,8 +34,18 @@
 
 ### v0.3.12
 ```
+- Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.
+- Added new relation type: RL_SND_MSG_Q and RL_RCV_MSG_Q.
+- Added new relation type: RL_SND_MSG and RL_RCV_MSG.
+- Added new relation type: RL_CLONE_MEM.
+- Split RL_CREATE into RL_SOCKET_CREATE, RL_MSG_CREATE and RL_INODE_CREATE.
+- Re-introduce RL_SND_UNIX and RL_RCV_UNIX now that we have space.
+- Added new relation type: RL_PROC_WRITE and RL_PROC_READ.
+- Increased the maximum number of relation type supported.
+- Protect (ro) a number of pointers after init.
 - Handle signal.
-- Update to kernel version 4.14.23.
+- Revert single source of ID change.
+- Update to kernel version 4.14.30.
 ```
 
 ### v0.3.11

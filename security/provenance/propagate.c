@@ -20,6 +20,7 @@ static int out_edge(prov_entry_t *node, prov_entry_t *edge)
 		if (!filter_propagate_relation(prov_type(edge))) {
 			set_tracked(edge);
 			set_propagate(edge);
+			prov_bloom_merge(prov_taint(edge), prov_taint(node));
 		}
 	}
 	return 0;
@@ -32,6 +33,7 @@ static int in_edge(prov_entry_t *edge, prov_entry_t *node)
 		if (!filter_propagate_node(node)) {
 			set_tracked(node);
 			set_propagate(node);
+			prov_bloom_merge(prov_taint(node), prov_taint(edge));
 		}
 	}
 	return 0;

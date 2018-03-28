@@ -92,8 +92,8 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL, 0);
 	else
 		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
-	prov->has_outgoing = false; // we update there is no more outgoing edge
-	prov->saved = false; // for inode prov persistance
+	prov->has_outgoing = false;     // we update there is no more outgoing edge
+	prov->saved = false;            // for inode prov persistance
 	return rc;
 }
 
@@ -105,21 +105,12 @@ static inline int record_relation(const uint64_t type,
 {
 	int rc = 0;
 
-	// check if the nodes match some capture options
-	apply_target(prov_elt(from));
-	apply_target(prov_elt(to));
-
-	if (!provenance_is_tracked(prov_elt(from)) && !provenance_is_tracked(prov_elt(to)) && !prov_policy.prov_all)
-		return 0;
-	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
-		return 0;
-
-	if (prov_policy.should_compress_edge){
+	if (prov_policy.should_compress_edge) {
 		// we compress edges, do not record same edge type twice
-		if(to->previous_id == node_identifier(prov_entry(from)).id
-				&& to->previous_type == type){
+		if (to->previous_id == node_identifier(prov_entry(from)).id
+		    && to->previous_type == type)
 			return 0;
-		} else { // if not we save those information
+		else {   // if not we save those information
 			to->previous_id = node_identifier(prov_entry(from)).id;
 			to->previous_type = type;
 		}
@@ -139,27 +130,69 @@ static inline void current_update_shst(struct provenance *cprov);
 // from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
 				struct provenance *from,
-				struct provenance *to,
+				struct provenance *tprov,
+				struct provenance *cprov,
 				const struct file *file,
 				const uint64_t flags)
 {
 	int rc;
+
 	BUILD_BUG_ON(!prov_is_used(type));
-	rc = record_relation(type, from, to, file, flags);
-	if (should_record_relation(type, prov_entry(from), prov_entry(to)))
-		to->updt_mmap = true;
+
+	// check if the nodes match some capture options
+	apply_target(prov_elt(from));
+	apply_target(prov_elt(tprov));
+	apply_target(prov_elt(cprov));
+
+	if (!provenance_is_tracked(prov_elt(from))
+	    && !provenance_is_tracked(prov_elt(tprov))
+	    && !provenance_is_tracked(prov_elt(cprov))
+	    && !prov_policy.prov_all)
+		return 0;
+	if (!should_record_relation(type, prov_entry(from), prov_entry(tprov)))
+		return 0;
+
+	rc = record_relation(type, from, tprov, file, flags);
+	if (rc < 0)
+		goto out;
+	rc = record_relation(RL_PROC_WRITE, tprov, cprov, NULL, 0);
+out:
+	if (should_record_relation(type, prov_entry(from), prov_entry(tprov)))
+		cprov->updt_mmap = true;
 	return rc;
 }
 
 // from (activity) to (entity)
 static __always_inline int generates(const uint64_t type,
-				     struct provenance *from,
+				     struct provenance *cprov,
+				     struct provenance *tprov,
 				     struct provenance *to,
 				     const struct file *file,
 				     const uint64_t flags)
 {
+	int rc;
+
 	BUILD_BUG_ON(!prov_is_generated(type));
-	return record_relation(type, from, to, file, flags);
+
+	// check if the nodes match some capture options
+	apply_target(prov_elt(cprov));
+	apply_target(prov_elt(tprov));
+	apply_target(prov_elt(to));
+
+	if (!provenance_is_tracked(prov_elt(cprov))
+	    && !provenance_is_tracked(prov_elt(tprov))
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
+		return 0;
+	if (!should_record_relation(type, prov_entry(tprov), prov_entry(to)))
+		return 0;
+
+	rc = record_relation(RL_PROC_READ, cprov, tprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = record_relation(type, tprov, to, file, flags);
+out:
+	return rc;
 }
 
 // from (entity) to (entity)
@@ -170,6 +203,18 @@ static __always_inline int derives(const uint64_t type,
 				   const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_derived(type));
+
+	// check if the nodes match some capture options
+	apply_target(prov_elt(from));
+	apply_target(prov_elt(to));
+
+	if (!provenance_is_tracked(prov_elt(from))
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
+		return 0;
+	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
+		return 0;
+
 	return record_relation(type, from, to, file, flags);
 }
 
@@ -181,6 +226,18 @@ static __always_inline int informs(const uint64_t type,
 				   const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_informed(type));
+
+	// check if the nodes match some capture options
+	apply_target(prov_elt(from));
+	apply_target(prov_elt(to));
+
+	if (!provenance_is_tracked(prov_elt(from))
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
+		return 0;
+	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
+		return 0;
+
 	return record_relation(type, from, to, file, flags);
 }
 #endif

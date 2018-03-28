@@ -20,8 +20,14 @@ struct capture_policy {
 	bool should_compress_edge;
 	uint64_t prov_node_filter;
 	uint64_t prov_propagate_node_filter;
-	uint64_t prov_relation_filter;
-	uint64_t prov_propagate_relation_filter;
+	uint64_t prov_derived_filter;
+	uint64_t prov_generated_filter;
+	uint64_t prov_used_filter;
+	uint64_t prov_informed_filter;
+	uint64_t prov_propagate_derived_filter;
+	uint64_t prov_propagate_generated_filter;
+	uint64_t prov_propagate_used_filter;
+	uint64_t prov_propagate_informed_filter;
 };
 
 extern struct capture_policy prov_policy;

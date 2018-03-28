@@ -225,7 +225,7 @@ out:
 	return rc;
 }
 
-static inline void update_task_perf(struct task_struct *task,
+static inline void update_proc_perf(struct task_struct *task,
 				    struct provenance *prov)
 {
 	struct mm_struct *mm;
@@ -235,35 +235,35 @@ static inline void update_task_perf(struct task_struct *task,
 	/* time */
 	/* usec */
 	task_cputime_adjusted(task, &utime, &stime);
-	prov_elt(prov)->task_info.utime = div_u64(utime, NSEC_PER_USEC);
-	prov_elt(prov)->task_info.stime = div_u64(stime, NSEC_PER_USEC);
+	prov_elt(prov)->proc_info.utime = div_u64(utime, NSEC_PER_USEC);
+	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
 
 	/* memory */
 	mm = get_task_mm(current);
 	if (mm) {
 		/* KB */
-		prov_elt(prov)->task_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->proc_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
+		prov_elt(prov)->proc_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->proc_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->proc_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
 		mmput_async(mm);
 	}
 	/* IO */
 #ifdef CONFIG_TASK_IO_ACCOUNTING
 	/* KB */
-	prov_elt(prov)->task_info.rbytes = task->ioac.read_bytes & KB_MASK;
-	prov_elt(prov)->task_info.wbytes = task->ioac.write_bytes & KB_MASK;
-	prov_elt(prov)->task_info.cancel_wbytes =
+	prov_elt(prov)->proc_info.rbytes = task->ioac.read_bytes & KB_MASK;
+	prov_elt(prov)->proc_info.wbytes = task->ioac.write_bytes & KB_MASK;
+	prov_elt(prov)->proc_info.cancel_wbytes =
 		task->ioac.cancelled_write_bytes & KB_MASK;
 #else
 	/* KB */
-	prov_elt(prov)->task_info.rbytes = task->ioac.rchar & KB_MASK;
-	prov_elt(prov)->task_info.wbytes = task->ioac.wchar & KB_MASK;
-	prov_elt(prov)->task_info.cancel_wbytes = 0;
+	prov_elt(prov)->proc_info.rbytes = task->ioac.rchar & KB_MASK;
+	prov_elt(prov)->proc_info.wbytes = task->ioac.wchar & KB_MASK;
+	prov_elt(prov)->proc_info.cancel_wbytes = 0;
 #endif
 }
 
-static inline struct provenance *get_current_provenance(void)
+static inline struct provenance *get_cred_provenance(void)
 {
 	struct provenance *prov = current_provenance();
 	unsigned long irqflags;
@@ -272,25 +272,31 @@ static inline struct provenance *get_current_provenance(void)
 	if (provenance_is_opaque(prov_elt(prov)))
 		goto out;
 	record_task_name(current, prov);
-	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_TASK);
-	prov_elt(prov)->task_info.pid = task_pid_nr(current);
-	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
-	prov_elt(prov)->task_info.ppid = task_ppid_nr(current);
-	prov_elt(prov)->task_info.tgid = task_tgid_nr(current);
-	prov_elt(prov)->task_info.utsns = current_utsns();
-	prov_elt(prov)->task_info.ipcns = current_ipcns();
-	prov_elt(prov)->task_info.mntns = current_mntns();
-	prov_elt(prov)->task_info.pidns = current_pidns();
-	prov_elt(prov)->task_info.netns = current_netns();
-	prov_elt(prov)->task_info.cgroupns = current_cgroupns();
-	security_task_getsecid(current, &(prov_elt(prov)->task_info.secid));
-	update_task_perf(current, prov);
+	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
+	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
+	prov_elt(prov)->proc_info.utsns = current_utsns();
+	prov_elt(prov)->proc_info.ipcns = current_ipcns();
+	prov_elt(prov)->proc_info.mntns = current_mntns();
+	prov_elt(prov)->proc_info.pidns = current_pidns();
+	prov_elt(prov)->proc_info.netns = current_netns();
+	prov_elt(prov)->proc_info.cgroupns = current_cgroupns();
+	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
+	update_proc_perf(current, prov);
 	if (prov->updt_mmap && prov->has_mmap) {
 		current_update_shst(prov);
 		prov->updt_mmap = false;
 	}
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
+	return prov;
+}
+
+static inline struct provenance *get_task_provenance( void )
+{
+	struct provenance *prov = current->provenance;
+
+	prov_elt(prov)->task_info.pid = task_pid_nr(current);
+	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
 	return prov;
 }
 
@@ -308,6 +314,23 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
 	return tprov;
 }
 
+static inline int terminate_proc(struct provenance *cprov)
+{
+	union prov_elt old_prov;
+	int rc;
+
+	if (!provenance_is_tracked(prov_elt(cprov)) && !prov_policy.prov_all)
+		return 0;
+	if (filter_node(prov_entry(cprov)))
+		return 0;
+	memcpy(&old_prov, prov_elt(cprov), sizeof(old_prov));
+	node_identifier(prov_elt(cprov)).version++;
+	clear_recorded(prov_elt(cprov));
+
+	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(cprov), NULL, 0);
+	return rc;
+}
+
 static inline int terminate_task(struct provenance *tprov)
 {
 	union prov_elt old_prov;
@@ -322,7 +345,6 @@ static inline int terminate_task(struct provenance *tprov)
 	clear_recorded(prov_elt(tprov));
 
 	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL, 0);
-	tprov->has_outgoing = false;
 	return rc;
 }
 

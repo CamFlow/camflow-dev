@@ -23,7 +23,8 @@
 /* global variable, extern in provenance.h */
 static struct rchan *prov_chan;
 static struct rchan *long_prov_chan;
-atomic64_t prov_id = ATOMIC64_INIT(0);
+atomic64_t prov_relation_id = ATOMIC64_INIT(0);
+atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
 /*
  * create_buf_file() callback.  Creates relay file in debugfs.
@@ -51,7 +52,6 @@ static int remove_buf_file_handler(struct dentry *dentry)
  * relay interface callbacks
  */
 static struct rchan_callbacks relay_callbacks = {
-
 	.create_buf_file	= create_buf_file_handler,
 	.remove_buf_file	= remove_buf_file_handler,
 };

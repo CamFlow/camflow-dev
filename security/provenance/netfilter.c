@@ -23,8 +23,8 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 	union prov_elt pckprov;
 	unsigned long irqflags;
 
-	if (!cprov)
-		return NF_ACCEPT;
+   if (!cprov)
+    return NF_ACCEPT;
 
 	if (provenance_is_tracked(prov_elt(cprov))) {
 		iprov = sk_inode_provenance(skb->sk);

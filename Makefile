@@ -1,4 +1,4 @@
-kernel-version=4.14.23
+kernel-version=4.14.30
 lsm-version=0.3.12
 arch=x86_64
 
@@ -180,9 +180,9 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_ns.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_policy.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_query.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_types.h
 
 patch: copy_change
 	cd build && mkdir -p pristine

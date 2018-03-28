@@ -48,8 +48,19 @@ static inline bool filter_update_node(const uint64_t relation_type)
 static inline bool filter_relation(const uint64_t type)
 {
 	// we hit an element of the black list ignore
-	if (HIT_FILTER(prov_policy.prov_relation_filter, type))
-		return true;
+	if (prov_is_derived(type)) {
+		if (HIT_FILTER(prov_policy.prov_derived_filter, type))
+			return true;
+	} else if (prov_is_generated(type)) {
+		if (HIT_FILTER(prov_policy.prov_generated_filter, type))
+			return true;
+	} else if (prov_is_used(type)) {
+		if (HIT_FILTER(prov_policy.prov_used_filter, type))
+			return true;
+	} else if (prov_is_informed(type)) {
+		if (HIT_FILTER(prov_policy.prov_informed_filter, type))
+			return true;
+	}
 	return false;
 }
 
@@ -57,8 +68,20 @@ static inline bool filter_relation(const uint64_t type)
 static inline bool filter_propagate_relation(uint64_t type)
 {
 	// the relation does not allow tracking propagation
-	if (HIT_FILTER(prov_policy.prov_propagate_relation_filter, type))
-		return true;
+	// we hit an element of the black list ignore
+	if (prov_is_derived(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_derived_filter, type))
+			return true;
+	} else if (prov_is_generated(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter, type))
+			return true;
+	} else if (prov_is_used(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_used_filter, type))
+			return true;
+	} else if (prov_is_informed(type)) {
+		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter, type))
+			return true;
+	}
 	return false;
 }
 
@@ -146,13 +169,13 @@ static inline void apply_target(union prov_elt *prov)
 	uint8_t op = 0;
 
 	// track based on ns
-	if (prov_type(prov) == ACT_TASK)
-		op |= prov_ns_whichOP(prov->task_info.utsns,
-				      prov->task_info.ipcns,
-				      prov->task_info.mntns,
-				      prov->task_info.pidns,
-				      prov->task_info.netns,
-				      prov->task_info.cgroupns);
+	if (prov_type(prov) == ENT_PROC)
+		op |= prov_ns_whichOP(prov->proc_info.utsns,
+				      prov->proc_info.ipcns,
+				      prov->proc_info.mntns,
+				      prov->proc_info.pidns,
+				      prov->proc_info.netns,
+				      prov->proc_info.cgroupns);
 
 	if (prov_has_secid(node_type(prov)))
 		op |= prov_secctx_whichOP(node_secid(prov));

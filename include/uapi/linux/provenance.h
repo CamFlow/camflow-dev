@@ -21,6 +21,16 @@
 #include <linux/mutex.h>
 #endif
 
+#define xstr(s) str(s)
+#define str(s) # s
+
+#define CAMFLOW_VERSION_MAJOR     0
+#define CAMFLOW_VERSION_MINOR     3
+#define CAMFLOW_VERSION_PATCH     12
+#define CAMFLOW_VERSION_STR "v"xstr(CAMFLOW_VERSION_MAJOR)\
+  "."xstr(CAMFLOW_VERSION_MINOR)\
+  "."xstr(CAMFLOW_VERSION_PATCH)\
+
 #define PROVENANCE_HASH "sha256"
 
 #define PROV_GOLDEN_RATIO_64 0x61C8864680B583EBUL
@@ -110,9 +120,15 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_MACHINE_ID_FILE                  "/sys/kernel/security/provenance/machine_id"
 #define PROV_BOOT_ID_FILE                  		"/sys/kernel/security/provenance/boot_id"
 #define PROV_NODE_FILTER_FILE                 "/sys/kernel/security/provenance/node_filter"
-#define PROV_RELATION_FILTER_FILE             "/sys/kernel/security/provenance/relation_filter"
+#define PROV_DERIVED_FILTER_FILE              "/sys/kernel/security/provenance/derived_filter"
+#define PROV_GENERATED_FILTER_FILE            "/sys/kernel/security/provenance/generated_filter"
+#define PROV_USED_FILTER_FILE                 "/sys/kernel/security/provenance/used_filter"
+#define PROV_INFORMED_FILTER_FILE             "/sys/kernel/security/provenance/informed_filter"
 #define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
-#define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
+#define PROV_PROPAGATE_DERIVED_FILTER_FILE    "/sys/kernel/security/provenance/propagate_derived_filter"
+#define PROV_PROPAGATE_GENERATED_FILTER_FILE  "/sys/kernel/security/provenance/propagate_generated_filter"
+#define PROV_PROPAGATE_USED_FILTER_FILE       "/sys/kernel/security/provenance/propagate_used_filter"
+#define PROV_PROPAGATE_INFORMED_FILTER_FILE   "/sys/kernel/security/provenance/propagate_informed_filter"
 #define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
 #define PROV_PROCESS_FILE                     "/sys/kernel/security/provenance/process"
 #define PROV_IPV4_INGRESS_FILE                "/sys/kernel/security/provenance/ipv4_ingress"
@@ -245,11 +261,8 @@ struct node_struct {
 	basic_elements;
 };
 
-struct task_prov_struct {
+struct proc_prov_struct {
 	basic_elements;
-	uint32_t pid;
-	uint32_t vpid;
-	uint32_t ppid;
 	uint32_t tgid;
 	uint32_t utsns;
 	uint32_t ipcns;
@@ -268,6 +281,12 @@ struct task_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
+};
+
+struct task_prov_struct {
+	basic_elements;
+	uint32_t pid;
+	uint32_t vpid;
 };
 
 struct inode_prov_struct {
@@ -311,6 +330,7 @@ union prov_elt {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
+	struct proc_prov_struct proc_info;
 	struct task_prov_struct task_info;
 	struct inode_prov_struct inode_info;
 	struct msg_msg_struct msg_msg_info;
@@ -373,6 +393,7 @@ union long_prov_elt {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
+	struct proc_prov_struct proc_info;
 	struct task_prov_struct task_info;
 	struct inode_prov_struct inode_info;
 	struct msg_msg_struct msg_msg_info;
