@@ -2,13 +2,6 @@ dist: trusty
 sudo: required
 language: c
 
-addons:
-  sonarcloud:
-    organization: "tfjmp-github" # the key of the org you chose at step #3
-    branches:
-      - master
-      - dev
-
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get -y install build-essential
@@ -24,7 +17,6 @@ before_script:
   - make config_travis
 
 script:
-  - sonar-scanner
   - make compile_security
   - make compile_kernel
   - make test_travis
