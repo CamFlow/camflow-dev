@@ -3,7 +3,8 @@ sudo: required
 language: c
 
 addons:
-  sonarqube:
+  sonarcloud:
+    organization: "tfjmp-github" # the key of the org you chose at step #3
     branches:
       - master
       - dev
@@ -23,7 +24,7 @@ before_script:
   - make config_travis
 
 script:
-  - sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=https://sonarqube.com
+  - sonar-scanner
   - make compile_security
   - make compile_kernel
   - make test_travis
