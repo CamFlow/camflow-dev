@@ -76,6 +76,7 @@ static inline void prov_write(union prov_elt *msg)
 		} else
 			pr_err("Provenance: boot buffer is full.\n");
 	} else {
+		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->prov, msg, sizeof(union prov_elt));
 		}
@@ -99,6 +100,7 @@ static inline void long_prov_write(union long_prov_elt *msg)
 		} else
 			pr_err("Provenance: long boot buffer is full.\n");
 	} else {
+		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->long_prov, msg, sizeof(union long_prov_elt));
 		}

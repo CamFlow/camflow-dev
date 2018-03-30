@@ -112,6 +112,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
+#define PROV_WRITTEN_FILE                     "/sys/kernel/security/provenance/written"
 #define PROV_COMPRESS_NODE_FILE               "/sys/kernel/security/provenance/compress_node"
 #define PROV_COMPRESS_EDGE_FILE               "/sys/kernel/security/provenance/compress_edge"
 #define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"

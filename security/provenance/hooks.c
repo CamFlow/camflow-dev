@@ -1855,6 +1855,7 @@ void __init provenance_add_hooks(void)
 #else
 	prov_policy.prov_all = false;
 #endif
+	prov_policy.prov_written = false;
 	prov_machine_id = 1;
 	prov_boot_id = 0;
 	provenance_cache = kmem_cache_create("provenance_struct",

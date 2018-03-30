@@ -16,6 +16,7 @@
 struct capture_policy {
 	bool prov_enabled;
 	bool prov_all;
+	bool prov_written;
 	bool should_compress_node;
 	bool should_compress_edge;
 	uint64_t prov_node_filter;
