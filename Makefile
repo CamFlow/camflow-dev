@@ -131,8 +131,9 @@ clean_us:
 	cd ./build/camflowd && $(MAKE) clean
 
 delete_kernel:
-	cd ./build && rm -rf ./linux-$(kernel-version)
-	cd ./build && rm -f ./linux-$(kernel-version).tar.xz
+	cd ./build && rm -rf ./linux-*
+	cd ./build && rm -f ./linux-*.tar.xz
+	cd ./build && rm -rf ./information-flow-patch
 
 test: copy_change
 	@echo "Running sparse, result in /tmp/sparse.txt"
