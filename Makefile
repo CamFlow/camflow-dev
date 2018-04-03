@@ -202,6 +202,10 @@ patch: copy_change
 prepare_release_travis:
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
 
+test_patch:
+	cd ./build/pristine/linux-stable && patch -p2 < ../../patch-$(kernel-version)-v$(lsm-version)
+
+
 prepare_git:
 	mkdir -p build
 	cd build && git clone -b v$(kernel-version) git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
