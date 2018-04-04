@@ -36,10 +36,13 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 	return false;
 }
 
-#define UPDATE_FILTER (SUBTYPE(RL_VERSION_PROCESS) | SUBTYPE(RL_VERSION) | SUBTYPE(RL_NAMED))
 static inline bool filter_update_node(const uint64_t relation_type)
 {
-	if (HIT_FILTER(UPDATE_FILTER, relation_type)) // not update if relation is of above type
+	if (relation_type == RL_VERSION_PROCESS)
+		return true;
+	if (relation_type == RL_VERSION)
+		return true;
+	if (relation_type == RL_NAMED)
 		return true;
 	return false;
 }
