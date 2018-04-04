@@ -119,9 +119,8 @@ static inline int record_relation(const uint64_t type,
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
-
-	rc = write_relation(type, prov_elt(from), prov_elt(to), file, flags);
 	from->has_outgoing = true; // there is an outgoing edge
+	rc = write_relation(type, prov_elt(from), prov_elt(to), file, flags);
 	return rc;
 }
 

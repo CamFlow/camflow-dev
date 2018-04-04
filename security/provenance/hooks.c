@@ -82,7 +82,7 @@ static int provenance_task_alloc(struct task_struct *task,
 		cred = t->real_cred;
 		if (cred != NULL) {
 			if (t->provenance != NULL && cred->provenance != NULL) {
-				informs(RL_CLONE, cred->provenance, t->provenance, NULL, clone_flags);
+				informs(RL_CLONE_MEM, cred->provenance, t->provenance, NULL, clone_flags);
 				informs(RL_CLONE, t->provenance, prov, NULL, clone_flags);
 			}
 		}
@@ -171,8 +171,7 @@ static int provenance_cred_prepare(struct cred *new,
 	if (current != NULL) {
 		if (current->provenance != NULL)
 			rc = generates(RL_CLONE_MEM, old_prov, current->provenance, prov, NULL, 0);
-	} else
-		rc = informs(RL_CLONE, old_prov, prov, NULL, 0);
+	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = prov;
 	return rc;
