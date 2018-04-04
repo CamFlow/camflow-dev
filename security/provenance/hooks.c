@@ -82,7 +82,7 @@ static int provenance_task_alloc(struct task_struct *task,
 		cred = t->real_cred;
 		if (cred != NULL) {
 			if (t->provenance != NULL && cred->provenance != NULL) {
-				informs(RL_CLONE_MEM, cred->provenance, t->provenance, NULL, clone_flags);
+				informs(RL_CLONE, cred->provenance, t->provenance, NULL, clone_flags);
 				informs(RL_CLONE, t->provenance, prov, NULL, clone_flags);
 			}
 		}
