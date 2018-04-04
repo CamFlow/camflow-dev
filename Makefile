@@ -21,6 +21,8 @@ prepare_kernel:
 	cd ./build/information-flow-patch && git checkout $(kernel-version)
 	cd ./build/information-flow-patch && mkdir -p ./build/linux-stable
 	cd ./build && cp -fa ./linux-stable/* ./information-flow-patch/build/linux-stable/
+	cd ./build/information-flow-patch && mkdir -p ./build/pristine/linux-stable/
+	cd ./build && cp -fa ./linux-stable/* ./information-flow-patch/build/pristine/linux-stable/
 	cd ./build/information-flow-patch && $(MAKE) patch
 	cd ./build/linux-stable && patch -p2 < ../information-flow-patch/output/patch-$(kernel-version)-flow-friendly
 
