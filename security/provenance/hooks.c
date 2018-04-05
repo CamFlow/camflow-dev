@@ -850,6 +850,24 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	return rc;
 }
 
+static int provenance_file_receive(struct file *file)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = file_provenance(file, true);
+	unsigned long irqflags;
+	int rc;
+
+	if (!iprov)
+		return -ENOMEM;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = uses(RL_FILE_RCV, iprov, tprov, cprov, file, 0);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
 /*
  * Check permissions for a mmap operation.  The @file may be NULL, e.g.
  * if mapping anonymous memory.
@@ -1778,6 +1796,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 #endif
 	LSM_HOOK_INIT(file_ioctl,			    provenance_file_ioctl),
 	LSM_HOOK_INIT(file_open,			    provenance_file_open),
+	LSM_HOOK_INIT(file_receive,			    provenance_file_receive),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(file_splice_pipe_to_pipe,
 		      provenance_file_splice_pipe_to_pipe),

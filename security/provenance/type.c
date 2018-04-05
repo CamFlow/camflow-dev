@@ -32,6 +32,7 @@ static const char RL_STR_CONNECT[]               = "connect";
 static const char RL_STR_LISTEN[]                = "listen";
 static const char RL_STR_ACCEPT[]                = "accept";
 static const char RL_STR_OPEN[]                  = "open";
+static const char RL_STR_FILE_RCV[]             = "file_rcv";
 static const char RL_STR_VERSION[]               = "version_entity";
 static const char RL_STR_MMAP[]                  = "mmap";
 static const char RL_STR_MUNMAP[]                = "munmap";
@@ -145,6 +146,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_ACCEPT;
 	case RL_OPEN:
 		return RL_STR_OPEN;
+	case RL_FILE_RCV:
+		return RL_STR_FILE_RCV;
 	case RL_VERSION:
 		return RL_STR_VERSION;
 	case RL_MMAP:
@@ -269,6 +272,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_LISTEN, RL_LISTEN);
 	MATCH_AND_RETURN(str, RL_STR_ACCEPT, RL_ACCEPT);
 	MATCH_AND_RETURN(str, RL_STR_OPEN, RL_OPEN);
+	MATCH_AND_RETURN(str, RL_STR_FILE_RCV, RL_FILE_RCV);
 	MATCH_AND_RETURN(str, RL_STR_VERSION, RL_VERSION);
 	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
