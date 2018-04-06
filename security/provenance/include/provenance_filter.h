@@ -38,7 +38,7 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 
 static inline bool filter_update_node(const uint64_t relation_type)
 {
-	if (relation_type == RL_VERSION_PROCESS)
+	if (relation_type == RL_VERSION_TASK)
 		return true;
 	if (relation_type == RL_VERSION)
 		return true;

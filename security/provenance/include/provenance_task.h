@@ -327,7 +327,7 @@ static inline int terminate_proc(struct provenance *cprov)
 	node_identifier(prov_elt(cprov)).version++;
 	clear_recorded(prov_elt(cprov));
 
-	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(cprov), NULL, 0);
+	rc = write_relation(RL_TERMINATE_PROC, &old_prov, prov_elt(cprov), NULL, 0);
 	return rc;
 }
 
@@ -344,7 +344,7 @@ static inline int terminate_task(struct provenance *tprov)
 	node_identifier(prov_elt(tprov)).version++;
 	clear_recorded(prov_elt(tprov));
 
-	rc = write_relation(RL_TERMINATE_PROCESS, &old_prov, prov_elt(tprov), NULL, 0);
+	rc = write_relation(RL_TERMINATE_TASK, &old_prov, prov_elt(tprov), NULL, 0);
 	return rc;
 }
 

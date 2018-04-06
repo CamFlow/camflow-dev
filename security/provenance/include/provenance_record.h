@@ -89,7 +89,7 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 
 	// record version relation between version
 	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
-		rc = write_relation(RL_VERSION_PROCESS, &old_prov, prov_elt(prov), NULL, 0);
+		rc = write_relation(RL_VERSION_TASK, &old_prov, prov_elt(prov), NULL, 0);
 	else
 		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
 	prov->has_outgoing = false;     // we update there is no more outgoing edge

@@ -50,15 +50,15 @@ static const char RL_STR_RMVXATTR_INODE[]        = "removexattr_inode";
 static const char RL_STR_NAMED[]                 = "named";
 static const char RL_STR_NAMED_PROCESS[]         = "named_process";
 static const char RL_STR_EXEC[]                  = "exec";
-static const char RL_STR_EXEC_PROCESS[]          = "exec_process";
+static const char RL_STR_EXEC_TASK[]          	 = "exec_task";
 static const char RL_STR_CLONE[]                 = "clone";
-static const char RL_STR_VERSION_PROCESS[]       = "version_activity";
+static const char RL_STR_VERSION_TASK[]       	 = "version_activity";
 static const char RL_STR_SEARCH[]                = "search";
 static const char RL_STR_GETATTR[]               = "getattr";
 static const char RL_STR_GETXATTR[]              = "getxattr";
 static const char RL_STR_GETXATTR_INODE[]        = "getxattr_inode";
 static const char RL_STR_LSTXATTR[]              = "listxattr";
-static const char RL_STR_READ_LINK[]              = "READ_LINK";
+static const char RL_STR_READ_LINK[]             = "read_link";
 static const char RL_STR_MMAP_READ[]             = "mmap_read";
 static const char RL_STR_SH_READ[]               = "sh_read";
 static const char RL_STR_PROC_READ[]             = "proc_read";
@@ -76,7 +76,8 @@ static const char RL_STR_RCV_MSG_Q[]						 = "receive_msg_queue";
 static const char RL_STR_PERM_READ[]             = "perm_read";
 static const char RL_STR_PERM_WRITE[]            = "perm_write";
 static const char RL_STR_PERM_EXEC[]             = "perm_exec";
-static const char RL_STR_TERMINATE_PROCESS[]     = "terminate";
+static const char RL_STR_TERMINATE_TASK[]     	 = "terminate_task";
+static const char RL_STR_TERMINATE_PROC[]     	 = "terminate_proc";
 static const char RL_STR_CLOSED[]                = "closed";
 static const char RL_STR_ARG[]                   = "arg";
 static const char RL_STR_ENV[]                   = "env";
@@ -182,12 +183,12 @@ const char* relation_str(uint64_t type)
 		return RL_STR_NAMED_PROCESS;
 	case RL_EXEC:
 		return RL_STR_EXEC;
-	case RL_EXEC_PROCESS:
-		return RL_STR_EXEC_PROCESS;
+	case RL_EXEC_TASK:
+		return RL_STR_EXEC_TASK;
 	case RL_CLONE:
 		return RL_STR_CLONE;
-	case RL_VERSION_PROCESS:
-		return RL_STR_VERSION_PROCESS;
+	case RL_VERSION_TASK:
+		return RL_STR_VERSION_TASK;
 	case RL_SEARCH:
 		return RL_STR_SEARCH;
 	case RL_GETATTR:
@@ -238,8 +239,10 @@ const char* relation_str(uint64_t type)
 		return RL_STR_PROC_WRITE;
 	case RL_PERM_EXEC:
 		return RL_STR_PERM_EXEC;
-	case RL_TERMINATE_PROCESS:
-		return RL_STR_TERMINATE_PROCESS;
+	case RL_TERMINATE_TASK:
+		return RL_STR_TERMINATE_TASK;
+	case RL_TERMINATE_PROC:
+		return RL_STR_TERMINATE_PROC;
 	case RL_CLOSED:
 		return RL_STR_CLOSED;
 	case RL_ARG:
@@ -291,9 +294,9 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_NAMED, RL_NAMED);
 	MATCH_AND_RETURN(str, RL_STR_NAMED_PROCESS, RL_NAMED_PROCESS);
 	MATCH_AND_RETURN(str, RL_STR_EXEC, RL_EXEC);
-	MATCH_AND_RETURN(str, RL_STR_EXEC_PROCESS, RL_EXEC_PROCESS);
+	MATCH_AND_RETURN(str, RL_STR_EXEC_TASK, RL_EXEC_TASK);
 	MATCH_AND_RETURN(str, RL_STR_CLONE, RL_CLONE);
-	MATCH_AND_RETURN(str, RL_STR_VERSION_PROCESS, RL_VERSION_PROCESS);
+	MATCH_AND_RETURN(str, RL_STR_VERSION_TASK, RL_VERSION_TASK);
 	MATCH_AND_RETURN(str, RL_STR_SEARCH, RL_SEARCH);
 	MATCH_AND_RETURN(str, RL_STR_GETATTR, RL_GETATTR);
 	MATCH_AND_RETURN(str, RL_STR_GETXATTR, RL_GETXATTR);
@@ -318,7 +321,8 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_PROC_READ, RL_PROC_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_WRITE, RL_SH_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_PROC_WRITE, RL_PROC_WRITE);
-	MATCH_AND_RETURN(str, RL_STR_TERMINATE_PROCESS, RL_TERMINATE_PROCESS);
+	MATCH_AND_RETURN(str, RL_STR_TERMINATE_TASK, RL_TERMINATE_TASK);
+	MATCH_AND_RETURN(str, RL_STR_TERMINATE_PROC, RL_TERMINATE_PROC);
 	MATCH_AND_RETURN(str, RL_STR_CLOSED, RL_CLOSED);
 	MATCH_AND_RETURN(str, RL_STR_ARG, RL_ARG);
 	MATCH_AND_RETURN(str, RL_STR_ENV, RL_ENV);

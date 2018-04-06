@@ -1707,7 +1707,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 	record_node_name(cprov, bprm->interp);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	informs(RL_EXEC_PROCESS, cprov, nprov, NULL, 0);
+	informs(RL_EXEC_TASK, cprov, nprov, NULL, 0);
 	derives(RL_EXEC, iprov, nprov, NULL, 0);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1762,7 +1762,6 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
 	LSM_HOOK_INIT(cred_alloc_blank,			    provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
 	LSM_HOOK_INIT(cred_prepare,			    provenance_cred_prepare),
 	LSM_HOOK_INIT(cred_transfer,			    provenance_cred_transfer),
 	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
