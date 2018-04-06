@@ -161,6 +161,28 @@ out:
 	return rc;
 }
 
+// from (entity) to (activity)
+static __always_inline int uses_two(const uint64_t type,
+				struct provenance *from,
+				struct provenance *to,
+				const struct file *file,
+				const uint64_t flags)
+{
+	BUILD_BUG_ON(!prov_is_used(type));
+
+	// check if the nodes match some capture options
+	apply_target(prov_elt(from));
+	apply_target(prov_elt(to));
+
+	if (!provenance_is_tracked(prov_elt(from))
+	    && !provenance_is_tracked(prov_elt(to))
+	    && !prov_policy.prov_all)
+		return 0;
+	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
+		return 0;
+	return record_relation(type, from, to, file, flags);
+}
+
 // from (activity) to (entity)
 static __always_inline int generates(const uint64_t type,
 				     struct provenance *cprov,
