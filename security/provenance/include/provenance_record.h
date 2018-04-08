@@ -124,8 +124,6 @@ static inline int record_relation(const uint64_t type,
 	return rc;
 }
 
-static inline void current_update_shst(struct provenance *cprov);
-
 // from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
 				struct provenance *from,
@@ -156,8 +154,6 @@ static __always_inline int uses(const uint64_t type,
 		goto out;
 	rc = record_relation(RL_PROC_WRITE, tprov, cprov, NULL, 0);
 out:
-	if (should_record_relation(type, prov_entry(from), prov_entry(tprov)))
-		cprov->updt_mmap = true;
 	return rc;
 }
 

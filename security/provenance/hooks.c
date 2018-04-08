@@ -167,7 +167,6 @@ static int provenance_cred_prepare(struct cred *new,
 	node_uid(prov_elt(prov)) = __kuid_val(new->euid);
 	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	prov->has_mmap = old_prov->has_mmap;
 	if (current != NULL) {
 		if (current->provenance != NULL)
 			rc = generates(RL_CLONE_MEM, old_prov, current->provenance, prov, NULL, 0);
@@ -898,7 +897,6 @@ static int provenance_mmap_file(struct file *file,
 	if (rc < 0)
 		goto out;
 	if ((flags & MAP_TYPE) == MAP_SHARED) {
-		cprov->has_mmap = true;
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = derives(RL_MMAP_WRITE, cprov, iprov, file, flags);
 		if (rc < 0)

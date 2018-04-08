@@ -158,7 +158,6 @@ static inline void current_update_shst(struct provenance *cprov)
 
 	if (!mm)
 		return;
-	cprov->has_mmap = false;
 	vma = mm->mmap;
 	while (vma) { // we go through mmaped files
 		mmapf = vma->vm_file;
@@ -166,7 +165,6 @@ static inline void current_update_shst(struct provenance *cprov)
 			flags = vma->vm_flags;
 			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
-				cprov->has_mmap = true;
 				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
 					record_relation(RL_SH_READ, mmprov, cprov, mmapf, flags);
@@ -282,10 +280,6 @@ static inline struct provenance *get_cred_provenance(void)
 	prov_elt(prov)->proc_info.cgroupns = current_cgroupns();
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
 	update_proc_perf(current, prov);
-	if (prov->updt_mmap && prov->has_mmap) {
-		current_update_shst(prov);
-		prov->updt_mmap = false;
-	}
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 out:
 	return prov;
