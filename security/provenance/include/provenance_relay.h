@@ -62,7 +62,7 @@ struct prov_long_boot_buffer {
 
 extern struct prov_boot_buffer *boot_buffer;
 
-static inline void prov_write(union prov_elt *msg)
+static __always_inline void prov_write(union prov_elt *msg)
 {
 	struct relay_list *tmp;
 	union prov_elt *provtmp;
@@ -120,7 +120,7 @@ static inline void prov_flush(void)
 	}
 }
 
-static inline void __write_node(prov_entry_t *node)
+static __always_inline void __write_node(prov_entry_t *node)
 {
 	if (filter_node(node) || provenance_is_recorded(node))   // filtered or already recorded
 		return;
@@ -139,7 +139,7 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 	memcpy(dest, src, sizeof(union prov_identifier));
 }
 
-static inline int write_relation(const uint64_t type,
+static __always_inline int write_relation(const uint64_t type,
 				 void *from,
 				 void *to,
 				 const struct file *file,

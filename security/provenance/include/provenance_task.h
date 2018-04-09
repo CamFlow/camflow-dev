@@ -148,7 +148,7 @@ static inline uint32_t current_pidns(void)
 #define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
 // write <- are we reading or writting from shared state
-static inline void current_update_shst(struct provenance *cprov)
+static __always_inline void current_update_shst(struct provenance *cprov)
 {
 	struct mm_struct *mm = get_task_mm(current);
 	struct vm_area_struct *vma;
@@ -165,12 +165,12 @@ static inline void current_update_shst(struct provenance *cprov)
 			flags = vma->vm_flags;
 			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
-				spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
+				/*spin_lock_nested(prov_lock(mmprov), PROVENANCE_LOCK_INODE);
 				if (vm_read_exec_mayshare(flags))
 					record_relation(RL_SH_READ, mmprov, cprov, mmapf, flags);
 				if (vm_write_mayshare(flags))
 					record_relation(RL_SH_WRITE, cprov, mmprov, mmapf, flags);
-				spin_unlock(prov_lock(mmprov));
+				spin_unlock(prov_lock(mmprov));*/
 			}
 		}
 		vma = vma->vm_next;

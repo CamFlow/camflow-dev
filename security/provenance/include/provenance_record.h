@@ -70,7 +70,7 @@ out:
 	return count;
 }
 
-static inline int __update_version(const uint64_t type, struct provenance *prov)
+static __always_inline int __update_version(const uint64_t type, struct provenance *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
@@ -97,7 +97,7 @@ static inline int __update_version(const uint64_t type, struct provenance *prov)
 	return rc;
 }
 
-static inline int record_relation(const uint64_t type,
+static __always_inline int record_relation(const uint64_t type,
 				  struct provenance *from,
 				  struct provenance *to,
 				  const struct file *file,
@@ -123,6 +123,8 @@ static inline int record_relation(const uint64_t type,
 	rc = write_relation(type, prov_elt(from), prov_elt(to), file, flags);
 	return rc;
 }
+
+static __always_inline void current_update_shst(struct provenance *cprov);
 
 // from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
@@ -153,6 +155,7 @@ static __always_inline int uses(const uint64_t type,
 	if (rc < 0)
 		goto out;
 	rc = record_relation(RL_PROC_WRITE, tprov, cprov, NULL, 0);
+	current_update_shst(cprov);
 out:
 	return rc;
 }
