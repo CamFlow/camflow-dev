@@ -120,15 +120,14 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	return rc;
 }
 
-static inline void refresh_inode_provenance(struct inode *inode, bool may_sleep)
+static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
 
 	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	if (may_sleep)
-		record_inode_name(inode, prov);
+	record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
 	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
 	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
@@ -203,18 +202,19 @@ free_buf:
 	return rc;
 }
 
-static inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
+static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *prov = inode->i_provenance;
 
 	might_sleep_if(may_sleep);
 	if (!prov->initialised && may_sleep)
 		inode_init_provenance(inode, NULL);
-	refresh_inode_provenance(inode, may_sleep);
+	if (may_sleep)
+		refresh_inode_provenance(inode);
 	return prov;
 }
 
-static inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
+static __always_inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
 
@@ -223,7 +223,7 @@ static inline struct provenance *dentry_provenance(struct dentry *dentry, bool m
 	return inode_provenance(inode, may_sleep);
 }
 
-static inline struct provenance *file_provenance(struct file *file, bool may_sleep)
+static __always_inline struct provenance *file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 

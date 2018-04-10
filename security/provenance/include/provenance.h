@@ -50,8 +50,6 @@ enum {
 struct provenance {
 	union prov_elt msg;
 	spinlock_t lock;
-	bool has_mmap;
-	bool updt_mmap;
 	bool has_outgoing;
 	bool initialised;
 	bool saved;
