@@ -61,6 +61,8 @@
 #define RL_SPLICE							(RL_DERIVED   | (0x0000000000000001ULL<<18))
 #define RL_EXEC               (RL_DERIVED   | (0x0000000000000001ULL<<19))
 #define RL_TERMINATE_PROC     (RL_DERIVED   | (0x0000000000000001ULL<<20))
+#define RL_ARG                (RL_DERIVED   | (0x0000000000000001ULL<<21))
+#define RL_ENV                (RL_DERIVED   | (0x0000000000000001ULL<<22))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */
@@ -103,11 +105,9 @@
 #define RL_LSTXATTR           (RL_USED      | (0x0000000000000001ULL<<15))
 #define RL_NAMED_PROCESS      (RL_USED      | (0x0000000000000001ULL<<16))
 #define RL_LOG                (RL_USED      | (0x0000000000000001ULL<<17))
-#define RL_ARG                (RL_USED      | (0x0000000000000001ULL<<18))
-#define RL_ENV                (RL_USED      | (0x0000000000000001ULL<<19))
-#define RL_PERM_READ          (RL_USED      | (0x0000000000000001ULL<<20))
-#define RL_PERM_WRITE         (RL_USED      | (0x0000000000000001ULL<<21))
-#define RL_PERM_EXEC          (RL_USED      | (0x0000000000000001ULL<<22))
+#define RL_PERM_READ          (RL_USED      | (0x0000000000000001ULL<<18))
+#define RL_PERM_WRITE         (RL_USED      | (0x0000000000000001ULL<<19))
+#define RL_PERM_EXEC          (RL_USED      | (0x0000000000000001ULL<<20))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
