@@ -12,6 +12,7 @@
  *	(at your option) any later version.
  */
 
+#include <linux/bpf.h>
 #include <linux/capability.h>
 #include <linux/dcache.h>
 #include <linux/module.h>
@@ -1750,3 +1751,34 @@ int security_socket_recvmsg_always(struct socket *sock, struct msghdr *msg,
 	return call_int_hook(socket_recvmsg_always, 0, sock, msg, size, flags);
 }
 #endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
+
+#ifdef CONFIG_BPF_SYSCALL
+int security_bpf(int cmd, union bpf_attr *attr, unsigned int size)
+{
+	return call_int_hook(bpf, 0, cmd, attr, size);
+}
+int security_bpf_map(struct bpf_map *map, fmode_t fmode)
+{
+	return call_int_hook(bpf_map, 0, map, fmode);
+}
+int security_bpf_prog(struct bpf_prog *prog)
+{
+	return call_int_hook(bpf_prog, 0, prog);
+}
+int security_bpf_map_alloc(struct bpf_map *map)
+{
+	return call_int_hook(bpf_map_alloc_security, 0, map);
+}
+int security_bpf_prog_alloc(struct bpf_prog_aux *aux)
+{
+	return call_int_hook(bpf_prog_alloc_security, 0, aux);
+}
+void security_bpf_map_free(struct bpf_map *map)
+{
+	call_void_hook(bpf_map_free_security, map);
+}
+void security_bpf_prog_free(struct bpf_prog_aux *aux)
+{
+	call_void_hook(bpf_prog_free_security, aux);
+}
+#endif /* CONFIG_BPF_SYSCALL */
