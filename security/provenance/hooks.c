@@ -1188,12 +1188,12 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
 	if (shmflg & SHM_RDONLY)
-		rc = uses(RL_SH_READ, sprov, tprov, cprov, NULL, shmflg);
+		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 	else {
-		rc = uses(RL_SH_READ, sprov, tprov, cprov, NULL, shmflg);
+		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = generates(RL_SH_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = uses(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));

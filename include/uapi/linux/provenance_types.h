@@ -108,6 +108,8 @@
 #define RL_PERM_READ          (RL_USED      | (0x0000000000000001ULL<<17))
 #define RL_PERM_WRITE         (RL_USED      | (0x0000000000000001ULL<<18))
 #define RL_PERM_EXEC          (RL_USED      | (0x0000000000000001ULL<<19))
+#define RL_SH_ATTACH_READ     (RL_USED      | (0x0000000000000001ULL<<20))
+#define RL_SH_ATTACH_WRITE    (RL_USED      | (0x0000000000000001ULL<<21))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */

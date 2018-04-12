@@ -36,6 +36,7 @@
 ```
 - Reworking mmap handling logic.
 - Added hook and relation type to capture open file descriptor sent over ipc.
+- Added new relation type: RL_STR_SH_ATTACH_READ and RL_STR_SH_ATTACH_WRITE.
 - Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.
 - Added new relation type: RL_SND_MSG_Q and RL_RCV_MSG_Q.
 - Added new relation type: RL_SND_MSG and RL_RCV_MSG.
