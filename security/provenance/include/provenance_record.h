@@ -98,10 +98,10 @@ static __always_inline int __update_version(const uint64_t type, struct provenan
 }
 
 static __always_inline int record_relation(const uint64_t type,
-				  struct provenance *from,
-				  struct provenance *to,
-				  const struct file *file,
-				  const uint64_t flags)
+					   struct provenance *from,
+					   struct provenance *to,
+					   const struct file *file,
+					   const uint64_t flags)
 {
 	int rc = 0;
 
@@ -164,10 +164,10 @@ out:
 
 // from (entity) to (activity)
 static __always_inline int uses_two(const uint64_t type,
-				struct provenance *from,
-				struct provenance *to,
-				const struct file *file,
-				const uint64_t flags)
+				    struct provenance *from,
+				    struct provenance *to,
+				    const struct file *file,
+				    const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_used(type));
 

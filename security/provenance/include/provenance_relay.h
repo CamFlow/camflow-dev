@@ -122,7 +122,7 @@ static inline void prov_flush(void)
 
 static __always_inline void __write_node(prov_entry_t *node)
 {
-	if (filter_node(node) || (provenance_is_recorded(node)&&!prov_policy.should_duplicate))   // filtered or already recorded
+	if (filter_node(node) || (provenance_is_recorded(node) && !prov_policy.should_duplicate)) // filtered or already recorded
 		return;
 	set_recorded(node);
 	if ( provenance_is_long(node) )
@@ -140,10 +140,10 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 }
 
 static __always_inline int write_relation(const uint64_t type,
-				 void *from,
-				 void *to,
-				 const struct file *file,
-				 const uint64_t flags)
+					  void *from,
+					  void *to,
+					  const struct file *file,
+					  const uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;

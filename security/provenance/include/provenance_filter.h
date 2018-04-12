@@ -60,10 +60,9 @@ static inline bool filter_relation(const uint64_t type)
 	} else if (prov_is_used(type)) {
 		if (HIT_FILTER(prov_policy.prov_used_filter, type))
 			return true;
-	} else if (prov_is_informed(type)) {
+	} else if (prov_is_informed(type))
 		if (HIT_FILTER(prov_policy.prov_informed_filter, type))
 			return true;
-	}
 	return false;
 }
 
@@ -81,10 +80,9 @@ static inline bool filter_propagate_relation(uint64_t type)
 	} else if (prov_is_used(type)) {
 		if (HIT_FILTER(prov_policy.prov_propagate_used_filter, type))
 			return true;
-	} else if (prov_is_informed(type)) {
+	} else if (prov_is_informed(type))
 		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter, type))
 			return true;
-	}
 	return false;
 }
 

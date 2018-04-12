@@ -941,9 +941,9 @@ static int __init init_prov_fs(void)
 	prov_create_file("propagate_node_filter", 0644,
 			 &prov_propagate_node_filter_ops);
 	prov_create_file("propagate_derived_filter", 0644, &prov_propagate_derived_filter_ops);
- 	prov_create_file("propagate_generated_filter", 0644, &prov_propagate_generated_filter_ops);
- 	prov_create_file("propagate_used_filter", 0644, &prov_propagate_used_filter_ops);
- 	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
+	prov_create_file("propagate_generated_filter", 0644, &prov_propagate_generated_filter_ops);
+	prov_create_file("propagate_used_filter", 0644, &prov_propagate_used_filter_ops);
+	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
 	prov_create_file("flush", 0600, &prov_flush_ops);
 	prov_create_file("process", 0644, &prov_process_ops);
 	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);
