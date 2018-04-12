@@ -84,6 +84,8 @@ static const char RL_STR_ENV[]                   = "env";
 static const char RL_STR_LOG[]                   = "log";
 static const char RL_STR_SH_ATTACH_READ[]        = "sh_attach_read";
 static const char RL_STR_SH_ATTACH_WRITE[]       = "sh_attach_write";
+static const char RL_STR_SH_CREATE_READ[]        = "sh_create_read";
+static const char RL_STR_SH_CREATE_WRITE[]       = "sh_create_write";
 
 /* node string name */
 static const char ND_STR_UNKNOWN[]                           = "unknown";
@@ -257,6 +259,10 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SH_ATTACH_READ;
 	case RL_SH_ATTACH_WRITE:
 		return RL_STR_SH_ATTACH_WRITE;
+	case RL_SH_CREATE_READ:
+		return RL_STR_SH_CREATE_READ;
+	case RL_SH_CREATE_WRITE:
+		return RL_STR_SH_CREATE_WRITE;
 	default:
 		return RL_STR_UNKNOWN;
 	}
@@ -335,6 +341,8 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_LOG, RL_LOG);
 	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_READ, RL_SH_ATTACH_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_WRITE, RL_SH_ATTACH_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_READ, RL_SH_CREATE_READ);
+	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_WRITE, RL_SH_CREATE_WRITE);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(relation_id);
