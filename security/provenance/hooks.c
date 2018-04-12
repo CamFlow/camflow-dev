@@ -205,11 +205,12 @@ static int provenance_task_fix_setuid(struct cred *new,
 {
 	struct provenance *old_prov = old->provenance;
 	struct provenance *prov = new->provenance;
+	struct provenance *tprov = get_task_provenance();
 	unsigned long irqflags;
 	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	rc = informs(RL_CHANGE, old_prov, prov, NULL, flags);
+	rc = generates(RL_SETUID, old_prov, tprov, prov, NULL, flags);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }

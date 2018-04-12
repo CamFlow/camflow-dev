@@ -23,7 +23,7 @@ static const char RL_STR_CLONE_MEM[]             = "clone_mem";
 static const char RL_STR_MSG_CREATE[]            = "msg_create";
 static const char RL_STR_SOCKET_CREATE[]         = "socket_create";
 static const char RL_STR_INODE_CREATE[]	         = "inode_create";
-static const char RL_STR_CHANGE[]                = "change";
+static const char RL_STR_SETUID[]                = "setuid";
 static const char RL_STR_MMAP_WRITE[]            = "mmap_write";
 static const char RL_STR_SH_WRITE[]              = "sh_write";
 static const char RL_STR_PROC_WRITE[]            = "proc_write";
@@ -137,8 +137,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SOCKET_CREATE;
 	case RL_INODE_CREATE:
 		return RL_STR_INODE_CREATE;
-	case RL_CHANGE:
-		return RL_STR_CHANGE;
+	case RL_SETUID:
+		return RL_STR_SETUID;
 	case RL_MMAP_WRITE:
 		return RL_STR_MMAP_WRITE;
 	case RL_BIND:
@@ -280,7 +280,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_MSG_CREATE, RL_MSG_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SOCKET_CREATE, RL_SOCKET_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_INODE_CREATE, RL_INODE_CREATE);
-	MATCH_AND_RETURN(str, RL_STR_CHANGE, RL_CHANGE);
+	MATCH_AND_RETURN(str, RL_STR_SETUID, RL_SETUID);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);
