@@ -1872,6 +1872,9 @@ void __init provenance_add_hooks(void)
 	prov_policy.prov_all = false;
 #endif
 	prov_policy.prov_written = false;
+	prov_policy.should_duplicate = false;
+	prov_policy.should_compress_node = true;
+	prov_policy.should_compress_edge = true;
 	prov_machine_id = 1;
 	prov_boot_id = 0;
 	provenance_cache = kmem_cache_create("provenance_struct",

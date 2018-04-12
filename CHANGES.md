@@ -34,6 +34,7 @@
 
 ### v0.3.12
 ```
+- Support node duplication on/off.
 - Reworking mmap handling logic.
 - Added hook and relation type to capture open file descriptor sent over ipc.
 - RL_CHANGE becomes RL_SETUID.

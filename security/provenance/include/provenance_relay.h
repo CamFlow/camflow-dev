@@ -122,7 +122,7 @@ static inline void prov_flush(void)
 
 static __always_inline void __write_node(prov_entry_t *node)
 {
-	if (filter_node(node) || provenance_is_recorded(node))   // filtered or already recorded
+	if (filter_node(node) || (provenance_is_recorded(node)&&!prov_policy.should_duplicate))   // filtered or already recorded
 		return;
 	set_recorded(node);
 	if ( provenance_is_long(node) )

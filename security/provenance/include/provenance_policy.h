@@ -19,6 +19,7 @@ struct capture_policy {
 	bool prov_written;
 	bool should_compress_node;
 	bool should_compress_edge;
+	bool should_duplicate;
 	uint64_t prov_node_filter;
 	uint64_t prov_propagate_node_filter;
 	uint64_t prov_derived_filter;
