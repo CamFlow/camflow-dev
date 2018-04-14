@@ -128,9 +128,9 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 
 // from (entity) to (activity)
 static __always_inline int uses(const uint64_t type,
-				struct provenance *from,
-				struct provenance *tprov,
-				struct provenance *cprov,
+				struct provenance *entity,
+				struct provenance *activity,
+				struct provenance *activity_mem,
 				const struct file *file,
 				const uint64_t flags)
 {
@@ -139,56 +139,56 @@ static __always_inline int uses(const uint64_t type,
 	BUILD_BUG_ON(!prov_is_used(type));
 
 	// check if the nodes match some capture options
-	apply_target(prov_elt(from));
-	apply_target(prov_elt(tprov));
-	apply_target(prov_elt(cprov));
+	apply_target(prov_elt(entity));
+	apply_target(prov_elt(activity));
+	apply_target(prov_elt(activity_mem));
 
-	if (!provenance_is_tracked(prov_elt(from))
-	    && !provenance_is_tracked(prov_elt(tprov))
-	    && !provenance_is_tracked(prov_elt(cprov))
+	if (!provenance_is_tracked(prov_elt(entity))
+	    && !provenance_is_tracked(prov_elt(activity))
+	    && !provenance_is_tracked(prov_elt(activity_mem))
 	    && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(type, prov_entry(from), prov_entry(tprov)))
+	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 		return 0;
 
-	rc = record_relation(type, from, tprov, file, flags);
+	rc = record_relation(type, entity, activity, file, flags);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(RL_PROC_WRITE, tprov, cprov, NULL, 0);
+	rc = record_relation(RL_PROC_WRITE, activity, activity_mem, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = current_update_shst(cprov, false);
+	rc = current_update_shst(activity_mem, false);
 out:
 	return rc;
 }
 
 // from (entity) to (activity)
 static __always_inline int uses_two(const uint64_t type,
-				    struct provenance *from,
-				    struct provenance *to,
+				    struct provenance *entity,
+				    struct provenance *activity,
 				    const struct file *file,
 				    const uint64_t flags)
 {
 	BUILD_BUG_ON(!prov_is_used(type));
 
 	// check if the nodes match some capture options
-	apply_target(prov_elt(from));
-	apply_target(prov_elt(to));
+	apply_target(prov_elt(entity));
+	apply_target(prov_elt(activity));
 
-	if (!provenance_is_tracked(prov_elt(from))
-	    && !provenance_is_tracked(prov_elt(to))
+	if (!provenance_is_tracked(prov_elt(entity))
+	    && !provenance_is_tracked(prov_elt(activity))
 	    && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
+	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 		return 0;
-	return record_relation(type, from, to, file, flags);
+	return record_relation(type, entity, activity, file, flags);
 }
 
 // from (activity) to (entity)
 static __always_inline int generates(const uint64_t type,
-				     struct provenance *cprov,
-				     struct provenance *tprov,
-				     struct provenance *to,
+				     struct provenance *activity_mem,
+				     struct provenance *activity,
+				     struct provenance *entity,
 				     const struct file *file,
 				     const uint64_t flags)
 {
@@ -197,25 +197,25 @@ static __always_inline int generates(const uint64_t type,
 	BUILD_BUG_ON(!prov_is_generated(type));
 
 	// check if the nodes match some capture options
-	apply_target(prov_elt(cprov));
-	apply_target(prov_elt(tprov));
-	apply_target(prov_elt(to));
+	apply_target(prov_elt(activity_mem));
+	apply_target(prov_elt(activity));
+	apply_target(prov_elt(entity));
 
-	if (!provenance_is_tracked(prov_elt(cprov))
-	    && !provenance_is_tracked(prov_elt(tprov))
-	    && !provenance_is_tracked(prov_elt(to))
+	if (!provenance_is_tracked(prov_elt(activity_mem))
+	    && !provenance_is_tracked(prov_elt(activity))
+	    && !provenance_is_tracked(prov_elt(entity))
 	    && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(type, prov_entry(tprov), prov_entry(to)))
+	if (!should_record_relation(type, prov_entry(activity), prov_entry(entity)))
 		return 0;
 
-	rc = current_update_shst(cprov, true);
+	rc = current_update_shst(activity_mem, true);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(RL_PROC_READ, cprov, tprov, NULL, 0);
+	rc = record_relation(RL_PROC_READ, activity_mem, activity, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(type, tprov, to, file, flags);
+	rc = record_relation(type, activity, entity, file, flags);
 out:
 	return rc;
 }
