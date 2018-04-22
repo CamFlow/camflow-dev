@@ -233,7 +233,7 @@ static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *
 	if (provenance_is_tracked(prov_elt(inode)) || prov_policy.prov_all) {
 		if (!should_record_relation(RL_SND_PACKET, prov_entry(inode), (prov_entry_t*)pck))
 			return 0;
-		rc = write_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL, 0);
+		rc = record_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL, 0);
 		inode->has_outgoing = true;
 	}
 	return rc;

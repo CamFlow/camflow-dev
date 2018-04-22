@@ -285,10 +285,10 @@ static inline int record_write_xattr(uint64_t type,
 			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
 		}
 	}
-	rc = __update_version(RL_SH_READ, tprov);
+	rc = __update_version(RL_PROC_READ, tprov);
 	if (rc < 0)
 		goto out;
-	rc = write_relation(RL_SH_READ, prov_elt(cprov), prov_elt(tprov), NULL, 0);
+	rc = write_relation(RL_PROC_READ, prov_elt(cprov), prov_elt(tprov), NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = write_relation(type, prov_elt(tprov), xattr, NULL, flags);
@@ -332,10 +332,10 @@ static inline int record_read_xattr(struct provenance *cprov,
 	rc = write_relation(RL_GETXATTR, xattr, prov_elt(tprov), NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = __update_version(RL_SH_WRITE, cprov);
+	rc = __update_version(RL_PROC_WRITE, cprov);
 	if (rc < 0)
 		goto out;
-	rc = write_relation(RL_SH_WRITE, prov_elt(tprov), prov_elt(cprov), NULL, 0);
+	rc = write_relation(RL_PROC_WRITE, prov_elt(tprov), prov_elt(cprov), NULL, 0);
 	iprov->has_outgoing = true;
 out:
 	free_long_provenance(xattr);
