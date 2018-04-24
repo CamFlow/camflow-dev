@@ -203,26 +203,6 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 	return 0;
 }
 
-// TODO record_pck_to_inode and record_inode_to_pck need a rewrite
-
-// incoming packet
-static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *inode)
-{
-	int rc = 0;
-
-	apply_target(prov_elt(inode));
-	apply_target(pck);
-	if (provenance_is_tracked(prov_elt(inode)) || prov_policy.prov_all) {
-		if (!should_record_relation(RL_RCV_PACKET, (prov_entry_t*)pck, prov_entry(inode)))
-			return 0;
-		rc = __update_version(RL_RCV_PACKET, inode);
-		if (rc < 0)
-			return rc;
-		rc = write_relation(RL_RCV_PACKET, pck, prov_elt(inode), NULL, 0);
-	}
-	return rc;
-}
-
 static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
