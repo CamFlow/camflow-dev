@@ -24,6 +24,8 @@ struct provenance_query_hooks {
   struct list_head list;
   int (*out_edge)(prov_entry_t*, prov_entry_t*);
   int (*in_edge)(prov_entry_t*, prov_entry_t*);
+  int (*alloc)(prov_entry_t*);
+  int (*free)(prov_entry_t*);
 };
 
  extern struct list_head provenance_query_hooks;

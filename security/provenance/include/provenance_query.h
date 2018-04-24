@@ -45,6 +45,34 @@ static inline int call_provenance_in_edge(prov_entry_t *edge,
 	return rc;
 }
 
+static inline int call_provenance_alloc(prov_entry_t *elt)
+{
+	int rc = 0;
+	struct list_head *listentry, *listtmp;
+	struct provenance_query_hooks *fcn;
+
+	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
+		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		if (fcn->alloc)
+			rc |= fcn->alloc(elt);
+	}
+	return rc;
+}
+
+static inline int call_provenance_free(prov_entry_t *elt)
+{
+	int rc = 0;
+	struct list_head *listentry, *listtmp;
+	struct provenance_query_hooks *fcn;
+
+	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
+		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		if (fcn->free)
+			rc |= fcn->free(elt);
+	}
+	return rc;
+}
+
 static inline int call_query_hooks(prov_entry_t *from,
 				   prov_entry_t *to,
 				   prov_entry_t *edge)

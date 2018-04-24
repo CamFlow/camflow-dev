@@ -1568,7 +1568,9 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 			if (rc < 0)
 				goto out;
 		}
+		call_provenance_alloc((prov_entry_t*)&pckprov);
 		rc = derives(RL_RCV_PACKET, &pckprov, iprov, NULL, 0);
+		call_provenance_free((prov_entry_t*)&pckprov);
 out:
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
