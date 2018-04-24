@@ -168,6 +168,10 @@
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
 #define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
 
+#define prov_is_close(val) (val == RL_TERMINATE_TASK \
+												 || val == RL_TERMINATE_PROC \
+												 || val == RL_CLOSED)
+
 static inline bool prov_has_uidgid(uint64_t type)
 {
 	switch (type) {

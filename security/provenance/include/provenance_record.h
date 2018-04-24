@@ -124,6 +124,24 @@ static __always_inline int record_relation(const uint64_t type,
 	return rc;
 }
 
+static __always_inline int record_close(uint64_t type, struct provenance *prov){
+	union prov_elt old_prov;
+	int rc;
+
+	BUILD_BUG_ON(!prov_is_close(type));
+
+	if (!provenance_is_tracked(prov_elt(prov)) && !prov_policy.prov_all)
+		return 0;
+	if (filter_node(prov_entry(prov)))
+		return 0;
+	memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+	node_identifier(prov_elt(prov)).version++;
+	clear_recorded(prov_elt(prov));
+
+	rc = write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
+	return rc;
+}
+
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
 
 // from (entity) to (activity)
