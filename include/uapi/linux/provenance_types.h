@@ -163,6 +163,8 @@
 #define prov_is_packet(prov) (node_type(prov) == ENT_PACKET)
 
 #define prov_is_type(val, type) ((val&type)==type)
+#define prov_type_is_relation(val) prov_is_type(val, DM_RELATION)
+#define prov_type_is_node(val) (!prov_is_type(val, DM_RELATION))
 #define prov_is_used(val) prov_is_type(val, RL_USED)
 #define prov_is_informed(val) prov_is_type(val, RL_INFORMED)
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)

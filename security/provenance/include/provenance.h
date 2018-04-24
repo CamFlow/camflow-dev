@@ -66,9 +66,11 @@ struct provenance {
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
-static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
+static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
 	struct provenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
+
+	BUILD_BUG_ON(!prov_type_is_node(ntype));
 
 	if (!prov)
 		return NULL;
@@ -85,9 +87,11 @@ static inline void free_provenance(struct provenance *prov)
 	kmem_cache_free(provenance_cache, prov);
 }
 
-static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
+static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
 	union long_prov_elt *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+
+	BUILD_BUG_ON(!prov_type_is_node(ntype));
 
 	if (!tmp)
 		return NULL;

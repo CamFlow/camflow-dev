@@ -105,6 +105,8 @@ static __always_inline int record_relation(const uint64_t type,
 {
 	int rc = 0;
 
+	BUILD_BUG_ON(!prov_type_is_relation(type));
+
 	if (prov_policy.should_compress_edge) {
 		// we compress edges, do not record same edge type twice
 		if (to->previous_id == node_identifier(prov_entry(from)).id
