@@ -223,22 +223,6 @@ static inline int record_pck_to_inode(union prov_elt *pck, struct provenance *in
 	return rc;
 }
 
-// outgoing packet
-static inline int record_inode_to_pck(struct provenance *inode, union prov_elt *pck)
-{
-	int rc = 0;
-
-	apply_target(prov_elt(inode));
-	apply_target(pck);
-	if (provenance_is_tracked(prov_elt(inode)) || prov_policy.prov_all) {
-		if (!should_record_relation(RL_SND_PACKET, prov_entry(inode), (prov_entry_t*)pck))
-			return 0;
-		rc = write_relation(RL_SND_PACKET, prov_elt(inode), pck, NULL, 0);
-		inode->has_outgoing = true;
-	}
-	return rc;
-}
-
 static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
