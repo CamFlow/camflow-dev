@@ -393,6 +393,7 @@ struct arg_struct {
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
 	basic_elements;
+  void *var_ptr;
 	char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
 	uint8_t value[PROV_XATTR_VALUE_SIZE];
 	size_t size;
@@ -400,6 +401,7 @@ struct xattr_prov_struct {
 
 struct disc_node_struct {
 	basic_elements;
+  void *var_ptr;
 	size_t length;
 	char content[PATH_MAX];
 	union prov_identifier parent;
