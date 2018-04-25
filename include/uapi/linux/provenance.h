@@ -266,6 +266,7 @@ struct node_struct {
 
 struct proc_prov_struct {
 	basic_elements;
+  void *var_ptr;
 	uint32_t tgid;
 	uint32_t utsns;
 	uint32_t ipcns;
@@ -288,12 +289,14 @@ struct proc_prov_struct {
 
 struct task_prov_struct {
 	basic_elements;
+  void *var_ptr;
 	uint32_t pid;
 	uint32_t vpid;
 };
 
 struct inode_prov_struct {
 	basic_elements;
+  void *var_ptr;
 	uint64_t ino;
 	uint16_t mode;
 	uint8_t sb_uuid[16];
@@ -301,6 +304,7 @@ struct inode_prov_struct {
 
 struct iattr_prov_struct {
 	basic_elements;
+  void *var_ptr;
 	uint32_t valid;
 	uint16_t mode;
 	int64_t size;
@@ -311,21 +315,25 @@ struct iattr_prov_struct {
 
 struct msg_msg_struct {
 	basic_elements;
+  void *var_ptr;
 	long type;
 };
 
 struct shm_struct {
 	basic_elements;
+  void *var_ptr;
 	uint16_t mode;
 };
 
 struct sb_struct {
 	basic_elements;
+  void *var_ptr;
 	uint8_t uuid[16];
 };
 
 struct pck_struct {
 	basic_elements;
+  void *var_ptr;
 	uint16_t length;
 };
 
@@ -345,18 +353,21 @@ union prov_elt {
 
 struct str_struct {
 	basic_elements;
+  void *var_ptr;
 	char str[PATH_MAX];
 	size_t length;
 };
 
 struct file_name_struct {
 	basic_elements;
+  void *var_ptr;
 	char name[PATH_MAX];
 	size_t length;
 };
 
 struct address_struct {
 	basic_elements;
+  void *var_ptr;
 	struct sockaddr addr;
 	size_t length;
 };
@@ -364,6 +375,7 @@ struct address_struct {
 #define PROV_TRUNCATED 1
 struct pckcnt_struct {
 	basic_elements;
+  void *var_ptr;
 	uint8_t content[PATH_MAX];
 	size_t length;
 	uint8_t truncated;
@@ -371,6 +383,7 @@ struct pckcnt_struct {
 
 struct arg_struct {
 	basic_elements;
+  void *var_ptr;
 	char value[PATH_MAX];
 	size_t length;
 	uint8_t truncated;
