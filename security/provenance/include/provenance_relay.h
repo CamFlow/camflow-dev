@@ -165,9 +165,7 @@ static __always_inline int write_relation(const uint64_t type,
 		relation.relation_info.offset = file->f_pos;
 	}
 	relation.relation_info.flags = flags;
-	call_provenance_alloc((prov_entry_t*)&relation);
 	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
-	call_provenance_free((prov_entry_t*)&relation);
 	__write_node(f);
 	__write_node(t);
 	prov_write(&relation);

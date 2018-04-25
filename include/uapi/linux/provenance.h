@@ -241,7 +241,7 @@ union prov_identifier {
 #define clear_is_long(node)						prov_clear_flag(node, LONG_BIT)
 #define provenance_is_long(node)			prov_check_flag(node, LONG_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
+#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES]
 
 struct msg_struct {
 	basic_elements;
@@ -261,6 +261,7 @@ struct relation_struct {
 
 struct node_struct {
 	basic_elements;
+  void *var_ptr;
 };
 
 struct proc_prov_struct {

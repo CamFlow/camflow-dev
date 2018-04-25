@@ -15,8 +15,9 @@
 
 #include <linux/provenance_query.h>
 
-static inline int call_provenance_out_edge(prov_entry_t *node,
-					   prov_entry_t *edge)
+static inline int call_provenance_flow(prov_entry_t *from,
+					   prov_entry_t *edge,
+					 	 prov_entry_t *to)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -24,23 +25,8 @@ static inline int call_provenance_out_edge(prov_entry_t *node,
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
 		fcn = list_entry(listentry, struct provenance_query_hooks, list);
-		if (fcn->out_edge)
-			rc |= fcn->out_edge(node, edge);
-	}
-	return rc;
-}
-
-static inline int call_provenance_in_edge(prov_entry_t *edge,
-					  prov_entry_t *node)
-{
-	int rc = 0;
-	struct list_head *listentry, *listtmp;
-	struct provenance_query_hooks *fcn;
-
-	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
-		if (fcn->in_edge)
-			rc |= fcn->in_edge(edge, node);
+		if (fcn->flow)
+			rc |= fcn->flow(from, edge, to);
 	}
 	return rc;
 }
@@ -79,15 +65,7 @@ static inline int call_query_hooks(prov_entry_t *from,
 {
 	int rc = 0;
 
-	rc = call_provenance_out_edge(from, edge);
-	if ((rc & PROVENANCE_RAISE_WARNING) == PROVENANCE_RAISE_WARNING)
-		pr_warning("Provenance: warning raised.\n");
-	if ((rc & PROVENANCE_PREVENT_FLOW) == PROVENANCE_PREVENT_FLOW) {
-		pr_err("Provenance: error raised.\n");
-		edge->relation_info.allowed = FLOW_DISALLOWED;
-		return -EPERM;
-	}
-	rc = call_provenance_in_edge(edge, to);
+	rc = call_provenance_flow(from, edge, to);
 	if ((rc & PROVENANCE_RAISE_WARNING) == PROVENANCE_RAISE_WARNING)
 		pr_warning("Provenance: warning raised.\n");
 	if ((rc & PROVENANCE_PREVENT_FLOW) == PROVENANCE_PREVENT_FLOW) {
