@@ -13,35 +13,21 @@
 #include "provenance.h"
 #include "provenance_query.h"
 
-static int out_edge(prov_entry_t *node, prov_entry_t *edge)
+static int flow(prov_entry_t *from, prov_entry_t *edge, prov_entry_t *to)
 {
-	if (provenance_does_propagate(node) && provenance_is_tracked(node)) {
+	if (provenance_does_propagate(from) && provenance_is_tracked(from)) {
 		// can propagate over edge?
 		if (!filter_propagate_relation(prov_type(edge))) {
-			set_tracked(edge);
-			set_propagate(edge);
-			prov_bloom_merge(prov_taint(edge), prov_taint(node));
-		}
-	}
-	return 0;
-}
-
-static int in_edge(prov_entry_t *edge, prov_entry_t *node)
-{
-	if (provenance_does_propagate(edge) && provenance_is_tracked(edge)) {
-		// can propagate to node?
-		if (!filter_propagate_node(node)) {
-			set_tracked(node);
-			set_propagate(node);
-			prov_bloom_merge(prov_taint(node), prov_taint(edge));
+			set_tracked(to);
+			set_propagate(to);
+			prov_bloom_merge(prov_taint(to), prov_taint(from));
 		}
 	}
 	return 0;
 }
 
 struct provenance_query_hooks hooks = {
-	QUERY_HOOK_INIT(out_edge, out_edge),
-	QUERY_HOOK_INIT(in_edge,  in_edge),
+	QUERY_HOOK_INIT(flow, flow),
 };
 
 static int __init init_prov_propagate(void)
