@@ -441,7 +441,7 @@ out:
 	return rv;
 }
 
-static inline int prov_record_arg(struct provenance *prov,
+static __always_inline int prov_record_arg(struct provenance *prov,
 				  uint64_t vtype,
 				  uint64_t etype,
 				  const char *arg,
