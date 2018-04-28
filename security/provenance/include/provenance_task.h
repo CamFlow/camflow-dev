@@ -278,6 +278,8 @@ static inline struct provenance *get_cred_provenance(void)
 	prov_elt(prov)->proc_info.pidns = current_pidns();
 	prov_elt(prov)->proc_info.netns = current_netns();
 	prov_elt(prov)->proc_info.cgroupns = current_cgroupns();
+	prov_elt(prov)->proc_info.uid = __kuid_val(current_uid());
+	prov_elt(prov)->proc_info.gid = __kgid_val(current_gid());
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
 	update_proc_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
