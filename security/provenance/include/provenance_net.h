@@ -234,10 +234,11 @@ static inline int record_packet_content(struct provenance *pck, const struct sk_
 	if (cnt->pckcnt_info.length > PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
 		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
-	} else
+	} else {
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
+	}
 
-	//rc = record_relation(RL_PCK_CNT, cnt, prov_entry(pck), NULL, 0);
+	rc = __write_relation(RL_PCK_CNT, cnt, prov_entry(pck), NULL, 0);
 	free_long_provenance(cnt);
 	return rc;
 }
