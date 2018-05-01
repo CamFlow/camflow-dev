@@ -70,36 +70,37 @@ out:
 	return count;
 }
 
-static __always_inline int __update_version(const uint64_t type, struct provenance *prov)
+static __always_inline int __update_version(const uint64_t type,
+																						prov_entry_t *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
 
 	// there is no outgoing edge and we are compressing
-	if (!prov->has_outgoing && prov_policy.should_compress_node)
+	if (!provenance_has_outgoing(prov) && prov_policy.should_compress_node)
 		return 0;
 	// is it an edge type that needs update
 	if (filter_update_node(type))
 		return 0;
 	// copy provenance to old
-	memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+	memcpy(&old_prov, prov, sizeof(union prov_elt));
 	// update version
-	node_identifier(prov_elt(prov)).version++;
-	clear_recorded(prov_elt(prov));
+	node_identifier(prov).version++;
+	clear_recorded(prov);
 
 	// record version relation between version
-	if (node_identifier(prov_elt(prov)).type == ACT_TASK)
-		rc = write_relation(RL_VERSION_TASK, &old_prov, prov_elt(prov), NULL, 0);
+	if (node_identifier(prov).type == ACT_TASK)
+		rc = write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
-		rc = write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
-	prov->has_outgoing = false;     // we update there is no more outgoing edge
-	prov->saved = false;            // for inode prov persistance
+		rc = write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
+	clear_has_outgoing(prov);     // we update there is no more outgoing edge
+	clear_saved(prov);           // for inode prov persistance
 	return rc;
 }
 
 static __always_inline int record_relation(const uint64_t type,
-					   struct provenance *from,
-					   struct provenance *to,
+					   prov_entry_t *from,
+					   prov_entry_t *to,
 					   const struct file *file,
 					   const uint64_t flags)
 {
@@ -109,20 +110,20 @@ static __always_inline int record_relation(const uint64_t type,
 
 	if (prov_policy.should_compress_edge) {
 		// we compress edges, do not record same edge type twice
-		if (to->previous_id == node_identifier(prov_entry(from)).id
-		    && to->previous_type == type)
+		if (node_previous_id(to) == node_identifier(from).id
+		    && node_previous_type(to) == type)
 			return 0;
 		else {   // if not we save those information
-			to->previous_id = node_identifier(prov_entry(from)).id;
-			to->previous_type = type;
+			node_previous_id(to) = node_identifier(from).id;
+			node_previous_type(to) = type;
 		}
 	}
 
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
-	from->has_outgoing = true; // there is an outgoing edge
-	rc = write_relation(type, prov_elt(from), prov_elt(to), file, flags);
+	set_has_outgoing(from); // there is an outgoing edge
+	rc = write_relation(type, from, to, file, flags);
 	return rc;
 }
 
@@ -171,10 +172,10 @@ static __always_inline int uses(const uint64_t type,
 	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 		return 0;
 
-	rc = record_relation(type, entity, activity, file, flags);
+	rc = record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(RL_PROC_WRITE, activity, activity_mem, NULL, 0);
+	rc = record_relation(RL_PROC_WRITE, prov_entry(activity), prov_entry(activity_mem), NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = current_update_shst(activity_mem, false);
@@ -201,7 +202,7 @@ static __always_inline int uses_two(const uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 		return 0;
-	return record_relation(type, entity, activity, file, flags);
+	return record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
 }
 
 // from (activity) to (entity)
@@ -232,10 +233,10 @@ static __always_inline int generates(const uint64_t type,
 	rc = current_update_shst(activity_mem, true);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(RL_PROC_READ, activity_mem, activity, NULL, 0);
+	rc = record_relation(RL_PROC_READ, prov_entry(activity_mem), prov_entry(activity), NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(type, activity, entity, file, flags);
+	rc = record_relation(type, prov_entry(activity), prov_entry(entity), file, flags);
 out:
 	return rc;
 }
@@ -260,7 +261,7 @@ static __always_inline int derives(const uint64_t type,
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
 
-	return record_relation(type, from, to, file, flags);
+	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
 
 // from (activity) to (activity)
@@ -283,6 +284,6 @@ static __always_inline int informs(const uint64_t type,
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
 
-	return record_relation(type, from, to, file, flags);
+	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
 #endif

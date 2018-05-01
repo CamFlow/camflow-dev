@@ -61,8 +61,8 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 
 		/* we record a version edge */
 		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
-		prov->has_outgoing = false; // we update there is no more outgoing edge
-		prov->saved = false;
+		clear_has_outgoing(prov_elt(prov)); // we update there is no more outgoing edge
+		clear_saved(prov_elt(prov));
 	}
 out:
 	prov_elt(prov)->inode_info.mode = mode;
@@ -160,14 +160,15 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	struct dentry *dentry;
 	int rc = 0;
 
-	if (prov->initialised)
+	if (provenance_is_initialized(prov_elt(prov)))
 		return 0;
 	spin_lock_nested(prov_lock(prov), PROVENANCE_LOCK_INODE);
-	if (prov->initialised) {
+	if (provenance_is_initialized(prov_elt(prov))) {
 		spin_unlock(prov_lock(prov));
 		return 0;
-	}       else
-		prov->initialised = true;
+	} else {
+		set_initialized(prov_elt(prov));
+	}
 	spin_unlock(prov_lock(prov));
 	update_inode_type(inode->i_mode, prov);
 	if (!(inode->i_opflags & IOP_XATTR)) // xattr not supported on this inode
@@ -180,7 +181,7 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 		return 0;
 	buf = kmalloc(sizeof(union prov_elt), GFP_NOFS);
 	if (!buf) {
-		prov->initialised = false;
+		clear_initialized(prov_elt(prov));
 		dput(dentry);
 		return -ENOMEM;
 	}
@@ -188,7 +189,7 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	dput(dentry);
 	if (rc < 0) {
 		if (rc != -ENODATA && rc != -EOPNOTSUPP) {
-			prov->initialised = false;
+			clear_initialized(prov_elt(prov));
 			goto free_buf;
 		} else {
 			rc = 0;
@@ -207,7 +208,7 @@ static __always_inline struct provenance *inode_provenance(struct inode *inode, 
 	struct provenance *prov = inode->i_provenance;
 
 	might_sleep_if(may_sleep);
-	if (!prov->initialised && may_sleep)
+	if (!provenance_is_initialized(prov_elt(prov)) && may_sleep)
 		inode_init_provenance(inode, NULL);
 	if (may_sleep)
 		refresh_inode_provenance(inode);
@@ -243,12 +244,14 @@ static inline void save_provenance(struct dentry *dentry)
 	if (!prov)
 		return;
 	spin_lock(prov_lock(prov));
-	if (!prov->initialised || prov->saved) { // not initialised or already saved
+	// not initialised or already saved
+	if (!provenance_is_initialized(prov_elt(prov))
+			|| provenance_is_saved(prov_elt(prov))) {
 		spin_unlock(prov_lock(prov));
 		return;
 	}
 	memcpy(&buf, prov_elt(prov), sizeof(union prov_elt));
-	prov->saved = true;
+	set_saved(prov_elt(prov));
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
 	clear_name_recorded(&buf);
@@ -285,7 +288,7 @@ static inline int record_write_xattr(uint64_t type,
 			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
 		}
 	}
-	rc = __update_version(RL_PROC_READ, tprov);
+	rc = __update_version(RL_PROC_READ, prov_entry(tprov));
 	if (rc < 0)
 		goto out;
 	rc = write_relation(RL_PROC_READ, prov_elt(cprov), prov_elt(tprov), NULL, 0);
@@ -294,14 +297,14 @@ static inline int record_write_xattr(uint64_t type,
 	rc = write_relation(type, prov_elt(tprov), xattr, NULL, flags);
 	if (rc < 0)
 		goto out;
-	rc = __update_version(type, iprov);
+	rc = __update_version(type, prov_entry(iprov));
 	if (rc < 0)
 		goto out;
 	if (type == RL_SETXATTR)
 		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
 	else
 		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
-	cprov->has_outgoing = true;
+	set_has_outgoing(prov_elt(cprov));
 out:
 	free_long_provenance(xattr);
 	return rc;
@@ -326,17 +329,17 @@ static inline int record_read_xattr(struct provenance *cprov,
 	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = __update_version(RL_GETXATTR, tprov);
+	rc = __update_version(RL_GETXATTR, prov_entry(tprov));
 	if (rc < 0)
 		goto out;
 	rc = write_relation(RL_GETXATTR, xattr, prov_elt(tprov), NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = __update_version(RL_PROC_WRITE, cprov);
+	rc = __update_version(RL_PROC_WRITE, prov_entry(cprov));
 	if (rc < 0)
 		goto out;
 	rc = write_relation(RL_PROC_WRITE, prov_elt(tprov), prov_elt(cprov), NULL, 0);
-	iprov->has_outgoing = true;
+	set_has_outgoing(prov_elt(iprov));
 out:
 	free_long_provenance(xattr);
 	return rc;

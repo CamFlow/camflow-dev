@@ -162,6 +162,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_secid(node)              ((node)->node_info.secid)
 #define node_uid(node)              	((node)->node_info.uid)
 #define node_gid(node)              	((node)->node_info.gid)
+#define node_previous_id(node)        ((node)->node_info.previous_id)
+#define node_previous_type(node)      ((node)->node_info.previous_type)
+
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -241,7 +244,24 @@ union prov_identifier {
 #define clear_is_long(node)						prov_clear_flag(node, LONG_BIT)
 #define provenance_is_long(node)			prov_check_flag(node, LONG_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
+#define OUTGOING_BIT 7
+#define set_has_outgoing(node)				    prov_set_flag(node, OUTGOING_BIT)
+#define clear_has_outgoing(node)					prov_clear_flag(node, OUTGOING_BIT)
+#define provenance_has_outgoing(node)			prov_check_flag(node, OUTGOING_BIT)
+
+#define INITIALIZED_BIT 8
+#define set_initialized(node)				        prov_set_flag(node, INITIALIZED_BIT)
+#define clear_initialized(node)					    prov_clear_flag(node, INITIALIZED_BIT)
+#define provenance_is_initialized(node)			prov_check_flag(node, INITIALIZED_BIT)
+
+#define SAVED_BIT 9
+#define set_saved(node)				        prov_set_flag(node, SAVED_BIT)
+#define clear_saved(node)					    prov_clear_flag(node, SAVED_BIT)
+#define provenance_is_saved(node)			prov_check_flag(node, SAVED_BIT)
+
+
+
+#define basic_elements union prov_identifier identifier; uint64_t previous_id; uint64_t previous_type; uint32_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
 
 struct msg_struct {
 	basic_elements;

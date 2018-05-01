@@ -167,9 +167,9 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
 				if (vm_read_exec_mayshare(flags) && read)
-					rc = record_relation(RL_SH_READ, mmprov, cprov, mmapf, flags);
+					rc = record_relation(RL_SH_READ, prov_entry(mmprov), prov_entry(cprov), mmapf, flags);
 				if (vm_write_mayshare(flags) && !read)
-					rc = record_relation(RL_SH_WRITE, cprov, mmprov, mmapf, flags);
+					rc = record_relation(RL_SH_WRITE, prov_entry(cprov), prov_entry(mmprov), mmapf, flags);
 			}
 		}
 		vma = vma->vm_next;
