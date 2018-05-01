@@ -1584,7 +1584,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		if (provenance_records_packet(prov_elt(iprov))) {
-			rc = record_packet_content(prov_elt((&pckprov)), skb);
+			rc = record_packet_content(&pckprov, skb);
 			if (rc < 0)
 				goto out;
 		}

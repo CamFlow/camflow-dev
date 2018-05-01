@@ -460,7 +460,7 @@ static __always_inline int prov_record_arg(struct provenance *prov,
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
 
-	rc = write_relation(etype, aprov, prov_elt(prov), NULL, 0);
+	rc = record_relation(etype, aprov, prov_entry(prov), NULL, 0);
 	free_long_provenance(aprov);
 	return rc;
 }

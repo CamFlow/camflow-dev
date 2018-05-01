@@ -37,7 +37,7 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);
 		if (provenance_records_packet(prov_elt(iprov)))
-			record_packet_content(prov_elt((&pckprov)), skb);
+			record_packet_content(&pckprov, skb);
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	}

@@ -67,6 +67,7 @@
 #define RL_SH_READ            (RL_DERIVED   | (0x0000000000000001ULL<<23))
 #define RL_SH_WRITE           (RL_DERIVED   | (0x0000000000000001ULL<<24))
 #define RL_EXEC_TASK       		(RL_DERIVED   | (0x0000000000000001ULL<<25))
+#define RL_PCK_CNT	       		(RL_DERIVED   | (0x0000000000000001ULL<<26))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */

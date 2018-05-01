@@ -16,60 +16,6 @@
 #include "provenance.h"
 #include "provenance_relay.h"
 
-static inline int record_node_name(struct provenance *node, const char *name)
-{
-	union long_prov_elt *fname_prov;
-	int rc;
-
-	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
-		return 0;
-
-	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
-	if (!fname_prov)
-		return -ENOMEM;
-
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
-
-	// record the relation
-	spin_lock(prov_lock(node));
-	if (prov_type(prov_elt(node)) == ACT_TASK) {
-		rc = write_relation(RL_NAMED_PROCESS, fname_prov, prov_elt(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	} else{
-		rc = write_relation(RL_NAMED, fname_prov, prov_elt(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	}
-	spin_unlock(prov_lock(node));
-	free_long_provenance(fname_prov);
-	return rc;
-}
-
-static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
-{
-	union long_prov_elt *str;
-	int rc = 0;
-
-	str = alloc_long_provenance(ENT_STR);
-	if (!str) {
-		rc = -ENOMEM;
-		goto out;
-	}
-	if (copy_from_user(str->str_info.str, buf, count)) {
-		rc = -EAGAIN;
-		goto out;
-	}
-	str->str_info.str[count] = '\0'; // make sure the string is null terminated
-	str->str_info.length = count;
-
-	rc = write_relation(RL_LOG, str, cprov, NULL, 0);
-out:
-	free_long_provenance(str);
-	if (rc < 0)
-		return rc;
-	return count;
-}
-
 static __always_inline int __update_version(const uint64_t type,
 																						prov_entry_t *prov)
 {
@@ -90,9 +36,9 @@ static __always_inline int __update_version(const uint64_t type,
 
 	// record version relation between version
 	if (node_identifier(prov).type == ACT_TASK)
-		rc = write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
+		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
-		rc = write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
+		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
 	clear_has_outgoing(prov);     // we update there is no more outgoing edge
 	clear_saved(prov);           // for inode prov persistance
 	return rc;
@@ -123,7 +69,7 @@ static __always_inline int record_relation(const uint64_t type,
 	if (rc < 0)
 		return rc;
 	set_has_outgoing(from); // there is an outgoing edge
-	rc = write_relation(type, from, to, file, flags);
+	rc = __write_relation(type, from, to, file, flags);
 	return rc;
 }
 
@@ -141,8 +87,62 @@ static __always_inline int record_close(uint64_t type, struct provenance *prov){
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 
-	rc = write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
+	rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
 	return rc;
+}
+
+static inline int record_node_name(struct provenance *node, const char *name)
+{
+	union long_prov_elt *fname_prov;
+	int rc;
+
+	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
+		return 0;
+
+	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
+	if (!fname_prov)
+		return -ENOMEM;
+
+	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
+
+	// record the relation
+	spin_lock(prov_lock(node));
+	if (prov_type(prov_elt(node)) == ACT_TASK) {
+		rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
+		set_name_recorded(prov_elt(node));
+	} else{
+		rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
+		set_name_recorded(prov_elt(node));
+	}
+	spin_unlock(prov_lock(node));
+	free_long_provenance(fname_prov);
+	return rc;
+}
+
+static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
+{
+	union long_prov_elt *str;
+	int rc = 0;
+
+	str = alloc_long_provenance(ENT_STR);
+	if (!str) {
+		rc = -ENOMEM;
+		goto out;
+	}
+	if (copy_from_user(str->str_info.str, buf, count)) {
+		rc = -EAGAIN;
+		goto out;
+	}
+	str->str_info.str[count] = '\0'; // make sure the string is null terminated
+	str->str_info.length = count;
+
+	rc = __write_relation(RL_LOG, str, cprov, NULL, 0);
+out:
+	free_long_provenance(str);
+	if (rc < 0)
+		return rc;
+	return count;
 }
 
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);

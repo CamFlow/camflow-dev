@@ -218,17 +218,17 @@ static inline int provenance_record_address(struct sockaddr *address, int addrle
 	addr_info->address_info.length = addrlen;
 	memcpy(&(addr_info->address_info.addr), address, addrlen);
 
-	rc = write_relation(RL_NAMED, addr_info, prov_elt(prov), NULL, 0);
+	rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
 	set_name_recorded(prov_elt(prov));
 out:
 	free_long_provenance(addr_info);
 	return rc;
 }
 
-static inline int record_packet_content(union prov_elt *pck, const struct sk_buff *skb)
+static inline int record_packet_content(struct provenance *pck, const struct sk_buff *skb)
 {
 	union long_prov_elt *cnt = alloc_long_provenance(ENT_PCKCNT);
-	int rc;
+	int rc = 0;
 
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length > PATH_MAX) {
@@ -237,7 +237,7 @@ static inline int record_packet_content(union prov_elt *pck, const struct sk_buf
 	} else
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 
-	rc = write_relation(RL_READ, cnt, pck, NULL, 0);
+	//rc = record_relation(RL_PCK_CNT, cnt, prov_entry(pck), NULL, 0);
 	free_long_provenance(cnt);
 	return rc;
 }

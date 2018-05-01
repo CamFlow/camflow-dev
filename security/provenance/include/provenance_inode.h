@@ -60,7 +60,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		clear_recorded(prov_elt(prov));
 
 		/* we record a version edge */
-		write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
+		__write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
 		clear_has_outgoing(prov_elt(prov)); // we update there is no more outgoing edge
 		clear_saved(prov_elt(prov));
 	}
@@ -288,23 +288,16 @@ static inline int record_write_xattr(uint64_t type,
 			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
 		}
 	}
-	rc = __update_version(RL_PROC_READ, prov_entry(tprov));
+	rc = record_relation(RL_PROC_READ, prov_entry(cprov), prov_entry(tprov), NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = write_relation(RL_PROC_READ, prov_elt(cprov), prov_elt(tprov), NULL, 0);
-	if (rc < 0)
-		goto out;
-	rc = write_relation(type, prov_elt(tprov), xattr, NULL, flags);
-	if (rc < 0)
-		goto out;
-	rc = __update_version(type, prov_entry(iprov));
+	rc = record_relation(type, prov_entry(tprov), xattr, NULL, flags);
 	if (rc < 0)
 		goto out;
 	if (type == RL_SETXATTR)
-		rc = write_relation(RL_SETXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
+		rc = record_relation(RL_SETXATTR_INODE, xattr, prov_entry(iprov), NULL, flags);
 	else
-		rc = write_relation(RL_RMVXATTR_INODE, xattr, prov_elt(iprov), NULL, flags);
-	set_has_outgoing(prov_elt(cprov));
+		rc = record_relation(RL_RMVXATTR_INODE, xattr, prov_entry(iprov), NULL, flags);
 out:
 	free_long_provenance(xattr);
 	return rc;
@@ -326,20 +319,13 @@ static inline int record_read_xattr(struct provenance *cprov,
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 
-	rc = write_relation(RL_GETXATTR_INODE, prov_elt(iprov), xattr, NULL, 0);
+	rc = record_relation(RL_GETXATTR_INODE, prov_entry(iprov), xattr, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = __update_version(RL_GETXATTR, prov_entry(tprov));
+	rc = record_relation(RL_GETXATTR, xattr, prov_entry(tprov), NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = write_relation(RL_GETXATTR, xattr, prov_elt(tprov), NULL, 0);
-	if (rc < 0)
-		goto out;
-	rc = __update_version(RL_PROC_WRITE, prov_entry(cprov));
-	if (rc < 0)
-		goto out;
-	rc = write_relation(RL_PROC_WRITE, prov_elt(tprov), prov_elt(cprov), NULL, 0);
-	set_has_outgoing(prov_elt(iprov));
+	rc = record_relation(RL_PROC_WRITE, prov_entry(tprov), prov_entry(cprov), NULL, 0);
 out:
 	free_long_provenance(xattr);
 	return rc;

@@ -139,7 +139,7 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 	memcpy(dest, src, sizeof(union prov_identifier));
 }
 
-static __always_inline int write_relation(const uint64_t type,
+static __always_inline int __write_relation(const uint64_t type,
 					  void *from,
 					  void *to,
 					  const struct file *file,

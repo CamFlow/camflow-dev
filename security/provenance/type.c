@@ -52,6 +52,7 @@ static const char RL_STR_NAMED[]                 = "named";
 static const char RL_STR_NAMED_PROCESS[]         = "named_process";
 static const char RL_STR_EXEC[]                  = "exec";
 static const char RL_STR_EXEC_TASK[]             = "exec_task";
+static const char RL_STR_PCK_CNT[]             	 = "packet_content";
 static const char RL_STR_CLONE[]                 = "clone";
 static const char RL_STR_VERSION_TASK[]          = "version_activity";
 static const char RL_STR_SEARCH[]                = "search";
@@ -192,6 +193,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_EXEC;
 	case RL_EXEC_TASK:
 		return RL_STR_EXEC_TASK;
+	case RL_PCK_CNT:
+		return RL_STR_PCK_CNT;
 	case RL_CLONE:
 		return RL_STR_CLONE;
 	case RL_VERSION_TASK:
@@ -311,6 +314,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_NAMED_PROCESS, RL_NAMED_PROCESS);
 	MATCH_AND_RETURN(str, RL_STR_EXEC, RL_EXEC);
 	MATCH_AND_RETURN(str, RL_STR_EXEC_TASK, RL_EXEC_TASK);
+	MATCH_AND_RETURN(str, RL_STR_PCK_CNT, RL_PCK_CNT);
 	MATCH_AND_RETURN(str, RL_STR_CLONE, RL_CLONE);
 	MATCH_AND_RETURN(str, RL_STR_VERSION_TASK, RL_VERSION_TASK);
 	MATCH_AND_RETURN(str, RL_STR_SEARCH, RL_SEARCH);
