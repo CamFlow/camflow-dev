@@ -167,9 +167,9 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 			mmprov = file_provenance(mmapf, false);
 			if (mmprov) {
 				if (vm_read_exec_mayshare(flags) && read)
-					rc = record_relation(RL_SH_READ, mmprov, cprov, mmapf, flags);
+					rc = record_relation(RL_SH_READ, prov_entry(mmprov), prov_entry(cprov), mmapf, flags);
 				if (vm_write_mayshare(flags) && !read)
-					rc = record_relation(RL_SH_WRITE, cprov, mmprov, mmapf, flags);
+					rc = record_relation(RL_SH_WRITE, prov_entry(cprov), prov_entry(mmprov), mmapf, flags);
 			}
 		}
 		vma = vma->vm_next;
@@ -278,6 +278,8 @@ static inline struct provenance *get_cred_provenance(void)
 	prov_elt(prov)->proc_info.pidns = current_pidns();
 	prov_elt(prov)->proc_info.netns = current_netns();
 	prov_elt(prov)->proc_info.cgroupns = current_cgroupns();
+	prov_elt(prov)->proc_info.uid = __kuid_val(current_uid());
+	prov_elt(prov)->proc_info.gid = __kgid_val(current_gid());
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
 	update_proc_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
@@ -458,7 +460,7 @@ static __always_inline int prov_record_arg(struct provenance *prov,
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
 
-	rc = write_relation(etype, aprov, prov_elt(prov), NULL, 0);
+	rc = record_relation(etype, aprov, prov_entry(prov), NULL, 0);
 	free_long_provenance(aprov);
 	return rc;
 }

@@ -20,7 +20,7 @@
 #include "provenance_filter.h"
 #include "provenance_query.h"
 
-#define PROV_RELAY_BUFF_EXP         22 // 4MB
+#define PROV_RELAY_BUFF_EXP         24 // 16MB
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
 #define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
@@ -139,7 +139,7 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 	memcpy(dest, src, sizeof(union prov_identifier));
 }
 
-static __always_inline int write_relation(const uint64_t type,
+static __always_inline int __write_relation(const uint64_t type,
 					  void *from,
 					  void *to,
 					  const struct file *file,

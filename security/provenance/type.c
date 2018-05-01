@@ -24,6 +24,7 @@ static const char RL_STR_MSG_CREATE[]            = "msg_create";
 static const char RL_STR_SOCKET_CREATE[]         = "socket_create";
 static const char RL_STR_INODE_CREATE[]          = "inode_create";
 static const char RL_STR_SETUID[]                = "setuid";
+static const char RL_STR_SETGID[]                = "setgid";
 static const char RL_STR_MMAP_WRITE[]            = "mmap_write";
 static const char RL_STR_SH_WRITE[]              = "sh_write";
 static const char RL_STR_PROC_WRITE[]            = "proc_write";
@@ -51,6 +52,7 @@ static const char RL_STR_NAMED[]                 = "named";
 static const char RL_STR_NAMED_PROCESS[]         = "named_process";
 static const char RL_STR_EXEC[]                  = "exec";
 static const char RL_STR_EXEC_TASK[]             = "exec_task";
+static const char RL_STR_PCK_CNT[]             	 = "packet_content";
 static const char RL_STR_CLONE[]                 = "clone";
 static const char RL_STR_VERSION_TASK[]          = "version_activity";
 static const char RL_STR_SEARCH[]                = "search";
@@ -139,6 +141,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_INODE_CREATE;
 	case RL_SETUID:
 		return RL_STR_SETUID;
+	case RL_SETGID:
+		return RL_STR_SETGID;
 	case RL_MMAP_WRITE:
 		return RL_STR_MMAP_WRITE;
 	case RL_BIND:
@@ -189,6 +193,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_EXEC;
 	case RL_EXEC_TASK:
 		return RL_STR_EXEC_TASK;
+	case RL_PCK_CNT:
+		return RL_STR_PCK_CNT;
 	case RL_CLONE:
 		return RL_STR_CLONE;
 	case RL_VERSION_TASK:
@@ -281,6 +287,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SOCKET_CREATE, RL_SOCKET_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_INODE_CREATE, RL_INODE_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SETUID, RL_SETUID);
+	MATCH_AND_RETURN(str, RL_STR_SETGID, RL_SETGID);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);
@@ -307,6 +314,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_NAMED_PROCESS, RL_NAMED_PROCESS);
 	MATCH_AND_RETURN(str, RL_STR_EXEC, RL_EXEC);
 	MATCH_AND_RETURN(str, RL_STR_EXEC_TASK, RL_EXEC_TASK);
+	MATCH_AND_RETURN(str, RL_STR_PCK_CNT, RL_PCK_CNT);
 	MATCH_AND_RETURN(str, RL_STR_CLONE, RL_CLONE);
 	MATCH_AND_RETURN(str, RL_STR_VERSION_TASK, RL_VERSION_TASK);
 	MATCH_AND_RETURN(str, RL_STR_SEARCH, RL_SEARCH);

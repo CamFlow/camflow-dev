@@ -67,6 +67,7 @@
 #define RL_SH_READ            (RL_DERIVED   | (0x0000000000000001ULL<<23))
 #define RL_SH_WRITE           (RL_DERIVED   | (0x0000000000000001ULL<<24))
 #define RL_EXEC_TASK       		(RL_DERIVED   | (0x0000000000000001ULL<<25))
+#define RL_PCK_CNT	       		(RL_DERIVED   | (0x0000000000000001ULL<<26))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */
@@ -89,6 +90,7 @@
 #define RL_RMVXATTR           (RL_GENERATED | (0x0000000000000001ULL<<17))
 #define RL_SHMDT		        	(RL_GENERATED | (0x0000000000000001ULL<<18))
 #define RL_SETUID             (RL_GENERATED | (0x0000000000000001ULL<<19))
+#define RL_SETGID             (RL_GENERATED | (0x0000000000000001ULL<<20))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */

@@ -214,6 +214,26 @@ static int provenance_task_fix_setuid(struct cred *new,
 }
 
 /*
+ * @task_setpgid:
+ *	Check permission before setting the process group identifier of the
+ *	process @p to @pgid.
+ *	@p contains the task_struct for process being modified.
+ *	@pgid contains the new pgid.
+ *	Return 0 if permission is granted.
+ */
+static int provenance_task_setpgid(struct task_struct *p, pid_t pgid) {
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	const struct cred *cred = get_task_cred(p);
+	struct provenance *nprov = cred->provenance;
+	int rc;
+	prov_elt(nprov)->proc_info.gid = pgid;
+	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
+	put_cred(cred);
+	return rc;
+}
+
+/*
  *	Check permission before sending signal @sig to @p.  @info can be NULL,
  *	the constant 1, or a pointer to a siginfo structure.  If @info is 1 or
  *	SI_FROMKERNEL(info) is true, then the signal should be viewed as coming
@@ -1564,7 +1584,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		if (provenance_records_packet(prov_elt(iprov))) {
-			rc = record_packet_content(prov_elt((&pckprov)), skb);
+			rc = record_packet_content(&pckprov, skb);
 			if (rc < 0)
 				goto out;
 		}
@@ -1769,6 +1789,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_alloc,			    provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,			    provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,			    provenance_task_fix_setuid),
+	LSM_HOOK_INIT(task_setpgid,			    provenance_task_setpgid),
 	LSM_HOOK_INIT(task_kill,			    provenance_task_kill),
 
 	/* inode related hooks */
