@@ -79,7 +79,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 
 	BUILD_BUG_ON(!prov_is_close(type));
 
-	if (!provenance_is_tracked(prov_elt(prov)) && !prov_policy.prov_all)
+	if (!provenance_is_recorded(prov_elt(prov)) && !prov_policy.prov_all)
 		return 0;
 	if (filter_node(prov_entry(prov)))
 		return 0;

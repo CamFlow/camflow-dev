@@ -125,11 +125,11 @@ static __always_inline void __write_node(prov_entry_t *node)
 	// filtered or already recorded
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
+	if (!prov_is_packet(node))
+		node_identifier(node).machine_id = prov_machine_id;
 	if ( provenance_is_long(node) ) {
 		long_prov_write(node);
 	} else {
-		if (!prov_is_packet(node))
-			node_identifier(node).machine_id = prov_machine_id;
 		prov_write((union prov_elt*)node);
 	}
 	set_recorded(node);
@@ -154,6 +154,10 @@ static __always_inline int __write_relation(const uint64_t type,
 	if (!should_record_relation(type, f, t))
 		return 0;
 
+	// record the two concerned nodes
+	__write_node(f);
+	__write_node(t);
+	// prepare the relation
 	memset(&relation, 0, sizeof(union prov_elt));
 	prov_type(&relation) = type;
 	relation_identifier(&relation).id = prov_next_relation_id();
@@ -166,9 +170,9 @@ static __always_inline int __write_relation(const uint64_t type,
 		relation.relation_info.offset = file->f_pos;
 	}
 	relation.relation_info.flags = flags;
+	// run camquery framework
 	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);
-	__write_node(f);
-	__write_node(t);
+	// finally write down the relation
 	prov_write(&relation);
 	return rc;
 }
