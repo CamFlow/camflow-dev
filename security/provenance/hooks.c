@@ -611,12 +611,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 		return;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (provenance_is_opaque(prov_elt(cprov)) || provenance_is_opaque(prov_elt(iprov)))
-		goto out;
-	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
-		goto out;
 	record_write_xattr(RL_SETXATTR, iprov, tprov, cprov, name, value, size, flags);
-out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -642,10 +637,6 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (provenance_is_opaque(prov_elt(cprov)) || provenance_is_opaque(prov_elt(iprov)))
-		goto out;
-	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
-		goto out;
 	rc = record_read_xattr(cprov, tprov, iprov, name);
 out:
 	spin_unlock(prov_lock(iprov));
@@ -697,10 +688,6 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (provenance_is_opaque(prov_elt(cprov)) || provenance_is_opaque(prov_elt(iprov)))
-		goto out;
-	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
-		goto out;
 	rc = record_write_xattr(RL_RMVXATTR, iprov, tprov, cprov, name, NULL, 0, 0);
 out:
 	queue_save_provenance(iprov, dentry);
@@ -1583,13 +1570,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
-		if (provenance_records_packet(prov_elt(iprov))) {
-			rc = record_packet_content(&pckprov, skb);
-			if (rc < 0)
-				goto out;
-		}
 		rc = derives(RL_RCV_PACKET, &pckprov, iprov, NULL, 0);
-out:
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
 	return rc;
