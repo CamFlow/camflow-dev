@@ -800,7 +800,6 @@ static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out
 	rc = derives(RL_SPLICE, inprov, outprov, NULL, 0);
 	spin_unlock(prov_lock(outprov));
 	spin_unlock_irqrestore(prov_lock(inprov), irqflags);
-
 	return rc;
 }
 #endif
