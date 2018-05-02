@@ -93,7 +93,7 @@ static int provenance_task_alloc(struct task_struct *task,
 static void provenance_task_free(struct task_struct *task)
 {
 	if (task->provenance) {
-		record_close(RL_TERMINATE_TASK, task->provenance);
+		record_terminate(RL_TERMINATE_TASK, task->provenance);
 		free_provenance(task->provenance);
 	}
 	task->provenance = NULL;
@@ -140,7 +140,7 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 static void provenance_cred_free(struct cred *cred)
 {
 	if (cred->provenance) {
-		record_close(RL_TERMINATE_PROC, cred->provenance);
+		record_terminate(RL_TERMINATE_PROC, cred->provenance);
 		free_provenance(cred->provenance);
 	}
 	cred->provenance = NULL;
@@ -280,10 +280,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	if (inode->i_provenance) {
-		record_close(RL_CLOSED, inode->i_provenance);
+	if (inode->i_provenance)
 		free_provenance(inode->i_provenance);
-	}
 	inode->i_provenance = NULL;
 }
 
@@ -344,49 +342,25 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (is_inode_dir(inode)) {
-		if ((perms & (DIR__WRITE)) != 0) {
-			rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (DIR__READ)) != 0) {
-			rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (DIR__SEARCH)) != 0) {
-			rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-	} else if (is_inode_socket(inode)) {
-		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0) {
-			rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (FILE__READ)) != 0) {
-			rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-	} else {
-		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0) {
-			rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (FILE__READ)) != 0) {
-			rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (FILE__EXECUTE)) != 0) {
-			rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
+	if (mask & MAY_EXEC) {
+		rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+	}
+	if (mask & MAY_READ) {
+		rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+	}
+	if (mask & MAY_APPEND) {
+		rc = uses(RL_PERM_APPEND, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+	}
+	if (mask & MAY_WRITE) {
+		rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
 	}
 out:
 	spin_unlock(prov_lock(iprov));
@@ -611,12 +585,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 		return;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (provenance_is_opaque(prov_elt(cprov)) || provenance_is_opaque(prov_elt(iprov)))
-		goto out;
-	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
-		goto out;
 	record_write_xattr(RL_SETXATTR, iprov, tprov, cprov, name, value, size, flags);
-out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -642,10 +611,6 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (provenance_is_opaque(prov_elt(cprov)) || provenance_is_opaque(prov_elt(iprov)))
-		goto out;
-	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
-		goto out;
 	rc = record_read_xattr(cprov, tprov, iprov, name);
 out:
 	spin_unlock(prov_lock(iprov));
@@ -697,10 +662,6 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (provenance_is_opaque(prov_elt(cprov)) || provenance_is_opaque(prov_elt(iprov)))
-		goto out;
-	if (!provenance_is_tracked(prov_elt(cprov)) && !provenance_is_tracked(prov_elt(iprov)))
-		goto out;
 	rc = record_write_xattr(RL_RMVXATTR, iprov, tprov, cprov, name, NULL, 0, 0);
 out:
 	queue_save_provenance(iprov, dentry);
@@ -947,10 +908,8 @@ static int provenance_mmap_file(struct file *file,
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	if (bprov) {
-		record_close(RL_CLOSED, iprov);
+	if (bprov)
 		free_provenance(bprov);
-	}
 	return rc;
 }
 
@@ -1583,15 +1542,9 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
-		if (provenance_records_packet(prov_elt(iprov))) {
-			rc = record_packet_content(&pckprov, skb);
-			if (rc < 0)
-				goto out;
-		}
 		call_provenance_alloc((prov_entry_t*)&pckprov);
 		rc = derives(RL_RCV_PACKET, &pckprov, iprov, NULL, 0);
 		call_provenance_free((prov_entry_t*)&pckprov);
-out:
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
 	return rc;

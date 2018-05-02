@@ -78,6 +78,7 @@ static const char RL_STR_RCV_MSG_Q[]             = "receive_msg_queue";
 static const char RL_STR_PERM_READ[]             = "perm_read";
 static const char RL_STR_PERM_WRITE[]            = "perm_write";
 static const char RL_STR_PERM_EXEC[]             = "perm_exec";
+static const char RL_STR_PERM_APPEND[]           = "perm_append";
 static const char RL_STR_TERMINATE_TASK[]        = "terminate_task";
 static const char RL_STR_TERMINATE_PROC[]        = "terminate_proc";
 static const char RL_STR_CLOSED[]                = "closed";
@@ -249,6 +250,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_PROC_WRITE;
 	case RL_PERM_EXEC:
 		return RL_STR_PERM_EXEC;
+	case RL_PERM_APPEND:
+		return RL_STR_PERM_APPEND;
 	case RL_TERMINATE_TASK:
 		return RL_STR_TERMINATE_TASK;
 	case RL_TERMINATE_PROC:
@@ -337,6 +340,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_PERM_READ, RL_PERM_READ);
 	MATCH_AND_RETURN(str, RL_STR_PERM_WRITE, RL_PERM_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_PERM_EXEC, RL_PERM_EXEC);
+	MATCH_AND_RETURN(str, RL_STR_PERM_APPEND, RL_PERM_APPEND);
 	MATCH_AND_RETURN(str, RL_STR_SH_READ, RL_SH_READ);
 	MATCH_AND_RETURN(str, RL_STR_PROC_READ, RL_PROC_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_WRITE, RL_SH_WRITE);

@@ -243,6 +243,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock(prov_lock(cprov));
+		// TODO redo
 		__write_node(prov_entry(cprov));
 		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
 		spin_unlock(prov_lock(cprov));

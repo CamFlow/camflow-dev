@@ -271,7 +271,11 @@ static inline int record_write_xattr(uint64_t type,
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
-
+	if (!provenance_is_tracked(prov_elt(iprov))
+	    && !provenance_is_tracked(prov_elt(tprov))
+	    && !provenance_is_tracked(prov_elt(cprov))
+	    && !prov_policy.prov_all)
+		return 0;
 	if (!should_record_relation(type, prov_entry(cprov), prov_entry(iprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
@@ -310,7 +314,11 @@ static inline int record_read_xattr(struct provenance *cprov,
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
-
+	if (!provenance_is_tracked(prov_elt(iprov))
+	    && !provenance_is_tracked(prov_elt(tprov))
+	    && !provenance_is_tracked(prov_elt(cprov))
+	    && !prov_policy.prov_all)
+		return 0;
 	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);

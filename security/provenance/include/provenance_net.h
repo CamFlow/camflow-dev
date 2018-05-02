@@ -224,21 +224,4 @@ out:
 	free_long_provenance(addr_info);
 	return rc;
 }
-
-static inline int record_packet_content(struct provenance *pck, const struct sk_buff *skb)
-{
-	union long_prov_elt *cnt = alloc_long_provenance(ENT_PCKCNT);
-	int rc = 0;
-
-	cnt->pckcnt_info.length = skb_end_offset(skb);
-	if (cnt->pckcnt_info.length > PATH_MAX) {
-		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
-		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
-	} else
-		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
-
-	//rc = record_relation(RL_PCK_CNT, cnt, prov_entry(pck), NULL, 0);
-	free_long_provenance(cnt);
-	return rc;
-}
 #endif

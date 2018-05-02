@@ -38,8 +38,6 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 		call_provenance_alloc((prov_entry_t*)&pckprov);
 		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);
 		call_provenance_free((prov_entry_t*)&pckprov);
-		if (provenance_records_packet(prov_elt(iprov)))
-			record_packet_content(&pckprov, skb);
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	}

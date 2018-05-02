@@ -37,7 +37,8 @@
 - Support node duplication on/off.
 - Reworking mmap handling logic.
 - Added hook and relation type to capture open file descriptor sent over ipc.
-- RL_CHANGE becomes RL_SETUID.
+- RL_CHANGE becomes RL_SETUID and RL_SETGID.
+- Added new relation type: RL_PERM_APPEND.
 - Added new relation type: RL_STR_SH_CREATE_READ and RL_STR_SH_CREATE_WRITE.
 - Added new relation type: RL_STR_SH_ATTACH_READ and RL_STR_SH_ATTACH_WRITE.
 - Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.

@@ -73,7 +73,7 @@ static __always_inline int record_relation(const uint64_t type,
 	return rc;
 }
 
-static __always_inline int record_close(uint64_t type, struct provenance *prov){
+static __always_inline int record_terminate(uint64_t type, struct provenance *prov){
 	union prov_elt old_prov;
 	int rc;
 
