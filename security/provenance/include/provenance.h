@@ -84,18 +84,18 @@ static inline void free_provenance(struct provenance *prov)
 
 static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
-	union long_prov_elt *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
 	BUILD_BUG_ON(!prov_type_is_node(ntype));
 
-	if (!tmp)
+	if (!prov)
 		return NULL;
-	prov_type(tmp) = ntype;
-	node_identifier(tmp).id = prov_next_node_id();
-	node_identifier(tmp).boot_id = prov_boot_id;
-	node_identifier(tmp).machine_id = prov_machine_id;
-	set_is_long(tmp);
-	return tmp;
+	prov_type(prov) = ntype;
+	node_identifier(prov).id = prov_next_node_id();
+	node_identifier(prov).boot_id = prov_boot_id;
+	node_identifier(prov).machine_id = prov_machine_id;
+	set_is_long(prov);
+	return prov;
 }
 
 static inline void free_long_provenance(union long_prov_elt *prov)
