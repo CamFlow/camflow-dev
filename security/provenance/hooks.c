@@ -93,7 +93,7 @@ static int provenance_task_alloc(struct task_struct *task,
 static void provenance_task_free(struct task_struct *task)
 {
 	if (task->provenance) {
-		record_close(RL_TERMINATE_TASK, task->provenance);
+		record_terminate(RL_TERMINATE_TASK, task->provenance);
 		free_provenance(task->provenance);
 	}
 	task->provenance = NULL;
@@ -140,7 +140,7 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 static void provenance_cred_free(struct cred *cred)
 {
 	if (cred->provenance) {
-		record_close(RL_TERMINATE_PROC, cred->provenance);
+		record_terminate(RL_TERMINATE_PROC, cred->provenance);
 		free_provenance(cred->provenance);
 	}
 	cred->provenance = NULL;
@@ -280,10 +280,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	if (inode->i_provenance) {
-		record_close(RL_CLOSED, inode->i_provenance);
+	if (inode->i_provenance)
 		free_provenance(inode->i_provenance);
-	}
 	inode->i_provenance = NULL;
 }
 
@@ -344,49 +342,25 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	perms = file_mask_to_perms(inode->i_mode, mask);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (is_inode_dir(inode)) {
-		if ((perms & (DIR__WRITE)) != 0) {
-			rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (DIR__READ)) != 0) {
-			rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (DIR__SEARCH)) != 0) {
-			rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-	} else if (is_inode_socket(inode)) {
-		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0) {
-			rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (FILE__READ)) != 0) {
-			rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-	} else {
-		if ((perms & (FILE__WRITE | FILE__APPEND)) != 0) {
-			rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (FILE__READ)) != 0) {
-			rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
-		if ((perms & (FILE__EXECUTE)) != 0) {
-			rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
-			if (rc < 0)
-				goto out;
-		}
+	if (mask & MAY_EXEC) {
+		rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+	}
+	if (mask & MAY_READ) {
+		rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+	}
+	if (mask & MAY_APPEND) {
+		rc = uses(RL_PERM_APPEND, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
+	}
+	if (mask & MAY_WRITE) {
+		rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
+		if (rc < 0)
+			goto out;
 	}
 out:
 	spin_unlock(prov_lock(iprov));
