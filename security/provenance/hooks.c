@@ -328,7 +328,6 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
-	uint32_t perms;
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -339,7 +338,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 	iprov = inode_provenance(inode, false);
 	if (!iprov)
 		return -ENOMEM;
-	perms = file_mask_to_perms(inode->i_mode, mask);
+
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (mask & MAY_EXEC) {
@@ -612,7 +611,6 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = record_read_xattr(cprov, tprov, iprov, name);
-out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
@@ -663,7 +661,6 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = record_write_xattr(RL_RMVXATTR, iprov, tprov, cprov, name, NULL, 0, 0);
-out:
 	queue_save_provenance(iprov, dentry);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
