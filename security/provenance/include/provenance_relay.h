@@ -125,8 +125,6 @@ static __always_inline void __write_node(prov_entry_t *node)
 	// filtered or already recorded
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
-	if (!prov_is_packet(node))
-		node_identifier(node).machine_id = prov_machine_id;
 	if ( provenance_is_long(node) ) {
 		long_prov_write(node);
 	} else {
