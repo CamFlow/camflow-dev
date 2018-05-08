@@ -13,7 +13,7 @@
 #include "provenance.h"
 #include "provenance_types.h"
 
-/* reation string name */
+/* relation string name */
 static const char RL_STR_UNKNOWN[]               = "unknown";
 static const char RL_STR_READ[]                  = "read";
 static const char RL_STR_WRITE[]                 = "write";
