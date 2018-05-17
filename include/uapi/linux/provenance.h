@@ -147,6 +147,8 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 #define PROV_DUPLICATE_FILE										"/sys/kernel/security/provenance/duplicate"
 
+#define PROV_CMD_LINE_TOOL                    "/usr/bin/camflow"
+
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
 #define PROV_CHANNEL_ROOT											"/sys/kernel/debug/"

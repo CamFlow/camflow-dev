@@ -77,6 +77,7 @@ static inline void __init_opaque(void)
 	provenance_mark_as_opaque(PROV_VERSION);
 	provenance_mark_as_opaque(PROV_CHANNEL);
 	provenance_mark_as_opaque(PROV_DUPLICATE_FILE);
+	provenance_mark_as_opaque(PROV_CMD_LINE_TOOL);
 }
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
