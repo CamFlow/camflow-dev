@@ -61,6 +61,19 @@ struct provenance {
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
+/*!
+ * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
+ *
+ * The memory is allocated from "provenance_cache".
+ * The type of the provenance node provided in the argument list must align with the allowed provenance node type.
+ * Allowed provenance node types are defined in "include/uapi/linux/provenance_types.h"
+ * The lock accompanied "provenance" structure is initialized as UNLOCK.
+ * Implicitly, the "version" member of "node_identifier" structure is set to 0 through "zalloc".
+ * This is because the version of a new node starts from 0.
+ * @param ntype The type of the provenance node.
+ * @param gfp GFP flags used in memory allocation in the kernel
+ * @return The pointer to the provenance node or NULL if allocating memory from cache failed.
+ */
 static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
 	struct provenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
