@@ -1,5 +1,5 @@
 kernel-version=4.16.10
-lsm-version=0.3.12
+lsm-version=0.4.0
 arch=x86_64
 
 
