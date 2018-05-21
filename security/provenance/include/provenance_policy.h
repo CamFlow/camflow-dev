@@ -13,6 +13,9 @@
 #ifndef _PROVENANCE_POLICY_H
 #define _PROVENANCE_POLICY_H
 
+/*!
+ * @brief provenance capture policy defined by the user.
+ */
 struct capture_policy {
 	bool prov_enabled;
 	bool prov_all;

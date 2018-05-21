@@ -36,6 +36,9 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 	return false;
 }
 
+/*!
+ * @brief If the relation type is VERSION_TASK or VERSION or NAMED, 
+ */
 static inline bool filter_update_node(const uint64_t relation_type)
 {
 	if (relation_type == RL_VERSION_TASK)
@@ -86,14 +89,24 @@ static inline bool filter_propagate_relation(uint64_t type)
 	return false;
 }
 
+/*!
+ * @brief Whether a provenance relation between two nodes should be recorded based on the user-defined filter.
+ * 
+ * If either the relation type or at least one of the two end nodes are filtered out (i.e., not to be recorded as defined by the user),
+ * Then this function will return false.
+ * Otherwise, the relation should be recorded and thus the function will return true.
+ * @param type The type of the relation
+ * @param from The provenance node entry of the source node.
+ * @param to The provenance node entry of the destination node.
+ * @return True if the relation of type 'type' should be recorded; False if otherwise.
+ */
 static inline bool should_record_relation(const uint64_t type,
 					  prov_entry_t *from,
 					  prov_entry_t *to)
 {
 	if (filter_relation(type))
 		return false;
-	// one of the node should not appear in the record, ignore the relation
-	if (filter_node(from) || filter_node(to))
+	if (filter_node(from) || filter_node(to)) /*! If at least one of the end nodes should not appear in the record, do not record the relation. */
 		return false;
 	return true;
 }

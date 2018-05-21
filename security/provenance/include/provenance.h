@@ -65,14 +65,14 @@ extern struct kmem_cache *long_provenance_cache;
  * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
  *
  * The memory is allocated from "provenance_cache".
- * The type of the provenance node provided in the argument list must align with the allowed provenance node type.
+ * The type of the provenance node provided in the argument list must align with the allowed provenance node type (i.e., not a relation type).
  * Allowed provenance node types are defined in "include/uapi/linux/provenance_types.h"
  * The lock accompanied "provenance" structure is initialized as UNLOCK.
  * Implicitly, the "version" member of "node_identifier" structure is set to 0 through "zalloc".
  * This is because the version of a new node starts from 0.
  * @param ntype The type of the provenance node.
  * @param gfp GFP flags used in memory allocation in the kernel
- * @return The pointer to the provenance node or NULL if allocating memory from cache failed.
+ * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
  */
 static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
@@ -90,11 +90,26 @@ static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t
 	return prov;
 }
 
+/*!
+ * @brief Free memory of a provenance node
+ */
 static inline void free_provenance(struct provenance *prov)
 {
 	kmem_cache_free(provenance_cache, prov);
 }
 
+/*!
+ * @brief Allocate memory for a new long provenance node and set the provenance "LONG" flag (in basic_elements).
+ * 
+ * Similar to "alloc_provenance" routine above, this routine allocate memory for long_prove_elt union structure.
+ * long_prov_elt contains more types of node structures than prov_elt.
+ * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
+ * @param ntype The type of the long provenance node.
+ * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
+ *
+ * @question Why is spin_lock not needed in the long provenance case?
+ * @question GFP is set to GFP_ATOMIC in this case. Why is it a parameter in the case above?
+ */
 static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
 	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
@@ -111,6 +126,9 @@ static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype
 	return prov;
 }
 
+/*!
+ * @brief Free memory of a long provenance node
+ */
 static inline void free_long_provenance(union long_prov_elt *prov)
 {
 	kmem_cache_free(long_provenance_cache, prov);
