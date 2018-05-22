@@ -75,7 +75,7 @@ extern struct prov_boot_buffer *boot_buffer;
 
 /*!
  * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
- * 
+ *
  * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
  * However, in an unlikely event that the boot buffer is full, an error is thrown.
  * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
@@ -113,7 +113,7 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 /*!
  * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
  *
- * This routine performs the same function as "prov_write" routine except that it writes a long provenance information,
+ * This function performs the same function as "prov_write" function except that it writes a long provenance information,
  * instead of regular provenance information to the buffer.
  */
 static inline void long_prov_write(union long_prov_elt *msg)
@@ -193,8 +193,8 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
  * @brief write provenance relation to relay buffer.
  *
  * The relation will only be recorded if no user-supplied filter is applicable to the type of the relation or the end nodes.
- * This is checked by "should_record_relation" routine.
- * Two end nodes are recorded by calling "__write_node" routine before the relation itself is recorded.
+ * This is checked by "should_record_relation" function.
+ * Two end nodes are recorded by calling "__write_node" function before the relation itself is recorded.
  * CamQuery is called for provenance runtime analysis of this provenance relation (i.e., edge) before the relation is recorded to relay.
  * @param type The type of the relation (i.e., edge)
  * @param from The source node of the provenance edge
@@ -223,7 +223,7 @@ static __always_inline int __write_relation(const uint64_t type,
 	/* Record the two end nodes */
 	__write_node(f);
 	__write_node(t);
-	
+
 	memset(&relation, 0, sizeof(union prov_elt)); /* Allocate memory for the relation edge */
 	prov_type(&relation) = type;
 	relation_identifier(&relation).id = prov_next_relation_id();

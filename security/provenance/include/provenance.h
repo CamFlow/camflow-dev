@@ -100,8 +100,8 @@ static inline void free_provenance(struct provenance *prov)
 
 /*!
  * @brief Allocate memory for a new long provenance node and set the provenance "LONG" flag (in basic_elements).
- * 
- * Similar to "alloc_provenance" routine above, this routine allocate memory for long_prove_elt union structure.
+ *
+ * Similar to "alloc_provenance" function above, this function allocate memory for long_prove_elt union structure.
  * long_prov_elt contains more types of node structures than prov_elt.
  * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
  * @param ntype The type of the long provenance node.

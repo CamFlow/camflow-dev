@@ -17,16 +17,16 @@
 #include "provenance_relay.h"
 
 /*!
- * @brief This routine updates the version of a provenance node.
+ * @brief This function updates the version of a provenance node.
  *
  * Versioning is used to avoid cycles in a provenance graph.
  * Given a provenance node, unless a certain criteria are met, the node should be versioned to avoid cycles.
  * "old_prov" holds the older version of the node while "prov" is updated to the newer version.
- * "prov" and "old_prov" have the same information except the version number. 
+ * "prov" and "old_prov" have the same information except the version number.
  * Once the node with a new version is created, a relation between the old and the new version should be estabilished.
  * The relation is either "RL_VERSION_TASK" or "RL_VERSION" depending on the type of the nodes (note that they should be of the same type).
  * If the nodes are of type AC_TASK, then the relation should be "RL_VERSION_TASK"; otherwise it is "RL_VERSION".
- * The new node is not recorded (therefore "recorded" flag is unset) until we record it in the "__write_relation" routine.
+ * The new node is not recorded (therefore "recorded" flag is unset) until we record it in the "__write_relation" function.
  * The criteria that should be met to not to update the version are:
  * 1. ???
  * 2. If the argument "type" is a relation whose destination node's version should not be updated becasue the "type" itself either is a VERSION type or a NAMED type.
@@ -45,12 +45,12 @@ static __always_inline int __update_version(const uint64_t type,
 
 	if (!provenance_has_outgoing(prov) && prov_policy.should_compress_node)
 		return 0;
-	
+
 	if (filter_update_node(type))
 		return 0;
-	
+
 	memcpy(&old_prov, prov, sizeof(union prov_elt)); /* Copy the current provenance prov to old_prov. */
-	
+
 	node_identifier(prov).version++; /* Update the version of prov to the newer version. */
 	clear_recorded(prov);
 
@@ -65,10 +65,10 @@ static __always_inline int __update_version(const uint64_t type,
 }
 
 /*!
- * @brief This routine records a provenance relation (i.e., edge) between two provenance nodes unless certain criteria are met.
+ * @brief This function records a provenance relation (i.e., edge) between two provenance nodes unless certain criteria are met.
  *
- * Unless edges are to be compressed and certain criteria are met, 
- * this routine would attempt to update the version of the destination node,
+ * Unless edges are to be compressed and certain criteria are met,
+ * this function would attempt to update the version of the destination node,
  * and create a relation between the source node and the newer version (if version is updated) of the destination node.
  * Version should be updated every time an information flow occurs,
  * Unless:
@@ -77,7 +77,7 @@ static __always_inline int __update_version(const uint64_t type,
  * The criteria to be met so as not to record the relation are:
  * 1. Compression of edges are set. (Multiple edges should be compressed to 1 edge.), and
  * 2. The type of the edges being recorded are the same as before.
- * The relation is recorded by calling the "__write_relation" routine.
+ * The relation is recorded by calling the "__write_relation" function.
  * @param type The type of the relation
  * @param from The pointer to the source provenance node
  * @param to The pointer to the destination provenance node
@@ -136,9 +136,9 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 }
 
 /*!
- * @brief This routine records the name of a provenance node. The name itself is a provenance node so there exists a new relation between the name and the node.
+ * @brief This function records the name of a provenance node. The name itself is a provenance node so there exists a new relation between the name and the node.
  *
- * Unless the node has already have a name or is not recorded, calling this routine will generate a new naming relation between the node and its name.
+ * Unless the node has already have a name or is not recorded, calling this function will generate a new naming relation between the node and its name.
  * The name node is transient and should not have any further use.
  * Therefore, once we record the name node, we will free the memory allocated for the name provenance node.
  * The name node has type "ENT_FILE_NAME", and the name has max length PATH_MAX.
@@ -183,9 +183,9 @@ static inline int record_node_name(struct provenance *node, const char *name)
 }
 
 /*!
- * @brief This routine records a relation between a provenance node and a user supplied data, which is a transient node.
+ * @brief This function records a relation between a provenance node and a user supplied data, which is a transient node.
  *
- * This routine allows the user to attach an annotation node to a provenance node.
+ * This function allows the user to attach an annotation node to a provenance node.
  * The relation between the two nodes is RL_LOG and the node of the user-supplied log is of type ENT_STR.
  * ENT_STR node is transient and should not have further use.
  * Therefore, once we have recorded the node, we will free the memory allocated for it.
