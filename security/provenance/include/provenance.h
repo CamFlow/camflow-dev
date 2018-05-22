@@ -73,6 +73,8 @@ extern struct kmem_cache *long_provenance_cache;
  * @param ntype The type of the provenance node.
  * @param gfp GFP flags used in memory allocation in the kernel
  * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
+ *
+ * @todo Check what other GFP flags (possibly only GFP_KERNEL and GFP_ATOMIC) are used in this context.
  */
 static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
@@ -104,11 +106,10 @@ static inline void free_provenance(struct provenance *prov)
  * Similar to "alloc_provenance" function above, this function allocate memory for long_prove_elt union structure.
  * long_prov_elt contains more types of node structures than prov_elt.
  * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
+ * Spin lock is not needed because at most one thread will access the structure at a time, since it is a transient element.
  * @param ntype The type of the long provenance node.
  * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
- *
- * @question Why is spin_lock not needed in the long provenance case?
- * @question GFP is set to GFP_ATOMIC in this case. Why is it a parameter in the case above?
+ * @reference GFP_ATOMIC https://www.linuxjournal.com/article/6930
  */
 static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {

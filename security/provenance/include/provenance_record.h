@@ -35,7 +35,6 @@
  * @return 0 if no error occurred. Other error codes unknown.
  *
  * @question Why do we have to meet both conditions in the first criterion?
- * @answer do you remember when we looked at node compression (when off a new version is created when new info comes in)
  *
  */
 static __always_inline int __update_version(const uint64_t type,
@@ -197,7 +196,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
  * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
  *
  * @question Why are we not using spin lock in this case?
- * @answer the context in which it is called
+ * @TODO double check there is a lock on the cprov when this function is called
  */
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
@@ -226,7 +225,28 @@ out:
 
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
 
-// from (entity) to (activity)
+/*!
+ * @brief Record "used" relation from entity provenance node to activity provenance node, including its memory state.
+ *
+ * This routine applies to only "used" relation between two provenance nodes.
+ * Unless all nodes involved (entity, activity, activity_mem) are set not to be tracked and prov_all is also turned off,
+ * or unless the relation type is set not to be tracked,
+ * relation will be captured.
+ * At least two relations will possibly be captured:
+ * 1. Whatever relation between entity and activity given by the argument "type", and
+ * 2. RL_PROC_WRITE relation between activity and activity_mem
+ * If activity_mem is a shared memory, a SH_READ/WRITE relation may be captured (see routine definition of "current_update_shst").
+ * @param type The type of relation (in the category of "used") between entity and activity.
+ * @param entity The entity provenance node.
+ * @param activity The activity provenance node.
+ * @param activity_mem The memory provenance node of the activity.
+ * @param file ???
+ * @param flags ???
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ * @question What exactly is activity_mem? Why do we have two functions (this and the next function) and have this one specifically to deal with activity_mem?
+ * @TODO something to do with fork/exec (when a new process is created) we call uses_two
+ */
 static __always_inline int uses(const uint64_t type,
 				struct provenance *entity,
 				struct provenance *activity,
@@ -238,7 +258,7 @@ static __always_inline int uses(const uint64_t type,
 
 	BUILD_BUG_ON(!prov_is_used(type));
 
-	// check if the nodes match some capture options
+	// Check if the nodes match some capture options.
 	apply_target(prov_elt(entity));
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(activity_mem));
@@ -262,7 +282,19 @@ out:
 	return rc;
 }
 
-// from (entity) to (activity)
+/*!
+ * @brief Record "used" relation from entity provenance node to activity provenance node. This routine is a stripped-down version of "uses" routine above.
+ *
+ * This routine applies to only "used" relation between two provenance nodes and does almost the same as the above "uses" routine.
+ * Except that it does not deal with "activity_mem" provenance node.
+ * @param type The type of relation (in the category of "used") between entity and activity.
+ * @param entity The entity provenance node.
+ * @param activity The activity provenance node.
+ * @param file ???
+ * @param flags ???
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ */
 static __always_inline int uses_two(const uint64_t type,
 				    struct provenance *entity,
 				    struct provenance *activity,
@@ -271,7 +303,6 @@ static __always_inline int uses_two(const uint64_t type,
 {
 	BUILD_BUG_ON(!prov_is_used(type));
 
-	// check if the nodes match some capture options
 	apply_target(prov_elt(entity));
 	apply_target(prov_elt(activity));
 
@@ -284,7 +315,27 @@ static __always_inline int uses_two(const uint64_t type,
 	return record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
 }
 
-// from (activity) to (entity)
+/*!
+ * @brief Record "generated" relation from activity provenance node (including its memory state) to entity provenance node.
+ *
+ * This routine applies to only "generated" relation between two provenance nodes.
+ * Unless all nodes involved (entity, activity, activity_mem) are set not to be tracked and prov_all is also turned off,
+ * or unless the relation type is set not to be tracked,
+ * relation will be captured.
+ * At least two relations will possibly be captured:
+ * 1. RL_PROC_READ relation between activity_mem and activity
+ * 1. Whatever relation between activity and entity given by the argument "type", and
+ * If activity_mem is a shared memory, a SH_READ/WRITE relation may be captured (see routine definition of "current_update_shst").
+ * @param type The type of relation (in the category of "generated") between activity and entity.
+ * @param activity_mem The memory provenance node of the activity.
+ * @param activity The activity provenance node.
+ * @param entity The entity provenance node.
+ * @param file ???
+ * @param flags ???
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ * @question How come we do not have a stripped-down version of "generates" like in the case of "uses"?
+ */
 static __always_inline int generates(const uint64_t type,
 				     struct provenance *activity_mem,
 				     struct provenance *activity,
@@ -296,7 +347,6 @@ static __always_inline int generates(const uint64_t type,
 
 	BUILD_BUG_ON(!prov_is_generated(type));
 
-	// check if the nodes match some capture options
 	apply_target(prov_elt(activity_mem));
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(entity));
@@ -320,7 +370,22 @@ out:
 	return rc;
 }
 
-// from (entity) to (entity)
+/*!
+ * @brief Record "derived" relation from one entity provenance node to another entity provenance node.
+ *
+ * This routine applies to only "derived" relation between two entity provenance nodes.
+ * Unless both nodes involved (from, to) are set not to be tracked and prov_all is also turned off,
+ * or unless the relation type is set not to be tracked,
+ * relation will be captured.
+ * The relation is whatever relation between one entity to another given by the argument "type".
+ * @param type The type of relation (in the category of "derived") between two entities.
+ * @param from The entity provenance node.
+ * @param to The other entity provenance node.
+ * @param file ???
+ * @param flags ???
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ */
 static __always_inline int derives(const uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
@@ -329,7 +394,6 @@ static __always_inline int derives(const uint64_t type,
 {
 	BUILD_BUG_ON(!prov_is_derived(type));
 
-	// check if the nodes match some capture options
 	apply_target(prov_elt(from));
 	apply_target(prov_elt(to));
 
@@ -343,7 +407,22 @@ static __always_inline int derives(const uint64_t type,
 	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
 
-// from (activity) to (activity)
+/*!
+ * @brief Record "informed" relation from one activity provenance node to another activity provenance node.
+ *
+ * This routine applies to only "informed" relation between two activity provenance nodes.
+ * Unless both nodes involved (from, to) are set not to be tracked and prov_all is also turned off,
+ * or unless the relation type is set not to be tracked,
+ * relation will be captured.
+ * The relation is whatever relation between one activity node to another given by the argument "type".
+ * @param type The type of relation (in the category of "informed") between two activities.
+ * @param from The activity provenance node.
+ * @param to The other activity provenance node.
+ * @param file ???
+ * @param flags ???
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ */
 static __always_inline int informs(const uint64_t type,
 				   struct provenance *from,
 				   struct provenance *to,
@@ -352,7 +431,6 @@ static __always_inline int informs(const uint64_t type,
 {
 	BUILD_BUG_ON(!prov_is_informed(type));
 
-	// check if the nodes match some capture options
 	apply_target(prov_elt(from));
 	apply_target(prov_elt(to));
 

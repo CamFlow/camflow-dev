@@ -43,7 +43,6 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 		return true;
 	if (provenance_is_opaque(node))
 		return true;
-	// we hit an element of the black list ignore
 	if (HIT_FILTER(filter, node_identifier(node).type))
 		return true;
 	return false;
@@ -99,17 +98,15 @@ static inline bool filter_relation(const uint64_t type)
 /*!
  * @brief This function decides whether or not tracking should propagate.
  *
- * Based on the user supplied filter, a relation (i.e., edge) may not be allowed to propagate the tracking.
+ * Based on the user supplied filter, a relation (i.e., edge) may be filtered if it is tracked in the propagation.
  * User supplies filter criterion based on the categories of the relations as in the "filter_relation" function.
- * Depending on the type of the current relation in question, test if the type of the relation hits the filter (i.e., should not be propagated).
+ * Depending on the type of the current relation in question, test if the type of the relation hits the filter (i.e., should be filtered out if it is part of propagation).
  * @param type The type of the relation (i.e., edge).
- * @return true if the relation should not be propagated or false if otherwise.
+ * @return true if the relation should be filtered out during propagation or false if otherwise.
  *
  */
 static inline bool filter_propagate_relation(uint64_t type)
 {
-	// the relation does not allow tracking propagation
-	// we hit an element of the black list ignore
 	if (prov_is_derived(type)) {
 		if (HIT_FILTER(prov_policy.prov_propagate_derived_filter, type))
 			return true;
@@ -148,6 +145,9 @@ static inline bool should_record_relation(const uint64_t type,
 	return true;
 }
 
+/*!
+ * @brief Define an abstract list. See concrete example below.
+ */
 #define declare_filter_list(filter_name, type) \
 	struct filter_name { \
 		struct list_head list; \
@@ -155,6 +155,9 @@ static inline bool should_record_relation(const uint64_t type,
 	}; \
 	extern struct list_head filter_name;
 
+/*!
+ * @brief Define an abstract operation that returns op value of an item in a list. See concrete example below.
+ */
 #define declare_filter_whichOP(function_name, type, variable) \
 	static inline uint8_t function_name(uint32_t variable) \
 	{ \
@@ -168,6 +171,9 @@ static inline bool should_record_relation(const uint64_t type,
 		return 0; \
 	}
 
+/*!
+ * @brief Define an abstract operation that deletes an item from a list. See concrete example below.
+ */
 #define declare_filter_delete(function_name, type, variable) \
 	static inline uint8_t function_name(struct type *f) \
 	{ \
@@ -184,6 +190,9 @@ static inline bool should_record_relation(const uint64_t type,
 		return 0; \
 	}
 
+/*!
+ * @brief Define an abstract operation that adds/updates the op value of an item from a list. See concrete example below.
+ */
 #define declare_filter_add_or_update(function_name, type, variable) \
 	static inline uint8_t function_name(struct type *f) \
 	{ \
@@ -200,21 +209,39 @@ static inline bool should_record_relation(const uint64_t type,
 		return 0; \
 	}
 
-declare_filter_list(secctx_filters, secinfo);
-declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);
-declare_filter_delete(prov_secctx_delete, secctx_filters, secid);
-declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid);
+declare_filter_list(secctx_filters, secinfo);	// A list of secinfo structs (defined in /include/uapi/linux/provenance.h, same as the following)
+declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);	// Return op value of an item of a specific secid in the secctx_filters list if exists; return 0 otherwise
+declare_filter_delete(prov_secctx_delete, secctx_filters, secid);	// Delete the element in secctx_filters list with the same secid as the item given in the function argument
+declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid);	// Add or update op value of an item of a specific secid, which is the same as the item given in the function argument. 
 
+/*!
+ * @brief Same set of operations as above but operate on "userinfo" list.
+ */
 declare_filter_list(user_filters, userinfo);
 declare_filter_whichOP(prov_uid_whichOP, user_filters, uid);
 declare_filter_delete(prov_uid_delete, user_filters, uid);
 declare_filter_add_or_update(prov_uid_add_or_update, user_filters, uid);
 
+/*!
+ * @brief Same set of operations as above but operate on "groupinfo" list.
+ */
 declare_filter_list(group_filters, groupinfo);
 declare_filter_whichOP(prov_gid_whichOP, group_filters, gid);
 declare_filter_delete(prov_gid_delete, group_filters, gid);
 declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
 
+/*!
+ * @brief Based on "op" value of a provenance node, decide whether it should be tracked/propagated/opaque.
+ *
+ * "op" value is contingent upon "op" values of:
+ * 1. ns (i.e., namespace) elements: ipcns, mntns, pidns, netns, cgroupns, if the node is of type ENT_PROC, and
+ * 2. secctx (i.e., security context) element if it has secctx, and
+ * 3. uid element if it has uid, and
+ * 4. gid element if it has gid.
+ * @param prov The provenance node in question.
+ *
+ * @question What are the op's and why do they decide whether a provenance node is tracked/propagated/opaque or not? 
+ */
 static inline void apply_target(union prov_elt *prov)
 {
 	uint8_t op = 0;
