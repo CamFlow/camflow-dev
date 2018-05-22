@@ -53,7 +53,6 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
  * @brief If the relation type is VERSION_TASK or VERSION or NAMED, updating a node's version is unnecessary.
  * @param relation_type The type of the relation (i.e., edge)
  *
- * @question Are those the only relations that we do not need explicit update node's version? For example, what about RL_NAMED_PROCESS?
  */
 static inline bool filter_update_node(const uint64_t relation_type)
 {
@@ -62,6 +61,8 @@ static inline bool filter_update_node(const uint64_t relation_type)
 	if (relation_type == RL_VERSION)
 		return true;
 	if (relation_type == RL_NAMED)
+		return true;
+	if (relation_type == RL_NAMED_PROCESS)
 		return true;
 	return false;
 }
@@ -104,7 +105,6 @@ static inline bool filter_relation(const uint64_t type)
  * @param type The type of the relation (i.e., edge).
  * @return true if the relation should not be propagated or false if otherwise.
  *
- * @question What does it mean by filter propagate by relation type? I have not yet used this feature.
  */
 static inline bool filter_propagate_relation(uint64_t type)
 {
