@@ -230,31 +230,30 @@ static inline void update_proc_perf(struct task_struct *task,
 	uint64_t utime;
 	uint64_t stime;
 
-	/* time */
-	/* usec */
+	// time
 	task_cputime_adjusted(task, &utime, &stime);
 	prov_elt(prov)->proc_info.utime = div_u64(utime, NSEC_PER_USEC);
 	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
 
-	/* memory */
+	// memory
 	mm = get_task_mm(current);
 	if (mm) {
-		/* KB */
+		// KB
 		prov_elt(prov)->proc_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
 		prov_elt(prov)->proc_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
 		prov_elt(prov)->proc_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
 		prov_elt(prov)->proc_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
 		mmput_async(mm);
 	}
-	/* IO */
+	// IO
 #ifdef CONFIG_TASK_IO_ACCOUNTING
-	/* KB */
+	// KB
 	prov_elt(prov)->proc_info.rbytes = task->ioac.read_bytes & KB_MASK;
 	prov_elt(prov)->proc_info.wbytes = task->ioac.write_bytes & KB_MASK;
 	prov_elt(prov)->proc_info.cancel_wbytes =
 		task->ioac.cancelled_write_bytes & KB_MASK;
 #else
-	/* KB */
+	// KB
 	prov_elt(prov)->proc_info.rbytes = task->ioac.rchar & KB_MASK;
 	prov_elt(prov)->proc_info.wbytes = task->ioac.wchar & KB_MASK;
 	prov_elt(prov)->proc_info.cancel_wbytes = 0;

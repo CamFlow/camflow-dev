@@ -50,18 +50,18 @@ static __always_inline int __update_version(const uint64_t type,
 	if (filter_update_node(type))
 		return 0;
 
-	memcpy(&old_prov, prov, sizeof(union prov_elt)); /* Copy the current provenance prov to old_prov. */
+	memcpy(&old_prov, prov, sizeof(union prov_elt)); // Copy the current provenance prov to old_prov.
 
-	node_identifier(prov).version++; /* Update the version of prov to the newer version. */
+	node_identifier(prov).version++; // Update the version of prov to the newer version.
 	clear_recorded(prov);
 
-	/* Record the version relation between two versions of the same identity. */
+	// Record the version relation between two versions of the same identity.
 	if (node_identifier(prov).type == ACT_TASK)
 		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
-	clear_has_outgoing(prov);     /* Newer version now has no outgoing edge. */
-	clear_saved(prov);           // for inode prov persistance /* @question What is this for?  @answer to save provenance as xattr when applicable */
+	clear_has_outgoing(prov);     // Newer version now has no outgoing edge.
+	clear_saved(prov);           // for inode prov persistance @question What is this for? @answer to save provenance as xattr when applicable
 	return rc;
 }
 
@@ -115,7 +115,7 @@ static __always_inline int record_relation(const uint64_t type,
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
-	set_has_outgoing(from); /* The source node now has an outgoing edge. */
+	set_has_outgoing(from); // The source node now has an outgoing edge.
 	rc = __write_relation(type, from, to, file, flags);
 	return rc;
 }
@@ -170,7 +170,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
-	/* Here we record the relation. */
+	// Here we record the relation.
 	spin_lock(prov_lock(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
@@ -213,7 +213,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 		rc = -EAGAIN;
 		goto out;
 	}
-	str->str_info.str[count] = '\0'; /* Make sure the string is null terminated. */
+	str->str_info.str[count] = '\0'; // Make sure the string is null terminated.
 	str->str_info.length = count;
 
 	rc = __write_relation(RL_LOG, str, cprov, NULL, 0);

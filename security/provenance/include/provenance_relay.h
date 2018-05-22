@@ -220,11 +220,11 @@ static __always_inline int __write_relation(const uint64_t type,
 	if (!should_record_relation(type, f, t))
 		return 0;
 
-	/* Record the two end nodes */
+	// Record the two end nodes
 	__write_node(f);
 	__write_node(t);
 
-	memset(&relation, 0, sizeof(union prov_elt)); /* Allocate memory for the relation edge */
+	memset(&relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 	prov_type(&relation) = type;
 	relation_identifier(&relation).id = prov_next_relation_id();
 	relation_identifier(&relation).boot_id = prov_boot_id;
@@ -237,9 +237,9 @@ static __always_inline int __write_relation(const uint64_t type,
 	}
 	relation.relation_info.flags = flags;
 
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation); /* Run camquery framework */
+	rc = call_query_hooks(f, t, (prov_entry_t*)&relation); // Run camquery framework.
 
-	prov_write(&relation); /* Finally record the relation (i.e., edge) to relay buffer */
+	prov_write(&relation); // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
 }
 #endif

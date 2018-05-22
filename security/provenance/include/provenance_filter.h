@@ -143,7 +143,7 @@ static inline bool should_record_relation(const uint64_t type,
 {
 	if (filter_relation(type))
 		return false;
-	if (filter_node(from) || filter_node(to)) /*! If at least one of the end nodes should not appear in the record, do not record the relation. */
+	if (filter_node(from) || filter_node(to))
 		return false;
 	return true;
 }
