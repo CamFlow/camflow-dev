@@ -49,7 +49,7 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 }
 
 /*!
- * @brief If the relation type is VERSION_TASK or VERSION or NAMED, updating a node's version is unnecessary.
+ * @brief If the relation type is VERSION_TASK or VERSION or NAMED or NAMED_PROCESS, updating a node's version is unnecessary.
  * @param relation_type The type of the relation (i.e., edge)
  *
  */

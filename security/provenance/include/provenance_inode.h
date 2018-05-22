@@ -26,6 +26,24 @@
 #define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
 #define is_inode_file(inode) S_ISREG(inode->i_mode)
 
+/*!
+ * @brief Update the type of the provenance inode node based on the mode of the inode, and create a version relation between old and new provenance node.
+ *
+ * Based on the mode of the inode, determine the type of the provenance inode node, choosing from:
+ * ENT_INODE_BLOCK, ENT_INODE_CHAR, ENT_INODE_DIRECTORY, ENT_INODE_FIFO, ENT_INODE_LINK, ENT_INODE_FILE, ENT_INODE_SOCKET.
+ * Create a new provenance node with the updated type, and a updated version and a RL_VERSION relation between them if certain criteria are met.
+ * Otherwise, RL_VERSION relation is not needed and we simply update the node type and mode information.
+ * The operation is done in a nested spin_lock to avoid concurrency.
+ * The criteria are:
+ * 1. The mode is not 0, and
+ * 2. The mode is not already already up-to-date, and
+ * 3. The old provenance inode has already been recorded.
+ * @param mode The new updated mode.
+ * @param prov The provenance node to be updated.
+ * 
+ * @question Why check mode != 0 ?
+ * @question What is the PROVENANCE_LOCK_INODE subclass in the nested spin_lock?
+ */
 static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
 	union prov_elt old_prov;
@@ -50,8 +68,6 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	if (prov_elt(prov)->inode_info.mode != 0
 	    && prov_elt(prov)->inode_info.mode != mode
 	    && provenance_is_recorded(prov_elt(prov))) {
-		if (filter_update_node(type))
-			goto out;
 		memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
 		// We update the info of the new version and record it.
 		prov_elt(prov)->inode_info.mode = mode;
@@ -61,15 +77,22 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 
 		// We record a version edge.
 		__write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
-		clear_has_outgoing(prov_elt(prov)); // we update there is no more outgoing edge
+		clear_has_outgoing(prov_elt(prov));
 		clear_saved(prov_elt(prov));
 	}
-out:
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
+/*!
+ * @brief Set the provenance node to be opaque based on the name given in the argument.
+ *
+ * Based on the given name, we will perform a kernal path lookup and get the provenance information of that name.
+ * Then we will set the provenance node as opaque.
+ * @param name The name of the file object to be set opaque. Note that every object in Linux is a file.
+ * 
+ */
 static inline void provenance_mark_as_opaque(const char *name)
 {
 	struct path path;
@@ -84,6 +107,21 @@ static inline void provenance_mark_as_opaque(const char *name)
 		set_opaque(prov_elt(prov));
 }
 
+/*!
+ * @brief Record the name of a provenance node from directory entry.
+ *
+ * Unless specific criteria are met, 
+ * the name of the provenance node is looked up through "dentry_path_raw" and routine "record_node_name" is called,
+ * to associate the name of the provenance to the provenance node itself as a relation.
+ * The criteria to be met are:
+ * 1. The name of the provenance node has been recorded already, or
+ * 2. The provenance node itself has not been recorded.
+ * @param dentry Pointer to dentry of the base directory.
+ * @param prov The provenance node in question.
+ * @return 0 if no error occurred. -ENOMEM if no memory to store the name of the provenance node. PTR_ERR if path lookup failed.
+ *
+ * @question What is the difference between "dentry_path_raw" and "kern_path"?
+ */
 static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
 {
 	char *buffer;
@@ -105,6 +143,19 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 	return rc;
 }
 
+/*!
+ * @brief Record the name of the provenance node directly from the inode.
+ * 
+ * Unless the name of the provenance node has already been recorded,
+ * or that the provenance node itself is not recorded,
+ * the routine will attempt to create a name node for the provenance node by calling "record_inode_name_from_dentry".
+ * To call that routine, we will find a hashed alias of inode, which is a dentry struct, and then pass that information to the routine.
+ * @param inode The inode whose name we look up and assocaite it with the provenance node.
+ * @param prov The provenance node in question.
+ * @return 0 if no error occurred or if "dentry" returns NULL. Other error codes unknown.
+ * 
+ * @todo Check under what circumstances "dentry" can be NULL.
+ */
 static inline int record_inode_name(struct inode *inode, struct provenance *prov)
 {
 	struct dentry *dentry;
@@ -113,13 +164,26 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	dentry = d_find_alias(inode);
-	if (!dentry) // we did not find a dentry, not sure if it should ever happen
+	if (!dentry)	// We did not find a dentry, not sure if it should ever happen.
 		return 0;
 	rc = record_inode_name_from_dentry(dentry, prov);
 	dput(dentry);
 	return rc;
 }
 
+/*!
+ * @brief Update provenance information of an inode node.
+ * 
+ * Update provenance entry of an inode node unless that provenance node is set to be opaque.
+ * The update operation includes:
+ * 1. Record the name of the inode, which creates a named relation between the name node and the inode.
+ * 2. Update i_ino information in inode_info structure.
+ * 3. Update uid and gid information of the inode node.
+ * 4. Update secid information of the inode node.
+ * 5. Update the type of the inode node itself.
+ * @param inode The inode in question whose provenance entry to be updated.
+ * 
+ */
 static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
@@ -203,6 +267,18 @@ free_buf:
 	return rc;
 }
 
+/*!
+ * @brief This routine returns the provenance of an inode.
+ *
+ * This routine either initialize the provenance of the inode (if not initialized) and/or refreshes the provenance of the inode if needed.
+ * If the routine can sleep, provenance information of the inode should be refreshed.
+ * @param inode The inode in question.
+ * @param may_sleep Bool value signifies whether this routine can sleep.
+ * @return provenance struct pointer.
+ *
+ * @question Why do we have a may_sleep boolean?
+ * @todo Error checking in this routine should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
+ */
 static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *prov = inode->i_provenance;
@@ -215,6 +291,15 @@ static __always_inline struct provenance *inode_provenance(struct inode *inode, 
 	return prov;
 }
 
+/*!
+ * @brief This routine returns the provenance of the given directory entry based on its inode.
+ *
+ * This routine ultimately calls "inode_provenance" routine.
+ * We find the inode of the dentry (if this dentry were to be opened as a file) by calling "d_backing_inode" routine.
+ * @param dentry The dentry whose provenance is to be returned.
+ * @param may_sleep Bool value used in "inode_provenance" routine (See above)
+ * @return provenance struct pointer or NULL if inode does not exist.
+ */
 static __always_inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
@@ -224,6 +309,16 @@ static __always_inline struct provenance *dentry_provenance(struct dentry *dentr
 	return inode_provenance(inode, may_sleep);
 }
 
+/*!
+ * @brief This routine returns the provenance of the given file based on its inode.
+ *
+ * This routine ultimately calls "inode_provenance" routine.
+ * We find the inode of the file by calling "file_inode" routine.
+ * @param file The file whose provenance is to be returned.
+ * @param may_sleep Bool value used in "inode_provenance" routine (See above)
+ * @return provenance struct pointer or NULL if inode does not exist.
+ *
+ */
 static __always_inline struct provenance *file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
