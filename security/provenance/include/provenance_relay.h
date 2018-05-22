@@ -35,9 +35,9 @@ extern bool relay_ready;
  */
 struct relay_list {
 	struct list_head list;
-	char *name;
-	struct rchan *prov;
-	struct rchan *long_prov;
+	char *name;	// The name of the relay channel.
+	struct rchan *prov;	// Relay buffer for regular provenance entries.
+	struct rchan *long_prov;	// Relay buffer for long provenance entries.
 };
 
 extern struct list_head relay_list;
@@ -49,6 +49,8 @@ int prov_create_channel(char *buffer, size_t len);
  * @param name Member of the element in the relay list
  * @param prov Member of the element in the relay list. This is a relay channel pointer.
  * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
+ *
+ * @todo failure case checking is missing.
  */
 static inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
 {

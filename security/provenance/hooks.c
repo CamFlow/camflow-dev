@@ -1836,6 +1836,24 @@ struct capture_policy prov_policy;
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
 
+/*!
+ * @brief Operations to start provenance capture.
+ *
+ * Those operations are:
+ * 1. Set up default capture policies.
+ * 2. Machine ID is default to 1.
+ * 3. Boot ID is default to 0.
+ * 4. Set up kernel memory cache for regular provenance entries (NULL on failure).
+ * 5. Set up kernel memory cache for long provenance entries (NULL on failure).
+ * 6. Set up boot buffer for regualr provenance entries (NULL on failure).
+ * 7. Set up boot buffer for long provenance entries (NULL on failure).
+ * (Note that we set up boot buffer because relayfs is not ready at this point.)
+ * 8. Initialize a workqueue (NULL on failure).
+ * 9. Initialize security for provenance task ("cred_init_provenance" routine).
+ * 10. Register provenance security hooks.
+ *
+ * @question How does workqueue help persist provenance?
+ */
 void __init provenance_add_hooks(void)
 {
 	prov_policy.prov_enabled = true;
@@ -1853,11 +1871,14 @@ void __init provenance_add_hooks(void)
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);
+	if (unlikely(!provenance_cache))
+		panic("Provenance: could not allocate provenance_cache.");
 	long_provenance_cache = kmem_cache_create("long_provenance_struct",
 						  sizeof(union long_prov_elt),
 						  0, SLAB_PANIC, NULL);
-	/* init relay buffers, to deal with provenance before FS is ready */
-	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);
+	if (unlikely(!long_provenance_cache))
+		panic("Provenance: could not allocate long_provenance_cache.");
+	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);	// Initalize boot buffer to record provenance before relayfs is ready.
 	if (unlikely(!boot_buffer))
 		panic("Provenance: could not allocate boot_buffer.");
 	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
@@ -1866,7 +1887,7 @@ void __init provenance_add_hooks(void)
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 	prov_queue = alloc_workqueue("prov_queue", 0, 0);
 	if (!prov_queue)
-		pr_err("Provenance: could not initialise work queue.");
+		pr_err("Provenance: could not initialize work queue.");
 #endif
 	relay_ready = false;
 	cred_init_provenance();
