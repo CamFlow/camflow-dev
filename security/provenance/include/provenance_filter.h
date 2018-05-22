@@ -23,7 +23,20 @@
 #define filter_node(node) __filter_node(prov_policy.prov_node_filter, node)
 #define filter_propagate_node(node) __filter_node(prov_policy.prov_propagate_node_filter, node)
 
-/* return either or not the node should be filtered out */
+/*!
+ * @brief This routine decides whether or not a node should be filtered.
+ *
+ * The decision is based on three criteria:
+ * 1. If provenance capture is not enable, then the node should be filtered out.
+ * 2. If the node is set to be opaque, then it should be filtered out.
+ * 3. If the node hits the given filter, then it should be filtered out.
+ * If one of the above criteria is met, then the node should be filtered out.
+ * Otherwise, it should be recorded.
+ * @param filter The supplied filter to be checked against the node.
+ * @param node The node in question (i.e., whether or not to be filtered).
+ * @return true (i.e., should be filtered out) or false (i.e., should not be filtered out).
+ *
+ */
 static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 {
 	if (!prov_policy.prov_enabled)
@@ -37,7 +50,10 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 }
 
 /*!
- * @brief If the relation type is VERSION_TASK or VERSION or NAMED, 
+ * @brief If the relation type is VERSION_TASK or VERSION or NAMED, updating a node's version is unnecessary.
+ * @param relation_type The type of the relation (i.e., edge)
+ *
+ * @question Are those the only relations that we do not need explicit update node's version? For example, what about RL_NAMED_PROCESS? 
  */
 static inline bool filter_update_node(const uint64_t relation_type)
 {
@@ -50,10 +66,20 @@ static inline bool filter_update_node(const uint64_t relation_type)
 	return false;
 }
 
-/* return either or not the relation should be filtered out */
+/*!
+ * @brief This routine decides whether or not a relation (i.e., edge) should be filtered.
+ *
+ * Based on the user supplied filter, a relation (i.e., edge) may be filtered out so as not to be recorded.
+ * User supplies filter criterion based on the categories of the relations. 
+ * There are four categories of the relations: "derived", "generated", "used", and "informed".
+ * Each category has its own filter supplied by the user.
+ * Depending on the type of the current relation in question, test if the type of the relation hits the filter (i.e., should be filtered out).
+ * @param type The type of the relation (i.e., edge).
+ * @return true if the relation should be filtered out (i.e., not recorded) or false if otherwise.
+ * 
+ */
 static inline bool filter_relation(const uint64_t type)
 {
-	// we hit an element of the black list ignore
 	if (prov_is_derived(type)) {
 		if (HIT_FILTER(prov_policy.prov_derived_filter, type))
 			return true;
@@ -69,7 +95,17 @@ static inline bool filter_relation(const uint64_t type)
 	return false;
 }
 
-/* return either or not tracking should propagate */
+/*!
+ * @brief This routine decides whether or not tracking should propagate.
+ *
+ * Based on the user supplied filter, a relation (i.e., edge) may not be allowed to propagate the tracking.
+ * User supplies filter criterion based on the categories of the relations as in the "filter_relation" routine. 
+ * Depending on the type of the current relation in question, test if the type of the relation hits the filter (i.e., should not be propagated).
+ * @param type The type of the relation (i.e., edge).
+ * @return true if the relation should not be propagated or false if otherwise.
+ *
+ * @question What does it mean by filter propagate by relation type? I have not yet used this feature.
+ */
 static inline bool filter_propagate_relation(uint64_t type)
 {
 	// the relation does not allow tracking propagation
@@ -99,6 +135,7 @@ static inline bool filter_propagate_relation(uint64_t type)
  * @param from The provenance node entry of the source node.
  * @param to The provenance node entry of the destination node.
  * @return True if the relation of type 'type' should be recorded; False if otherwise.
+ * 
  */
 static inline bool should_record_relation(const uint64_t type,
 					  prov_entry_t *from,

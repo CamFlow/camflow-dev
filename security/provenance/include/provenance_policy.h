@@ -15,6 +15,8 @@
 
 /*!
  * @brief provenance capture policy defined by the user.
+ * 
+ * @question We need to document what each element in this struct is used for.
  */
 struct capture_policy {
 	bool prov_enabled;

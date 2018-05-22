@@ -16,34 +16,79 @@
 #include "provenance.h"
 #include "provenance_relay.h"
 
+/*!
+ * @brief This routine updates the version of a provenance node.
+ *
+ * Versioning is used to avoid cycles in a provenance graph.
+ * Given a provenance node, unless a certain criteria are met, the node should be versioned to avoid cycles.
+ * "old_prov" holds the older version of the node while "prov" is updated to the newer version.
+ * "prov" and "old_prov" have the same information except the version number. 
+ * Once the node with a new version is created, a relation between the old and the new version should be estabilished.
+ * The relation is either "RL_VERSION_TASK" or "RL_VERSION" depending on the type of the nodes (note that they should be of the same type).
+ * If the nodes are of type AC_TASK, then the relation should be "RL_VERSION_TASK"; otherwise it is "RL_VERSION".
+ * The new node is not recorded (therefore "recorded" flag is unset) until we record it in the "__write_relation" routine.
+ * The criteria that should be met to not to update the version are:
+ * 1. ???
+ * 2. If the argument "type" is a relation whose destination node's version should not be updated becasue the "type" itself either is a VERSION type or a NAMED type.
+ * @param type The type of the relation.
+ * @param prov The pointer to the provenance node whose version may need to be updated.
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ * @question Why do we have to meet both conditions in the first criterion?
+ *
+ */
 static __always_inline int __update_version(const uint64_t type,
 																						prov_entry_t *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
 
-	// there is no outgoing edge and we are compressing
 	if (!provenance_has_outgoing(prov) && prov_policy.should_compress_node)
 		return 0;
-	// is it an edge type that needs update
+	
 	if (filter_update_node(type))
 		return 0;
-	// copy provenance to old
-	memcpy(&old_prov, prov, sizeof(union prov_elt));
-	// update version
-	node_identifier(prov).version++;
+	
+	memcpy(&old_prov, prov, sizeof(union prov_elt)); /* Copy the current provenance prov to old_prov. */
+	
+	node_identifier(prov).version++; /* Update the version of prov to the newer version. */
 	clear_recorded(prov);
 
-	// record version relation between version
+	/* Record the version relation between two versions of the same identity. */
 	if (node_identifier(prov).type == ACT_TASK)
 		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
-	clear_has_outgoing(prov);     // we update there is no more outgoing edge
-	clear_saved(prov);           // for inode prov persistance
+	clear_has_outgoing(prov);     /* Newer version now has no outgoing edge. */
+	clear_saved(prov);           // for inode prov persistance /* @question What is this for? */
 	return rc;
 }
 
+/*!
+ * @brief This routine records a provenance relation (i.e., edge) between two provenance nodes unless certain criteria are met.
+ *
+ * Unless edges are to be compressed and certain criteria are met, 
+ * this routine would attempt to update the version of the destination node,
+ * and create a relation between the source node and the newer version (if version is updated) of the destination node.
+ * Version should be updated every time an information flow occurs,
+ * Unless:
+ * 1. The relation to be recorded here is to explicitly update a version, or
+ * 2. Compression of nodes is used.
+ * The criteria to be met so as not to record the relation are:
+ * 1. Compression of edges are set. (Multiple edges should be compressed to 1 edge.), and
+ * 2. The type of the edges being recorded are the same as before.
+ * The relation is recorded by calling the "__write_relation" routine.
+ * @param type The type of the relation
+ * @param from The pointer to the source provenance node
+ * @param to The pointer to the destination provenance node
+ * @param file ???
+ * @param flags ???
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ * @question What is the "file" and "flags" arguments?
+ * @question node_previous_id only records the most recent node? Is it possible that the ones before the most recent node have the same id and type? Do we not skip?
+ *
+ */
 static __always_inline int record_relation(const uint64_t type,
 					   prov_entry_t *from,
 					   prov_entry_t *to,
@@ -55,11 +100,10 @@ static __always_inline int record_relation(const uint64_t type,
 	BUILD_BUG_ON(!prov_type_is_relation(type));
 
 	if (prov_policy.should_compress_edge) {
-		// we compress edges, do not record same edge type twice
 		if (node_previous_id(to) == node_identifier(from).id
 		    && node_previous_type(to) == type)
 			return 0;
-		else {   // if not we save those information
+		else {
 			node_previous_id(to) = node_identifier(from).id;
 			node_previous_type(to) = type;
 		}
@@ -68,7 +112,7 @@ static __always_inline int record_relation(const uint64_t type,
 	rc = __update_version(type, to);
 	if (rc < 0)
 		return rc;
-	set_has_outgoing(from); // there is an outgoing edge
+	set_has_outgoing(from); /* The source node now has an outgoing edge. */
 	rc = __write_relation(type, from, to, file, flags);
 	return rc;
 }
@@ -91,6 +135,24 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 	return rc;
 }
 
+/*!
+ * @brief This routine records the name of a provenance node. The name itself is a provenance node so there exists a new relation between the name and the node.
+ *
+ * Unless the node has already have a name or is not recorded, calling this routine will generate a new naming relation between the node and its name.
+ * The name node is transient and should not have any further use.
+ * Therefore, once we record the name node, we will free the memory allocated for the name provenance node.
+ * The name node has type "ENT_FILE_NAME", and the name has max length PATH_MAX.
+ * Depending on the type of the node in question, the relation between the node and the name node can be:
+ * 1. RL_NAMED_PROCESS, if the node in question is ACT_TASK node, or
+ * 2. RL_NAMED otherwise.
+ * Recording the relation is located in a critical section.
+ * No other thread can update the node in question, when its named is being attached.
+ * @param node The provenance node to which we create a new name node and a naming relation between them.
+ * @param name The name of the provenance node.
+ * @return 0 if no error occurred. -ENOMEM if no memory can be allocated for long provenance name node. Other error codes unknown.
+ *
+ * @question When do we decide when to use spin lock?
+ */
 static inline int record_node_name(struct provenance *node, const char *name)
 {
 	union long_prov_elt *fname_prov;
@@ -106,7 +168,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
-	// record the relation
+	/* Here we record the relation. */
 	spin_lock(prov_lock(node));
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
@@ -120,6 +182,21 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	return rc;
 }
 
+/*!
+ * @brief This routine records a relation between a provenance node and a user supplied data, which is a transient node.
+ *
+ * This routine allows the user to attach an annotation node to a provenance node.
+ * The relation between the two nodes is RL_LOG and the node of the user-supplied log is of type ENT_STR.
+ * ENT_STR node is transient and should not have further use.
+ * Therefore, once we have recorded the node, we will free the memory allocated for it.
+ * @param cprov Provenance node to be annotated by the user.
+ * @param buf Userspace buffer where user annotation locates.
+ * @param count Number of bytes copied from the user buffer.
+ * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
+ *
+ * @question Any reason we bypass "record_relation" function and use "__write_relation" instead? Is it because this node does not count as an outgoing node?
+ * @question Why are we not using spin lock in this case?
+ */
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
 	union long_prov_elt *str;
@@ -134,7 +211,7 @@ static inline int record_log(union prov_elt *cprov, const char __user *buf, size
 		rc = -EAGAIN;
 		goto out;
 	}
-	str->str_info.str[count] = '\0'; // make sure the string is null terminated
+	str->str_info.str[count] = '\0'; /* Make sure the string is null terminated. */
 	str->str_info.length = count;
 
 	rc = __write_relation(RL_LOG, str, cprov, NULL, 0);
