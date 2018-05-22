@@ -35,6 +35,7 @@
  * @return 0 if no error occurred. Other error codes unknown.
  *
  * @question Why do we have to meet both conditions in the first criterion?
+ * @answer do you remember when we looked at node compression (when off a new version is created when new info comes in)
  *
  */
 static __always_inline int __update_version(const uint64_t type,
@@ -60,7 +61,7 @@ static __always_inline int __update_version(const uint64_t type,
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
 	clear_has_outgoing(prov);     /* Newer version now has no outgoing edge. */
-	clear_saved(prov);           // for inode prov persistance /* @question What is this for? */
+	clear_saved(prov);           // for inode prov persistance /* @question What is this for?  @answer to save provenance as xattr when applicable */
 	return rc;
 }
 
@@ -86,7 +87,9 @@ static __always_inline int __update_version(const uint64_t type,
  * @return 0 if no error occurred. Other error codes unknown.
  *
  * @question What is the "file" and "flags" arguments?
+ * @answer file passed to the LSM hook and flag passed to the hook
  * @question node_previous_id only records the most recent node? Is it possible that the ones before the most recent node have the same id and type? Do we not skip?
+ * @answer yes only the most recent. this work as intended.
  *
  */
 static __always_inline int record_relation(const uint64_t type,
@@ -151,7 +154,6 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  * @param name The name of the provenance node.
  * @return 0 if no error occurred. -ENOMEM if no memory can be allocated for long provenance name node. Other error codes unknown.
  *
- * @question When do we decide when to use spin lock?
  */
 static inline int record_node_name(struct provenance *node, const char *name)
 {
@@ -194,8 +196,8 @@ static inline int record_node_name(struct provenance *node, const char *name)
  * @param count Number of bytes copied from the user buffer.
  * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
  *
- * @question Any reason we bypass "record_relation" function and use "__write_relation" instead? Is it because this node does not count as an outgoing node?
  * @question Why are we not using spin lock in this case?
+ * @answer the context in which it is called
  */
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
