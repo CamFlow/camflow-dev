@@ -17,7 +17,7 @@
 #include "provenance_relay.h"
 
 static __always_inline int __update_version(const uint64_t type,
-																						prov_entry_t *prov)
+					    prov_entry_t *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
@@ -39,8 +39,8 @@ static __always_inline int __update_version(const uint64_t type,
 		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
-	clear_has_outgoing(prov);     // we update there is no more outgoing edge
-	clear_saved(prov);           // for inode prov persistance
+	clear_has_outgoing(prov);       // we update there is no more outgoing edge
+	clear_saved(prov);              // for inode prov persistance
 	return rc;
 }
 
@@ -73,7 +73,8 @@ static __always_inline int record_relation(const uint64_t type,
 	return rc;
 }
 
-static __always_inline int record_terminate(uint64_t type, struct provenance *prov){
+static __always_inline int record_terminate(uint64_t type, struct provenance *prov)
+{
 	union prov_elt old_prov;
 	int rc;
 

@@ -166,9 +166,8 @@ static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_
 	if (provenance_is_initialized(prov_elt(prov))) {
 		spin_unlock(prov_lock(prov));
 		return 0;
-	} else {
+	} else
 		set_initialized(prov_elt(prov));
-	}
 	spin_unlock(prov_lock(prov));
 	update_inode_type(inode->i_mode, prov);
 	if (!(inode->i_opflags & IOP_XATTR)) // xattr not supported on this inode
@@ -246,7 +245,7 @@ static inline void save_provenance(struct dentry *dentry)
 	spin_lock(prov_lock(prov));
 	// not initialised or already saved
 	if (!provenance_is_initialized(prov_elt(prov))
-			|| provenance_is_saved(prov_elt(prov))) {
+	    || provenance_is_saved(prov_elt(prov))) {
 		spin_unlock(prov_lock(prov));
 		return;
 	}
@@ -271,6 +270,7 @@ static inline int record_write_xattr(uint64_t type,
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
+
 	if (!provenance_is_tracked(prov_elt(iprov))
 	    && !provenance_is_tracked(prov_elt(tprov))
 	    && !provenance_is_tracked(prov_elt(cprov))
@@ -314,6 +314,7 @@ static inline int record_read_xattr(struct provenance *cprov,
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
+
 	if (!provenance_is_tracked(prov_elt(iprov))
 	    && !provenance_is_tracked(prov_elt(tprov))
 	    && !provenance_is_tracked(prov_elt(cprov))
