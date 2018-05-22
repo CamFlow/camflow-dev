@@ -28,14 +28,13 @@
  * If the nodes are of type AC_TASK, then the relation should be "RL_VERSION_TASK"; otherwise it is "RL_VERSION".
  * The new node is not recorded (therefore "recorded" flag is unset) until we record it in the "__write_relation" function.
  * The criteria that should be met to not to update the version are:
- * 1. ???
+ * 1. If nodes are set to be compressed and do not have outgoing edges, or
  * 2. If the argument "type" is a relation whose destination node's version should not be updated becasue the "type" itself either is a VERSION type or a NAMED type.
  * @param type The type of the relation.
  * @param prov The pointer to the provenance node whose version may need to be updated.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @question Why do we have to meet both conditions in the first criterion?
- *
+ * @question: What is the use of "clear_saved"?
  */
 static __always_inline int __update_version(const uint64_t type,
 																						prov_entry_t *prov)
@@ -60,7 +59,7 @@ static __always_inline int __update_version(const uint64_t type,
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
 	clear_has_outgoing(prov);     // Newer version now has no outgoing edge.
-	clear_saved(prov);           // for inode prov persistance @question What is this for? @answer to save provenance as xattr when applicable
+	clear_saved(prov);           // For inode prov persistance
 	return rc;
 }
 
@@ -76,19 +75,14 @@ static __always_inline int __update_version(const uint64_t type,
  * 2. Compression of nodes is used.
  * The criteria to be met so as not to record the relation are:
  * 1. Compression of edges are set. (Multiple edges should be compressed to 1 edge.), and
- * 2. The type of the edges being recorded are the same as before.
+ * 2. The type of the edges being recorded are the same as before (we only compress same edges that occurs consecutively on the two nodes).
  * The relation is recorded by calling the "__write_relation" function.
  * @param type The type of the relation
  * @param from The pointer to the source provenance node
  * @param to The pointer to the destination provenance node
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks.
+ * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
- *
- * @question What is the "file" and "flags" arguments?
- * @answer file passed to the LSM hook and flag passed to the hook
- * @question node_previous_id only records the most recent node? Is it possible that the ones before the most recent node have the same id and type? Do we not skip?
- * @answer yes only the most recent. this work as intended.
  *
  */
 static __always_inline int record_relation(const uint64_t type,
@@ -196,7 +190,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
  * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
  *
  * @question Why are we not using spin lock in this case?
- * @TODO double check there is a lock on the cprov when this function is called
+ * @todo double check there is a lock on the cprov when this function is called
  */
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
@@ -240,12 +234,11 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param entity The entity provenance node.
  * @param activity The activity provenance node.
  * @param activity_mem The memory provenance node of the activity.
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks.
+ * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @question What exactly is activity_mem? Why do we have two functions (this and the next function) and have this one specifically to deal with activity_mem?
- * @TODO something to do with fork/exec (when a new process is created) we call uses_two
+ * @todo We have two versions of "uses" because of something that has to do with fork/exec (when a new process is created, we call uses)
  */
 static __always_inline int uses(const uint64_t type,
 				struct provenance *entity,
@@ -290,8 +283,8 @@ out:
  * @param type The type of relation (in the category of "used") between entity and activity.
  * @param entity The entity provenance node.
  * @param activity The activity provenance node.
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks.
+ * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
@@ -330,11 +323,10 @@ static __always_inline int uses_two(const uint64_t type,
  * @param activity_mem The memory provenance node of the activity.
  * @param activity The activity provenance node.
  * @param entity The entity provenance node.
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks.
+ * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @question How come we do not have a stripped-down version of "generates" like in the case of "uses"?
  */
 static __always_inline int generates(const uint64_t type,
 				     struct provenance *activity_mem,
@@ -381,8 +373,8 @@ out:
  * @param type The type of relation (in the category of "derived") between two entities.
  * @param from The entity provenance node.
  * @param to The other entity provenance node.
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks.
+ * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
@@ -418,8 +410,8 @@ static __always_inline int derives(const uint64_t type,
  * @param type The type of relation (in the category of "informed") between two activities.
  * @param from The activity provenance node.
  * @param to The other activity provenance node.
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks.
+ * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */

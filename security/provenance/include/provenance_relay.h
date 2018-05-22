@@ -80,11 +80,12 @@ extern struct prov_boot_buffer *boot_buffer;
  * However, in an unlikely event that the boot buffer is full, an error is thrown.
  * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
  * If relay buffer is ready, write to relay buffer.
+ * It will write to every relay buffer in the relay_list for every CamQuery query use.
+ * This is because once provenance is read from a relay buffer, it will be consumed from the buffer. 
+ * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
  * @param msg Provenance information to be written to either boot buffer or relay buffer.
  * @return NULL
  *
- * @question What is the use of prov_written flag?
- * @question Why are we using a for loop in the relay list buffer?
  */
 static __always_inline void prov_write(union prov_elt *msg)
 {
@@ -115,6 +116,7 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
  *
  * This function performs the same function as "prov_write" function except that it writes a long provenance information,
  * instead of regular provenance information to the buffer.
+ * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
  */
 static inline void long_prov_write(union long_prov_elt *msg)
 {
@@ -161,17 +163,15 @@ static inline void prov_flush(void)
  * Then mark the provenance node as recorded.
  * The checks include:
  * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
- * 2. ???
+ * 2. If the provenance is not a packet node (which means it should have machine and boot ID) and the provenacne is not recorded, 
+ * 		record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
  * @param node Provenance node (could be either regular or long)
  *
- * @question What is the second check? Why set the machine_id again?
  */
 static __always_inline void __write_node(prov_entry_t *node)
 {
-	// filtered or already recorded /* @question this is not the right check based on the comment. */
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
-	// need to make sure it has not been recorded in case duplicate config is on./* @question This is a confusing comment. */
 	if (!prov_is_packet(node) && !provenance_is_recorded(node)) {
 		node_identifier(node).machine_id = prov_machine_id;
 		node_identifier(node).boot_id = prov_boot_id;
@@ -190,7 +190,7 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
 }
 
 /*!
- * @brief write provenance relation to relay buffer.
+ * @brief Write provenance relation to relay buffer.
  *
  * The relation will only be recorded if no user-supplied filter is applicable to the type of the relation or the end nodes.
  * This is checked by "should_record_relation" function.
@@ -199,12 +199,10 @@ static inline void copy_identifier(union prov_identifier *dest, union prov_ident
  * @param type The type of the relation (i.e., edge)
  * @param from The source node of the provenance edge
  * @param to The destination node of the provenance edge
- * @param file ???
- * @param flags ???
+ * @param file Information related to LSM hooks
+ * @param flags Information related to LSM hooks
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @question What is the use of file? The corresponding set and offset element of the relation_info structure?
- * @question What are the possible flags?
  */
 static __always_inline int __write_relation(const uint64_t type,
 					  void *from,
