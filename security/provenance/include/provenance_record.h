@@ -113,6 +113,19 @@ static __always_inline int record_relation(const uint64_t type,
 	return rc;
 }
 
+/*!
+ * @brief This routine record a provenance relation that signifies termination of an activity.
+ *
+ * Unless certain criteria are met, a termination relation is recorded of an activity.
+ * Because of this special relation, we will only update the version of the provenance node that is about to be terminated (i.e., an activity).
+ * The criteria that need to be met not to record this relation are:
+ * 1. The provenance node itself is not recorded and capture all provenance is not set, or
+ * 2. The provenance node should be filtered out (i.e., not recorded).
+ * @param type The type of termination relation to be recorded.
+ * @param prov The provenance node in question (i.e., about to be terminated).
+ * @return 0 if no errors occurred. Other error codes unknown.
+ * 
+ */
 static __always_inline int record_terminate(uint64_t type, struct provenance *prov){
 	union prov_elt old_prov;
 	int rc;
@@ -128,6 +141,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 	clear_recorded(prov_elt(prov));
 
 	rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
+	clear_has_outgoing(prov);     // Newer version now has no outgoing edge.
 	return rc;
 }
 

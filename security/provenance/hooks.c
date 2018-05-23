@@ -1729,6 +1729,9 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 	return 0;
 }
 
+/*!
+ * @brief Add provenance hooks to security_hook_list.
+ */
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_free,			    provenance_cred_free),
@@ -1816,7 +1819,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(sb_kern_mount,			    provenance_sb_kern_mount)
 };
 
-struct kmem_cache *provenance_cache __ro_after_init;
+struct kmem_cache *provenance_cache __ro_after_init; /* @question Why is the cache read-only after init? */
 struct kmem_cache *long_provenance_cache __ro_after_init;
 
 struct prov_boot_buffer         *boot_buffer;
@@ -1891,8 +1894,8 @@ void __init provenance_add_hooks(void)
 #endif
 	relay_ready = false;
 	cred_init_provenance();
-	/* register the provenance security hooks */
-	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");
+
+	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");	// Register provenance security hooks.
 	pr_info("Provenance: version %s\n", CAMFLOW_VERSION_STR);
 	pr_info("Provenance: hooks ready.\n");
 }
