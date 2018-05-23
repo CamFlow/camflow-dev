@@ -197,7 +197,21 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	security_inode_getsecid(inode, &(prov_elt(prov)->inode_info.secid));
 	update_inode_type(inode->i_mode, prov);
 }
-
+/*!
+ * @brief Create a new provenance node if mmap is not shared.
+ * 
+ * If a process mmap a file but set the flag as MAP_PRIAVTE,
+ * other processes do not see the updates to the mapping, and thus the calling process should have its own mmap.
+ * That is, the mapping has a new branch.
+ * We create a new provenance entry ENT_INODE_MMAP and copy information from the original file's provenance entry @iprov,
+ * unless either the original file or the calling process is set not to be tracked or the capture all is unset.
+ * It is also possible that there is not enough memory to be allocated for a new provenance node, in which case, a NULL pointer is returned.
+ * Note that this provenance node is short-lived and will be freed once a relation is recorded.
+ * @param iprov The provenance entry pointer of the mmap'ed inode.
+ * @param cprov The cred provenance entry pointer of the calling process.
+ * @return The pointer to the new provenance entry node or NULL.
+ * 
+ */
 static inline struct provenance *branch_mmap(struct provenance *iprov, struct provenance *cprov)
 {
 	struct provenance *prov;

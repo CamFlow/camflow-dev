@@ -1084,14 +1084,33 @@ static int provenance_file_receive(struct file *file)
 	return rc;
 }
 
-/*
- * Check permissions for a mmap operation.  The @file may be NULL, e.g.
- * if mapping anonymous memory.
- * @file contains the file structure for file to map (may be NULL).
- * @reqprot contains the protection requested by the application.
- * @prot contains the protection that will be applied by the kernel.
- * @flags contains the operational flags.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when mmap_file hook is triggered.
+ *
+ * This hook is triggered when checking permissions for a mmap operation.  
+ * The @file may be NULL, e.g., if mapping anonymous memory.
+ * Provenance relation will not be recorded if:
+ * 1. The file is NULL, or
+ * 2. Failure occurred.
+ * If the mmap is shared (flag: MAP_SHARED or MAP_SHARED_VALIDATE),
+ * depending on the action allowed by the kernel, 
+ * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or RL_MMAP_EXEC by calling "derives" routine.
+ * Information flows between the mmap file and calling process and its cred.
+ * The direction of the information flow depends on the action allowed.
+ * If the mmap is private (flag: MAP_PRIVATE),
+ * we create an additional provenance node to represent the private mapped inode by calling routine "branch_mmap",
+ * record provenance relation RL_MMAP by calling "derives" routine because information flows from the original mapped file to the private file.
+ * Then depending on the action allowed by the kernel,
+ * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or RL_MMAP_EXEC by calling "derives" routine.
+ * Information flows between the new private mmap node and calling process and its cred.
+ * The direction of the information flow depends on the action allowed.
+ * Note that this new node is short-lived.
+ * @param file The file structure for file to map (may be NULL).
+ * @param reqprot The protection requested by the application.
+ * @param prot The protection that will be applied by the kernel.
+ * @param flags The operational flags.
+ * @return 0 if permission is granted and no error occurred; -ENOMEM if the original file inode provenance entry is NULL; Other error codes inherited from derives routine or unknown.
+ *
  */
 static int provenance_mmap_file(struct file *file,
 				unsigned long reqprot,
@@ -1111,9 +1130,8 @@ static int provenance_mmap_file(struct file *file,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (rc < 0)
-		goto out;
-	if ((flags & MAP_TYPE) == MAP_SHARED) {
+	if ((flags & MAP_TYPE) == MAP_SHARED ||
+			(flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = derives(RL_MMAP_WRITE, cprov, iprov, file, flags);
 		if (rc < 0)
