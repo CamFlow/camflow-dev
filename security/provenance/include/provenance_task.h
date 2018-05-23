@@ -189,7 +189,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * 3. The "mm_exe_file"'s provenance is set to be opaque (if so, the @prov itself will be set opaque).
  * @param task The task whose name is to be obtained.
  * @param prov The provenance entry that will be associated with the task name.
- * @return 0 if no error occurred. Other error code unknown.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for buffer to hold file path. Other error code unknown.
  * 
  * @question: Why is cred being obtained in the code? It does not seem to have any use here.
  * @question: Why get_mm_exe_file instead of get_task_exe_file?
@@ -241,7 +241,11 @@ out:
 }
 
 /*!
- * @brief 
+ * @brief Update @prov with process performance information associated with @task.
+ *
+ * @param task The task whose performance information to be obtained.
+ * @param prov The provenance entry to be updated.
+ *
  */
 static inline void update_proc_perf(struct task_struct *task,
 				    struct provenance *prov)
@@ -256,7 +260,7 @@ static inline void update_proc_perf(struct task_struct *task,
 	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
 
 	// memory
-	mm = get_task_mm(current);
+	mm = get_task_mm(task);
 	if (mm) {
 		// KB
 		prov_elt(prov)->proc_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
