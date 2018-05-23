@@ -808,10 +808,19 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 	return rc;
 }
 
-/*
- * Check permission before removing the extended attribute
- * identified by @name for @dentry.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_removexattr hook is triggered.
+ *
+ * This hook is triggered when checking permission before removing the extended attribute identified by @name for @dentry.
+ * The relations are recorded through "record_write_xattr" routine defined in provenance_inode.h file.
+ * RL_RMVXATTR is one of the relations to be recorded.
+ * The relations may not be recorded for the following reasons:
+ * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
+ * 2. inode provenance entry is NULL.
+ * @param dentry The dentry structure for the file.
+ * @param name The name of the extended attribute.
+ *
+ * @question We have been checking whether @prov is NULL for all these times, but why?
  */
 static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 {
@@ -836,6 +845,20 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 	return rc;
 }
 
+/*!
+ * @brief Enabling checking provenance of an inode from user space.
+ *
+ * This hook allows us to retrieve a copy of the extended attribute representation of the security label 
+ * associated with @name for @inode via @buffer.  
+ * Note that @name is the remainder of the attribute name after the security prefix has been removed. 
+ * The provenance of the inode, if exists, is stored in @buffer.
+ * @param inode The inode whose provenance is to be retrieved.
+ * @param name The name of extended attribute, which must be provenance (or an error will be thrown).
+ * @param buffer The buffer to hold the provenance of the inode.
+ * @param alloc Specify if the call should return a value via the buffer or just the value length.
+ * @return Size of the buffer on success, which in this case is the size of the provenance entry; -ENOMEM if inode provenance is NULL; -EOPNOTSUPP if name of the attribute is not provenance.
+ * 
+ */
 static int provenance_inode_getsecurity(struct inode *inode,
 					const char *name,
 					void **buffer,
@@ -855,6 +878,20 @@ out:
 	return sizeof(union prov_elt);
 }
 
+/*!
+ * @brief Copy the name of the provenance extended attribute to buffer.
+ *
+ * This routine copies the extended attribute of provenance associated with @inode into @buffer.  
+ * The maximum size of @buffer is specified by @buffer_size.  
+ * @buffer may be NULL to request the size of the buffer required.
+ * If @buffer is not NULL and the length of the provenance attribute name is smaller than @buffer_size, 
+ * then the buffer will contain the name of the provenance attribute.
+ * @param inode The inode whose provenance extended attribute is to be retrieved.
+ * @param buffer The buffer that holds that attribute name.
+ * @param buffer_size The maximum size of the buffer.
+ * @returns Number of bytes used/required on success.
+ *
+ */
 static int provenance_inode_listsecurity(struct inode *inode,
 					 char *buffer,
 					 size_t buffer_size)
@@ -866,23 +903,30 @@ static int provenance_inode_listsecurity(struct inode *inode,
 	return len;
 }
 
-/*
- * Check file permissions before accessing an open file.  This hook is
- * called by various operations that read or write files.  A security
- * module can use this hook to perform additional checking on these
- * operations, e.g.  to revalidate permissions on use to support privilege
- * bracketing or policy changes.  Notice that this hook is used when the
- * actual read/write operations are performed, whereas the
- * inode_security_ops hook is called when a file is opened (as well as
- * many other operations).
- * Caveat:  Although this hook can be used to revalidate permissions for
- * various system call operations that read or write files, it does not
- * address the revalidation of permissions for memory-mapped files.
- * Security modules must handle this separately if they need such
- * revalidation.
- * @file contains the file structure being accessed.
- * @mask contains the requested permissions.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when file_permission hook is triggered.
+ *
+ * This hook is triggered when checking file permissions before accessing an open file.  
+ * This hook is called by various operations that read or write files.  
+ * A security module can use this hook to perform additional checking on these operations,
+ * e.g., to revalidate permissions on use to support privilege bracketing or policy changes.  
+ * Notice that this hook is used when the actual read/write operations are performed, 
+ * whereas the inode_security_ops hook is called when a file is opened (as well as many other operations).
+ * Caveat:
+ * Although this hook can be used to revalidate permissions for various system call operations that read or write files, 
+ * it does not address the revalidation of permissions for memory-mapped files.
+ * Security modules must handle this separately if they need such revalidation.
+ * Depending on the type of the @file (e.g., a regular file or a directory),
+ * and the requested permission from @mask,
+ * record various provenance relations, including:
+ * RL_WRITE, RL_READ, RL_SEARCH, RL_SND, RL_RCV, RL_EXEC.
+ * @param file The file structure being accessed.
+ * @param mask The requested permissions.
+ * @return 0 if permission is granted; -ENOMEM if inode provenance is NULL. Other error codes unknown.
+ * 
+ * @question In FILE__EXECUTE case, why do we suddenly check if iprov is opaque? Why do we propagate the opaqueness to cprov? Why is derives relation between iprov and cprov but not tprov?
+ * @question What is the difference between cprov and tprov?
+ * @question Why are we saving iprov at the end?
  */
 static int provenance_file_permission(struct file *file, int mask)
 {
@@ -952,12 +996,23 @@ out:
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+/*!
+ * @brief Record provenance when file_splice_pipe_to_pipe hook is triggered (splice system call).
+ *
+ * Record provenance relation RL_SPLICE by calling "derives" routine.
+ * Information flows from one pipe @in to another pipe @out.
+ * Fail if either file inode provenance does not exist.
+ * @param in Information source file.
+ * @param out Information drain file.
+ * @return 0 if no error occurred; -ENOMEM if either end of the file provenance entry is NULL.
+ * 
+ */
 static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
 {
 	struct provenance *inprov = file_provenance(in, true);
 	struct provenance *outprov = file_provenance(out, true);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!inprov || !outprov)
 		return -ENOMEM;

@@ -361,7 +361,7 @@ static inline void save_provenance(struct dentry *dentry)
  * 1. Record a RL_PROC_READ relation between a task process and its cred. Information flows from cred to the task process, and
  * 2. Record a given type @type of relation between the process and xattr provenance entry. Information flows from the task to the xattr, and
  * 3-1. If the given type is RL_SETXATTR, then record a RL_SETXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode;
- * 3-2. otherwise, record a RL_RMVXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode.
+ * 3-2. otherwise (the only other case is that the given type is RL_RMVXATTR_INODE), record a RL_RMVXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode.
  * The criteria to be met so as not to record the relations are:
  * 1. If any of the cred, task, and inode provenance are not tracked and if the capture all is not set, or
  * 2. If the relation @type should not be recorded, or
@@ -377,7 +377,6 @@ static inline void save_provenance(struct dentry *dentry)
  * @param flags Flags passed by LSM hooks.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" routine or unknown.
  *
- * @question What is RL_RMVXATTR_INODE? In what circumstances will we have this relation?
  */
 static inline int record_write_xattr(uint64_t type,
 				     struct provenance *iprov,
@@ -488,6 +487,14 @@ out:
 #define DIR__WRITE      0x00000020UL
 #define DIR__READ       0x00000040UL
 
+/*!
+ * @brief Helper function to return permissions of a file/directory from mask.
+ *
+ * @param mode The mode of the inode.
+ * @param mask The permission mask.
+ * @return The permission of the file/directory/socket....
+ *
+ */
 static inline uint32_t file_mask_to_perms(int mode, unsigned int mask)
 {
 	uint32_t av = 0;
