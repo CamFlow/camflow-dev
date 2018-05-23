@@ -284,12 +284,14 @@ static int provenance_task_fix_setuid(struct cred *new,
  * @return 0 if permission is granted. Other error codes unknown.
  * 
  */
-static int provenance_task_setpgid(struct task_struct *p, pid_t pgid) {
+static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
+{
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	const struct cred *cred = get_task_cred(p);
 	struct provenance *nprov = cred->provenance;
 	int rc;
+
 	prov_elt(nprov)->proc_info.gid = pgid;
 	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
 	put_cred(cred);	// Release cred.

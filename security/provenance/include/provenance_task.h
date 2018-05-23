@@ -483,10 +483,10 @@ out:
 }
 
 static __always_inline int prov_record_arg(struct provenance *prov,
-				  uint64_t vtype,
-				  uint64_t etype,
-				  const char *arg,
-				  size_t len)
+					   uint64_t vtype,
+					   uint64_t etype,
+					   const char *arg,
+					   size_t len)
 {
 	union long_prov_elt *aprov;
 	int rc = 0;

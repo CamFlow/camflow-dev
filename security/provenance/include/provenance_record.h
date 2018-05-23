@@ -37,7 +37,7 @@
  * @question: What is the use of "clear_saved"?
  */
 static __always_inline int __update_version(const uint64_t type,
-																						prov_entry_t *prov)
+					    prov_entry_t *prov)
 {
 	union prov_elt old_prov;
 	int rc = 0;
@@ -126,7 +126,8 @@ static __always_inline int record_relation(const uint64_t type,
  * @return 0 if no errors occurred. Other error codes unknown.
  * 
  */
-static __always_inline int record_terminate(uint64_t type, struct provenance *prov){
+static __always_inline int record_terminate(uint64_t type, struct provenance *prov)
+{
 	union prov_elt old_prov;
 	int rc;
 
