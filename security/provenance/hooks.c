@@ -90,6 +90,15 @@ static int provenance_task_alloc(struct task_struct *task,
 	return 0;
 }
 
+/*!
+ * @brief Record provenance when task_free hook is triggered.
+ * 
+ * Record provenance relation RL_TERMINATE_TASK by calling routine "record_terminate".
+ * Free kernel memory allocated for provenance entry of the task in question.
+ * Set the provenance pointer in task_struct to NULL.
+ * @param task The task in question (i.e., to be free).
+ *
+ */
 static void provenance_task_free(struct task_struct *task)
 {
 	if (task->provenance) {
@@ -99,8 +108,13 @@ static void provenance_task_free(struct task_struct *task)
 	task->provenance = NULL;
 }
 
-/*
- * initialise the security for the init task
+/*!
+ * @brief Initialise the security for the initial task.
+ *
+ * This is the initial task when provenance capture is initialized.
+ * We create a ENT_PROC provenance node, and set the UID and GID of the provenance node information from the current process's credential.
+ * Current process's cred struct's provenance pointer now points to the provenance node.
+ * 
  */
 static void cred_init_provenance(void)
 {
