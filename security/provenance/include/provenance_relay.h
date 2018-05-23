@@ -83,7 +83,7 @@ extern struct prov_boot_buffer *boot_buffer;
  * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
  * If relay buffer is ready, write to relay buffer.
  * It will write to every relay buffer in the relay_list for every CamQuery query use.
- * This is because once provenance is read from a relay buffer, it will be consumed from the buffer. 
+ * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
  * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
  * @param msg Provenance information to be written to either boot buffer or relay buffer.
  * @return NULL
@@ -166,7 +166,7 @@ static inline void prov_flush(void)
  * Then mark the provenance node as recorded.
  * The checks include:
  * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
- * 2. If the provenance is not a packet node (which means it should have machine and boot ID) and the provenacne is not recorded, 
+ * 2. If the provenance is not a packet node (which means it should have machine ID) and the provenacne is not recorded,
  * 		record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
  * @param node Provenance node (could be either regular or long)
  *
@@ -175,10 +175,8 @@ static __always_inline void __write_node(prov_entry_t *node)
 {
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
-	if (!prov_is_packet(node) && !provenance_is_recorded(node)) {
+	if (!prov_is_packet(node) && !provenance_is_recorded(node))
 		node_identifier(node).machine_id = prov_machine_id;
-		node_identifier(node).boot_id = prov_boot_id;
-	}
 	if ( provenance_is_long(node) )
 		long_prov_write(node);
 	else
