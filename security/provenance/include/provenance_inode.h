@@ -188,7 +188,6 @@ static inline void refresh_inode_provenance(struct inode *inode)
 {
 	struct provenance *prov = inode->i_provenance;
 
-	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
 	record_inode_name(inode, prov);
@@ -355,6 +354,32 @@ static inline void save_provenance(struct dentry *dentry)
 	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_elt), 0);
 }
 
+/*!
+ * @brief This routine records relations related to setting extended file attributes.
+ *
+ * xattr is a long provenance entry and is transient (i.e., freed after recorded).
+ * Unless certain criteria are met, several relations are recorded when a process attempts to write xattr of a file:
+ * 1. Record a RL_PROC_READ relation between a task process and its cred. Information flows from cred to the task process, and
+ * 2. Record a given type @type of relation between the process and xattr provenance entry. Information flows from the task to the xattr, and
+ * 3-1. If the given type is RL_SETXATTR, then record a RL_SETXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode;
+ * 3-2. otherwise, record a RL_RMVXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode.
+ * The criteria to be met so as not to record the relations are:
+ * 1. If any of the cred, task, and inode provenance are not tracked and if the capture all is not set, or
+ * 2. If the relation @type should not be recorded, or
+ * 3. Failure occurred.
+ * xattr name and value pair is recorded in the long provenance entry.
+ * @param type The type of relation to be recorded.
+ * @param iprov The inode provenance entry.
+ * @param tprov The task provenance entry.
+ * @param cprov The cred provenance entry.
+ * @param name The name of the extended attribute.
+ * @param value The value of that attribute.
+ * @param size The size of the value.
+ * @param flags Flags passed by LSM hooks.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" routine or unknown.
+ *
+ * @question What is RL_RMVXATTR_INODE? In what circumstances will we have this relation?
+ */
 static inline int record_write_xattr(uint64_t type,
 				     struct provenance *iprov,
 				     struct provenance *tprov,
@@ -402,6 +427,24 @@ out:
 	return rc;
 }
 
+/*!
+ * @brief This routine records relations related to reading extended file attributes.
+ *
+ * xattr is a long provenance entry and is transient (i.e., freed after recorded).
+ * Unless certain criteria are met, several relations are recorded when a process attempts to read xattr of a file:
+ * 1. Record a RL_GETXATTR_INODE relation between inode and xattr. Information flows from inode to xattr (to get xattr of an inode).
+ * 2. Record a RL_GETXATTR relation between xattr and task process. Information flows from xattr to the task (task reads the xattr).
+ * 3. Record a RL_PROC_WRITE relation between task and its cred. Information flows from task to its cred.
+ * The criteria to be met so as not to record the relations are:
+ * 1. If any of the cred, task, and inode provenance are not tracked and if the capture all is not set, or
+ * 2. If the relation RL_GETXATTR should not be recorded, or
+ * 3. Failure occurred.
+ * @param cprov The cred provenance entry.
+ * @param tprov The task provenance entry.
+ * @param name The name of the extended attribute.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" routine or unknown.
+ *
+ */
 static inline int record_read_xattr(struct provenance *cprov,
 				    struct provenance *tprov,
 				    struct provenance *iprov,
@@ -417,8 +460,10 @@ static inline int record_read_xattr(struct provenance *cprov,
 	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
-	if (!xattr)
+	if (!xattr) {
+		rc = -ENOMEM;
 		goto out;
+	}
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 

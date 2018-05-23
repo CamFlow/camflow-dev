@@ -287,7 +287,11 @@ static inline void update_proc_perf(struct task_struct *task,
 /*!
  * @brief Update and return provenance entry of cred structure.
  *
- * 
+ * This routine records the name of the current process and associates it with the cred provenance entry,
+ * unless the provenance is set to be opqaue, in which case no update is performed.
+ * The cred provenance entry is also updated with UID, GID, namespaces, secid, and perform information.
+ * @return The pointer to the cred provenance entry.
+ *
  */
 static inline struct provenance *get_cred_provenance(void)
 {

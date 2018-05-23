@@ -274,10 +274,15 @@ static int provenance_task_fix_setuid(struct cred *new,
  * @brief Record provenance when task_setpgid hook is triggered.
  *
  * This hooks is triggered when checking permission before setting the process group identifier of the process @p to @pgid.
+ * @cprov is the cred provenance of the @current process, and @tprov is the task provenance of the @current process.
+ * During "get_cred_provenance" and "get_task_provenance" routines, their provenances are updated too.
+ * We update process @p's cred provenance's pgid info as required by the trigger of the hook.
+ * Record provenance relation RL_SETGID by calling "generates" routine.
+ * Information flows from cred of the @current process, which sets the @pgid, to the current process, and eventually to the process @p whose @pgid is updated.
+ * @param p The task_struct for process being modified.
+ * @param pgid The new pgid.
+ * @return 0 if permission is granted. Other error codes unknown.
  * 
- *	@p contains the task_struct for process being modified.
- *	@pgid contains the new pgid.
- *	Return 0 if permission is granted.
  */
 static int provenance_task_setpgid(struct task_struct *p, pid_t pgid) {
 	struct provenance *cprov = get_cred_provenance();
@@ -287,22 +292,24 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid) {
 	int rc;
 	prov_elt(nprov)->proc_info.gid = pgid;
 	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
-	put_cred(cred);
+	put_cred(cred);	// Release cred.
 	return rc;
 }
 
-/*
- *	Check permission before sending signal @sig to @p.  @info can be NULL,
- *	the constant 1, or a pointer to a siginfo structure.  If @info is 1 or
- *	SI_FROMKERNEL(info) is true, then the signal should be viewed as coming
- *	from the kernel and should typically be permitted.
- *	SIGIO signals are handled separately by the send_sigiotask hook in
- *	file_security_ops.
- *	@p contains the task_struct for process.
- *	@info contains the signal information.
- *	@sig contains the signal value.
- *	@secid contains the sid of the process where the signal originated
- *	Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when task_kill hook is triggered.
+ *	
+ * This hook is triggered when checking permission before sending signal @sig to @p.  
+ * @info can be NULL, the constant 1, or a pointer to a siginfo structure.  
+ * If @info is 1 or SI_FROMKERNEL(info) is true, then the signal should be viewed as coming from the kernel and should typically be permitted.
+ * SIGIO signals are handled separately by the send_sigiotask hook in file_security_ops.
+ * No information flow happens in this case. Simply return 0.
+ * @param p The task_struct for process.
+ * @param info The signal information.
+ * @param sig The signal value.
+ * @param secid The sid of the process where the signal originated.
+ * @return 0 if permission is granted.
+ * 
  */
 static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
 				int sig, u32 secid)
@@ -310,12 +317,19 @@ static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
 	return 0;
 }
 
-/*
- * Allocate and attach a security structure to @inode->i_security.  The
- * i_security field is initialized to NULL when the inode structure is
- * allocated.
- * @inode contains the inode structure.
- * Return 0 if operation was successful.
+/*!
+ * @brief Record provenance when inode_alloc_security hook is triggered.
+ *
+ * This hook is triggered when allocating and attaching a security structure to @inode->i_security.  
+ * The i_security field is initialized to NULL when the inode structure is allocated.
+ * When i_security field is initialized, we also initialize i_provenance field of the inode.
+ * Therefore, we create a new ENT_INODE_UNKNOWN provenance entry.
+ * UUID information from @i_sb (superblock) is copied to the new inode's provenance entry.
+ * We then call routine "refresh_inode_provenance" to obtain more information about the inode. 
+ * No information flow occurs.
+ * @param inode The inode structure.
+ * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for the new inode provenance entry. Other error codes unknown.
+ *
  */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
@@ -331,10 +345,15 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	return 0;
 }
 
-/*
- * @inode contains the inode structure.
- * Deallocate the inode security structure and set @inode->i_security to
- * NULL.
+/*!
+ * @brief Record provenance when inode_free_security hook is triggered.
+ * 
+ * This hook is triggered when deallocating the inode security structure and set @inode->i_security to NULL.
+ * Record provenance relation RL_CLOSED by calling "record_terminate" routine.
+ * Free kernel memory allocated for provenance entry of the inode in question.
+ * Set the provenance pointer in @inode to NULL.
+ * @param inode The inode structure whose security is to be freed.
+ *
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
@@ -345,12 +364,18 @@ static void provenance_inode_free_security(struct inode *inode)
 	inode->i_provenance = NULL;
 }
 
-/*
- * Check permission to create a regular file.
- * @dir contains inode structure of the parent of the new file.
- * @dentry contains the dentry structure for the file to be created.
- * @mode contains the file mode of the file to be created.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_create hook is triggered.
+ * 
+ * This hook is trigger when checking permission to create a regular file.
+ * Record provenance relation RL_INODE_CREATE by calling "generates" routine.
+ * Information flows from current process's cred's to the process, and eventually to the parent's inode.
+ * @param dir Inode structure of the parent of the new file.
+ * @param dentry The dentry structure for the file to be created.
+ * @param mode The file mode of the file to be created.
+ * @return 0 if permission is granted; -ENOMEM if parent's inode's provenance entry is NULL. Other error codes unknown.
+ *
+ * @question Two spin_lock's are set, but why?
  */
 static int provenance_inode_create(struct inode *dir,
 				   struct dentry *dentry,
@@ -372,16 +397,29 @@ static int provenance_inode_create(struct inode *dir,
 	return rc;
 }
 
-/*
- * Check permission before accessing an inode.  This hook is called by the
- * existing Linux permission function, so a security module can use it to
- * provide additional checking for existing Linux permission checks.
- * Notice that this hook is called when a file is opened (as well as many
- * other operations), whereas the file_security_ops permission hook is
- * called when the actual read/write operations are performed.
- * @inode contains the inode structure to check.
- * @mask contains the permission mask.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_permission hook is triggered.
+ *
+ * This hook is triggered when checking permission before accessing an inode.  
+ * This hook is called by the existing Linux permission function, 
+ * so a security module can use it to provide additional checking for existing Linux permission checks.
+ * Notice that this hook is called when a file is opened (as well as many other operations), 
+ * whereas the file_security_ops permission hook is called when the actual read/write operations are performed.
+ * Depending on the permission specified in @mask,
+ * Zero or more relation may be recorded during this permission check.
+ * If permission is:
+ * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses" routine, and 
+ * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" routine, and 
+ * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses" routine, and 
+ * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses" routine.
+ * Note that "uses" routine also generates provenance relation RL_PROC_WRITE.
+ * Information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
+ * Provenance relation is not recorded if the inode to be access is private or if the inode's provenance entry does not exist.
+ * @param inode The inode structure to check.
+ * @param mask The permission mask.
+ * @return 0 if permission is granted; -ENOMEM if @inode's provenance does not exist. Other error codes unknown.
+ *
+ * @question What is IS_PRIVATE?
  */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
@@ -427,14 +465,24 @@ out:
 	return rc;
 }
 
-/*
- * Check permission before creating a new hard link to a file.
- * @old_dentry contains the dentry structure for an existing
- * link to the file.
- * @dir contains the inode structure of the parent directory
- * of the new link.
- * @new_dentry contains the dentry structure for the new link.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_link hook is triggered.
+ *
+ * This hook is triggered when checking permission before creating a new hard link to a file.
+ * We obtain the provenance of current process and its cred, as well as provenance of inode or parent directory of new link.
+ * We also get the provenance of existing link to the file.
+ * Record two provenance relations RL_LINK by calling "generates" routine, and
+ * a provenance relation RL_LINK_INODE by calling "derives" routine.
+ * Information flows:
+ * 1. From cred of the current process to the process, and eventually to the inode of parent directory of new link, and,
+ * 2. From cred of the current process to the process, and eventually to the dentry of the existing link to the file, and
+ * 3. From the inode of parent directory of new link to the dentry of the existing link to the file.
+ * @param old_dentry The dentry structure for an existing link to the file.
+ * @parm dir The inode structure of the parent directory of the new link.
+ * @param new_dentry The dentry structure for the new link.
+ * @return 0 if permission is granted; -ENOMEM if either the dentry provenance of the existing link to the file or the inode provenance of the new parent directory of new link does not exist.
+ *
+ * @question I do not understand this information flow scheme.
  */
 
 static int provenance_inode_link(struct dentry *old_dentry,
@@ -475,13 +523,17 @@ out:
 
 // TODO probably deal with unlink (useful for stream processing)
 
-/*
- * Check for permission to rename a file or directory.
- * @old_dir contains the inode structure for parent of the old link.
- * @old_dentry contains the dentry structure of the old link.
- * @new_dir contains the inode structure for parent of the new link.
- * @new_dentry contains the dentry structure of the new link.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_rename hook is triggered.
+ *
+ * This hook is triggered when checking for permission to rename a file or directory.
+ * Information flow is the same as in the "provenance_inode_link" routine so we call this routine.
+ * @param old_dir The inode structure for parent of the old link.
+ * @param old_dentry The dentry structure of the old link.
+ * @param new_dir The inode structure for parent of the new link.
+ * @param new_dentry The dentry structure of the new link.
+ * @return Error code is the same as in "provenance_inode_link" routine.
+ *
  */
 static int provenance_inode_rename(struct inode *old_dir,
 				   struct dentry *old_dentry,
@@ -491,14 +543,25 @@ static int provenance_inode_rename(struct inode *old_dir,
 	return provenance_inode_link(old_dentry, new_dir, new_dentry);
 }
 
-/*
- * Check permission before setting file attributes.  Note that the kernel
- * call to notify_change is performed from several locations, whenever
- * file attributes change (such as when a file is truncated, chown/chmod
- * operations, transferring disk quotas, etc).
- * @dentry contains the dentry structure for the file.
- * @attr is the iattr structure containing the new file attributes.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_setattr hook is triggered.
+ * 
+ * This hooks is triggered when checking permission before setting file attributes.  
+ * Note that the kernel call to notify_change is performed from several locations, 
+ * whenever file attributes change (such as when a file is truncated, chown/chmod operations
+ * transferring disk quotas, etc).
+ * We create a new provenance node ENT_IATTR, and update its information based on @iattr.
+ * Record provenance relation RL_SETATTR by calling "generates" routine.
+ * Record provenance relation RL_SETATTR_INODE by calling "derives" routine.
+ * Information flows from cred of the current process to the process, and eventually to the inode attribute to set the attributes.
+ * Information also flows from inode attribute to the inode whose attributes are to be set.
+ * After relation is recorded, iattr provenance entry is freed (i.e., memory deallocated).
+ * We also persistant the inode's provenance.
+ * @param dentry The dentry structure for the file.
+ * @param attr The iattr structure containing the new file attributes.
+ * @return 0 if permission is granted; -ENOMEM if inode provenance of the file is NULL; -ENOMEM if no memory can be allocated for a new ENT_IATTR provenance entry. Other error codes unknown.
+ *
+ * @question Why do we persist provenance now (by calling queue_save_provenance routine)?
  */
 static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 {
@@ -539,10 +602,17 @@ out:
 	return rc;
 }
 
-/*
- * Check permission before obtaining file attributes.
- * @path contains the path structure for the file.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_getattr hook is triggered.
+ *
+ * This hook is triggered when checking permission before obtaining file attributes.
+ * Record provenance relation RL_GETATTR by calling "uses" routine.
+ * Information flows from the inode of the file to the calling process, and eventually to the process's cred.
+ * @param path The path structure for the file.
+ * @return 0 if permission is granted; -ENOMEM if the provenance entry of the file is NULL. Other error codes unknown.
+ *
+ * @question Is it the reason that we don't have explicit relaiton between ENT_IATTR and the process because of the fact that iattr is short-lived?
+ * @question Why does information always flow to cred? (We have seen this before too).
  */
 static int provenance_inode_getattr(const struct path *path)
 {
@@ -563,10 +633,15 @@ static int provenance_inode_getattr(const struct path *path)
 	return rc;
 }
 
-/*
- * Check the permission to read the symbolic link.
- * @dentry contains the dentry structure for the file link.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_readlink hook is triggered.
+ * 
+ * This hook is triggered when checking the permission to read the symbolic link.
+ * Record provenance relation RL_READ_LINK by calling "uses" routine.
+ * Information flows from the link file to the calling process, and eventually to its cred.
+ * @param dentry The dentry structure for the file link.
+ * @return 0 if permission is granted; -ENOMEM if the link file's provenance entry is NULL. Other error codes unknown.
+ *
  */
 static int provenance_inode_readlink(struct dentry *dentry)
 {
@@ -587,6 +662,12 @@ static int provenance_inode_readlink(struct dentry *dentry)
 	return rc;
 }
 
+/*!
+ * Check permission before setting the extended attributes
+ * @value identified by @name for @dentry.
+ * Return 0 if permission is granted.
+ * ???
+ */
 static int provenance_inode_setxattr(struct dentry *dentry,
 				     const char *name,
 				     const void *value,
