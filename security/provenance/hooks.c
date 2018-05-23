@@ -1004,7 +1004,7 @@ out:
  * Fail if either file inode provenance does not exist.
  * @param in Information source file.
  * @param out Information drain file.
- * @return 0 if no error occurred; -ENOMEM if either end of the file provenance entry is NULL.
+ * @return 0 if no error occurred; -ENOMEM if either end of the file provenance entry is NULL; Other error code inherited from derives routine or unknown.
  * 
  */
 static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
@@ -1026,10 +1026,17 @@ static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out
 }
 #endif
 
-/*
- * Save open-time permission checking state for later use upon
- * file_permission, and recheck access if anything has changed
- * since inode_permission.
+/*!
+ * @brief Record provenance when file_open hook is triggered.
+ *
+ * This hook is triggered when saving open-time permission checking state for later use upon file_permission, 
+ * and rechecking access if anything has changed since inode_permission.
+ * Record provenance relation RL_OPEN by calling "uses" routine.
+ * Information flows from inode of the file to be opened to the calling process, and eventually to its cred.
+ * @param file The file to be opened.
+ * @param cred Unused parameter.
+ * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses routine or unknown.
+ *
  */
 static int provenance_file_open(struct file *file, const struct cred *cred)
 {
@@ -1037,7 +1044,7 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(file, true);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
@@ -1049,13 +1056,23 @@ static int provenance_file_open(struct file *file, const struct cred *cred)
 	return rc;
 }
 
+/*!
+ * @brief Record provenance when file_receive hook is triggered.
+ *
+ * This hook allows security modules to control the ability of a process to receive an open file descriptor via socket IPC.
+ * Record provenance relation RL_FILE_RCV by calling "uses" routine.
+ * Information flows from inode of the file being received to the calling process, and eventually to its cred.
+ * @param file The file structure being received.
+ * @return 0 if permission is granted, no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses routine or unknown.
+ *
+ */
 static int provenance_file_receive(struct file *file)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(file, true);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
