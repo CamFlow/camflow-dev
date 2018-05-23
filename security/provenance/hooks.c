@@ -70,6 +70,18 @@ static inline void queue_save_provenance(struct provenance *provenance,
 }
 #endif
 
+/*!
+ * @brief Record provenance when task_alloc is triggered.
+ * 
+ * Record provenance relation RL_PROC_READ (by calling "uses_two" routine) and RL_CLONE (by calling "informs" routine).
+ * We create a ACT_TASK node for the newly allocated task.
+ * @param task Task being allocated.
+ * @param clone_flags The flags indicating what should be shared.
+ * @return 0 if no error occurred. Other error codes unknown.
+ *
+ * @question Why do we include a RL_PROC_READ relation? Is it because of the task allocating a new task needs to read its cred first?
+ * @question If either t or cred is NULL, what happened? (Is nothing happens in that case correct?)
+ */
 static int provenance_task_alloc(struct task_struct *task,
 				 unsigned long clone_flags)
 {
@@ -128,11 +140,17 @@ static void cred_init_provenance(void)
 	cred->provenance = prov;
 }
 
-/*
- * @cred points to the credentials.
- * @gfp indicates the atomicity of any memory allocations.
- * Only allocate sufficient memory and attach to @cred such that
- * cred_transfer() will not get ENOMEM.
+/*!
+ * @brief Record provenance when cred_alloc_blank hook is triggered.
+ *
+ * This hook is triggered when allocating sufficient memory and attaching to @cred such that cred_transfer() will not get ENOMEM.
+ * Therefore, no information flow occurred.
+ * We simply create a ENT_PROC provenance node and associate the provenance entry to the newly allocated @cred.
+ * Set the proper UID and GID of the node based on the information from @cred.
+ * @param cred Points to the new credentials.
+ * @param gfp Indicates the atomicity of any memory allocations.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new provenance entry. Other error codes unknown.\
+ *
  */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
@@ -147,9 +165,15 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 	return 0;
 }
 
-/*
- * @cred points to the credentials.
- * Deallocate and clear the cred->security field in a set of credentials.
+/*!
+ * @brief Record provenance when cred_free hook is triggered.
+ *
+ * This hook is triggered when deallocating and clearing the cred->security field in a set of credentials.
+ * Record provenance relation RL_TERMINATE_PROC by calling "record_terminate" routine.
+ * Free kernel memory allocated for provenance entry of the cred in question.
+ * Set the provenance pointer in @cred to NULL.
+ * @param cred Points to the credentials to be freed.
+ * 
  */
 static void provenance_cred_free(struct cred *cred)
 {
@@ -160,11 +184,20 @@ static void provenance_cred_free(struct cred *cred)
 	cred->provenance = NULL;
 }
 
-/*
- * @new points to the new credentials.
- * @old points to the original credentials.
- * @gfp indicates the atomicity of any memory allocations.
- * Prepare a new set of credentials by copying the data from the old set.
+/*!
+ * @brief Record provenance when cred_prepare hook is triggered.
+ *
+ * This hook is triggered when preparing a new set of credentials by copying the data from the old set.
+ * Record provenance relation RL_CLONE_MEM by calling "generates" routine.
+ * We create a new ENT_PROC provenance entry for the new cred.
+ * Information flows from old cred to the process that is preparing the new cred.
+ * @param new Points to the new credentials.
+ * @param old Points to the original credentials.
+ * @param gfp Indicates the atomicity of any memory allocations.
+ * @return 0 if no error occured. Other error codes unknown.
+ *
+ * @question Why use "current->provenance" instead of calling routine "get_task_provenance"?
+ * @question What is the subclass PROVENANCE_LOCK_PROC?
  */
 static int provenance_cred_prepare(struct cred *new,
 				   const struct cred *old,
@@ -188,10 +221,15 @@ static int provenance_cred_prepare(struct cred *new,
 	return rc;
 }
 
-/*
- * @new points to the new credentials.
- * @old points to the original credentials.
- * Transfer data from original creds to new creds
+/*!
+ * @brief Record provenance when cred_transfer hook is triggered.
+ *
+ * This hook is triggered when transfering data from original creds to new creds.
+ * We simply update the new creds provenance entry to that of the old creds.
+ * @param new Points to the new credentials.
+ * @param old Points to the original credentials.
+ *
+ * @question There seems to have information flow here. What's the difference between this hook and cred_prepare hook? 
  */
 static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 {
@@ -201,15 +239,20 @@ static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 	*prov =  *old_prov;
 }
 
-/*
- * Update the module's state after setting one or more of the user
- * identity attributes of the current process.  The @flags parameter
- * indicates which of the set*uid system calls invoked this hook.if
- * @new is the set of credentials that will be installed.  Modifications
- * should be made to this rather than to @current->cred.
- * @old is the set of credentials that are being replaces
- * @flags contains one of the LSM_SETID_* values.
- * Return 0 on success.
+/*!
+ * @brief Record provenance when task_fix_setuid hook is triggered.
+ *
+ * This hook is triggered when updating the module's state after setting one or more of the user
+ * identity attributes of the current process.  
+ * The @flags parameter indicates which of the set*uid system calls invoked this hook.
+ * If @new is the set of credentials that will be installed,  
+ * modifications should be made to this rather than to @current->cred.
+ * Information flows from @old to current process and then eventually flows to @new (since modification should be made to @new instead of @current->cred).
+ * Record provenance relation RL_SETUID by calling "generates" routine.
+ * @param old The set of credentials that are being replaced.
+ * @param flags One of the LSM_SETID_* values.
+ * @return 0 if no error occurred. Other error codes unknown.
+ * 
  */
 static int provenance_task_fix_setuid(struct cred *new,
 				      const struct cred *old,
@@ -227,10 +270,11 @@ static int provenance_task_fix_setuid(struct cred *new,
 	return rc;
 }
 
-/*
- * @task_setpgid:
- *	Check permission before setting the process group identifier of the
- *	process @p to @pgid.
+/*!
+ * @brief Record provenance when task_setpgid hook is triggered.
+ *
+ * This hooks is triggered when checking permission before setting the process group identifier of the process @p to @pgid.
+ * 
  *	@p contains the task_struct for process being modified.
  *	@pgid contains the new pgid.
  *	Return 0 if permission is granted.

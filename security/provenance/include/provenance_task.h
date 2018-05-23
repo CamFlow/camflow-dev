@@ -178,6 +178,22 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 	return rc;
 }
 
+/*!
+ * @brief Record the name of the task @task, and associate the name to the provenance entry @prov by creating a relation by calling "record_node_name" routine.
+ *
+ * Unless failure occurs or certain criteria are met, 
+ * we obtain the name of the task from its "mm_exe_file", and create a RL_NAMED_PROCESS relation by calling "record_node_name" routine.
+ * Criteria to be met so as not to record task name are:
+ * 1. The name of the provenance node has already been recorded, or
+ * 2. The provenance node itself is not recorded, or
+ * 3. The "mm_exe_file"'s provenance is set to be opaque (if so, the @prov itself will be set opaque).
+ * @param task The task whose name is to be obtained.
+ * @param prov The provenance entry that will be associated with the task name.
+ * @return 0 if no error occurred. Other error code unknown.
+ * 
+ * @question: Why is cred being obtained in the code? It does not seem to have any use here.
+ * @question: Why get_mm_exe_file instead of get_task_exe_file?
+ */
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
 {
@@ -206,23 +222,27 @@ static inline int record_task_name(struct task_struct *task,
 			set_opaque(prov_elt(prov));
 			goto out;
 		}
-		// should not sleep
-		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);	// Memory allocation not allowed to sleep.
 		if (!buffer) {
 			pr_err("Provenance: could not allocate memory\n");
-			fput(exe_file);
+			fput(exe_file);	// Release the file.
+			rc = -ENOMEM;
 			goto out;
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
-		fput(exe_file);
+		fput(exe_file);	// Release the file.
 		rc = record_node_name(prov, ptr);
 		kfree(buffer);
 	}
 out:
-	put_cred(cred);
+	put_cred(cred);	// Release the credential.
 	return rc;
 }
 
+/*!
+ * @brief 
+ */
 static inline void update_proc_perf(struct task_struct *task,
 				    struct provenance *prov)
 {
@@ -260,12 +280,16 @@ static inline void update_proc_perf(struct task_struct *task,
 #endif
 }
 
+/*!
+ * @brief Update and return provenance entry of cred structure.
+ *
+ * 
+ */
 static inline struct provenance *get_cred_provenance(void)
 {
-	struct provenance *prov = current_provenance();
+	struct provenance *prov = current_provenance();	// current_provenance returns provenance pointer of current_cred().
 	unsigned long irqflags;
 
-	// will not be recorded
 	if (provenance_is_opaque(prov_elt(prov)))
 		goto out;
 	record_task_name(current, prov);
@@ -286,6 +310,14 @@ out:
 	return prov;
 }
 
+/*!
+ * @brief Return the provenance of current process.
+ *
+ * Get the provenance entry of the current process and update its pid and vpid.
+ * @return The provenance entry pointer.
+ * 
+ * @question Why update pid and vpid during get? What's the difference between them?
+ */
 static inline struct provenance *get_task_provenance( void )
 {
 	struct provenance *prov = current->provenance;
