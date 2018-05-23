@@ -705,9 +705,21 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 	return 0;
 }
 
-/*
- * Update inode security field after successful setxattr operation.
- * @value identified by @name for @dentry.
+/*!
+ * @brief Record provenance when inode_post_setxattr hook is triggered.
+ *
+ * This hook is triggered when updating inode security field after successful setxattr operation.
+ * The relations are recorded through "record_write_xattr" routine defined in provenance_inode.h file.
+ * RL_SETXATTR is one of the relations to be recorded.
+ * The relations may not be recorded for the following reasons:
+ * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
+ * 2. inode provenance entry is NULL.
+ * @param dentry The dentry structure for the file.
+ * @param name The name of the extended attribute.
+ * @param value The value of that attribute.
+ * @param size The size of the value.
+ * @param flags 
+ * 
  */
 static void provenance_inode_post_setxattr(struct dentry *dentry,
 					   const char *name,
@@ -733,10 +745,18 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
 
-/*
- * Check permission before obtaining the extended attributes
- * identified by @name for @dentry.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_getxattr hook is triggered.
+ *
+ * This hook is triggered when checking permission before obtaining the extended attributes.
+ * The relations are recorded through "record_read_xattr" routine defined in provenance_inode.h file.
+ * The relations may not be recorded for the following reasons:
+ * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
+ * 2. inode provenance entry is NULL.
+ * @param dentry The dentry structure for the file.
+ * @param name The name of the extended attribute.
+ * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; Other error codes inherited from "record_read_xattr" routine or unknown.
+ *
  */
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 {
@@ -759,10 +779,16 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 	return rc;
 }
 
-/*
- * Check permission before obtaining the list of extended attribute
- * names for @dentry.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when inode_listxattr hook is triggered.
+ * 
+ * This hook is triggered when checking permission before obtaining the list of extended attribute names for @dentry.
+ * Record provenance relation RL_LSTXATTR by calling "uses" routine.
+ * Information flows from inode (whose xattrs are of interests) to calling task process, and eventually to its cred.
+ * The relation may not be recorded if inode provenance entry is NULL.
+ * @param dentry The dentry structure for the file.
+ * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; Other error codes inherited from "uses" routine or unknown.
+ *
  */
 static int provenance_inode_listxattr(struct dentry *dentry)
 {
@@ -770,7 +796,7 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = dentry_provenance(dentry, true);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
