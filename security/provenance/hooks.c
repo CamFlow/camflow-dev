@@ -1169,6 +1169,9 @@ out:
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+/*!
+ * ???
+ */
 static void provenance_mmap_munmap(struct mm_struct *mm,
 				   struct vm_area_struct *vma,
 				   unsigned long start,
@@ -1195,15 +1198,22 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 }
 #endif
 
-/*
- * @file contains the file structure.
- * @cmd contains the operation to perform.
- * @arg contains the operational arguments.
- * Check permission for an ioctl operation on @file.  Note that @arg
- * sometimes represents a user space pointer; in other cases, it may be a
- * simple integer value.  When @arg represents a user space pointer, it
- * should never be used by the security module.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when file_ioctl hook is triggered.
+ *
+ * This hook is triggered when checking permission for an ioctl operation on @file.
+ * Note that @arg sometimes represents a user space pointer; 
+ * in other cases, it may be a simple integer value.  
+ * When @arg represents a user space pointer, it should never be used by the security module.
+ * Record provenance relation RL_WRITE_IOCTL by calling "generates" routine and RL_READ_IOCTL by calling "uses" routine.
+ * Information flows between the file and the calling process and its cred.
+ * At the end, we save @iprov provenance.
+ * @param file The file structure.
+ * @param cmd The operation to perform.
+ * @param arg The operational arguments.
+ * @return 0 if permission is granted or no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from generates/uses routine or unknown.
+ *
+ * @question Why do we record both read and write? What about execute? Why are we saving iprov here?
  */
 static int provenance_file_ioctl(struct file *file,
 				 unsigned int cmd,
@@ -1213,7 +1223,7 @@ static int provenance_file_ioctl(struct file *file,
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(file, true);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
