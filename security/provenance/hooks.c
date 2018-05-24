@@ -28,11 +28,18 @@
 #include "provenance_task.h"
 
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
+// If provenance is set to be persistant (saved between reboots).
 struct save_work {
 	struct work_struct work;
 	struct dentry *dentry;
 };
 
+/*!
+ * @brief Helper function for queue_save_provenance routine.
+ * 
+ * Calls save_provenance routine to persist provenance.
+ *
+ */
 static void __do_prov_save(struct work_struct *pwork)
 {
 	struct save_work *w = container_of(pwork, struct save_work, work);
@@ -46,6 +53,10 @@ free_work:
 }
 
 static struct workqueue_struct *prov_queue __ro_after_init;
+
+/*!
+ * @brief Create workqueue to persist provenance.
+ */
 static inline void queue_save_provenance(struct provenance *provenance,
 					 struct dentry *dentry)
 {
@@ -53,7 +64,6 @@ static inline void queue_save_provenance(struct provenance *provenance,
 
 	if (!prov_queue)
 		return;
-	// not initialised or already saved
 	if (!provenance->initialised || provenance->saved)
 		return;
 	work = kmalloc(sizeof(struct save_work), GFP_ATOMIC);
@@ -75,12 +85,12 @@ static inline void queue_save_provenance(struct provenance *provenance,
  * 
  * Record provenance relation RL_PROC_READ (by calling "uses_two" routine) and RL_CLONE (by calling "informs" routine).
  * We create a ACT_TASK node for the newly allocated task.
+ * Since @cred is shared by all threads, we use @cred to save process's provenance,
+ * and @task to save provenance of each thread.
  * @param task Task being allocated.
  * @param clone_flags The flags indicating what should be shared.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @question Why do we include a RL_PROC_READ relation? Is it because of the task allocating a new task needs to read its cred first?
- * @question If either t or cred is NULL, what happened? (Is nothing happens in that case correct?)
  */
 static int provenance_task_alloc(struct task_struct *task,
 				 unsigned long clone_flags)
@@ -121,7 +131,7 @@ static void provenance_task_free(struct task_struct *task)
 }
 
 /*!
- * @brief Initialise the security for the initial task.
+ * @brief Initialize the security for the initial task.
  *
  * This is the initial task when provenance capture is initialized.
  * We create a ENT_PROC provenance node, and set the UID and GID of the provenance node information from the current process's credential.
@@ -196,9 +206,6 @@ static void provenance_cred_free(struct cred *cred)
  * @param gfp Indicates the atomicity of any memory allocations.
  * @return 0 if no error occured. Other error codes unknown.
  *
- * @question Why use "current->provenance" instead of calling routine "get_task_provenance"?
- * @answer if we do not do get_task_provenance, because if we do so, the system crash. Check why. maybe it is not ready?
- * @question What is the subclass PROVENANCE_LOCK_PROC?
  */
 static int provenance_cred_prepare(struct cred *new,
 				   const struct cred *old,
@@ -216,6 +223,8 @@ static int provenance_cred_prepare(struct cred *new,
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	if (current != NULL)
 		if (current->provenance != NULL)
+			// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet. 
+			// System will crash if attempt to update those values.
 			rc = generates(RL_CLONE_MEM, old_prov, current->provenance, prov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = prov;
@@ -227,11 +236,10 @@ static int provenance_cred_prepare(struct cred *new,
  *
  * This hook is triggered when transfering data from original creds to new creds.
  * We simply update the new creds provenance entry to that of the old creds.
+ * Information flow between cred's is captured when provenance_cred_prepare routine is called.
  * @param new Points to the new credentials.
  * @param old Points to the original credentials.
  *
- * @question There seems to have information flow here. What's the difference between this hook and cred_prepare hook? 
- * @answer capture by cred_prepare
  */
 static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 {
@@ -379,7 +387,6 @@ static void provenance_inode_free_security(struct inode *inode)
  * @param mode The file mode of the file to be created.
  * @return 0 if permission is granted; -ENOMEM if parent's inode's provenance entry is NULL. Other error codes unknown.
  *
- * @question Two spin_lock's are set, but why?
  */
 static int provenance_inode_create(struct inode *dir,
 				   struct dentry *dentry,
@@ -423,8 +430,8 @@ static int provenance_inode_create(struct inode *dir,
  * @param mask The permission mask.
  * @return 0 if permission is granted; -ENOMEM if @inode's provenance does not exist. Other error codes unknown.
  *
- * @question What is IS_PRIVATE?
- * @todo For FS internel and we ignore.
+ * @todo We ignore inode that are PRIVATE (i.e., IS_PRIVATE is true). Private inodes are FS internals and we ignore for now.
+ *
  */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
@@ -487,8 +494,7 @@ out:
  * @param new_dentry The dentry structure for the new link.
  * @return 0 if permission is granted; -ENOMEM if either the dentry provenance of the existing link to the file or the inode provenance of the new parent directory of new link does not exist.
  *
- * @question I do not understand this information flow scheme.
- * @todo This IF is a bit weird
+ * @todo The information flow relations captured here is a bit weird. We need to double check the correctness.
  */
 
 static int provenance_inode_link(struct dentry *old_dentry,
@@ -527,7 +533,7 @@ out:
 	return rc;
 }
 
-// TODO probably deal with unlink (useful for stream processing)
+/* @todo Probably we want to capture information flow during unlink as well (useful for stream processing) */
 
 /*!
  * @brief Record provenance when inode_rename hook is triggered.
@@ -567,7 +573,6 @@ static int provenance_inode_rename(struct inode *old_dir,
  * @param attr The iattr structure containing the new file attributes.
  * @return 0 if permission is granted; -ENOMEM if inode provenance of the file is NULL; -ENOMEM if no memory can be allocated for a new ENT_IATTR provenance entry. Other error codes unknown.
  *
- * @question Why do we persist provenance now (by calling queue_save_provenance routine)?
  */
 static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
 {
@@ -617,9 +622,6 @@ out:
  * @param path The path structure for the file.
  * @return 0 if permission is granted; -ENOMEM if the provenance entry of the file is NULL. Other error codes unknown.
  *
- * @question Is it the reason that we don't have explicit relaiton between ENT_IATTR and the process because of the fact that iattr is short-lived?
- * @answer Iattr is part of inode too.
- * @question Why does information always flow to cred? (We have seen this before too).
  */
 static int provenance_inode_getattr(const struct path *path)
 {
@@ -670,12 +672,16 @@ static int provenance_inode_readlink(struct dentry *dentry)
 }
 
 /*!
- * Check permission before setting the extended attributes
- * @value identified by @name for @dentry.
- * Return 0 if permission is granted.
- * 
- * @answer setting provenance attributes
- * Merge with existing bloom filter.
+ * @brief Setting provenance extended attribute for an inode.
+
+ * The provenance extended attributes are set for an inode only if the @name of xattr is matched to be XATTR_NAME_PROVENANCE.
+ * @param dentry The dentry struct whose inode's provenance xattr is to be set.
+ * @param name Must be XATTR_NAME_PROVENANCE to set the xattr.
+ * @param value Setting of the provenance xattr.
+ * @param size Must be the size of provenance entry.
+ * @param flags The operational flags.
+ * @return 0 if no error occurred; -ENOMEM if size does not match. Other error codes unknown.
+ *
  */
 static int provenance_inode_setxattr(struct dentry *dentry,
 				     const char *name,
@@ -686,7 +692,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 	struct provenance *prov;
 	union prov_elt *setting;
 
-	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0) { // provenance xattr
+	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0) { // Provenance xattr
 		if (size != sizeof(union prov_elt))
 			return -ENOMEM;
 		prov = dentry_provenance(dentry, true);
@@ -725,7 +731,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
  * @param name The name of the extended attribute.
  * @param value The value of that attribute.
  * @param size The size of the value.
- * @param flags 
+ * @param flags The operational flags.
  * 
  */
 static void provenance_inode_post_setxattr(struct dentry *dentry,
@@ -930,11 +936,6 @@ static int provenance_inode_listsecurity(struct inode *inode,
  * @param mask The requested permissions.
  * @return 0 if permission is granted; -ENOMEM if inode provenance is NULL. Other error codes unknown.
  * 
- * @question In FILE__EXECUTE case, why do we suddenly check if iprov is opaque? Why do we propagate the opaqueness to cprov? Why is derives relation between iprov and cprov but not tprov?
- * @question What is the difference between cprov and tprov?
- * @answer Process, and its threads
- * @question Why are we saving iprov at the end?
- * @question sleep or not
  */
 static int provenance_file_permission(struct file *file, int mask)
 {
@@ -1190,10 +1191,8 @@ out:
  * @param start Unused parameter.
  * @param end Unused parameter.
  *
- * @question Why do we not error check if iprov == NULL?
- * @question What if derives failed? Maybe we should throw error messages?
  * @question What if a privately mmapped file is unmmapped?
- * @todo what should we do if we gets NULL?
+ * @todo How do we do error checking in this routine?
  */
 static void provenance_mmap_munmap(struct mm_struct *mm,
 				   struct vm_area_struct *vma,
@@ -1235,9 +1234,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
  * @param arg The operational arguments.
  * @return 0 if permission is granted or no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from generates/uses routine or unknown.
  *
- * @question Why do we record both read and write? Why are we saving iprov here?
- * Save provenance data structure associated to an inode on the disk using work_queue because cannot sleep. If can, use save_provenance
- * @todo: Do we have file exec/append? 
+ * @todo: Do we have file exec/append IOCTL? 
  */
 static int provenance_file_ioctl(struct file *file,
 				 unsigned int cmd,
@@ -1442,8 +1439,6 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
  * @param ts Unused parameter.
  * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv routine or unknown.
  *
- * @question Are we sure it is the current process that receives the message?
- * @todo Double check
  */
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
 				      struct timespec *ts)
@@ -1591,8 +1586,6 @@ static void provenance_shm_shmdt(struct shmid_kernel *shp)
  * @param priority Memory allocation operation flag.
  * @return 0 if success and no error occurred; -ENOMEM if calling process's cred structure does not exist. Other error codes unknown.
  *
- * @question What is the difference between sock and socket? Why do they have different provenance?
- @ sk hold the reference of the process that creates the sk.
  */
 static int provenance_sk_alloc_security(struct sock *sk,
 					int family,
@@ -1619,6 +1612,8 @@ static int provenance_sk_alloc_security(struct sock *sk,
  * Record provenance relation RL_SOCKET_CREATE by calling "generates" routine.
  * Information flows from the calling process's cred to the process, and eventually to the socket that is being created.
  * If @kern is 1 (kernal socket), no provenance relation is recorded.
+ * This is becasuse kernel socket is a form of communication between kernel and userspace.
+ * We do not capture kernel's provenance for now.
  * @param sock The newly created socket structure.
  * @param family The requested protocol family.
  * @param type The requested communications type.
@@ -1626,9 +1621,7 @@ static int provenance_sk_alloc_security(struct sock *sk,
  * @param kern Set to 1 if it is a kernel socket.
  * @return 0 if no error occurred; -ENOMEM if inode provenance entry does not exist. Other error codes inherited from generates routine or unknown.
  *
- * @question What is special about kernel socket? Why are we not capturing provenance?
- * @answer Not tracking kernel socket, which is kernel socket to the user space (a form of communication between kernel and user space.)
- * @todo maybe check kernel socket
+ * @todo Maybe support kernel socket in a future release.
  */
 static int provenance_socket_post_create(struct socket *sock,
 					 int family,
@@ -2111,9 +2104,11 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * The primary difference from set_creds is that the argv list and envp list are reliably available in @bprm.  
  * This hook may be called multiple times during a single execve; 
  * and in each pass set_creds is called first.
- * 
+ * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque (i.e., do not track).
+ * The relations between the bprm arguments and bprm->cred are recorded by calling prov_record_args routine.
  * @param bprm The linux_binprm structure.
- *	Return 0 if the hook is successful and permission is granted.
+ * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from prov_record_args routine or unknown.
+ *
  */
 static int provenance_bprm_check(struct linux_binprm *bprm)
 {
@@ -2130,15 +2125,27 @@ static int provenance_bprm_check(struct linux_binprm *bprm)
 	return prov_record_args(nprov, bprm);
 }
 
-/*
- * Prepare to install the new security attributes of a process being
- * transformed by an execve operation, based on the old credentials
- * pointed to by @current->cred and the information set in @bprm->cred by
- * the bprm_set_creds hook.  @bprm points to the linux_binprm structure.
- * This hook is a good place to perform state changes on the process such
- * as closing open file descriptors to which access will no longer be
- * granted when the attributes are changed.  This is called immediately
- * before commit_creds().
+/*!
+ * @brief Record provenance when bprm_committing_creds hook is triggered.
+ * 
+ * This hook is triggered when preparing to install the new security attributes of a process being transformed by an execve operation,
+ * based on the old credentials pointed to by @current->cred,
+ * and the information set in @bprm->cred by the bprm_set_creds hook.
+ * This hook is a good place to perform state changes on the process such as
+ * closing open file descriptors to which access will no longer
+ * be granted when the attributes are changed.  
+ * This is called immediately before commit_creds().
+ * Since the process is being transformed to the new process,
+ * record provenance relation RL_EXEC_TASK by calling "derives" routine.
+ * Information flows from the old process's cred to the new process's cred.
+ * Cred can also be set by bprm_set_creds, so
+ * record provenance relation RL_EXEC by calling "derives" routine.
+ * Information flows from the bprm->file's cred to the new process's cred.
+ * The old process gets the name of the new process by calling record_node_name routine.
+ * Note that if bprm->file's provenance is set to be opaque,
+ * the new process bprm->cred's provenance will therefore be opaque and we do not track any of the relations.
+ * @param bprm points to the linux_binprm structure.
+ *
  */
 static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 {
@@ -2351,8 +2358,9 @@ uint32_t prov_boot_id;
  * 8. Initialize a workqueue (NULL on failure).
  * 9. Initialize security for provenance task ("cred_init_provenance" routine).
  * 10. Register provenance security hooks.
+ * Work_queue helps persiste provenance of inodes (if needed) during the operations that cannot sleep,
+ * since persists provenance requires writing to disk (which means sleep is needed).
  *
- * @question How does workqueue help persist provenance?
  */
 void __init provenance_add_hooks(void)
 {

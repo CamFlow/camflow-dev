@@ -315,6 +315,7 @@ static __always_inline struct provenance *inode_provenance(struct inode *inode, 
  * @param dentry The dentry whose provenance is to be returned.
  * @param may_sleep Bool value used in "inode_provenance" routine (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
+ *
  */
 static __always_inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
