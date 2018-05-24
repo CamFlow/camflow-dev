@@ -110,6 +110,7 @@ static inline void free_provenance(struct provenance *prov)
  * @param ntype The type of the long provenance node.
  * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
  * @reference GFP_ATOMIC https://www.linuxjournal.com/article/6930
+ *
  */
 static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {

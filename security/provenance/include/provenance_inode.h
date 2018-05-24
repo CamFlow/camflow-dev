@@ -35,15 +35,12 @@
  * Otherwise, RL_VERSION relation is not needed and we simply update the node type and mode information.
  * The operation is done in a nested spin_lock to avoid concurrency.
  * The criteria are:
- * 1. The mode is not 0, and
- * 2. The mode is not already already up-to-date, and
- * 3. The old provenance inode has already been recorded.
+ * 1. The inode_info.mode is not 0 (when mode is zero, this is the first time we record the inode), and
+ * 2. The inode_info.mode is not already up-to-date, and
+ * 3. The inode is set to be recorded.
  * @param mode The new updated mode.
  * @param prov The provenance node to be updated.
  * 
- * @question Why check mode != 0 ?
- * @asnwer When mode is 0 this is the first type we record, we don't update; nothing has chanegd
- * @question What is the PROVENANCE_LOCK_INODE subclass in the nested spin_lock?
  */
 static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
@@ -121,8 +118,6 @@ static inline void provenance_mark_as_opaque(const char *name)
  * @param prov The provenance node in question.
  * @return 0 if no error occurred. -ENOMEM if no memory to store the name of the provenance node. PTR_ERR if path lookup failed.
  *
- * @question What is the difference between "dentry_path_raw" and "kern_path"?
- * @answer depend on the parameter
  */
 static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
 {
@@ -133,7 +128,7 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	// should not sleep
+	// Should not sleep.
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 	if (!buffer)
 		return -ENOMEM;
@@ -232,6 +227,18 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
 	return prov;
 }
 
+/*!
+ * @brief Initialize the provenance of the inode.
+ *
+ * We do not initialize the inode if it has already been initialized, or failure occurred.
+ * Provenance extended attributes are copied to the inode provenance in this routine,
+ * unless the inode does not support xattr.
+ * inode struct contains @inode->i_provenance to store provenance.
+ * @param inode The inode structure in which we initialize provenance.
+ * @param opt_dentry The directory entry pointer.
+ * @return 0 if no error occurred; -ENOMEM if no more memory to allocate for the provenance entry. Other error codes inherited or unknown.
+ *
+ */
 static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
 {
 	struct provenance *prov = inode->i_provenance;
@@ -291,9 +298,8 @@ free_buf:
  * @return provenance struct pointer.
  *
  * @question Why do we have a may_sleep boolean?
- * @answer Some operations may be able to sleep
  * @todo Error checking in this routine should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
- * @todo We may not want to update all the time
+ * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
 static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
 {

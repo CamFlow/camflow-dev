@@ -31,6 +31,7 @@ extern struct list_head ns_filters;
  * @param netns Network namespace.
  * @param cgroupns Control group namespace.
  * @return op value or 0
+ *
  */
 static inline uint8_t prov_ns_whichOP(uint32_t utsns,
 				      uint32_t ipcns,
