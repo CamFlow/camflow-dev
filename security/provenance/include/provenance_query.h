@@ -15,6 +15,14 @@
 
 #include <linux/provenance_query.h>
 
+/*!
+ * @brief Go through each element in provenance_query_hooks and call out_edge function.
+ *
+ * @param node The node provenance entry pointer.
+ * @param edge The edge provenance entry pointer.
+ * @return 0 if no error occurred. Other error codes inherited or unknown.
+ *
+ */
 static inline int call_provenance_out_edge(prov_entry_t *node,
 					   prov_entry_t *edge)
 {
@@ -30,6 +38,14 @@ static inline int call_provenance_out_edge(prov_entry_t *node,
 	return rc;
 }
 
+/*!
+ * @brief Go through each element in provenance_query_hooks and call in_edge function.
+ *
+ * @param edge The edge provenance entry pointer.
+ * @param node The node provenance entry pointer.
+ * @return 0 if no error occurred. Other error codes inherited or unknown.
+ *
+ */
 static inline int call_provenance_in_edge(prov_entry_t *edge,
 					  prov_entry_t *node)
 {
@@ -45,6 +61,17 @@ static inline int call_provenance_in_edge(prov_entry_t *edge,
 	return rc;
 }
 
+/*!
+ * @brief Call out_edge and in_edge function.
+ *
+ * Simply call both call_provenance_out_edge and call_provenance_in_edge routine.
+ * @param from The source node provenance entry pointer.
+ * @param to The destination node provenance entry pointer.
+ * @param edge The edge provenance entry pointer.
+ * @return 0 if no error occurred; -EPERM if flow is disallowed. Other error codes inherited or unknown.
+ *
+ * @question What are all the warnings about?
+ */
 static inline int call_query_hooks(prov_entry_t *from,
 				   prov_entry_t *to,
 				   prov_entry_t *edge)
