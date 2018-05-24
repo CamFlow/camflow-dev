@@ -42,6 +42,7 @@
  * @param prov The provenance node to be updated.
  * 
  * @question Why check mode != 0 ?
+ * @asnwer When mode is 0 this is the first type we record, we don't update; nothing has chanegd
  * @question What is the PROVENANCE_LOCK_INODE subclass in the nested spin_lock?
  */
 static inline void update_inode_type(uint16_t mode, struct provenance *prov)
@@ -121,6 +122,7 @@ static inline void provenance_mark_as_opaque(const char *name)
  * @return 0 if no error occurred. -ENOMEM if no memory to store the name of the provenance node. PTR_ERR if path lookup failed.
  *
  * @question What is the difference between "dentry_path_raw" and "kern_path"?
+ * @answer depend on the parameter
  */
 static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
 {
@@ -289,7 +291,9 @@ free_buf:
  * @return provenance struct pointer.
  *
  * @question Why do we have a may_sleep boolean?
+ * @answer Some operations may be able to sleep
  * @todo Error checking in this routine should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
+ * @todo We may not want to update all the time
  */
 static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
 {

@@ -35,6 +35,7 @@
  * @return 0 if no error occurred. Other error codes unknown.
  *
  * @question: What is the use of "clear_saved"?
+ * @answer check if you want to save again becasue information has changed
  */
 static __always_inline int __update_version(const uint64_t type,
 					    prov_entry_t *prov)
@@ -253,7 +254,6 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param flags Information related to LSM hooks.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @todo We have two versions of "uses" because of something that has to do with fork/exec (when a new process is created, we call uses)
  */
 static __always_inline int uses(const uint64_t type,
 				struct provenance *entity,

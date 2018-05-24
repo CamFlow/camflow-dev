@@ -240,7 +240,6 @@ declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
  * 4. gid element if it has gid.
  * @param prov The provenance node in question.
  *
- * @question What are the op's and why do they decide whether a provenance node is tracked/propagated/opaque or not? 
  */
 static inline void apply_target(union prov_elt *prov)
 {

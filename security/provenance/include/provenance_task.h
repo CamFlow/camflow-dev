@@ -205,8 +205,8 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param prov The provenance entry that will be associated with the task name.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for buffer to hold file path. Other error code unknown.
  * 
- * @question: Why is cred being obtained in the code? It does not seem to have any use here.
  * @question: Why get_mm_exe_file instead of get_task_exe_file?
+ * @todo Check myself
  */
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
@@ -222,9 +222,6 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	cred = get_task_cred(task);
-	if (!cred)
-		return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
@@ -250,7 +247,6 @@ static inline int record_task_name(struct task_struct *task,
 		kfree(buffer);
 	}
 out:
-	put_cred(cred);	// Release the credential.
 	return rc;
 }
 
@@ -339,6 +335,8 @@ out:
  * @return The provenance entry pointer.
  * 
  * @question Why update pid and vpid during get? What's the difference between them?
+ * @answer When cred is first initialized, pid and vpid is unknown.
+ * @todo Find a clear way to do this.
  */
 static inline struct provenance *get_task_provenance( void )
 {
