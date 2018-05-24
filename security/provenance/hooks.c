@@ -1663,7 +1663,7 @@ static int provenance_socket_post_create(struct socket *sock,
  * The relation between the socket and its address is recorded first,
  * then record provenance relation RL_BIND by calling "generates" routine.
  * Information flows from the cred of the calling process to the process itself, and eventually to the socket.
- * If the address family is PF_INET, we check if we should record the packet from the socket,
+ * If the address family is PF_INET (we only support IPv4 for now), we check if we should record the packet from the socket,
  * and track and propagate recording from the socket and the calling process.
  * Note that usually server binds the socket to its local address.
  * @param sock The socket structure.
@@ -1671,12 +1671,7 @@ static int provenance_socket_post_create(struct socket *sock,
  * @param addrlen The length of address.
  * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
  *
- * @question Why do extra setting on PF_INET? What is special about it?
- * @answer We only suppory IPV4 and PF_INET is IPv4. 
- * @question Why are we checking if the calling process is opaque in this case? We don't check that in many other functions.
- * @answer Because we don't want to set stuf to be tracked if cprov is opaque. Set_record_packet is to record the content of the packet.
- * @question Why are we not using spin_lock here but we use it in connect() case below?
- * @answer Unknown reason. If put spin_lock the system crashes.
+ * @todo We need to figure out why if we use a spin_lock here, the system crashes.
  */
 static int provenance_socket_bind(struct socket *sock,
 				  struct sockaddr *address,
@@ -1692,7 +1687,7 @@ static int provenance_socket_bind(struct socket *sock,
 	if (!iprov)
 		return -ENOMEM;
 
-	if (provenance_is_opaque(prov_elt(cprov)))
+	if (provenance_is_opaque(prov_elt(cprov)))	// We perform a check here so that we won't accidentally start tracking/propagating @iprov and @cprov
 		return rc;
 
 	if (address->sa_family == PF_INET) {
@@ -1709,7 +1704,7 @@ static int provenance_socket_bind(struct socket *sock,
 			set_propagate(prov_elt(cprov));
 		}
 		if ((op & PROV_SET_RECORD) != 0)
-			set_record_packet(prov_elt(iprov));
+			set_record_packet(prov_elt(iprov));	// We want to record packet content.
 	}
 	rc = provenance_record_address(address, addrlen, iprov);
 	if (rc < 0)
@@ -1861,7 +1856,6 @@ out:
  * @param size The size of message.
  * @return 0 if permission is granted and no error occurred; -ENOMEM if the sending socket's provenance entry does not exist; Other error codes inherited from generates and derives routine or unknown.
  *
- * @question What is special about SOCK_DGRAM? We can only get peer (which I assume to be receiving socket) from local communication, which is flagged by PF_UNIX. What about PF_LOCAL?
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_sendmsg_always(struct socket *sock,
@@ -1971,14 +1965,22 @@ out:
 	return rc;
 }
 
-/*
- * Check permissions on incoming network packets.  This hook is distinct
- * from Netfilter's IP input hooks since it is the first time that the
- * incoming sk_buff @skb has been associated with a particular socket, @sk.
+/*!
+ * @brief Record provenance when socket_sock_rcv_skb hook is triggered.
+ * 
+ * This hooks is triggered when checking permissions on incoming network packets.  
+ * This hook is distinct from Netfilter's IP input hooks since it is the first time that
+ * the incoming sk_buff @skb has been associated with a particular socket, @sk.
  * Must not sleep inside this hook because some callers hold spinlocks.
- * @sk contains the sock (not socket) associated with the incoming sk_buff.
- * @skb contains the incoming network data.
- * For the stream mode.
+ * If the socket inode is tracked,
+ * create a packet provenance node and fill the provenance information of the node from @skb,
+ * and record provenance relation RL_RCV_PACKET by calling "derives" routine.
+ * Information flows from the packet to the socket.
+ * We only handle IPv4 in this function for now (i.e. PF_INET family only).
+ * @param sk The sock (not socket) associated with the incoming sk_buff.
+ * @param skb The incoming network data.
+ * @return 0 if no error occurred; -ENOMEM if sk provenance does not exist. Other error codes inherited from derives routine or unknown.
+ *
  */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
@@ -1992,7 +1994,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return 0;
 	iprov = sk_inode_provenance(sk);
 	if (!iprov)
-		return 0;
+		return -ENOMEM;
 	if (provenance_is_tracked(prov_elt(iprov))) {
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
@@ -2004,13 +2006,20 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	return rc;
 }
 
-/*
- * Check permissions before establishing a Unix domain stream connection
- * between @sock and @other.
- * @sock contains the sock structure.
- * @other contains the peer sock structure.
- * @newsk contains the new sock structure.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when unix_stream_connect hook is triggered.
+ *
+ * This hook is triggered when checking permissions before establishing a Unix domain stream connection b]etween @sock and @other.
+ * Unix domain connection is local communication.
+ * Since this is simply to connect (no information should flow between the two local sockets yet),
+ * we do not use receiving socket information @other or new socket @newsk.
+ * Record provenance relation RL_CONNECT by calling "generates" routine.
+ * Information flows from the calling process's cred to the task , and eventually to the sending socket.
+ * @param sock The (sending) sock structure.
+ * @param other The peer (i.e., receiving) sock structure. Unused parameter.
+ * @param newsk The new sock structure. Unused parameter.
+ * @return 0 if permission is granted; Other error code inherited from generates routine or unknown.
+ *
  */
 static int provenance_unix_stream_connect(struct sock *sock,
 					  struct sock *other,
@@ -2020,7 +2029,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = sk_inode_provenance(sock);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -2057,26 +2066,29 @@ static int provenance_unix_may_send(struct socket *sock,
 	return rc;
 }
 
-/* outdated description */
-/*
- * Save security information in the bprm->security field, typically based
- * on information about the bprm->file, for later use by the apply_creds
- * hook.  This hook may also optionally check permissions (e.g. for
- * transitions between security domains).
- * This hook may be called multiple times during a single execve, e.g. for
- * interpreters.  The hook can tell whether it has already been called by
- * checking to see if @bprm->security is non-NULL.if so, then the hook
- * may decide either to retain the security information saved earlier or
- * to replace it.
- * @bprm contains the linux_binprm structure.
- * Return 0 if the hook is successful and permission is granted.
+/*!
+ * @brief Record provenance when bprm_set_creds hook is triggered.
+ *
+ * This hook is triggered when saving security information in the bprm->security field, 
+ * typically based on information about the bprm->file, for later use by the apply_creds hook.
+ * This hook may also optionally check permissions (e.g. for transitions between security domains).
+ * This hook may be called multiple times during a single execve, e.g. for interpreters.  
+ * The hook can tell whether it has already been called by checking to see if @bprm->security is non-NULL.
+ * If so, then the hook may decide either to retain the security information saved earlier or to replace it.
+ * Since cred is based on information about the @bprm->file,
+ * information flows from the inode of bprm->file to bprm->cred.
+ * Therefore, record provenance relation RL_EXEC by calling "derives" routine.
+ * Relation is not recorded if the inode of bprm->file is set to be opaque.
+ * @param bprm The linux_binprm structure.
+ * @return 0 if the hook is successful and permission is granted; -ENOMEM if bprm->cred's provenance does not exist. Other error codes inherited from derives routine or unknown.
+ *
  */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *iprov = file_provenance(bprm->file, true);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!nprov)
 		return -ENOMEM;
@@ -2091,14 +2103,16 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 	return rc;
 }
 
-/*
- *	This hook mediates the point when a search for a binary handler will
- *	begin.  It allows a check the @bprm->security value which is set in the
- *	preceding set_creds call.  The primary difference from set_creds is
- *	that the argv list and envp list are reliably available in @bprm.  This
- *	hook may be called multiple times during a single execve; and in each
- *	pass set_creds is called first.
- *	@bprm contains the linux_binprm structure.
+/*!
+ * @brief Record provenance when bprm_check hook is triggered.
+ *
+ * This hook mediates the point when a search for a binary handler will begin.
+ * It allows a check the @bprm->security value which is set in the preceding set_creds call.  
+ * The primary difference from set_creds is that the argv list and envp list are reliably available in @bprm.  
+ * This hook may be called multiple times during a single execve; 
+ * and in each pass set_creds is called first.
+ * 
+ * @param bprm The linux_binprm structure.
  *	Return 0 if the hook is successful and permission is granted.
  */
 static int provenance_bprm_check(struct linux_binprm *bprm)
@@ -2153,6 +2167,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
  * The s_security field is initialized to NULL when the structure is allocated.
  * This routine allocates and initializes a provenance structure to sb->s_provenance field.
  * It also creates a new provenance node ENT_SBLCK.
+ * SB represents the existence of a device/pipe.
  * @param sb The super_block structure to be modified.
  * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for a new provenance entry. Other error codes unknown.
  *
@@ -2185,8 +2200,14 @@ static void provenance_sb_free_security(struct super_block *sb)
 /*!
  * @brief Record provenance when sb_kern_mount hook is triggered.
  *
- * @question What does it do?
- * Mount a device, including pipe Update UUID.
+ * This hook is triggered when mounting a kernel device, including pipe.
+ * This routine will update the Universal Unique ID of the provenance entry of the device @sb->s_provenance once it is mounted.
+ * We obtain this information from @sb if it exists, or we give it a random value.
+ * @param sb The super block structure.
+ * @param flags The operations flags.
+ * @param data
+ * @return always return 0.
+ *
  */
 static int provenance_sb_kern_mount(struct super_block *sb,
 				    int flags,

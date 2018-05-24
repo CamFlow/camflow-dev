@@ -29,7 +29,7 @@
 /*!
  * @brief Returns the provenance entry pointer of the inode associated with sock.
  *
- * @sock The socket structure whose provenance to be obtained.
+ * @param sock The socket structure whose provenance to be obtained.
  * @return The provenance entry pointer of the socket or NULL if it does not exist.
  * 
  */
@@ -43,6 +43,17 @@ static inline struct provenance *socket_inode_provenance(struct socket *sock)
 	return iprov;
 }
 
+/*!
+ * @brief Returns the provenance entry pointer of the inode associated with sk.
+ *
+ * This routine calls the routine socket_inode_provenance.
+ * This is becasue only socket has an inode associated with it. 
+ * We obtain the socket structure from sk structure: @sk->sk_socket.
+ * We obtain socket from sock and return the provenance entry pointer.
+ * @param sk The sock structure whose provenance to be obtained.
+ * @return The provenance entry pointer of the corresponding socket.
+ *
+ */
 static inline struct provenance *sk_inode_provenance(struct sock *sk)
 {
 	struct socket *sock = sk->sk_socket;
@@ -57,6 +68,7 @@ static inline struct provenance *sk_inode_provenance(struct sock *sk)
  *
  * @param sk The sock structure.
  * @return The provenance entry pointer.
+ *
  */
 static inline struct provenance *sk_provenance(struct sock *sk)
 {
@@ -65,6 +77,15 @@ static inline struct provenance *sk_provenance(struct sock *sk)
 	return prov;
 }
 
+/*!
+ * @brief Return the provenance entry pointer of sock.
+ *
+ * The provenance information is stored in the @sock->sk struct.
+ * Therefore, we simply call the routine sk_provenance.
+ * @param sock The socket structure.
+ * @return The provenance entry pointer.
+ *
+ */
 static inline struct provenance *socket_provenance(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
@@ -76,6 +97,15 @@ static inline struct provenance *socket_provenance(struct socket *sock)
 
 #define ihlen(ih) (ih->ihl * 4)
 
+/*!
+ * @brief Extract TCP header information and store it in packet_identifier struct of provenance entry.
+ *
+ * @param skb The socket buffer.
+ * @param ih The IP header.
+ * @param offset
+ * @param id The packet identifier structure of provenance entry.
+ *
+ */
 static inline void __extract_tcp_info(struct sk_buff *skb,
 				      struct iphdr *ih,
 				      int offset,
@@ -87,7 +117,7 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
-	tcpoff = offset + ihlen(ih); //point to tcp packet
+	tcpoff = offset + ihlen(ih);	//Point to tcp packet.
 	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
 	if (!th)
 		return;
@@ -96,6 +126,15 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 	id->seq = th->seq;
 }
 
+/*!
+ * @brief Extract UPD header information and store it in packet_identifier struct of provenance entry.
+ *
+ * @param skb The socket buffer.
+ * @param ih The IP header.
+ * @param offset
+ * @param id The packet identifier structure of provenance entry.
+ *
+ */
 static inline void __extract_udp_info(struct sk_buff *skb,
 				      struct iphdr *ih,
 				      int offset,
@@ -115,6 +154,16 @@ static inline void __extract_udp_info(struct sk_buff *skb,
 	id->rcv_port = uh->dest;
 }
 
+/*!
+ * @brief Parse network packet information @skb into a packet provenance entry @prov.
+ *
+ * We parse a series of IP information from @skb and create a provenance entry node ENT_PACKET.
+ * Depending on the type of the packet (i.e., TCP or UDP), we call either __extract_tcp_info or __extract_udp_info subroutine to parse.
+ * @param skb Socket buffer where packet information lies.
+ * @param prov The provenance entry pointer.
+ * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
+ * 
+ */
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_elt *prov)
 {
 	struct packet_identifier *id;
@@ -123,7 +172,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 	struct iphdr *ih;
 
 	offset = skb_network_offset(skb);
-	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph); // we obtain the ip header
+	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);	// We obtain the IP header.
 	if (!ih)
 		return -EINVAL;
 
@@ -131,17 +180,16 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 		return -EINVAL;
 
 	memset(prov, 0, sizeof(union prov_elt));
-	id = &packet_identifier(prov); // we are going fo fill this
+	id = &packet_identifier(prov);	// We are going fo fill the information.
 
 	id->type = ENT_PACKET;
-	// collect IP element of prov identifier
+	// Collect IP element of prov identifier.
 	id->id = ih->id;
 	id->snd_ip = ih->saddr;
 	id->rcv_ip = ih->daddr;
 	id->protocol = ih->protocol;
 	prov->pck_info.length = ih->tot_len;
 
-	// now we collect
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
 		__extract_tcp_info(skb, ih, offset, id);

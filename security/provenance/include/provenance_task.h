@@ -36,6 +36,9 @@
 #define MB (1024 * KB)
 #define KB_MASK (~(KB - 1))
 
+/*!
+ * @summary The following current_XXX routines are to obtain XXX information of the current process.
+ */
 #define current_pid() (current->pid)
 static inline uint32_t current_cgroupns(void)
 {
@@ -205,8 +208,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param prov The provenance entry that will be associated with the task name.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for buffer to hold file path. Other error code unknown.
  * 
- * @question: Why get_mm_exe_file instead of get_task_exe_file?
- * @todo Check myself
+ * @todo Why get_mm_exe_file instead of get_task_exe_file?
  */
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
@@ -332,11 +334,11 @@ out:
  * @brief Return the provenance of current process.
  *
  * Get the provenance entry of the current process and update its pid and vpid.
+ * We need to update pid and vpid here because when the task is first initialized,
+ * these information is not available.
  * @return The provenance entry pointer.
  * 
- * @question Why update pid and vpid during get? What's the difference between them?
- * @answer When cred is first initialized, pid and vpid is unknown.
- * @todo Find a clear way to do this.
+ * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
 static inline struct provenance *get_task_provenance( void )
 {
@@ -347,10 +349,17 @@ static inline struct provenance *get_task_provenance( void )
 	return prov;
 }
 
+/*!
+ * @brief Return process's provenance from @pid.
+ *
+ * @param pid The pid of the process whose provenance is to be returned.
+ * @return The provenance entry pointer or NULL if process does not exist.
+ *
+ */
 static inline struct provenance *prov_from_vpid(pid_t pid)
 {
 	struct provenance *tprov;
-	struct task_struct *dest = find_task_by_vpid(pid);
+	struct task_struct *dest = find_task_by_vpid(pid);	// Function is in /kernel/pid.c
 
 	if (!dest)
 		return NULL;
@@ -361,7 +370,11 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
 	return tprov;
 }
 
-/* see fs/exec.c */
+/*!
+ * Helper function used to copy arguments.
+ * See fs/exec.c
+ *
+ */
 static inline void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
 {
 	struct mm_struct *mm = current->mm;
@@ -374,7 +387,11 @@ static inline void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
 	add_mm_counter(mm, MM_ANONPAGES, diff);
 }
 
-/* see fs/exec.c */
+/*!
+ * Helper function used to copy arguments.
+ * See fs/exec.c
+ *
+ */
 static inline struct page *get_arg_page(struct linux_binprm *bprm,
 					unsigned long pos,
 					int write)
@@ -453,7 +470,11 @@ fail:
 	return NULL;
 }
 
-/* see fs/exec.c */
+/*!
+ * Copy bprm arguments. Helper function.
+ * See fs/exec.c
+ *
+ */
 static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 				 unsigned long len)
 {
@@ -494,6 +515,24 @@ out:
 	return rv;
 }
 
+/*!
+ * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
+ * 
+ * This is a helper funtion used by prov_record_args routine.
+ * It records @arg by:
+ * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
+ * 2. Recording a provenance relation @etype (either RL_ARG or RL_ENV depending on @vtype) between the @arg and @prov
+ * The length of the argument should not be longer than PATH_MAX, otherwise we have to truncate the argument.
+ * Note that the provenance entry is short-lived.
+ * After we record the relation, we will free the long provenance entry.
+ * @param prov The provenance entry pointer to which @arg has a relation.
+ * @param vtype The type of the newly created long provenance entry.
+ * @param etype The relation between @prov and @arg.
+ * @param arg The value of the argument.
+ * @param len The length of the argument.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation routine or unknown.
+ *
+ */
 static __always_inline int prov_record_arg(struct provenance *prov,
 					   uint64_t vtype,
 					   uint64_t etype,
@@ -516,6 +555,17 @@ static __always_inline int prov_record_arg(struct provenance *prov,
 	return rc;
 }
 
+/*!
+ * @brief Record all arguments to @prov.
+ *
+ * We will only record all the arguments if @prov is tracked or capture all is set.
+ * We record both ENT_ARG and ENT_ENV types of arguments and relations RL_ARG and RL_ENV between those arguments and @prov,
+ * by calling prov_record_arg routine.
+ * @param prov The provenance entry pointer where arguments should be associated with.
+ * @param bprm The binary parameter structure.
+ * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
+ *
+ */
 static inline int prov_record_args(struct provenance *prov,
 				   struct linux_binprm *bprm)
 {
@@ -527,7 +577,6 @@ static inline int prov_record_args(struct provenance *prov,
 	int argc;
 	int envc;
 
-	// we are not tracked, no need to register parameters
 	if (!provenance_is_tracked(prov_elt(prov)) && !prov_policy.prov_all)
 		return 0;
 	len = bprm->exec - bprm->p;
@@ -551,6 +600,6 @@ static inline int prov_record_args(struct provenance *prov,
 		ptr += size + 1;
 	}
 	kfree(argv);
-	return 0;
+	return rc;
 }
 #endif
