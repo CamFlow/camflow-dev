@@ -1580,7 +1580,7 @@ static void provenance_shm_shmdt(struct shmid_kernel *shp)
  * @param priority Memory allocation operation flag.
  * @return 0 if success and no error occurred; -ENOMEM if calling process's cred structure does not exist. Other error codes unknown.
  *
- * @question What is the difference between sock and socket?
+ * @question What is the difference between sock and socket? Why do they have different provenance?
  */
 static int provenance_sk_alloc_security(struct sock *sk,
 					int family,
@@ -1599,12 +1599,12 @@ static int provenance_sk_alloc_security(struct sock *sk,
  * 
  * This hook allows a module to update or allocate a per-socket security structure. 
  * Note that the security field was not added directly to the socket structure, 
- * but rather, the socket security information is stored
- * in the associated inode.  Typically, the inode alloc_security hook will
- * allocate and and attach security information to
- * sock->inode->i_security.  This hook may be used to update the
- * sock->inode->i_security field with additional information that wasn't
- * available when the inode was allocated.
+ * but rather, the socket security information is stored in the associated inode.  
+ * Typically, the inode alloc_security hook will allocate and and attach security information to
+ * sock->inode->i_security.  
+ * This hook may be used to update the sock->inode->i_security field 
+ * with additional information that wasn't available when the inode was allocated.
+ * 
  * @sock contains the newly created socket structure.
  * @family contains the requested protocol family.
  * @type contains the requested communications type.

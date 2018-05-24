@@ -26,13 +26,20 @@
 #include "provenance_policy.h"
 #include "provenance_inode.h"
 
+/*!
+ * @brief Returns the provenance entry pointer of the inode associated with sock.
+ *
+ * @sock The socket structure whose provenance to be obtained.
+ * @return The provenance entry pointer of the socket or NULL if it does not exist.
+ * 
+ */
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
 	struct inode *inode = SOCK_INODE(sock);
 	struct provenance *iprov = NULL;
 
 	if (inode)
-		iprov = inode_provenance(SOCK_INODE(sock), false);
+		iprov = inode_provenance(inode, false);
 	return iprov;
 }
 
