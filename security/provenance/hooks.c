@@ -1442,12 +1442,20 @@ static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
 }
 #endif
 
-/*
- * Allocate and attach a security structure to the shp->shm_perm.security
- * field.  The security field is initialized to NULL when the structure is
- * first created.
- * @shp contains the shared memory structure to be modified.
- * Return 0 if operation was successful and permission is granted.
+/*!
+ * @brief Record provenance when shm_alloc_security hook is triggered.
+ *
+ * This hunk is triggered when allocating and attaching a security structure to the shp->shm_perm.security field.
+ * The security field is initialized to NULL when the structure is first created.
+ * This routine allocates and attaches a provenance entry to the shp->shm_perm.provenance field.
+ * That is, it creates a new provenance node ENT_SHM.
+ * It also fills in some provenance information based on the information contained in @shp.
+ * Record provenance relation RL_SH_CREATE_READ by calling "uses" routine.
+ * For read, information flows from shared memory to the calling process, and eventually to its cred.
+ * Record provenance relation RL_SH_CREATE_WRITE by calling "generates" routine.
+ * For write, information flows from the calling process's cree to the process, and eventually to shared memory.
+ * @param shp The shared memory structure to be modified.
+ * @return 0 if operation was successful and permission is granted, no error occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM provenance entry. Other error code inherited from uses and generates routine or unknown.
  */
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
@@ -1455,7 +1463,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!sprov)
 		return -ENOMEM;
@@ -1465,7 +1473,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	rc = uses(RL_SH_CREATE_READ, sprov, tprov, cprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = uses(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
+	rc = generates(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
