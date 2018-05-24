@@ -1456,6 +1456,7 @@ static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
  * For write, information flows from the calling process's cree to the process, and eventually to shared memory.
  * @param shp The shared memory structure to be modified.
  * @return 0 if operation was successful and permission is granted, no error occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM provenance entry. Other error code inherited from uses and generates routine or unknown.
+ *
  */
 static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 {
@@ -1479,9 +1480,13 @@ out:
 	return 0;
 }
 
-/*
- * Deallocate the security struct for this memory segment.
- * @shp contains the shared memory structure to be modified.
+/*!
+ * @brief Record provenance when shm_free_security hook is triggered.
+ *
+ * This hook is triggered when deallocating the security struct for this memory segment.
+ * We simply free the memory of the allocated provenance entry if it exists, and set the pointer to NULL.
+ * @param shp The shared memory structure to be modified.
+ *
  */
 static void provenance_shm_free_security(struct shmid_kernel *shp)
 {
@@ -1490,14 +1495,23 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
 	shp->shm_perm.provenance = NULL;
 }
 
-/*
- * Check permissions prior to allowing the shmat system call to attach the
+/*!
+ * @brief Record provenance when shm_shmat hook is triggered.
+ * 
+ * This hook is triggered when checking permissions prior to allowing the shmat system call to attach the
  * shared memory segment @shp to the data segment of the calling process.
  * The attaching address is specified by @shmaddr.
- * @shp contains the shared memory structure to be modified.
- * @shmaddr contains the address to attach memory region to.
- * @shmflg contains the operational flags.
- * Return 0 if permission is granted.
+ * If @shmflg is SHM_RDONLY (readable only), then:
+ * Record provenance relation RL_SH_ATTACH_READ by calling "uses" routine.
+ * Information flows from shared memory to the calling process, and then eventually to its cred.
+ * Otherwise, shared memory is both readable and writable, then:
+ * Record provenance relation RL_SH_ATTACH_READ by calling "uses" routine and RL_SH_ATTACH_WRITE by calling "generates" routine.
+ * Information can flow both ways.
+ * @param shp The shared memory structure to be modified.
+ * @param shmaddr The address to attach memory region to.
+ * @param shmflg The operational flags.
+ * @return 0 if permission is granted and no error occurred; -ENOMEM if shared memory provenance entry does not exist. Other error codes inherited from uses and generates routine or unknown.
+ *
  */
 static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, int shmflg)
 {
@@ -1517,7 +1531,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = uses(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));
