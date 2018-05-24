@@ -145,9 +145,23 @@ static inline uint32_t current_pidns(void)
 #define vm_exec(flags)    ((flags & VM_EXEC) == VM_EXEC)
 #define vm_mayshare(flags) ((flags & (VM_SHARED | VM_MAYSHARE)) != 0)
 #define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
-#define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
+#define vm_read_exec_mayshare(flags) ((vm_read(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
-// write <- are we reading or writting from shared state
+/*!
+ * @brief Record shared mmap relations of a process.
+ *
+ * The routine goes through all the mmapped files of the "current" process,
+ * and for every shared mmaped file, 
+ * if the mmapped file has provenance entry,
+ * record provenance relation between the mmaped file and the current process 
+ * based on the permission flags and the action (read, exec, or write).
+ * If read/exec, record provenance relation RL_SH_READ by calling "record_relation" routine.
+ * If write, record provenance relation RL_SH_WRITE by calling "record_relation" routine.
+ * @param cprov The cred provenance entry pointer of the current process.
+ * @param read Whether the operation is read or not.
+ * @return 0 if no error occurred or "mm" is NULL; Other error codes inherited from record_relation routine or unknown.
+ * 
+ */
 static __always_inline int current_update_shst(struct provenance *cprov, bool read)
 {
 	struct mm_struct *mm = get_task_mm(current);
@@ -158,9 +172,9 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 	int rc = 0;
 
 	if (!mm)
-		return 0;
+		return rc;
 	vma = mm->mmap;
-	while (vma) { // we go through mmaped files
+	while (vma) { // We go through all the mmaped files.
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			flags = vma->vm_flags;
@@ -174,7 +188,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 		}
 		vma = vma->vm_next;
 	}
-	mmput_async(mm);
+	mmput_async(mm);	// Release the file.
 	return rc;
 }
 

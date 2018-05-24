@@ -1242,10 +1242,12 @@ out:
 
 /* msg */
 
-/*
- * Allocate and attach a security structure to the msg->security field.
- * The security field is initialized to NULL when the structure is first
- * created.
+/*!
+ * @brief Record provenance when msg_msg_alloc_security hook is triggered.
+ * 
+ * This hooks allocates and attaches a security structure to the msg->security field.
+ * The security field is initialized to NULL when the structure is first created.
+ * 
  * @msg contains the message structure to be modified.
  * Return 0 if operation was successful and permission is granted.
  */
@@ -1257,7 +1259,6 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	unsigned long irqflags;
 	int rc;
 
-	/* alloc new prov struct with generated id */
 	mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
 	if (!mprov)
