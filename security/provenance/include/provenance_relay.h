@@ -50,7 +50,7 @@ int prov_create_channel(char *buffer, size_t len);
  * @param prov Member of the element in the relay list. This is a relay channel pointer.
  * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
  *
- * @todo failure case checking is missing.
+ * @todo Failure case checking is missing.
  */
 static inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
 {
@@ -119,6 +119,7 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
  * This function performs the same function as "prov_write" function except that it writes a long provenance information,
  * instead of regular provenance information to the buffer.
  * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
+ *
  */
 static inline void long_prov_write(union long_prov_elt *msg)
 {
