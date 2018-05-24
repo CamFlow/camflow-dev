@@ -244,7 +244,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * At least two relations will possibly be captured:
  * 1. Whatever relation between entity and activity given by the argument "type", and
  * 2. RL_PROC_WRITE relation between activity and activity_mem
- * If activity_mem is a shared memory, a SH_READ/WRITE relation may be captured (see routine definition of "current_update_shst").
+ * If activity_mem has memory mapped files, a SH_WRITE relation may be captured (see routine definition of "current_update_shst").
  * @param type The type of relation (in the category of "used") between entity and activity.
  * @param entity The entity provenance node.
  * @param activity The activity provenance node.
@@ -333,7 +333,7 @@ static __always_inline int uses_two(const uint64_t type,
  * At least two relations will possibly be captured:
  * 1. RL_PROC_READ relation between activity_mem and activity
  * 1. Whatever relation between activity and entity given by the argument "type", and
- * If activity_mem is a shared memory, a SH_READ/WRITE relation may be captured (see routine definition of "current_update_shst").
+ * If activity_mem has memory mapped files, a SH_READ relation may be captured (see routine definition of "current_update_shst").
  * @param type The type of relation (in the category of "generated") between activity and entity.
  * @param activity_mem The memory provenance node of the activity.
  * @param activity The activity provenance node.

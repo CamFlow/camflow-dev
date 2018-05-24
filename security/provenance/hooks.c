@@ -1124,7 +1124,7 @@ static int provenance_mmap_file(struct file *file,
 	int rc = 0;
 
 	if (unlikely(!file))
-		return 0;
+		return rc;
 	iprov = file_provenance(file, true);
 	if (!iprov)
 		return -ENOMEM;
@@ -1170,7 +1170,21 @@ out:
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 /*!
- * ???
+ * @brief Record provenance when mmap_munmap hook is triggered.
+ * 
+ * This hook is triggered when a file is unmmap'ed.
+ * We obtain the provenance entry of the mmap'ed file, and if it shows that the mmap'ed file is shared based on the flags,
+ * record provenance relation RL_MUNMAP by calling "derives" routine.
+ * Information flows from cred of the process that unmmaps the file to the mmap'ed file.
+ * Note that if the file to be unmmap'ed is private, the provenance of the mmap'ed file is short-lived and thus no longer exists.
+ * @param mm Unused parameter.
+ * @param vma Virtual memory of the calling process.
+ * @param start Unused parameter.
+ * @param end Unused parameter.
+ *
+ * @question Why do we not error check if iprov == NULL?
+ * @question What if derives failed? Maybe we should throw error messages?
+ * @question What if a privately mmapped file is unmmapped?
  */
 static void provenance_mmap_munmap(struct mm_struct *mm,
 				   struct vm_area_struct *vma,
@@ -1183,8 +1197,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 	unsigned long irqflags;
 	vm_flags_t flags = vma->vm_flags;
 
-	// it is a shared mmap
-	if ( vm_mayshare(flags) ) {
+	if ( vm_mayshare(flags) ) {	// It is a shared mmap.
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			iprov = file_provenance(mmapf, false);
@@ -1247,9 +1260,13 @@ out:
  * 
  * This hooks allocates and attaches a security structure to the msg->security field.
  * The security field is initialized to NULL when the structure is first created.
- * 
- * @msg contains the message structure to be modified.
- * Return 0 if operation was successful and permission is granted.
+ * This routine initializes and attaches a new provenance entry to the msg->provenance field.
+ * We create a new provenance node ENT_MSG and update the information in the provenance entry from @msg.
+ * Record provenance relation RL_MSG_CREATE by calling "generates" routine.
+ * Information flows from cred of the calling process to the task, and eventually to the newly created msg node.
+ * @param msg The message structure to be modified.
+ * @return 0 if operation was successful and permission is granted; -ENOMEM if no memory can be allocated for the new provenance entry; Other error codes inherited from generates routine or unknown.
+ *
  */
 static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
@@ -1257,7 +1274,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *mprov;
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
 
@@ -1271,9 +1288,14 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 	return rc;
 }
 
-/*
- * Deallocate the security structure for this message.
- * @msg contains the message structure to be modified.
+/*!
+ * @brief Record provenance when msg_msg_free_security hook is triggered.
+ *
+ * This hook is triggered when deallocating the security structure for this message.
+ * Free msg provenance entry when security structure for this message is deallocated.
+ * If the msg has a valid provenance entry pointer (i.e., non-NULL), free the memory and set the pointer to NULL.
+ * @param msg The message structure whose security structure to be freed.
+ * 
  */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
@@ -1282,14 +1304,22 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
 	msg->provenance = NULL;
 }
 
-
+/*!
+ * @brief Helper function for two security hooks: msg_queue_msgsnd and mq_timedsend.
+ *
+ * Record provenance relation RL_SND_MSG_Q by calling "generates" routine.
+ * Information flows from calling process's cred to the process, and eventually to msg.
+ * @param msg The message structure.
+ * @return 0 if no error occurred; Other error codes inherited from generates routine or unknown.
+ *  
+ */
 static inline int __mq_msgsnd(struct msg_msg *msg)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *mprov = msg->provenance;
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
@@ -1299,13 +1329,16 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
 	return rc;
 }
 
-/*
- * Check permission before a message, @msg, is enqueued on the message
- * queue, @msq.
- * @msq contains the message queue to send message to.
- * @msg contains the message to be enqueued.
- * @msqflg contains operational flags.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when msg_queue_msgsnd hook is triggered.
+ *
+ * This hook is trigger when checking permission before a message, @msg, is enqueued on the message queue, @msq.
+ * This routine simply calls the helper function __mq_msgsnd.
+ * @param msq The message queue to send message to.
+ * @param msg The message to be enqueued.
+ * @param msqflg The operational flags.
+ * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd routine or unknown.
+ *
  */
 static int provenance_msg_queue_msgsnd(struct msg_queue *msq,
 				       struct msg_msg *msg,
@@ -1315,6 +1348,17 @@ static int provenance_msg_queue_msgsnd(struct msg_queue *msq,
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+
+/*!
+ * @brief Record provenance when mq_timedsend hook is triggered.
+ *
+ * This routine simply calls the helper function __mq_msgsnd.
+ * @param inode Unused parameter.
+ * @param msg The message to be enqueued.
+ * @param ts Unused parameter.
+ * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd routine or unknown.
+ *
+ */
 static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
 				   struct timespec *ts)
 {
@@ -1322,12 +1366,22 @@ static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
 }
 #endif
 
+/*!
+ * @brief Helper function for two security hooks: msg_queue_msgrcv and mq_timedreceive.
+ *
+ * Record provenance relation RL_RCV_MSG_Q by calling "uses" routine.
+ * Information flows from msg to the calling process, and eventually to its cred.
+ * @param cprov The calling process's cred provenance entry pointer.
+ * @param msg The message structure.
+ * @return 0 if no error occurred; Other error codes inherited from uses routine or unknown.
+ *  
+ */
 static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
 {
 	struct provenance *mprov = msg->provenance;
 	struct provenance *tprov = get_task_provenance();
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(mprov), PROVENANCE_LOCK_MSG);
@@ -1337,17 +1391,22 @@ static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
 	return rc;
 }
 
-/*
- * Check permission before a message, @msg, is removed from the message
- * queue, @msq.  The @target task structure contains a pointer to the
- * process that will be receiving the message (not equal to the current
- * process when inline receives are being performed).
- * @msq contains the message queue to retrieve message from.
- * @msg contains the message destination.
- * @target contains the task structure for recipient process.
- * @type contains the type of message requested.
- * @mode contains the operational flags.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when msg_queue_msgrcv hook is triggered.
+ * 
+ * This hook is triggered when checking permission before a message, @msg, is removed from the message queue, @msq.  
+ * The @target task structure contains a pointer to the process that will be receiving the message 
+ * (not equal to the current process when inline receives are being performed).
+ * Since it is the receiving task that receives the msg,
+ * we first obtain the receiving task's cred provenance entry pointer, 
+ * and then simply calls the helper function __mq_msgrcv to record the information flow.
+ * @param msq The message queue to retrieve message from.
+ * @param msg The message destination.
+ * @param target The task structure for recipient process.
+ * @param type The type of message requested.
+ * @param mode The operational flags.
+ * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv routine or unknown.
+ *
  */
 static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
 				       struct msg_msg *msg,
@@ -1361,6 +1420,19 @@ static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+
+/*!
+ * @brief Record provenance when mq_timedreceive hook is triggered.
+ * 
+ * Current process will be receiving the message.
+ * We simply calls the helper function __mq_msgrcv to record the information flow.
+ * @param inode Unused parameter.
+ * @param msg The message destination.
+ * @param ts Unused parameter.
+ * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv routine or unknown.
+ *
+ * @question Are we sure it is the current process that receives the message?
+ */
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
 				      struct timespec *ts)
 {
