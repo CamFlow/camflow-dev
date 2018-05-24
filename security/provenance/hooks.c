@@ -412,11 +412,10 @@ static int provenance_inode_create(struct inode *dir,
  * If permission is:
  * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses" routine, and 
  * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" routine, and 
- * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "generates" routine, and 
- * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "generates" routine.
+ * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses" routine, and 
+ * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses" routine.
  * Note that "uses" routine also generates provenance relation RL_PROC_WRITE.
- * For exec/read, information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
- * For append/write, it is the other way around.
+ * Information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
  * Provenance relation is not recorded if the inode to be access is private or if the inode's provenance entry does not exist.
  * @param inode The inode structure to check.
  * @param mask The permission mask.
@@ -453,12 +452,12 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 			goto out;
 	}
 	if (mask & MAY_APPEND) {
-		rc = generates(RL_PERM_APPEND, cprov, tprov, iprov, NULL, mask);
+		rc = uses(RL_PERM_APPEND, iprov, tprov, cprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 	}
 	if (mask & MAY_WRITE) {
-		rc = generates(RL_PERM_WRITE, cprov, tprov, iprov, NULL, mask);
+		rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 	}
@@ -1227,7 +1226,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
  * @param arg The operational arguments.
  * @return 0 if permission is granted or no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from generates/uses routine or unknown.
  *
- * @question Why do we record both read and write? What about execute? Why are we saving iprov here?
+ * @question Why do we record both read and write? Why are we saving iprov here?
  */
 static int provenance_file_ioctl(struct file *file,
 				 unsigned int cmd,
@@ -1621,7 +1620,7 @@ static int provenance_socket_post_create(struct socket *sock,
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (kern)
 		return 0;
