@@ -27,6 +27,7 @@
  * The relation is either "RL_VERSION_TASK" or "RL_VERSION" depending on the type of the nodes (note that they should be of the same type).
  * If the nodes are of type AC_TASK, then the relation should be "RL_VERSION_TASK"; otherwise it is "RL_VERSION".
  * The new node is not recorded (therefore "recorded" flag is unset) until we record it in the "__write_relation" function.
+ * The new node is not saved for persistance in this routine. So we clear the saved bit inherited from the older version node.
  * The criteria that should be met to not to update the version are:
  * 1. If nodes are set to be compressed and do not have outgoing edges, or
  * 2. If the argument "type" is a relation whose destination node's version should not be updated becasue the "type" itself either is a VERSION type or a NAMED type.
@@ -34,8 +35,6 @@
  * @param prov The pointer to the provenance node whose version may need to be updated.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @question: What is the use of "clear_saved"?
- * @answer check if you want to save again becasue information has changed
  */
 static __always_inline int __update_version(const uint64_t type,
 					    prov_entry_t *prov)
@@ -60,7 +59,7 @@ static __always_inline int __update_version(const uint64_t type,
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
 	clear_has_outgoing(prov);     // Newer version now has no outgoing edge.
-	clear_saved(prov);           // For inode prov persistance
+	clear_saved(prov);           // For inode provenance persistance
 	return rc;
 }
 
@@ -205,8 +204,7 @@ static inline int record_node_name(struct provenance *node, const char *name)
  * @param count Number of bytes copied from the user buffer.
  * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
  *
- * @question Why are we not using spin lock in this case?
- * @todo double check there is a lock on the cprov when this function is called
+ * @todo Since we are not using spin lock here, double check there is a lock on the cprov when this function is called
  */
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {
