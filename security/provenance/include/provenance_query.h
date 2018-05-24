@@ -18,6 +18,7 @@
 /*!
  * @brief Go through each element in provenance_query_hooks and call out_edge function.
  *
+ * out_edge routine is defined propagate.c
  * @param node The node provenance entry pointer.
  * @param edge The edge provenance entry pointer.
  * @return 0 if no error occurred. Other error codes inherited or unknown.
@@ -41,6 +42,7 @@ static inline int call_provenance_out_edge(prov_entry_t *node,
 /*!
  * @brief Go through each element in provenance_query_hooks and call in_edge function.
  *
+ * in_edge routine is defined propagate.c
  * @param edge The edge provenance entry pointer.
  * @param node The node provenance entry pointer.
  * @return 0 if no error occurred. Other error codes inherited or unknown.

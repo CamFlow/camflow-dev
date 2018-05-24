@@ -14,6 +14,13 @@
 
 #include "provenance_query.h"
 
+/*!
+ * @brief Register provenance query hooks.
+ *
+ * @param hook The provenance_query_hooks pointer.
+ * @return 0 if no error occurred; -ENOMEM if hook is NULL (does not exist yet).
+ *
+ */
 int register_provenance_query_hooks(struct provenance_query_hooks *hook)
 {
 	if (!hook)
@@ -24,6 +31,13 @@ int register_provenance_query_hooks(struct provenance_query_hooks *hook)
 }
 EXPORT_SYMBOL_GPL(register_provenance_query_hooks);
 
+/*!
+ * @brief Unregister provenance query hooks.
+ *
+ * @param hook The provenance_query_hooks pointer.
+ * @return 0 if no error occurred.
+ *
+ */
 int unregister_provenance_query_hooks(struct provenance_query_hooks *hook)
 {
 	list_del_rcu(&(hook->list));
