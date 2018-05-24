@@ -1603,12 +1603,17 @@ static int provenance_sk_alloc_security(struct sock *sk,
  * sock->inode->i_security.  
  * This hook may be used to update the sock->inode->i_security field 
  * with additional information that wasn't available when the inode was allocated.
- * 
- * @sock contains the newly created socket structure.
- * @family contains the requested protocol family.
- * @type contains the requested communications type.
- * @protocol contains the requested protocol.
- * @kern set to 1 if a kernel socket.
+ * Record provenance relation RL_SOCKET_CREATE by calling "generates" routine.
+ * Information flows from the calling process's cred to the process, and eventually to the socket that is being created.
+ * If @kern is 1 (kernal socket), no provenance relation is recorded.
+ * @param sock The newly created socket structure.
+ * @param family The requested protocol family.
+ * @param type The requested communications type.
+ * @param protocol The requested protocol.
+ * @param kern Set to 1 if it is a kernel socket.
+ * @return 0 if no error occurred; -ENOMEM if inode provenance entry does not exist. Other error codes inherited from generates routine or unknown.
+ *
+ * @question What is special about kernel socket? Why are we not capturing provenance?
  */
 static int provenance_socket_post_create(struct socket *sock,
 					 int family,
@@ -1624,6 +1629,8 @@ static int provenance_socket_post_create(struct socket *sock,
 
 	if (kern)
 		return 0;
+	if (!iprov)
+		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
@@ -1632,14 +1639,26 @@ static int provenance_socket_post_create(struct socket *sock,
 	return rc;
 }
 
-/*
- * Check permission before socket protocol layer bind operation is
- * performed and the socket @sock is bound to the address specified in the
- * @address parameter.
- * @sock contains the socket structure.
- * @address contains the address to bind to.
- * @addrlen contains the length of address.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when socket_bind hook is triggered.
+ * 
+ * This hook is triggered when checking permission before socket protocol layer bind operation is performed,
+ * and the socket @sock is bound to the address specified in the @address parameter.
+ * The routine records the provenance relations if the calling process is not set to be opaque (i.e., should be recorded).
+ * The relation between the socket and its address is recorded first,
+ * then record provenance relation RL_BIND by calling "generates" routine.
+ * Information flows from the cred of the calling process to the process itself, and eventually to the socket.
+ * If the address family is PF_INET, we check if we should record the packet from the socket,
+ * and track and propagate recording from the socket and the calling process.
+ * Note that usually server binds the socket to its local address.
+ * @param sock The socket structure.
+ * @param address The address to bind to.
+ * @param addrlen The length of address.
+ * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
+ *
+ * @question Why do extra setting on PF_INET? What is special about it?
+ * @question Why are we checking if the calling process is opaque in this case? We don't check that in many other functions.
+ * @question Why are we not using spin_lock here but we use it in connect() case below?
  */
 static int provenance_socket_bind(struct socket *sock,
 				  struct sockaddr *address,
@@ -1650,15 +1669,14 @@ static int provenance_socket_bind(struct socket *sock,
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct sockaddr_in *ipv4_addr;
 	uint8_t op;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
 
 	if (provenance_is_opaque(prov_elt(cprov)))
-		return 0;
+		return rc;
 
-	/* should we start tracking this socket */
 	if (address->sa_family == PF_INET) {
 		if (addrlen < sizeof(struct sockaddr_in))
 			return -EINVAL;
@@ -1682,13 +1700,18 @@ static int provenance_socket_bind(struct socket *sock,
 	return rc;
 }
 
-/*
- * Check permission before socket protocol layer connect operation
+/*!
+ * @brief Record provenance when socket_connect hook is triggered.
+ *
+ * This hook is triggered when checking permission before socket protocol layer connect operation
  * attempts to connect socket @sock to a remote address, @address.
- * @sock contains the socket structure.
- * @address contains the address of remote endpoint.
- * @addrlen contains the length of address.
- * Return 0 if permission is granted.
+ * This routine is similar to the above provenance_socket_bind routine, except that we 
+ * record provenance relation RL_CONNECT by calling "generates" routine.
+ * @param sock The socket structure.
+ * @param address The address of remote endpoint.
+ * @param addrlen The length of address.
+ * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
+ *
  */
 static int provenance_socket_connect(struct socket *sock,
 				     struct sockaddr *address,
@@ -1710,7 +1733,6 @@ static int provenance_socket_connect(struct socket *sock,
 	if (provenance_is_opaque(prov_elt(cprov)))
 		goto out;
 
-	/* should we start tracking this socket */
 	if (address->sa_family == PF_INET) {
 		if (addrlen < sizeof(struct sockaddr_in)) {
 			rc = -EINVAL;
@@ -1739,11 +1761,15 @@ out:
 	return rc;
 }
 
-/*
- * Check permission before socket protocol layer listen operation.
- * @sock contains the socket structure.
- * @backlog contains the maximum length for the pending connection queue.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when socket_listen hook is triggered.
+ *
+ * This hook is triggered when checking permission before socket protocol layer listen operation.
+ * Record provenance relation RL_LISTEN by calling "generates" routine.
+ * @param sock The socket structure.
+ * @param backlog The maximum length for the pending connection queue.
+ * @return 0 if no error occurred; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited from generates routine or unknown.
+ *
  */
 static int provenance_socket_listen(struct socket *sock, int backlog)
 {
@@ -1751,7 +1777,7 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = socket_inode_provenance(sock);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
@@ -1763,13 +1789,22 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 	return rc;
 }
 
-/*
- * Check permission before accepting a new connection.  Note that the new
- * socket, @newsock, has been created and some information copied to it,
+/*!
+ * @brief Record provenance when socket_accept hook is triggered.
+ *
+ * This hook is triggered when checking permission before accepting a new connection.  
+ * Note that the new socket, @newsock, has been created and some information copied to it,
  * but the accept operation has not actually been performed.
- * @sock contains the listening socket structure.
- * @newsock contains the newly created server socket for connection.
- * Return 0 if permission is granted.
+ * Since a new socket has been created after aceepting a new connection,
+ * record provenance relation RL_ACCEPT_SOCKET by calling "derives" routine.
+ * Information flows from the old socket to the new socket.
+ * Then record provenance relation RL_ACCEPT by calling "uses" routine,
+ * since the calling process accepts the connection.
+ * Information flows from the new socket to the calling process, and eventually to its cred.
+ * @param sock The listening socket structure.
+ * @param newsock The newly created server socket for connection.
+ * @return 0 if permission is granted and no error occurred; Other error codes inherited from derives and uses routine or unknown.
+ *
  */
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 {
@@ -1778,7 +1813,7 @@ static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
 	struct provenance *iprov = socket_inode_provenance(sock);
 	struct provenance *niprov = socket_inode_provenance(newsock);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
@@ -1792,18 +1827,29 @@ out:
 	return rc;
 }
 
-/*
- * Check permission before transmitting a message to another socket.
- * @sock contains the socket structure.
- * @msg contains the message to be transmitted.
- * @size contains the size of message.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when socket_sendmsg_always/socket_sendmsg hook is triggered.
+ *
+ * This hook is triggered when checking permission before transmitting a message to another socket.
+ * Record provenance relation RL_SND_MSG by calling "generates" routine.
+ * Information flows from the calling process's cred to the calling process, and eventually to the sending socket.
+ * If sk_family is PF_UNIX/PF_LOCAL (local communication) and sk_type is not SOCK_DGRAM,
+ * we obtain the @peer receiving socket and its provenance,
+ * and if the provenance is not NULL,
+ * record provenance relation RL_RCV_UNIX by calling "derives" routine.
+ * Information flows from the sending socket to the receiving peer socket.
+ * @param sock The socket structure.
+ * @param msg The message to be transmitted.
+ * @param size The size of message.
+ * @return 0 if permission is granted and no error occurred; -ENOMEM if the sending socket's provenance entry does not exist; Other error codes inherited from generates and derives routine or unknown.
+ *
+ * @question What is special about SOCK_DGRAM? We can only get peer (which I assume to be receiving socket) from local communication, which is flagged by PF_UNIX. What about PF_LOCAL?
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_sendmsg_always(struct socket *sock,
 					    struct msghdr *msg,
 					    int size)
-#else /* CONFIG_SECURITY_FLOW_FRIENDLY */
+#else
 static int provenance_socket_sendmsg(struct socket *sock,
 				     struct msghdr *msg,
 				     int size)
@@ -1815,12 +1861,12 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	struct provenance *pprov = NULL;
 	struct sock *peer = NULL;
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
-	if (sock->sk->sk_family == PF_UNIX &&
-	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
+	if ((sock->sk->sk_family == PF_UNIX || sock->sk->sk_family == PF_LOCAL) &&
+	    sock->sk->sk_type != SOCK_DGRAM) {	// Datagram handled by unix_may_send.
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);

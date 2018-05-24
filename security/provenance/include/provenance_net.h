@@ -52,6 +52,12 @@ static inline struct provenance *sk_inode_provenance(struct sock *sk)
 	return socket_inode_provenance(sock);
 }
 
+/*!
+ * @brief Return the provenance entry pointer of sk.
+ *
+ * @param sk The sock structure.
+ * @return The provenance entry pointer.
+ */
 static inline struct provenance *sk_provenance(struct sock *sk)
 {
 	struct provenance *prov = sk->sk_provenance;
@@ -160,6 +166,18 @@ extern struct list_head egress_ipv4filters;
 #define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 #define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
+/*!
+ * @brief Returns op value of the filter of a specific IP and/or port.
+ *
+ * This routine goes through a filter list,
+ * and attempts to match the given @ip and @port.
+ * If matched, the op value of the matched element will be returned.
+ * @param filters The list to go through.
+ * @param ip The IP to match.
+ * @param port The port to match.
+ * @return 0 if not found or the op value of the matched element in the list.
+ *
+ */
 static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, uint32_t port)
 {
 	struct list_head *listentry, *listtmp;
@@ -167,11 +185,11 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, struct ipv4_filters, list);
-		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))     // ip match filter
-			if (tmp->filter.port == 0 || tmp->filter.port == port)          // any port or match
+		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))     // Match IP
+			if (tmp->filter.port == 0 || tmp->filter.port == port)          // Any port or a specific match
 				return tmp->filter.op;
 	}
-	return 0; // do nothing
+	return 0;
 }
 
 static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_filters *f)
@@ -210,6 +228,22 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 	return 0;
 }
 
+/*!
+ * @brief Record the address provenance node that binds to the socket node.
+ *
+ * This routine creates a long provenance entry node ENT_ADDR that binds to the socket provenance entry @prov.
+ * Record provenance relation RL_NAMED by calling "record_relation" routine.
+ * Relation will not be recorded, if:
+ * 1. The socket inode is not recorded or the name (addr) of the socket has been recorded already, or
+ * 2. Failure occurs.
+ * The information in the ENT_ADDR node is filled in from @address and @addrlen.
+ * This provenance node is short-lived and thus we free the memory once we have recorded the relation.
+ * @param address The address of the socket.
+ * @param addrlen The length of the addres.
+ * @param prov The provenance entry pointer of the socket.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation routine or unknown.
+ * 
+ */
 static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
