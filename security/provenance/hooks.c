@@ -1833,7 +1833,7 @@ out:
  * This hook is triggered when checking permission before transmitting a message to another socket.
  * Record provenance relation RL_SND_MSG by calling "generates" routine.
  * Information flows from the calling process's cred to the calling process, and eventually to the sending socket.
- * If sk_family is PF_UNIX/PF_LOCAL (local communication) and sk_type is not SOCK_DGRAM,
+ * If sk_family is PF_UNIX (or any local communication) and sk_type is not SOCK_DGRAM,
  * we obtain the @peer receiving socket and its provenance,
  * and if the provenance is not NULL,
  * record provenance relation RL_RCV_UNIX by calling "derives" routine.
@@ -1865,8 +1865,8 @@ static int provenance_socket_sendmsg(struct socket *sock,
 
 	if (!iprov)
 		return -ENOMEM;
-	if ((sock->sk->sk_family == PF_UNIX || sock->sk->sk_family == PF_LOCAL) &&
-	    sock->sk->sk_type != SOCK_DGRAM) {	// Datagram handled by unix_may_send.
+	if (sock->sk->sk_family == PF_UNIX &&
+	    sock->sk->sk_type != SOCK_DGRAM) {	// Datagram handled by unix_may_send hook.
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);
@@ -1889,20 +1889,29 @@ out:
 	return rc;
 }
 
-/*
- * Check permission before receiving a message from a socket.
- * @sock contains the socket structure.
- * @msg contains the message structure.
- * @size contains the size of message structure.
- * @flags contains the operational flags.
- * Return 0 if permission is granted.
+/*! 
+ * @brief Record provenance when socket_recvmsg_always/socket_recvmsg hook is triggered.
+ * 
+ * This hook is triggered when checking permission before receiving a message from a socket.
+ * This routine is similar to the above provenance_socket_sendmsg_always routine except the direction is reversed.
+ * Specifically, if we know the sending socket, we have
+ * record provenance relation RL_SND_UNIX by calling "derives" routine.
+ * Information flows from the sending socket (@peer) to the receiving socket (@sock).
+ * Then record provenance relation RL_RCV_MSG by calling "uses" routine.
+ * Information flows from the receiving socket to the calling process, and eventually to its cred.
+ * @param sock The receiving socket structure.
+ * @param msg The message structure.
+ * @param size The size of message structure.
+ * @param flags The operational flags.
+ * @return 0 if permission is granted, and no error occurred; -ENOMEM if the receiving socket's provenance entry does not exist; Other error codes inherited from uses and derives routine or unknown.
+ *
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 static int provenance_socket_recvmsg_always(struct socket *sock,
 					    struct msghdr *msg,
 					    int size,
 					    int flags)
-#else /* CONFIG_SECURITY_FLOW_FRIENDLY */
+#else
 static int provenance_socket_recvmsg(struct socket *sock,
 				     struct msghdr *msg,
 				     int size,
@@ -1915,11 +1924,11 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	struct provenance *pprov = NULL;
 	struct sock *peer = NULL;
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
-	if (sock->sk->sk_family == PF_UNIX &&
+	if ((sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
@@ -2002,12 +2011,16 @@ static int provenance_unix_stream_connect(struct sock *sock,
 	return rc;
 }
 
-/*
- * Check permissions before connecting or sending datagrams from @sock to
- * @other.
- * @sock contains the socket structure.
- * @other contains the peer socket structure.
- * Return 0 if permission is granted.
+/*!
+ * @brief Record provenance when unix_may_send hook is triggered.
+ * 
+ * This hook is triggered when checking permissions before connecting or sending datagrams from @sock to @other.
+ * Record provenance relation RL_SND_UNIX by calling "derives" routine.
+ * Information flows from the sending socket (@sock) to the receiving socket (@other).
+ * @param sock The socket structure.
+ * @param other The peer socket structure.
+ * @return 0 if permission is granted and no error occurred; Other error codes inherited from derives routine or unknown.
+ *
  */
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
@@ -2015,7 +2028,7 @@ static int provenance_unix_may_send(struct socket *sock,
 	struct provenance *sprov = socket_provenance(sock);
 	struct provenance *oprov = socket_inode_provenance(other);
 	unsigned long irqflags;
-	int rc;
+	int rc = 0;
 
 	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
@@ -2114,12 +2127,16 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
 
-/*
- * Allocate and attach a security structure to the sb->s_security field.
- * The s_security field is initialized to NULL when the structure is
- * allocated.
- * @sb contains the super_block structure to be modified.
- * Return 0 if operation was successful.
+/*!
+ * @brief Record provenance when sb_alloc_security hook is triggered.
+ * 
+ * This hook is triggered when allocating and attaching a security structure to the sb->s_security field.
+ * The s_security field is initialized to NULL when the structure is allocated.
+ * This routine allocates and initializes a provenance structure to sb->s_provenance field.
+ * It also creates a new provenance node ENT_SBLCK.
+ * @param sb The super_block structure to be modified.
+ * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for a new provenance entry. Other error codes unknown.
+ *
  */
 static int provenance_sb_alloc_security(struct super_block *sb)
 {
@@ -2131,9 +2148,13 @@ static int provenance_sb_alloc_security(struct super_block *sb)
 	return 0;
 }
 
-/*
- * Deallocate and clear the sb->s_security field.
- * @sb contains the super_block structure to be modified.
+/*!
+ * @brief Record provenance when sb_free_security hook is triggered.
+ * 
+ * This hooks is triggered when deallocating and clearing the sb->s_security field.
+ * This routine frees the memory of the allocated provenance field and set the pointer to NULL.
+ * @param sb The super_block structure to be modified.
+ *
  */
 static void provenance_sb_free_security(struct super_block *sb)
 {
@@ -2142,6 +2163,11 @@ static void provenance_sb_free_security(struct super_block *sb)
 	sb->s_provenance = NULL;
 }
 
+/*!
+ * @brief Record provenance when sb_kern_mount hook is triggered.
+ *
+ * @question What does it do?
+ */
 static int provenance_sb_kern_mount(struct super_block *sb,
 				    int flags,
 				    void *data)
@@ -2154,7 +2180,7 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 		prov_elt(sbprov)->sb_info.uuid[i] = sb->s_uuid.b[i];
 		c |= sb->s_uuid.b[i];
 	}
-	if (c == 0) // no uuid defined, generate random one
+	if (c == 0)	// If no uuid defined, generate a random one.
 		get_random_bytes(prov_elt(sbprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	return 0;
 }
