@@ -237,7 +237,7 @@ static __always_inline int __write_relation(const uint64_t type,
 	}
 	relation.relation_info.flags = flags;
 
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation); // Call query hooks for propagate tracking
+	rc = call_query_hooks(f, t, (prov_entry_t*)&relation); // Call query hooks for propagate tracking.
 
 	prov_write(&relation); // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
