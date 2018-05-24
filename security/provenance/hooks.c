@@ -412,10 +412,11 @@ static int provenance_inode_create(struct inode *dir,
  * If permission is:
  * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses" routine, and 
  * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" routine, and 
- * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses" routine, and 
- * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses" routine.
+ * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "generates" routine, and 
+ * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "generates" routine.
  * Note that "uses" routine also generates provenance relation RL_PROC_WRITE.
- * Information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
+ * For exec/read, information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
+ * For append/write, it is the other way around.
  * Provenance relation is not recorded if the inode to be access is private or if the inode's provenance entry does not exist.
  * @param inode The inode structure to check.
  * @param mask The permission mask.
@@ -452,12 +453,12 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 			goto out;
 	}
 	if (mask & MAY_APPEND) {
-		rc = uses(RL_PERM_APPEND, iprov, tprov, cprov, NULL, mask);
+		rc = generates(RL_PERM_APPEND, cprov, tprov, iprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 	}
 	if (mask & MAY_WRITE) {
-		rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
+		rc = generates(RL_PERM_WRITE, cprov, tprov, iprov, NULL, mask);
 		if (rc < 0)
 			goto out;
 	}
@@ -1540,6 +1541,16 @@ out:
 }
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
+/*!
+ * @brief Record provenance when shm_shmdt hook is triggered.
+ *
+ * This hook is triggered when detaching the shared memory segment from the address space of the calling process. 
+ * The to-be-detached segment must be currently attached with shmaddr equal to the value returned by the attaching shmat() call.
+ * Record provenance relation RL_SHMDT by calling "generates" routine.
+ * Information flows from the calling process's cred to the process, and eventually to the shared memory.
+ * @param shp The shared memory structure to be modified.
+ * 
+ */
 static void provenance_shm_shmdt(struct shmid_kernel *shp)
 {
 	struct provenance *cprov = get_cred_provenance();
@@ -1557,9 +1568,19 @@ static void provenance_shm_shmdt(struct shmid_kernel *shp)
 }
 #endif
 
-/*
- * Allocate and attach a security structure to the sk->sk_security field,
+/*!
+ * @brief Record provenance when sk_alloc_security hook is triggered.
+ *
+ * This hook is triggered when allocating and attaching a security structure to the sk->sk_security field,
  * which is used to copy security attributes between local stream sockets.
+ * This routine therefore allocates and attaches @sk_provenance structure to @sk.
+ * The provenance of the local stream socket is the same as the cred provenance of the calling process.
+ * @param sk The sock structure to be modified.
+ * @param family The protocol family. Unused parameter.
+ * @param priority Memory allocation operation flag.
+ * @return 0 if success and no error occurred; -ENOMEM if calling process's cred structure does not exist. Other error codes unknown.
+ *
+ * @question What is the difference between sock and socket?
  */
 static int provenance_sk_alloc_security(struct sock *sk,
 					int family,
@@ -1573,10 +1594,12 @@ static int provenance_sk_alloc_security(struct sock *sk,
 	return 0;
 }
 
-/*
- * This hook allows a module to update or allocate a per-socket security
- * structure. Note that the security field was not added directly to the
- * socket structure, but rather, the socket security information is stored
+/*!
+ * @brief Record provenance when socket_post_create hook is triggered.
+ * 
+ * This hook allows a module to update or allocate a per-socket security structure. 
+ * Note that the security field was not added directly to the socket structure, 
+ * but rather, the socket security information is stored
  * in the associated inode.  Typically, the inode alloc_security hook will
  * allocate and and attach security information to
  * sock->inode->i_security.  This hook may be used to update the
