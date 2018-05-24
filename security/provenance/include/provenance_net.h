@@ -240,6 +240,17 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
 	return 0;
 }
 
+/*!
+ * @brief Delete an element in the filter list that matches a specific filter.
+ *
+ * This routine goes through a filter list,
+ * and attempts to match the given filter.
+ * If matched, the matched element will be removed from the list.
+ * @param filters The list to go through.
+ * @param f The filter to match its mask, ip and port.
+ * @return Always return 0.
+ *
+ */
 static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_filters *f)
 {
 	struct list_head *listentry, *listtmp;
@@ -252,12 +263,23 @@ static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_fi
 		    tmp->filter.port == f->filter.port) {
 			list_del(listentry);
 			kfree(tmp);
-			return 0; // you should only get one
+			return 0;	// Should only get one.
 		}
 	}
-	return 0; // do nothing
+	return 0;
 }
 
+/*!
+ * @brief Add or update an element in the filter list that matches a specific filter.
+ *
+ * This routine goes through a filter list,
+ * and attempts to match the given filter.
+ * If matched, the matched element's op value will be updated based on the given filter @f or the element will be added if no matches.
+ * @param filters The list to go through.
+ * @param f The filter to match its mask, ip and port.
+ * @return Always return 0.
+ *
+ */
 static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct ipv4_filters *f)
 {
 	struct list_head *listentry, *listtmp;
@@ -272,7 +294,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 			return 0; // you should only get one
 		}
 	}
-	list_add_tail(&(f->list), filters); // not already on the list, we add it
+	list_add_tail(&(f->list), filters); // If not already in the list, we add it.
 	return 0;
 }
 
