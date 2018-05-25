@@ -18,7 +18,7 @@
 /*!
  * @brief Record provenance of an outgoing packets, which is done through NetFilter (instead of LSM) hooks.
  *
- * We record the provenance relation RL_SND_PACKET by calling "derives" routine.
+ * We record the provenance relation RL_SND_PACKET by calling "derives" function.
  * Information flows from the sending socket to the outgoing packet.
  * We will not record the provenance if:
  * 1. The calling process cred's provenance (obtained from current_provenance) is not recorded or does not exist, or
@@ -27,7 +27,7 @@
  * @param skb The socket buffer that contain packet information.
  * @return always return NF_ACCEPT.
  *
- * @todo The return value seems to be off. 
+ * @todo The return value seems to be off.
  */
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
@@ -56,9 +56,9 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 }
 
 /*!
- * @brief This routine records the provenance of outgoing packets using NetFilter.
- * 
- * It simply calls __ipv4_out routine to perform this task.
+ * @brief This function records the provenance of outgoing packets using NetFilter.
+ *
+ * It simply calls __ipv4_out function to perform this task.
  * Parameters are netfilter specific.
  *
  */

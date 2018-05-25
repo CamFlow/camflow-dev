@@ -27,7 +27,7 @@
  * The relation is either "RL_VERSION_TASK" or "RL_VERSION" depending on the type of the nodes (note that they should be of the same type).
  * If the nodes are of type AC_TASK, then the relation should be "RL_VERSION_TASK"; otherwise it is "RL_VERSION".
  * The new node is not recorded (therefore "recorded" flag is unset) until we record it in the "__write_relation" function.
- * The new node is not saved for persistance in this routine. So we clear the saved bit inherited from the older version node.
+ * The new node is not saved for persistance in this function. So we clear the saved bit inherited from the older version node.
  * The criteria that should be met to not to update the version are:
  * 1. If nodes are set to be compressed and do not have outgoing edges, or
  * 2. If the argument "type" is a relation whose destination node's version should not be updated becasue the "type" itself either is a VERSION type or a NAMED type.
@@ -114,7 +114,7 @@ static __always_inline int record_relation(const uint64_t type,
 }
 
 /*!
- * @brief This routine record a provenance relation that signifies termination of an activity.
+ * @brief This function record a provenance relation that signifies termination of an activity.
  *
  * Unless certain criteria are met, a termination relation is recorded of an activity.
  * Because of this special relation, we will only update the version of the provenance node that is about to be terminated (i.e., an activity).
@@ -124,7 +124,7 @@ static __always_inline int record_relation(const uint64_t type,
  * @param type The type of termination relation to be recorded.
  * @param prov The provenance node in question (i.e., about to be terminated).
  * @return 0 if no errors occurred. Other error codes unknown.
- * 
+ *
  */
 static __always_inline int record_terminate(uint64_t type, struct provenance *prov)
 {
@@ -236,14 +236,14 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 /*!
  * @brief Record "used" relation from entity provenance node to activity provenance node, including its memory state.
  *
- * This routine applies to only "used" relation between two provenance nodes.
+ * This function applies to only "used" relation between two provenance nodes.
  * Unless all nodes involved (entity, activity, activity_mem) are set not to be tracked and prov_all is also turned off,
  * or unless the relation type is set not to be tracked,
  * relation will be captured.
  * At least two relations will possibly be captured:
  * 1. Whatever relation between entity and activity given by the argument "type", and
  * 2. RL_PROC_WRITE relation between activity and activity_mem
- * If activity_mem has memory mapped files, a SH_WRITE relation may be captured (see routine definition of "current_update_shst").
+ * If activity_mem has memory mapped files, a SH_WRITE relation may be captured (see function definition of "current_update_shst").
  * @param type The type of relation (in the category of "used") between entity and activity.
  * @param entity The entity provenance node.
  * @param activity The activity provenance node.
@@ -289,9 +289,9 @@ out:
 }
 
 /*!
- * @brief Record "used" relation from entity provenance node to activity provenance node. This routine is a stripped-down version of "uses" routine above.
+ * @brief Record "used" relation from entity provenance node to activity provenance node. This function is a stripped-down version of "uses" function above.
  *
- * This routine applies to only "used" relation between two provenance nodes and does almost the same as the above "uses" routine.
+ * This function applies to only "used" relation between two provenance nodes and does almost the same as the above "uses" function.
  * Except that it does not deal with "activity_mem" provenance node.
  * @param type The type of relation (in the category of "used") between entity and activity.
  * @param entity The entity provenance node.
@@ -324,14 +324,14 @@ static __always_inline int uses_two(const uint64_t type,
 /*!
  * @brief Record "generated" relation from activity provenance node (including its memory state) to entity provenance node.
  *
- * This routine applies to only "generated" relation between two provenance nodes.
+ * This function applies to only "generated" relation between two provenance nodes.
  * Unless all nodes involved (entity, activity, activity_mem) are set not to be tracked and prov_all is also turned off,
  * or unless the relation type is set not to be tracked,
  * relation will be captured.
  * At least two relations will possibly be captured:
  * 1. RL_PROC_READ relation between activity_mem and activity
  * 1. Whatever relation between activity and entity given by the argument "type", and
- * If activity_mem has memory mapped files, a SH_READ relation may be captured (see routine definition of "current_update_shst").
+ * If activity_mem has memory mapped files, a SH_READ relation may be captured (see function definition of "current_update_shst").
  * @param type The type of relation (in the category of "generated") between activity and entity.
  * @param activity_mem The memory provenance node of the activity.
  * @param activity The activity provenance node.
@@ -378,7 +378,7 @@ out:
 /*!
  * @brief Record "derived" relation from one entity provenance node to another entity provenance node.
  *
- * This routine applies to only "derived" relation between two entity provenance nodes.
+ * This function applies to only "derived" relation between two entity provenance nodes.
  * Unless both nodes involved (from, to) are set not to be tracked and prov_all is also turned off,
  * or unless the relation type is set not to be tracked,
  * relation will be captured.
@@ -415,7 +415,7 @@ static __always_inline int derives(const uint64_t type,
 /*!
  * @brief Record "informed" relation from one activity provenance node to another activity provenance node.
  *
- * This routine applies to only "informed" relation between two activity provenance nodes.
+ * This function applies to only "informed" relation between two activity provenance nodes.
  * Unless both nodes involved (from, to) are set not to be tracked and prov_all is also turned off,
  * or unless the relation type is set not to be tracked,
  * relation will be captured.

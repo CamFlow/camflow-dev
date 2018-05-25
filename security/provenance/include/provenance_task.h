@@ -37,7 +37,7 @@
 #define KB_MASK (~(KB - 1))
 
 /*!
- * @summary The following current_XXX routines are to obtain XXX information of the current process.
+ * @summary The following current_XXX functions are to obtain XXX information of the current process.
  */
 #define current_pid() (current->pid)
 static inline uint32_t current_cgroupns(void)
@@ -153,16 +153,16 @@ static inline uint32_t current_pidns(void)
 /*!
  * @brief Record shared mmap relations of a process.
  *
- * The routine goes through all the mmapped files of the "current" process,
+ * The function goes through all the mmapped files of the "current" process,
  * and for every shared mmaped file,
  * if the mmapped file has provenance entry,
  * record provenance relation between the mmaped file and the current process
  * based on the permission flags and the action (read, exec, or write).
- * If read/exec, record provenance relation RL_SH_READ by calling "record_relation" routine.
- * If write, record provenance relation RL_SH_WRITE by calling "record_relation" routine.
+ * If read/exec, record provenance relation RL_SH_READ by calling "record_relation" function.
+ * If write, record provenance relation RL_SH_WRITE by calling "record_relation" function.
  * @param cprov The cred provenance entry pointer of the current process.
  * @param read Whether the operation is read or not.
- * @return 0 if no error occurred or "mm" is NULL; Other error codes inherited from record_relation routine or unknown.
+ * @return 0 if no error occurred or "mm" is NULL; Other error codes inherited from record_relation function or unknown.
  *
  */
 static __always_inline int current_update_shst(struct provenance *cprov, bool read)
@@ -196,10 +196,10 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 }
 
 /*!
- * @brief Record the name of the task @task, and associate the name to the provenance entry @prov by creating a relation by calling "record_node_name" routine.
+ * @brief Record the name of the task @task, and associate the name to the provenance entry @prov by creating a relation by calling "record_node_name" function.
  *
  * Unless failure occurs or certain criteria are met,
- * we obtain the name of the task from its "mm_exe_file", and create a RL_NAMED_PROCESS relation by calling "record_node_name" routine.
+ * we obtain the name of the task from its "mm_exe_file", and create a RL_NAMED_PROCESS relation by calling "record_node_name" function.
  * Criteria to be met so as not to record task name are:
  * 1. The name of the provenance node has already been recorded, or
  * 2. The provenance node itself is not recorded, or
@@ -298,7 +298,7 @@ static inline void update_proc_perf(struct task_struct *task,
 /*!
  * @brief Update and return provenance entry of cred structure.
  *
- * This routine records the name of the current process and associates it with the cred provenance entry,
+ * This function records the name of the current process and associates it with the cred provenance entry,
  * unless the provenance is set to be opqaue, in which case no update is performed.
  * The cred provenance entry is also updated with UID, GID, namespaces, secid, and perform information.
  * @return The pointer to the cred provenance entry.
@@ -517,7 +517,7 @@ out:
 /*!
  * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
  *
- * This is a helper funtion used by prov_record_args routine.
+ * This is a helper funtion used by prov_record_args function.
  * It records @arg by:
  * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
  * 2. Recording a provenance relation @etype (either RL_ARG or RL_ENV depending on @vtype) between the @arg and @prov
@@ -529,7 +529,7 @@ out:
  * @param etype The relation between @prov and @arg.
  * @param arg The value of the argument.
  * @param len The length of the argument.
- * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation routine or unknown.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation function or unknown.
  *
  */
 static __always_inline int prov_record_arg(struct provenance *prov,
@@ -559,7 +559,7 @@ static __always_inline int prov_record_arg(struct provenance *prov,
  *
  * We will only record all the arguments if @prov is tracked or capture all is set.
  * We record both ENT_ARG and ENT_ENV types of arguments and relations RL_ARG and RL_ENV between those arguments and @prov,
- * by calling prov_record_arg routine.
+ * by calling prov_record_arg function.
  * @param prov The provenance entry pointer where arguments should be associated with.
  * @param bprm The binary parameter structure.
  * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.

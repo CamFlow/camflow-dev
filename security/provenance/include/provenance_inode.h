@@ -40,7 +40,7 @@
  * 3. The inode is set to be recorded.
  * @param mode The new updated mode.
  * @param prov The provenance node to be updated.
- * 
+ *
  */
 static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 {
@@ -89,7 +89,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
  * Based on the given name, we will perform a kernal path lookup and get the provenance information of that name.
  * Then we will set the provenance node as opaque.
  * @param name The name of the file object to be set opaque. Note that every object in Linux is a file.
- * 
+ *
  */
 static inline void provenance_mark_as_opaque(const char *name)
 {
@@ -108,8 +108,8 @@ static inline void provenance_mark_as_opaque(const char *name)
 /*!
  * @brief Record the name of a provenance node from directory entry.
  *
- * Unless specific criteria are met, 
- * the name of the provenance node is looked up through "dentry_path_raw" and routine "record_node_name" is called,
+ * Unless specific criteria are met,
+ * the name of the provenance node is looked up through "dentry_path_raw" and function "record_node_name" is called,
  * to associate the name of the provenance to the provenance node itself as a relation.
  * The criteria to be met are:
  * 1. The name of the provenance node has been recorded already, or
@@ -142,15 +142,15 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 
 /*!
  * @brief Record the name of the provenance node directly from the inode.
- * 
+ *
  * Unless the name of the provenance node has already been recorded,
  * or that the provenance node itself is not recorded,
- * the routine will attempt to create a name node for the provenance node by calling "record_inode_name_from_dentry".
- * To call that routine, we will find a hashed alias of inode, which is a dentry struct, and then pass that information to the routine.
+ * the function will attempt to create a name node for the provenance node by calling "record_inode_name_from_dentry".
+ * To call that function, we will find a hashed alias of inode, which is a dentry struct, and then pass that information to the function.
  * @param inode The inode whose name we look up and assocaite it with the provenance node.
  * @param prov The provenance node in question.
  * @return 0 if no error occurred or if "dentry" returns NULL. Other error codes unknown.
- * 
+ *
  * @todo Check under what circumstances "dentry" can be NULL.
  */
 static inline int record_inode_name(struct inode *inode, struct provenance *prov)
@@ -170,7 +170,7 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 
 /*!
  * @brief Update provenance information of an inode node.
- * 
+ *
  * Update provenance entry of an inode node unless that provenance node is set to be opaque.
  * The update operation includes:
  * 1. Record the name of the inode, which creates a named relation between the name node and the inode.
@@ -179,7 +179,7 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
  * 4. Update secid information of the inode node.
  * 5. Update the type of the inode node itself.
  * @param inode The inode in question whose provenance entry to be updated.
- * 
+ *
  */
 static inline void refresh_inode_provenance(struct inode *inode)
 {
@@ -196,7 +196,7 @@ static inline void refresh_inode_provenance(struct inode *inode)
 }
 /*!
  * @brief Create a new provenance node if mmap is not shared.
- * 
+ *
  * If a process mmap a file but set the flag as MAP_PRIAVTE,
  * other processes do not see the updates to the mapping, and thus the calling process should have its own mmap.
  * That is, the mapping has a new branch.
@@ -207,7 +207,7 @@ static inline void refresh_inode_provenance(struct inode *inode)
  * @param iprov The provenance entry pointer of the mmap'ed inode.
  * @param cprov The cred provenance entry pointer of the calling process.
  * @return The pointer to the new provenance entry node or NULL.
- * 
+ *
  */
 static inline struct provenance *branch_mmap(struct provenance *iprov, struct provenance *cprov)
 {
@@ -231,7 +231,7 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
  * @brief Initialize the provenance of the inode.
  *
  * We do not initialize the inode if it has already been initialized, or failure occurred.
- * Provenance extended attributes are copied to the inode provenance in this routine,
+ * Provenance extended attributes are copied to the inode provenance in this function,
  * unless the inode does not support xattr.
  * inode struct contains @inode->i_provenance to store provenance.
  * @param inode The inode structure in which we initialize provenance.
@@ -289,16 +289,16 @@ free_buf:
 }
 
 /*!
- * @brief This routine returns the provenance of an inode.
+ * @brief This function returns the provenance of an inode.
  *
- * This routine either initialize the provenance of the inode (if not initialized) and/or refreshes the provenance of the inode if needed.
- * If the routine can sleep, provenance information of the inode should be refreshed.
+ * This function either initialize the provenance of the inode (if not initialized) and/or refreshes the provenance of the inode if needed.
+ * If the function can sleep, provenance information of the inode should be refreshed.
  * @param inode The inode in question.
- * @param may_sleep Bool value signifies whether this routine can sleep.
+ * @param may_sleep Bool value signifies whether this function can sleep.
  * @return provenance struct pointer.
  *
  * @question Why do we have a may_sleep boolean?
- * @todo Error checking in this routine should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
+ * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
 static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
@@ -314,12 +314,12 @@ static __always_inline struct provenance *inode_provenance(struct inode *inode, 
 }
 
 /*!
- * @brief This routine returns the provenance of the given directory entry based on its inode.
+ * @brief This function returns the provenance of the given directory entry based on its inode.
  *
- * This routine ultimately calls "inode_provenance" routine.
- * We find the inode of the dentry (if this dentry were to be opened as a file) by calling "d_backing_inode" routine.
+ * This function ultimately calls "inode_provenance" function.
+ * We find the inode of the dentry (if this dentry were to be opened as a file) by calling "d_backing_inode" function.
  * @param dentry The dentry whose provenance is to be returned.
- * @param may_sleep Bool value used in "inode_provenance" routine (See above)
+ * @param may_sleep Bool value used in "inode_provenance" function (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
@@ -333,12 +333,12 @@ static __always_inline struct provenance *dentry_provenance(struct dentry *dentr
 }
 
 /*!
- * @brief This routine returns the provenance of the given file based on its inode.
+ * @brief This function returns the provenance of the given file based on its inode.
  *
- * This routine ultimately calls "inode_provenance" routine.
- * We find the inode of the file by calling "file_inode" routine.
+ * This function ultimately calls "inode_provenance" function.
+ * We find the inode of the file by calling "file_inode" function.
  * @param file The file whose provenance is to be returned.
- * @param may_sleep Bool value used in "inode_provenance" routine (See above)
+ * @param may_sleep Bool value used in "inode_provenance" function (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
@@ -379,7 +379,7 @@ static inline void save_provenance(struct dentry *dentry)
 }
 
 /*!
- * @brief This routine records relations related to setting extended file attributes.
+ * @brief This function records relations related to setting extended file attributes.
  *
  * xattr is a long provenance entry and is transient (i.e., freed after recorded).
  * Unless certain criteria are met, several relations are recorded when a process attempts to write xattr of a file:
@@ -400,7 +400,7 @@ static inline void save_provenance(struct dentry *dentry)
  * @param value The value of that attribute.
  * @param size The size of the value.
  * @param flags Flags passed by LSM hooks.
- * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" routine or unknown.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
 static inline int record_write_xattr(uint64_t type,
@@ -452,7 +452,7 @@ out:
 }
 
 /*!
- * @brief This routine records relations related to reading extended file attributes.
+ * @brief This function records relations related to reading extended file attributes.
  *
  * xattr is a long provenance entry and is transient (i.e., freed after recorded).
  * Unless certain criteria are met, several relations are recorded when a process attempts to read xattr of a file:
@@ -466,7 +466,7 @@ out:
  * @param cprov The cred provenance entry.
  * @param tprov The task provenance entry.
  * @param name The name of the extended attribute.
- * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" routine or unknown.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
 static inline int record_read_xattr(struct provenance *cprov,

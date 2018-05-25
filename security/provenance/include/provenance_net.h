@@ -31,7 +31,7 @@
  *
  * @param sock The socket structure whose provenance to be obtained.
  * @return The provenance entry pointer of the socket or NULL if it does not exist.
- * 
+ *
  */
 static inline struct provenance *socket_inode_provenance(struct socket *sock)
 {
@@ -46,8 +46,8 @@ static inline struct provenance *socket_inode_provenance(struct socket *sock)
 /*!
  * @brief Returns the provenance entry pointer of the inode associated with sk.
  *
- * This routine calls the routine socket_inode_provenance.
- * This is becasue only socket has an inode associated with it. 
+ * This function calls the function socket_inode_provenance.
+ * This is becasue only socket has an inode associated with it.
  * We obtain the socket structure from sk structure: @sk->sk_socket.
  * We obtain socket from sock and return the provenance entry pointer.
  * @param sk The sock structure whose provenance to be obtained.
@@ -81,7 +81,7 @@ static inline struct provenance *sk_provenance(struct sock *sk)
  * @brief Return the provenance entry pointer of sock.
  *
  * The provenance information is stored in the @sock->sk struct.
- * Therefore, we simply call the routine sk_provenance.
+ * Therefore, we simply call the function sk_provenance.
  * @param sock The socket structure.
  * @return The provenance entry pointer.
  *
@@ -158,11 +158,11 @@ static inline void __extract_udp_info(struct sk_buff *skb,
  * @brief Parse network packet information @skb into a packet provenance entry @prov.
  *
  * We parse a series of IP information from @skb and create a provenance entry node ENT_PACKET.
- * Depending on the type of the packet (i.e., TCP or UDP), we call either __extract_tcp_info or __extract_udp_info subroutine to parse.
+ * Depending on the type of the packet (i.e., TCP or UDP), we call either __extract_tcp_info or __extract_udp_info subfunction to parse.
  * @param skb Socket buffer where packet information lies.
  * @param prov The provenance entry pointer.
  * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
- * 
+ *
  */
 static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_elt *prov)
 {
@@ -217,7 +217,7 @@ extern struct list_head egress_ipv4filters;
 /*!
  * @brief Returns op value of the filter of a specific IP and/or port.
  *
- * This routine goes through a filter list,
+ * This function goes through a filter list,
  * and attempts to match the given @ip and @port.
  * If matched, the op value of the matched element will be returned.
  * @param filters The list to go through.
@@ -243,7 +243,7 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
 /*!
  * @brief Delete an element in the filter list that matches a specific filter.
  *
- * This routine goes through a filter list,
+ * This function goes through a filter list,
  * and attempts to match the given filter.
  * If matched, the matched element will be removed from the list.
  * @param filters The list to go through.
@@ -272,7 +272,7 @@ static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_fi
 /*!
  * @brief Add or update an element in the filter list that matches a specific filter.
  *
- * This routine goes through a filter list,
+ * This function goes through a filter list,
  * and attempts to match the given filter.
  * If matched, the matched element's op value will be updated based on the given filter @f or the element will be added if no matches.
  * @param filters The list to go through.
@@ -301,8 +301,8 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 /*!
  * @brief Record the address provenance node that binds to the socket node.
  *
- * This routine creates a long provenance entry node ENT_ADDR that binds to the socket provenance entry @prov.
- * Record provenance relation RL_NAMED by calling "record_relation" routine.
+ * This function creates a long provenance entry node ENT_ADDR that binds to the socket provenance entry @prov.
+ * Record provenance relation RL_NAMED by calling "record_relation" function.
  * Relation will not be recorded, if:
  * 1. The socket inode is not recorded or the name (addr) of the socket has been recorded already, or
  * 2. Failure occurs.
@@ -311,8 +311,8 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
  * @param address The address of the socket.
  * @param addrlen The length of the addres.
  * @param prov The provenance entry pointer of the socket.
- * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation routine or unknown.
- * 
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation function or unknown.
+ *
  */
 static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
