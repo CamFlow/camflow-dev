@@ -10,6 +10,12 @@
  * or (at your option) any later version.
  *
  */
+
+ /*!
+  * This file creates securityfs for provenance capture.
+  * @todo We will document this file if needed in the future.
+  *
+  */
 #include <linux/security.h>
 #include <linux/provenance_types.h>
 #include <crypto/hash.h>
