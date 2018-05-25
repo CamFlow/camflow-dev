@@ -30,6 +30,9 @@ struct provenance_query_hooks hooks = {
 	QUERY_HOOK_INIT(flow, flow),
 };
 
+/*!
+ * Register the propagate hooks.
+ */
 static int __init init_prov_propagate(void)
 {
 	register_provenance_query_hooks(&hooks);

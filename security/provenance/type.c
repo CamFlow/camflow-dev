@@ -13,7 +13,7 @@
 #include <linux/provenance_types.h>
 #include "provenance.h"
 
-/* reation string name */
+/* relation string name */
 static const char RL_STR_UNKNOWN[]               = "unknown";
 static const char RL_STR_READ[]                  = "read";
 static const char RL_STR_READ_IOCTL[]            = "read_ioctl";
@@ -52,7 +52,7 @@ static const char RL_STR_NAMED[]                 = "named";
 static const char RL_STR_NAMED_PROCESS[]         = "named_process";
 static const char RL_STR_EXEC[]                  = "exec";
 static const char RL_STR_EXEC_TASK[]             = "exec_task";
-static const char RL_STR_PCK_CNT[]             	 = "packet_content";
+static const char RL_STR_PCK_CNT[]               = "packet_content";
 static const char RL_STR_CLONE[]                 = "clone";
 static const char RL_STR_VERSION_TASK[]          = "version_activity";
 static const char RL_STR_SEARCH[]                = "search";
