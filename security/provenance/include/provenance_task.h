@@ -154,16 +154,16 @@ static inline uint32_t current_pidns(void)
  * @brief Record shared mmap relations of a process.
  *
  * The routine goes through all the mmapped files of the "current" process,
- * and for every shared mmaped file, 
+ * and for every shared mmaped file,
  * if the mmapped file has provenance entry,
- * record provenance relation between the mmaped file and the current process 
+ * record provenance relation between the mmaped file and the current process
  * based on the permission flags and the action (read, exec, or write).
  * If read/exec, record provenance relation RL_SH_READ by calling "record_relation" routine.
  * If write, record provenance relation RL_SH_WRITE by calling "record_relation" routine.
  * @param cprov The cred provenance entry pointer of the current process.
  * @param read Whether the operation is read or not.
  * @return 0 if no error occurred or "mm" is NULL; Other error codes inherited from record_relation routine or unknown.
- * 
+ *
  */
 static __always_inline int current_update_shst(struct provenance *cprov, bool read)
 {
@@ -198,7 +198,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 /*!
  * @brief Record the name of the task @task, and associate the name to the provenance entry @prov by creating a relation by calling "record_node_name" routine.
  *
- * Unless failure occurs or certain criteria are met, 
+ * Unless failure occurs or certain criteria are met,
  * we obtain the name of the task from its "mm_exe_file", and create a RL_NAMED_PROCESS relation by calling "record_node_name" routine.
  * Criteria to be met so as not to record task name are:
  * 1. The name of the provenance node has already been recorded, or
@@ -207,13 +207,12 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param task The task whose name is to be obtained.
  * @param prov The provenance entry that will be associated with the task name.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for buffer to hold file path. Other error code unknown.
- * 
+ *
  * @todo Why get_mm_exe_file instead of get_task_exe_file?
  */
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
 {
-	const struct cred *cred;
 	struct provenance *fprov;
 	struct mm_struct *mm;
 	struct file *exe_file;
@@ -235,7 +234,7 @@ static inline int record_task_name(struct task_struct *task,
 			set_opaque(prov_elt(prov));
 			goto out;
 		}
-		
+
 		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);	// Memory allocation not allowed to sleep.
 		if (!buffer) {
 			pr_err("Provenance: could not allocate memory\n");
@@ -337,7 +336,7 @@ out:
  * We need to update pid and vpid here because when the task is first initialized,
  * these information is not available.
  * @return The provenance entry pointer.
- * 
+ *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
 static inline struct provenance *get_task_provenance( void )
@@ -517,7 +516,7 @@ out:
 
 /*!
  * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
- * 
+ *
  * This is a helper funtion used by prov_record_args routine.
  * It records @arg by:
  * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
