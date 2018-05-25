@@ -35,9 +35,9 @@ extern bool relay_ready;
  */
 struct relay_list {
 	struct list_head list;
-	char *name;	// The name of the relay channel.
-	struct rchan *prov;	// Relay buffer for regular provenance entries.
-	struct rchan *long_prov;	// Relay buffer for long provenance entries.
+	char *name;                     // The name of the relay channel.
+	struct rchan *prov;             // Relay buffer for regular provenance entries.
+	struct rchan *long_prov;        // Relay buffer for long provenance entries.
 };
 
 extern struct list_head relay_list;
@@ -167,7 +167,7 @@ static inline void prov_flush(void)
  * The checks include:
  * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
  * 2. If the provenance is not a packet node (which means it should have machine ID) and the provenacne is not recorded,
- * 		record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
+ *              record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
  * @param node Provenance node (could be either regular or long)
  *
  */
@@ -230,9 +230,9 @@ static __always_inline int __write_relation(const uint64_t type,
 	}
 	relation.relation_info.flags = flags;
 
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation); // Call query hooks for propagate tracking.
+	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);  // Call query hooks for propagate tracking.
 
-	prov_write(&relation); // Finally record the relation (i.e., edge) to relay buffer.
+	prov_write(&relation);                                  // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
 }
 #endif

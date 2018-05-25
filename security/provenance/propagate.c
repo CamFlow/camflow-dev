@@ -23,7 +23,7 @@
  * @param node The source provenance node entry pointer.
  * @param edge The outgoing edge provenance entry pointer.
  * @return 0 if no error occurred.
- * 
+ *
  */
 static int out_edge(prov_entry_t *node, prov_entry_t *edge)
 {
@@ -47,7 +47,7 @@ static int out_edge(prov_entry_t *node, prov_entry_t *edge)
  * @param edge The edge provenance entry pointer.
  * @param node The destination provenance node entry pointer.
  * @return 0 if no error occurred.
- * 
+ *
  */
 static int in_edge(prov_entry_t *edge, prov_entry_t *node)
 {

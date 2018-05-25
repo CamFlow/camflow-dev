@@ -304,7 +304,7 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
 
 	prov_elt(nprov)->proc_info.gid = pgid;
 	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
-	put_cred(cred);	// Release cred.
+	put_cred(cred); // Release cred.
 	return rc;
 }
 
@@ -1140,7 +1140,7 @@ static int provenance_mmap_file(struct file *file,
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if ((flags & MAP_TYPE) == MAP_SHARED ||
-			(flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
+	    (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = derives(RL_MMAP_WRITE, cprov, iprov, file, flags);
 		if (rc < 0)
@@ -1205,7 +1205,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 	unsigned long irqflags;
 	vm_flags_t flags = vma->vm_flags;
 
-	if ( vm_mayshare(flags) ) {	// It is a shared mmap.
+	if ( vm_mayshare(flags) ) {     // It is a shared mmap.
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			iprov = file_provenance(mmapf, false);
@@ -1680,7 +1680,7 @@ static int provenance_socket_bind(struct socket *sock,
 	if (!iprov)
 		return -ENOMEM;
 
-	if (provenance_is_opaque(prov_elt(cprov)))	// We perform a check here so that we won't accidentally start tracking/propagating @iprov and @cprov
+	if (provenance_is_opaque(prov_elt(cprov)))      // We perform a check here so that we won't accidentally start tracking/propagating @iprov and @cprov
 		return rc;
 
 	if (address->sa_family == PF_INET) {
@@ -1697,7 +1697,7 @@ static int provenance_socket_bind(struct socket *sock,
 			set_propagate(prov_elt(cprov));
 		}
 		if ((op & PROV_SET_RECORD) != 0)
-			set_record_packet(prov_elt(iprov));	// We want to record packet content.
+			set_record_packet(prov_elt(iprov));     // We want to record packet content.
 	}
 	rc = provenance_record_address(address, addrlen, iprov);
 	if (rc < 0)
@@ -1871,7 +1871,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	if (!iprov)
 		return -ENOMEM;
 	if (sock->sk->sk_family == PF_UNIX &&
-	    sock->sk->sk_type != SOCK_DGRAM) {	// Datagram handled by unix_may_send hook.
+	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = sk_provenance(peer);
@@ -2228,7 +2228,7 @@ static int provenance_sb_kern_mount(struct super_block *sb,
 		prov_elt(sbprov)->sb_info.uuid[i] = sb->s_uuid.b[i];
 		c |= sb->s_uuid.b[i];
 	}
-	if (c == 0)	// If no uuid defined, generate a random one.
+	if (c == 0)     // If no uuid defined, generate a random one.
 		get_random_bytes(prov_elt(sbprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	return 0;
 }
@@ -2386,7 +2386,7 @@ void __init provenance_add_hooks(void)
 						  0, SLAB_PANIC, NULL);
 	if (unlikely(!long_provenance_cache))
 		panic("Provenance: could not allocate long_provenance_cache.");
-	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);	// Initalize boot buffer to record provenance before relayfs is ready.
+	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);     // Initalize boot buffer to record provenance before relayfs is ready.
 	if (unlikely(!boot_buffer))
 		panic("Provenance: could not allocate boot_buffer.");
 	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
@@ -2400,7 +2400,7 @@ void __init provenance_add_hooks(void)
 	relay_ready = false;
 	cred_init_provenance();
 
-	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");	// Register provenance security hooks.
+	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 	pr_info("Provenance: version %s\n", CAMFLOW_VERSION_STR);
 	pr_info("Provenance: hooks ready.\n");
 }

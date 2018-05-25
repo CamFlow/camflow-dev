@@ -191,7 +191,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 		}
 		vma = vma->vm_next;
 	}
-	mmput_async(mm);	// Release the file.
+	mmput_async(mm);        // Release the file.
 	return rc;
 }
 
@@ -235,15 +235,15 @@ static inline int record_task_name(struct task_struct *task,
 			goto out;
 		}
 
-		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);	// Memory allocation not allowed to sleep.
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);   // Memory allocation not allowed to sleep.
 		if (!buffer) {
 			pr_err("Provenance: could not allocate memory\n");
-			fput(exe_file);	// Release the file.
+			fput(exe_file); // Release the file.
 			rc = -ENOMEM;
 			goto out;
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
-		fput(exe_file);	// Release the file.
+		fput(exe_file); // Release the file.
 		rc = record_node_name(prov, ptr);
 		kfree(buffer);
 	}
@@ -306,7 +306,7 @@ static inline void update_proc_perf(struct task_struct *task,
  */
 static inline struct provenance *get_cred_provenance(void)
 {
-	struct provenance *prov = current_provenance();	// current_provenance returns provenance pointer of current_cred().
+	struct provenance *prov = current_provenance(); // current_provenance returns provenance pointer of current_cred().
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
@@ -358,7 +358,7 @@ static inline struct provenance *get_task_provenance( void )
 static inline struct provenance *prov_from_vpid(pid_t pid)
 {
 	struct provenance *tprov;
-	struct task_struct *dest = find_task_by_vpid(pid);	// Function is in /kernel/pid.c
+	struct task_struct *dest = find_task_by_vpid(pid);      // Function is in /kernel/pid.c
 
 	if (!dest)
 		return NULL;

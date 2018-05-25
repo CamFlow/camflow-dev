@@ -48,9 +48,9 @@ static __always_inline int __update_version(const uint64_t type,
 	if (filter_update_node(type))
 		return 0;
 
-	memcpy(&old_prov, prov, sizeof(union prov_elt)); // Copy the current provenance prov to old_prov.
+	memcpy(&old_prov, prov, sizeof(union prov_elt));        // Copy the current provenance prov to old_prov.
 
-	node_identifier(prov).version++; // Update the version of prov to the newer version.
+	node_identifier(prov).version++;                        // Update the version of prov to the newer version.
 	clear_recorded(prov);
 
 	// Record the version relation between two versions of the same identity.
@@ -58,8 +58,8 @@ static __always_inline int __update_version(const uint64_t type,
 		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
-	clear_has_outgoing(prov);     // Newer version now has no outgoing edge.
-	clear_saved(prov);           // For inode provenance persistance
+	clear_has_outgoing(prov);       // Newer version now has no outgoing edge.
+	clear_saved(prov);              // For inode provenance persistance
 	return rc;
 }
 

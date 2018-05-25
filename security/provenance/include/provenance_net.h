@@ -117,7 +117,7 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
-	tcpoff = offset + ihlen(ih);	//Point to tcp packet.
+	tcpoff = offset + ihlen(ih);    //Point to tcp packet.
 	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
 	if (!th)
 		return;
@@ -172,7 +172,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 	struct iphdr *ih;
 
 	offset = skb_network_offset(skb);
-	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);	// We obtain the IP header.
+	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);      // We obtain the IP header.
 	if (!ih)
 		return -EINVAL;
 
@@ -180,7 +180,7 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 		return -EINVAL;
 
 	memset(prov, 0, sizeof(union prov_elt));
-	id = &packet_identifier(prov);	// We are going fo fill the information.
+	id = &packet_identifier(prov);  // We are going fo fill the information.
 
 	id->type = ENT_PACKET;
 	// Collect IP element of prov identifier.
@@ -263,7 +263,7 @@ static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_fi
 		    tmp->filter.port == f->filter.port) {
 			list_del(listentry);
 			kfree(tmp);
-			return 0;	// Should only get one.
+			return 0;       // Should only get one.
 		}
 	}
 	return 0;

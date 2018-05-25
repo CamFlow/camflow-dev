@@ -161,7 +161,7 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	dentry = d_find_alias(inode);
-	if (!dentry)	// We did not find a dentry, not sure if it should ever happen.
+	if (!dentry)    // We did not find a dentry, not sure if it should ever happen.
 		return 0;
 	rc = record_inode_name_from_dentry(dentry, prov);
 	dput(dentry);
