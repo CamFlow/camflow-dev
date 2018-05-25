@@ -184,11 +184,6 @@ static __always_inline void __write_node(prov_entry_t *node)
 	set_recorded(node);
 }
 
-static inline void copy_identifier(union prov_identifier *dest, union prov_identifier *src)
-{
-	memcpy(dest, src, sizeof(union prov_identifier));
-}
-
 /*!
  * @brief Write provenance relation to relay buffer.
  *
@@ -227,8 +222,8 @@ static __always_inline int __write_relation(const uint64_t type,
 	relation_identifier(&relation).id = prov_next_relation_id();
 	relation_identifier(&relation).boot_id = prov_boot_id;
 	relation_identifier(&relation).machine_id = prov_machine_id;
-	copy_identifier(&relation.relation_info.snd, &get_prov_identifier(f));
-	copy_identifier(&relation.relation_info.rcv, &get_prov_identifier(t));
+	memcpy(&relation.relation_info.snd, &get_prov_identifier(f), sizeof(union prov_identifier));
+	memcpy(&relation.relation_info.rcv, &get_prov_identifier(t), sizeof(union prov_identifier));
 	if (file) {
 		relation.relation_info.set = FILE_INFO_SET;
 		relation.relation_info.offset = file->f_pos;
