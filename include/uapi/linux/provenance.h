@@ -21,6 +21,16 @@
 #include <linux/mutex.h>
 #endif
 
+#define xstr(s) str(s)
+#define str(s) # s
+
+#define CAMFLOW_VERSION_MAJOR     0
+#define CAMFLOW_VERSION_MINOR     4
+#define CAMFLOW_VERSION_PATCH     0
+#define CAMFLOW_VERSION_STR "v"xstr(CAMFLOW_VERSION_MAJOR)\
+  "."xstr(CAMFLOW_VERSION_MINOR)\
+  "."xstr(CAMFLOW_VERSION_PATCH)\
+
 #define PROVENANCE_HASH "sha256"
 
 #define PROV_GOLDEN_RATIO_64 0x61C8864680B583EBUL
@@ -102,6 +112,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
+#define PROV_WRITTEN_FILE                     "/sys/kernel/security/provenance/written"
 #define PROV_COMPRESS_NODE_FILE               "/sys/kernel/security/provenance/compress_node"
 #define PROV_COMPRESS_EDGE_FILE               "/sys/kernel/security/provenance/compress_edge"
 #define PROV_NODE_FILE                        "/sys/kernel/security/provenance/node"
@@ -110,9 +121,15 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_MACHINE_ID_FILE                  "/sys/kernel/security/provenance/machine_id"
 #define PROV_BOOT_ID_FILE                  		"/sys/kernel/security/provenance/boot_id"
 #define PROV_NODE_FILTER_FILE                 "/sys/kernel/security/provenance/node_filter"
-#define PROV_RELATION_FILTER_FILE             "/sys/kernel/security/provenance/relation_filter"
+#define PROV_DERIVED_FILTER_FILE              "/sys/kernel/security/provenance/derived_filter"
+#define PROV_GENERATED_FILTER_FILE            "/sys/kernel/security/provenance/generated_filter"
+#define PROV_USED_FILTER_FILE                 "/sys/kernel/security/provenance/used_filter"
+#define PROV_INFORMED_FILTER_FILE             "/sys/kernel/security/provenance/informed_filter"
 #define PROV_PROPAGATE_NODE_FILTER_FILE       "/sys/kernel/security/provenance/propagate_node_filter"
-#define PROV_PROPAGATE_RELATION_FILTER_FILE   "/sys/kernel/security/provenance/propagate_relation_filter"
+#define PROV_PROPAGATE_DERIVED_FILTER_FILE    "/sys/kernel/security/provenance/propagate_derived_filter"
+#define PROV_PROPAGATE_GENERATED_FILTER_FILE  "/sys/kernel/security/provenance/propagate_generated_filter"
+#define PROV_PROPAGATE_USED_FILTER_FILE       "/sys/kernel/security/provenance/propagate_used_filter"
+#define PROV_PROPAGATE_INFORMED_FILTER_FILE   "/sys/kernel/security/provenance/propagate_informed_filter"
 #define PROV_FLUSH_FILE                       "/sys/kernel/security/provenance/flush"
 #define PROV_PROCESS_FILE                     "/sys/kernel/security/provenance/process"
 #define PROV_IPV4_INGRESS_FILE                "/sys/kernel/security/provenance/ipv4_ingress"
@@ -128,6 +145,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_TYPE															"/sys/kernel/security/provenance/type"
 #define PROV_VERSION													"/sys/kernel/security/provenance/version"
 #define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
+#define PROV_DUPLICATE_FILE										"/sys/kernel/security/provenance/duplicate"
+
+#define PROV_CMD_LINE_TOOL                    "/usr/bin/camflow"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -144,6 +164,9 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_secid(node)              ((node)->node_info.secid)
 #define node_uid(node)              	((node)->node_info.uid)
 #define node_gid(node)              	((node)->node_info.gid)
+#define node_previous_id(node)        ((node)->node_info.previous_id)
+#define node_previous_type(node)      ((node)->node_info.previous_type)
+
 
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
@@ -223,7 +246,24 @@ union prov_identifier {
 #define clear_is_long(node)						prov_clear_flag(node, LONG_BIT)
 #define provenance_is_long(node)			prov_check_flag(node, LONG_BIT)
 
-#define basic_elements union prov_identifier identifier; uint8_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
+#define OUTGOING_BIT 7
+#define set_has_outgoing(node)				    prov_set_flag(node, OUTGOING_BIT)
+#define clear_has_outgoing(node)					prov_clear_flag(node, OUTGOING_BIT)
+#define provenance_has_outgoing(node)			prov_check_flag(node, OUTGOING_BIT)
+
+#define INITIALIZED_BIT 8
+#define set_initialized(node)				        prov_set_flag(node, INITIALIZED_BIT)
+#define clear_initialized(node)					    prov_clear_flag(node, INITIALIZED_BIT)
+#define provenance_is_initialized(node)			prov_check_flag(node, INITIALIZED_BIT)
+
+#define SAVED_BIT 9
+#define set_saved(node)				        prov_set_flag(node, SAVED_BIT)
+#define clear_saved(node)					    prov_clear_flag(node, SAVED_BIT)
+#define provenance_is_saved(node)			prov_check_flag(node, SAVED_BIT)
+
+
+
+#define basic_elements union prov_identifier identifier; uint64_t previous_id; uint64_t previous_type; uint32_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
 
 struct msg_struct {
 	basic_elements;
@@ -245,11 +285,8 @@ struct node_struct {
 	basic_elements;
 };
 
-struct task_prov_struct {
+struct proc_prov_struct {
 	basic_elements;
-	uint32_t pid;
-	uint32_t vpid;
-	uint32_t ppid;
 	uint32_t tgid;
 	uint32_t utsns;
 	uint32_t ipcns;
@@ -268,6 +305,12 @@ struct task_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
+};
+
+struct task_prov_struct {
+	basic_elements;
+	uint32_t pid;
+	uint32_t vpid;
 };
 
 struct inode_prov_struct {
@@ -311,6 +354,7 @@ union prov_elt {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
+	struct proc_prov_struct proc_info;
 	struct task_prov_struct task_info;
 	struct inode_prov_struct inode_info;
 	struct msg_msg_struct msg_msg_info;
@@ -373,6 +417,7 @@ union long_prov_elt {
 	struct msg_struct msg_info;
 	struct relation_struct relation_info;
 	struct node_struct node_info;
+	struct proc_prov_struct proc_info;
 	struct task_prov_struct task_info;
 	struct inode_prov_struct inode_info;
 	struct msg_msg_struct msg_msg_info;

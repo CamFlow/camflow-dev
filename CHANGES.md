@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.4.0           | 4.16.12        | 26/05/2018 |
 | 0.3.11          | 4.14.18        | 09/02/2018 |
 | 0.3.10          | 4.14.15        | 27/01/2018 |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
@@ -30,6 +31,29 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.4.0
+```
+- Support node duplication on/off.
+- Reworking mmap handling logic.
+- Added hook and relation type to capture open file descriptor sent over ipc.
+- RL_CHANGE becomes RL_SETUID and RL_SETGID.
+- Added new relation type: RL_PERM_APPEND.
+- Added new relation type: RL_STR_SH_CREATE_READ and RL_STR_SH_CREATE_WRITE.
+- Added new relation type: RL_STR_SH_ATTACH_READ and RL_STR_SH_ATTACH_WRITE.
+- Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.
+- Added new relation type: RL_SND_MSG_Q and RL_RCV_MSG_Q.
+- Added new relation type: RL_SND_MSG and RL_RCV_MSG.
+- Added new relation type: RL_CLONE_MEM.
+- Split RL_CREATE into RL_SOCKET_CREATE, RL_MSG_CREATE and RL_INODE_CREATE.
+- Re-introduce RL_SND_UNIX and RL_RCV_UNIX now that we have space.
+- Added new relation type: RL_PROC_WRITE and RL_PROC_READ.
+- Increased the maximum number of relation type supported.
+- Protect (ro) a number of pointers after init.
+- Handle signal.
+- Revert single source of ID change.
+- Update to kernel version 4.16.12.
+```
 
 ### v0.3.11
 ```

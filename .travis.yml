@@ -3,10 +3,14 @@ sudo: required
 language: c
 
 addons:
-  sonarqube:
-    branches:
-      - master
-      - dev
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    packages:
+    # install toolchains
+    - gcc-7
+    - g++-7
 
 before_install:
   - sudo apt-get update -qq
@@ -20,17 +24,20 @@ before_install:
 before_script:
   - make prepare_kernel
   - make patch
-  - make config_travis
 
 script:
-  - sonar-scanner -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=https://sonarqube.com
+  - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
+  - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-7 /usr/bin/g++
+  - gcc --version
+  - g++ --version
+  - make config_travis
   - make compile_security
   - make compile_kernel
   - make test_travis
+  - make test_patch
 
 after_success:
   - make prepare_release_travis
-  - ./linuxkit.sh
 
 deploy:
   provider: releases

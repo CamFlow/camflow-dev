@@ -20,13 +20,14 @@
 #define PROV_BASE_NAME "provenance"
 #define LONG_PROV_BASE_NAME "long_provenance"
 
-/* global variable, extern in provenance.h */
+/* Global variables: variable declarations in provenance.h */
 static struct rchan *prov_chan;
 static struct rchan *long_prov_chan;
-atomic64_t prov_id = ATOMIC64_INIT(0);
+atomic64_t prov_relation_id = ATOMIC64_INIT(0);
+atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
-/*
- * create_buf_file() callback.  Creates relay file in debugfs.
+/*!
+ * @brief Callback function of function "create_buf_file". This callback function creates relay file in "debugfs".
  */
 static struct dentry *create_buf_file_handler(const char *filename,
 					      struct dentry *parent,
@@ -38,8 +39,8 @@ static struct dentry *create_buf_file_handler(const char *filename,
 				   &relay_file_operations);
 }
 
-/*
- * remove_buf_file() callback.  Removes relay file from debugfs.
+/*!
+ * @brief Callback function of function "remove_buf_file". This callback function removes the relay file from "debugfs".
  */
 static int remove_buf_file_handler(struct dentry *dentry)
 {
@@ -47,15 +48,21 @@ static int remove_buf_file_handler(struct dentry *dentry)
 	return 0;
 }
 
-/*
- * relay interface callbacks
- */
-static struct rchan_callbacks relay_callbacks = {
 
+/* Relay interface callback functions */
+static struct rchan_callbacks relay_callbacks = {
 	.create_buf_file	= create_buf_file_handler,
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
+/*!
+ * @brief Write whatever in boot buffer to relay buffer when relay buffer is ready.
+ *
+ * This function writes what's in boot_buffer to relay buffer for regular provenance entries,
+ * and what's in long_boot_buffer to relay buffer for long provenance entries.
+ * It also frees memory after it is done writing.
+ *
+ */
 static void write_boot_buffer(void)
 {
 	if (boot_buffer->nb_entry > 0)
@@ -72,6 +79,16 @@ static void write_boot_buffer(void)
 bool relay_ready;
 extern struct workqueue_struct *prov_queue;
 
+/*!
+ * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
+ *
+ * Each relay channel in the list must have a unique name.
+ * Each relay channel contains a relay buffer for regular provenance entries and a relay buffer for long provenance entries.
+ * @param buffer Contains the name of the relay buffer for regular provenance entries (prepend "long_" for the relay buffer name for long provenance entries)
+ * @param len The length of the name of the regular relay buffer.
+ * @return 0 if no error occurred; -EFAULT if name already exists for relay buffer or opening new relay buffer failed; -ENOMEM if length of the name of the relay buffer is too long. Other error codes unknown.
+ *
+ */
 int prov_create_channel(char *buffer, size_t len)
 {
 	struct relay_list *tmp;
@@ -80,7 +97,7 @@ int prov_create_channel(char *buffer, size_t len)
 	struct rchan *long_chan;
 	int rc = 0;
 
-	// test if channel already exists
+	// Test if channel already exists based on the name.
 	list_for_each_entry(tmp, &relay_list, list) {
 		if (strcmp(tmp->name, buffer) == 0) {
 			rc = -EFAULT;
@@ -107,6 +124,18 @@ out:
 	return rc;
 }
 
+/*!
+ * @brief Initialize relay buffer for provenance.
+ *
+ * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,
+ * and a base relay buffer for long provenance entries.
+ * This will become the first relay channel in the relay_list.
+ * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
+ * Then we can write down whatever is in the boot buffer to relay buffer.
+ * Head of the relay_list is defined in hooks.c file.
+ * @return 0 if no error occurred.
+ *
+ */
 static int __init relay_prov_init(void)
 {
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
@@ -118,7 +147,7 @@ static int __init relay_prov_init(void)
 		panic("Provenance: relay_open failure\n");
 	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
 	relay_ready = true;
-	// relay buffer are ready, we can write down the boot buffer
+
 	write_boot_buffer();
 	pr_info("Provenance: relay ready.\n");
 	return 0;
