@@ -66,6 +66,8 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	if (prov_elt(prov)->inode_info.mode != 0
 	    && prov_elt(prov)->inode_info.mode != mode
 	    && provenance_is_recorded(prov_elt(prov))) {
+		if (filter_update_node(type))
+			goto out;
 		memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
 		// We update the info of the new version and record it.
 		prov_elt(prov)->inode_info.mode = mode;
@@ -78,6 +80,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		clear_has_outgoing(prov_elt(prov));
 		clear_saved(prov_elt(prov));
 	}
+out:
 	prov_elt(prov)->inode_info.mode = mode;
 	prov_type(prov_elt(prov)) = type;
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);

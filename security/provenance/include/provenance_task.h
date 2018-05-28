@@ -213,7 +213,6 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
 {
-	const struct cred *cred;
 	struct provenance *fprov;
 	struct mm_struct *mm;
 	struct file *exe_file;
@@ -224,9 +223,6 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	cred = get_task_cred(task);
-	if (!cred)
-		return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
@@ -252,7 +248,6 @@ static inline int record_task_name(struct task_struct *task,
 		kfree(buffer);
 	}
 out:
-	put_cred(cred);	// Release the credential.
 	return rc;
 }
 
@@ -276,7 +271,7 @@ static inline void update_proc_perf(struct task_struct *task,
 	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
 
 	// memory
-	mm = get_task_mm(task);
+	mm = get_task_mm(current);
 	if (mm) {
 		// KB
 		prov_elt(prov)->proc_info.vm =  mm->total_vm  * PAGE_SIZE / KB;

@@ -1481,7 +1481,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	rc = uses(RL_SH_CREATE_READ, sprov, tprov, cprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = generates(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
+	rc = uses(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1538,7 +1538,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = uses(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));
