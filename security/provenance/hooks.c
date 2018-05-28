@@ -504,7 +504,7 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *dprov = NULL;
-	struct provenance *iprov;
+	struct provenance *iprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -533,7 +533,32 @@ out:
 	return rc;
 }
 
-/* @todo Probably we want to capture information flow during unlink as well (useful for stream processing) */
+/*
+ *	Check the permission to remove a hard link to a file.
+ *	@dir contains the inode structure of parent directory of the file.
+ *	@dentry contains the dentry structure for file to be unlinked.
+ *	Return 0 if permission is granted.
+ */
+static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = NULL;
+	unsigned long irqflags;
+	int rc;
+
+	iprov = dentry_provenance(dentry, true);
+	if (!iprov)
+		return -ENOMEM;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
+	rc = generates(RL_UNLINK, cprov, tprov, iprov, NULL, 0);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
 
 /*!
  * @brief Record provenance when inode_rename hook is triggered.
@@ -2254,6 +2279,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(inode_free_security,		    provenance_inode_free_security),
 	LSM_HOOK_INIT(inode_permission,			    provenance_inode_permission),
 	LSM_HOOK_INIT(inode_link,			    provenance_inode_link),
+	LSM_HOOK_INIT(inode_unlink,			    provenance_inode_unlink),
 	LSM_HOOK_INIT(inode_rename,			    provenance_inode_rename),
 	LSM_HOOK_INIT(inode_setattr,			    provenance_inode_setattr),
 	LSM_HOOK_INIT(inode_getattr,			    provenance_inode_getattr),
