@@ -1139,8 +1139,8 @@ static int provenance_mmap_file(struct file *file,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if ((flags & MAP_TYPE) == MAP_SHARED) {
-		    //  || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
+	if ((flags & MAP_TYPE) == MAP_SHARED
+		    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
 			rc = derives(RL_MMAP_WRITE, cprov, iprov, file, flags);
 		if (rc < 0)
