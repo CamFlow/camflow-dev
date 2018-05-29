@@ -35,10 +35,10 @@
 ### v0.4.0
 ```
 - Changes in the following functions:
-	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS. (R)
-	- update_inode_type in security/provenance/include/provenance_inode.h: remove filter_update_node function call in the function body because type variable is never a relation. (R)
-	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed. (R)
-	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node. (R)
+	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS.
+	- update_inode_type in security/provenance/include/provenance_inode.h: remove filter_update_node function call in the function body because type variable is never a relation.
+	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed.
+	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node.
 	- __write_node in security/provenance/include/provenance_relay.h: remove setting boot_id.
 	- record_task_name in security/provenance/include/provenance_task.h: return error code -ENOMEM when allocating buffer failed. (R)
 	- update_proc_perf in security/provenance/inclue/provenance_task.h: get mm from task instead of current when calling get_task_mm function. (R)

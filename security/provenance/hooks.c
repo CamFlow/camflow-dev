@@ -2379,13 +2379,13 @@ void __init provenance_add_hooks(void)
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);
-	// if (unlikely(!provenance_cache))
-	// 	panic("Provenance: could not allocate provenance_cache.");
+	if (unlikely(!provenance_cache))
+		panic("Provenance: could not allocate provenance_cache.");
 	long_provenance_cache = kmem_cache_create("long_provenance_struct",
 						  sizeof(union long_prov_elt),
 						  0, SLAB_PANIC, NULL);
-	// if (unlikely(!long_provenance_cache))
-	// 	panic("Provenance: could not allocate long_provenance_cache.");
+	if (unlikely(!long_provenance_cache))
+		panic("Provenance: could not allocate long_provenance_cache.");
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);     // Initalize boot buffer to record provenance before relayfs is ready.
 	if (unlikely(!boot_buffer))
 		panic("Provenance: could not allocate boot_buffer.");

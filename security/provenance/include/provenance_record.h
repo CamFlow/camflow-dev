@@ -142,7 +142,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 	clear_recorded(prov_elt(prov));
 
 	rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
-	// clear_has_outgoing(prov_elt(prov));     // Newer version now has no outgoing edge.
+	clear_has_outgoing(prov_elt(prov));     // Newer version now has no outgoing edge.
 	return rc;
 }
 
