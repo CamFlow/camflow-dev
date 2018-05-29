@@ -1986,8 +1986,8 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (family != PF_INET)
 		return 0;
 	iprov = sk_inode_provenance(sk);
-	// if (!iprov)
-	// 	return -ENOMEM;
+	if (!iprov)
+		return 0;
 	if (provenance_is_tracked(prov_elt(iprov))) {
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
