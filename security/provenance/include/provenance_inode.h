@@ -489,7 +489,7 @@ static inline int record_read_xattr(struct provenance *cprov,
 		return 0;
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr) {
-		rc = -ENOMEM;
+		// rc = -ENOMEM;
 		goto out;
 	}
 	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);

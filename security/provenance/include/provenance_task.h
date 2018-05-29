@@ -243,7 +243,7 @@ static inline int record_task_name(struct task_struct *task,
 		if (!buffer) {
 			pr_err("Provenance: could not allocate memory\n");
 			fput(exe_file); // Release the file.
-			rc = -ENOMEM;
+			// rc = -ENOMEM;
 			goto out;
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
