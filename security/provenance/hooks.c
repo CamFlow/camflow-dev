@@ -1987,7 +1987,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return 0;
 	iprov = sk_inode_provenance(sk);
 	if (!iprov)
-		return 0;
+		return -ENOMEM;
 	if (provenance_is_tracked(prov_elt(iprov))) {
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));

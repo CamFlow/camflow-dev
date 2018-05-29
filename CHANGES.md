@@ -66,13 +66,13 @@
 	- provenance_socket_sendmsg in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_socket_recvmsg in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_unix_may_send in security/provenance/hooks.c: initialize rc to 0.
-	- record_task_name in security/provenance/include/provenance_task.h: remove cred declaraction, then remove obtaining credential (and releasing it later) and checking its existence. (R)
-	- provenance_socket_sock_rcv_skb in security/provenance/hooks.c: return -ENOMEM if sk inode provenance does not exist. (R)
+	- record_task_name in security/provenance/include/provenance_task.h: remove cred declaraction, then remove obtaining credential (and releasing it later) and checking its existence.
+	- provenance_socket_sock_rcv_skb in security/provenance/hooks.c: return -ENOMEM if sk inode provenance does not exist.
 	- provenance_unix_stream_connect in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_bprm_set_creds in security/provenance/hooks.c: initialize rc to 0.
-	- prov_record_args in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0 at the end (rc should be 0 at the end). (R)(R2)(R3)
+	- prov_record_args in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0 at the end (rc should be 0 at the end). (BUG)
 - Change in the following defintions:
-	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags). (R)
+	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags).
 - Support node duplication on/off.
 - Reworking mmap handling logic.
 - Added hook and relation type to capture open file descriptor sent over ipc.

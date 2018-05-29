@@ -148,7 +148,7 @@ static inline uint32_t current_pidns(void)
 #define vm_exec(flags)    ((flags & VM_EXEC) == VM_EXEC)
 #define vm_mayshare(flags) ((flags & (VM_SHARED | VM_MAYSHARE)) != 0)
 #define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
-#define vm_read_exec_mayshare(flags) ((vm_write(flags) || vm_exec(flags)) && vm_mayshare(flags))
+#define vm_read_exec_mayshare(flags) ((vm_read(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
 /*!
  * @brief Record shared mmap relations of a process.
@@ -213,7 +213,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
 {
-	const struct cred *cred;
+	// const struct cred *cred;
 	struct provenance *fprov;
 	struct mm_struct *mm;
 	struct file *exe_file;
@@ -224,9 +224,9 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	cred = get_task_cred(task);
-	if (!cred)
-		return rc;
+	// cred = get_task_cred(task);
+	// if (!cred)
+	// 	return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
@@ -252,7 +252,7 @@ static inline int record_task_name(struct task_struct *task,
 		kfree(buffer);
 	}
 out:
-	put_cred(cred);
+	// put_cred(cred);
 	return rc;
 }
 
