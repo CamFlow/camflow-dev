@@ -39,7 +39,7 @@ static inline struct provenance *socket_inode_provenance(struct socket *sock)
 	struct provenance *iprov = NULL;
 
 	if (inode)
-		iprov = inode_provenance(SOCK_INODE(sock), false);
+		iprov = inode_provenance(inode, false);
 	return iprov;
 }
 

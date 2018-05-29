@@ -1481,7 +1481,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	rc = uses(RL_SH_CREATE_READ, sprov, tprov, cprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = uses(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
+	rc = generates(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1538,7 +1538,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = uses(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));
@@ -1637,8 +1637,8 @@ static int provenance_socket_post_create(struct socket *sock,
 
 	if (kern)
 		return 0;
-	// if (!iprov)
-	// 	return -ENOMEM;
+	if (!iprov)
+		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
