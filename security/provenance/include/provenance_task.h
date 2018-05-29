@@ -243,7 +243,7 @@ static inline int record_task_name(struct task_struct *task,
 		if (!buffer) {
 			pr_err("Provenance: could not allocate memory\n");
 			fput(exe_file); // Release the file.
-			// rc = -ENOMEM;
+			rc = -ENOMEM;
 			goto out;
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
@@ -276,7 +276,7 @@ static inline void update_proc_perf(struct task_struct *task,
 	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
 
 	// memory
-	mm = get_task_mm(current);
+	mm = get_task_mm(task);
 	if (mm) {
 		// KB
 		prov_elt(prov)->proc_info.vm =  mm->total_vm  * PAGE_SIZE / KB;

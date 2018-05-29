@@ -40,9 +40,9 @@
 	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed.
 	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node.
 	- __write_node in security/provenance/include/provenance_relay.h: remove setting boot_id.
-	- record_task_name in security/provenance/include/provenance_task.h: return error code -ENOMEM when allocating buffer failed. (R)
-	- update_proc_perf in security/provenance/inclue/provenance_task.h: get mm from task instead of current when calling get_task_mm function. (R)
-	- record_read_xattr in security/provenance/include/provenance_inode.h: return error code -ENOMEM when allocating a new long provenance entry failed. (R)
+	- record_task_name in security/provenance/include/provenance_task.h: return error code -ENOMEM when allocating buffer failed.
+	- update_proc_perf in security/provenance/inclue/provenance_task.h: get mm from task instead of current when calling get_task_mm function.
+	- record_read_xattr in security/provenance/include/provenance_inode.h: return error code -ENOMEM when allocating a new long provenance entry failed.
 	- provenance_inode_listxattr in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_file_splice_pipe_to_pipe in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_file_open in security/provenance/hooks.c: initialize rc to 0.
