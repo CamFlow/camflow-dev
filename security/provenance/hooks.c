@@ -1637,8 +1637,8 @@ static int provenance_socket_post_create(struct socket *sock,
 
 	if (kern)
 		return 0;
-	if (!iprov)
-		return -ENOMEM;
+	// if (!iprov)
+	// 	return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
@@ -1986,8 +1986,8 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (family != PF_INET)
 		return 0;
 	iprov = sk_inode_provenance(sk);
-	if (!iprov)
-		return -ENOMEM;
+	// if (!iprov)
+	// 	return -ENOMEM;
 	if (provenance_is_tracked(prov_elt(iprov))) {
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
@@ -2379,13 +2379,13 @@ void __init provenance_add_hooks(void)
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);
-	if (unlikely(!provenance_cache))
-		panic("Provenance: could not allocate provenance_cache.");
+	// if (unlikely(!provenance_cache))
+	// 	panic("Provenance: could not allocate provenance_cache.");
 	long_provenance_cache = kmem_cache_create("long_provenance_struct",
 						  sizeof(union long_prov_elt),
 						  0, SLAB_PANIC, NULL);
-	if (unlikely(!long_provenance_cache))
-		panic("Provenance: could not allocate long_provenance_cache.");
+	// if (unlikely(!long_provenance_cache))
+	// 	panic("Provenance: could not allocate long_provenance_cache.");
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);     // Initalize boot buffer to record provenance before relayfs is ready.
 	if (unlikely(!boot_buffer))
 		panic("Provenance: could not allocate boot_buffer.");

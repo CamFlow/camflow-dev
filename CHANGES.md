@@ -35,19 +35,19 @@
 ### v0.4.0
 ```
 - Changes in the following functions:
-	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS.
-	- update_inode_type in security/provenance/include/provenance_inode.h: remove filter_update_node function call in the function body because type variable is never a relation.
-	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed.
-	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node.
+	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS. (R)
+	- update_inode_type in security/provenance/include/provenance_inode.h: remove filter_update_node function call in the function body because type variable is never a relation. (R)
+	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed. (R)
+	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node. (R)
 	- __write_node in security/provenance/include/provenance_relay.h: remove setting boot_id.
-	- record_task_name in security/provenance/include/provenance_task.h: return error code -ENOMEM when allocating buffer failed.
-	- update_proc_perf in security/provenance/inclue/provenance_task.h: get mm from task instead of current when calling get_task_mm function.
-	- record_read_xattr in security/provenance/include/provenance_inode.h: return error code -ENOMEM when allocating a new long provenance entry failed.
+	- record_task_name in security/provenance/include/provenance_task.h: return error code -ENOMEM when allocating buffer failed. (R)
+	- update_proc_perf in security/provenance/inclue/provenance_task.h: get mm from task instead of current when calling get_task_mm function. (R)
+	- record_read_xattr in security/provenance/include/provenance_inode.h: return error code -ENOMEM when allocating a new long provenance entry failed. (R)
 	- provenance_inode_listxattr in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_file_splice_pipe_to_pipe in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_file_open in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_file_receive in security/provenance/hooks.c: initialize rc to 0.
-	- provenance_mmap_file in security/provenance/hooks.c: add a map type MAP_SHARED_VALIDATE.
+	- provenance_mmap_file in security/provenance/hooks.c: add a map type MAP_SHARED_VALIDATE. (R)
 	- provenance_mmap_file in security/provenance/hooks.c: return rc instead of hard-coded 0.
 	- provenance_file_ioctl in security/provenance/hooks.c: initialize rc to 0.
 	- current_update_shst in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0.
@@ -55,10 +55,10 @@
 	- __mq_msgsnd in security/provenance/hooks.c: initialize rc to 0.
 	- __mq_msgrcv in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_shm_alloc_security in security/provenance/hooks.c: initialize rc to 0.
-	- provenance_shm_alloc_security in security/provenance/hooks.c: RL_SH_CREATE_WRITE relation changes from uses to generates.
-	- provenance_shm_shmat in security/provenance/hooks.c: RL_SH_ATTACH_WRITE relation changes from uses to generates.
-	- socket_inode_provenance in security/provenance/include/provenance_net.h: change SOCK_INODE(sock) to simply inode.
-	- provenance_socket_post_create in security/provenance/hooks.c: return -ENOMEM if socket inode provenance does not exist.
+	- provenance_shm_alloc_security in security/provenance/hooks.c: RL_SH_CREATE_WRITE relation changes from uses to generates. (R)
+	- provenance_shm_shmat in security/provenance/hooks.c: RL_SH_ATTACH_WRITE relation changes from uses to generates. (R)
+	- socket_inode_provenance in security/provenance/include/provenance_net.h: change SOCK_INODE(sock) to simply inode. (R)
+	- provenance_socket_post_create in security/provenance/hooks.c: return -ENOMEM if socket inode provenance does not exist. (R)
 	- provenance_socket_bind in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_socket_bind in security/provenance/hooks.c: return rc instead of hard-coded 0 when provenance is opaque.
 	- provenance_socket_listen in security/provenance/hooks.c: initialize rc to 0.
@@ -66,13 +66,13 @@
 	- provenance_socket_sendmsg in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_socket_recvmsg in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_unix_may_send in security/provenance/hooks.c: initialize rc to 0.
-	- record_task_name in security/provenance/include/provenance_task.h: remove cred declaraction, then remove obtaining credential (and releasing it later) and checking its existence.
-	- provenance_socket_sock_rcv_skb in security/provenance/hooks.c: return -ENOMEM if sk inode provenance does not exist.
+	- record_task_name in security/provenance/include/provenance_task.h: remove cred declaraction, then remove obtaining credential (and releasing it later) and checking its existence. (R)
+	- provenance_socket_sock_rcv_skb in security/provenance/hooks.c: return -ENOMEM if sk inode provenance does not exist. (R)
 	- provenance_unix_stream_connect in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_bprm_set_creds in security/provenance/hooks.c: initialize rc to 0.
-	- prov_record_args in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0 at the end (rc should be 0 at the end.)
+	- prov_record_args in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0 at the end (rc should be 0 at the end). (R)
 - Change in the following defintions:
-	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags).
+	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags). (R)
 - Support node duplication on/off.
 - Reworking mmap handling logic.
 - Added hook and relation type to capture open file descriptor sent over ipc.

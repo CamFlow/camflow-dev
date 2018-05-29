@@ -604,6 +604,6 @@ static inline int prov_record_args(struct provenance *prov,
 		ptr += size + 1;
 	}
 	kfree(argv);
-	return rc;
+	return 0;
 }
 #endif
