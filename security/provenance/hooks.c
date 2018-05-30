@@ -502,8 +502,8 @@ static int provenance_inode_link(struct dentry *old_dentry,
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *dprov = NULL;
 	struct provenance *iprov = NULL;
+	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -540,17 +540,28 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
+	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
-	iprov = dentry_provenance(dentry, true);
+	iprov = dentry_provenance(old_dentry, true);
 	if (!iprov)
 		return -ENOMEM;
 
+	dprov = inode_provenance(dir, true);
+	if (!dprov)
+		return -ENOMEM;
+
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_DIR);
+	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_UNLINK, cprov, tprov, dprov, NULL, 0);
+	if (rc < 0)
+		goto out;
 	rc = generates(RL_UNLINK, cprov, tprov, iprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(iprov));
+	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
