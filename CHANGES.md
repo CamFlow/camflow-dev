@@ -36,7 +36,7 @@
 
 ### v0.4.2
 ```
-- Update to kernel version 4.16.12.
+- Update to kernel version 4.16.13.
 ```
 
 ### v0.4.1
