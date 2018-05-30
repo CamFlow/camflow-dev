@@ -39,10 +39,14 @@
 - Update to kernel version 4.16.13.
 ```
 
+See *note* in release v0.4.0.
+
 ### v0.4.1
 ```
-- Hotfix (ignore all changes introduced by Michael's "doc" branch, to be merged back after debug).
+- Hotfix (revert some changes introduced in v0.4.0 as they were introducing a bug).
 ```
+
+See *note* in release v0.4.0.
 
 ### v0.4.0
 ```
@@ -67,7 +71,7 @@
 - Update to kernel version 4.16.12.
 ```
 
-Changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
+*NOTE* changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 ```
 - Changes in the following functions:
 	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS.
