@@ -544,7 +544,7 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 	unsigned long irqflags;
 	int rc;
 
-	iprov = dentry_provenance(old_dentry, true);
+	iprov = dentry_provenance(dentry, true);
 	if (!iprov)
 		return -ENOMEM;
 
