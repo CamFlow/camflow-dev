@@ -2,6 +2,8 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.4.2           | 4.16.12        | N/A        |
+| 0.4.1           | 4.16.12        | 28/05/2018 |
 | 0.4.0           | 4.16.12        | 26/05/2018 |
 | 0.3.11          | 4.14.18        | 09/02/2018 |
 | 0.3.10          | 4.14.15        | 27/01/2018 |
@@ -32,11 +34,44 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.4.2
+```
+- Update to kernel version 4.16.12.
+```
+
+### v0.4.1
+```
+- Hotfix (ignore all changes introduced by Michael's "doc" branch, to be merged back after debug).
+```
+
 ### v0.4.0
+```
+- Support node duplication on/off.
+- Reworking mmap handling logic.
+- Added hook and relation type to capture open file descriptor sent over ipc.
+- RL_CHANGE becomes RL_SETUID and RL_SETGID.
+- Added new relation type: RL_PERM_APPEND.
+- Added new relation type: RL_STR_SH_CREATE_READ and RL_STR_SH_CREATE_WRITE.
+- Added new relation type: RL_STR_SH_ATTACH_READ and RL_STR_SH_ATTACH_WRITE.
+- Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.
+- Added new relation type: RL_SND_MSG_Q and RL_RCV_MSG_Q.
+- Added new relation type: RL_SND_MSG and RL_RCV_MSG.
+- Added new relation type: RL_CLONE_MEM.
+- Split RL_CREATE into RL_SOCKET_CREATE, RL_MSG_CREATE and RL_INODE_CREATE.
+- Re-introduce RL_SND_UNIX and RL_RCV_UNIX now that we have space.
+- Added new relation type: RL_PROC_WRITE and RL_PROC_READ.
+- Increased the maximum number of relation type supported.
+- Protect (ro) a number of pointers after init.
+- Handle signal.
+- Revert single source of ID change.
+- Update to kernel version 4.16.12.
+```
+
+Changes reverted in `v0.4.1`:
 ```
 - Changes in the following functions:
 	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS.
-	- update_inode_type in security/provenance/include/provenance_inode.h: remove filter_update_node function call in the function body because type variable is never a relation.
+	- update_inode_type in security/provenance/include/provenance_filter.h: remove filter_update_node function call in the function body becasue type variable is never a relation.
 	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed.
 	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node.
 	- __write_node in security/provenance/include/provenance_relay.h: remove setting boot_id.
@@ -70,27 +105,9 @@
 	- provenance_socket_sock_rcv_skb in security/provenance/hooks.c: return -ENOMEM if sk inode provenance does not exist.
 	- provenance_unix_stream_connect in security/provenance/hooks.c: initialize rc to 0.
 	- provenance_bprm_set_creds in security/provenance/hooks.c: initialize rc to 0.
+	- prov_record_args in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0 at the end (rc should be 0 at the end.)
 - Change in the following defintions:
 	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags).
-- Support node duplication on/off.
-- Reworking mmap handling logic.
-- Added hook and relation type to capture open file descriptor sent over ipc.
-- RL_CHANGE becomes RL_SETUID and RL_SETGID.
-- Added new relation type: RL_PERM_APPEND.
-- Added new relation type: RL_STR_SH_CREATE_READ and RL_STR_SH_CREATE_WRITE.
-- Added new relation type: RL_STR_SH_ATTACH_READ and RL_STR_SH_ATTACH_WRITE.
-- Added new relation type: RL_WRITE_IOCTL and RL_READ_IOCTL.
-- Added new relation type: RL_SND_MSG_Q and RL_RCV_MSG_Q.
-- Added new relation type: RL_SND_MSG and RL_RCV_MSG.
-- Added new relation type: RL_CLONE_MEM.
-- Split RL_CREATE into RL_SOCKET_CREATE, RL_MSG_CREATE and RL_INODE_CREATE.
-- Re-introduce RL_SND_UNIX and RL_RCV_UNIX now that we have space.
-- Added new relation type: RL_PROC_WRITE and RL_PROC_READ.
-- Increased the maximum number of relation type supported.
-- Protect (ro) a number of pointers after init.
-- Handle signal.
-- Revert single source of ID change.
-- Update to kernel version 4.16.12.
 ```
 
 ### v0.3.11
