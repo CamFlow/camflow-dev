@@ -15,7 +15,20 @@
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
-
+/*!
+ * @brief Record provenance of an outgoing packets, which is done through NetFilter (instead of LSM) hooks.
+ *
+ * We record the provenance relation RL_SND_PACKET by calling "derives" function.
+ * Information flows from the sending socket to the outgoing packet.
+ * We will not record the provenance if:
+ * 1. The calling process cred's provenance (obtained from current_provenance) is not recorded or does not exist, or
+ * 2. The socket inode's provenance does not exist.
+ * We will create a new packet provenance node for this relation.
+ * @param skb The socket buffer that contain packet information.
+ * @return always return NF_ACCEPT.
+ *
+ * @todo The return value seems to be off.
+ */
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {
 	struct provenance *cprov = current_provenance();
@@ -39,9 +52,16 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	}
-	return NF_ACCEPT; // TODO prevent
+	return NF_ACCEPT;
 }
 
+/*!
+ * @brief This function records the provenance of outgoing packets using NetFilter.
+ *
+ * It simply calls __ipv4_out function to perform this task.
+ * Parameters are netfilter specific.
+ *
+ */
 static unsigned int provenance_ipv4_out(void *priv,
 					struct sk_buff *skb,
 					const struct nf_hook_state *state)
@@ -49,6 +69,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 	return __ipv4_out(skb);
 }
 
+/* Netfilter hook operations */
 static struct nf_hook_ops provenance_nf_ops[] = {
 	{
 		.hook = provenance_ipv4_out,
@@ -58,12 +79,12 @@ static struct nf_hook_ops provenance_nf_ops[] = {
 	},
 };
 
-// will initialise the hooks
+/* Register the hooks */
 static int __net_init provenance_nf_register(struct net *net)
 {
 	return nf_register_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
 }
-
+/* Unregister the hooks */
 static void __net_exit provenance_nf_unregister(struct net *net)
 {
 	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
@@ -74,6 +95,9 @@ static struct pernet_operations provenance_net_ops = {
 	.exit	= provenance_nf_unregister,
 };
 
+/*!
+ * Initialization of netfilter hooks.
+ */
 static int __init provenance_nf_ip_init(void)
 {
 	int err;
