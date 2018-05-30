@@ -483,8 +483,7 @@ out:
  * This hook is triggered when checking permission before creating a new hard link to a file.
  * We obtain the provenance of current process and its cred, as well as provenance of inode or parent directory of new link.
  * We also get the provenance of existing link to the file.
- * Record two provenance relations RL_LINK by calling "generates" function, and
- * a provenance relation RL_LINK_INODE by calling "derives" function.
+ * Record two provenance relations RL_LINK by calling "generates" function.
  * Information flows:
  * 1. From cred of the current process to the process, and eventually to the inode of parent directory of new link, and,
  * 2. From cred of the current process to the process, and eventually to the dentry of the existing link to the file, and
@@ -523,9 +522,6 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	if (rc < 0)
 		goto out;
 	rc = generates(RL_LINK, cprov, tprov, iprov, NULL, 0);
-	if (rc < 0)
-		goto out;
-	rc = derives(RL_LINK_INODE, dprov, iprov, NULL, 0);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
