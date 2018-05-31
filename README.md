@@ -30,7 +30,7 @@ Do not hesitate to fork the repository or to report bugs.
 
 ``` shell
 sudo dnf groupinstall 'Development Tools'
-sudo dnf install ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto
+sudo dnf install ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib ruby bison flex patch mosquitto
 ```
 
 ```

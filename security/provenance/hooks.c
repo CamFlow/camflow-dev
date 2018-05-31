@@ -2348,8 +2348,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(file_open,			    provenance_file_open),
 	LSM_HOOK_INIT(file_receive,			    provenance_file_receive),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(file_splice_pipe_to_pipe,
-		      provenance_file_splice_pipe_to_pipe),
+	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
 #endif
 
 	/* msg related hooks */
