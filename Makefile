@@ -89,13 +89,13 @@ config_old: copy_change copy_config
 	 cd ./build/linux-stable && $(MAKE) menuconfig
 
 hooklist:
-	ruby ./scripts/hooklist.rb > HOOKS.md
+	ruby ./scripts/hooklist.rb > docs/HOOKS.md
 
 relationlist:
-	ruby ./scripts/relationlist.rb > RELATIONS.md
+	ruby ./scripts/relationlist.rb > docs/RELATIONS.md
 
 vertexlist:
-	ruby ./scripts/vertexlist.rb > VERTICES.md
+	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
 doc: hooklist relationlist vertexlist
 
