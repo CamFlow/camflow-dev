@@ -3,6 +3,7 @@
 Automatically generated do not edit!
 
 |As defined in #include<linux/provenance_types.h>|string in configuration file and CLI|
+---------------------------------------------------------------------------------------
 |RL_UNKNOWN|unknown|
 |RL_READ|read|
 |RL_READ_IOCTL|read_ioctl|
