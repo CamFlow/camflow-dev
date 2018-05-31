@@ -64,7 +64,6 @@ static inline uint8_t prov_ns_whichOP(uint32_t utsns,
  * @param f The ns_filter that is checked against to remove the filter in the list.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @todo check if @postcondition is correct.
  */
 static inline uint8_t prov_ns_delete(struct ns_filters *f)
 {
@@ -99,7 +98,6 @@ static inline uint8_t prov_ns_delete(struct ns_filters *f)
  * @param f The ns_filter that is checked against to update the filter in the list.
  * @return 0 if no error occurred. Other error codes unknown.
  *
- * @todo check if @postcondition is correct.
  */
 static inline uint8_t prov_ns_add_or_update(struct ns_filters *f)
 {

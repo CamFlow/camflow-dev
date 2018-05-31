@@ -1265,8 +1265,6 @@ out:
  * @param start Unused parameter.
  * @param end Unused parameter.
  *
- * @question What if a privately mmapped file is unmmapped?
- * @todo How do we do error checking in this function?
  */
 static void provenance_mmap_munmap(struct mm_struct *mm,
 				   struct vm_area_struct *vma,
@@ -1308,7 +1306,6 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
  * @param arg The operational arguments.
  * @return 0 if permission is granted or no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from generates/uses function or unknown.
  *
- * @todo: Do we have file exec/append IOCTL?
  */
 static int provenance_file_ioctl(struct file *file,
 				 unsigned int cmd,
@@ -1738,7 +1735,6 @@ static int provenance_socket_post_create(struct socket *sock,
  * @param addrlen The length of address.
  * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
  *
- * @todo We need to figure out why if we use a spin_lock here, the system crashes.
  */
 static int provenance_socket_bind(struct socket *sock,
 				  struct sockaddr *address,
@@ -2399,7 +2395,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(sb_kern_mount,			    provenance_sb_kern_mount)
 };
 
-struct kmem_cache *provenance_cache __ro_after_init; /* @question Why is the cache read-only after init? */
+struct kmem_cache *provenance_cache __ro_after_init;
 struct kmem_cache *long_provenance_cache __ro_after_init;
 
 struct prov_boot_buffer         *boot_buffer;

@@ -153,7 +153,6 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
  * @param prov The provenance node in question.
  * @return 0 if no error occurred or if "dentry" returns NULL. Other error codes unknown.
  *
- * @todo Check under what circumstances "dentry" can be NULL.
  */
 static inline int record_inode_name(struct inode *inode, struct provenance *prov)
 {
@@ -299,7 +298,6 @@ free_buf:
  * @param may_sleep Bool value signifies whether this function can sleep.
  * @return provenance struct pointer.
  *
- * @question Why do we have a may_sleep boolean?
  * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */

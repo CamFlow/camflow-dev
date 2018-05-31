@@ -208,7 +208,6 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param prov The provenance entry that will be associated with the task name.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for buffer to hold file path. Other error code unknown.
  *
- * @todo Why get_mm_exe_file instead of get_task_exe_file?
  */
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
@@ -569,7 +568,6 @@ static __always_inline int prov_record_arg(struct provenance *prov,
  * @param bprm The binary parameter structure.
  * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
  *
- * @todo Return rc instead of hard-coded 0 at the end breaks the system.
  */
 static inline int prov_record_args(struct provenance *prov,
 				   struct linux_binprm *bprm)

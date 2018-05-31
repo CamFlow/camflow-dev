@@ -27,7 +27,6 @@
  * @param skb The socket buffer that contain packet information.
  * @return always return NF_ACCEPT.
  *
- * @todo The return value seems to be off.
  */
 static inline unsigned int __ipv4_out(struct sk_buff *skb)
 {

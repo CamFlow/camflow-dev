@@ -72,7 +72,6 @@ static inline int call_provenance_in_edge(prov_entry_t *edge,
  * @param edge The edge provenance entry pointer.
  * @return 0 if no error occurred; -EPERM if flow is disallowed. Other error codes inherited or unknown.
  *
- * @question What are all the warnings about?
  */
 static inline int call_query_hooks(prov_entry_t *from,
 				   prov_entry_t *to,

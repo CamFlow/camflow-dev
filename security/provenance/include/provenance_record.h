@@ -207,7 +207,6 @@ static inline int record_node_name(struct provenance *node,
  * @param count Number of bytes copied from the user buffer.
  * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
  *
- * @todo Since we are not using spin lock here, double check there is a lock on the cprov when this function is called
  */
 static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
 {

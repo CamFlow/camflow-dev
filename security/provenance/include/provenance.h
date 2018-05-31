@@ -74,7 +74,6 @@ extern struct kmem_cache *long_provenance_cache;
  * @param gfp GFP flags used in memory allocation in the kernel
  * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
  *
- * @todo Check what other GFP flags (possibly only GFP_KERNEL and GFP_ATOMIC) are used in this context.
  */
 static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
