@@ -526,6 +526,7 @@ out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	record_inode_name_from_dentry(new_dentry, iprov, true);
 	return rc;
 }
 
@@ -604,6 +605,7 @@ out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	record_node_name(iprov, name, true);
 	return rc;
 }
 
@@ -2230,7 +2232,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 		set_opaque(prov_elt(nprov));
 		return;
 	}
-	record_node_name(cprov, bprm->interp);
+	record_node_name(cprov, bprm->interp, false);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	derives(RL_EXEC_TASK, cprov, nprov, NULL, 0);

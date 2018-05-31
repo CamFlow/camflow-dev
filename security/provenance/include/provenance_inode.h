@@ -119,7 +119,9 @@ static inline void provenance_mark_as_opaque(const char *name)
  * @return 0 if no error occurred. -ENOMEM if no memory to store the name of the provenance node. PTR_ERR if path lookup failed.
  *
  */
-static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
+static inline int record_inode_name_from_dentry(struct dentry *dentry,
+																								struct provenance *prov,
+																								bool force)
 {
 	char *buffer;
 	char *ptr;
@@ -135,7 +137,7 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
 	if (IS_ERR(ptr))
 		return PTR_ERR(ptr);
-	rc = record_node_name(prov, ptr);
+	rc = record_node_name(prov, ptr, force);
 	kfree(buffer);
 	return rc;
 }
@@ -163,7 +165,7 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	dentry = d_find_alias(inode);
 	if (!dentry)    // We did not find a dentry, not sure if it should ever happen.
 		return 0;
-	rc = record_inode_name_from_dentry(dentry, prov);
+	rc = record_inode_name_from_dentry(dentry, prov, false);
 	dput(dentry);
 	return rc;
 }

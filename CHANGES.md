@@ -36,6 +36,7 @@
 
 ### v0.4.2
 ```
+- Links rework.
 - Delete relation RL_LINK_INODE.
 - Added support for symlink operation (RL_SYMLINK).
 - Added support for unlink operation (RL_UNLINK).

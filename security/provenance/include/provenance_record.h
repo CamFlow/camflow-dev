@@ -163,12 +163,15 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  * @return 0 if no error occurred. -ENOMEM if no memory can be allocated for long provenance name node. Other error codes unknown.
  *
  */
-static inline int record_node_name(struct provenance *node, const char *name)
+static inline int record_node_name(struct provenance *node,
+																	 const char *name,
+																	 bool force)
 {
 	union long_prov_elt *fname_prov;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
+	if ( (provenance_is_name_recorded(prov_elt(node)) && !force)
+	 		 || !provenance_is_recorded(prov_elt(node)))
 		return 0;
 
 	fname_prov = alloc_long_provenance(ENT_FILE_NAME);

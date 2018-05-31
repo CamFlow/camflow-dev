@@ -248,7 +248,7 @@ static inline int record_task_name(struct task_struct *task,
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
 		fput(exe_file); // Release the file.
-		rc = record_node_name(prov, ptr);
+		rc = record_node_name(prov, ptr, false);
 		kfree(buffer);
 	}
 out:
@@ -569,7 +569,7 @@ static __always_inline int prov_record_arg(struct provenance *prov,
  * @param bprm The binary parameter structure.
  * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
  *
- * @todo Return rc instead of hard-coded 0 at the end breaks the system. 
+ * @todo Return rc instead of hard-coded 0 at the end breaks the system.
  */
 static inline int prov_record_args(struct provenance *prov,
 				   struct linux_binprm *bprm)
