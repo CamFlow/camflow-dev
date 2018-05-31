@@ -1,5 +1,7 @@
-#LSM hooks implemented by CamFlow
+# LSM hooks implemented by CamFlow
+
 Automatically generated do not edit!
+
 ```
 - cred_free
 - cred_alloc_blank

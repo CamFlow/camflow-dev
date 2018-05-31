@@ -1,5 +1,7 @@
-#Relation supported by CamFlow
+# Vertices supported by CamFlow
+
 Automatically generated do not edit!
+
 |As defined in #include<linux/provenance_types.h>|string in configuration file and CLI|
 |ENT_UNKNOWN|unknown|
 |ENT_STR|string|
