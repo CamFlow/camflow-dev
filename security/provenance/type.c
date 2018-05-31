@@ -40,6 +40,7 @@ static const char RL_STR_MUNMAP[]                = "munmap";
 static const char RL_STR_SHMDT[]                 = "shmdt";
 static const char RL_STR_LINK[]                  = "link";
 static const char RL_STR_UNLINK[]                = "unlink";
+static const char RL_STR_SYMLINK[]                = "symlink";
 static const char RL_STR_SPLICE[]                = "splice";
 static const char RL_STR_SETATTR[]               = "setattr";
 static const char RL_STR_SETATTR_INODE[]         = "setattr_inode";
@@ -170,6 +171,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_LINK;
 	case RL_UNLINK:
 		return RL_STR_UNLINK;
+	case RL_SYMLINK:
+		return RL_STR_SYMLINK;
 	case RL_SPLICE:
 		return RL_STR_SPLICE;
 	case RL_SETATTR:
@@ -304,6 +307,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
 	MATCH_AND_RETURN(str, RL_STR_UNLINK, RL_UNLINK);
+	MATCH_AND_RETURN(str, RL_STR_SYMLINK, RL_SYMLINK);
 	MATCH_AND_RETURN(str, RL_STR_SPLICE, RL_SPLICE);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR, RL_SETATTR);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR_INODE, RL_SETATTR_INODE);

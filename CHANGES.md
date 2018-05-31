@@ -37,7 +37,8 @@
 ### v0.4.2
 ```
 - Delete relation RL_LINK_INODE.
-- Added support for unlink operation (RL_UNLINK)
+- Added support for symlink operation (RL_SYMLINK).
+- Added support for unlink operation (RL_UNLINK).
 - Update to kernel version 4.16.13.
 ```
 

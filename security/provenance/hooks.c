@@ -566,6 +566,46 @@ out:
 	return rc;
 }
 
+/*
+ * @inode_symlink:
+ *	Check the permission to create a symbolic link to a file.
+ *	@dir contains the inode structure of parent directory of the symbolic link.
+ *	@dentry contains the dentry structure of the symbolic link.
+ *	@old_name contains the pathname of file.
+ *	Return 0 if permission is granted.
+ */
+static int provenance_inode_symlink(struct inode *dir,
+																		struct dentry *dentry,
+																		const char *name)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = NULL;
+	struct provenance *dprov = NULL;
+	unsigned long irqflags;
+	int rc;
+
+	iprov = dentry_provenance(dentry, true);
+	if (!iprov)
+		return -ENOMEM;
+
+	dprov = inode_provenance(dir, true);
+	if (!dprov)
+		return -ENOMEM;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_UNLINK, cprov, tprov, dprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_UNLINK, cprov, tprov, iprov, NULL, 0);
+out:
+	spin_unlock(prov_lock(iprov));
+	spin_unlock(prov_lock(dprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
 
 /*!
  * @brief Record provenance when inode_rename hook is triggered.
@@ -2287,6 +2327,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(inode_permission,			    provenance_inode_permission),
 	LSM_HOOK_INIT(inode_link,			    provenance_inode_link),
 	LSM_HOOK_INIT(inode_unlink,			    provenance_inode_unlink),
+	LSM_HOOK_INIT(inode_symlink,			    provenance_inode_symlink),
 	LSM_HOOK_INIT(inode_rename,			    provenance_inode_rename),
 	LSM_HOOK_INIT(inode_setattr,			    provenance_inode_setattr),
 	LSM_HOOK_INIT(inode_getattr,			    provenance_inode_getattr),
