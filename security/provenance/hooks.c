@@ -1530,7 +1530,7 @@ static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
  * It also fills in some provenance information based on the information contained in @shp.
  * Record provenance relation RL_SH_CREATE_READ by calling "uses" function.
  * For read, information flows from shared memory to the calling process, and eventually to its cred.
- * Record provenance relation RL_SH_CREATE_WRITE by calling "generates" function.
+ * Record provenance relation RL_SH_CREATE_WRITE by calling "uses" function.
  * For write, information flows from the calling process's cree to the process, and eventually to shared memory.
  * @param shp The shared memory structure to be modified.
  * @return 0 if operation was successful and permission is granted, no error occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM provenance entry. Other error code inherited from uses and generates function or unknown.
@@ -1552,7 +1552,7 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 	rc = uses(RL_SH_CREATE_READ, sprov, tprov, cprov, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = generates(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
+	rc = uses(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return 0;
@@ -1583,7 +1583,7 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
  * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function.
  * Information flows from shared memory to the calling process, and then eventually to its cred.
  * Otherwise, shared memory is both readable and writable, then:
- * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function and RL_SH_ATTACH_WRITE by calling "generates" function.
+ * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function and RL_SH_ATTACH_WRITE by calling "uses" function.
  * Information can flow both ways.
  * @param shp The shared memory structure to be modified.
  * @param shmaddr The address to attach memory region to.
@@ -1609,7 +1609,7 @@ static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, 
 		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = uses(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));
