@@ -142,14 +142,14 @@
 #define ENT_INODE_DIRECTORY   (DM_ENTITY    | (0x0000000000000001ULL<<9))
 #define ENT_INODE_CHAR        (DM_ENTITY    | (0x0000000000000001ULL<<10))
 #define ENT_INODE_BLOCK       (DM_ENTITY    | (0x0000000000000001ULL<<11))
-#define ENT_INODE_FIFO        (DM_ENTITY    | (0x0000000000000001ULL<<12))
+#define ENT_INODE_PIPE        (DM_ENTITY    | (0x0000000000000001ULL<<12))
 #define ENT_INODE_SOCKET      (DM_ENTITY    | (0x0000000000000001ULL<<13))
 #define ENT_INODE_MMAP        (DM_ENTITY    | (0x0000000000000001ULL<<14))
 #define ENT_MSG               (DM_ENTITY    | (0x0000000000000001ULL<<15))
 #define ENT_SHM               (DM_ENTITY    | (0x0000000000000001ULL<<16))
 #define ENT_ADDR              (DM_ENTITY    | (0x0000000000000001ULL<<17))
 #define ENT_SBLCK             (DM_ENTITY    | (0x0000000000000001ULL<<18))
-#define ENT_FILE_NAME         (DM_ENTITY    | (0x0000000000000001ULL<<19))
+#define ENT_PATH         			(DM_ENTITY    | (0x0000000000000001ULL<<19))
 #define ENT_PACKET            (DM_ENTITY    | (0x0000000000000001ULL<<20))
 #define ENT_DISC              (DM_ENTITY    | (0x0000000000000001ULL<<21))
 #define ENT_IATTR             (DM_ENTITY    | (0x0000000000000001ULL<<22))
@@ -188,7 +188,7 @@ static inline bool prov_has_uidgid(uint64_t type)
   	case ENT_INODE_DIRECTORY:
   	case ENT_INODE_CHAR:
   	case ENT_INODE_BLOCK:
-  	case ENT_INODE_FIFO:
+  	case ENT_INODE_PIPE:
   	case ENT_INODE_SOCKET:
   	case ENT_INODE_MMAP:
   		return true;
@@ -205,7 +205,7 @@ static inline bool prov_is_inode(uint64_t type)
   	case ENT_INODE_DIRECTORY:
   	case ENT_INODE_CHAR:
   	case ENT_INODE_BLOCK:
-  	case ENT_INODE_FIFO:
+  	case ENT_INODE_PIPE:
   	case ENT_INODE_SOCKET:
   	case ENT_INODE_MMAP:
   		return true;
@@ -223,7 +223,7 @@ static inline bool prov_has_secid(uint64_t type)
 	case ENT_INODE_DIRECTORY:
 	case ENT_INODE_CHAR:
 	case ENT_INODE_BLOCK:
-	case ENT_INODE_FIFO:
+	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
 	case ENT_INODE_MMAP:
 		return true;

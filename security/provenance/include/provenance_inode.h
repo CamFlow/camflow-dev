@@ -30,7 +30,7 @@
  * @brief Update the type of the provenance inode node based on the mode of the inode, and create a version relation between old and new provenance node.
  *
  * Based on the mode of the inode, determine the type of the provenance inode node, choosing from:
- * ENT_INODE_BLOCK, ENT_INODE_CHAR, ENT_INODE_DIRECTORY, ENT_INODE_FIFO, ENT_INODE_LINK, ENT_INODE_FILE, ENT_INODE_SOCKET.
+ * ENT_INODE_BLOCK, ENT_INODE_CHAR, ENT_INODE_DIRECTORY, ENT_INODE_PIPE, ENT_INODE_LINK, ENT_INODE_FILE, ENT_INODE_SOCKET.
  * Create a new provenance node with the updated type, and a updated version and a RL_VERSION relation between them if certain criteria are met.
  * Otherwise, RL_VERSION relation is not needed and we simply update the node type and mode information.
  * The operation is done in a nested spin_lock to avoid concurrency.
@@ -55,7 +55,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	else if (S_ISDIR(mode))
 		type = ENT_INODE_DIRECTORY;
 	else if (S_ISFIFO(mode))
-		type = ENT_INODE_FIFO;
+		type = ENT_INODE_PIPE;
 	else if (S_ISLNK(mode))
 		type = ENT_INODE_LINK;
 	else if (S_ISREG(mode))

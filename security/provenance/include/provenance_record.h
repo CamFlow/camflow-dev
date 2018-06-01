@@ -152,7 +152,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  * Unless the node has already have a name or is not recorded, calling this function will generate a new naming relation between the node and its name.
  * The name node is transient and should not have any further use.
  * Therefore, once we record the name node, we will free the memory allocated for the name provenance node.
- * The name node has type "ENT_FILE_NAME", and the name has max length PATH_MAX.
+ * The name node has type "ENT_PATH", and the name has max length PATH_MAX.
  * Depending on the type of the node in question, the relation between the node and the name node can be:
  * 1. RL_NAMED_PROCESS, if the node in question is ACT_TASK node, or
  * 2. RL_NAMED otherwise.
@@ -174,7 +174,7 @@ static inline int record_node_name(struct provenance *node,
 	 		 || !provenance_is_recorded(prov_elt(node)))
 		return 0;
 
-	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
+	fname_prov = alloc_long_provenance(ENT_PATH);
 	if (!fname_prov)
 		return -ENOMEM;
 

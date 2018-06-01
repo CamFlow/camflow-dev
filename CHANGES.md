@@ -38,6 +38,7 @@
 ```
 - Automated documentation.
 - Node name changes: file_name -> path and fifo -> pipe.
+- Node macro renamed accordingly.
 - Links rework.
 - Delete relation RL_LINK_INODE.
 - Added support for symlink operation (RL_SYMLINK).

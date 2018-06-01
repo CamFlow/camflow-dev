@@ -13,13 +13,13 @@ ENT_INODE_FILE|file|standard file|
 ENT_INODE_DIRECTORY|directory|directory|
 ENT_INODE_CHAR|char|character device|
 ENT_INODE_BLOCK|block|block device|
-ENT_INODE_FIFO|pipe|pipe|
+ENT_INODE_PIPE|pipe|pipe|
 ENT_INODE_SOCKET|socket|network socket|
 ENT_MSG|msg|msg as in IPC message passing|
 ENT_SHM|shm|shared memory|
 ENT_ADDR|address|network address|
 ENT_SB|sb|superblock|
-ENT_FILE_NAME|path|path associated with a file|
+ENT_PATH|path|path associated with a file|
 ENT_DISC_ENTITY|disc_entity|descilosed node representing an entity|
 ENT_DISC_ACTIVITY|disc_activity|descilosed node representing an activity|
 ENT_DISC_AGENT|disc_agent|disclosed node representing an agent|

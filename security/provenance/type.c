@@ -101,13 +101,13 @@ static const char ND_STR_INODE_FILE[]                        = "file"; // standa
 static const char ND_STR_INODE_DIRECTORY[]                   = "directory"; // directory
 static const char ND_STR_INODE_CHAR[]                        = "char"; // character device
 static const char ND_STR_INODE_BLOCK[]                       = "block"; // block device
-static const char ND_STR_INODE_FIFO[]                        = "pipe"; // pipe
+static const char ND_STR_INODE_PIPE[]                        = "pipe"; // pipe
 static const char ND_STR_INODE_SOCKET[]                      = "socket"; // network socket
 static const char ND_STR_MSG[]                               = "msg"; // msg as in IPC message passing
 static const char ND_STR_SHM[]                               = "shm"; // shared memory
 static const char ND_STR_ADDR[]                              = "address"; // network address
 static const char ND_STR_SB[]                                = "sb"; // superblock
-static const char ND_STR_FILE_NAME[]                         = "path"; // path associated with a file
+static const char ND_STR_PATH[]                         		 = "path"; // path associated with a file
 static const char ND_STR_DISC_ENTITY[]                       = "disc_entity"; // descilosed node representing an entity
 static const char ND_STR_DISC_ACTIVITY[]                     = "disc_activity"; // descilosed node representing an activity
 static const char ND_STR_DISC_AGENT[]                        = "disc_agent"; // disclosed node representing an agent
@@ -383,8 +383,8 @@ const char* node_str(uint64_t type)
 		return ND_STR_INODE_CHAR;
 	case ENT_INODE_BLOCK:
 		return ND_STR_INODE_BLOCK;
-	case ENT_INODE_FIFO:
-		return ND_STR_INODE_FIFO;
+	case ENT_INODE_PIPE:
+		return ND_STR_INODE_PIPE;
 	case ENT_INODE_SOCKET:
 		return ND_STR_INODE_SOCKET;
 	case ENT_INODE_MMAP:
@@ -397,8 +397,8 @@ const char* node_str(uint64_t type)
 		return ND_STR_ADDR;
 	case ENT_SBLCK:
 		return ND_STR_SB;
-	case ENT_FILE_NAME:
-		return ND_STR_FILE_NAME;
+	case ENT_PATH:
+		return ND_STR_PATH;
 	case ENT_DISC:
 		return ND_STR_DISC_ENTITY;
 	case ACT_DISC:
@@ -435,14 +435,14 @@ uint64_t node_id(const char* str)
 	MATCH_AND_RETURN(str, ND_STR_INODE_DIRECTORY, ENT_INODE_DIRECTORY);
 	MATCH_AND_RETURN(str, ND_STR_INODE_CHAR, ENT_INODE_CHAR);
 	MATCH_AND_RETURN(str, ND_STR_INODE_BLOCK, ENT_INODE_BLOCK);
-	MATCH_AND_RETURN(str, ND_STR_INODE_FIFO, ENT_INODE_FIFO);
+	MATCH_AND_RETURN(str, ND_STR_INODE_PIPE, ENT_INODE_PIPE);
 	MATCH_AND_RETURN(str, ND_STR_INODE_SOCKET, ENT_INODE_SOCKET);
 	MATCH_AND_RETURN(str, ND_STR_INODE_MMAP, ENT_INODE_MMAP);
 	MATCH_AND_RETURN(str, ND_STR_MSG, ENT_MSG);
 	MATCH_AND_RETURN(str, ND_STR_SHM, ENT_SHM);
 	MATCH_AND_RETURN(str, ND_STR_ADDR, ENT_ADDR);
 	MATCH_AND_RETURN(str, ND_STR_SB, ENT_SBLCK);
-	MATCH_AND_RETURN(str, ND_STR_FILE_NAME, ENT_FILE_NAME);
+	MATCH_AND_RETURN(str, ND_STR_PATH, ENT_PATH);
 	MATCH_AND_RETURN(str, ND_STR_DISC_ENTITY, ENT_DISC);
 	MATCH_AND_RETURN(str, ND_STR_DISC_ACTIVITY, ACT_DISC);
 	MATCH_AND_RETURN(str, ND_STR_DISC_AGENT, AGT_DISC);
