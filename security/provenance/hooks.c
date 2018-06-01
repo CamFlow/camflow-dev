@@ -1213,6 +1213,8 @@ static int provenance_mmap_file(struct file *file,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	if (provenance_is_opaque(prov_elt(cprov)))
+		goto out;
 	if ((flags & MAP_TYPE) == MAP_SHARED
 		    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
@@ -2183,6 +2185,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 static int provenance_bprm_check(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(bprm->file, true);
 
 	if (!nprov)
@@ -2190,6 +2193,7 @@ static int provenance_bprm_check(struct linux_binprm *bprm)
 
 	if (provenance_is_opaque(prov_elt(iprov))) {
 		set_opaque(prov_elt(nprov));
+		set_opaque(prov_elt(tprov));
 		return 0;
 	}
 	return prov_record_args(nprov, bprm);
@@ -2220,12 +2224,14 @@ static int provenance_bprm_check(struct linux_binprm *bprm)
 static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *iprov = file_provenance(bprm->file, true);
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(iprov))) {
 		set_opaque(prov_elt(nprov));
+		set_opaque(prov_elt(tprov));
 		return;
 	}
 	record_node_name(cprov, bprm->interp, false);

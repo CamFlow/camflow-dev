@@ -36,6 +36,7 @@
 
 ### v0.4.2
 ```
+- Fix issue where thread were not made opaque.
 - Automated documentation.
 - Node name changes: file_name -> path and fifo -> pipe, process -> process_memory.
 - Node macro renamed accordingly.
