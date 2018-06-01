@@ -37,7 +37,7 @@
 ### v0.4.2
 ```
 - Automated documentation.
-- Node name changes: file_name -> path and fifo -> pipe.
+- Node name changes: file_name -> path and fifo -> pipe, process -> process_memory.
 - Node macro renamed accordingly.
 - Links rework.
 - Delete relation RL_LINK_INODE.

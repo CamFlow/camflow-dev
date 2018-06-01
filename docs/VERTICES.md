@@ -30,4 +30,4 @@ ENT_XATTR|xattr|extended attributes value|
 ENT_PCKCNT|packet_content|the content of network packet|
 ENT_ARG|argv|argument passed to a process|
 ENT_ENV|envp|environment parameter|
-ENT_PROC|process|process memory|
+ENT_PROC|process_memory|process memory|

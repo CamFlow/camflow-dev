@@ -118,7 +118,7 @@ static const char ND_STR_XATTR[]                             = "xattr"; // exten
 static const char ND_STR_PCKCNT[]                            = "packet_content"; // the content of network packet
 static const char ND_STR_ARG[]                               = "argv"; // argument passed to a process
 static const char ND_STR_ENV[]                               = "envp"; // environment parameter
-static const char ND_STR_PROC[]                              = "process"; // process memory
+static const char ND_STR_PROC[]                              = "process_memory"; // process memory
 
 #define MATCH_AND_RETURN(str1, str2, v) if (strcmp(str1, str2) == 0) return v
 /* transform from relation ID to string representation */
