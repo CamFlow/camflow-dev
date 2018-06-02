@@ -271,6 +271,11 @@ static __always_inline int uses(const uint64_t type,
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(activity_mem));
 
+	if (provenance_is_opaque(prov_elt(entity))
+			|| provenance_is_opaque(prov_elt(activity))
+			|| provenance_is_opaque(prov_elt(activity_mem)))
+		return 0;
+
 	if (!provenance_is_tracked(prov_elt(entity))
 	    && !provenance_is_tracked(prov_elt(activity))
 	    && !provenance_is_tracked(prov_elt(activity_mem))
@@ -313,6 +318,10 @@ static __always_inline int uses_two(const uint64_t type,
 
 	apply_target(prov_elt(entity));
 	apply_target(prov_elt(activity));
+
+	if (provenance_is_opaque(prov_elt(entity))
+			|| provenance_is_opaque(prov_elt(activity)))
+		return 0;
 
 	if (!provenance_is_tracked(prov_elt(entity))
 	    && !provenance_is_tracked(prov_elt(activity))
@@ -357,6 +366,11 @@ static __always_inline int generates(const uint64_t type,
 	apply_target(prov_elt(activity_mem));
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(entity));
+
+	if (provenance_is_opaque(prov_elt(entity))
+			|| provenance_is_opaque(prov_elt(activity))
+			|| provenance_is_opaque(prov_elt(activity_mem)))
+		return 0;
 
 	if (!provenance_is_tracked(prov_elt(activity_mem))
 	    && !provenance_is_tracked(prov_elt(activity))
@@ -404,6 +418,10 @@ static __always_inline int derives(const uint64_t type,
 	apply_target(prov_elt(from));
 	apply_target(prov_elt(to));
 
+	if (provenance_is_opaque(prov_elt(from))
+			|| provenance_is_opaque(prov_elt(to)))
+		return 0;
+
 	if (!provenance_is_tracked(prov_elt(from))
 	    && !provenance_is_tracked(prov_elt(to))
 	    && !prov_policy.prov_all)
@@ -440,6 +458,10 @@ static __always_inline int informs(const uint64_t type,
 
 	apply_target(prov_elt(from));
 	apply_target(prov_elt(to));
+
+	if (provenance_is_opaque(prov_elt(from))
+			|| provenance_is_opaque(prov_elt(to)))
+		return 0;
 
 	if (!provenance_is_tracked(prov_elt(from))
 	    && !provenance_is_tracked(prov_elt(to))
