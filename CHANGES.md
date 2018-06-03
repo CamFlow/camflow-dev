@@ -44,6 +44,7 @@
 - Delete relation RL_LINK_INODE.
 - Added support for symlink operation (RL_SYMLINK).
 - Added support for unlink operation (RL_UNLINK).
+- Reintroduce packet content recording (optional).
 - Update to kernel version 4.16.13.
 ```
 

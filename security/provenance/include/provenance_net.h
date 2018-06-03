@@ -314,7 +314,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation function or unknown.
  *
  */
-static inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
+static __always_inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
 	int rc = 0;
@@ -333,6 +333,31 @@ static inline int provenance_record_address(struct sockaddr *address, int addrle
 	set_name_recorded(prov_elt(prov));
 out:
 	free_long_provenance(addr_info);
+	return rc;
+}
+
+static __always_inline int provenance_record_pckt(struct sk_buff *skb, struct provenance *prov)
+{
+	union long_prov_elt *cnt;
+	int rc = 0;
+
+	cnt = alloc_long_provenance(ENT_PCKCNT);
+	if (!cnt) {
+		rc = -ENOMEM;
+		goto out;
+	}
+
+	cnt->pckcnt_info.length = skb_end_offset(skb);
+	if (cnt->pckcnt_info.length >= PATH_MAX) {
+		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
+		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
+	} else {
+		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
+	}
+
+	rc = record_relation(RL_VERSION, cnt, prov_entry(prov), NULL, 0);
+out:
+	free_long_provenance(cnt);
 	return rc;
 }
 #endif

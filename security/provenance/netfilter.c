@@ -48,6 +48,9 @@ static unsigned int provenance_ipv4_out(void *priv,
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
 
+		if (provenance_records_packet(prov_elt(iprov)))
+			provenance_record_pckt(skb, iprov);
+
 		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);

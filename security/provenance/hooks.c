@@ -2064,6 +2064,9 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
 
+		if (provenance_records_packet(prov_elt(iprov)))
+			provenance_record_pckt(skb, &pckprov);
+
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		rc = derives(RL_RCV_PACKET, &pckprov, iprov, NULL, 0);
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
