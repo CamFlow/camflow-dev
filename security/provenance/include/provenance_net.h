@@ -336,17 +336,8 @@ out:
 	return rc;
 }
 
-static __always_inline int provenance_record_pckt(struct sk_buff *skb, struct provenance *prov)
+static __always_inline void provenance_extract_pckt(struct sk_buff *skb, union long_prov_elt *cnt)
 {
-	union long_prov_elt *cnt;
-	int rc = 0;
-
-	cnt = alloc_long_provenance(ENT_PCKCNT);
-	if (!cnt) {
-		rc = -ENOMEM;
-		goto out;
-	}
-
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length >= PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
@@ -354,10 +345,5 @@ static __always_inline int provenance_record_pckt(struct sk_buff *skb, struct pr
 	} else {
 		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
 	}
-
-	rc = record_relation(RL_VERSION, cnt, prov_entry(prov), NULL, 0);
-out:
-	free_long_provenance(cnt);
-	return rc;
 }
 #endif
