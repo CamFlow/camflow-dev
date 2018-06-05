@@ -1,5 +1,5 @@
-kernel-version=4.16.12
-lsm-version=0.4.1
+kernel-version=4.16.13
+lsm-version=0.4.2
 arch=x86_64
 
 
@@ -88,12 +88,23 @@ config_old: copy_change copy_config
 	 cd ./build/linux-stable && $(MAKE) olddefconfig
 	 cd ./build/linux-stable && $(MAKE) menuconfig
 
+hooklist:
+	ruby ./scripts/hooklist.rb > docs/HOOKS.md
+
+relationlist:
+	ruby ./scripts/relationlist.rb > docs/RELATIONS.md
+
+vertexlist:
+	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
+
+doc: hooklist relationlist vertexlist
+
 compile: compile_security compile_kernel compile_us
 
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1
 
-compile_security: copy_change compile_security_only
+compile_security: copy_change compile_security_only doc
 
 compile_kernel: copy_change
 	cd ./build/linux-stable && $(MAKE) -j16

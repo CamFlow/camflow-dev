@@ -14,110 +14,111 @@
 #include "provenance.h"
 
 /* relation string name */
-static const char RL_STR_UNKNOWN[]               = "unknown";
-static const char RL_STR_READ[]                  = "read";
-static const char RL_STR_READ_IOCTL[]            = "read_ioctl";
-static const char RL_STR_WRITE[]                 = "write";
-static const char RL_STR_WRITE_IOCTL[]           = "write";
-static const char RL_STR_CLONE_MEM[]             = "clone_mem";
-static const char RL_STR_MSG_CREATE[]            = "msg_create";
-static const char RL_STR_SOCKET_CREATE[]         = "socket_create";
-static const char RL_STR_INODE_CREATE[]          = "inode_create";
-static const char RL_STR_SETUID[]                = "setuid";
-static const char RL_STR_SETGID[]                = "setgid";
-static const char RL_STR_MMAP_WRITE[]            = "mmap_write";
-static const char RL_STR_SH_WRITE[]              = "sh_write";
-static const char RL_STR_PROC_WRITE[]            = "proc_write";
-static const char RL_STR_BIND[]                  = "bind";
-static const char RL_STR_CONNECT[]               = "connect";
-static const char RL_STR_LISTEN[]                = "listen";
-static const char RL_STR_ACCEPT[]                = "accept";
-static const char RL_STR_OPEN[]                  = "open";
-static const char RL_STR_FILE_RCV[]              = "file_rcv";
-static const char RL_STR_VERSION[]               = "version_entity";
-static const char RL_STR_MMAP[]                  = "mmap";
-static const char RL_STR_MUNMAP[]                = "munmap";
-static const char RL_STR_SHMDT[]                 = "shmdt";
-static const char RL_STR_LINK[]                  = "link";
-static const char RL_STR_LINK_INODE[]            = "link_inode";
-static const char RL_STR_SPLICE[]                = "splice";
-static const char RL_STR_SETATTR[]               = "setattr";
-static const char RL_STR_SETATTR_INODE[]         = "setattr_inode";
-static const char RL_STR_ACCEPT_SOCKET[]         = "accept_socket";
-static const char RL_STR_SETXATTR[]              = "setxattr";
-static const char RL_STR_SETXATTR_INODE[]        = "setxattr_inode";
-static const char RL_STR_RMVXATTR[]              = "removexattr";
-static const char RL_STR_RMVXATTR_INODE[]        = "removexattr_inode";
-static const char RL_STR_NAMED[]                 = "named";
-static const char RL_STR_NAMED_PROCESS[]         = "named_process";
-static const char RL_STR_EXEC[]                  = "exec";
-static const char RL_STR_EXEC_TASK[]             = "exec_task";
-static const char RL_STR_PCK_CNT[]             	 = "packet_content";
-static const char RL_STR_CLONE[]                 = "clone";
-static const char RL_STR_VERSION_TASK[]          = "version_activity";
-static const char RL_STR_SEARCH[]                = "search";
-static const char RL_STR_GETATTR[]               = "getattr";
-static const char RL_STR_GETXATTR[]              = "getxattr";
-static const char RL_STR_GETXATTR_INODE[]        = "getxattr_inode";
-static const char RL_STR_LSTXATTR[]              = "listxattr";
-static const char RL_STR_READ_LINK[]             = "read_link";
-static const char RL_STR_MMAP_READ[]             = "mmap_read";
-static const char RL_STR_SH_READ[]               = "sh_read";
-static const char RL_STR_PROC_READ[]             = "proc_read";
-static const char RL_STR_MMAP_EXEC[]             = "mmap_exec";
-static const char RL_STR_SND[]                   = "send";
-static const char RL_STR_SND_PACKET[]            = "send_packet";
-static const char RL_STR_SND_UNIX[]              = "send_unix";
-static const char RL_STR_SND_MSG[]               = "send_msg";
-static const char RL_STR_SND_MSG_Q[]             = "send_msg_queue";
-static const char RL_STR_RCV[]                   = "receive";
-static const char RL_STR_RCV_PACKET[]            = "receive_packet";
-static const char RL_STR_RCV_UNIX[]              = "receive_unix";
-static const char RL_STR_RCV_MSG[]               = "receive_msg";
-static const char RL_STR_RCV_MSG_Q[]             = "receive_msg_queue";
-static const char RL_STR_PERM_READ[]             = "perm_read";
-static const char RL_STR_PERM_WRITE[]            = "perm_write";
-static const char RL_STR_PERM_EXEC[]             = "perm_exec";
-static const char RL_STR_PERM_APPEND[]           = "perm_append";
-static const char RL_STR_TERMINATE_TASK[]        = "terminate_task";
-static const char RL_STR_TERMINATE_PROC[]        = "terminate_proc";
-static const char RL_STR_CLOSED[]                = "closed";
-static const char RL_STR_ARG[]                   = "arg";
-static const char RL_STR_ENV[]                   = "env";
-static const char RL_STR_LOG[]                   = "log";
-static const char RL_STR_SH_ATTACH_READ[]        = "sh_attach_read";
-static const char RL_STR_SH_ATTACH_WRITE[]       = "sh_attach_write";
-static const char RL_STR_SH_CREATE_READ[]        = "sh_create_read";
-static const char RL_STR_SH_CREATE_WRITE[]       = "sh_create_write";
+static const char RL_STR_UNKNOWN[]               = "unknown"; // unknown relation should not happen
+static const char RL_STR_READ[]                  = "read"; // read to inode
+static const char RL_STR_READ_IOCTL[]            = "read_ioctl"; // ioctl read
+static const char RL_STR_WRITE[]                 = "write"; // write to inode
+static const char RL_STR_WRITE_IOCTL[]           = "write_ioctl"; // ioctl write
+static const char RL_STR_CLONE_MEM[]             = "clone_mem"; // memory copy on clone
+static const char RL_STR_MSG_CREATE[]            = "msg_create"; // create msg (IPC message passing)
+static const char RL_STR_SOCKET_CREATE[]         = "socket_create"; // create socket
+static const char RL_STR_INODE_CREATE[]          = "inode_create"; // create inode
+static const char RL_STR_SETUID[]                = "setuid"; // setuid
+static const char RL_STR_SETGID[]                = "setgid"; // setgid
+static const char RL_STR_MMAP_WRITE[]            = "mmap_write"; // mmap mounting with write perm
+static const char RL_STR_SH_WRITE[]              = "sh_write"; // writing to shared state
+static const char RL_STR_PROC_WRITE[]            = "proc_write"; // writing to process memory (i.e. shared between thread)
+static const char RL_STR_BIND[]                  = "bind"; // socket bind operation
+static const char RL_STR_CONNECT[]               = "connect"; // socket connection operation
+static const char RL_STR_LISTEN[]                = "listen"; // socket listen operation
+static const char RL_STR_ACCEPT[]                = "accept"; // socket accept operation
+static const char RL_STR_OPEN[]                  = "open"; // file open operation
+static const char RL_STR_FILE_RCV[]              = "file_rcv"; // open file descriptor recevied through IPC
+static const char RL_STR_VERSION[]               = "version_entity"; // connect version of entity object
+static const char RL_STR_MMAP[]                  = "mmap"; // mmap operation
+static const char RL_STR_MUNMAP[]                = "munmap"; // munmap operation
+static const char RL_STR_SHMDT[]                 = "shmdt"; // shmdt operation
+static const char RL_STR_LINK[]                  = "link"; // create a link
+static const char RL_STR_UNLINK[]                = "unlink"; // delete a link
+static const char RL_STR_SYMLINK[]               = "symlink"; // create a symlink
+static const char RL_STR_SPLICE[]                = "splice"; // pipe splice operation
+static const char RL_STR_SETATTR[]               = "setattr"; // setattr operation (task -> iattr)
+static const char RL_STR_SETATTR_INODE[]         = "setattr_inode"; // setattr operation (iattr -> inode)
+static const char RL_STR_ACCEPT_SOCKET[]         = "accept_socket"; // accept operation (parent -> child socket)
+static const char RL_STR_SETXATTR[]              = "setxattr"; // setxattr operation (task -> xattr)
+static const char RL_STR_SETXATTR_INODE[]        = "setxattr_inode"; // setxattr operation (xattr -> inode)
+static const char RL_STR_RMVXATTR[]              = "removexattr"; // remove xattr operation (task -> xattr)
+static const char RL_STR_RMVXATTR_INODE[]        = "removexattr_inode"; // remove xattr operation (xattr -> inode)
+static const char RL_STR_NAMED[]                 = "named"; // connect path to inode
+static const char RL_STR_NAMED_PROCESS[]         = "named_process"; // connect path to process_memory
+static const char RL_STR_EXEC[]                  = "exec"; // exec operation
+static const char RL_STR_EXEC_TASK[]             = "exec_task"; // exec operation
+static const char RL_STR_PCK_CNT[]               = "packet_content"; // connect netwrok packet to its content
+static const char RL_STR_CLONE[]                 = "clone"; // clone operation
+static const char RL_STR_VERSION_TASK[]          = "version_activity"; // connection two versions of an activity
+static const char RL_STR_SEARCH[]                = "search"; // search operation on directory
+static const char RL_STR_GETATTR[]               = "getattr"; // getattr operation
+static const char RL_STR_GETXATTR[]              = "getxattr"; // getxattr operation (xattr -> process)
+static const char RL_STR_GETXATTR_INODE[]        = "getxattr_inode"; // getxattr operation (inode -> xattr)
+static const char RL_STR_LSTXATTR[]              = "listxattr"; // listxattr operation
+static const char RL_STR_READ_LINK[]             = "read_link"; // readlink operation
+static const char RL_STR_MMAP_READ[]             = "mmap_read"; // mmap mounting with read perm
+static const char RL_STR_SH_READ[]               = "sh_read"; // sh_read operation
+static const char RL_STR_PROC_READ[]             = "proc_read"; // read from process memory
+static const char RL_STR_MMAP_EXEC[]             = "mmap_exec"; // mmap mounting with exec perm
+static const char RL_STR_SND[]                   = "send"; // send over socket
+static const char RL_STR_SND_PACKET[]            = "send_packet"; // connect socket to packet on send operation
+static const char RL_STR_SND_UNIX[]              = "send_unix"; // send over unix socket
+static const char RL_STR_SND_MSG[]               = "send_msg"; // send message
+static const char RL_STR_SND_MSG_Q[]             = "send_msg_queue"; // send message to queue
+static const char RL_STR_RCV[]                   = "receive"; // receive socket operation
+static const char RL_STR_RCV_PACKET[]            = "receive_packet"; // connect packet to socket on receive operation
+static const char RL_STR_RCV_UNIX[]              = "receive_unix"; // receive on unix socket
+static const char RL_STR_RCV_MSG[]               = "receive_msg"; // receive message
+static const char RL_STR_RCV_MSG_Q[]             = "receive_msg_queue"; // receive message from queue
+static const char RL_STR_PERM_READ[]             = "perm_read"; // check read permission
+static const char RL_STR_PERM_WRITE[]            = "perm_write"; // check write permission
+static const char RL_STR_PERM_EXEC[]             = "perm_exec"; // check exec permission
+static const char RL_STR_PERM_APPEND[]           = "perm_append"; // check append permission
+static const char RL_STR_TERMINATE_TASK[]        = "terminate_task"; // created when task data structure is freed
+static const char RL_STR_TERMINATE_PROC[]        = "terminate_proc"; // created when cred data structure is freed
+static const char RL_STR_CLOSED[]                = "closed"; // created when a file is closed
+static const char RL_STR_ARG[]                   = "arg"; // connect arg value to process
+static const char RL_STR_ENV[]                   = "env"; // connect env value to process
+static const char RL_STR_LOG[]                   = "log"; // connect string to task
+static const char RL_STR_SH_ATTACH_READ[]        = "sh_attach_read"; // attach sh with read perm
+static const char RL_STR_SH_ATTACH_WRITE[]       = "sh_attach_write"; // attach sh with write perm
+static const char RL_STR_SH_CREATE_READ[]        = "sh_create_read"; // sh create with read perm
+static const char RL_STR_SH_CREATE_WRITE[]       = "sh_create_write"; // sh create with write perm
 
 /* node string name */
-static const char ND_STR_UNKNOWN[]                           = "unknown";
-static const char ND_STR_STR[]                               = "string";
-static const char ND_STR_TASK[]                              = "task";
-static const char ND_STR_INODE_UNKNOWN[]                     = "inode_unknown";
-static const char ND_STR_INODE_LINK[]                        = "link";
-static const char ND_STR_INODE_FILE[]                        = "file";
-static const char ND_STR_INODE_DIRECTORY[]                   = "directory";
-static const char ND_STR_INODE_CHAR[]                        = "char";
-static const char ND_STR_INODE_BLOCK[]                       = "block";
-static const char ND_STR_INODE_FIFO[]                        = "fifo";
-static const char ND_STR_INODE_SOCKET[]                      = "socket";
-static const char ND_STR_MSG[]                               = "msg";
-static const char ND_STR_SHM[]                               = "shm";
-static const char ND_STR_ADDR[]                              = "address";
-static const char ND_STR_SB[]                                = "sb";
-static const char ND_STR_FILE_NAME[]                         = "file_name";
-static const char ND_STR_DISC_ENTITY[]                       = "disc_entity";
-static const char ND_STR_DISC_ACTIVITY[]                     = "disc_activity";
-static const char ND_STR_DISC_AGENT[]                        = "disc_agent";
-static const char ND_STR_PACKET[]                            = "packet";
-static const char ND_STR_INODE_MMAP[]                        = "mmaped_file";
-static const char ND_STR_IATTR[]                             = "iattr";
-static const char ND_STR_XATTR[]                             = "xattr";
-static const char ND_STR_PCKCNT[]                            = "packet_content";
-static const char ND_STR_ARG[]                               = "argv";
-static const char ND_STR_ENV[]                               = "envp";
-static const char ND_STR_PROC[]                              = "process";
+static const char ND_STR_UNKNOWN[]                           = "unknown"; // unkown node type should normally not appear
+static const char ND_STR_STR[]                               = "string"; // simple string used for disclosed log
+static const char ND_STR_TASK[]                              = "task"; // represent a thread from user space POV
+static const char ND_STR_INODE_UNKNOWN[]                     = "inode_unknown"; // unknown inode type should normally not appear
+static const char ND_STR_INODE_LINK[]                        = "link"; // link
+static const char ND_STR_INODE_FILE[]                        = "file"; // standard file
+static const char ND_STR_INODE_DIRECTORY[]                   = "directory"; // directory
+static const char ND_STR_INODE_CHAR[]                        = "char"; // character device
+static const char ND_STR_INODE_BLOCK[]                       = "block"; // block device
+static const char ND_STR_INODE_PIPE[]                        = "pipe"; // pipe
+static const char ND_STR_INODE_SOCKET[]                      = "socket"; // network socket
+static const char ND_STR_MSG[]                               = "msg"; // msg as in IPC message passing
+static const char ND_STR_SHM[]                               = "shm"; // shared memory
+static const char ND_STR_ADDR[]                              = "address"; // network address
+static const char ND_STR_SB[]                                = "sb"; // superblock
+static const char ND_STR_PATH[]                         		 = "path"; // path associated with a file
+static const char ND_STR_DISC_ENTITY[]                       = "disc_entity"; // descilosed node representing an entity
+static const char ND_STR_DISC_ACTIVITY[]                     = "disc_activity"; // descilosed node representing an activity
+static const char ND_STR_DISC_AGENT[]                        = "disc_agent"; // disclosed node representing an agent
+static const char ND_STR_PACKET[]                            = "packet"; // network packet
+static const char ND_STR_INODE_MMAP[]                        = "mmaped_file"; // privately mmaped file
+static const char ND_STR_IATTR[]                             = "iattr"; // inode attributes value
+static const char ND_STR_XATTR[]                             = "xattr"; // extended attributes value
+static const char ND_STR_PCKCNT[]                            = "packet_content"; // the content of network packet
+static const char ND_STR_ARG[]                               = "argv"; // argument passed to a process
+static const char ND_STR_ENV[]                               = "envp"; // environment parameter
+static const char ND_STR_PROC[]                              = "process_memory"; // process memory
 
 #define MATCH_AND_RETURN(str1, str2, v) if (strcmp(str1, str2) == 0) return v
 /* transform from relation ID to string representation */
@@ -168,8 +169,10 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SHMDT;
 	case RL_LINK:
 		return RL_STR_LINK;
-	case RL_LINK_INODE:
-		return RL_STR_LINK_INODE;
+	case RL_UNLINK:
+		return RL_STR_UNLINK;
+	case RL_SYMLINK:
+		return RL_STR_SYMLINK;
 	case RL_SPLICE:
 		return RL_STR_SPLICE;
 	case RL_SETATTR:
@@ -303,7 +306,8 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
 	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
-	MATCH_AND_RETURN(str, RL_STR_LINK_INODE, RL_LINK_INODE);
+	MATCH_AND_RETURN(str, RL_STR_UNLINK, RL_UNLINK);
+	MATCH_AND_RETURN(str, RL_STR_SYMLINK, RL_SYMLINK);
 	MATCH_AND_RETURN(str, RL_STR_SPLICE, RL_SPLICE);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR, RL_SETATTR);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR_INODE, RL_SETATTR_INODE);
@@ -379,8 +383,8 @@ const char* node_str(uint64_t type)
 		return ND_STR_INODE_CHAR;
 	case ENT_INODE_BLOCK:
 		return ND_STR_INODE_BLOCK;
-	case ENT_INODE_FIFO:
-		return ND_STR_INODE_FIFO;
+	case ENT_INODE_PIPE:
+		return ND_STR_INODE_PIPE;
 	case ENT_INODE_SOCKET:
 		return ND_STR_INODE_SOCKET;
 	case ENT_INODE_MMAP:
@@ -393,8 +397,8 @@ const char* node_str(uint64_t type)
 		return ND_STR_ADDR;
 	case ENT_SBLCK:
 		return ND_STR_SB;
-	case ENT_FILE_NAME:
-		return ND_STR_FILE_NAME;
+	case ENT_PATH:
+		return ND_STR_PATH;
 	case ENT_DISC:
 		return ND_STR_DISC_ENTITY;
 	case ACT_DISC:
@@ -431,14 +435,14 @@ uint64_t node_id(const char* str)
 	MATCH_AND_RETURN(str, ND_STR_INODE_DIRECTORY, ENT_INODE_DIRECTORY);
 	MATCH_AND_RETURN(str, ND_STR_INODE_CHAR, ENT_INODE_CHAR);
 	MATCH_AND_RETURN(str, ND_STR_INODE_BLOCK, ENT_INODE_BLOCK);
-	MATCH_AND_RETURN(str, ND_STR_INODE_FIFO, ENT_INODE_FIFO);
+	MATCH_AND_RETURN(str, ND_STR_INODE_PIPE, ENT_INODE_PIPE);
 	MATCH_AND_RETURN(str, ND_STR_INODE_SOCKET, ENT_INODE_SOCKET);
 	MATCH_AND_RETURN(str, ND_STR_INODE_MMAP, ENT_INODE_MMAP);
 	MATCH_AND_RETURN(str, ND_STR_MSG, ENT_MSG);
 	MATCH_AND_RETURN(str, ND_STR_SHM, ENT_SHM);
 	MATCH_AND_RETURN(str, ND_STR_ADDR, ENT_ADDR);
 	MATCH_AND_RETURN(str, ND_STR_SB, ENT_SBLCK);
-	MATCH_AND_RETURN(str, ND_STR_FILE_NAME, ENT_FILE_NAME);
+	MATCH_AND_RETURN(str, ND_STR_PATH, ENT_PATH);
 	MATCH_AND_RETURN(str, ND_STR_DISC_ENTITY, ENT_DISC);
 	MATCH_AND_RETURN(str, ND_STR_DISC_ACTIVITY, ACT_DISC);
 	MATCH_AND_RETURN(str, ND_STR_DISC_AGENT, AGT_DISC);

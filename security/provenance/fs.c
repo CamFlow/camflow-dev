@@ -10,6 +10,12 @@
  * or (at your option) any later version.
  *
  */
+
+/*!
+ * This file creates securityfs for provenance capture.
+ * @todo We will document this file if needed in the future.
+ *
+ */
 #include <linux/security.h>
 #include <linux/provenance_types.h>
 #include <crypto/hash.h>
@@ -246,7 +252,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		spin_lock(prov_lock(cprov));
 		// TODO redo
 		__write_node(prov_entry(cprov));
-		copy_identifier(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier);
+		memcpy(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier, sizeof(union prov_identifier));
 		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;

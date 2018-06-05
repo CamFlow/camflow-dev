@@ -17,7 +17,6 @@ Automated Travis test run the following operation:
 - run [sparse](https://sparse.wiki.kernel.org/index.php/Main_Page);
 - run [checkpatch](https://kernelnewbies.org/CheckpatchTips);
 - run [flawfinder](https://www.dwheeler.com/flawfinder/);
-- run [SonarQube](https://sonarqube.com);
 - build the kernel patch.
 
 ## Warning
@@ -30,7 +29,7 @@ Do not hesitate to fork the repository or to report bugs.
 
 ``` shell
 sudo dnf groupinstall 'Development Tools'
-sudo dnf install ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto
+sudo dnf install ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib ruby bison flex patch mosquitto
 ```
 
 ```
