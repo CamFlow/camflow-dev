@@ -21,3 +21,9 @@ jobs:
       - run:
           name: prepare-analysis
           command: 'cd ./analysis && make prepare'
+      - run:
+          name: prepare-kernel
+          command: 'make prepare_kernel'
+      - run:
+          name: config
+          command: 'cd ./analysis && make config'

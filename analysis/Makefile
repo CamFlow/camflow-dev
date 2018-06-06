@@ -1,4 +1,4 @@
-prepare: prepare_gcc prepare_gpp prepare_m4 prepare_callgraph prepare_kernel prepare_analysis
+prepare: prepare_gcc prepare_gpp prepare_m4 prepare_callgraph prepare_analysis
 
 prepare_gcc:
 	wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-4.8/gcc-4.8-base_4.8.5-4ubuntu2_amd64.deb
@@ -40,10 +40,6 @@ prepare_m4:
 prepare_callgraph:
 	git clone https://scm.gforge.inria.fr/anonscm/git/kayrebt/Callgraphs.git
 
-prepare_kernel:
-	git clone https://github.com/camflow/camflow-dev
-	cd ./camflow-dev && $(MAKE) prepare_kernel
-
 prepare_analysis:
 	git clone https://github.com/michael-hahn/syscalllsm.git
 
@@ -56,7 +52,9 @@ config_callgraph:
 	cd ./Callgraphs && sudo $(MAKE) install
 
 config_kernel:
-	cd ../build/linux-stable && $(MAKE) menuconfig
+	git clone https://github.com/camflow/camflow-patches
+	cp -f ./camflow-patches/v0.4.3/.config ../build/linux-stable/
+	cd ../build/linux-stable && $(MAKE) config_circle
 	cd ../build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
 
 config_sqlite:
