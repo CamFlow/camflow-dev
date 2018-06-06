@@ -35,6 +35,11 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.4.3
+```
+- Update to kernel version 4.16.13.
+```
+
 ### v0.4.2
 ```
 - Fix issue where thread were not made opaque.
