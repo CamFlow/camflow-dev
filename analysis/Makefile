@@ -47,7 +47,7 @@ config: config_callgraph config_kernel config_sqlite
 
 config_callgraph:
 	cd ./Callgraphs && ls
-	cd ./Callgraphs && autoreconf —-install -vv
+	cd ./Callgraphs && autoreconf --install -vv
 	cd ./Callgraphs && ./configure
 	cd ./Callgraphs && $(MAKE)
 	cd ./Callgraphs && sudo $(MAKE) install
