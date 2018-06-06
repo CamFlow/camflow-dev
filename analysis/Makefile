@@ -46,6 +46,7 @@ prepare_analysis:
 config: config_callgraph config_kernel config_sqlite
 
 config_callgraph:
+	cd ./Callgraphs && ls
 	cd ./Callgraphs && autoreconf —-install
 	cd ./Callgraphs && ./configure
 	cd ./Callgraphs && $(MAKE)
