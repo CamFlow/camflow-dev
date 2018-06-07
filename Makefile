@@ -69,13 +69,14 @@ copy_change:
 copy_config:
 	cp -f /boot/config-$(shell uname -r) .config
 	sed -i -e "s/CONFIG_DRM_VBOXVIDEO=m/# CONFIG_DRM_VBOXVIDEO is not set/g" ./.config
+	cd ./build/linux-stable && cp ../../.config .config
 
 config: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-stable &&  mv .config config_sav
 	cd ./build/linux-stable &&  mv config_strip .config
 	cd ./build/linux-stable && $(MAKE) menuconfig
-	cd ./build/linux-stable && cp ../../.config .config
+	cd ./build/linux-stable && cp .config ../../.config
 
 config_travis: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
