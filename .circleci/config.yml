@@ -27,3 +27,12 @@ jobs:
       - run:
           name: config
           command: 'cd ./analysis && make config'
+      - run:
+          name: compile
+          command: 'cd ./analysis && make compile'
+      - run:
+          name: analyse
+          command: 'cd ./analysis && make run'
+      - run:
+          name: results
+          command: 'cd ./analysis && ls'
