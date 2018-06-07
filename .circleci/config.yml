@@ -34,5 +34,11 @@ jobs:
           name: analyse
           command: 'cd ./analysis && make run'
       - run:
-          name: results
-          command: 'cd ./analysis && ls'
+          name: syslist
+          command: 'cd ./analysis && cat syslist.txt'
+      - run:
+          name: syslist
+          command: 'cd ./analysis && cat syshooks.txt'
+      - run:
+          name: syslist
+          command: 'cd ./analysis && cat stats.txt'
