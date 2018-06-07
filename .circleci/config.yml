@@ -10,5 +10,8 @@ jobs:
           name: update
           command: 'apt-get update -qq'
       - run:
+          name: sudo
+          command: 'apt-get install sudo -y'
+      - run:
           name: prepare-analysis
           command: 'cd ./analysis && make prepare'
