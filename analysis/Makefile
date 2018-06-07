@@ -1,4 +1,4 @@
-prepare: prepare_gcc prepare_gpp prepare_sqlite prepare_m4 prepare_callgraph prepare_kernel prepare_analysis
+prepare: prepare_gcc prepare_gpp prepare_m4 prepare_callgraph prepare_kernel prepare_analysis
 
 prepare_gcc:
 	wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-4.8/gcc-4.8-base_4.8.5-4ubuntu2_amd64.deb
@@ -31,10 +31,6 @@ prepare_gcc:
 prepare_gpp:
 	sudo rm /usr/bin/g++
 	sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
-
-prepare_sqlite:
-	sudo apt-get install -y sqlite3
-	sudo apt-get install -y libsqlite3-dev
 
 prepare_m4:
 	git clone https://github.com/michael-hahn/m4.git

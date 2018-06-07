@@ -14,7 +14,7 @@ jobs:
           command: 'apt-get install -y sudo'
       - run:
           name: dependencies
-          command: 'apt-get install -y autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex'
+          command: 'apt-get install -y autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run:
           name: reinstall-make
           command: 'apt-get install --reinstall make'
