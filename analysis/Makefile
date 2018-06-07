@@ -54,7 +54,7 @@ config_callgraph:
 
 config_kernel:
 	git clone https://github.com/camflow/camflow-patches
-	cp -f ./camflow-patches/v0.4.3/.config ../build/linux-stable/
+	cp -f ./camflow-patches/v0.4.2/.config ../build/linux-stable/
 	cd ../build/linux-stable && $(MAKE) config_circle
 	cd ../build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
 
