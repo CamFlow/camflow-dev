@@ -11,7 +11,13 @@ jobs:
           command: 'apt-get update -qq'
       - run:
           name: sudo
-          command: 'apt-get install sudo -y'
+          command: 'apt-get install -y sudo'
+      - run:
+          name: dependencies
+          command: 'apt-get install -y autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex'
+      - run:
+          name: reinstall-make
+          command: 'apt-get install --reinstall make'
       - run:
           name: prepare-analysis
           command: 'cd ./analysis && make prepare'
