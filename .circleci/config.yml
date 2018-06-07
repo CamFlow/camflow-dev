@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - run:
+          name: update
+          command: 'apt-get update -qq'
+      - run:
+          name: prepare-analysis
+          command: 'cd ./analysis && make prepare'
