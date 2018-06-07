@@ -54,6 +54,7 @@ config_callgraph:
 
 config_kernel:
 	cp -f ./.config ../build/linux-stable/
+	cd .. && $(MAKE) config_circle
 	cd ../build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
 
 config_sqlite:
@@ -72,6 +73,6 @@ compile:
 run: run_analysis
 
 run_analysis:
-	cd syscalllsm && python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	cd syscalllsm && python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	cd syscalllsm && python syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	cd syscalllsm && python analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
 	cd syscalllsm && python stats.py syshooks.txt stats.txt
