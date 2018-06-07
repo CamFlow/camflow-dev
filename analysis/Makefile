@@ -54,7 +54,7 @@ config_callgraph:
 
 config_kernel:
 	cp -f ./.config ../build/linux-stable/
-	cd ../build/linux-stable && $(MAKE) config_circle
+	cd .. && $(MAKE) config_circle
 	cd ../build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
 
 config_sqlite:
