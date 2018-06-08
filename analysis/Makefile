@@ -33,7 +33,7 @@ prepare_gpp:
 	sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 
 prepare_m4:
-	git clone https://github.com/michael-hahn/m4.git
+	git clone https://github.com/tfjmp/m4.git
 	sudo mv m4/* /usr/share/aclocal
 	rm -rf m4
 
@@ -41,7 +41,7 @@ prepare_callgraph:
 	git clone https://scm.gforge.inria.fr/anonscm/git/kayrebt/Callgraphs.git
 
 prepare_analysis:
-	git clone https://github.com/michael-hahn/syscalllsm.git
+	git clone https://github.com/tfjmp/syscalllsm.git
 
 config: config_callgraph config_kernel config_sqlite
 
