@@ -37,6 +37,7 @@
 
 ### v0.4.3
 ```
+- Perform code analysis as part of CI to assess LSM hooks coverage.
 - Update to kernel version 4.17.
 ```
 

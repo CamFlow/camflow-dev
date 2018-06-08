@@ -37,8 +37,8 @@ jobs:
           name: syslist
           command: 'cd ./analysis/syscalllsm && cat syslist.txt'
       - run:
-          name: syslist
+          name: syshooks
           command: 'cd ./analysis/syscalllsm && cat syshooks.txt'
       - run:
-          name: syslist
+          name: stats
           command: 'cd ./analysis/syscalllsm && cat stats.txt'
