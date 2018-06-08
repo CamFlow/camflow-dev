@@ -76,3 +76,8 @@ run_analysis:
 	cd syscalllsm && python syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
 	cd syscalllsm && python analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
 	cd syscalllsm && python stats.py syshooks.txt stats.txt
+
+run_local:
+	cd syscalllsm && python syscall.py ../../build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	cd syscalllsm && python analyze.py ../../build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	cd syscalllsm && python stats.py syshooks.txt stats.txt
