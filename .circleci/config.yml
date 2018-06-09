@@ -35,10 +35,10 @@ jobs:
           command: 'cd ./analysis && make run'
       - run:
           name: syslist
-          command: 'cd ./analysis/syscalllsm && cat syslist.txt'
+          command: 'cd ./scripts && cat syslist.txt'
       - run:
           name: syshooks
-          command: 'cd ./analysis/syscalllsm && cat syshooks.txt'
+          command: 'cd ./scripts && cat syshooks.txt'
       - run:
           name: stats
-          command: 'cd ./analysis/syscalllsm && cat stats.txt'
+          command: 'cd ./scripts && cat stats.txt'
