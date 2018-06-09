@@ -13,7 +13,7 @@ if __name__ == "__main__":
 			'''
 		exit(1)
 
-	with open(sys.argv[1], 'w+') as f:
+	with open(sys.argv[1], 'r') as f:
 		for line in f:
 			fields = line.split('\t')
 			syscall = fields[0]
@@ -56,7 +56,6 @@ if __name__ == "__main__":
 	f.close()
 
 	with open(sys.argv[2], "w+") as f:
-		f.write("Kernel Version: 4.16.8\n")
 		f.write("Total number of system calls that trigger no LSM hooks: " + str(len(no_lsm_syscalls)) + "\n")
 		f.write("Those system calls are:\n")
 		for syscall in no_lsm_syscalls:
@@ -72,35 +71,18 @@ if __name__ == "__main__":
 		f.write("======================================================================\n\n")
 		f.write("WEIGHTED API CALL (MOST TO LEAST IMPORTANT)\t\t\tNUMBER OF HOOKS CALLED\n")
 		for wsyscall in weightedAPI:
-			SyS_syscall = "SyS_" + wsyscall
-			sys_syscall = "sys_" + wsyscall
-			C_SYSC_x86_syscall = "C_SYSC_x86_" + wsyscall
-			C_SYSC_syscall = "C_SYSC_" + wsyscall
-			if SyS_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[SyS_syscall]) + '\n')
-			elif sys_syscall in syscall_num_lsm_map:
+			sys_syscall = "__x64_sys_" + wsyscall
+			print sys_syscall
+			if sys_syscall in syscall_num_lsm_map:
 				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[sys_syscall]) + '\n')
-			elif C_SYSC_x86_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[C_SYSC_x86_syscall]) + '\n')
-			elif C_SYSC_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[C_SYSC_syscall]) + '\n')
 			else:
 				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + "N/A" + '\n')
 		f.write("======================================================================\n\n")
 		f.write("UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT)\t\t\tNUMBER OF HOOKS CALLED\n")
 		for wsyscall in unweightedAPI:
-			SyS_syscall = "SyS_" + wsyscall
-			sys_syscall = "sys_" + wsyscall
-			C_SYSC_x86_syscall = "C_SYSC_x86_" + wsyscall
-			C_SYSC_syscall = "C_SYSC_" + wsyscall
-			if SyS_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[SyS_syscall]) + '\n')
-			elif sys_syscall in syscall_num_lsm_map:
+			sys_syscall = "__x64_sys_" + wsyscall
+			if sys_syscall in syscall_num_lsm_map:
 				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[sys_syscall]) + '\n')
-			elif C_SYSC_x86_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[C_SYSC_x86_syscall]) + '\n')
-			elif C_SYSC_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[C_SYSC_syscall]) + '\n')
 			else:
 				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + "N/A" + '\n')
 	f.close()

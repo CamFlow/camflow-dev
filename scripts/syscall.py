@@ -31,9 +31,9 @@ if __name__ == "__main__":
 	with open(sys.argv[2], 'r') as f:
 		for line in f:
 			funcname = line.strip()
-			print "FuncName: " + funcname + "\n"
+			print "FuncName: " + funcname
 			id = str(getID(funcname, c)[0])
-			print "ID: " + id + "\n"
+			print "ID: " + id
 			outline = funcname + '\t' + id + '\n'
 			output.write(outline)
 	f.close()

@@ -36,6 +36,7 @@ prepare_m4:
 	sudo mv ../scripts/m4/* /usr/share/aclocal
 
 prepare_callgraph:
+	mkdir -p ../build
 	cd ../build && git clone https://github.com/CamFlow/callgraphs.git
 
 config: config_callgraph config_kernel config_sqlite
@@ -68,11 +69,11 @@ compile:
 run: run_analysis
 
 run_analysis:
-	cd syscalllsm && python ../scripts/syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	cd syscalllsm && python ../scripts/analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
-	cd syscalllsm && python ../scripts/stats.py syshooks.txt stats.txt
+	cd ../scripts && python syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	cd ../scripts && python analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	cd ../scripts && python stats.py syshooks.txt stats.txt
 
 run_local:
-	cd syscalllsm && python ../scripts/syscall.py ../../build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	cd syscalllsm && python ../scripts/analyze.py ../../build/linux-stable/db.sqlite syslist.txt syshooks.txt
-	cd syscalllsm && python ../scripts/stats.py syshooks.txt stats.txt
+	cd ../scripts && python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	cd ../scripts && python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	cd ../scripts && python stats.py syshooks.txt stats.txt
