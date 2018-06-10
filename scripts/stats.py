@@ -56,33 +56,37 @@ if __name__ == "__main__":
 	f.close()
 
 	with open(sys.argv[2], "w+") as f:
+		f.write("# LSM statistics\n")
 		f.write("Total number of system calls that trigger no LSM hooks: " + str(len(no_lsm_syscalls)) + "\n")
 		f.write("Those system calls are:\n")
 		for syscall in no_lsm_syscalls:
 			f.write("\t" + syscall + '\n')
-		f.write("==========Statistics of System Calls That Trigger LSM Hooks==========\n")
-		f.write("SYSCALL NAME\t\t\t\t\t\t\t\t\tNUMBER OF HOOKS CALLED\n")
+		f.write("## Statistics of System Calls That Trigger LSM Hooks\n")
+		f.write("SYSCALL NAME | NUMBER OF HOOKS CALLED |\n")
+		f.write("-------------|------------------------|\n")
 		for syscall in syscall_num_lsm_map:
-			f.write(syscall + '\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[syscall]) + '\n')
-		f.write("======================================================================\n\n")
-		f.write("NUMBER OF HOOKS CALLED\t\t\t\t\t\tNUMBER OF SYSTEM CALLS\n")
+			f.write(syscall + '|' + str(syscall_num_lsm_map[syscall]) + '|\n')
+		f.write("\n\n")
+		f.write("NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |\n")
 		for num in lsm_stats:
-			f.write(str(num) + '\t\t\t\t\t\t\t\t\t\t\t' + str(lsm_stats[num]) + '\n')
-		f.write("======================================================================\n\n")
-		f.write("WEIGHTED API CALL (MOST TO LEAST IMPORTANT)\t\t\tNUMBER OF HOOKS CALLED\n")
+			f.write(str(num) + '|' + str(lsm_stats[num]) + '|\n')
+		f.write("\n\n")
+		f.write("WEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |\n")
+		f.write("--------------------------------------------|------------------------|\n")
 		for wsyscall in weightedAPI:
 			sys_syscall = "__x64_sys_" + wsyscall
 			print sys_syscall
 			if sys_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[sys_syscall]) + '\n')
+				f.write(wsyscall + '|' + str(syscall_num_lsm_map[sys_syscall]) + '|\n')
 			else:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + "N/A" + '\n')
-		f.write("======================================================================\n\n")
-		f.write("UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT)\t\t\tNUMBER OF HOOKS CALLED\n")
+				f.write(wsyscall + '|' + "N/A" + '|\n')
+		f.write("\n\n")
+		f.write("UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |\n")
+		f.write("----------------------------------------------|------------------------|\n")
 		for wsyscall in unweightedAPI:
 			sys_syscall = "__x64_sys_" + wsyscall
 			if sys_syscall in syscall_num_lsm_map:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + str(syscall_num_lsm_map[sys_syscall]) + '\n')
+				f.write(wsyscall + '|' + str(syscall_num_lsm_map[sys_syscall]) + '|\n')
 			else:
-				f.write(wsyscall + '\t\t\t\t\t\t\t\t\t\t\t\t\t' + "N/A" + '\n')
+				f.write(wsyscall + '|' + "N/A" + '|\n')
 	f.close()

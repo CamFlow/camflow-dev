@@ -76,4 +76,4 @@ run_analysis:
 run_local:
 	cd ../scripts && python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
 	cd ../scripts && python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
-	cd ../scripts && python stats.py syshooks.txt stats.txt
+	cd ../scripts && python stats.py syshooks.txt ../docs/STATS.md

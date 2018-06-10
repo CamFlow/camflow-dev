@@ -4,6 +4,9 @@ jobs:
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
+    environment:
+      - SOURCE_BRANCH: dev
+      - TARGET_BRANCH: dev
     steps:
       - checkout
       - run:
@@ -40,5 +43,11 @@ jobs:
           name: syshooks
           command: 'cd ./scripts && cat syshooks.txt'
       - run:
-          name: stats
-          command: 'cd ./scripts && cat stats.txt'
+          name: Publish
+          command: |
+            if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
+              git config --global user.email $GH_EMAIL
+              git config --global user.name $GH_NAME
+              git commit -m "CircleCI automated documentation generation: ${CIRCLE_SHA1}"
+              git push
+            fi
