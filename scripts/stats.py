@@ -68,6 +68,7 @@ if __name__ == "__main__":
 			f.write(syscall + '|' + str(syscall_num_lsm_map[syscall]) + '|\n')
 		f.write("\n\n")
 		f.write("NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |\n")
+		f.write("-----------------------|------------------------|\n")
 		for num in lsm_stats:
 			f.write(str(num) + '|' + str(lsm_stats[num]) + '|\n')
 		f.write("\n\n")
