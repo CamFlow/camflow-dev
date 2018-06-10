@@ -48,6 +48,7 @@ jobs:
             if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
               git config --global user.email $GH_EMAIL
               git config --global user.name $GH_NAME
-              git commit -m "CircleCI automated documentation generation: ${CIRCLE_SHA1}"
+              git status
+              git commit -a -m "CircleCI automated documentation generation: ${CIRCLE_SHA1}"
               git push
             fi
