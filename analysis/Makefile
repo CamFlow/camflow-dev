@@ -33,7 +33,7 @@ prepare_gpp:
 	sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 
 prepare_m4:
-	sudo mv ../scripts/m4/* /usr/share/aclocal
+	sudo cp -f -a ../scripts/m4/. /usr/share/aclocal
 
 prepare_callgraph:
 	mkdir -p ../build

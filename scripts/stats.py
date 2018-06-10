@@ -62,7 +62,7 @@ if __name__ == "__main__":
 		for syscall in no_lsm_syscalls:
 			f.write("\t" + syscall + '\n')
 		f.write("## Statistics of System Calls That Trigger LSM Hooks\n")
-		f.write("SYSCALL NAME | NUMBER OF HOOKS CALLED |\n")
+		f.write("SYSTEM CALL NAME | NUMBER OF HOOKS CALLED |\n")
 		f.write("-------------|------------------------|\n")
 		for syscall in syscall_num_lsm_map:
 			f.write(syscall + '|' + str(syscall_num_lsm_map[syscall]) + '|\n')

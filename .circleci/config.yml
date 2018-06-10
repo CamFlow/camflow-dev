@@ -49,6 +49,12 @@ jobs:
               git config --global user.email $GH_EMAIL
               git config --global user.name $GH_NAME
               git status
-              git commit -a -m "CircleCI automated documentation generation: ${CIRCLE_SHA1}"
-              git push
+              # is there any change
+              if git diff-index --quiet HEAD; then
+                echo 'Committing...'
+                git commit -a -m "CircleCI automated documentation generation: ${CIRCLE_SHA1}"
+                git push
+              else
+                echo 'Nothing to commit.'
+              fi
             fi
