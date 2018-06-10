@@ -42,8 +42,8 @@ jobs:
       - run:
           name: syshooks
           command: 'cd ./scripts && cat syshooks.txt'
-      - run:
-          name: Publish
+      - deploy:
+          name: Deploy
           command: |
             if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
               git config --global user.email $GH_EMAIL
