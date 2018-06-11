@@ -1,7 +1,7 @@
 puts "# CamFlow LSM hooks coverage\n\n"
 puts "Automatically generated do not edit!\n\n"
 
-to_remove = ['audit_rule_match', 'capable', 'capable_noaudit', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx']
+to_remove = ['audit_rule_match', 'capable', 'capable_noaudit', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx', 'path_truncate', 'path_mknod', 'path_mkdir', 'path_rmdir', 'path_unlink', 'path_symlink', 'path_link', 'path_rename', 'path_chmod', 'path_chown', 'path_chroot']
 puts 'The following hooks are ignored in this report: '+to_remove.to_s+"\n\n"
 
 puts "System Call|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)|\n"
