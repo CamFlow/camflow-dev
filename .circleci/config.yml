@@ -48,9 +48,15 @@ jobs:
             if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
               git config --global user.email $GH_EMAIL
               git config --global user.name $GH_NAME
+              mkdir -p output
+              cd output
+              git clone https://github.com/camflow/camflow-dev
+              cd camflow-dev
+              git checkout &TARGET_BRANCH
+              cp -a ../../docs/. ./docs
               git status
               # is there any change
-              if git diff-index --quiet HEAD; then
+              if ! git diff-index --exit-code --quiet HEAD; then
                 echo 'Committing...'
                 git commit -a -m "CircleCI automated documentation generation: ${CIRCLE_SHA1}"
                 git push
