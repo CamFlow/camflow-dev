@@ -57,21 +57,24 @@ if __name__ == "__main__":
 
 	with open(sys.argv[2], "w+") as f:
 		f.write("# LSM statistics\n")
-		f.write("Total number of system calls that trigger no LSM hooks: " + str(len(no_lsm_syscalls)) + "\n")
-		f.write("Those system calls are:\n")
+		f.write("This file is generated automatically. DO NOT EDIT.\n\n")
+		f.write("Total number of system calls that trigger no LSM hooks: " + str(len(no_lsm_syscalls)) + "\n\n")
+		f.write("Those system calls are:\n\n")
 		for syscall in no_lsm_syscalls:
-			f.write("\t" + syscall + '\n')
+			f.write("\t" + syscall + "\n\n")
 		f.write("## Statistics of System Calls That Trigger LSM Hooks\n")
 		f.write("SYSTEM CALL NAME | NUMBER OF HOOKS CALLED |\n")
 		f.write("-----------------|------------------------|\n")
 		for syscall in syscall_num_lsm_map:
 			f.write(syscall + '|' + str(syscall_num_lsm_map[syscall]) + '|\n')
 		f.write("\n\n")
+		f.write("## Statistics of Number of LSM Hooks Triggered by System Calls\n")
 		f.write("NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |\n")
 		f.write("-----------------------|------------------------|\n")
 		for num in lsm_stats:
 			f.write(str(num) + '|' + str(lsm_stats[num]) + '|\n')
 		f.write("\n\n")
+		f.write("## Statistics of System Calls Arranged by Weighted API Importance\n")
 		f.write("WEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |\n")
 		f.write("--------------------------------------------|------------------------|\n")
 		for wsyscall in weightedAPI:
@@ -82,6 +85,7 @@ if __name__ == "__main__":
 			else:
 				f.write(wsyscall + '|' + "N/A" + '|\n')
 		f.write("\n\n")
+		f.write("## Statistics of System Calls Arranged by Unweighted API Importance\n")
 		f.write("UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |\n")
 		f.write("----------------------------------------------|------------------------|\n")
 		for wsyscall in unweightedAPI:
