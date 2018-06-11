@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
 	with open(sys.argv[2], "w+") as f:
 		f.write("# LSM statistics\n")
+		f.write("This file is generated automatically. DO NOT EDIT.\n\n")
 		f.write("Total number of system calls that trigger no LSM hooks: " + str(len(no_lsm_syscalls)) + "\n\n")
 		f.write("Those system calls are:\n\n")
 		for syscall in no_lsm_syscalls:
