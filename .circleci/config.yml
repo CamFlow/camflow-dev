@@ -52,7 +52,7 @@ jobs:
               cd output
               git clone https://github.com/camflow/camflow-dev
               cd camflow-dev
-              git checkout &TARGET_BRANCH
+              git checkout $TARGET_BRANCH
               cp -a ../../docs/. ./docs
               git status
               # is there any change
