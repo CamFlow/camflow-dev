@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.4.3           | 4.17           | N/A        |
+| 0.4.3           | 4.17.1         | N/A        |
 | 0.4.2           | 4.16.13        | 05/06/2018 |
 | 0.4.1           | 4.16.12        | 28/05/2018 |
 | 0.4.0           | 4.16.12        | 26/05/2018 |
@@ -38,7 +38,7 @@
 ### v0.4.3
 ```
 - Perform code analysis as part of CI to assess LSM hooks coverage.
-- Update to kernel version 4.17.
+- Update to kernel version 4.17.1.
 ```
 
 ### v0.4.2
