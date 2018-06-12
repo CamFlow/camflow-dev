@@ -1167,6 +1167,32 @@ static int provenance_file_receive(struct file *file)
 	return rc;
 }
 
+/*
+ *	Check permission before performing file locking operations.
+ *	Note: this hook mediates both flock and fcntl style locks.
+ *	@file contains the file structure.
+ *	@cmd contains the posix-translated lock operation to perform
+ *	(e.g. F_RDLCK, F_WRLCK).
+ *	Return 0 if permission is granted.
+ */
+static int provenance_file_lock(struct file *file, unsigned int cmd)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = file_provenance(file, true);
+	unsigned long irqflags;
+	int rc = 0;
+
+	if (!iprov)
+		return -ENOMEM;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = uses(RL_FILE_LOCK, iprov, tprov, cprov, file, cmd);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
 /*!
  * @brief Record provenance when mmap_file hook is triggered.
  *
@@ -2355,7 +2381,8 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 #endif
 	LSM_HOOK_INIT(file_ioctl,			    provenance_file_ioctl),
 	LSM_HOOK_INIT(file_open,			    provenance_file_open),
-	LSM_HOOK_INIT(file_receive,			    provenance_file_receive),
+	LSM_HOOK_INIT(file_receive,			  provenance_file_receive),
+	LSM_HOOK_INIT(file_lock,			  	provenance_file_lock),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
 #endif
