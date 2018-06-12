@@ -1179,7 +1179,7 @@ static int provenance_file_lock(struct file *file, unsigned int cmd)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, true);
+	struct provenance *iprov = file_provenance(file, false);
 	unsigned long irqflags;
 	int rc = 0;
 

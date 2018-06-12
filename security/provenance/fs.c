@@ -866,14 +866,15 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 		return -ENOMEM;
 	if ( copy_from_user(&type_info, buf, sizeof(struct prov_type)) )
 		return -EAGAIN;
+	memset(type_info.str, 0, 256);
 	if (type_info.is_relation) {
 		if (type_info.id)
-			strncpy(type_info.str, relation_str(type_info.id), 256);
+			strncpy(type_info.str, relation_str(type_info.id), 256-1);
 		else
 			type_info.id = relation_id(type_info.str);
 	}else{
 		if (type_info.id)
-			strncpy(type_info.str, node_str(type_info.id), 256);
+			strncpy(type_info.str, node_str(type_info.id), 256-1);
 		else
 			type_info.id = node_id(type_info.str);
 	}
