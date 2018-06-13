@@ -1193,6 +1193,39 @@ static int provenance_file_lock(struct file *file, unsigned int cmd)
 	return rc;
 }
 
+/*
+ *	process @tsk.  Note that this hook is sometimes called from interrupt.
+ *	Note that the fown_struct, @fown, is never outside the context of a
+ *	struct file, so the file structure (and associated security information)
+ *	can always be obtained:
+ *		container_of(fown, struct file, f_owner)
+ *	@tsk contains the structure of task receiving signal.
+ *	@fown contains the file owner information.
+ *	@sig is the signal that will be sent.  When 0, kernel sends SIGIO.
+ *	Return 0 if permission is granted.
+ */
+ static int provenance_file_send_sigiotask(struct task_struct *task,
+ 				       struct fown_struct *fown, int signum)
+ {
+ 	struct file *file = container_of(fown, struct file, f_owner);
+	struct provenance *iprov = file_provenance(file, false);
+	struct provenance *tprov = task->provenance;
+	struct provenance *cprov = task_cred_xxx(task, provenance);
+	unsigned long irqflags;
+	int rc = 0;
+
+	if (!iprov)
+		return -ENOMEM;
+	if (!signum)
+		signum = SIGIO;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = uses(RL_FILE_SIGIO, iprov, tprov, cprov, file, signum);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+ }
+
 /*!
  * @brief Record provenance when mmap_file hook is triggered.
  *
@@ -2383,6 +2416,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(file_open,			    provenance_file_open),
 	LSM_HOOK_INIT(file_receive,			  provenance_file_receive),
 	LSM_HOOK_INIT(file_lock,			  	provenance_file_lock),
+	LSM_HOOK_INIT(file_send_sigiotask,	provenance_file_send_sigiotask),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
 #endif

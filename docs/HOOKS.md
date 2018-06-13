@@ -37,6 +37,7 @@ Automatically generated do not edit!
 - file_open
 - file_receive
 - file_lock
+- file_send_sigiotask
 - file_splice_pipe_to_pipe
 - msg_msg_alloc_security
 - msg_msg_free_security

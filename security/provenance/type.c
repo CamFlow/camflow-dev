@@ -35,6 +35,7 @@ static const char RL_STR_ACCEPT[]                = "accept"; // socket accept op
 static const char RL_STR_OPEN[]                  = "open"; // file open operation
 static const char RL_STR_FILE_RCV[]              = "file_rcv"; // open file descriptor recevied through IPC
 static const char RL_STR_FILE_LOCK[]             = "file_lock"; // represent file lock operation
+static const char RL_STR_FILE_SIGIO[]            = "file_sigio"; // represent IO signal
 static const char RL_STR_VERSION[]               = "version_entity"; // connect version of entity object
 static const char RL_STR_MMAP[]                  = "mmap"; // mmap operation
 static const char RL_STR_MUNMAP[]                = "munmap"; // munmap operation
@@ -162,6 +163,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_FILE_RCV;
 	case RL_FILE_LOCK:
 		return RL_STR_FILE_LOCK;
+	case RL_FILE_SIGIO:
+		return RL_STR_FILE_SIGIO;
 	case RL_VERSION:
 		return RL_STR_VERSION;
 	case RL_MMAP:
@@ -305,6 +308,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_OPEN, RL_OPEN);
 	MATCH_AND_RETURN(str, RL_STR_FILE_RCV, RL_FILE_RCV);
 	MATCH_AND_RETURN(str, RL_STR_FILE_LOCK, RL_FILE_LOCK);
+	MATCH_AND_RETURN(str, RL_STR_FILE_SIGIO, RL_FILE_SIGIO);
 	MATCH_AND_RETURN(str, RL_STR_VERSION, RL_VERSION);
 	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);

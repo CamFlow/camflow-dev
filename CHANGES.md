@@ -37,6 +37,7 @@
 
 ### v0.4.3
 ```
+- Added support for IO signal.
 - Added support for file_lock.
 - Perform code analysis as part of CI to assess LSM hooks coverage.
 - Update to kernel version 4.17.1.

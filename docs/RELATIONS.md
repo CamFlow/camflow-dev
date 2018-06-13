@@ -25,6 +25,7 @@ RL_ACCEPT|accept|socket accept operation|
 RL_OPEN|open|file open operation|
 RL_FILE_RCV|file_rcv|open file descriptor recevied through IPC|
 RL_FILE_LOCK|file_lock|represent file lock operation|
+RL_FILE_SIGIO|file_sigio|represent IO signal|
 RL_VERSION|version_entity|connect version of entity object|
 RL_MMAP|mmap|mmap operation|
 RL_MUNMAP|munmap|munmap operation|
