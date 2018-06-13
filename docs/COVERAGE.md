@@ -2,7 +2,7 @@
 
 Automatically generated do not edit!
 
-The following hooks are ignored in this report: ["audit_rule_init", "audit_rule_match", "capable", "capable_noaudit", "ipc_getsecid", "inode_getsecid", "task_getsecid", "secid_to_secctx", "release_secctx", "cred_getsecid", "path_truncate", "path_mknod", "path_mkdir", "path_rmdir", "path_unlink", "path_symlink", "path_link", "path_rename", "path_chmod", "path_chown", "path_chroot", "prepare_creds"]
+The following hooks are ignored in this report: ["audit_rule_init", "audit_rule_match", "capable", "capable_noaudit", "capset", "capget", "ipc_getsecid", "inode_getsecid", "task_getsecid", "secid_to_secctx", "release_secctx", "cred_getsecid", "path_truncate", "path_mknod", "path_mkdir", "path_rmdir", "path_unlink", "path_symlink", "path_link", "path_rename", "path_chmod", "path_chown", "path_chroot", "prepare_creds"]
 
 System Call|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)|
 -----------|------------|-----------------|---------------------|------------------------------|
@@ -124,8 +124,8 @@ __x64_sys_mprotect|["inode_free", "file_send_sigiotask", "mmap_addr", "vm_enough
 __x64_sys_pkey_mprotect|["inode_free", "file_send_sigiotask", "mmap_addr", "vm_enough_memory_mm", "task_free", "file_mprotect"]|["inode_free", "file_send_sigiotask", "task_free"]|["mmap_addr", "vm_enough_memory_mm", "file_mprotect"]|3/6|
 __x64_sys_pkey_alloc|["file_send_sigiotask", "task_free"]|["file_send_sigiotask", "task_free"]|[]|2/2|
 __x64_sys_pkey_free|["file_send_sigiotask", "task_free"]|["file_send_sigiotask", "task_free"]|[]|2/2|
-__x64_sys_capget|["task_free", "capget", "file_send_sigiotask"]|["task_free", "file_send_sigiotask"]|["capget"]|2/3|
-__x64_sys_capset|["capset", "file_send_sigiotask", "sk_free", "socket_sock_rcv_skb", "task_free"]|["file_send_sigiotask", "socket_sock_rcv_skb", "task_free"]|["capset", "sk_free"]|3/5|
+__x64_sys_capget|["task_free", "file_send_sigiotask"]|["task_free", "file_send_sigiotask"]|[]|2/2|
+__x64_sys_capset|["file_send_sigiotask", "sk_free", "socket_sock_rcv_skb", "task_free"]|["file_send_sigiotask", "socket_sock_rcv_skb", "task_free"]|["sk_free"]|3/4|
 __x64_sys_brk|["inode_free", "file_send_sigiotask", "mmap_addr", "mmap_munmap", "vm_enough_memory_mm", "task_free"]|["inode_free", "file_send_sigiotask", "mmap_munmap", "task_free"]|["mmap_addr", "vm_enough_memory_mm"]|4/6|
 __x64_sys_mmap_pgoff|["inode_alloc", "inode_free", "file_alloc", "file_send_sigiotask", "mmap_addr", "mmap_munmap", "sb_free", "vm_enough_memory_mm", "mmap_file", "d_instantiate", "task_free"]|["inode_alloc", "inode_free", "file_send_sigiotask", "mmap_munmap", "sb_free", "mmap_file", "task_free"]|["file_alloc", "mmap_addr", "vm_enough_memory_mm", "d_instantiate"]|7/11|
 __x64_sys_munmap|["inode_free", "file_send_sigiotask", "mmap_addr", "mmap_munmap", "vm_enough_memory_mm", "task_free"]|["inode_free", "file_send_sigiotask", "mmap_munmap", "task_free"]|["mmap_addr", "vm_enough_memory_mm"]|4/6|
