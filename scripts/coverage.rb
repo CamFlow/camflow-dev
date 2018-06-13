@@ -1,7 +1,7 @@
 puts "# CamFlow LSM hooks coverage\n\n"
 puts "Automatically generated do not edit!\n\n"
 audit_related = ['audit_rule_init', 'audit_rule_match']
-capable_related = ['capable', 'capable_noaudit']
+capable_related = ['capable', 'capable_noaudit','capset','capget']
 secid_related = ['ipc_getsecid', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx', 'cred_getsecid']
 path_related = ['path_truncate', 'path_mknod', 'path_mkdir', 'path_rmdir', 'path_unlink', 'path_symlink', 'path_link', 'path_rename', 'path_chmod', 'path_chown', 'path_chroot']
 creds_related = ['prepare_creds']
