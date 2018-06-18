@@ -7,7 +7,7 @@ path_related = ['path_truncate', 'path_mknod', 'path_mkdir', 'path_rmdir', 'path
 creds_related = ['prepare_creds'] # no need to support this one
 sk_related = ['sk_free'] # not necessary due to implementation specific
 file_related = ['file_alloc', 'file_free'] # we use underlying inode structure for tracking rather than file
-to_remove = audit_related + capable_related + secid_related + path_related + creds_related
+to_remove = audit_related + capable_related + secid_related + path_related + creds_related + sk_related + file_related
 puts 'The following hooks are ignored in this report: '+to_remove.to_s+"\n\n"
 
 puts "System Call|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)|\n"
