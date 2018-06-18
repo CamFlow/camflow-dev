@@ -1,10 +1,12 @@
 puts "# CamFlow LSM hooks coverage\n\n"
 puts "Automatically generated do not edit!\n\n"
-audit_related = ['audit_rule_init', 'audit_rule_match']
-capable_related = ['capable', 'capable_noaudit','capset','capget']
-secid_related = ['ipc_getsecid', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx', 'cred_getsecid']
-path_related = ['path_truncate', 'path_mknod', 'path_mkdir', 'path_rmdir', 'path_unlink', 'path_symlink', 'path_link', 'path_rename', 'path_chmod', 'path_chown', 'path_chroot']
-creds_related = ['prepare_creds']
+audit_related = ['audit_rule_init', 'audit_rule_match'] # we do not handle audit rules
+capable_related = ['capable', 'capable_noaudit','capset','capget'] # we do not implement capability
+secid_related = ['ipc_getsecid', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx', 'cred_getsecid'] # no need to support secid related info as 1) we do not generate secid; 2) only one module can support it at any given time (right now SELinux)
+path_related = ['path_truncate', 'path_mknod', 'path_mkdir', 'path_rmdir', 'path_unlink', 'path_symlink', 'path_link', 'path_rename', 'path_chmod', 'path_chown', 'path_chroot'] # supported by inode_xxx rather than path names
+creds_related = ['prepare_creds'] # no need to support this one
+sk_related = ['sk_free'] # not necessary due to implementation specific
+file_related = ['file_alloc', 'file_free'] # we use underlying inode structure for tracking rather than file
 to_remove = audit_related + capable_related + secid_related + path_related + creds_related
 puts 'The following hooks are ignored in this report: '+to_remove.to_s+"\n\n"
 
