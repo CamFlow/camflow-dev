@@ -45,47 +45,6 @@ static ssize_t no_write(struct file *file, const char __user *buf,
 	return -EPERM; // read only
 }
 
-static inline void __init_opaque(void)
-{
-	provenance_mark_as_opaque(PROV_ENABLE_FILE);
-	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_WRITTEN_FILE);
-	provenance_mark_as_opaque(PROV_COMPRESS_NODE_FILE);
-	provenance_mark_as_opaque(PROV_COMPRESS_EDGE_FILE);
-	provenance_mark_as_opaque(PROV_NODE_FILE);
-	provenance_mark_as_opaque(PROV_RELATION_FILE);
-	provenance_mark_as_opaque(PROV_SELF_FILE);
-	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
-	provenance_mark_as_opaque(PROV_BOOT_ID_FILE);
-	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_DERIVED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_GENERATED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_USED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_INFORMED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_DERIVED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_GENERATED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_USED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_INFORMED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_FLUSH_FILE);
-	provenance_mark_as_opaque(PROV_PROCESS_FILE);
-	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
-	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
-	provenance_mark_as_opaque(PROV_SECCTX);
-	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
-	provenance_mark_as_opaque(PROV_NS_FILTER);
-	provenance_mark_as_opaque(PROV_LOG_FILE);
-	provenance_mark_as_opaque(PROV_LOGP_FILE);
-	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
-	provenance_mark_as_opaque(PROV_UID_FILTER);
-	provenance_mark_as_opaque(PROV_GID_FILTER);
-	provenance_mark_as_opaque(PROV_TYPE);
-	provenance_mark_as_opaque(PROV_VERSION);
-	provenance_mark_as_opaque(PROV_CHANNEL);
-	provenance_mark_as_opaque(PROV_DUPLICATE_FILE);
-	provenance_mark_as_opaque(PROV_CMD_LINE_TOOL);
-}
-
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos, bool *flag)
 
@@ -168,9 +127,6 @@ declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_dupl
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	// ideally should be decoupled from set machine id
-	__init_opaque();
-
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -925,7 +881,8 @@ out:
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
 #define prov_create_file(name, perm, fun_ptr) \
-	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
+	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);\
+	provenance_mark_as_opaque(PROV_SEC_PATH name)
 
 static int __init init_prov_fs(void)
 {

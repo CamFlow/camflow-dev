@@ -110,6 +110,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 	return true;
 }
 
+#define PROV_SEC_PATH                         "/sys/kernel/security/provenance/"
 #define PROV_ENABLE_FILE                      "/sys/kernel/security/provenance/enable"
 #define PROV_ALL_FILE                         "/sys/kernel/security/provenance/all"
 #define PROV_WRITTEN_FILE                     "/sys/kernel/security/provenance/written"
@@ -146,8 +147,6 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_VERSION													"/sys/kernel/security/provenance/version"
 #define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 #define PROV_DUPLICATE_FILE										"/sys/kernel/security/provenance/duplicate"
-
-#define PROV_CMD_LINE_TOOL                    "/usr/bin/camflow"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
