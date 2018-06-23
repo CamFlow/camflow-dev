@@ -881,12 +881,13 @@ out:
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
 #define prov_create_file(name, perm, fun_ptr) \
-	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);\
-	provenance_mark_as_opaque(PROV_SEC_PATH name)
+	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);\
+	provenance_mark_as_opaque_dentry(dentry)
 
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
+	struct dentry *dentry;
 
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	prov_create_file("enable", 0644, &prov_enable_ops);

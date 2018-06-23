@@ -83,6 +83,16 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
+static inline void provenance_mark_as_opaque_dentry(const struct dentry *dentry) {
+	struct provenance *prov;
+	
+	if (IS_ERR(dentry))
+		return;
+	prov = dentry->d_inode->i_provenance;
+	if (prov)
+		set_opaque(prov_elt(prov));
+}
+
 /*!
  * @brief Set the provenance node to be opaque based on the name given in the argument.
  *
@@ -94,15 +104,12 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 static inline void provenance_mark_as_opaque(const char *name)
 {
 	struct path path;
-	struct provenance *prov;
 
 	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
 		pr_err("Provenance: Failed file look up (%s).", name);
 		return;
 	}
-	prov = path.dentry->d_inode->i_provenance;
-	if (prov)
-		set_opaque(prov_elt(prov));
+	provenance_mark_as_opaque_dentry(path.dentry);
 }
 
 /*!
