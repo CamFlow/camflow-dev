@@ -126,7 +126,7 @@ install: install_kernel install_header install_us
 install_kernel:
 	cd ./build/linux-stable && sudo $(MAKE) modules_install
 	cd ./build/linux-stable && sudo $(MAKE) install
-	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)
+	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)+
 
 install_us:
 	cd ./build/libprovenance && $(MAKE) install
