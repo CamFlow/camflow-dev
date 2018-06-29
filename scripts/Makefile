@@ -72,10 +72,10 @@ run_analysis:
 	python syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
 	python analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
 	python stats.py syshooks.txt ../docs/STATS.md
-	ruby ./coverage.rb > ../docs/COVERAGE.md
+	cd .. && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md
 
 run_local:
 	python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
 	python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
 	python stats.py syshooks.txt ../docs/STATS.md
-	ruby ./coverage.rb > ../docs/COVERAGE.md
+	cd .. && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md
