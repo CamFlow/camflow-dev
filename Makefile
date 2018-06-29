@@ -77,7 +77,6 @@ config: copy_change copy_config
 	cd ./build/linux-stable && $(MAKE) menuconfig
 	cd ./build/linux-stable && cp .config ../../.config
 	cp -f .config ./analysis/.config
-	sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)+
 
 config_travis: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
@@ -127,7 +126,7 @@ install: install_kernel install_header install_us
 install_kernel:
 	cd ./build/linux-stable && sudo $(MAKE) modules_install
 	cd ./build/linux-stable && sudo $(MAKE) install
-	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow_$(lsm-version)
+	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)
 
 install_us:
 	cd ./build/libprovenance && $(MAKE) install
