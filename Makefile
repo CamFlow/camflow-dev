@@ -76,7 +76,7 @@ config: copy_change copy_config
 	cd ./build/linux-stable &&  mv config_strip .config
 	cd ./build/linux-stable && $(MAKE) menuconfig
 	cd ./build/linux-stable && cp .config ../../.config
-	cp -f .config ./analysis/.config
+	cp -f .config ./scripts/.config
 
 config_travis: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip

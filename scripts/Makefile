@@ -33,7 +33,7 @@ prepare_gpp:
 	sudo ln -s /usr/bin/g++-4.8 /usr/bin/g++
 
 prepare_m4:
-	sudo cp -f -a ../scripts/m4/. /usr/share/aclocal
+	sudo cp -f -a ./m4/. /usr/share/aclocal
 
 prepare_callgraph:
 	mkdir -p ../build
@@ -69,13 +69,13 @@ compile:
 run: run_analysis
 
 run_analysis:
-	cd ../scripts && python syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	cd ../scripts && python analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
-	cd ../scripts && python stats.py syshooks.txt ../docs/STATS.md
-	cd ../ && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md
+	python syscall.py /root/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	python analyze.py /root/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	python stats.py syshooks.txt ../docs/STATS.md
+	ruby ./coverage.rb > ../docs/COVERAGE.md
 
 run_local:
-	cd ../scripts && python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	cd ../scripts && python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
-	cd ../scripts && python stats.py syshooks.txt ../docs/STATS.md
-	cd ../ && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md
+	python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	python stats.py syshooks.txt ../docs/STATS.md
+	ruby ./coverage.rb > ../docs/COVERAGE.md

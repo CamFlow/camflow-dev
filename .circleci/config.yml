@@ -23,19 +23,19 @@ jobs:
           command: 'apt-get install --reinstall make'
       - run:
           name: prepare-analysis
-          command: 'cd ./analysis && make prepare'
+          command: 'cd ./scripts && make prepare'
       - run:
           name: prepare-kernel
           command: 'make prepare_kernel'
       - run:
           name: config
-          command: 'cd ./analysis && make config'
+          command: 'cd ./scripts && make config'
       - run:
           name: compile
-          command: 'cd ./analysis && make compile'
+          command: 'cd ./scripts && make compile'
       - run:
           name: analyse
-          command: 'cd ./analysis && make run'
+          command: 'cd ./scripts && make run'
       - run:
           name: syslist
           command: 'cd ./scripts && cat syslist.txt'
