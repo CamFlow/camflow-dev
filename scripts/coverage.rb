@@ -23,6 +23,7 @@ File.readlines('./scripts/syshooks.txt').each do |line|
   implemented = 0
   a_used = Array.new
   a_implemented = Array.new
+  a_missing = Array.new
   hook_list = line.match(/[\w]+\s\[([\w',\s]*)\]/)
   hooks = Array.new
   hooks = hook_list.captures[0].split(',') unless hook_list.nil?
@@ -41,5 +42,9 @@ File.readlines('./scripts/syshooks.txt').each do |line|
   call = line.match(/([\w]+)/)
   call_name = ''
   call_name = call.captures[0].strip unless call.nil?
-  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + (a_used - a_implemented).to_s + '|' + implemented.to_s + '/' + used.to_s + "|\n"
+  a_used.sort!
+  a_implemented.sort!
+  a_missing = a_used - a_implemented
+  a_missing.sort!
+  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + "|\n"
 end
