@@ -4,7 +4,7 @@ Automatically generated do not edit!
 
 We build uppon [INRIA tools](http://kayrebt.gforge.inria.fr/).
 
-The following hooks are ignored in this report: ["audit_rule_init", "audit_rule_match", "capable", "capable_noaudit", "capset", "capget", "ipc_getsecid", "inode_getsecid", "task_getsecid", "secid_to_secctx", "release_secctx", "cred_getsecid", "path_truncate", "path_mknod", "path_mkdir", "path_rmdir", "path_unlink", "path_symlink", "path_link", "path_rename", "path_chmod", "path_chown", "path_chroot", "prepare_creds", "sk_free", "file_alloc", "file_free"]
+The following hooks are ignored in this report: ["audit_rule_init", "audit_rule_match", "capable", "capable_noaudit", "capget", "capset", "cred_getsecid", "file_alloc", "file_free", "inode_getsecid", "ipc_getsecid", "path_chmod", "path_chown", "path_chroot", "path_link", "path_mkdir", "path_mknod", "path_rename", "path_rmdir", "path_symlink", "path_truncate", "path_unlink", "prepare_creds", "release_secctx", "secid_to_secctx", "sk_free", "task_getsecid"]
 
 System Call|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)|
 -----------|------------|-----------------|---------------------|------------------------------|
