@@ -315,14 +315,20 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 {
 	struct prov_filter setting;
 
-	if (!capable(CAP_AUDIT_CONTROL))
+	if (!capable(CAP_AUDIT_CONTROL)) {
+		pr_err("Provenance: failing setting filter, !CAP_AUDIT_CONTROL.");
 		return -EPERM;
+	}
 
-	if (count < sizeof(struct prov_filter))
+	if (count < sizeof(struct prov_filter)){
+		pr_err("Provenance: failing setting filter, wrong length.");
 		return -ENOMEM;
+	}
 
-	if (copy_from_user(&setting, buf, sizeof(struct prov_filter)))
+	if (copy_from_user(&setting, buf, sizeof(struct prov_filter))){
+		pr_err("Provenance: failed copying from user.");
 		return -ENOMEM;
+	}
 
 	if (setting.add != 0)
 		(*filter) |= setting.filter & setting.mask;
@@ -335,11 +341,15 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 				    size_t count, uint64_t filter)
 {
-	if (count < sizeof(uint64_t))
+	if (count < sizeof(uint64_t)){
+		pr_err("Provenance: failing setting filter, wrong length.");
 		return -ENOMEM;
+	}
 
-	if (copy_to_user(buf, &filter, sizeof(uint64_t)))
+	if (copy_to_user(buf, &filter, sizeof(uint64_t))){
+		pr_err("Provenance: failed copying to user.");
 		return -EAGAIN;
+	}
 
 	return count;
 }
