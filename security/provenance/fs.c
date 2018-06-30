@@ -828,24 +828,30 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 {
 	struct prov_type type_info;
 
-	if ( count < sizeof(struct prov_type) )
+	if ( count < sizeof(struct prov_type) ) {
+		pr_err("Provenance: failed retrieving object id, wrong string length.");
 		return -ENOMEM;
-	if ( copy_from_user(&type_info, buf, sizeof(struct prov_type)) )
+	}
+	if ( copy_from_user(&type_info, buf, sizeof(struct prov_type)) ) {
+		pr_err("Provenance: failed retrieving object id, could not copy from user.");
 		return -EAGAIN;
-	memset(type_info.str, 0, 256);
+	}
 	if (type_info.is_relation) {
 		if (type_info.id)
-			strncpy(type_info.str, relation_str(type_info.id), 256-1);
+			strcpy(type_info.str, relation_str(type_info.id));
 		else
 			type_info.id = relation_id(type_info.str);
 	}else{
 		if (type_info.id)
-			strncpy(type_info.str, node_str(type_info.id), 256-1);
+			strcpy(type_info.str, node_str(type_info.id));
 		else
 			type_info.id = node_id(type_info.str);
 	}
-	if ( copy_to_user(buf, &type_info, sizeof(struct prov_type)) )
+	pr_info("Provenance: relation retrieved %u - %s.", type_info.id, type_info.str);
+	if ( copy_to_user(buf, &type_info, sizeof(struct prov_type)) ) {
+		pr_err("Provenance: failed retrieving object id, could not copy to user.");
 		return -EAGAIN;
+	}
 	return sizeof(struct prov_type);
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
