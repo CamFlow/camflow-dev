@@ -847,7 +847,7 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 		else
 			type_info.id = node_id(type_info.str);
 	}
-	pr_info("Provenance: relation retrieved %u - %s.", type_info.id, type_info.str);
+	pr_info("Provenance: relation retrieved %llu - %s.", type_info.id, type_info.str);
 	if ( copy_to_user(buf, &type_info, sizeof(struct prov_type)) ) {
 		pr_err("Provenance: failed retrieving object id, could not copy to user.");
 		return -EAGAIN;
