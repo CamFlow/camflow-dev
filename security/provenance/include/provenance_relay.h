@@ -185,7 +185,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 }
 
 static __always_inline void prepare_relation(const uint64_t type,
-																						prov_entry_t *relation,
+																						union prov_elt *relation,
 																						prov_entry_t *f,
 																						prov_entry_t *t,
 																				    const struct file *file,
@@ -236,7 +236,7 @@ static __always_inline int __write_relation(const uint64_t type,
 	// Record the two end nodes
 	__write_node(f);
 	__write_node(t);
-	prepare_relation(type, (prov_entry_t*)&relation, f, t, file, flags);
+	prepare_relation(type, &relation, f, t, file, flags);
 	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);  // Call query hooks for propagate tracking.
 	prov_write(&relation);                                  // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
