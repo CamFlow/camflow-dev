@@ -1,4 +1,4 @@
-# CamFlow development [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches)s [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/master.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/master)
+# CamFlow development [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches) [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/master.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/master)
 
 [![DOI](https://zenodo.org/badge/48607854.svg)](https://zenodo.org/badge/latestdoi/48607854)
 
