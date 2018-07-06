@@ -1,23 +1,32 @@
-# CamFlow
+# CamFlow development [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches) [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/master.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/master)
 
 [![DOI](https://zenodo.org/badge/48607854.svg)](https://zenodo.org/badge/latestdoi/48607854)
 
 If you simply wish to install CamFlow please visit [here](https://github.com/CamFlow/camflow-install).
 The source code for the provenance userspace library is available [here](https://github.com/CamFlow/camflow-provenance-lib).
 
-# Build Status
+## Build Status
 
-| Branch | Status                                                                                  |
-|--------|-----------------------------------------------------------------------------------------|
-| master | [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches)  |
-| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)](https://travis-ci.org/CamFlow/camflow-dev/branches)      |
+| Branch | TravisCI | CircleCI |
+|--------|----------|----------|
+| master | [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches) | [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/master.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/master) |
+| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)](https://travis-ci.org/CamFlow/camflow-dev/branches) | [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/dev.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/dev)
 
-Automated Travis test run the following operation:
+### TravisCI
+
+The automated Travis script runs the following operation:
 - build the kernel;
 - run [sparse](https://sparse.wiki.kernel.org/index.php/Main_Page);
 - run [checkpatch](https://kernelnewbies.org/CheckpatchTips);
 - run [flawfinder](https://www.dwheeler.com/flawfinder/);
 - build the kernel patch.
+
+### CircleCI
+
+The automated CircleCI script runs the following operation:
+- perform kernel source code analysis;
+- generate report available in the `/docs` folder;
+- commit and push those reports.
 
 ## Warning
 

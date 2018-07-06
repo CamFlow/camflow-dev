@@ -324,7 +324,7 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
  *
  */
 static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
-				int sig, u32 secid)
+				int sig, const struct cred *cred)
 {
 	return 0;
 }
@@ -1167,6 +1167,65 @@ static int provenance_file_receive(struct file *file)
 	return rc;
 }
 
+/*
+ *	Check permission before performing file locking operations.
+ *	Note: this hook mediates both flock and fcntl style locks.
+ *	@file contains the file structure.
+ *	@cmd contains the posix-translated lock operation to perform
+ *	(e.g. F_RDLCK, F_WRLCK).
+ *	Return 0 if permission is granted.
+ */
+static int provenance_file_lock(struct file *file, unsigned int cmd)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprov = file_provenance(file, false);
+	unsigned long irqflags;
+	int rc = 0;
+
+	if (!iprov)
+		return -ENOMEM;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_FILE_LOCK, cprov, tprov, iprov, file, cmd);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
+/*
+ *	process @tsk.  Note that this hook is sometimes called from interrupt.
+ *	Note that the fown_struct, @fown, is never outside the context of a
+ *	struct file, so the file structure (and associated security information)
+ *	can always be obtained:
+ *		container_of(fown, struct file, f_owner)
+ *	@tsk contains the structure of task receiving signal.
+ *	@fown contains the file owner information.
+ *	@sig is the signal that will be sent.  When 0, kernel sends SIGIO.
+ *	Return 0 if permission is granted.
+ */
+ static int provenance_file_send_sigiotask(struct task_struct *task,
+ 				       struct fown_struct *fown, int signum)
+ {
+ 	struct file *file = container_of(fown, struct file, f_owner);
+	struct provenance *iprov = file_provenance(file, false);
+	struct provenance *tprov = task->provenance;
+	struct provenance *cprov = task_cred_xxx(task, provenance);
+	unsigned long irqflags;
+	int rc = 0;
+
+	if (!iprov)
+		return -ENOMEM;
+	if (!signum)
+		signum = SIGIO;
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = uses(RL_FILE_SIGIO, iprov, tprov, cprov, file, signum);
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+ }
+
 /*!
  * @brief Record provenance when mmap_file hook is triggered.
  *
@@ -1421,7 +1480,7 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
  * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd function or unknown.
  *
  */
-static int provenance_msg_queue_msgsnd(struct msg_queue *msq,
+static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
 				       struct msg_msg *msg,
 				       int msqflg)
 {
@@ -1489,7 +1548,7 @@ static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
  * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv function or unknown.
  *
  */
-static int provenance_msg_queue_msgrcv(struct msg_queue *msq,
+static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
 				       struct msg_msg *msg,
 				       struct task_struct *target,
 				       long type,
@@ -1538,7 +1597,7 @@ static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
  * @return 0 if operation was successful and permission is granted, no error occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM provenance entry. Other error code inherited from uses and generates function or unknown.
  *
  */
-static int provenance_shm_alloc_security(struct shmid_kernel *shp)
+static int provenance_shm_alloc_security(struct kern_ipc_perm *shp)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
@@ -1548,8 +1607,8 @@ static int provenance_shm_alloc_security(struct shmid_kernel *shp)
 
 	if (!sprov)
 		return -ENOMEM;
-	prov_elt(sprov)->shm_info.mode = shp->shm_perm.mode;
-	shp->shm_perm.provenance = sprov;
+	prov_elt(sprov)->shm_info.mode = shp->mode;
+	shp->provenance = sprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	rc = generates(RL_SH_CREATE_READ, sprov, tprov, cprov, NULL, 0);
 	if (rc < 0)
@@ -1568,11 +1627,11 @@ out:
  * @param shp The shared memory structure to be modified.
  *
  */
-static void provenance_shm_free_security(struct shmid_kernel *shp)
+static void provenance_shm_free_security(struct kern_ipc_perm *shp)
 {
-	if (shp->shm_perm.provenance)
-		free_provenance(shp->shm_perm.provenance);
-	shp->shm_perm.provenance = NULL;
+	if (shp->provenance)
+		free_provenance(shp->provenance);
+	shp->provenance = NULL;
 }
 
 /*!
@@ -1593,11 +1652,11 @@ static void provenance_shm_free_security(struct shmid_kernel *shp)
  * @return 0 if permission is granted and no error occurred; -ENOMEM if shared memory provenance entry does not exist. Other error codes inherited from uses and generates function or unknown.
  *
  */
-static int provenance_shm_shmat(struct shmid_kernel *shp, char __user *shmaddr, int shmflg)
+static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr, int shmflg)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *sprov = shp->shm_perm.provenance;
+	struct provenance *sprov = shp->provenance;
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1630,11 +1689,11 @@ out:
  * @param shp The shared memory structure to be modified.
  *
  */
-static void provenance_shm_shmdt(struct shmid_kernel *shp)
+static void provenance_shm_shmdt(struct kern_ipc_perm *shp)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *sprov = shp->shm_perm.provenance;
+	struct provenance *sprov = shp->provenance;
 	unsigned long irqflags;
 
 	if (!sprov)
@@ -2355,7 +2414,9 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 #endif
 	LSM_HOOK_INIT(file_ioctl,			    provenance_file_ioctl),
 	LSM_HOOK_INIT(file_open,			    provenance_file_open),
-	LSM_HOOK_INIT(file_receive,			    provenance_file_receive),
+	LSM_HOOK_INIT(file_receive,			  provenance_file_receive),
+	LSM_HOOK_INIT(file_lock,			  	provenance_file_lock),
+	LSM_HOOK_INIT(file_send_sigiotask,	provenance_file_send_sigiotask),
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
 #endif

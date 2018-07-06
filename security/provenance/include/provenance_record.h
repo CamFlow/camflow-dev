@@ -195,44 +195,6 @@ static inline int record_node_name(struct provenance *node,
 	return rc;
 }
 
-/*!
- * @brief This function records a relation between a provenance node and a user supplied data, which is a transient node.
- *
- * This function allows the user to attach an annotation node to a provenance node.
- * The relation between the two nodes is RL_LOG and the node of the user-supplied log is of type ENT_STR.
- * ENT_STR node is transient and should not have further use.
- * Therefore, once we have recorded the node, we will free the memory allocated for it.
- * @param cprov Provenance node to be annotated by the user.
- * @param buf Userspace buffer where user annotation locates.
- * @param count Number of bytes copied from the user buffer.
- * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
- *
- */
-static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
-{
-	union long_prov_elt *str;
-	int rc = 0;
-
-	str = alloc_long_provenance(ENT_STR);
-	if (!str) {
-		rc = -ENOMEM;
-		goto out;
-	}
-	if (copy_from_user(str->str_info.str, buf, count)) {
-		rc = -EAGAIN;
-		goto out;
-	}
-	str->str_info.str[count] = '\0'; // Make sure the string is null terminated.
-	str->str_info.length = count;
-
-	rc = __write_relation(RL_LOG, str, cprov, NULL, 0);
-out:
-	free_long_provenance(str);
-	if (rc < 0)
-		return rc;
-	return count;
-}
-
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
 
 /*!

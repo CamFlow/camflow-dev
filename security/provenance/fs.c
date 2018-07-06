@@ -45,47 +45,6 @@ static ssize_t no_write(struct file *file, const char __user *buf,
 	return -EPERM; // read only
 }
 
-static inline void __init_opaque(void)
-{
-	provenance_mark_as_opaque(PROV_ENABLE_FILE);
-	provenance_mark_as_opaque(PROV_ALL_FILE);
-	provenance_mark_as_opaque(PROV_WRITTEN_FILE);
-	provenance_mark_as_opaque(PROV_COMPRESS_NODE_FILE);
-	provenance_mark_as_opaque(PROV_COMPRESS_EDGE_FILE);
-	provenance_mark_as_opaque(PROV_NODE_FILE);
-	provenance_mark_as_opaque(PROV_RELATION_FILE);
-	provenance_mark_as_opaque(PROV_SELF_FILE);
-	provenance_mark_as_opaque(PROV_MACHINE_ID_FILE);
-	provenance_mark_as_opaque(PROV_BOOT_ID_FILE);
-	provenance_mark_as_opaque(PROV_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_DERIVED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_GENERATED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_USED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_INFORMED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_NODE_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_DERIVED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_GENERATED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_USED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_PROPAGATE_INFORMED_FILTER_FILE);
-	provenance_mark_as_opaque(PROV_FLUSH_FILE);
-	provenance_mark_as_opaque(PROV_PROCESS_FILE);
-	provenance_mark_as_opaque(PROV_IPV4_INGRESS_FILE);
-	provenance_mark_as_opaque(PROV_IPV4_EGRESS_FILE);
-	provenance_mark_as_opaque(PROV_SECCTX);
-	provenance_mark_as_opaque(PROV_SECCTX_FILTER);
-	provenance_mark_as_opaque(PROV_NS_FILTER);
-	provenance_mark_as_opaque(PROV_LOG_FILE);
-	provenance_mark_as_opaque(PROV_LOGP_FILE);
-	provenance_mark_as_opaque(PROV_POLICY_HASH_FILE);
-	provenance_mark_as_opaque(PROV_UID_FILTER);
-	provenance_mark_as_opaque(PROV_GID_FILTER);
-	provenance_mark_as_opaque(PROV_TYPE);
-	provenance_mark_as_opaque(PROV_VERSION);
-	provenance_mark_as_opaque(PROV_CHANNEL);
-	provenance_mark_as_opaque(PROV_DUPLICATE_FILE);
-	provenance_mark_as_opaque(PROV_CMD_LINE_TOOL);
-}
-
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos, bool *flag)
 
@@ -168,9 +127,6 @@ declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_dupl
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	// ideally should be decoupled from set machine id
-	__init_opaque();
-
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -359,14 +315,20 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 {
 	struct prov_filter setting;
 
-	if (!capable(CAP_AUDIT_CONTROL))
+	if (!capable(CAP_AUDIT_CONTROL)) {
+		pr_err("Provenance: failing setting filter, !CAP_AUDIT_CONTROL.");
 		return -EPERM;
+	}
 
-	if (count < sizeof(struct prov_filter))
+	if (count < sizeof(struct prov_filter)){
+		pr_err("Provenance: failing setting filter, wrong length.");
 		return -ENOMEM;
+	}
 
-	if (copy_from_user(&setting, buf, sizeof(struct prov_filter)))
+	if (copy_from_user(&setting, buf, sizeof(struct prov_filter))){
+		pr_err("Provenance: failed copying from user.");
 		return -ENOMEM;
+	}
 
 	if (setting.add != 0)
 		(*filter) |= setting.filter & setting.mask;
@@ -379,11 +341,15 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 				    size_t count, uint64_t filter)
 {
-	if (count < sizeof(uint64_t))
+	if (count < sizeof(uint64_t)){
+		pr_err("Provenance: failing setting filter, wrong length.");
 		return -ENOMEM;
+	}
 
-	if (copy_to_user(buf, &filter, sizeof(uint64_t)))
+	if (copy_to_user(buf, &filter, sizeof(uint64_t))){
+		pr_err("Provenance: failed copying to user.");
 		return -EAGAIN;
+	}
 
 	return count;
 }
@@ -737,28 +703,64 @@ static ssize_t prov_read_ns_filter(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_ns_filter_ops, prov_write_ns_filter, prov_read_ns_filter);
 
+/*!
+ * @brief This function records a relation between a provenance node and a user supplied data, which is a transient node.
+ *
+ * This function allows the user to attach an annotation node to a provenance node.
+ * The relation between the two nodes is RL_LOG and the node of the user-supplied log is of type ENT_STR.
+ * ENT_STR node is transient and should not have further use.
+ * Therefore, once we have recorded the node, we will free the memory allocated for it.
+ * @param cprov Provenance node to be annotated by the user.
+ * @param buf Userspace buffer where user annotation locates.
+ * @param count Number of bytes copied from the user buffer.
+ * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
+ *
+ */
+static inline int record_log(union prov_elt *tprov, const char __user *buf, size_t count)
+{
+	union long_prov_elt *str;
+	int rc = 0;
+
+	str = alloc_long_provenance(ENT_STR);
+	if (!str)
+		return -ENOMEM;
+	if (copy_from_user(str->str_info.str, buf, count)) {
+		rc = -EAGAIN;
+		goto out;
+	}
+	str->str_info.str[count] = '\0'; // Make sure the string is null terminated.
+	str->str_info.length = count;
+
+	rc = __write_relation(RL_LOG, str, tprov, NULL, 0);
+out:
+	free_long_provenance(str);
+	if (rc < 0)
+		return rc;
+	return count;
+}
+
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
-	set_tracked(prov_elt(cprov));
-	return record_log(prov_elt(cprov), buf, count);
+	set_tracked(prov_elt(tprov));
+	return record_log(prov_elt(tprov), buf, count);
 }
 declare_file_operations(prov_log_ops, prov_write_log, no_read);
 
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
-	set_tracked(prov_elt(cprov));
-	set_propagate(prov_elt(cprov));
-	return record_log(prov_elt(cprov), buf, count);
+	set_tracked(prov_elt(tprov));
+	set_propagate(prov_elt(tprov));
+	return record_log(prov_elt(tprov), buf, count);
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
@@ -862,23 +864,29 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 {
 	struct prov_type type_info;
 
-	if ( count < sizeof(struct prov_type) )
+	if ( count < sizeof(struct prov_type) ) {
+		pr_err("Provenance: failed retrieving object id, wrong string length.");
 		return -ENOMEM;
-	if ( copy_from_user(&type_info, buf, sizeof(struct prov_type)) )
+	}
+	if ( copy_from_user(&type_info, buf, sizeof(struct prov_type)) ) {
+		pr_err("Provenance: failed retrieving object id, could not copy from user.");
 		return -EAGAIN;
+	}
 	if (type_info.is_relation) {
 		if (type_info.id)
-			strncpy(type_info.str, relation_str(type_info.id), 256);
+			strcpy(type_info.str, relation_str(type_info.id));
 		else
 			type_info.id = relation_id(type_info.str);
 	}else{
 		if (type_info.id)
-			strncpy(type_info.str, node_str(type_info.id), 256);
+			strcpy(type_info.str, node_str(type_info.id));
 		else
 			type_info.id = node_id(type_info.str);
 	}
-	if ( copy_to_user(buf, &type_info, sizeof(struct prov_type)) )
+	if ( copy_to_user(buf, &type_info, sizeof(struct prov_type)) ) {
+		pr_err("Provenance: failed retrieving object id, could not copy to user.");
 		return -EAGAIN;
+	}
 	return sizeof(struct prov_type);
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
@@ -924,11 +932,13 @@ out:
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
 #define prov_create_file(name, perm, fun_ptr) \
-	securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr)
+	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);\
+	provenance_mark_as_opaque_dentry(dentry)
 
 static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
+	struct dentry *dentry;
 
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	prov_create_file("enable", 0644, &prov_enable_ops);

@@ -36,7 +36,6 @@ static unsigned int provenance_ipv4_out(void *priv,
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = NULL;
 	struct provenance pckprov;
-	union long_prov_elt *cnt;
 	unsigned long irqflags;
 
 	if (!cprov)
@@ -58,7 +57,6 @@ static unsigned int provenance_ipv4_out(void *priv,
 		spin_unlock(prov_lock(iprov));
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	}
-out:
 	return NF_ACCEPT;
 }
 

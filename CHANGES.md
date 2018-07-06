@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.4.3           | 4.17.4         | 06/07/2018 |
 | 0.4.2           | 4.16.13        | 05/06/2018 |
 | 0.4.1           | 4.16.12        | 28/05/2018 |
 | 0.4.0           | 4.16.12        | 26/05/2018 |
@@ -33,6 +34,14 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.4.3
+```
+- Added support for IO signal.
+- Added support for file_lock.
+- Perform code analysis as part of CI to assess LSM hooks coverage.
+- Update to kernel version 4.17.4.
+```
 
 ### v0.4.2
 ```

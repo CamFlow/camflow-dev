@@ -83,6 +83,16 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
+static inline void provenance_mark_as_opaque_dentry(const struct dentry *dentry) {
+	struct provenance *prov;
+	
+	if (IS_ERR(dentry))
+		return;
+	prov = dentry->d_inode->i_provenance;
+	if (prov)
+		set_opaque(prov_elt(prov));
+}
+
 /*!
  * @brief Set the provenance node to be opaque based on the name given in the argument.
  *
@@ -94,15 +104,12 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 static inline void provenance_mark_as_opaque(const char *name)
 {
 	struct path path;
-	struct provenance *prov;
 
 	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
 		pr_err("Provenance: Failed file look up (%s).", name);
 		return;
 	}
-	prov = path.dentry->d_inode->i_provenance;
-	if (prov)
-		set_opaque(prov_elt(prov));
+	provenance_mark_as_opaque_dentry(path.dentry);
 }
 
 /*!
@@ -403,7 +410,7 @@ static inline void save_provenance(struct dentry *dentry)
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static inline int record_write_xattr(uint64_t type,
+static __always_inline int record_write_xattr(uint64_t type,
 				     struct provenance *iprov,
 				     struct provenance *tprov,
 				     struct provenance *cprov,
@@ -469,7 +476,7 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static inline int record_read_xattr(struct provenance *cprov,
+static __always_inline int record_read_xattr(struct provenance *cprov,
 				    struct provenance *tprov,
 				    struct provenance *iprov,
 				    const char *name)
