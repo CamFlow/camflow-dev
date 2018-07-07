@@ -30,7 +30,7 @@
  * @brief Update the type of the provenance inode node based on the mode of the inode, and create a version relation between old and new provenance node.
  *
  * Based on the mode of the inode, determine the type of the provenance inode node, choosing from:
- * ENT_INODE_BLOCK, ENT_INODE_CHAR, ENT_INODE_DIRECTORY, ENT_INODE_FIFO, ENT_INODE_LINK, ENT_INODE_FILE, ENT_INODE_SOCKET.
+ * ENT_INODE_BLOCK, ENT_INODE_CHAR, ENT_INODE_DIRECTORY, ENT_INODE_PIPE, ENT_INODE_LINK, ENT_INODE_FILE, ENT_INODE_SOCKET.
  * Create a new provenance node with the updated type, and a updated version and a RL_VERSION relation between them if certain criteria are met.
  * Otherwise, RL_VERSION relation is not needed and we simply update the node type and mode information.
  * The operation is done in a nested spin_lock to avoid concurrency.
@@ -55,7 +55,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	else if (S_ISDIR(mode))
 		type = ENT_INODE_DIRECTORY;
 	else if (S_ISFIFO(mode))
-		type = ENT_INODE_FIFO;
+		type = ENT_INODE_PIPE;
 	else if (S_ISLNK(mode))
 		type = ENT_INODE_LINK;
 	else if (S_ISREG(mode))
@@ -83,6 +83,16 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
+static inline void provenance_mark_as_opaque_dentry(const struct dentry *dentry) {
+	struct provenance *prov;
+	
+	if (IS_ERR(dentry))
+		return;
+	prov = dentry->d_inode->i_provenance;
+	if (prov)
+		set_opaque(prov_elt(prov));
+}
+
 /*!
  * @brief Set the provenance node to be opaque based on the name given in the argument.
  *
@@ -94,15 +104,12 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 static inline void provenance_mark_as_opaque(const char *name)
 {
 	struct path path;
-	struct provenance *prov;
 
 	if (kern_path(name, LOOKUP_FOLLOW, &path)) {
 		pr_err("Provenance: Failed file look up (%s).", name);
 		return;
 	}
-	prov = path.dentry->d_inode->i_provenance;
-	if (prov)
-		set_opaque(prov_elt(prov));
+	provenance_mark_as_opaque_dentry(path.dentry);
 }
 
 /*!
@@ -119,7 +126,9 @@ static inline void provenance_mark_as_opaque(const char *name)
  * @return 0 if no error occurred. -ENOMEM if no memory to store the name of the provenance node. PTR_ERR if path lookup failed.
  *
  */
-static inline int record_inode_name_from_dentry(struct dentry *dentry, struct provenance *prov)
+static inline int record_inode_name_from_dentry(struct dentry *dentry,
+																								struct provenance *prov,
+																								bool force)
 {
 	char *buffer;
 	char *ptr;
@@ -135,7 +144,7 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
 	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
 	if (IS_ERR(ptr))
 		return PTR_ERR(ptr);
-	rc = record_node_name(prov, ptr);
+	rc = record_node_name(prov, ptr, force);
 	kfree(buffer);
 	return rc;
 }
@@ -151,7 +160,6 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry, struct pr
  * @param prov The provenance node in question.
  * @return 0 if no error occurred or if "dentry" returns NULL. Other error codes unknown.
  *
- * @todo Check under what circumstances "dentry" can be NULL.
  */
 static inline int record_inode_name(struct inode *inode, struct provenance *prov)
 {
@@ -161,9 +169,9 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	dentry = d_find_alias(inode);
-	if (!dentry)	// We did not find a dentry, not sure if it should ever happen.
+	if (!dentry)    // We did not find a dentry, not sure if it should ever happen.
 		return 0;
-	rc = record_inode_name_from_dentry(dentry, prov);
+	rc = record_inode_name_from_dentry(dentry, prov, false);
 	dput(dentry);
 	return rc;
 }
@@ -297,7 +305,6 @@ free_buf:
  * @param may_sleep Bool value signifies whether this function can sleep.
  * @return provenance struct pointer.
  *
- * @question Why do we have a may_sleep boolean?
  * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
@@ -403,7 +410,7 @@ static inline void save_provenance(struct dentry *dentry)
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static inline int record_write_xattr(uint64_t type,
+static __always_inline int record_write_xattr(uint64_t type,
 				     struct provenance *iprov,
 				     struct provenance *tprov,
 				     struct provenance *cprov,
@@ -469,7 +476,7 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static inline int record_read_xattr(struct provenance *cprov,
+static __always_inline int record_read_xattr(struct provenance *cprov,
 				    struct provenance *tprov,
 				    struct provenance *iprov,
 				    const char *name)

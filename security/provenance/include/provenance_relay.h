@@ -35,9 +35,9 @@ extern bool relay_ready;
  */
 struct relay_list {
 	struct list_head list;
-	char *name;	// The name of the relay channel.
-	struct rchan *prov;	// Relay buffer for regular provenance entries.
-	struct rchan *long_prov;	// Relay buffer for long provenance entries.
+	char *name;                     // The name of the relay channel.
+	struct rchan *prov;             // Relay buffer for regular provenance entries.
+	struct rchan *long_prov;        // Relay buffer for long provenance entries.
 };
 
 extern struct list_head relay_list;
@@ -167,7 +167,7 @@ static inline void prov_flush(void)
  * The checks include:
  * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
  * 2. If the provenance is not a packet node (which means it should have machine ID) and the provenacne is not recorded,
- * 		record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
+ *              record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
  * @param node Provenance node (could be either regular or long)
  *
  */
@@ -182,6 +182,26 @@ static __always_inline void __write_node(prov_entry_t *node)
 	else
 		prov_write((union prov_elt*)node);
 	set_recorded(node);
+}
+
+static __always_inline void prepare_relation(const uint64_t type,
+																						union prov_elt *relation,
+																						prov_entry_t *f,
+																						prov_entry_t *t,
+																				    const struct file *file,
+																				    const uint64_t flags) {
+	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
+	prov_type(relation) = type;
+	relation_identifier(relation).id = prov_next_relation_id();
+	relation_identifier(relation).boot_id = prov_boot_id;
+	relation_identifier(relation).machine_id = prov_machine_id;
+	memcpy(&(relation->relation_info.snd), &get_prov_identifier(f), sizeof(union prov_identifier));
+	memcpy(&(relation->relation_info.rcv), &get_prov_identifier(t), sizeof(union prov_identifier));
+	if (file) {
+		relation->relation_info.set = FILE_INFO_SET;
+		relation->relation_info.offset = file->f_pos;
+	}
+	relation->relation_info.flags = flags;
 }
 
 /*!
@@ -216,23 +236,9 @@ static __always_inline int __write_relation(const uint64_t type,
 	// Record the two end nodes
 	__write_node(f);
 	__write_node(t);
-
-	memset(&relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
-	prov_type(&relation) = type;
-	relation_identifier(&relation).id = prov_next_relation_id();
-	relation_identifier(&relation).boot_id = prov_boot_id;
-	relation_identifier(&relation).machine_id = prov_machine_id;
-	memcpy(&relation.relation_info.snd, &get_prov_identifier(f), sizeof(union prov_identifier));
-	memcpy(&relation.relation_info.rcv, &get_prov_identifier(t), sizeof(union prov_identifier));
-	if (file) {
-		relation.relation_info.set = FILE_INFO_SET;
-		relation.relation_info.offset = file->f_pos;
-	}
-	relation.relation_info.flags = flags;
-
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation); // Call query hooks for propagate tracking.
-
-	prov_write(&relation); // Finally record the relation (i.e., edge) to relay buffer.
+	prepare_relation(type, &relation, f, t, file, flags);
+	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);  // Call query hooks for propagate tracking.
+	prov_write(&relation);                                  // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
 }
 #endif

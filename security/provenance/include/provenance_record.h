@@ -48,9 +48,9 @@ static __always_inline int __update_version(const uint64_t type,
 	if (filter_update_node(type))
 		return 0;
 
-	memcpy(&old_prov, prov, sizeof(union prov_elt)); // Copy the current provenance prov to old_prov.
+	memcpy(&old_prov, prov, sizeof(union prov_elt));        // Copy the current provenance prov to old_prov.
 
-	node_identifier(prov).version++; // Update the version of prov to the newer version.
+	node_identifier(prov).version++;                        // Update the version of prov to the newer version.
 	clear_recorded(prov);
 
 	// Record the version relation between two versions of the same identity.
@@ -58,8 +58,8 @@ static __always_inline int __update_version(const uint64_t type,
 		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
-	clear_has_outgoing(prov);     // Newer version now has no outgoing edge.
-	clear_saved(prov);           // For inode provenance persistance
+	clear_has_outgoing(prov);       // Newer version now has no outgoing edge.
+	clear_saved(prov);              // For inode provenance persistance
 	return rc;
 }
 
@@ -152,7 +152,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  * Unless the node has already have a name or is not recorded, calling this function will generate a new naming relation between the node and its name.
  * The name node is transient and should not have any further use.
  * Therefore, once we record the name node, we will free the memory allocated for the name provenance node.
- * The name node has type "ENT_FILE_NAME", and the name has max length PATH_MAX.
+ * The name node has type "ENT_PATH", and the name has max length PATH_MAX.
  * Depending on the type of the node in question, the relation between the node and the name node can be:
  * 1. RL_NAMED_PROCESS, if the node in question is ACT_TASK node, or
  * 2. RL_NAMED otherwise.
@@ -163,15 +163,18 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  * @return 0 if no error occurred. -ENOMEM if no memory can be allocated for long provenance name node. Other error codes unknown.
  *
  */
-static inline int record_node_name(struct provenance *node, const char *name)
+static inline int record_node_name(struct provenance *node,
+																	 const char *name,
+																	 bool force)
 {
 	union long_prov_elt *fname_prov;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(node)) || !provenance_is_recorded(prov_elt(node)))
+	if ( (provenance_is_name_recorded(prov_elt(node)) && !force)
+	 		 || !provenance_is_recorded(prov_elt(node)))
 		return 0;
 
-	fname_prov = alloc_long_provenance(ENT_FILE_NAME);
+	fname_prov = alloc_long_provenance(ENT_PATH);
 	if (!fname_prov)
 		return -ENOMEM;
 
@@ -190,45 +193,6 @@ static inline int record_node_name(struct provenance *node, const char *name)
 	spin_unlock(prov_lock(node));
 	free_long_provenance(fname_prov);
 	return rc;
-}
-
-/*!
- * @brief This function records a relation between a provenance node and a user supplied data, which is a transient node.
- *
- * This function allows the user to attach an annotation node to a provenance node.
- * The relation between the two nodes is RL_LOG and the node of the user-supplied log is of type ENT_STR.
- * ENT_STR node is transient and should not have further use.
- * Therefore, once we have recorded the node, we will free the memory allocated for it.
- * @param cprov Provenance node to be annotated by the user.
- * @param buf Userspace buffer where user annotation locates.
- * @param count Number of bytes copied from the user buffer.
- * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
- *
- * @todo Since we are not using spin lock here, double check there is a lock on the cprov when this function is called
- */
-static inline int record_log(union prov_elt *cprov, const char __user *buf, size_t count)
-{
-	union long_prov_elt *str;
-	int rc = 0;
-
-	str = alloc_long_provenance(ENT_STR);
-	if (!str) {
-		rc = -ENOMEM;
-		goto out;
-	}
-	if (copy_from_user(str->str_info.str, buf, count)) {
-		rc = -EAGAIN;
-		goto out;
-	}
-	str->str_info.str[count] = '\0'; // Make sure the string is null terminated.
-	str->str_info.length = count;
-
-	rc = __write_relation(RL_LOG, str, cprov, NULL, 0);
-out:
-	free_long_provenance(str);
-	if (rc < 0)
-		return rc;
-	return count;
 }
 
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
@@ -268,6 +232,11 @@ static __always_inline int uses(const uint64_t type,
 	apply_target(prov_elt(entity));
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(activity_mem));
+
+	if (provenance_is_opaque(prov_elt(entity))
+			|| provenance_is_opaque(prov_elt(activity))
+			|| provenance_is_opaque(prov_elt(activity_mem)))
+		return 0;
 
 	if (!provenance_is_tracked(prov_elt(entity))
 	    && !provenance_is_tracked(prov_elt(activity))
@@ -312,6 +281,10 @@ static __always_inline int uses_two(const uint64_t type,
 	apply_target(prov_elt(entity));
 	apply_target(prov_elt(activity));
 
+	if (provenance_is_opaque(prov_elt(entity))
+			|| provenance_is_opaque(prov_elt(activity)))
+		return 0;
+
 	if (!provenance_is_tracked(prov_elt(entity))
 	    && !provenance_is_tracked(prov_elt(activity))
 	    && !prov_policy.prov_all)
@@ -355,6 +328,11 @@ static __always_inline int generates(const uint64_t type,
 	apply_target(prov_elt(activity_mem));
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(entity));
+
+	if (provenance_is_opaque(prov_elt(entity))
+			|| provenance_is_opaque(prov_elt(activity))
+			|| provenance_is_opaque(prov_elt(activity_mem)))
+		return 0;
 
 	if (!provenance_is_tracked(prov_elt(activity_mem))
 	    && !provenance_is_tracked(prov_elt(activity))
@@ -402,6 +380,10 @@ static __always_inline int derives(const uint64_t type,
 	apply_target(prov_elt(from));
 	apply_target(prov_elt(to));
 
+	if (provenance_is_opaque(prov_elt(from))
+			|| provenance_is_opaque(prov_elt(to)))
+		return 0;
+
 	if (!provenance_is_tracked(prov_elt(from))
 	    && !provenance_is_tracked(prov_elt(to))
 	    && !prov_policy.prov_all)
@@ -438,6 +420,10 @@ static __always_inline int informs(const uint64_t type,
 
 	apply_target(prov_elt(from));
 	apply_target(prov_elt(to));
+
+	if (provenance_is_opaque(prov_elt(from))
+			|| provenance_is_opaque(prov_elt(to)))
+		return 0;
 
 	if (!provenance_is_tracked(prov_elt(from))
 	    && !provenance_is_tracked(prov_elt(to))

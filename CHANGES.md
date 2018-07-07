@@ -2,7 +2,10 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.4.0           | 4.16.11        | N/A        |
+| 0.4.3           | 4.17.4         | 06/07/2018 |
+| 0.4.2           | 4.16.13        | 05/06/2018 |
+| 0.4.1           | 4.16.12        | 28/05/2018 |
+| 0.4.0           | 4.16.12        | 26/05/2018 |
 | 0.3.11          | 4.14.18        | 09/02/2018 |
 | 0.3.10          | 4.14.15        | 27/01/2018 |
 | 0.3.9           | 4.14.9         | 27/12/2017 |
@@ -32,6 +35,37 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.4.3
+```
+- Added support for IO signal.
+- Added support for file_lock.
+- Perform code analysis as part of CI to assess LSM hooks coverage.
+- Update to kernel version 4.17.4.
+```
+
+### v0.4.2
+```
+- Fix issue where thread were not made opaque.
+- Automated documentation.
+- Node name changes: file_name -> path and fifo -> pipe, process -> process_memory.
+- Node macro renamed accordingly.
+- Links rework.
+- Delete relation RL_LINK_INODE.
+- Added support for symlink operation (RL_SYMLINK).
+- Added support for unlink operation (RL_UNLINK).
+- Reintroduce packet content recording (optional).
+- Update to kernel version 4.16.13.
+```
+
+See _note_ in release v0.4.0.
+
+### v0.4.1
+```
+- Hotfix (revert some changes introduced in v0.4.0 as they were introducing a bug).
+```
+
+See _note_ in release v0.4.0.
+
 ### v0.4.0
 ```
 - Support node duplication on/off.
@@ -52,7 +86,33 @@
 - Protect (ro) a number of pointers after init.
 - Handle signal.
 - Revert single source of ID change.
-- Update to kernel version 4.16.11.
+- Update to kernel version 4.16.12.
+```
+
+_NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
+```
+- Changes in the following functions:
+	- filter_update_node in security/provenance/include/provenance_filter.h: filter relation_type RL_NAMED_PROCESS.
+	- update_inode_type in security/provenance/include/provenance_filter.h: remove filter_update_node function call in the function body because type variable is never a relation.
+	- provenance_add_hooks in security/provenance/hooks.c: add code to check if allocating memory in provenance_cache and long_provenance_cache failed.
+	- record_terminate in security/provenance/include/provenance_record.h: clear outgoing edge count of a terminate node.
+	- __write_node in security/provenance/include/provenance_relay.h: remove setting boot_id.
+	- record_task_name in security/provenance/include/provenance_task.h: return error code -ENOMEM when allocating buffer failed.
+	- update_proc_perf in security/provenance/inclue/provenance_task.h: get mm from task instead of current when calling get_task_mm function.
+	- record_read_xattr in security/provenance/include/provenance_inode.h: return error code -ENOMEM when allocating a new long provenance entry failed.
+	- provenance_mmap_file in security/provenance/hooks.c: add a map type MAP_SHARED_VALIDATE.
+	- provenance_mmap_file in security/provenance/hooks.c: return rc instead of hard-coded 0.
+	- current_update_shst in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0.
+	- provenance_shm_alloc_security in security/provenance/hooks.c: RL_SH_CREATE_WRITE relation changes from uses to generates.
+	- provenance_shm_shmat in security/provenance/hooks.c: RL_SH_ATTACH_WRITE relation changes from uses to generates.
+	- socket_inode_provenance in security/provenance/include/provenance_net.h: change SOCK_INODE(sock) to simply inode.
+	- provenance_socket_post_create in security/provenance/hooks.c: return -ENOMEM if socket inode provenance does not exist.
+	- provenance_socket_bind in security/provenance/hooks.c: return rc instead of hard-coded 0 when provenance is opaque.
+	- record_task_name in security/provenance/include/provenance_task.h: remove cred declaraction, then remove obtaining credential (and releasing it later) and checking its existence.
+	- provenance_socket_sock_rcv_skb in security/provenance/hooks.c: return -ENOMEM if sk inode provenance does not exist.
+	- prov_record_args in security/provenance/include/provenance_task.h: return rc instead of hard-coded 0 at the end (rc should be 0 at the end.)
+- Change in the following defintions:
+	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags).
 ```
 
 ### v0.3.11

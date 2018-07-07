@@ -1,5 +1,5 @@
-kernel-version=4.16.11
-lsm-version=0.4.0
+kernel-version=4.17.4
+lsm-version=0.4.3
 arch=x86_64
 
 
@@ -68,7 +68,6 @@ copy_change:
 
 copy_config:
 	cp -f /boot/config-$(shell uname -r) .config
-	sed -i -e "s/CONFIG_DRM_VBOXVIDEO=m/# CONFIG_DRM_VBOXVIDEO is not set/g" ./.config
 	cd ./build/linux-stable && cp ../../.config .config
 
 config: copy_change copy_config
@@ -76,6 +75,8 @@ config: copy_change copy_config
 	cd ./build/linux-stable &&  mv .config config_sav
 	cd ./build/linux-stable &&  mv config_strip .config
 	cd ./build/linux-stable && $(MAKE) menuconfig
+	cd ./build/linux-stable && cp .config ../../.config
+	cp -f .config ./scripts/.config
 
 config_travis: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
@@ -88,12 +89,26 @@ config_old: copy_change copy_config
 	 cd ./build/linux-stable && $(MAKE) olddefconfig
 	 cd ./build/linux-stable && $(MAKE) menuconfig
 
+config_circle: copy_change
+	cd ./build/linux-stable && $(MAKE) olddefconfig
+
+hooklist:
+	ruby ./scripts/hooklist.rb > docs/HOOKS.md
+
+relationlist:
+	ruby ./scripts/relationlist.rb > docs/RELATIONS.md
+
+vertexlist:
+	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
+
+doc: hooklist relationlist vertexlist
+
 compile: compile_security compile_kernel compile_us
 
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1
 
-compile_security: copy_change compile_security_only
+compile_security: copy_change compile_security_only doc
 
 compile_kernel: copy_change
 	cd ./build/linux-stable && $(MAKE) -j16
@@ -111,7 +126,7 @@ install: install_kernel install_header install_us
 install_kernel:
 	cd ./build/linux-stable && sudo $(MAKE) modules_install
 	cd ./build/linux-stable && sudo $(MAKE) install
-	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow_$(lsm-version)
+	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)+
 
 install_us:
 	cd ./build/libprovenance && $(MAKE) install

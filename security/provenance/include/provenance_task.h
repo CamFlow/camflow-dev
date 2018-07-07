@@ -191,7 +191,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 		}
 		vma = vma->vm_next;
 	}
-	mmput_async(mm);	// Release the file.
+	mmput_async(mm);        // Release the file.
 	return rc;
 }
 
@@ -208,11 +208,11 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
  * @param prov The provenance entry that will be associated with the task name.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for buffer to hold file path. Other error code unknown.
  *
- * @todo Why get_mm_exe_file instead of get_task_exe_file?
  */
 static inline int record_task_name(struct task_struct *task,
 				   struct provenance *prov)
 {
+	// const struct cred *cred;
 	struct provenance *fprov;
 	struct mm_struct *mm;
 	struct file *exe_file;
@@ -223,6 +223,9 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
+	// cred = get_task_cred(task);
+	// if (!cred)
+	// 	return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
@@ -235,19 +238,20 @@ static inline int record_task_name(struct task_struct *task,
 			goto out;
 		}
 
-		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);	// Memory allocation not allowed to sleep.
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);   // Memory allocation not allowed to sleep.
 		if (!buffer) {
 			pr_err("Provenance: could not allocate memory\n");
-			fput(exe_file);	// Release the file.
+			fput(exe_file); // Release the file.
 			rc = -ENOMEM;
 			goto out;
 		}
 		ptr = file_path(exe_file, buffer, PATH_MAX);
-		fput(exe_file);	// Release the file.
-		rc = record_node_name(prov, ptr);
+		fput(exe_file); // Release the file.
+		rc = record_node_name(prov, ptr, false);
 		kfree(buffer);
 	}
 out:
+	// put_cred(cred);
 	return rc;
 }
 
@@ -306,7 +310,7 @@ static inline void update_proc_perf(struct task_struct *task,
  */
 static inline struct provenance *get_cred_provenance(void)
 {
-	struct provenance *prov = current_provenance();	// current_provenance returns provenance pointer of current_cred().
+	struct provenance *prov = current_provenance(); // current_provenance returns provenance pointer of current_cred().
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
@@ -358,7 +362,7 @@ static inline struct provenance *get_task_provenance( void )
 static inline struct provenance *prov_from_vpid(pid_t pid)
 {
 	struct provenance *tprov;
-	struct task_struct *dest = find_task_by_vpid(pid);	// Function is in /kernel/pid.c
+	struct task_struct *dest = find_task_by_vpid(pid);      // Function is in /kernel/pid.c
 
 	if (!dest)
 		return NULL;
@@ -599,6 +603,6 @@ static inline int prov_record_args(struct provenance *prov,
 		ptr += size + 1;
 	}
 	kfree(argv);
-	return rc;
+	return 0;
 }
 #endif

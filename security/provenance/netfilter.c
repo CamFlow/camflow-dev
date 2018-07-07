@@ -15,6 +15,7 @@
 #include "provenance.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
+
 /*!
  * @brief Record provenance of an outgoing packets, which is done through NetFilter (instead of LSM) hooks.
  *
@@ -27,9 +28,10 @@
  * @param skb The socket buffer that contain packet information.
  * @return always return NF_ACCEPT.
  *
- * @todo The return value seems to be off.
  */
-static inline unsigned int __ipv4_out(struct sk_buff *skb)
+static unsigned int provenance_ipv4_out(void *priv,
+					struct sk_buff *skb,
+					const struct nf_hook_state *state)
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = NULL;
@@ -46,6 +48,9 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 		memset(&pckprov, 0, sizeof(struct provenance));
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
 
+		if (provenance_records_packet(prov_elt(iprov)))
+			provenance_packet_content(skb, &pckprov);
+
 		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
 		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 		call_provenance_alloc((prov_entry_t*)&pckprov);
@@ -55,20 +60,6 @@ static inline unsigned int __ipv4_out(struct sk_buff *skb)
 		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	}
 	return NF_ACCEPT;
-}
-
-/*!
- * @brief This function records the provenance of outgoing packets using NetFilter.
- *
- * It simply calls __ipv4_out function to perform this task.
- * Parameters are netfilter specific.
- *
- */
-static unsigned int provenance_ipv4_out(void *priv,
-					struct sk_buff *skb,
-					const struct nf_hook_state *state)
-{
-	return __ipv4_out(skb);
 }
 
 /* Netfilter hook operations */
