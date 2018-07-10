@@ -83,9 +83,10 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 }
 
-static inline void provenance_mark_as_opaque_dentry(const struct dentry *dentry) {
+static inline void provenance_mark_as_opaque_dentry(const struct dentry *dentry)
+{
 	struct provenance *prov;
-	
+
 	if (IS_ERR(dentry))
 		return;
 	prov = dentry->d_inode->i_provenance;
@@ -127,8 +128,8 @@ static inline void provenance_mark_as_opaque(const char *name)
  *
  */
 static inline int record_inode_name_from_dentry(struct dentry *dentry,
-																								struct provenance *prov,
-																								bool force)
+						struct provenance *prov,
+						bool force)
 {
 	char *buffer;
 	char *ptr;
@@ -411,13 +412,13 @@ static inline void save_provenance(struct dentry *dentry)
  *
  */
 static __always_inline int record_write_xattr(uint64_t type,
-				     struct provenance *iprov,
-				     struct provenance *tprov,
-				     struct provenance *cprov,
-				     const char *name,
-				     const void *value,
-				     size_t size,
-				     const uint64_t flags)
+					      struct provenance *iprov,
+					      struct provenance *tprov,
+					      struct provenance *cprov,
+					      const char *name,
+					      const void *value,
+					      size_t size,
+					      const uint64_t flags)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
@@ -477,9 +478,9 @@ out:
  *
  */
 static __always_inline int record_read_xattr(struct provenance *cprov,
-				    struct provenance *tprov,
-				    struct provenance *iprov,
-				    const char *name)
+					     struct provenance *tprov,
+					     struct provenance *iprov,
+					     const char *name)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;

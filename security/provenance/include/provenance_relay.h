@@ -185,11 +185,12 @@ static __always_inline void __write_node(prov_entry_t *node)
 }
 
 static __always_inline void prepare_relation(const uint64_t type,
-																						union prov_elt *relation,
-																						prov_entry_t *f,
-																						prov_entry_t *t,
-																				    const struct file *file,
-																				    const uint64_t flags) {
+					     union prov_elt *relation,
+					     prov_entry_t *f,
+					     prov_entry_t *t,
+					     const struct file *file,
+					     const uint64_t flags)
+{
 	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
