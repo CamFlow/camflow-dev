@@ -95,6 +95,7 @@ static __always_inline void prov_write(union prov_elt *msg)
 	union prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
+	prov_set_epoch(msg);
 	if (unlikely(!relay_ready)) {
 		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
 			provtmp = &(boot_buffer->buffer[boot_buffer->nb_entry]);
@@ -127,6 +128,7 @@ static inline void long_prov_write(union long_prov_elt *msg)
 	union long_prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
+	prov_set_epoch(msg);
 	if (unlikely(!relay_ready)) {
 		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE)) {
 			provtmp = &(long_boot_buffer->buffer[long_boot_buffer->nb_entry]);

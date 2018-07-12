@@ -931,6 +931,14 @@ out:
 }
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
+static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
+				  size_t count, loff_t *ppos)
+{
+	epoch++;
+	return count;
+}
+declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
+
 #define prov_create_file(name, perm, fun_ptr) \
 	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
 	provenance_mark_as_opaque_dentry(dentry)
@@ -978,6 +986,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("version", 0444, &prov_version);
 	prov_create_file("channel", 0644, &prov_channel_ops);
 	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
+	prov_create_file("epoch", 0644, &prov_epoch_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }

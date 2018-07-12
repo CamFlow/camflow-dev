@@ -38,6 +38,7 @@
 
 ### v0.4.4
 ```
+- Add epoch support.
 - Update to kernel version 4.17.5.
 ```
 

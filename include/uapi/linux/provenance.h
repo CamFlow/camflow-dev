@@ -147,6 +147,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_VERSION													"/sys/kernel/security/provenance/version"
 #define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 #define PROV_DUPLICATE_FILE										"/sys/kernel/security/provenance/duplicate"
+#define PROV_EPOCH_FILE   										"/sys/kernel/security/provenance/epoch"
 
 #define PROV_RELAY_NAME                       "/sys/kernel/debug/provenance"
 #define PROV_LONG_RELAY_NAME                  "/sys/kernel/debug/long_provenance"
@@ -170,6 +171,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define prov_flag(prov) ((prov)->msg_info.flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
 #define prov_jiffies(prov) ((prov)->msg_info.jiffies)
+#define prov_set_epoch(prov) ((prov)->msg_info.epoch=epoch)
 
 struct node_identifier {
 	uint64_t type;
@@ -262,7 +264,7 @@ union prov_identifier {
 
 
 
-#define basic_elements union prov_identifier identifier; uint64_t previous_id; uint64_t previous_type; uint32_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
+#define basic_elements union prov_identifier identifier; uint8_t epoch; uint64_t previous_id; uint64_t previous_type; uint32_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES];	void *var_ptr
 
 struct msg_struct {
 	basic_elements;
