@@ -29,9 +29,9 @@
 #define TMPBUFLEN       12
 
 #define declare_file_operations(ops_name, write_op, read_op) static const struct file_operations ops_name = { \
-		.write		= write_op, \
-		.read		= read_op, \
-		.llseek		= generic_file_llseek, \
+		.write	= write_op, \
+		.read	= read_op, \
+		.llseek = generic_file_llseek, \
 }
 
 static ssize_t no_read(struct file *filp, char __user *buf, size_t count, loff_t *ppos)
@@ -320,12 +320,12 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 		return -EPERM;
 	}
 
-	if (count < sizeof(struct prov_filter)){
+	if (count < sizeof(struct prov_filter)) {
 		pr_err("Provenance: failing setting filter, wrong length.");
 		return -ENOMEM;
 	}
 
-	if (copy_from_user(&setting, buf, sizeof(struct prov_filter))){
+	if (copy_from_user(&setting, buf, sizeof(struct prov_filter))) {
 		pr_err("Provenance: failed copying from user.");
 		return -ENOMEM;
 	}
@@ -341,12 +341,12 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 				    size_t count, uint64_t filter)
 {
-	if (count < sizeof(uint64_t)){
+	if (count < sizeof(uint64_t)) {
 		pr_err("Provenance: failing setting filter, wrong length.");
 		return -ENOMEM;
 	}
 
-	if (copy_to_user(buf, &filter, sizeof(uint64_t))){
+	if (copy_to_user(buf, &filter, sizeof(uint64_t))) {
 		pr_err("Provenance: failed copying to user.");
 		return -EAGAIN;
 	}
@@ -931,8 +931,16 @@ out:
 }
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
+static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
+				  size_t count, loff_t *ppos)
+{
+	epoch++;
+	return count;
+}
+declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
+
 #define prov_create_file(name, perm, fun_ptr) \
-	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);\
+	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
 	provenance_mark_as_opaque_dentry(dentry)
 
 static int __init init_prov_fs(void)
@@ -978,6 +986,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("version", 0444, &prov_version);
 	prov_create_file("channel", 0644, &prov_channel_ops);
 	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
+	prov_create_file("epoch", 0644, &prov_epoch_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }

@@ -51,13 +51,11 @@ static unsigned int provenance_ipv4_out(void *priv,
 		if (provenance_records_packet(prov_elt(iprov)))
 			provenance_packet_content(skb, &pckprov);
 
-		spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_TASK);
-		spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		call_provenance_alloc((prov_entry_t*)&pckprov);
 		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);
 		call_provenance_free((prov_entry_t*)&pckprov);
-		spin_unlock(prov_lock(iprov));
-		spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
 	return NF_ACCEPT;
 }
