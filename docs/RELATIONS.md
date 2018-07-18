@@ -14,7 +14,8 @@ RL_MSG_CREATE|msg_create|create msg |
 RL_SOCKET_CREATE|socket_create|create socket|
 RL_INODE_CREATE|inode_create|create inode|
 RL_SETUID|setuid|setuid|
-RL_SETGID|setgid|setgid|
+RL_SETGID|setpgid|setpgid|
+RL_GETGID|getpgid|getpgid|
 RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
 RL_SH_WRITE|sh_write|writing to shared state|
 RL_PROC_WRITE|proc_write|writing to process memory |

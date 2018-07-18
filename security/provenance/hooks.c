@@ -308,6 +308,19 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
 	return rc;
 }
 
+static int provenance_task_getpgid(struct task_struct *p)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	const struct cred *cred = get_task_cred(p);
+	struct provenance *nprov = cred->provenance;
+	int rc;
+
+	rc = uses(RL_GETGID, nprov, tprov, cprov, NULL, 0);
+	put_cred(cred); // Release cred.
+	return rc;
+}
+
 /*!
  * @brief Record provenance when task_kill hook is triggered.
  *
@@ -2384,6 +2397,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_free,		provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,		provenance_task_fix_setuid),
 	LSM_HOOK_INIT(task_setpgid,		provenance_task_setpgid),
+	LSM_HOOK_INIT(task_getpgid,		provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,		provenance_task_kill),
 
 	/* inode related hooks */

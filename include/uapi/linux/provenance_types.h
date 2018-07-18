@@ -121,6 +121,7 @@
 #define RL_PERM_APPEND        (RL_USED      | (0x0000000000000001ULL<<21))
 #define RL_SH_ATTACH_READ     (RL_USED      | (0x0000000000000001ULL<<22))
 #define RL_SH_ATTACH_WRITE    (RL_USED 			| (0x0000000000000001ULL<<23))
+#define RL_GETGID             (RL_USED 			| (0x0000000000000001ULL<<24))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */

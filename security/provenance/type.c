@@ -24,7 +24,8 @@ static const char RL_STR_MSG_CREATE[] = "msg_create";                   // creat
 static const char RL_STR_SOCKET_CREATE[] = "socket_create";             // create socket
 static const char RL_STR_INODE_CREATE[] = "inode_create";               // create inode
 static const char RL_STR_SETUID[] = "setuid";                           // setuid
-static const char RL_STR_SETGID[] = "setgid";                           // setgid
+static const char RL_STR_SETGID[] = "setpgid";                           // setpgid
+static const char RL_STR_GETGID[] = "getpgid";                           // getpgid
 static const char RL_STR_MMAP_WRITE[] = "mmap_write";                   // mmap mounting with write perm
 static const char RL_STR_SH_WRITE[] = "sh_write";                       // writing to shared state
 static const char RL_STR_PROC_WRITE[] = "proc_write";                   // writing to process memory (i.e. shared between thread)
@@ -147,6 +148,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SETUID;
 	case RL_SETGID:
 		return RL_STR_SETGID;
+	case RL_GETGID:
+		return RL_STR_GETGID;
 	case RL_MMAP_WRITE:
 		return RL_STR_MMAP_WRITE;
 	case RL_BIND:
@@ -300,6 +303,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_INODE_CREATE, RL_INODE_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SETUID, RL_SETUID);
 	MATCH_AND_RETURN(str, RL_STR_SETGID, RL_SETGID);
+	MATCH_AND_RETURN(str, RL_STR_GETGID, RL_GETGID);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);

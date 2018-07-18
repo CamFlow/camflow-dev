@@ -11,6 +11,7 @@ Automatically generated do not edit!
 - task_free
 - task_fix_setuid
 - task_setpgid
+- task_getpgid
 - task_kill
 - inode_alloc_security
 - inode_create
