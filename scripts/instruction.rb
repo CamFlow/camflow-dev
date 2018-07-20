@@ -12,7 +12,7 @@ class Instruction
   end
 
   def self.prov_to_type str
-    if str == 'cprov' || str=='nprov'
+    if str == 'cprov' || str=='nprov' || str == 'old_prov'
       return 'process_memory'
     elsif str == 'tprov'
       return 'task'
@@ -22,6 +22,10 @@ class Instruction
       return 'msg'
     elsif str == 'sprov'
       return 'shm'
+    elsif str == 'dprov'
+      return 'directory'
+    elsif str == 'iattrprov'
+      return 'iattr'
     else
       puts 'ERROR: unknown prov!!! '+str
     end
@@ -35,5 +39,15 @@ class Instruction
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
     return a + '-' + relation + '->' + b + ',' + b + '-write_proc->' + c
+  end
+
+  def self.generates_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/generates\(([A-Z_]+),([a-z_]+),([a-z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    b = self.prov_to_type elements[3]
+    c = self.prov_to_type elements[4]
+    return a + '-read_proc->' + b + ',' + b + '-' + relation + '->' + c
   end
 end

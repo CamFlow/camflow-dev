@@ -26,5 +26,8 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   if line.include?('uses(')
     str += ',' unless str == ''
     str += Instruction.uses_to_relation(line)
+  elsif line.include?('generates(')
+    str += ',' unless str == ''
+    str += Instruction.generates_to_relation(line)
   end
 end

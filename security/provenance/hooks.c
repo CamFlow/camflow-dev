@@ -212,7 +212,8 @@ static int provenance_cred_prepare(struct cred *new,
 				   gfp_t gfp)
 {
 	struct provenance *old_prov = old->provenance;
-	struct provenance *prov = alloc_provenance(ENT_PROC, gfp);
+	struct provenance *nprov = alloc_provenance(ENT_PROC, gfp);
+	struct provenance *tprov;
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -222,10 +223,11 @@ static int provenance_cred_prepare(struct cred *new,
 	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	if (current != NULL)
-		if (current->provenance != NULL)
+		tprov = current->provenance;
+		if (tprov != NULL)
 			// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
 			// System will crash if attempt to update those values.
-			rc = generates(RL_CLONE_MEM, old_prov, current->provenance, prov, NULL, 0);
+			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = prov;
 	return rc;
@@ -269,13 +271,13 @@ static int provenance_task_fix_setuid(struct cred *new,
 				      int flags)
 {
 	struct provenance *old_prov = old->provenance;
-	struct provenance *prov = new->provenance;
+	struct provenance *nprov = new->provenance;
 	struct provenance *tprov = get_task_provenance();
 	unsigned long irqflags;
 	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	rc = generates(RL_SETUID, old_prov, tprov, prov, NULL, flags);
+	rc = generates(RL_SETUID, old_prov, tprov, nprov, NULL, flags);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }
