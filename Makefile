@@ -101,7 +101,10 @@ relationlist:
 vertexlist:
 	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
-doc: hooklist relationlist vertexlist
+graphs:
+	ruby ./scripts/graphs.rb
+
+doc: hooklist relationlist vertexlist graphs
 
 compile: compile_security compile_kernel compile_us
 
