@@ -34,6 +34,6 @@ class Instruction
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
-    return a + '-read_proc->' + b + ',' + b + '-' + relation + '->' + c
+    return a + '-' + relation + '->' + b + ',' + b + '-write_proc->' + c
   end
 end
