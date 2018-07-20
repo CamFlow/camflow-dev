@@ -101,7 +101,7 @@ static int provenance_task_alloc(struct task_struct *task,
 	struct provenance *tprov;
 	struct provenance *cprov;
 
-	task->provenance = prov;
+	task->provenance = ntprov;
 	if (t != NULL) {
 		cred = t->real_cred;
 		tprov = t->provenance;
@@ -221,19 +221,21 @@ static int provenance_cred_prepare(struct cred *new,
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!prov)
+	if (!nprov)
 		return -ENOMEM;
-	node_uid(prov_elt(prov)) = __kuid_val(new->euid);
-	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
+	node_uid(prov_elt(nprov)) = __kuid_val(new->euid);
+	node_gid(prov_elt(nprov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	if (current != NULL)
+	if (current != NULL) {
+		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
+		// System will crash if attempt to update those values.
 		tprov = current->provenance;
-		if (tprov != NULL)
-			// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
-			// System will crash if attempt to update those values.
+		if (tprov != NULL) {
 			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
+		}
+	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
-	new->provenance = prov;
+	new->provenance = nprov;
 	return rc;
 }
 
