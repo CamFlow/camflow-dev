@@ -95,17 +95,21 @@ static inline void queue_save_provenance(struct provenance *provenance,
 static int provenance_task_alloc(struct task_struct *task,
 				 unsigned long clone_flags)
 {
-	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
+	struct provenance *ntprov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 	const struct cred *cred;
 	struct task_struct *t = current;
+	struct provenance *tprov;
+	struct provenance *cprov;
 
 	task->provenance = prov;
 	if (t != NULL) {
 		cred = t->real_cred;
+		tprov = t->provenance;
 		if (cred != NULL) {
-			if (t->provenance != NULL && cred->provenance != NULL) {
-				uses_two(RL_PROC_READ, cred->provenance, t->provenance, NULL, clone_flags);
-				informs(RL_CLONE, t->provenance, prov, NULL, clone_flags);
+			cprov = cred->provenance;
+			if (tprov != NULL &&  cprov != NULL) {
+				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
+				informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
 			}
 		}
 	}

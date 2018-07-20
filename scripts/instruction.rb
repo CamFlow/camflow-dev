@@ -14,7 +14,7 @@ class Instruction
   def self.prov_to_type str
     if str == 'cprov' || str=='nprov' || str == 'old_prov' || str == 'pprov'
       return 'process_memory'
-    elsif str == 'tprov'
+    elsif str == 'tprov' || str == 'ntprov'
       return 'task'
     elsif str == 'iprov' || str == 'niprov' || str == 'inprov' || str == 'outprov' || str == 'oprov'
       return 'inode'
@@ -58,6 +58,15 @@ class Instruction
   def self.derives_to_relation str
     str = str.strip.delete(' ')
     elements = str.match(/derives\(([A-Z_]+),&*([a-z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    b = self.prov_to_type elements[3]
+    return a + '-' + relation + '->' + b
+  end
+
+  def self.informs_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/informs\(([A-Z_]+),&*([a-z_]+),([a-z_]+)/)
     relation = self.relation_to_str elements[1]
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]

@@ -32,5 +32,8 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('derives(')
     str += ',' unless str == ''
     str += Instruction.derives_to_relation(line)
+  elsif line.include?('informs(')
+    str += ',' unless str == ''
+    str += Instruction.informs_to_relation(line)
   end
 end
