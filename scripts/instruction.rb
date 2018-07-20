@@ -72,4 +72,13 @@ class Instruction
     b = self.prov_to_type elements[3]
     return a + '-' + relation + '->' + b
   end
+
+  def self.uses_two_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/uses_two\(([A-Z_]+),&*([a-z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    b = self.prov_to_type elements[3]
+    return a + '-' + relation + '->' + b
+  end
 end
