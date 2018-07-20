@@ -12,11 +12,11 @@ class Instruction
   end
 
   def self.prov_to_type str
-    if str == 'cprov' || str=='nprov' || str == 'old_prov'
+    if str == 'cprov' || str=='nprov' || str == 'old_prov' || str == 'pprov'
       return 'process_memory'
     elsif str == 'tprov'
       return 'task'
-    elsif str == 'iprov' || str == 'niprov'
+    elsif str == 'iprov' || str == 'niprov' || str == 'inprov' || str == 'outprov' || str == 'oprov'
       return 'inode'
     elsif str == 'mprov'
       return 'msg'
@@ -26,6 +26,10 @@ class Instruction
       return 'directory'
     elsif str == 'iattrprov'
       return 'iattr'
+    elsif str == 'bprov'
+      return 'mmaped_file'
+    elsif str == 'pckprov'
+      return 'packet'
     else
       puts 'ERROR: unknown prov!!! '+str
     end
@@ -49,5 +53,14 @@ class Instruction
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
     return a + '-read_proc->' + b + ',' + b + '-' + relation + '->' + c
+  end
+
+  def self.derives_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/derives\(([A-Z_]+),&*([a-z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    b = self.prov_to_type elements[3]
+    return a + '-' + relation + '->' + b
   end
 end

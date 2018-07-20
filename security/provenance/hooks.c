@@ -2195,16 +2195,16 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	struct provenance *sprov = socket_provenance(sock);
+	struct provenance *iprov = socket_provenance(sock);
 	struct provenance *oprov = socket_inode_provenance(other);
 	unsigned long irqflags;
 	int rc = 0;
 
-	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
+	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = derives(RL_SND_UNIX, sprov, oprov, NULL, 0);
+	rc = derives(RL_SND_UNIX, iprov, oprov, NULL, 0);
 	spin_unlock(prov_lock(oprov));
-	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
+	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
 }
 
