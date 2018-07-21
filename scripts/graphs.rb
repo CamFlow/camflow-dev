@@ -18,6 +18,9 @@ File.readlines('./security/provenance/hooks.c').each do |line|
       dot = g.get_dot unless str == ''
       File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
       system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+      if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+      end
       g.reset unless str == ''
       hook = h
       str = ''
