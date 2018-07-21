@@ -97,4 +97,8 @@ class Instruction
   def self.inode_provenance_to_relation
     return 'path-' + self.relation_to_str('RL_NAMED') + '->inode'
   end
+
+  def self.provenance_record_address_to_relation
+    return 'address-' + self.relation_to_str('RL_NAMED') + '->inode'
+  end
 end

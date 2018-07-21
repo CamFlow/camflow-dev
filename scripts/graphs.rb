@@ -53,5 +53,8 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('refresh_inode_provenance(')
     str += ',' unless str == ''
     str += Instruction.inode_provenance_to_relation
+  elsif line.include?('provenance_record_address(')
+    str += ',' unless str == ''
+    str += Instruction.provenance_record_address_to_relation
   end
 end
