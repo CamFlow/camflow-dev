@@ -104,11 +104,13 @@ class Instruction
 
   def self.record_write_xattr_to_relation str
     str = str.strip.delete(' ')
-    puts str
     elements = str.match(/record_write_xattr\(([A-Z_]+)/)
-    puts elements
     relation = self.relation_to_str elements[1]
     return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_RMVXATTR_INODE')+'->inode' unless relation == 'setxattr'
     return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_SETXATTR_INODE')+'->inode'
+  end
+
+  def self.record_read_xattr_to_relation
+    return 'inode-' + self.relation_to_str('RL_GETXATTR_INODE') + '->xattr,xattr-'+self.relation_to_str('RL_GETXATTR')+'->task,task-'+self.relation_to_str('RL_PROC_WRITE')+'->process_memory'
   end
 end
