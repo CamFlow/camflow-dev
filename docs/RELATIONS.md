@@ -18,7 +18,7 @@ RL_SETGID|setpgid|setpgid|
 RL_GETGID|getpgid|getpgid|
 RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
 RL_SH_WRITE|sh_write|writing to shared state|
-RL_PROC_WRITE|proc_write|writing to process memory |
+RL_PROC_WRITE|memory_write|writing to process memory |
 RL_BIND|bind|socket bind operation|
 RL_CONNECT|connect|socket connection operation|
 RL_LISTEN|listen|socket listen operation|
@@ -57,7 +57,7 @@ RL_LSTXATTR|listxattr|listxattr operation|
 RL_READ_LINK|read_link|readlink operation|
 RL_MMAP_READ|mmap_read|mmap mounting with read perm|
 RL_SH_READ|sh_read|sh_read operation|
-RL_PROC_READ|proc_read|read from process memory|
+RL_PROC_READ|memory_read|read from process memory|
 RL_MMAP_EXEC|mmap_exec|mmap mounting with exec perm|
 RL_SND|send|send over socket|
 RL_SND_PACKET|send_packet|connect socket to packet on send operation|

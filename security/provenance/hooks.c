@@ -2476,7 +2476,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(unix_may_send,		provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_check_security,	provenance_bprm_check),
+	LSM_HOOK_INIT(bprm_check_security,	provenance_bprm_check_security),
 	LSM_HOOK_INIT(bprm_set_creds,		provenance_bprm_set_creds),
 	LSM_HOOK_INIT(bprm_committing_creds,	provenance_bprm_committing_creds),
 
