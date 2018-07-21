@@ -2265,11 +2265,11 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from prov_record_args function or unknown.
  *
  */
-static int provenance_bprm_check(struct linux_binprm *bprm)
+static int provenance_bprm_check_security(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(bprm->file, true);
+	struct provenance *iprov = file_provenance(bprm->file, false);
 
 	if (!nprov)
 		return -ENOMEM;

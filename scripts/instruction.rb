@@ -117,4 +117,8 @@ class Instruction
   def self.provenance_packet_content_to_relation
     return 'packet_content-' + self.relation_to_str('RL_PCK_CNT') + '->packet'
   end
+
+  def self.prov_record_args_to_relation
+    return 'argv-' + self.relation_to_str('RL_ARG') + '->process_memory,envp-'+self.relation_to_str('RL_ENV')+'->process_memory'
+  end
 end
