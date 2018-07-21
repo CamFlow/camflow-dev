@@ -101,4 +101,14 @@ class Instruction
   def self.provenance_record_address_to_relation
     return 'address-' + self.relation_to_str('RL_NAMED') + '->inode'
   end
+
+  def self.record_write_xattr_to_relation str
+    str = str.strip.delete(' ')
+    puts str
+    elements = str.match(/record_write_xattr\(([A-Z_]+)/)
+    puts elements
+    relation = self.relation_to_str elements[1]
+    return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_RMVXATTR_INODE')+'->inode' unless relation == 'setxattr'
+    return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_SETXATTR_INODE')+'->inode'
+  end
 end

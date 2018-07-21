@@ -56,5 +56,8 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('provenance_record_address(')
     str += ',' unless str == ''
     str += Instruction.provenance_record_address_to_relation
+  elsif line.include?('record_write_xattr(')
+    str += ',' unless str == ''
+    str += Instruction.record_write_xattr_to_relation(line)
   end
 end
