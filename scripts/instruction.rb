@@ -113,4 +113,8 @@ class Instruction
   def self.record_read_xattr_to_relation
     return 'inode-' + self.relation_to_str('RL_GETXATTR_INODE') + '->xattr,xattr-'+self.relation_to_str('RL_GETXATTR')+'->task,task-'+self.relation_to_str('RL_PROC_WRITE')+'->process_memory'
   end
+
+  def self.provenance_packet_content_to_relation
+    return 'packet_content-' + self.relation_to_str('RL_PCK_CNT') + '->packet'
+  end
 end
