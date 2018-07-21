@@ -35,6 +35,14 @@ class Instruction
     end
   end
 
+  def self.version e
+    if e == 'task'
+      return 'task-'+ self.relation_to_str('RL_VERSION_TASK') + '->task'
+    else
+      return e+'-'+ self.relation_to_str('RL_VERSION') + '->' + e
+    end
+  end
+
   def self.uses_to_relation str
     str = str.strip.delete(' ')
     elements = str.match(/uses\(([A-Z_]+),([a-z_]+),([a-z_]+),([a-z_]+)/)
@@ -42,7 +50,7 @@ class Instruction
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
-    return a + '-' + relation + '->' + b + ',' + b + '-write_proc->' + c
+    return a + '-' + relation + '->' + b + ',' + b + '-' + self.relation_to_str('RL_PROC_WRITE') + '->' + c + ',' + self.version(b) + ',' + self.version(c)
   end
 
   def self.generates_to_relation str
@@ -52,7 +60,7 @@ class Instruction
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
-    return a + '-read_proc->' + b + ',' + b + '-' + relation + '->' + c
+    return a + '-' + self.relation_to_str('RL_PROC_READ') + '->' + b + ',' + b + '-' + relation + '->' + c + ',' + self.version(b) + ',' + self.version(c)
   end
 
   def self.derives_to_relation str
@@ -61,7 +69,7 @@ class Instruction
     relation = self.relation_to_str elements[1]
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
-    return a + '-' + relation + '->' + b
+    return a + '-' + relation + '->' + b + ',' + self.version(b)
   end
 
   def self.informs_to_relation str
@@ -70,7 +78,7 @@ class Instruction
     relation = self.relation_to_str elements[1]
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
-    return a + '-' + relation + '->' + b
+    return a + '-' + relation + '->' + b + ',' + self.version(b)
   end
 
   def self.uses_two_to_relation str
@@ -79,6 +87,6 @@ class Instruction
     relation = self.relation_to_str elements[1]
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
-    return a + '-' + relation + '->' + b
+    return a + '-' + relation + '->' + b + ',' + self.version(b)
   end
 end
