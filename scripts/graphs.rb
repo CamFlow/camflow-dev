@@ -39,6 +39,19 @@ File.readlines('./security/provenance/hooks.c').each do |line|
     str += ',' unless str == ''
     str += Instruction.uses_two_to_relation(line)
   elsif line.include?('get_cred_provenance(')
+    str += ',' unless str == ''
     str += Instruction.get_cred_provenance_to_relation
+  elsif line.include?('inode_provenance(') && line.include?('true')
+    str += ',' unless str == ''
+    str += Instruction.inode_provenance_to_relation
+  elsif line.include?('dentry_provenance(') && line.include?('true')
+    str += ',' unless str == ''
+    str += Instruction.inode_provenance_to_relation
+  elsif line.include?('file_provenance(') && line.include?('true')
+    str += ',' unless str == ''
+    str += Instruction.inode_provenance_to_relation
+  elsif line.include?('refresh_inode_provenance(')
+    str += ',' unless str == ''
+    str += Instruction.inode_provenance_to_relation
   end
 end
