@@ -89,4 +89,8 @@ class Instruction
     b = self.prov_to_type elements[3]
     return a + '-' + relation + '->' + b + ',' + self.version(b)
   end
+
+  def self.get_cred_provenance_to_relation
+    return 'path-' + self.relation_to_str('RL_NAMED_PROCESS') + '->process_memory'
+  end
 end
