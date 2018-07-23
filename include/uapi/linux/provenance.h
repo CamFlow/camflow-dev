@@ -168,7 +168,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_previous_type(node)      ((node)->node_info.previous_type)
 
 
-#define prov_flag(prov) ((prov)->msg_info.flag)
+#define prov_flag(prov) ((prov)->msg_info.internal_flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
 #define prov_jiffies(prov) ((prov)->msg_info.jiffies)
 #define prov_set_epoch(prov) ((prov)->msg_info.epoch=epoch)
@@ -264,7 +264,7 @@ union prov_identifier {
 
 
 
-#define basic_elements union prov_identifier identifier; uint8_t epoch; uint32_t flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];	void *var_ptr
+#define basic_elements union prov_identifier identifier; uint8_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];	void *var_ptr
 #define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid
 
 struct msg_struct {
