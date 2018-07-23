@@ -24,10 +24,11 @@ static const char RL_STR_MSG_CREATE[] = "msg_create";                   // creat
 static const char RL_STR_SOCKET_CREATE[] = "socket_create";             // create socket
 static const char RL_STR_INODE_CREATE[] = "inode_create";               // create inode
 static const char RL_STR_SETUID[] = "setuid";                           // setuid
-static const char RL_STR_SETGID[] = "setgid";                           // setgid
+static const char RL_STR_SETGID[] = "setpgid";                           // setpgid
+static const char RL_STR_GETGID[] = "getpgid";                           // getpgid
 static const char RL_STR_MMAP_WRITE[] = "mmap_write";                   // mmap mounting with write perm
 static const char RL_STR_SH_WRITE[] = "sh_write";                       // writing to shared state
-static const char RL_STR_PROC_WRITE[] = "proc_write";                   // writing to process memory (i.e. shared between thread)
+static const char RL_STR_PROC_WRITE[] = "memory_write";                   // writing to process memory (i.e. shared between thread)
 static const char RL_STR_BIND[] = "bind";                               // socket bind operation
 static const char RL_STR_CONNECT[] = "connect";                         // socket connection operation
 static const char RL_STR_LISTEN[] = "listen";                           // socket listen operation
@@ -66,7 +67,7 @@ static const char RL_STR_LSTXATTR[] = "listxattr";                      // listx
 static const char RL_STR_READ_LINK[] = "read_link";                     // readlink operation
 static const char RL_STR_MMAP_READ[] = "mmap_read";                     // mmap mounting with read perm
 static const char RL_STR_SH_READ[] = "sh_read";                         // sh_read operation
-static const char RL_STR_PROC_READ[] = "proc_read";                     // read from process memory
+static const char RL_STR_PROC_READ[] = "memory_read";                     // read from process memory
 static const char RL_STR_MMAP_EXEC[] = "mmap_exec";                     // mmap mounting with exec perm
 static const char RL_STR_SND[] = "send";                                // send over socket
 static const char RL_STR_SND_PACKET[] = "send_packet";                  // connect socket to packet on send operation
@@ -147,6 +148,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SETUID;
 	case RL_SETGID:
 		return RL_STR_SETGID;
+	case RL_GETGID:
+		return RL_STR_GETGID;
 	case RL_MMAP_WRITE:
 		return RL_STR_MMAP_WRITE;
 	case RL_BIND:
@@ -300,6 +303,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_INODE_CREATE, RL_INODE_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SETUID, RL_SETUID);
 	MATCH_AND_RETURN(str, RL_STR_SETGID, RL_SETGID);
+	MATCH_AND_RETURN(str, RL_STR_GETGID, RL_GETGID);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);

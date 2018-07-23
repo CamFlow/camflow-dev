@@ -105,8 +105,8 @@ __x64_sys_getegid|[]|[]|[]|0/0|
 __x64_sys_times|["file_send_sigiotask", "task_free"]|["file_send_sigiotask", "task_free"]|[]|2/2|
 __x64_sys_utimes|["file_send_sigiotask", "inode_follow_link", "inode_free", "inode_killpriv", "inode_need_killpriv", "inode_permission", "inode_setattr", "sb_free", "task_free"]|["file_send_sigiotask", "inode_free", "inode_permission", "inode_setattr", "sb_free", "task_free"]|["inode_follow_link", "inode_killpriv", "inode_need_killpriv"]|6/9|
 __x64_sys_setpgid|["file_send_sigiotask", "task_free", "task_setpgid"]|["file_send_sigiotask", "task_free", "task_setpgid"]|[]|3/3|
-__x64_sys_getpgid|["task_getpgid"]|[]|["task_getpgid"]|0/1|
-__x64_sys_getpgrp|["task_getpgid"]|[]|["task_getpgid"]|0/1|
+__x64_sys_getpgid|["task_getpgid"]|["task_getpgid"]|[]|1/1|
+__x64_sys_getpgrp|["task_getpgid"]|["task_getpgid"]|[]|1/1|
 __x64_sys_getsid|["task_getsid"]|[]|["task_getsid"]|0/1|
 __x64_sys_setsid|["file_send_sigiotask", "socket_sock_rcv_skb", "task_free"]|["file_send_sigiotask", "socket_sock_rcv_skb", "task_free"]|[]|3/3|
 __x64_sys_newuname|["file_send_sigiotask", "task_free"]|["file_send_sigiotask", "task_free"]|[]|2/2|

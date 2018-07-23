@@ -1,4 +1,4 @@
-kernel-version=4.17.6
+kernel-version=4.17.9
 lsm-version=0.4.4
 arch=x86_64
 
@@ -101,7 +101,10 @@ relationlist:
 vertexlist:
 	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
-doc: hooklist relationlist vertexlist
+graphs:
+	ruby ./scripts/graphs.rb
+
+doc: hooklist relationlist vertexlist graphs
 
 compile: compile_security compile_kernel compile_us
 
