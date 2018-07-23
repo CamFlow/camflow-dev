@@ -71,5 +71,8 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('prov_record_args(')
     str += ',' unless str == ''
     str += Instruction.prov_record_args_to_relation
+  elsif line.include?('record_terminate(')
+    str += ',' unless str == ''
+    str += Instruction.record_terminate_to_relation(line)
   end
 end
