@@ -12,14 +12,41 @@ end
 str = ''
 hook = ''
 File.readlines('./security/provenance/hooks.c').each do |line|
+  if  line.include?('int __mq_msgsnd(') || line.include?('int __mq_msgrcv(')
+    g.from_string(str) unless str == ''
+    dot = g.get_dot unless str == ''
+    File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
+    system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+    if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
+      system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+    end
+    g.reset unless str == ''
+    if line.include?('__mq_msgsnd(')
+      hook = '__mq_msgsnd'
+    elsif line.include?('__mq_msgrcv(')
+      hook = '__mq_msgrcv'
+    end
+    str = ''
+  end
   hooks.each do |h|
     if line.include?('provenance_'+h+'(')
       g.from_string(str) unless str == ''
       dot = g.get_dot unless str == ''
       File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-      system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+      puts hook
       if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+      elsif hook == '__mq_msgsnd'
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
+      elsif hook == '__mq_msgrcv'
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgrcv.png')  unless str == ''
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedreceive.png')  unless str == ''
+      elsif hook == 'msg_queue_msgrcv' || hook == 'mq_timedreceive' || hook == 'mq_timedsend' || hook == 'msg_queue_msgsnd'
+        puts 'Skipping '+hook
+      else
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
       end
       g.reset unless str == ''
       hook = h
