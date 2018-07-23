@@ -1,6 +1,7 @@
 require './scripts/graph.rb'
 require './scripts/instruction.rb'
 
+puts 'Building hooks provenance model...'
 g = Graph.new
 hooks = Array.new
 
