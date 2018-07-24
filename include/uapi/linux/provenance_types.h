@@ -52,7 +52,7 @@
 #define RL_SND_UNIX         	(RL_DERIVED   | (0x0000000000000001ULL<<8))
 #define RL_RCV_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<9))
 #define RL_RCV_UNIX         	(RL_DERIVED   | (0x0000000000000001ULL<<10))
-#define RL_CLOSED             (RL_DERIVED   | (0x0000000000000001ULL<<11))
+#define RL_FREED             	(RL_DERIVED   | (0x0000000000000001ULL<<11))
 #define RL_SETATTR_INODE      (RL_DERIVED   | (0x0000000000000001ULL<<12))
 #define RL_ACCEPT_SOCKET      (RL_DERIVED   | (0x0000000000000001ULL<<13))
 #define RL_GETXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<14))
@@ -179,7 +179,7 @@
 
 #define prov_is_close(val) (val == RL_TERMINATE_TASK \
 												 || val == RL_TERMINATE_PROC \
-												 || val == RL_CLOSED)
+												 || val == RL_FREED)
 
 static inline bool prov_has_uidgid(uint64_t type)
 {

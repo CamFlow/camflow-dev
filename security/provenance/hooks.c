@@ -384,7 +384,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
  * @brief Record provenance when inode_free_security hook is triggered.
  *
  * This hook is triggered when deallocating the inode security structure and set @inode->i_security to NULL.
- * Record provenance relation RL_CLOSED by calling "record_terminate" function.
+ * Record provenance relation RL_FREED by calling "record_terminate" function.
  * Free kernel memory allocated for provenance entry of the inode in question.
  * Set the provenance pointer in @inode to NULL.
  * @param inode The inode structure whose security is to be freed.
@@ -394,7 +394,7 @@ static void provenance_inode_free_security(struct inode *inode)
 {
 	struct provenance *iprov = inode->i_provenance;
 	if (iprov) {
-		record_terminate(RL_CLOSED, iprov);
+		record_terminate(RL_FREED, iprov);
 		free_provenance(iprov);
 	}
 	inode->i_provenance = NULL;

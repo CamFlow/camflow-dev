@@ -85,7 +85,7 @@ static const char RL_STR_PERM_EXEC[] = "perm_exec";                     // check
 static const char RL_STR_PERM_APPEND[] = "perm_append";                 // check append permission
 static const char RL_STR_TERMINATE_TASK[] = "terminate_task";           // created when task data structure is freed
 static const char RL_STR_TERMINATE_PROC[] = "terminate_proc";           // created when cred data structure is freed
-static const char RL_STR_CLOSED[] = "free";                           // created when an inode is freed
+static const char RL_STR_FREED[] = "free";                           // created when an inode is freed
 static const char RL_STR_ARG[] = "arg";                                 // connect arg value to process
 static const char RL_STR_ENV[] = "env";                                 // connect env value to process
 static const char RL_STR_LOG[] = "log";                                 // connect string to task
@@ -268,8 +268,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_TERMINATE_TASK;
 	case RL_TERMINATE_PROC:
 		return RL_STR_TERMINATE_PROC;
-	case RL_CLOSED:
-		return RL_STR_CLOSED;
+	case RL_FREED:
+		return RL_STR_FREED;
 	case RL_ARG:
 		return RL_STR_ARG;
 	case RL_ENV:
@@ -363,7 +363,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_PROC_WRITE, RL_PROC_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_TERMINATE_TASK, RL_TERMINATE_TASK);
 	MATCH_AND_RETURN(str, RL_STR_TERMINATE_PROC, RL_TERMINATE_PROC);
-	MATCH_AND_RETURN(str, RL_STR_CLOSED, RL_CLOSED);
+	MATCH_AND_RETURN(str, RL_STR_FREED, RL_FREED);
 	MATCH_AND_RETURN(str, RL_STR_ARG, RL_ARG);
 	MATCH_AND_RETURN(str, RL_STR_ENV, RL_ENV);
 	MATCH_AND_RETURN(str, RL_STR_LOG, RL_LOG);
