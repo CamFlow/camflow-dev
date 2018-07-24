@@ -1463,8 +1463,11 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
  */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
-	if (msg->provenance)
-		free_provenance(msg->provenance);
+	struct provenance *mprov = msg->provenance;
+	if (mprov) {
+		record_terminate(RL_FREED, mprov);
+		free_provenance(mprov);
+	}
 	msg->provenance = NULL;
 }
 
@@ -1653,8 +1656,11 @@ out:
  */
 static void provenance_shm_free_security(struct kern_ipc_perm *shp)
 {
-	if (shp->provenance)
-		free_provenance(shp->provenance);
+	struct provenance *sprov = shp->provenance;
+	if (sprov) {
+		record_terminate(RL_FREED, sprov);
+		free_provenance(sprov);
+	}
 	shp->provenance = NULL;
 }
 
