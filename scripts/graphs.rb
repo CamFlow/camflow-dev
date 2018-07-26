@@ -157,16 +157,16 @@ if File.file?('./scripts/syshooks.txt')
     call_name = call.captures[0].strip unless call.nil?
     a_used.sort!
     a_implemented.sort!
+
+    puts call_name
     str = ''
     a_implemented.each do |h|
       if hook_map.key? h
         puts h
-        puts hook_map[h]
         str += ',' unless str == ''
         str += hook_map[h] unless hook_map[h].nil?
       end
     end
-    puts str
     g.from_string(str) unless str == ''
     g.reset unless str == ''
     dot = g.get_dot unless str == ''
