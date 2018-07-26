@@ -106,7 +106,7 @@ graphs:
 
 doc: hooklist relationlist vertexlist graphs
 
-compile: compile_security compile_kernel compile_us
+compile: compile_security compile_kernel compile_us doc
 
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1
