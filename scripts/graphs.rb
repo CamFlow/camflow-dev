@@ -21,7 +21,7 @@ File.readlines('./security/provenance/hooks.c').each do |line|
     system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
     if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
       system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
-      hook_map.store(hook+'_always', str) unless str == ''
+      hook_map[hook+'_always'] = str unless str == ''
     end
     g.reset unless str == ''
     if line.include?('__mq_msgsnd(')
@@ -40,18 +40,18 @@ File.readlines('./security/provenance/hooks.c').each do |line|
       if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
-        hook_map.store(hook, str) unless str == ''
-        hook_map.store(hook+'_always', str) unless str == ''
+        hook_map[hook] = str unless str == ''
+        hook_map[hook+'_always'] = str unless str == ''
       elsif hook == '__mq_msgsnd'
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
-        hook_map.store('msg_queue_msgsnd', str) unless str == ''
-        hook_map.store('mq_timedsend', str) unless str == ''
+        hook_map['msg_queue_msgsnd'] = str unless str == ''
+        hook_map['mq_timedsend'] = str unless str == ''
       elsif hook == '__mq_msgrcv'
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgrcv.png')  unless str == ''
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedreceive.png')  unless str == ''
-        hook_map.store('msg_queue_msgrcv', str) unless str == ''
-        hook_map.store('mq_timedreceive', str) unless str == ''
+        hook_map['msg_queue_msgrcv'] = str unless str == ''
+        hook_map['mq_timedreceive'] = str unless str == ''
       elsif hook == 'msg_queue_msgrcv' || hook == 'mq_timedreceive' || hook == 'mq_timedsend' || hook == 'msg_queue_msgsnd'
         puts 'Skipping '+hook
       else
@@ -114,6 +114,8 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   end
 end
 
+puts hook_map
+
 audit_related = ['audit_rule_init', 'audit_rule_match'] # we do not handle audit rules
 capable_related = ['capable', 'capable_noaudit','capset','capget'] # we do not implement capability
 secid_related = ['ipc_getsecid', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx', 'cred_getsecid'] # no need to support secid related info as 1) we do not generate secid; 2) only one module can support it at any given time (right now SELinux)
@@ -129,7 +131,7 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   hook = line.match(/LSM_HOOK_INIT\s*\(\s*(\w+)\s*,\s*\w+\s*\)\s*,/)
   implemented_hooks << hook.captures[0].gsub('_security', '').strip unless hook.nil?
 end
-if File.file? './scripts/syshooks.txt'
+if File.file?('./scripts/syshooks.txt')
   File.readlines('./scripts/syshooks.txt').each do |line|
     used = 0
     implemented = 0
@@ -155,14 +157,19 @@ if File.file? './scripts/syshooks.txt'
     call_name = call.captures[0].strip unless call.nil?
     a_used.sort!
     a_implemented.sort!
+
+    puts call_name
     str = ''
     a_implemented.each do |h|
       if hook_map.key? h
-        str += hook_map['h']
+        puts h
+        str += ',' unless str == ''
+        str += hook_map[h] unless hook_map[h].nil?
       end
     end
     g.from_string(str) unless str == ''
     dot = g.get_dot unless str == ''
+    g.reset unless str == ''
     File.open('/tmp/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
     system('dot -Tpng /tmp/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
   end
