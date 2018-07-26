@@ -168,8 +168,8 @@ if File.file?('./scripts/syshooks.txt')
       end
     end
     g.from_string(str) unless str == ''
-    g.reset unless str == ''
     dot = g.get_dot unless str == ''
+    g.reset unless str == ''
     File.open('/tmp/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
     system('dot -Tpng /tmp/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
   end
