@@ -39,7 +39,7 @@ File.readlines('./security/provenance/hooks.c').each do |line|
       puts hook
       if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''hook_map[hook] = str unless str == ''
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map[hook+'_always'] = str unless str == ''
       elsif hook == 'inode_link'
