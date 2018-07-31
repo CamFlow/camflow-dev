@@ -1,4 +1,4 @@
-kernel-version=4.17.9
+kernel-version=4.17.11
 lsm-version=0.4.4
 arch=x86_64
 
@@ -106,7 +106,7 @@ graphs:
 
 doc: hooklist relationlist vertexlist graphs
 
-compile: compile_security compile_kernel compile_us
+compile: compile_security compile_kernel compile_us doc
 
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1

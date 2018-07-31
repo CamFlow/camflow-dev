@@ -127,9 +127,10 @@ static int provenance_task_alloc(struct task_struct *task,
  */
 static void provenance_task_free(struct task_struct *task)
 {
-	if (task->provenance) {
-		record_terminate(RL_TERMINATE_TASK, task->provenance);
-		free_provenance(task->provenance);
+	struct provenance *tprov = task->provenance;
+	if (tprov) {
+		record_terminate(RL_TERMINATE_TASK, tprov);
+		free_provenance(tprov);
 	}
 	task->provenance = NULL;
 }
@@ -191,9 +192,10 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
  */
 static void provenance_cred_free(struct cred *cred)
 {
-	if (cred->provenance) {
-		record_terminate(RL_TERMINATE_PROC, cred->provenance);
-		free_provenance(cred->provenance);
+	struct provenance *cprov = cred->provenance;
+	if (cprov) {
+		record_terminate(RL_TERMINATE_PROC, cprov);
+		free_provenance(cprov);
 	}
 	cred->provenance = NULL;
 }
@@ -390,9 +392,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	if (inode->i_provenance) {
-		record_terminate(RL_CLOSED, inode->i_provenance);
-		free_provenance(inode->i_provenance);
+	struct provenance *iprov = inode->i_provenance;
+	if (iprov) {
+		record_terminate(RL_CLOSED, iprov);
+		free_provenance(iprov);
 	}
 	inode->i_provenance = NULL;
 }

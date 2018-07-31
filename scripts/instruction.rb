@@ -110,6 +110,14 @@ class Instruction
     return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_SETXATTR_INODE')+'->inode'
   end
 
+  def self.record_terminate_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/record_terminate\(([A-Z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    return a + '-' + relation + '->' + a
+  end
+
   def self.record_read_xattr_to_relation
     return 'inode-' + self.relation_to_str('RL_GETXATTR_INODE') + '->xattr,xattr-'+self.relation_to_str('RL_GETXATTR')+'->task,task-'+self.relation_to_str('RL_PROC_WRITE')+'->process_memory'
   end
