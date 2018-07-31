@@ -95,17 +95,21 @@ static inline void queue_save_provenance(struct provenance *provenance,
 static int provenance_task_alloc(struct task_struct *task,
 				 unsigned long clone_flags)
 {
-	struct provenance *prov = alloc_provenance(ACT_TASK, GFP_KERNEL);
+	struct provenance *ntprov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 	const struct cred *cred;
 	struct task_struct *t = current;
+	struct provenance *tprov;
+	struct provenance *cprov;
 
-	task->provenance = prov;
+	task->provenance = ntprov;
 	if (t != NULL) {
 		cred = t->real_cred;
+		tprov = t->provenance;
 		if (cred != NULL) {
-			if (t->provenance != NULL && cred->provenance != NULL) {
-				uses_two(RL_PROC_READ, cred->provenance, t->provenance, NULL, clone_flags);
-				informs(RL_CLONE, t->provenance, prov, NULL, clone_flags);
+			cprov = cred->provenance;
+			if (tprov != NULL &&  cprov != NULL) {
+				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
+				informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
 			}
 		}
 	}
@@ -123,9 +127,10 @@ static int provenance_task_alloc(struct task_struct *task,
  */
 static void provenance_task_free(struct task_struct *task)
 {
-	if (task->provenance) {
-		record_terminate(RL_TERMINATE_TASK, task->provenance);
-		free_provenance(task->provenance);
+	struct provenance *tprov = task->provenance;
+	if (tprov) {
+		record_terminate(RL_TERMINATE_TASK, tprov);
+		free_provenance(tprov);
 	}
 	task->provenance = NULL;
 }
@@ -187,9 +192,10 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
  */
 static void provenance_cred_free(struct cred *cred)
 {
-	if (cred->provenance) {
-		record_terminate(RL_TERMINATE_PROC, cred->provenance);
-		free_provenance(cred->provenance);
+	struct provenance *cprov = cred->provenance;
+	if (cprov) {
+		record_terminate(RL_TERMINATE_PROC, cprov);
+		free_provenance(cprov);
 	}
 	cred->provenance = NULL;
 }
@@ -212,22 +218,26 @@ static int provenance_cred_prepare(struct cred *new,
 				   gfp_t gfp)
 {
 	struct provenance *old_prov = old->provenance;
-	struct provenance *prov = alloc_provenance(ENT_PROC, gfp);
+	struct provenance *nprov = alloc_provenance(ENT_PROC, gfp);
+	struct provenance *tprov;
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!prov)
+	if (!nprov)
 		return -ENOMEM;
-	node_uid(prov_elt(prov)) = __kuid_val(new->euid);
-	node_gid(prov_elt(prov)) = __kgid_val(new->egid);
+	node_uid(prov_elt(nprov)) = __kuid_val(new->euid);
+	node_gid(prov_elt(nprov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	if (current != NULL)
-		if (current->provenance != NULL)
-			// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
-			// System will crash if attempt to update those values.
-			rc = generates(RL_CLONE_MEM, old_prov, current->provenance, prov, NULL, 0);
+	if (current != NULL) {
+		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
+		// System will crash if attempt to update those values.
+		tprov = current->provenance;
+		if (tprov != NULL) {
+			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
+		}
+	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
-	new->provenance = prov;
+	new->provenance = nprov;
 	return rc;
 }
 
@@ -269,13 +279,13 @@ static int provenance_task_fix_setuid(struct cred *new,
 				      int flags)
 {
 	struct provenance *old_prov = old->provenance;
-	struct provenance *prov = new->provenance;
+	struct provenance *nprov = new->provenance;
 	struct provenance *tprov = get_task_provenance();
 	unsigned long irqflags;
 	int rc;
 
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	rc = generates(RL_SETUID, old_prov, tprov, prov, NULL, flags);
+	rc = generates(RL_SETUID, old_prov, tprov, nprov, NULL, flags);
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }
@@ -304,6 +314,19 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
 
 	prov_elt(nprov)->proc_info.gid = pgid;
 	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
+	put_cred(cred); // Release cred.
+	return rc;
+}
+
+static int provenance_task_getpgid(struct task_struct *p)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	const struct cred *cred = get_task_cred(p);
+	struct provenance *nprov = cred->provenance;
+	int rc;
+
+	rc = uses(RL_GETGID, nprov, tprov, cprov, NULL, 0);
 	put_cred(cred); // Release cred.
 	return rc;
 }
@@ -369,9 +392,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	if (inode->i_provenance) {
-		record_terminate(RL_CLOSED, inode->i_provenance);
-		free_provenance(inode->i_provenance);
+	struct provenance *iprov = inode->i_provenance;
+	if (iprov) {
+		record_terminate(RL_CLOSED, iprov);
+		free_provenance(iprov);
 	}
 	inode->i_provenance = NULL;
 }
@@ -2182,16 +2206,16 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	struct provenance *sprov = socket_provenance(sock);
+	struct provenance *iprov = socket_provenance(sock);
 	struct provenance *oprov = socket_inode_provenance(other);
 	unsigned long irqflags;
 	int rc = 0;
 
-	spin_lock_irqsave_nested(prov_lock(sprov), irqflags, PROVENANCE_LOCK_SOCKET);
+	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_SOCKET);
 	spin_lock_nested(prov_lock(oprov), PROVENANCE_LOCK_SOCK);
-	rc = derives(RL_SND_UNIX, sprov, oprov, NULL, 0);
+	rc = derives(RL_SND_UNIX, iprov, oprov, NULL, 0);
 	spin_unlock(prov_lock(oprov));
-	spin_unlock_irqrestore(prov_lock(sprov), irqflags);
+	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
 }
 
@@ -2246,11 +2270,11 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from prov_record_args function or unknown.
  *
  */
-static int provenance_bprm_check(struct linux_binprm *bprm)
+static int provenance_bprm_check_security(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(bprm->file, true);
+	struct provenance *iprov = file_provenance(bprm->file, false);
 
 	if (!nprov)
 		return -ENOMEM;
@@ -2386,6 +2410,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_free,		provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,		provenance_task_fix_setuid),
 	LSM_HOOK_INIT(task_setpgid,		provenance_task_setpgid),
+	LSM_HOOK_INIT(task_getpgid,		provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,		provenance_task_kill),
 
 	/* inode related hooks */
@@ -2456,7 +2481,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(unix_may_send,		provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_check_security,	provenance_bprm_check),
+	LSM_HOOK_INIT(bprm_check_security,	provenance_bprm_check_security),
 	LSM_HOOK_INIT(bprm_set_creds,		provenance_bprm_set_creds),
 	LSM_HOOK_INIT(bprm_committing_creds,	provenance_bprm_committing_creds),
 
