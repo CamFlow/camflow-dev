@@ -47,5 +47,5 @@ File.readlines('./scripts/syshooks.txt').each do |line|
   a_implemented.sort!
   a_missing = a_used - a_implemented
   a_missing.sort!
-  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + '| !['+call_name+' graph](./img/'+call_name+'.png)| + "\n"
+  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + '| !['+call_name+' graph](./img/'+call_name+'.png)|' + "\n"
 end
