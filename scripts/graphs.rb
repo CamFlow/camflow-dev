@@ -119,8 +119,6 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   end
 end
 
-puts hook_map
-
 audit_related = ['audit_rule_init', 'audit_rule_match'] # we do not handle audit rules
 capable_related = ['capable', 'capable_noaudit','capset','capget'] # we do not implement capability
 secid_related = ['ipc_getsecid', 'inode_getsecid', 'task_getsecid', 'secid_to_secctx', 'release_secctx', 'cred_getsecid'] # no need to support secid related info as 1) we do not generate secid; 2) only one module can support it at any given time (right now SELinux)
