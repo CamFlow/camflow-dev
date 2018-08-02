@@ -50,7 +50,7 @@ class Instruction
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
-    return a + '-' + relation + '->' + b + ',' + b + '-' + self.relation_to_str('RL_PROC_WRITE') + '->' + c + ',' + self.version(b) + ',' + self.version(c) + ',process_memory-'+self.relation_to_str('RL_SH_WRITE')+'->inode'
+    return a + '-' + relation + '->' + b + ',' + b + '-' + self.relation_to_str('RL_PROC_WRITE') + '->' + c + ',' + self.version(b) + ',' + self.version(c) + ',process_memory-'+self.relation_to_str('RL_SH_WRITE')+'->inode' +','+ self.version('inode')
   end
 
   def self.generates_to_relation str
@@ -60,7 +60,7 @@ class Instruction
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
     c = self.prov_to_type elements[4]
-    return a + '-' + self.relation_to_str('RL_PROC_READ') + '->' + b + ',' + b + '-' + relation + '->' + c + ',' + self.version(b) + ',' + self.version(c) + ',inode-'+self.relation_to_str('RL_SH_READ')+'->process_memory'
+    return a + '-' + self.relation_to_str('RL_PROC_READ') + '->' + b + ',' + b + '-' + relation + '->' + c + ',' + self.version(b) + ',' + self.version(c) + ',inode-'+self.relation_to_str('RL_SH_READ')+'->process_memory' +','+ self.version('process_memory')
   end
 
   def self.derives_to_relation str
