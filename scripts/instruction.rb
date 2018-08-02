@@ -106,8 +106,8 @@ class Instruction
     str = str.strip.delete(' ')
     elements = str.match(/record_write_xattr\(([A-Z_]+)/)
     relation = self.relation_to_str elements[1]
-    return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_RMVXATTR_INODE')+'->inode' unless relation == 'setxattr'
-    return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_SETXATTR_INODE')+'->inode'
+    return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_RMVXATTR_INODE')+'->inode' + ',' + self.version('task') + ',' + self.version('inode') unless relation == 'setxattr'
+    return 'process_memory-' + self.relation_to_str('RL_PROC_READ') + '->task,task-'+relation+'->xattr,xattr-'+self.relation_to_str('RL_SETXATTR_INODE')+'->inode' + ',' + self.version('task') + ',' + self.version('inode')
   end
 
   def self.record_terminate_to_relation str
@@ -119,7 +119,7 @@ class Instruction
   end
 
   def self.record_read_xattr_to_relation
-    return 'inode-' + self.relation_to_str('RL_GETXATTR_INODE') + '->xattr,xattr-'+self.relation_to_str('RL_GETXATTR')+'->task,task-'+self.relation_to_str('RL_PROC_WRITE')+'->process_memory'
+    return 'inode-' + self.relation_to_str('RL_GETXATTR_INODE') + '->xattr,xattr-'+self.relation_to_str('RL_GETXATTR')+'->task,task-'+self.relation_to_str('RL_PROC_WRITE')+'->process_memory' + ',' + self.version('task') + ',' + self.version('process_memory')
   end
 
   def self.provenance_packet_content_to_relation
