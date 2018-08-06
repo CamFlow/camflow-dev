@@ -38,7 +38,8 @@
 
 ### v0.4.4
 ```
-- Fix mmap so the thread initiating the mmap appears.
+- Fix file_unmmap so the thread initiating the unmmap appears.
+- Fix file_mmap so the thread initiating the mmap appears.
 - Generate through code analysis provenance model for LSM hooks and system calls.
 - Add epoch support.
 - Update to kernel version 4.17.9.

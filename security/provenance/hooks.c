@@ -1358,6 +1358,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 				   unsigned long end)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
 	struct file *mmapf;
 	unsigned long irqflags;
@@ -1369,7 +1370,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 			iprov = file_provenance(mmapf, false);
 			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-			derives(RL_MUNMAP, cprov, iprov, mmapf, flags);
+			uses(RL_MUNMAP, iprov, tprov, cprov, mmapf, flags);
 			spin_unlock(prov_lock(iprov));
 			spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 		}
