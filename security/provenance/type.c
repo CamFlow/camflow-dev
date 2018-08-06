@@ -44,7 +44,8 @@ static const char RL_STR_SHMDT[] = "shmdt";                             // shmdt
 static const char RL_STR_LINK[] = "link";                               // create a link
 static const char RL_STR_UNLINK[] = "unlink";                           // delete a link
 static const char RL_STR_SYMLINK[] = "symlink";                         // create a symlink
-static const char RL_STR_SPLICE[] = "splice";                           // pipe splice operation
+static const char RL_STR_SPLICE_IN[] = "splice_in";                     // pipe splice operation from in file
+static const char RL_STR_SPLICE_OUT[] = "splice_out";                   // pipe splice operation to out file
 static const char RL_STR_SETATTR[] = "setattr";                         // setattr operation (task -> iattr)
 static const char RL_STR_SETATTR_INODE[] = "setattr_inode";             // setattr operation (iattr -> inode)
 static const char RL_STR_ACCEPT_SOCKET[] = "accept_socket";             // accept operation (parent -> child socket)
@@ -182,8 +183,10 @@ const char* relation_str(uint64_t type)
 		return RL_STR_UNLINK;
 	case RL_SYMLINK:
 		return RL_STR_SYMLINK;
-	case RL_SPLICE:
-		return RL_STR_SPLICE;
+	case RL_SPLICE_OUT:
+		return RL_STR_SPLICE_OUT;
+	case RL_SPLICE_IN:
+		return RL_STR_SPLICE_IN;
 	case RL_SETATTR:
 		return RL_STR_SETATTR;
 	case RL_SETATTR_INODE:
@@ -320,7 +323,8 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
 	MATCH_AND_RETURN(str, RL_STR_UNLINK, RL_UNLINK);
 	MATCH_AND_RETURN(str, RL_STR_SYMLINK, RL_SYMLINK);
-	MATCH_AND_RETURN(str, RL_STR_SPLICE, RL_SPLICE);
+	MATCH_AND_RETURN(str, RL_STR_SPLICE_IN, RL_SPLICE_IN);
+	MATCH_AND_RETURN(str, RL_STR_SPLICE_OUT, RL_SPLICE_OUT);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR, RL_SETATTR);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR_INODE, RL_SETATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_ACCEPT_SOCKET, RL_ACCEPT_SOCKET);

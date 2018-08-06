@@ -1116,6 +1116,8 @@ out:
  */
 static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
 {
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *inprov = file_provenance(in, true);
 	struct provenance *outprov = file_provenance(out, true);
 	unsigned long irqflags;
@@ -1126,7 +1128,11 @@ static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out
 
 	spin_lock_irqsave_nested(prov_lock(inprov), irqflags, PROVENANCE_LOCK_INODE);
 	spin_lock_nested(prov_lock(outprov), PROVENANCE_LOCK_INODE);
-	rc = derives(RL_SPLICE, inprov, outprov, NULL, 0);
+	rc = uses(RL_SPLICE_IN, inprov, tprov, cprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SPLICE_OUT, cprov, tprov, outprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(outprov));
 	spin_unlock_irqrestore(prov_lock(inprov), irqflags);
 	return rc;

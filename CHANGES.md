@@ -38,6 +38,7 @@
 
 ### v0.4.4
 ```
+- Fix file splice_pipe_to_pipe so the thread initiating splice appears.
 - Fix file_unmmap so the thread initiating the unmmap appears.
 - Fix file_mmap so the thread initiating the mmap appears.
 - Generate through code analysis provenance model for LSM hooks and system calls.
