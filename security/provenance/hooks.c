@@ -1284,6 +1284,7 @@ static int provenance_mmap_file(struct file *file,
 				unsigned long flags)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
 	struct provenance *bprov = NULL;
 	unsigned long irqflags;
@@ -1301,15 +1302,15 @@ static int provenance_mmap_file(struct file *file,
 	if ((flags & MAP_TYPE) == MAP_SHARED
 	    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = derives(RL_MMAP_WRITE, cprov, iprov, file, flags);
+			rc = uses(RL_MMAP_WRITE, iprov, tprov, cprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
-			rc = derives(RL_MMAP_READ, iprov, cprov, file, flags);
+			rc = uses(RL_MMAP_READ, iprov, tprov, cprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
-			rc = derives(RL_MMAP_EXEC, iprov, cprov, file, flags);
+			rc = uses(RL_MMAP_EXEC, iprov, tprov, cprov, file, flags);
 	} else{
 		bprov = branch_mmap(iprov, cprov);
 		if (!bprov)
@@ -1318,15 +1319,15 @@ static int provenance_mmap_file(struct file *file,
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = derives(RL_MMAP_WRITE, cprov, bprov, file, flags);
+			rc = uses(RL_MMAP_WRITE, bprov, tprov, cprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
-			rc = derives(RL_MMAP_READ, bprov, cprov, file, flags);
+			rc = uses(RL_MMAP_READ, bprov, tprov, cprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
-			rc = derives(RL_MMAP_EXEC, bprov, cprov, file, flags);
+			rc = uses(RL_MMAP_EXEC, bprov, tprov, cprov, file, flags);
 	}
 out:
 	spin_unlock(prov_lock(iprov));
