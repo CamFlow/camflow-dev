@@ -1,3 +1,12 @@
+# Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+#
+# Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2, as
+# published by the Free Software Foundation; either version 2 of the License,
+# or (at your option) any later version.
+
 puts "# CamFlow LSM hooks coverage\n\n"
 puts "Automatically generated do not edit!\n\n"
 puts "We build uppon [INRIA tools](http://kayrebt.gforge.inria.fr/).\n\n"
@@ -47,5 +56,5 @@ File.readlines('./scripts/syshooks.txt').each do |line|
   a_implemented.sort!
   a_missing = a_used - a_implemented
   a_missing.sort!
-  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + '| !['+call_name+' graph](./img/'+call_name+'.png)| + "\n"
+  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + '| !['+call_name+' graph](./img/'+call_name+'.png)|' + "\n"
 end
