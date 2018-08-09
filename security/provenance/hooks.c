@@ -1308,7 +1308,7 @@ static int provenance_mmap_file(struct file *file,
 	if ((flags & MAP_TYPE) == MAP_SHARED
 	    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = uses(RL_MMAP_WRITE, iprov, tprov, cprov, file, flags);
+			rc = generates(RL_MMAP_WRITE, cprov, tprov, iprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
@@ -1325,7 +1325,7 @@ static int provenance_mmap_file(struct file *file,
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = uses(RL_MMAP_WRITE, bprov, tprov, cprov, file, flags);
+			rc = generates(RL_MMAP_WRITE, cprov, tprov, bprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
@@ -1376,7 +1376,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 			iprov = file_provenance(mmapf, false);
 			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-			uses(RL_MUNMAP, iprov, tprov, cprov, mmapf, flags);
+			generates(RL_MUNMAP, cprov, tprov, iprov, mmapf, flags);
 			spin_unlock(prov_lock(iprov));
 			spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 		}
