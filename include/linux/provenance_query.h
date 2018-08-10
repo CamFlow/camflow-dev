@@ -1,8 +1,8 @@
 /*
  *
- * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
+ * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University
+ * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -22,8 +22,9 @@
 
 struct provenance_query_hooks {
   struct list_head list;
-  int (*out_edge)(prov_entry_t*, prov_entry_t*);
-  int (*in_edge)(prov_entry_t*, prov_entry_t*);
+  int (*flow)(prov_entry_t*, prov_entry_t*, prov_entry_t*);
+  int (*alloc)(prov_entry_t*);
+  int (*free)(prov_entry_t*);
 };
 
  extern struct list_head provenance_query_hooks;

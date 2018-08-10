@@ -1,8 +1,8 @@
 /*
  *
- * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
+ * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University
+ * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -2165,7 +2165,9 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 			provenance_packet_content(skb, &pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
+		call_provenance_alloc((prov_entry_t*)&pckprov);
 		rc = derives(RL_RCV_PACKET, &pckprov, iprov, NULL, 0);
+		call_provenance_free((prov_entry_t*)&pckprov);
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
 	return rc;

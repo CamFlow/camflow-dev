@@ -1,8 +1,8 @@
 /*
  *
- * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
+ * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University
+ * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -15,17 +15,9 @@
 
 #include <linux/provenance_query.h>
 
-/*!
- * @brief Go through each element in provenance_query_hooks and call out_edge function.
- *
- * out_edge function is defined propagate.c
- * @param node The node provenance entry pointer.
- * @param edge The edge provenance entry pointer.
- * @return 0 if no error occurred. Other error codes inherited or unknown.
- *
- */
-static inline int call_provenance_out_edge(prov_entry_t *node,
-					   prov_entry_t *edge)
+static inline int call_provenance_flow(prov_entry_t *from,
+					   prov_entry_t *edge,
+					 	 prov_entry_t *to)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -33,23 +25,13 @@ static inline int call_provenance_out_edge(prov_entry_t *node,
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
 		fcn = list_entry(listentry, struct provenance_query_hooks, list);
-		if (fcn->out_edge)
-			rc |= fcn->out_edge(node, edge);
+		if (fcn->flow)
+			rc |= fcn->flow(from, edge, to);
 	}
 	return rc;
 }
 
-/*!
- * @brief Go through each element in provenance_query_hooks and call in_edge function.
- *
- * in_edge function is defined propagate.c
- * @param edge The edge provenance entry pointer.
- * @param node The node provenance entry pointer.
- * @return 0 if no error occurred. Other error codes inherited or unknown.
- *
- */
-static inline int call_provenance_in_edge(prov_entry_t *edge,
-					  prov_entry_t *node)
+static inline int call_provenance_alloc(prov_entry_t *elt)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;
@@ -57,8 +39,22 @@ static inline int call_provenance_in_edge(prov_entry_t *edge,
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
 		fcn = list_entry(listentry, struct provenance_query_hooks, list);
-		if (fcn->in_edge)
-			rc |= fcn->in_edge(edge, node);
+		if (fcn->alloc)
+			rc |= fcn->alloc(elt);
+	}
+	return rc;
+}
+
+static inline int call_provenance_free(prov_entry_t *elt)
+{
+	int rc = 0;
+	struct list_head *listentry, *listtmp;
+	struct provenance_query_hooks *fcn;
+
+	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
+		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		if (fcn->free)
+			rc |= fcn->free(elt);
 	}
 	return rc;
 }
@@ -79,15 +75,7 @@ static inline int call_query_hooks(prov_entry_t *from,
 {
 	int rc = 0;
 
-	rc = call_provenance_out_edge(from, edge);
-	if ((rc & PROVENANCE_RAISE_WARNING) == PROVENANCE_RAISE_WARNING)
-		pr_warning("Provenance: warning raised.\n");
-	if ((rc & PROVENANCE_PREVENT_FLOW) == PROVENANCE_PREVENT_FLOW) {
-		pr_err("Provenance: error raised.\n");
-		edge->relation_info.allowed = FLOW_DISALLOWED;
-		return -EPERM;
-	}
-	rc = call_provenance_in_edge(edge, to);
+	rc = call_provenance_flow(from, edge, to);
 	if ((rc & PROVENANCE_RAISE_WARNING) == PROVENANCE_RAISE_WARNING)
 		pr_warning("Provenance: warning raised.\n");
 	if ((rc & PROVENANCE_PREVENT_FLOW) == PROVENANCE_PREVENT_FLOW) {

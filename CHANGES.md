@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.4.4           | 4.17.9         | N/A        |
+| 0.4.4           | 4.17.12        | N/A        |
 | 0.4.3           | 4.17.4         | 06/07/2018 |
 | 0.4.2           | 4.16.13        | 05/06/2018 |
 | 0.4.1           | 4.16.12        | 28/05/2018 |
@@ -43,7 +43,7 @@
 - Fix file_mmap so the thread initiating the mmap appears.
 - Generate through code analysis provenance model for LSM hooks and system calls.
 - Add epoch support.
-- Update to kernel version 4.17.9.
+- Update to kernel version 4.17.12.
 ```
 
 ### v0.4.3
