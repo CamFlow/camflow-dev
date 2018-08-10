@@ -264,8 +264,8 @@ union prov_identifier {
 
 
 
-#define basic_elements union prov_identifier identifier; uint8_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];	void *var_ptr
-#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid
+#define basic_elements union prov_identifier identifier; uint8_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
+#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;

@@ -27,6 +27,7 @@
 
 #include "provenance_policy.h"
 #include "provenance_filter.h"
+#include "provenance_query.h"
 
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
@@ -89,6 +90,7 @@ static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t
 	node_identifier(prov_elt(prov)).id = prov_next_node_id();
 	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;
 	node_identifier(prov_elt(prov)).machine_id = prov_machine_id;
+	call_provenance_alloc(prov_entry(prov));
 	return prov;
 }
 
@@ -97,6 +99,7 @@ static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t
  */
 static inline void free_provenance(struct provenance *prov)
 {
+	call_provenance_free(prov_entry(prov));
 	kmem_cache_free(provenance_cache, prov);
 }
 
@@ -125,6 +128,7 @@ static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype
 	node_identifier(prov).boot_id = prov_boot_id;
 	node_identifier(prov).machine_id = prov_machine_id;
 	set_is_long(prov);
+	call_provenance_alloc(prov);
 	return prov;
 }
 
@@ -133,6 +137,7 @@ static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype
  */
 static inline void free_long_provenance(union long_prov_elt *prov)
 {
+	call_provenance_free(prov);
 	kmem_cache_free(long_provenance_cache, prov);
 }
 #endif
