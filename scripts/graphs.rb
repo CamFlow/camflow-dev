@@ -51,6 +51,11 @@ File.readlines('./security/provenance/hooks.c').each do |line|
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map[hook+'_always'] = str unless str == ''
+      elsif hook == 'inode_link'
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/inode_rename.png')  unless str == ''
+        hook_map[hook] = str unless str == ''
+        hook_map['inode_rename'] = str unless str == ''
       elsif hook == '__mq_msgsnd'
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
         system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
@@ -122,8 +127,6 @@ File.readlines('./security/provenance/hooks.c').each do |line|
     str += Instruction.record_terminate_to_relation(line)
   end
 end
-
-puts hook_map
 
 audit_related = ['audit_rule_init', 'audit_rule_match'] # we do not handle audit rules
 capable_related = ['capable', 'capable_noaudit','capset','capget'] # we do not implement capability

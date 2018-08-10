@@ -384,7 +384,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
  * @brief Record provenance when inode_free_security hook is triggered.
  *
  * This hook is triggered when deallocating the inode security structure and set @inode->i_security to NULL.
- * Record provenance relation RL_CLOSED by calling "record_terminate" function.
+ * Record provenance relation RL_FREED by calling "record_terminate" function.
  * Free kernel memory allocated for provenance entry of the inode in question.
  * Set the provenance pointer in @inode to NULL.
  * @param inode The inode structure whose security is to be freed.
@@ -394,7 +394,7 @@ static void provenance_inode_free_security(struct inode *inode)
 {
 	struct provenance *iprov = inode->i_provenance;
 	if (iprov) {
-		record_terminate(RL_CLOSED, iprov);
+		record_terminate(RL_FREED, iprov);
 		free_provenance(iprov);
 	}
 	inode->i_provenance = NULL;
@@ -1116,6 +1116,8 @@ out:
  */
 static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
 {
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *inprov = file_provenance(in, true);
 	struct provenance *outprov = file_provenance(out, true);
 	unsigned long irqflags;
@@ -1126,7 +1128,11 @@ static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out
 
 	spin_lock_irqsave_nested(prov_lock(inprov), irqflags, PROVENANCE_LOCK_INODE);
 	spin_lock_nested(prov_lock(outprov), PROVENANCE_LOCK_INODE);
-	rc = derives(RL_SPLICE, inprov, outprov, NULL, 0);
+	rc = uses(RL_SPLICE_IN, inprov, tprov, cprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_SPLICE_OUT, cprov, tprov, outprov, NULL, 0);
+out:
 	spin_unlock(prov_lock(outprov));
 	spin_unlock_irqrestore(prov_lock(inprov), irqflags);
 	return rc;
@@ -1284,6 +1290,7 @@ static int provenance_mmap_file(struct file *file,
 				unsigned long flags)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
 	struct provenance *bprov = NULL;
 	unsigned long irqflags;
@@ -1301,15 +1308,15 @@ static int provenance_mmap_file(struct file *file,
 	if ((flags & MAP_TYPE) == MAP_SHARED
 	    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = derives(RL_MMAP_WRITE, cprov, iprov, file, flags);
+			rc = generates(RL_MMAP_WRITE, cprov, tprov, iprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
-			rc = derives(RL_MMAP_READ, iprov, cprov, file, flags);
+			rc = uses(RL_MMAP_READ, iprov, tprov, cprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
-			rc = derives(RL_MMAP_EXEC, iprov, cprov, file, flags);
+			rc = uses(RL_MMAP_EXEC, iprov, tprov, cprov, file, flags);
 	} else{
 		bprov = branch_mmap(iprov, cprov);
 		if (!bprov)
@@ -1318,15 +1325,15 @@ static int provenance_mmap_file(struct file *file,
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_WRITE)) != 0)
-			rc = derives(RL_MMAP_WRITE, cprov, bprov, file, flags);
+			rc = generates(RL_MMAP_WRITE, cprov, tprov, bprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_READ)) != 0)
-			rc = derives(RL_MMAP_READ, bprov, cprov, file, flags);
+			rc = uses(RL_MMAP_READ, bprov, tprov, cprov, file, flags);
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_EXEC)) != 0)
-			rc = derives(RL_MMAP_EXEC, bprov, cprov, file, flags);
+			rc = uses(RL_MMAP_EXEC, bprov, tprov, cprov, file, flags);
 	}
 out:
 	spin_unlock(prov_lock(iprov));
@@ -1357,6 +1364,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 				   unsigned long end)
 {
 	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = NULL;
 	struct file *mmapf;
 	unsigned long irqflags;
@@ -1368,7 +1376,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 			iprov = file_provenance(mmapf, false);
 			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-			derives(RL_MUNMAP, cprov, iprov, mmapf, flags);
+			generates(RL_MUNMAP, cprov, tprov, iprov, mmapf, flags);
 			spin_unlock(prov_lock(iprov));
 			spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 		}
@@ -1463,8 +1471,11 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
  */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
-	if (msg->provenance)
-		free_provenance(msg->provenance);
+	struct provenance *mprov = msg->provenance;
+	if (mprov) {
+		record_terminate(RL_FREED, mprov);
+		free_provenance(mprov);
+	}
 	msg->provenance = NULL;
 }
 
@@ -1653,8 +1664,11 @@ out:
  */
 static void provenance_shm_free_security(struct kern_ipc_perm *shp)
 {
-	if (shp->provenance)
-		free_provenance(shp->provenance);
+	struct provenance *sprov = shp->provenance;
+	if (sprov) {
+		record_terminate(RL_FREED, sprov);
+		free_provenance(sprov);
+	}
 	shp->provenance = NULL;
 }
 

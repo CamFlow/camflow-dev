@@ -34,7 +34,8 @@ RL_SHMDT|shmdt|shmdt operation|
 RL_LINK|link|create a link|
 RL_UNLINK|unlink|delete a link|
 RL_SYMLINK|symlink|create a symlink|
-RL_SPLICE|splice|pipe splice operation|
+RL_SPLICE_IN|splice_in|pipe splice operation from in file|
+RL_SPLICE_OUT|splice_out|pipe splice operation to out file|
 RL_SETATTR|setattr|setattr operation |
 RL_SETATTR_INODE|setattr_inode|setattr operation |
 RL_ACCEPT_SOCKET|accept_socket|accept operation |
@@ -75,7 +76,7 @@ RL_PERM_EXEC|perm_exec|check exec permission|
 RL_PERM_APPEND|perm_append|check append permission|
 RL_TERMINATE_TASK|terminate_task|created when task data structure is freed|
 RL_TERMINATE_PROC|terminate_proc|created when cred data structure is freed|
-RL_CLOSED|free|created when an inode is freed|
+RL_FREED|free|created when an inode is freed|
 RL_ARG|arg|connect arg value to process|
 RL_ENV|env|connect env value to process|
 RL_LOG|log|connect string to task|
