@@ -168,7 +168,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_previous_type(node)      ((node)->node_info.previous_type)
 
 
-#define prov_flag(prov) ((prov)->msg_info.flag)
+#define prov_flag(prov) ((prov)->msg_info.internal_flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
 #define prov_jiffies(prov) ((prov)->msg_info.jiffies)
 #define prov_set_epoch(prov) ((prov)->msg_info.epoch=epoch)
@@ -264,7 +264,8 @@ union prov_identifier {
 
 
 
-#define basic_elements union prov_identifier identifier; uint8_t epoch; uint64_t previous_id; uint64_t previous_type; uint32_t flag; uint64_t jiffies; uint32_t secid; uint32_t uid; uint32_t gid; uint8_t taint[PROV_N_BYTES]
+#define basic_elements union prov_identifier identifier; uint8_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
+#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;
@@ -284,12 +285,12 @@ struct relation_struct {
 
 struct node_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 };
 
 struct proc_prov_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint32_t tgid;
 	uint32_t utsns;
 	uint32_t ipcns;
@@ -312,14 +313,14 @@ struct proc_prov_struct {
 
 struct task_prov_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint32_t pid;
 	uint32_t vpid;
 };
 
 struct inode_prov_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint64_t ino;
 	uint16_t mode;
 	uint8_t sb_uuid[16];
@@ -327,7 +328,7 @@ struct inode_prov_struct {
 
 struct iattr_prov_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint32_t valid;
 	uint16_t mode;
 	int64_t size;
@@ -338,25 +339,25 @@ struct iattr_prov_struct {
 
 struct msg_msg_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	long type;
 };
 
 struct shm_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint16_t mode;
 };
 
 struct sb_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint8_t uuid[16];
 };
 
 struct pck_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint16_t length;
 };
 
@@ -376,21 +377,21 @@ union prov_elt {
 
 struct str_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	char str[PATH_MAX];
 	size_t length;
 };
 
 struct file_name_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	char name[PATH_MAX];
 	size_t length;
 };
 
 struct address_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	struct sockaddr addr;
 	size_t length;
 };
@@ -398,7 +399,7 @@ struct address_struct {
 #define PROV_TRUNCATED 1
 struct pckcnt_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	uint8_t content[PATH_MAX];
 	size_t length;
 	uint8_t truncated;
@@ -406,7 +407,7 @@ struct pckcnt_struct {
 
 struct arg_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	char value[PATH_MAX];
 	size_t length;
 	uint8_t truncated;
@@ -416,7 +417,7 @@ struct arg_struct {
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
 	uint8_t value[PROV_XATTR_VALUE_SIZE];
 	size_t size;
@@ -424,7 +425,7 @@ struct xattr_prov_struct {
 
 struct disc_node_struct {
 	basic_elements;
-  void *var_ptr;
+  shared_node_elements;
 	size_t length;
 	char content[PATH_MAX];
 	union prov_identifier parent;
