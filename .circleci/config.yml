@@ -33,6 +33,7 @@ jobs:
       - run:
           name: compile
           command: 'cd ./scripts && make compile'
+          no_output_timeout: '30m'
       - run:
           name: analyse
           command: 'cd ./scripts && make run'
