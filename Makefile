@@ -1,5 +1,5 @@
-kernel-version=4.17.4
-lsm-version=0.4.3
+kernel-version=4.17.17
+lsm-version=0.4.4
 arch=x86_64
 
 
@@ -101,9 +101,12 @@ relationlist:
 vertexlist:
 	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
-doc: hooklist relationlist vertexlist
+graphs:
+	ruby ./scripts/graphs.rb
 
-compile: compile_security compile_kernel compile_us
+doc: hooklist relationlist vertexlist graphs
+
+compile: compile_security compile_kernel compile_us doc
 
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1

@@ -1,8 +1,8 @@
 /*
  *
- * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
+ * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University
+ * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -164,14 +164,14 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  *
  */
 static inline int record_node_name(struct provenance *node,
-																	 const char *name,
-																	 bool force)
+				   const char *name,
+				   bool force)
 {
 	union long_prov_elt *fname_prov;
 	int rc;
 
 	if ( (provenance_is_name_recorded(prov_elt(node)) && !force)
-	 		 || !provenance_is_recorded(prov_elt(node)))
+	     || !provenance_is_recorded(prov_elt(node)))
 		return 0;
 
 	fname_prov = alloc_long_provenance(ENT_PATH);
@@ -234,8 +234,8 @@ static __always_inline int uses(const uint64_t type,
 	apply_target(prov_elt(activity_mem));
 
 	if (provenance_is_opaque(prov_elt(entity))
-			|| provenance_is_opaque(prov_elt(activity))
-			|| provenance_is_opaque(prov_elt(activity_mem)))
+	    || provenance_is_opaque(prov_elt(activity))
+	    || provenance_is_opaque(prov_elt(activity_mem)))
 		return 0;
 
 	if (!provenance_is_tracked(prov_elt(entity))
@@ -282,7 +282,7 @@ static __always_inline int uses_two(const uint64_t type,
 	apply_target(prov_elt(activity));
 
 	if (provenance_is_opaque(prov_elt(entity))
-			|| provenance_is_opaque(prov_elt(activity)))
+	    || provenance_is_opaque(prov_elt(activity)))
 		return 0;
 
 	if (!provenance_is_tracked(prov_elt(entity))
@@ -330,8 +330,8 @@ static __always_inline int generates(const uint64_t type,
 	apply_target(prov_elt(entity));
 
 	if (provenance_is_opaque(prov_elt(entity))
-			|| provenance_is_opaque(prov_elt(activity))
-			|| provenance_is_opaque(prov_elt(activity_mem)))
+	    || provenance_is_opaque(prov_elt(activity))
+	    || provenance_is_opaque(prov_elt(activity_mem)))
 		return 0;
 
 	if (!provenance_is_tracked(prov_elt(activity_mem))
@@ -381,7 +381,7 @@ static __always_inline int derives(const uint64_t type,
 	apply_target(prov_elt(to));
 
 	if (provenance_is_opaque(prov_elt(from))
-			|| provenance_is_opaque(prov_elt(to)))
+	    || provenance_is_opaque(prov_elt(to)))
 		return 0;
 
 	if (!provenance_is_tracked(prov_elt(from))
@@ -422,7 +422,7 @@ static __always_inline int informs(const uint64_t type,
 	apply_target(prov_elt(to));
 
 	if (provenance_is_opaque(prov_elt(from))
-			|| provenance_is_opaque(prov_elt(to)))
+	    || provenance_is_opaque(prov_elt(to)))
 		return 0;
 
 	if (!provenance_is_tracked(prov_elt(from))

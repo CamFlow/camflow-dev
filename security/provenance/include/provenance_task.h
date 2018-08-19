@@ -1,8 +1,8 @@
 /*
  *
- * Author: Thomas Pasquier <thomas.pasquier@cl.cam.ac.uk>
+ * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University
+ * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -225,7 +225,7 @@ static inline int record_task_name(struct task_struct *task,
 		return 0;
 	// cred = get_task_cred(task);
 	// if (!cred)
-	// 	return rc;
+	//      return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
@@ -545,7 +545,7 @@ static __always_inline int prov_record_arg(struct provenance *prov,
 	union long_prov_elt *aprov;
 	int rc = 0;
 
-	aprov  = alloc_long_provenance(vtype);
+	aprov = alloc_long_provenance(vtype);
 	if (!aprov)
 		return -ENOMEM;
 	aprov->arg_info.length = len;

@@ -14,10 +14,11 @@ RL_MSG_CREATE|msg_create|create msg |
 RL_SOCKET_CREATE|socket_create|create socket|
 RL_INODE_CREATE|inode_create|create inode|
 RL_SETUID|setuid|setuid|
-RL_SETGID|setgid|setgid|
+RL_SETGID|setpgid|setpgid|
+RL_GETGID|getpgid|getpgid|
 RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
 RL_SH_WRITE|sh_write|writing to shared state|
-RL_PROC_WRITE|proc_write|writing to process memory |
+RL_PROC_WRITE|memory_write|writing to process memory |
 RL_BIND|bind|socket bind operation|
 RL_CONNECT|connect|socket connection operation|
 RL_LISTEN|listen|socket listen operation|
@@ -33,7 +34,8 @@ RL_SHMDT|shmdt|shmdt operation|
 RL_LINK|link|create a link|
 RL_UNLINK|unlink|delete a link|
 RL_SYMLINK|symlink|create a symlink|
-RL_SPLICE|splice|pipe splice operation|
+RL_SPLICE_IN|splice_in|pipe splice operation from in file|
+RL_SPLICE_OUT|splice_out|pipe splice operation to out file|
 RL_SETATTR|setattr|setattr operation |
 RL_SETATTR_INODE|setattr_inode|setattr operation |
 RL_ACCEPT_SOCKET|accept_socket|accept operation |
@@ -56,7 +58,7 @@ RL_LSTXATTR|listxattr|listxattr operation|
 RL_READ_LINK|read_link|readlink operation|
 RL_MMAP_READ|mmap_read|mmap mounting with read perm|
 RL_SH_READ|sh_read|sh_read operation|
-RL_PROC_READ|proc_read|read from process memory|
+RL_PROC_READ|memory_read|read from process memory|
 RL_MMAP_EXEC|mmap_exec|mmap mounting with exec perm|
 RL_SND|send|send over socket|
 RL_SND_PACKET|send_packet|connect socket to packet on send operation|
@@ -74,7 +76,7 @@ RL_PERM_EXEC|perm_exec|check exec permission|
 RL_PERM_APPEND|perm_append|check append permission|
 RL_TERMINATE_TASK|terminate_task|created when task data structure is freed|
 RL_TERMINATE_PROC|terminate_proc|created when cred data structure is freed|
-RL_CLOSED|closed|created when a file is closed|
+RL_FREED|free|created when an inode is freed|
 RL_ARG|arg|connect arg value to process|
 RL_ENV|env|connect env value to process|
 RL_LOG|log|connect string to task|

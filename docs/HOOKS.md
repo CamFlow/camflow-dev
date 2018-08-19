@@ -2,69 +2,70 @@
 
 Automatically generated do not edit!
 
-```
-- cred_free
-- cred_alloc_blank
-- cred_prepare
-- cred_transfer
-- task_alloc
-- task_free
-- task_fix_setuid
-- task_setpgid
-- task_kill
-- inode_alloc_security
-- inode_create
-- inode_free_security
-- inode_permission
-- inode_link
-- inode_unlink
-- inode_symlink
-- inode_rename
-- inode_setattr
-- inode_getattr
-- inode_readlink
-- inode_setxattr
-- inode_post_setxattr
-- inode_getxattr
-- inode_listxattr
-- inode_removexattr
-- inode_getsecurity
-- inode_listsecurity
-- file_permission
-- mmap_file
-- mmap_munmap
-- file_ioctl
-- file_open
-- file_receive
-- file_lock
-- file_send_sigiotask
-- file_splice_pipe_to_pipe
-- msg_msg_alloc_security
-- msg_msg_free_security
-- msg_queue_msgsnd
-- msg_queue_msgrcv
-- shm_alloc_security
-- shm_free_security
-- shm_shmat
-- shm_shmdt
-- sk_alloc_security
-- socket_post_create
-- socket_bind
-- socket_connect
-- socket_listen
-- socket_accept
-- socket_sendmsg_always
-- socket_recvmsg_always
-- mq_timedreceive
-- mq_timedsend
-- socket_sendmsg
-- socket_recvmsg
-- socket_sock_rcv_skb
-- unix_stream_connect
-- unix_may_send
-- bprm_check_security
-- bprm_set_creds
-- bprm_committing_creds
-- sb_alloc_security
-- sb_free_security
-```
+LSM Hook|Graph|
+--------|-----|
+cred_free| ![cred_free graph](./img/cred_free.png)|
+cred_alloc_blank| ![cred_alloc_blank graph](./img/cred_alloc_blank.png)|
+cred_prepare| ![cred_prepare graph](./img/cred_prepare.png)|
+cred_transfer| ![cred_transfer graph](./img/cred_transfer.png)|
+task_alloc| ![task_alloc graph](./img/task_alloc.png)|
+task_free| ![task_free graph](./img/task_free.png)|
+task_fix_setuid| ![task_fix_setuid graph](./img/task_fix_setuid.png)|
+task_setpgid| ![task_setpgid graph](./img/task_setpgid.png)|
+task_getpgid| ![task_getpgid graph](./img/task_getpgid.png)|
+task_kill| ![task_kill graph](./img/task_kill.png)|
+inode_alloc_security| ![inode_alloc_security graph](./img/inode_alloc_security.png)|
+inode_create| ![inode_create graph](./img/inode_create.png)|
+inode_free_security| ![inode_free_security graph](./img/inode_free_security.png)|
+inode_permission| ![inode_permission graph](./img/inode_permission.png)|
+inode_link| ![inode_link graph](./img/inode_link.png)|
+inode_unlink| ![inode_unlink graph](./img/inode_unlink.png)|
+inode_symlink| ![inode_symlink graph](./img/inode_symlink.png)|
+inode_rename| ![inode_rename graph](./img/inode_rename.png)|
+inode_setattr| ![inode_setattr graph](./img/inode_setattr.png)|
+inode_getattr| ![inode_getattr graph](./img/inode_getattr.png)|
+inode_readlink| ![inode_readlink graph](./img/inode_readlink.png)|
+inode_setxattr| ![inode_setxattr graph](./img/inode_setxattr.png)|
+inode_post_setxattr| ![inode_post_setxattr graph](./img/inode_post_setxattr.png)|
+inode_getxattr| ![inode_getxattr graph](./img/inode_getxattr.png)|
+inode_listxattr| ![inode_listxattr graph](./img/inode_listxattr.png)|
+inode_removexattr| ![inode_removexattr graph](./img/inode_removexattr.png)|
+inode_getsecurity| ![inode_getsecurity graph](./img/inode_getsecurity.png)|
+inode_listsecurity| ![inode_listsecurity graph](./img/inode_listsecurity.png)|
+file_permission| ![file_permission graph](./img/file_permission.png)|
+mmap_file| ![mmap_file graph](./img/mmap_file.png)|
+mmap_munmap| ![mmap_munmap graph](./img/mmap_munmap.png)|
+file_ioctl| ![file_ioctl graph](./img/file_ioctl.png)|
+file_open| ![file_open graph](./img/file_open.png)|
+file_receive| ![file_receive graph](./img/file_receive.png)|
+file_lock| ![file_lock graph](./img/file_lock.png)|
+file_send_sigiotask| ![file_send_sigiotask graph](./img/file_send_sigiotask.png)|
+file_splice_pipe_to_pipe| ![file_splice_pipe_to_pipe graph](./img/file_splice_pipe_to_pipe.png)|
+msg_msg_alloc_security| ![msg_msg_alloc_security graph](./img/msg_msg_alloc_security.png)|
+msg_msg_free_security| ![msg_msg_free_security graph](./img/msg_msg_free_security.png)|
+msg_queue_msgsnd| ![msg_queue_msgsnd graph](./img/msg_queue_msgsnd.png)|
+msg_queue_msgrcv| ![msg_queue_msgrcv graph](./img/msg_queue_msgrcv.png)|
+shm_alloc_security| ![shm_alloc_security graph](./img/shm_alloc_security.png)|
+shm_free_security| ![shm_free_security graph](./img/shm_free_security.png)|
+shm_shmat| ![shm_shmat graph](./img/shm_shmat.png)|
+shm_shmdt| ![shm_shmdt graph](./img/shm_shmdt.png)|
+sk_alloc_security| ![sk_alloc_security graph](./img/sk_alloc_security.png)|
+socket_post_create| ![socket_post_create graph](./img/socket_post_create.png)|
+socket_bind| ![socket_bind graph](./img/socket_bind.png)|
+socket_connect| ![socket_connect graph](./img/socket_connect.png)|
+socket_listen| ![socket_listen graph](./img/socket_listen.png)|
+socket_accept| ![socket_accept graph](./img/socket_accept.png)|
+socket_sendmsg_always| ![socket_sendmsg_always graph](./img/socket_sendmsg_always.png)|
+socket_recvmsg_always| ![socket_recvmsg_always graph](./img/socket_recvmsg_always.png)|
+mq_timedreceive| ![mq_timedreceive graph](./img/mq_timedreceive.png)|
+mq_timedsend| ![mq_timedsend graph](./img/mq_timedsend.png)|
+socket_sendmsg| ![socket_sendmsg graph](./img/socket_sendmsg.png)|
+socket_recvmsg| ![socket_recvmsg graph](./img/socket_recvmsg.png)|
+socket_sock_rcv_skb| ![socket_sock_rcv_skb graph](./img/socket_sock_rcv_skb.png)|
+unix_stream_connect| ![unix_stream_connect graph](./img/unix_stream_connect.png)|
+unix_may_send| ![unix_may_send graph](./img/unix_may_send.png)|
+bprm_check_security| ![bprm_check_security graph](./img/bprm_check_security.png)|
+bprm_set_creds| ![bprm_set_creds graph](./img/bprm_set_creds.png)|
+bprm_committing_creds| ![bprm_committing_creds graph](./img/bprm_committing_creds.png)|
+sb_alloc_security| ![sb_alloc_security graph](./img/sb_alloc_security.png)|
+sb_free_security| ![sb_free_security graph](./img/sb_free_security.png)|

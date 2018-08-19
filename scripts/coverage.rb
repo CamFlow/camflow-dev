@@ -1,3 +1,12 @@
+# Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+#
+# Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2, as
+# published by the Free Software Foundation; either version 2 of the License,
+# or (at your option) any later version.
+
 puts "# CamFlow LSM hooks coverage\n\n"
 puts "Automatically generated do not edit!\n\n"
 puts "We build uppon [INRIA tools](http://kayrebt.gforge.inria.fr/).\n\n"
@@ -12,8 +21,8 @@ to_remove = audit_related + capable_related + secid_related + path_related + cre
 to_remove.sort!
 puts 'The following hooks are ignored in this report: '+to_remove.to_s+"\n\n"
 
-puts "System Call|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)|\n"
-puts "-----------|------------|-----------------|---------------------|------------------------------|\n"
+puts "System Call|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)| Model |\n"
+puts "-----------|------------|-----------------|---------------------|------------------------------|-------|\n"
 implemented_hooks = Array.new
 File.readlines('./security/provenance/hooks.c').each do |line|
   hook = line.match(/LSM_HOOK_INIT\s*\(\s*(\w+)\s*,\s*\w+\s*\)\s*,/)
@@ -47,5 +56,5 @@ File.readlines('./scripts/syshooks.txt').each do |line|
   a_implemented.sort!
   a_missing = a_used - a_implemented
   a_missing.sort!
-  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + "|\n"
+  puts call_name + '|' + a_used.to_s + '|' + a_implemented.to_s + '|' + a_missing.to_s + '|' + implemented.to_s + '/' + used.to_s + '| !['+call_name+' graph](./img/'+call_name+'.png) |' + "\n"
 end
