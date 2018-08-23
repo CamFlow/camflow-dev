@@ -1535,7 +1535,7 @@ static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
  *
  */
 static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
-				   struct timespec *ts)
+				   struct timespec64 *ts)
 {
 	return __mq_msgsnd(msg);
 }
@@ -1608,7 +1608,7 @@ static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
  *
  */
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
-				      struct timespec *ts)
+				      struct timespec64 *ts)
 {
 	struct provenance *cprov = get_cred_provenance();
 
