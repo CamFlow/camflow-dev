@@ -7,10 +7,11 @@ The source code for the provenance userspace library is available [here](https:/
 
 ## Build Status
 
-| Branch | TravisCI | CircleCI |
-|--------|----------|----------|
-| master | [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches) | [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/master.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/master) |
-| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)](https://travis-ci.org/CamFlow/camflow-dev/branches) | [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/dev.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/dev)
+| Branch | TravisCI | CircleCI | Description |
+|--------|----------|----------|-------------|
+| master | [![Master Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=master)](https://travis-ci.org/CamFlow/camflow-dev/branches) | Latest release [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/master.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/master) |
+| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=dev)](https://travis-ci.org/CamFlow/camflow-dev/branches) | Development branch (unstable) [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/dev.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/dev)
+| dev    | [![Dev Build Status](https://api.travis-ci.org/CamFlow/camflow-dev.svg?branch=kernel)](https://travis-ci.org/CamFlow/camflow-dev/branches) | [![CircleCI](https://circleci.com/gh/CamFlow/camflow-dev/tree/kernel.svg?style=svg)](https://circleci.com/gh/CamFlow/camflow-dev/tree/kernel) | Master branch with latest supported kernel (unstable)
 
 ### TravisCI
 
