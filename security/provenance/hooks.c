@@ -2058,32 +2058,34 @@ static int provenance_socket_sendmsg(struct socket *sock,
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = socket_inode_provenance(sock);
-	struct provenance *pprov = NULL;
+	struct provenance *iprova = socket_inode_provenance(sock);
+	struct provenance *iprovb = NULL;
 	struct sock *peer = NULL;
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!iprov)
+	if (!iprova)
 		return -ENOMEM;
 	if (sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
-			pprov = sk_inode_provenance(peer);
-			if (pprov == cprov)
-				pprov = NULL;
+			iprovb = sk_inode_provenance(peer);
+			if (iprovb == cprov)
+				iprovb = NULL;
 		}
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SND_MSG, cprov, tprov, iprov, NULL, 0);
+	spin_lock_nested(prov_lock(iprova), PROVENANCE_LOCK_SOCKET);
+	spin_lock_nested(prov_lock(iprovb), PROVENANCE_LOCK_SOCK);
+	rc = generates(RL_SND_MSG, cprov, tprov, iprova, NULL, 0);
 	if (rc < 0)
 		goto out;
-	if (pprov)
-		rc = derives(RL_RCV_UNIX, iprov, pprov, NULL, 0);
+	if (iprovb)
+		rc = derives(RL_RCV_UNIX, iprova, iprovb, NULL, 0);
 out:
-	spin_unlock(prov_lock(iprov));
+	spin_unlock(prov_lock(iprovb));
+	spin_unlock(prov_lock(iprova));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
 		sock_put(peer);
