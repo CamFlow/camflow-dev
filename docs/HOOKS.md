@@ -51,7 +51,6 @@ shm_shmat| ![shm_shmat graph](./img/shm_shmat.png)|
 shm_shmdt| ![shm_shmdt graph](./img/shm_shmdt.png)|
 sk_alloc_security| ![sk_alloc_security graph](./img/sk_alloc_security.png)|
 socket_post_create| ![socket_post_create graph](./img/socket_post_create.png)|
-socket_socketpair| ![socket_socketpair graph](./img/socket_socketpair.png)|
 socket_bind| ![socket_bind graph](./img/socket_bind.png)|
 socket_connect| ![socket_connect graph](./img/socket_connect.png)|
 socket_listen| ![socket_listen graph](./img/socket_listen.png)|
