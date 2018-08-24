@@ -12,7 +12,6 @@ RL_WRITE_IOCTL|write_ioctl|ioctl write|
 RL_CLONE_MEM|clone_mem|memory copy on clone|
 RL_MSG_CREATE|msg_create|create msg |
 RL_SOCKET_CREATE|socket_create|create socket|
-RL_SOCKET_PAIR_CREATE|socket_pair_create|create socket pair|
 RL_INODE_CREATE|inode_create|create inode|
 RL_SETUID|setuid|setuid|
 RL_SETGID|setpgid|setpgid|
