@@ -2070,7 +2070,7 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
-			pprov = sk_provenance(peer);
+			pprov = sk_inode_provenance(peer);
 			if (pprov == cprov)
 				pprov = NULL;
 		}
