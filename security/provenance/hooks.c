@@ -1832,12 +1832,12 @@ static int provenance_socket_socketpair(struct socket *socka, struct socket *soc
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprova), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprova, NULL, 0);
+	rc = generates(RL_SOCKET_PAIR_CREATE, cprov, tprov, iprova, NULL, 0);
 	spin_unlock(prov_lock(iprova));
 	if (rc < 0)
 		goto out;
 	spin_lock_nested(prov_lock(iprovb), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprovb, NULL, 0);
+	rc = generates(RL_SOCKET_PAIR_CREATE, cprov, tprov, iprovb, NULL, 0);
 	spin_unlock(prov_lock(iprovb));
 out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
