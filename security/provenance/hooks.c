@@ -1817,6 +1817,33 @@ static int provenance_socket_post_create(struct socket *sock,
 	return rc;
 }
 
+static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb) {
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprova = socket_inode_provenance(socka);
+	struct provenance *iprovb = socket_inode_provenance(sockb);
+	unsigned long irqflags;
+	int rc = 0;
+
+	if (!iprova)
+		return -ENOMEM;
+	if (!iprovb)
+		return -ENOMEM;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprova), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprova, NULL, 0);
+	spin_unlock(prov_lock(iprova));
+	if (rc < 0)
+		goto out;
+	spin_lock_nested(prov_lock(iprovb), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprovb, NULL, 0);
+	spin_unlock(prov_lock(iprovb));
+out:
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
 /*!
  * @brief Record provenance when socket_bind hook is triggered.
  *
@@ -2477,6 +2504,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* socket related hooks */
 	LSM_HOOK_INIT(sk_alloc_security,	provenance_sk_alloc_security),
 	LSM_HOOK_INIT(socket_post_create,	provenance_socket_post_create),
+	LSM_HOOK_INIT(socket_socketpair,	provenance_socket_socketpair),
 	LSM_HOOK_INIT(socket_bind,		provenance_socket_bind),
 	LSM_HOOK_INIT(socket_connect,		provenance_socket_connect),
 	LSM_HOOK_INIT(socket_listen,		provenance_socket_listen),
