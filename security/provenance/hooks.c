@@ -2077,14 +2077,12 @@ static int provenance_socket_sendmsg(struct socket *sock,
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprova), PROVENANCE_LOCK_SOCKET);
-	//spin_lock_nested(prov_lock(iprovb), PROVENANCE_LOCK_SOCK);
 	rc = generates(RL_SND_MSG, cprov, tprov, iprova, NULL, 0);
 	if (rc < 0)
 		goto out;
 	if (iprovb)
 		rc = derives(RL_RCV_UNIX, iprova, iprovb, NULL, 0);
 out:
-	//spin_unlock(prov_lock(iprovb));
 	spin_unlock(prov_lock(iprova));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
