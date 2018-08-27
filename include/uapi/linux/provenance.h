@@ -211,59 +211,49 @@ union prov_identifier {
 #define prov_clear_flag(node, nbit) (prov_flag(node) &= ~(1 << nbit))
 #define prov_check_flag(node, nbit) ((prov_flag(node) & (1 << nbit)) == (1 << nbit))
 
-/*#define RECORDED_BIT 0
-#define set_recorded(node)                  prov_set_flag(node, RECORDED_BIT)
-#define clear_recorded(node)                prov_clear_flag(node, RECORDED_BIT)
-#define provenance_is_recorded(node)        prov_check_flag(node, RECORDED_BIT)*/
-
-#define NAME_RECORDED_BIT 1
-#define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
-#define clear_name_recorded(node)           prov_clear_flag(node, NAME_RECORDED_BIT)
-#define provenance_is_name_recorded(node)   prov_check_flag(node, NAME_RECORDED_BIT)
-
-#define TRACKED_BIT 2
+#define TRACKED_BIT 0
 #define set_tracked(node)                   prov_set_flag(node, TRACKED_BIT)
 #define clear_tracked(node)                 prov_clear_flag(node, TRACKED_BIT)
 #define provenance_is_tracked(node)         prov_check_flag(node, TRACKED_BIT)
 
-#define OPAQUE_BIT 3
+#define OPAQUE_BIT 1
 #define set_opaque(node)                    prov_set_flag(node, OPAQUE_BIT)
 #define clear_opaque(node)                  prov_clear_flag(node, OPAQUE_BIT)
 #define provenance_is_opaque(node)          prov_check_flag(node, OPAQUE_BIT)
 
-#define PROPAGATE_BIT 4
+#define PROPAGATE_BIT 2
 #define set_propagate(node)                 prov_set_flag(node, PROPAGATE_BIT)
 #define clear_propagate(node)               prov_clear_flag(node, PROPAGATE_BIT)
 #define provenance_does_propagate(node)     prov_check_flag(node, PROPAGATE_BIT)
 
-#define RECORD_PACKET_BIT 5
+#define RECORD_PACKET_BIT 3
 #define set_record_packet(node)							prov_set_flag(node, RECORD_PACKET_BIT)
 #define clear_record_packet(node)						prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)			prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define LONG_BIT 6
+#define LONG_BIT 4
 #define set_is_long(node)							prov_set_flag(node, LONG_BIT)
 #define clear_is_long(node)						prov_clear_flag(node, LONG_BIT)
 #define provenance_is_long(node)			prov_check_flag(node, LONG_BIT)
 
-#define OUTGOING_BIT 7
+#define OUTGOING_BIT 5
 #define set_has_outgoing(node)				    prov_set_flag(node, OUTGOING_BIT)
 #define clear_has_outgoing(node)					prov_clear_flag(node, OUTGOING_BIT)
 #define provenance_has_outgoing(node)			prov_check_flag(node, OUTGOING_BIT)
 
-#define INITIALIZED_BIT 8
+#define INITIALIZED_BIT 6
 #define set_initialized(node)				        prov_set_flag(node, INITIALIZED_BIT)
 #define clear_initialized(node)					    prov_clear_flag(node, INITIALIZED_BIT)
 #define provenance_is_initialized(node)			prov_check_flag(node, INITIALIZED_BIT)
 
-#define SAVED_BIT 9
+#define SAVED_BIT 7
 #define set_saved(node)				        prov_set_flag(node, SAVED_BIT)
 #define clear_saved(node)					    prov_clear_flag(node, SAVED_BIT)
 #define provenance_is_saved(node)			prov_check_flag(node, SAVED_BIT)
 
 
 
-#define basic_elements union prov_identifier identifier; uint32_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
+#define basic_elements union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
 #define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
