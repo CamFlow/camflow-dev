@@ -141,8 +141,6 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 	kmem_cache_free(long_provenance_cache, prov);
 }
 
-
-
 #define set_recorded(node) __set_recorded((union long_prov_elt*)node)
 static inline void __set_recorded(union long_prov_elt *node) {
 	node->msg_info.epoch=epoch;
