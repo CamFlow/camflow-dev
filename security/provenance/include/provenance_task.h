@@ -223,9 +223,6 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	// cred = get_task_cred(task);
-	// if (!cred)
-	//      return rc;
 	mm = get_task_mm(task);
 	if (!mm)
 		goto out;
