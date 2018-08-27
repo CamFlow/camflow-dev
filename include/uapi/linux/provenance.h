@@ -171,7 +171,6 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define prov_flag(prov) ((prov)->msg_info.internal_flag)
 #define prov_taint(prov) ((prov)->msg_info.taint)
 #define prov_jiffies(prov) ((prov)->msg_info.jiffies)
-#define prov_set_epoch(prov) ((prov)->msg_info.epoch=epoch)
 
 struct node_identifier {
 	uint64_t type;
@@ -212,10 +211,10 @@ union prov_identifier {
 #define prov_clear_flag(node, nbit) (prov_flag(node) &= ~(1 << nbit))
 #define prov_check_flag(node, nbit) ((prov_flag(node) & (1 << nbit)) == (1 << nbit))
 
-#define RECORDED_BIT 0
+/*#define RECORDED_BIT 0
 #define set_recorded(node)                  prov_set_flag(node, RECORDED_BIT)
 #define clear_recorded(node)                prov_clear_flag(node, RECORDED_BIT)
-#define provenance_is_recorded(node)        prov_check_flag(node, RECORDED_BIT)
+#define provenance_is_recorded(node)        prov_check_flag(node, RECORDED_BIT)*/
 
 #define NAME_RECORDED_BIT 1
 #define set_name_recorded(node)             prov_set_flag(node, NAME_RECORDED_BIT)
@@ -264,7 +263,7 @@ union prov_identifier {
 
 
 
-#define basic_elements union prov_identifier identifier; uint8_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
+#define basic_elements union prov_identifier identifier; uint32_t epoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
 #define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {

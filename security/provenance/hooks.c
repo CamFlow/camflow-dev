@@ -2552,7 +2552,7 @@ struct capture_policy prov_policy;
 
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
-uint8_t epoch;
+uint32_t epoch;
 
 /*!
  * @brief Operations to start provenance capture.
@@ -2587,7 +2587,7 @@ void __init provenance_add_hooks(void)
 	prov_policy.should_compress_edge = true;
 	prov_machine_id = 1;
 	prov_boot_id = 0;
-	epoch = 0;
+	epoch = 1;
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);

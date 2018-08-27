@@ -33,7 +33,7 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
-extern uint8_t epoch;
+extern uint32_t epoch;
 
 #define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
 #define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
@@ -139,5 +139,24 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 {
 	call_provenance_free(prov);
 	kmem_cache_free(long_provenance_cache, prov);
+}
+
+
+
+#define set_recorded(node) __set_recorded((union long_prov_elt*)node)
+static inline void __set_recorded(union long_prov_elt *node) {
+	node->msg_info.epoch=epoch;
+}
+
+#define clear_recorded(node) __clear_recorded((union long_prov_elt*)node)
+static inline void __clear_recorded(union long_prov_elt *node) {
+	node->msg_info.epoch = 0;
+}
+
+#define provenance_is_recorded(node) __provenance_is_recorded((union long_prov_elt*)node)
+static inline bool __provenance_is_recorded(union long_prov_elt *node) {
+	if (epoch > node->msg_info.epoch)
+		return false;
+	return true;
 }
 #endif
