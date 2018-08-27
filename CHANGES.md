@@ -39,6 +39,7 @@
 
 ### v0.4.5
 ```
+- Record graph in full once epoch changes.
 - Fix issue with receive_unix connecting to process memory instead of peer socket.
 - Add suport for socket_socketpair hook.
 - Update to kernel version 4.18.4.
