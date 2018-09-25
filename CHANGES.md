@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.4.5           | 4.18.8         | N/A				|
+| 0.4.5           | 4.18.9         | N/A				|
 | 0.4.4           | 4.17.17        | 19/08/2018 |
 | 0.4.3           | 4.17.4         | 06/07/2018 |
 | 0.4.2           | 4.16.13        | 05/06/2018 |
@@ -42,7 +42,7 @@
 - Record graph in full once epoch changes.
 - Fix issue with receive_unix connecting to process memory instead of peer socket.
 - Add suport for socket_socketpair hook.
-- Update to kernel version 4.18.8.
+- Update to kernel version 4.18.9.
 ```
 
 ### v0.4.4
