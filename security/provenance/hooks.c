@@ -1535,7 +1535,7 @@ static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
  *
  */
 static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
-				   struct timespec *ts)
+				   struct timespec64 *ts)
 {
 	return __mq_msgsnd(msg);
 }
@@ -1608,7 +1608,7 @@ static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
  *
  */
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
-				      struct timespec *ts)
+				      struct timespec64 *ts)
 {
 	struct provenance *cprov = get_cred_provenance();
 
@@ -1813,6 +1813,33 @@ static int provenance_socket_post_create(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
 	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
+static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb) {
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance();
+	struct provenance *iprova = socket_inode_provenance(socka);
+	struct provenance *iprovb = socket_inode_provenance(sockb);
+	unsigned long irqflags;
+	int rc = 0;
+
+	if (!iprova)
+		return -ENOMEM;
+	if (!iprovb)
+		return -ENOMEM;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprova), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_SOCKET_PAIR_CREATE, cprov, tprov, iprova, NULL, 0);
+	spin_unlock(prov_lock(iprova));
+	if (rc < 0)
+		goto out;
+	spin_lock_nested(prov_lock(iprovb), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_SOCKET_PAIR_CREATE, cprov, tprov, iprovb, NULL, 0);
+	spin_unlock(prov_lock(iprovb));
+out:
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
@@ -2031,32 +2058,32 @@ static int provenance_socket_sendmsg(struct socket *sock,
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = socket_inode_provenance(sock);
-	struct provenance *pprov = NULL;
+	struct provenance *iprova = socket_inode_provenance(sock);
+	struct provenance *iprovb = NULL;
 	struct sock *peer = NULL;
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!iprov)
+	if (!iprova)
 		return -ENOMEM;
 	if (sock->sk->sk_family == PF_UNIX &&
 	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
-			pprov = sk_provenance(peer);
-			if (pprov == cprov)
-				pprov = NULL;
+			iprovb = sk_inode_provenance(peer);
+			if (iprovb == cprov)
+				iprovb = NULL;
 		}
 	}
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SND_MSG, cprov, tprov, iprov, NULL, 0);
+	spin_lock_nested(prov_lock(iprova), PROVENANCE_LOCK_SOCKET);
+	rc = generates(RL_SND_MSG, cprov, tprov, iprova, NULL, 0);
 	if (rc < 0)
 		goto out;
-	if (pprov)
-		rc = derives(RL_RCV_UNIX, iprov, pprov, NULL, 0);
+	if (iprovb)
+		rc = derives(RL_RCV_UNIX, iprova, iprovb, NULL, 0);
 out:
-	spin_unlock(prov_lock(iprov));
+	spin_unlock(prov_lock(iprova));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	if (peer)
 		sock_put(peer);
@@ -2477,6 +2504,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* socket related hooks */
 	LSM_HOOK_INIT(sk_alloc_security,	provenance_sk_alloc_security),
 	LSM_HOOK_INIT(socket_post_create,	provenance_socket_post_create),
+	LSM_HOOK_INIT(socket_socketpair,	provenance_socket_socketpair),
 	LSM_HOOK_INIT(socket_bind,		provenance_socket_bind),
 	LSM_HOOK_INIT(socket_connect,		provenance_socket_connect),
 	LSM_HOOK_INIT(socket_listen,		provenance_socket_listen),
@@ -2524,7 +2552,7 @@ struct capture_policy prov_policy;
 
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
-uint8_t epoch;
+uint32_t epoch;
 
 /*!
  * @brief Operations to start provenance capture.
@@ -2559,7 +2587,7 @@ void __init provenance_add_hooks(void)
 	prov_policy.should_compress_edge = true;
 	prov_machine_id = 1;
 	prov_boot_id = 0;
-	epoch = 0;
+	epoch = 1;
 	provenance_cache = kmem_cache_create("provenance_struct",
 					     sizeof(struct provenance),
 					     0, SLAB_PANIC, NULL);

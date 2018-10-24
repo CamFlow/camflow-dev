@@ -1,7 +1,7 @@
 # LSM statistics
 This file is generated automatically. DO NOT EDIT.
 
-Total number of system calls that trigger no LSM hooks: 30
+Total number of system calls that trigger no LSM hooks: 29
 
 Those system calls are:
 
@@ -46,8 +46,6 @@ Those system calls are:
 	__x64_sys_set_tid_address
 
 	__x64_sys_sgetmask
-
-	__x64_sys_io_cancel
 
 	__x64_sys_getresuid16
 
@@ -192,7 +190,7 @@ __x64_sys_mq_timedsend|12|
 __x64_sys_finit_module|18|
 __x64_sys_setresgid16|8|
 __x64_sys_fanotify_init|9|
-__x64_sys_io_submit|5|
+__x64_sys_io_submit|7|
 __x64_sys_setitimer|3|
 __x64_sys_sched_setaffinity|6|
 __x64_sys_pkey_free|3|
@@ -205,7 +203,7 @@ __x64_sys_sched_getaffinity|4|
 __x64_sys_swapon|27|
 __x64_sys_eventfd|9|
 __x64_sys_newuname|3|
-__x64_sys_socketpair|13|
+__x64_sys_socketpair|14|
 __x64_sys_faccessat|14|
 __x64_sys_sethostname|5|
 __x64_sys_sysfs|3|
@@ -250,11 +248,11 @@ __x64_sys_mmap|20|
 __x64_sys_sysctl|3|
 __x64_sys_pwrite64|5|
 __x64_sys_pselect6|3|
-__x64_sys_socketcall|29|
+__x64_sys_socketcall|30|
 __x64_sys_setgroups|8|
 __x64_sys_setfsgid|8|
 __x64_sys_old_readdir|5|
-__x64_sys_ptrace|14|
+__x64_sys_ptrace|15|
 __x64_sys_clock_adjtime|3|
 __x64_sys_getrandom|3|
 __x64_sys_pipe2|11|
@@ -320,6 +318,7 @@ __x64_sys_unshare|14|
 __x64_sys_semget|7|
 __x64_sys_symlinkat|12|
 __x64_sys_splice|6|
+__x64_sys_io_cancel|3|
 __x64_sys_fcntl|9|
 __x64_sys_readv|5|
 __x64_sys_exit|19|
@@ -406,19 +405,19 @@ __x64_sys_timer_gettime|3|
 NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 -----------------------|------------------------|
 1|4|
-3|66|
+3|67|
 4|29|
-5|36|
+5|35|
 6|15|
-7|14|
+7|15|
 8|25|
 9|43|
 10|5|
 11|10|
 12|13|
-13|13|
+13|12|
 14|22|
-15|8|
+15|9|
 16|6|
 17|8|
 18|2|
@@ -430,7 +429,7 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 24|4|
 25|1|
 27|3|
-29|1|
+30|1|
 34|2|
 
 
@@ -528,7 +527,7 @@ symlink|12|
 fstatfs|4|
 getpeername|4|
 utimes|16|
-socketpair|13|
+socketpair|14|
 alarm|3|
 setsid|6|
 getxattr|15|
@@ -614,7 +613,7 @@ umount2|N/A|
 rt_sigtimedwait|3|
 timerfd_create|9|
 timerfd_settime|5|
-ptrace|14|
+ptrace|15|
 ioprio_set|6|
 fchmodat|17|
 fchownat|17|
@@ -697,12 +696,12 @@ nfsservctl|N/A|
 tee|4|
 sched_rr_get_interval|4|
 set_mempolicy|3|
-io_submit|5|
+io_submit|7|
 io_setup|13|
 mq_unlink|9|
 mq_open|13|
 io_destroy|9|
-io_cancel|N/A|
+io_cancel|3|
 signalfd|9|
 migrate_pages|11|
 kcmp|N/A|
@@ -867,7 +866,7 @@ shmget|7|
 inotify_init1|9|
 fadvise64|3|
 symlink|12|
-socketpair|13|
+socketpair|14|
 setsid|6|
 fallocate|5|
 sched_getscheduler|1|
@@ -956,7 +955,7 @@ signalfd4|9|
 ioprio_set|6|
 faccessat|14|
 fsetxattr|11|
-ptrace|14|
+ptrace|15|
 tkill|7|
 unlinkat|14|
 readlinkat|14|
@@ -975,7 +974,7 @@ msgsnd|11|
 lremovexattr|14|
 clock_nanosleep|3|
 perf_event_open|10|
-io_submit|5|
+io_submit|7|
 capset|8|
 renameat|12|
 io_setup|13|
@@ -1001,7 +1000,7 @@ setns|13|
 pivot_root|14|
 pwritev|5|
 preadv|5|
-io_cancel|N/A|
+io_cancel|3|
 setfsuid|9|
 io_destroy|9|
 timer_gettime|3|

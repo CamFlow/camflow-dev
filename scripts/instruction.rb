@@ -25,7 +25,7 @@ class Instruction
       return 'process_memory'
     elsif str == 'tprov' || str == 'ntprov'
       return 'task'
-    elsif str == 'iprov' || str == 'niprov' || str == 'inprov' || str == 'outprov' || str == 'oprov'
+    elsif str == 'iprov' || str == 'iprova' || str == 'iprovb' || str == 'niprov' || str == 'inprov' || str == 'outprov' || str == 'oprov'
       return 'inode'
     elsif str == 'mprov'
       return 'msg'

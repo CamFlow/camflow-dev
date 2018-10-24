@@ -22,6 +22,7 @@ static const char RL_STR_WRITE_IOCTL[] = "write_ioctl";                 // ioctl
 static const char RL_STR_CLONE_MEM[] = "clone_mem";                     // memory copy on clone
 static const char RL_STR_MSG_CREATE[] = "msg_create";                   // create msg (IPC message passing)
 static const char RL_STR_SOCKET_CREATE[] = "socket_create";             // create socket
+static const char RL_STR_SOCKET_PAIR_CREATE[] = "socket_pair_create";   // create socket pair
 static const char RL_STR_INODE_CREATE[] = "inode_create";               // create inode
 static const char RL_STR_SETUID[] = "setuid";                           // setuid
 static const char RL_STR_SETGID[] = "setpgid";                           // setpgid
@@ -143,6 +144,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_MSG_CREATE;
 	case RL_SOCKET_CREATE:
 		return RL_STR_SOCKET_CREATE;
+	case RL_SOCKET_PAIR_CREATE:
+		return RL_STR_SOCKET_PAIR_CREATE;
 	case RL_INODE_CREATE:
 		return RL_STR_INODE_CREATE;
 	case RL_SETUID:
@@ -303,6 +306,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_CLONE_MEM, RL_CLONE_MEM);
 	MATCH_AND_RETURN(str, RL_STR_MSG_CREATE, RL_MSG_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SOCKET_CREATE, RL_SOCKET_CREATE);
+	MATCH_AND_RETURN(str, RL_STR_SOCKET_PAIR_CREATE, RL_SOCKET_PAIR_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_INODE_CREATE, RL_INODE_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_SETUID, RL_SETUID);
 	MATCH_AND_RETURN(str, RL_STR_SETGID, RL_SETGID);
