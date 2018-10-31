@@ -1151,7 +1151,7 @@ out:
  * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses function or unknown.
  *
  */
-static int provenance_file_open(struct file *file, const struct cred *cred)
+static int provenance_file_open(struct file *file)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
