@@ -31,7 +31,7 @@
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\
 
-#define CAMFLOW_COMMIT bc8ae271f70d5c5486ed010a5642cdaa5462a6de
+#define CAMFLOW_COMMIT "0ca81315af0b7050dc857d131c6676a1ec699012"
 
 #define PROVENANCE_HASH "sha256"
 
@@ -147,6 +147,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_GID_FILTER												"/sys/kernel/security/provenance/gid"
 #define PROV_TYPE															"/sys/kernel/security/provenance/type"
 #define PROV_VERSION													"/sys/kernel/security/provenance/version"
+#define PROV_COMMIT 													"/sys/kernel/security/provenance/commit"
 #define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 #define PROV_DUPLICATE_FILE										"/sys/kernel/security/provenance/duplicate"
 #define PROV_EPOCH_FILE   										"/sys/kernel/security/provenance/epoch"
