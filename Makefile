@@ -62,7 +62,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-copy_change:
+copy_change: update_commit
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
@@ -114,7 +114,7 @@ compile: compile_security compile_kernel compile_us doc
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1
 
-compile_security: copy_change update_commit compile_security_only doc
+compile_security: copy_change compile_security_only doc
 
 compile_kernel: copy_change
 	cd ./build/linux-stable && $(MAKE) -j16
