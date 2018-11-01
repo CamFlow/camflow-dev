@@ -2616,3 +2616,5 @@ void __init provenance_add_hooks(void)
 	pr_info("Provenance: version %s\n", CAMFLOW_VERSION_STR);
 	pr_info("Provenance: hooks ready.\n");
 }
+
+// DO NOT USE DEFINE_LSM we ensure we are loaded last in security/security.c
