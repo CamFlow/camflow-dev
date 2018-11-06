@@ -1,4 +1,4 @@
-kernel-version=4.19
+kernel-version=4.19.1
 lsm-version=0.4.6
 arch=x86_64
 
@@ -62,7 +62,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-copy_change:
+copy_change: update_commit
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
@@ -105,6 +105,9 @@ graphs:
 	ruby ./scripts/graphs.rb
 
 doc: hooklist relationlist vertexlist graphs
+
+update_commit:
+	ruby ./scripts/commit.rb
 
 compile: compile_security compile_kernel compile_us doc
 
