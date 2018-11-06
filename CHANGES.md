@@ -40,6 +40,7 @@
 
 ### v0.4.6
 ```
+- Provide API to get commit ID to help with issue tracking.
 - Update to kernel version 4.19.1.
 ```
 
