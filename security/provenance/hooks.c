@@ -2614,6 +2614,7 @@ void __init provenance_add_hooks(void)
 
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 	pr_info("Provenance: version %s\n", CAMFLOW_VERSION_STR);
+	pr_info("Provenance: commit %s\n", CAMFLOW_COMMIT);
 	pr_info("Provenance: hooks ready.\n");
 }
 
