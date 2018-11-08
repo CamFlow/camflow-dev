@@ -68,13 +68,13 @@ copy_change: update_commit
 
 config_def:
 	echo "Default method to retrieve configuration"
-	cd ./build/linux-stable && cp -f /boot/config-$(shell uname -r) .config
+	cp -f /boot/config-$(shell uname -r) .config
 
 config_pi:
 	echo "Pi method to retrieve configuration"
 	sudo modprobe configs
 	zcat /proc/config.gz > /tmp/config.new
-	cd ./build/linux-stable && cp -f /tmp/config.new .config
+	cp -f /tmp/config.new .config
 
 copy_config:
 	test -f /boot/config-$(shell uname -r) && $(MAKE) config_def || $(MAKE) config_pi
