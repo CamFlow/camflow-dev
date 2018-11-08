@@ -66,8 +66,18 @@ copy_change: update_commit
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
+config_def:
+	echo "Default method to retrieve configuration"
+	cd ./build/linux-stable && cp -f /boot/config-$(shell uname -r) .config
+
+config_pi:
+	echo "Pi method to retrieve configuration"
+	sudo modprobe configs
+	zcat /proc/config.gz > /tmp/config.new
+	cd ./build/linux-stable && cp -f /tmp/config.new .config
+
 copy_config:
-	cp -f /boot/config-$(shell uname -r) .config
+	test -f /boot/config-$(shell uname -r) && $(MAKE) config_def || $(MAKE) config_pi
 	cd ./build/linux-stable && cp ../../.config .config
 
 config: copy_change copy_config
