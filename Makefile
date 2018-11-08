@@ -1,5 +1,6 @@
 kernel-version=4.19.1
 lsm-version=0.4.6
+arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
 cont-name != $(git log --format="%ae" HEAD^!)
