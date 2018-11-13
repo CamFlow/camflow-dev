@@ -390,7 +390,7 @@ __x64_sys_inotify_init1|9|
 __x64_sys_signal|3|
 __x64_sys_init_module|10|
 __x64_sys_getpeername|4|
-__x64_sys_msgrcv|10|
+__x64_sys_msgrcv|9|
 __x64_sys_sched_setattr|6|
 __x64_sys_truncate|17|
 __x64_sys_ioprio_get|4|
@@ -411,8 +411,8 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 6|16|
 7|15|
 8|25|
-9|42|
-10|8|
+9|43|
+10|7|
 11|8|
 12|14|
 13|11|
@@ -673,7 +673,7 @@ time|N/A|
 quotactl|15|
 _sysctl|N/A|
 msgsnd|11|
-msgrcv|10|
+msgrcv|9|
 clock_nanosleep|3|
 get_mempolicy|7|
 rt_sigpending|3|
@@ -982,7 +982,7 @@ linkat|15|
 unshare|14|
 reboot|21|
 mknodat|13|
-msgrcv|10|
+msgrcv|9|
 time|N/A|
 waitid|9|
 fchownat|17|
