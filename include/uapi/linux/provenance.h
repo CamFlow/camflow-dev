@@ -15,10 +15,12 @@
 
 #ifndef __KERNEL__
 #include <linux/limits.h>
+#include <uapi/linux/utsname.h>
 #else
 #include <linux/socket.h>
 #include <linux/limits.h>
 #include <linux/mutex.h>
+#include <linux/utsname.h>
 #endif
 
 #define xstr(s) str(s)
@@ -31,7 +33,7 @@
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\
 
-#define CAMFLOW_COMMIT "6b084cf7d02686f04bcc453110b8228980913a9a"
+#define CAMFLOW_COMMIT "fb499d9304af93f82c93274bf0f74d3dbb595af8"
 
 #define PROVENANCE_HASH "sha256"
 
@@ -405,6 +407,14 @@ struct arg_struct {
 	uint8_t truncated;
 };
 
+struct disc_node_struct {
+	basic_elements;
+  shared_node_elements;
+	size_t length;
+	char content[PATH_MAX];
+	union prov_identifier parent;
+};
+
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
@@ -415,12 +425,13 @@ struct xattr_prov_struct {
 	size_t size;
 };
 
-struct disc_node_struct {
+struct machine_prov_struct {
 	basic_elements;
   shared_node_elements;
-	size_t length;
-	char content[PATH_MAX];
-	union prov_identifier parent;
+  uint8_t cam_major;
+  uint8_t cam_minor;
+  uint8_t cam_patch;
+  struct new_utsname uname;
 };
 
 union long_prov_elt {
@@ -442,6 +453,7 @@ union long_prov_elt {
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
+  struct machine_prov_struct machine_info;
 };
 
 typedef union long_prov_elt prov_entry_t;
