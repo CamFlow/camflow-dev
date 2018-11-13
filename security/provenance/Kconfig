@@ -1,6 +1,6 @@
 config SECURITY_PROVENANCE
          bool "CamFlow - Provenance"
-         depends on SECURITY
+         select SECURITY
          select RELAY
          select SECURITY_NETWORK
          select SECURITYFS
