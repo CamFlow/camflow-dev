@@ -26,6 +26,7 @@
 #include "provenance_net.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"
+#include "provenance_machine.h"
 
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 // If provenance is set to be persistant (saved between reboots).
@@ -2550,6 +2551,8 @@ LIST_HEAD(relay_list);
 
 struct capture_policy prov_policy;
 
+union long_prov_elt prov_machine;
+
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
 uint32_t epoch;
@@ -2611,10 +2614,10 @@ void __init provenance_add_hooks(void)
 #endif
 	relay_ready = false;
 	cred_init_provenance();
+	init_prov_machine();
+	print_prov_machine();
 
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
-	pr_info("Provenance: version %s\n", CAMFLOW_VERSION_STR);
-	pr_info("Provenance: commit %s\n", CAMFLOW_COMMIT);
 	pr_info("Provenance: hooks ready.\n");
 }
 

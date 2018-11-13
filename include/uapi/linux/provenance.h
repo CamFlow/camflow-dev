@@ -13,15 +13,12 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
-#ifndef __KERNEL__
-#include <linux/limits.h>
-#include <uapi/linux/utsname.h>
-#else
+#ifdef __KERNEL__
 #include <linux/socket.h>
-#include <linux/limits.h>
 #include <linux/mutex.h>
-#include <linux/utsname.h>
 #endif
+#include <linux/limits.h>
+#include <linux/utsname.h>
 
 #define xstr(s) str(s)
 #define str(s) # s
@@ -33,7 +30,7 @@
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\
 
-#define CAMFLOW_COMMIT "fb499d9304af93f82c93274bf0f74d3dbb595af8"
+#define CAMFLOW_COMMIT "3533ddbcc36fcd717c056fa50af910559e992d86"
 
 #define PROVENANCE_HASH "sha256"
 
@@ -431,7 +428,8 @@ struct machine_prov_struct {
   uint8_t cam_major;
   uint8_t cam_minor;
   uint8_t cam_patch;
-  struct new_utsname uname;
+  struct new_utsname utsname;
+  char commit[256];
 };
 
 union long_prov_elt {
