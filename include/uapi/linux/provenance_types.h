@@ -163,6 +163,7 @@
 #define ENT_ARG               (DM_ENTITY    | (0x0000000000000001ULL<<25))
 #define ENT_ENV               (DM_ENTITY    | (0x0000000000000001ULL<<26))
 #define ENT_PROC              (DM_ENTITY    | (0x0000000000000001ULL<<27))
+#define ENT_MACHINE           (DM_ENTITY    | (0x0000000000000001ULL<<28))
 
 #define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
 #define node_type(node) prov_type(node)

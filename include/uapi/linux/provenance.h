@@ -30,7 +30,7 @@
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\
 
-#define CAMFLOW_COMMIT "3533ddbcc36fcd717c056fa50af910559e992d86"
+#define CAMFLOW_COMMIT "84954240e24c68635c6aaf6155b5af6a341708ae"
 
 #define PROVENANCE_HASH "sha256"
 
@@ -422,7 +422,7 @@ struct xattr_prov_struct {
 	size_t size;
 };
 
-struct machine_prov_struct {
+struct machine_struct {
 	basic_elements;
   shared_node_elements;
   uint8_t cam_major;
@@ -451,7 +451,7 @@ union long_prov_elt {
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
-  struct machine_prov_struct machine_info;
+  struct machine_struct machine_info;
 };
 
 typedef union long_prov_elt prov_entry_t;
