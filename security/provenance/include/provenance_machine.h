@@ -28,7 +28,7 @@ static void init_prov_machine(void) {
   prov_machine.machine_info.cam_minor = CAMFLOW_VERSION_MINOR;
   prov_machine.machine_info.cam_patch = CAMFLOW_VERSION_PATCH;
   memcpy(prov_machine.machine_info.commit, CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
-  prov_type(&prov_machine) = ENT_MACHINE;
+  prov_type(&prov_machine) = AGT_MACHINE;
 	node_identifier(&prov_machine).boot_id = prov_boot_id;
 	node_identifier(&prov_machine).machine_id = prov_machine_id;
   set_is_long(&prov_machine);
