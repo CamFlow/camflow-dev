@@ -15,19 +15,22 @@
 
 union long_prov_elt prov_machine;
 
-void init_prov_machine(void) {
+void refresh_prov_machine(void) {
   struct new_utsname *uname = utsname();
-
-  memset(&prov_machine.machine_info, 0, sizeof(prov_machine.machine_info));
   memcpy(&(prov_machine.machine_info.utsname), uname, sizeof(struct new_utsname));
+	node_identifier(&prov_machine).boot_id = prov_boot_id;
+	node_identifier(&prov_machine).machine_id = prov_machine_id;
+}
+
+void init_prov_machine(void) {
+  memset(&prov_machine.machine_info, 0, sizeof(prov_machine.machine_info));
   prov_machine.machine_info.cam_major = CAMFLOW_VERSION_MAJOR;
   prov_machine.machine_info.cam_minor = CAMFLOW_VERSION_MINOR;
   prov_machine.machine_info.cam_patch = CAMFLOW_VERSION_PATCH;
   memcpy(prov_machine.machine_info.commit, CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
   prov_type(&prov_machine) = AGT_MACHINE;
-	node_identifier(&prov_machine).boot_id = prov_boot_id;
-	node_identifier(&prov_machine).machine_id = prov_machine_id;
   set_is_long(&prov_machine);
+  refresh_prov_machine();
 }
 
 void print_prov_machine(void) {

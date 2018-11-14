@@ -18,5 +18,6 @@
 #include <uapi/linux/provenance.h>
 
 void init_prov_machine(void);
+void refresh_prov_machine(void);
 void print_prov_machine(void);
 #endif

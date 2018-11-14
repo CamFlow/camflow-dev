@@ -25,6 +25,7 @@
 #include "provenance_inode.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
+#include "provenance_machine.h"
 
 #define TMPBUFLEN       12
 
@@ -954,6 +955,7 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
 	epoch++;
+	refresh_prov_machine();
 	record_machine();
 	return count;
 }
