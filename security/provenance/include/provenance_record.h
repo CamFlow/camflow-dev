@@ -434,4 +434,10 @@ static __always_inline int informs(const uint64_t type,
 
 	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
+
+extern union long_prov_elt prov_machine;
+static __always_inline void record_machine(void)
+{
+	__write_node(&prov_machine);
+}
 #endif

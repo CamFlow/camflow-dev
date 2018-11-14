@@ -26,6 +26,7 @@
 #include "provenance_net.h"
 #include "provenance_inode.h"
 #include "provenance_task.h"
+#include "provenance_machine.h"
 
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 // If provenance is set to be persistant (saved between reboots).
@@ -2611,7 +2612,9 @@ void __init provenance_add_hooks(void)
 #endif
 	relay_ready = false;
 	cred_init_provenance();
-
+	init_prov_machine();
+	print_prov_machine();
+	record_machine();
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 	pr_info("Provenance: hooks ready.\n");
 }

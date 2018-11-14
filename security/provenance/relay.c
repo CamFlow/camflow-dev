@@ -16,7 +16,6 @@
 
 #include "provenance.h"
 #include "provenance_relay.h"
-#include "provenance_machine.h"
 
 #define PROV_BASE_NAME "provenance"
 #define LONG_PROV_BASE_NAME "long_provenance"
@@ -125,8 +124,6 @@ out:
 	return rc;
 }
 
-union long_prov_elt prov_machine;
-
 /*!
  * @brief Initialize relay buffer for provenance.
  *
@@ -153,10 +150,6 @@ static int __init relay_prov_init(void)
 
 	write_boot_buffer();
 	pr_info("Provenance: relay ready.\n");
-
-	init_prov_machine();
-	print_prov_machine();
-	__write_node(&prov_machine);
 	return 0;
 }
 core_initcall(relay_prov_init);
