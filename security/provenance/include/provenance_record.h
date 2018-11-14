@@ -438,6 +438,7 @@ static __always_inline int informs(const uint64_t type,
 extern union long_prov_elt prov_machine;
 static __always_inline void record_machine(void)
 {
+	pr_info("Provenance: recording machine node...");
 	__write_node(&prov_machine);
 }
 #endif
