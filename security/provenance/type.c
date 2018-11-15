@@ -87,7 +87,7 @@ static const char RL_STR_PERM_EXEC[] = "perm_exec";                     // check
 static const char RL_STR_PERM_APPEND[] = "perm_append";                 // check append permission
 static const char RL_STR_TERMINATE_TASK[] = "terminate_task";           // created when task data structure is freed
 static const char RL_STR_TERMINATE_PROC[] = "terminate_proc";           // created when cred data structure is freed
-static const char RL_STR_FREED[] = "free";                           // created when an inode is freed
+static const char RL_STR_FREED[] = "free";                           		// created when an inode is freed
 static const char RL_STR_ARG[] = "arg";                                 // connect arg value to process
 static const char RL_STR_ENV[] = "env";                                 // connect env value to process
 static const char RL_STR_LOG[] = "log";                                 // connect string to task
@@ -95,6 +95,7 @@ static const char RL_STR_SH_ATTACH_READ[] = "sh_attach_read";           // attac
 static const char RL_STR_SH_ATTACH_WRITE[] = "sh_attach_write";         // attach sh with write perm
 static const char RL_STR_SH_CREATE_READ[] = "sh_create_read";           // sh create with read perm
 static const char RL_STR_SH_CREATE_WRITE[] = "sh_create_write";         // sh create with write perm
+static const char RL_STR_LOAD_MODULE_FILE[] = "load_module_file";       // sh create with write perm
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                         // unkown node type should normally not appear
@@ -116,6 +117,7 @@ static const char ND_STR_PATH[] = "path";                               // path 
 static const char ND_STR_DISC_ENTITY[] = "disc_entity";                 // descilosed node representing an entity
 static const char ND_STR_DISC_ACTIVITY[] = "disc_activity";             // descilosed node representing an activity
 static const char ND_STR_DISC_AGENT[] = "disc_agent";                   // disclosed node representing an agent
+static const char ND_STR_MACHINE[] = "machine";                   			// machine representing an agent
 static const char ND_STR_PACKET[] = "packet";                           // network packet
 static const char ND_STR_INODE_MMAP[] = "mmaped_file";                  // privately mmaped file
 static const char ND_STR_IATTR[] = "iattr";                             // inode attributes value
@@ -290,6 +292,8 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SH_CREATE_READ;
 	case RL_SH_CREATE_WRITE:
 		return RL_STR_SH_CREATE_WRITE;
+	case RL_LOAD_MODULE_FILE:
+		return RL_STR_LOAD_MODULE_FILE;
 	default:
 		return RL_STR_UNKNOWN;
 	}
@@ -379,6 +383,7 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_WRITE, RL_SH_ATTACH_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_READ, RL_SH_CREATE_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_WRITE, RL_SH_CREATE_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_MODULE_FILE, RL_LOAD_MODULE_FILE);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(relation_id);
@@ -425,6 +430,8 @@ const char* node_str(uint64_t type)
 		return ND_STR_DISC_ACTIVITY;
 	case AGT_DISC:
 		return ND_STR_DISC_AGENT;
+	case AGT_MACHINE:
+		return ND_STR_MACHINE;
 	case ENT_PACKET:
 		return ND_STR_PACKET;
 	case ENT_IATTR:
@@ -466,6 +473,7 @@ uint64_t node_id(const char* str)
 	MATCH_AND_RETURN(str, ND_STR_DISC_ENTITY, ENT_DISC);
 	MATCH_AND_RETURN(str, ND_STR_DISC_ACTIVITY, ACT_DISC);
 	MATCH_AND_RETURN(str, ND_STR_DISC_AGENT, AGT_DISC);
+	MATCH_AND_RETURN(str, ND_STR_MACHINE, AGT_MACHINE);
 	MATCH_AND_RETURN(str, ND_STR_PACKET, ENT_PACKET);
 	MATCH_AND_RETURN(str, ND_STR_IATTR, ENT_IATTR);
 	MATCH_AND_RETURN(str, ND_STR_XATTR, ENT_XATTR);
