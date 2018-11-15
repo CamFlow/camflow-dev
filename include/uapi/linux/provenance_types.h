@@ -39,6 +39,7 @@
 #define RL_GENERATED          (DM_RELATION | 0x0040000000000000ULL)
 #define RL_USED               (DM_RELATION | 0x0020000000000000ULL)
 #define RL_INFORMED           (DM_RELATION | 0x0010000000000000ULL)
+#define RL_INFLUENCED         (DM_RELATION | 0x0008000000000000ULL)
 
 /* DERIVED SUBTYPES */
 #define RL_NAMED              (RL_DERIVED   | 0x0000000000000001ULL)
@@ -124,7 +125,7 @@
 #define RL_SPLICE_IN					(RL_USED 			| (0x0000000000000001ULL<<24))
 #define RL_MMAP_READ          (RL_USED			| (0x0000000000000001ULL<<25))
 #define RL_MMAP_EXEC          (RL_USED			| (0x0000000000000001ULL<<26))
-#define RL_LOAD_MODULE_FILE   (RL_USED			| (0x0000000000000001ULL<<27))
+#define RL_LOAD_FILE   				(RL_USED			| (0x0000000000000001ULL<<27))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
@@ -132,6 +133,9 @@
 #define RL_VERSION_TASK    		(RL_INFORMED  | (0x0000000000000001ULL<<1))
 #define RL_TERMINATE_TASK  		(RL_INFORMED  | (0x0000000000000001ULL<<2))
 /* no more than 51!!!! */
+
+/* INFLUENCED  SUBTYPES */
+#define RL_LOAD_MODULE 				(RL_INFLUENCED | (0x0000000000000001ULL))
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK              (DM_ACTIVITY  | 0x0000000000000001ULL)
@@ -178,6 +182,7 @@
 #define prov_type_is_node(val) (!prov_is_type(val, DM_RELATION))
 #define prov_is_used(val) prov_is_type(val, RL_USED)
 #define prov_is_informed(val) prov_is_type(val, RL_INFORMED)
+#define prov_is_influenced(val) prov_is_type(val, RL_INFLUENCED)
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
 #define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
 

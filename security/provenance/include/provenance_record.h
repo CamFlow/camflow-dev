@@ -435,7 +435,32 @@ static __always_inline int informs(const uint64_t type,
 	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
 
+// reference to node representing the machine/kernel
 extern union long_prov_elt prov_machine;
+
+static __always_inline int influences_kernel(const uint64_t type,
+						struct provenance *entity,
+				    struct provenance *activity,
+						const struct file *file)
+{
+	int rc;
+
+	BUILD_BUG_ON(!prov_is_influenced(type));
+
+	apply_target(prov_elt(entity));
+	apply_target(prov_elt(activity));
+
+	if (provenance_is_opaque(prov_elt(entity))
+	    || provenance_is_opaque(prov_elt(activity)))
+		return 0;
+	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
+	if (rc < 0)
+		goto out;
+	rc = record_relation(type, prov_entry(activity), &prov_machine, NULL, 0);
+out:
+	return rc;
+}
+
 static __always_inline void record_machine(void)
 {
 	pr_info("Provenance: recording machine node...");

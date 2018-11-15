@@ -85,4 +85,5 @@ RL_SH_ATTACH_READ|sh_attach_read|attach sh with read perm|
 RL_SH_ATTACH_WRITE|sh_attach_write|attach sh with write perm|
 RL_SH_CREATE_READ|sh_create_read|sh create with read perm|
 RL_SH_CREATE_WRITE|sh_create_write|sh create with write perm|
-RL_LOAD_MODULE_FILE|load_module_file|sh create with write perm|
+RL_LOAD_FILE|load_file|laod file into kernel|
+RL_LOAD_MODULE|load_module|laod file into kernel|

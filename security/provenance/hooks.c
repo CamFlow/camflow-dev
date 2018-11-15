@@ -1143,7 +1143,6 @@ out:
 static int provenance_kernel_read_file(struct file *file
 																						, enum kernel_read_file_id id)
 {
-	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(file, true);
 	unsigned long irqflags;
@@ -1153,11 +1152,11 @@ static int provenance_kernel_read_file(struct file *file
 		return 0;
 	if(id!=READING_MODULE) // there is other such as X509 or frimware, we leave it for now
 		return 0;
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_irqsave_nested(prov_lock(tprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = uses(RL_LOAD_MODULE_FILE, iprov, tprov, cprov, file, 0);
+	rc = influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
 	spin_unlock(prov_lock(iprov));
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	spin_unlock_irqrestore(prov_lock(tprov), irqflags);
 	return rc;
 }
 
