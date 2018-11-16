@@ -30,7 +30,7 @@
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\
 
-#define CAMFLOW_COMMIT "a525b86434adbdea7a81bf97199eccb7f8d812f4"
+#define CAMFLOW_COMMIT "811e643a97729346940d6e2291e33b4e52593dbe"
 
 #define PROVENANCE_HASH "sha256"
 
@@ -168,6 +168,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_gid(node)              	((node)->node_info.gid)
 #define node_previous_id(node)        ((node)->node_info.previous_id)
 #define node_previous_type(node)      ((node)->node_info.previous_type)
+#define node_kernel_version(node)      ((node)->node_info.k_version)
 
 
 #define prov_flag(prov) ((prov)->msg_info.internal_flag)
@@ -256,7 +257,7 @@ union prov_identifier {
 
 
 #define basic_elements union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
-#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
+#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;

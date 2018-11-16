@@ -195,6 +195,20 @@ static inline int record_node_name(struct provenance *node,
 	return rc;
 }
 
+static inline int record_kernel_link(struct provenance *node)
+{
+	int rc;
+
+	if (provenance_is_kernel_recorded(prov_elt(node)) ||
+	    !provenance_is_recorded(prov_elt(node)))
+		return 0;
+	spin_lock(prov_lock(node));
+	rc = record_relation(RL_RAN_ON, &prov_machine, prov_entry(node), NULL, 0);
+	set_kernel_recorded(prov_elt(node));
+	spin_unlock(prov_lock(node));
+	return rc;
+}
+
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
 
 /*!
