@@ -99,6 +99,15 @@ class Instruction
     return a + '-' + relation + '->' + b + ',' + self.version(b)
   end
 
+  def self.influences_kernel_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/influences_kernel\(([A-Z_]+),&*([a-z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    b = self.prov_to_type elements[3]
+    return a + '-' + self.relation_to_str('RL_LOAD_FILE') + '->' + b + ',' + self.version(b) + ',' + b + '-' + self.relation_to_str('RL_LOAD_MODULE') + '-> machine' + ',' + self.version('machine')
+  end
+
   def self.get_cred_provenance_to_relation
     return 'path-' + self.relation_to_str('RL_NAMED_PROCESS') + '->process_memory'
   end

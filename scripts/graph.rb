@@ -33,6 +33,10 @@ class Graph
       @str += name
       @str += '[fontsize = 8,label = '+name+',shape = rectangle, fillcolor="#e6e6fa", style = filled]'
       @str += "\n\n"
+    elsif name == 'machine'
+      @str += name
+      @str += '[fontsize = 8,label = '+name+',shape = house, fillcolor="#ff8c00", style = filled]'
+      @str += "\n\n"
     else
       @str += name
       @str += '[fontsize = 8,label = '+name+',shape = ellipse, fillcolor="#fffacd", style = filled]'

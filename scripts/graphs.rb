@@ -92,6 +92,9 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('uses_two(')
     str += ',' unless str == ''
     str += Instruction.uses_two_to_relation(line)
+  elsif line.include?('influences_kernel(')
+    str += ',' unless str == ''
+    str += Instruction.influences_kernel_to_relation(line)
   elsif line.include?('get_cred_provenance(')
     str += ',' unless str == ''
     str += Instruction.get_cred_provenance_to_relation
