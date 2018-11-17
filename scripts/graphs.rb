@@ -187,7 +187,6 @@ if File.file?('./scripts/syshooks.txt')
     puts dot
     g.reset unless str == ''
     File.open('./docs/dot/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-    system('cat ./docs/dot/'+call_name+'.dot') unless str == ''
     system('dot -Tpng ./docs/dot/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
   end
 end

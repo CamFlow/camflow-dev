@@ -1,0 +1,7 @@
+digraph RGL__DirectedAdjacencyGraph {inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+inode -> inode[fontsize = 8,label = send_unix]
+
+inode -> inode[fontsize = 8,label = version_entity]
+
+}

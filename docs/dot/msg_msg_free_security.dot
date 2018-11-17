@@ -1,0 +1,5 @@
+digraph RGL__DirectedAdjacencyGraph {msg[fontsize = 8,label = msg,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+msg -> msg[fontsize = 8,label = free]
+
+}
