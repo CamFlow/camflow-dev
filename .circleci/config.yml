@@ -44,6 +44,9 @@ jobs:
           name: syshooks
           command: 'cd ./scripts && cat syshooks.txt'
       - run:
+          name: clean
+          command: rm -rf ./docs/img && mkdir -p ./docs/img
+      - run:
           name: docs
           command: 'make doc'
       - deploy:
@@ -57,6 +60,7 @@ jobs:
               git clone https://github.com/camflow/camflow-dev
               cd camflow-dev
               git checkout $TARGET_BRANCH
+              rm -rf ./docs/img && mkdir -p ./docs/img
               cp -a ../../docs/. ./docs
               cp -a ../../docs/img/. ./docs/img
               git status
