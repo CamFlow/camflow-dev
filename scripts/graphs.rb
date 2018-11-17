@@ -182,8 +182,10 @@ if File.file?('./scripts/syshooks.txt')
         str += hook_map[h] unless hook_map[h].nil?
       end
     end
+    puts str
     g.from_string(str) unless str == ''
     dot = g.get_dot unless str == ''
+    puts dot
     g.reset unless str == ''
     File.open('/tmp/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
     system('dot -Tpng /tmp/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
