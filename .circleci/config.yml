@@ -62,8 +62,6 @@ jobs:
               cd camflow-dev
               git checkout $TARGET_BRANCH
               echo "Copying..."
-              rm -rf ./docs/img && mkdir -p ./docs/img
-              rm -rf ./docs/dot && mkdir -p ./docs/dot
               cp -a ../../docs/. ./docs
               cp -a ../../docs/img/. ./docs/img
               cp -a ../../docs/dot/. ./docs/dot

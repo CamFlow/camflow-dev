@@ -101,10 +101,6 @@ config_old: copy_change copy_config
 config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
 
-prepare_doc:
-	rm -rf ./docs/img && mkdir -p ./docs/img
-	rm -rf ./docs/dot && mkdir -p ./docs/dot
-
 hooklist:
 	echo 'Generating HOOKS.md...'
 	ruby ./scripts/hooklist.rb > docs/HOOKS.md
@@ -117,11 +113,15 @@ vertexlist:
 	echo 'Generating VERTICES.md...'
 	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
-graphs:
-	echo 'Generating models...'
+generate_dot:
+	echo 'Generating dot files...'
 	ruby ./scripts/graphs.rb
 
-doc: prepare_doc hooklist relationlist vertexlist graphs
+convert_png:
+	echo 'Converting to png...'
+	ruby ./scripts/convert.rb
+
+doc: hooklist relationlist vertexlist generate_dot convert_png
 
 update_commit:
 	ruby ./scripts/commit.rb

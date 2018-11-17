@@ -47,29 +47,26 @@ File.readlines('./security/provenance/hooks.c').each do |line|
       File.open('./docs/dot/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
       puts hook
       if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+        File.open('./docs/dot/'+hook+'_always.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map[hook+'_always'] = str unless str == ''
       elsif hook == 'inode_link'
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/inode_rename.png')  unless str == ''
+        File.open('./docs/dot/inode_rename.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map['inode_rename'] = str unless str == ''
       elsif hook == '__mq_msgsnd'
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
+        File.open('./docs/dot/msg_queue_msgsnd.dot', 'w') { |f| f.write(dot) } unless str == ''
+        File.open('./docs/dot/mq_timedsend.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map['msg_queue_msgsnd'] = str unless str == ''
         hook_map['mq_timedsend'] = str unless str == ''
       elsif hook == '__mq_msgrcv'
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/msg_queue_msgrcv.png')  unless str == ''
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/mq_timedreceive.png')  unless str == ''
+        File.open('./docs/dot/msg_queue_msgrcv.dot', 'w') { |f| f.write(dot) } unless str == ''
+        File.open('./docs/dot/mq_timedreceive.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map['msg_queue_msgrcv'] = str unless str == ''
         hook_map['mq_timedreceive'] = str unless str == ''
       elsif hook == 'msg_queue_msgrcv' || hook == 'mq_timedreceive' || hook == 'mq_timedsend' || hook == 'msg_queue_msgsnd'
         puts 'Skipping '+hook
       else
-        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
         hook_map.store(hook, str) unless str == ''
       end
       g.reset unless str == ''
@@ -187,6 +184,5 @@ if File.file?('./scripts/syshooks.txt')
     puts dot
     g.reset unless str == ''
     File.open('./docs/dot/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-    system('dot -Tpng ./docs/dot/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
   end
 end
