@@ -44,9 +44,6 @@ jobs:
           name: syshooks
           command: 'cd ./scripts && cat syshooks.txt'
       - run:
-          name: clean
-          command: rm -rf ./docs/img && mkdir -p ./docs/img
-      - run:
           name: docs
           command: 'make doc'
       - deploy:
@@ -57,13 +54,19 @@ jobs:
               git config --global user.name $GH_NAME
               mkdir -p output
               cd output
+              echo "Cloning..."
               git clone https://github.com/camflow/camflow-dev
               cd camflow-dev
               git checkout $TARGET_BRANCH
+              echo "Copying..."
               rm -rf ./docs/img && mkdir -p ./docs/img
+              rm -rf ./docs/dot && mkdir -p ./docs/dot
               cp -a ../../docs/. ./docs
               cp -a ../../docs/img/. ./docs/img
+              cp -a ../../docs/dot/. ./docs/dot
+              echo "Check files are there"
               ls -l ./docs/img
+              ls -l ./docs/dot
               git status
               # is there any change
               if ! git diff-index --exit-code --quiet HEAD; then

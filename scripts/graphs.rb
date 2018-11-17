@@ -26,10 +26,10 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   if  line.include?('int __mq_msgsnd(') || line.include?('int __mq_msgrcv(')
     g.from_string(str) unless str == ''
     dot = g.get_dot unless str == ''
-    File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-    system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+    File.open('./docs/dot/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
+    system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
     if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
-      system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+      system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
       hook_map[hook+'_always'] = str unless str == ''
     end
     g.reset unless str == ''
@@ -44,32 +44,32 @@ File.readlines('./security/provenance/hooks.c').each do |line|
     if line.include?('provenance_'+h+'(')
       g.from_string(str) unless str == ''
       dot = g.get_dot unless str == ''
-      File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
+      File.open('./docs/dot/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
       puts hook
       if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map[hook+'_always'] = str unless str == ''
       elsif hook == 'inode_link'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/inode_rename.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/inode_rename.png')  unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map['inode_rename'] = str unless str == ''
       elsif hook == '__mq_msgsnd'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
         hook_map['msg_queue_msgsnd'] = str unless str == ''
         hook_map['mq_timedsend'] = str unless str == ''
       elsif hook == '__mq_msgrcv'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgrcv.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedreceive.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/msg_queue_msgrcv.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/mq_timedreceive.png')  unless str == ''
         hook_map['msg_queue_msgrcv'] = str unless str == ''
         hook_map['mq_timedreceive'] = str unless str == ''
       elsif hook == 'msg_queue_msgrcv' || hook == 'mq_timedreceive' || hook == 'mq_timedsend' || hook == 'msg_queue_msgsnd'
         puts 'Skipping '+hook
       else
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+        system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
         hook_map.store(hook, str) unless str == ''
       end
       g.reset unless str == ''
@@ -186,8 +186,8 @@ if File.file?('./scripts/syshooks.txt')
     dot = g.get_dot unless str == ''
     puts dot
     g.reset unless str == ''
-    File.open('/tmp/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-    system('cat /tmp/'+call_name+'.dot') unless str == ''
-    system('dot -Tpng /tmp/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
+    File.open('./docs/dot/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
+    system('cat ./docs/dot/'+call_name+'.dot') unless str == ''
+    system('dot -Tpng ./docs/dot/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
   end
 end
