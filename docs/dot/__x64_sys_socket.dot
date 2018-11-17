@@ -1,0 +1,31 @@
+digraph RGL__DirectedAdjacencyGraph {inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
+
+inode -> task[fontsize = 8,label = file_sigio]
+
+process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+task -> process_memory[fontsize = 8,label = memory_write]
+
+task -> task[fontsize = 8,label = version_activity]
+
+process_memory -> process_memory[fontsize = 8,label = version_entity]
+
+process_memory -> inode[fontsize = 8,label = sh_write]
+
+inode -> inode[fontsize = 8,label = version_entity]
+
+path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+path -> process_memory[fontsize = 8,label = named_process]
+
+process_memory -> task[fontsize = 8,label = memory_read]
+
+task -> inode[fontsize = 8,label = socket_create]
+
+inode -> process_memory[fontsize = 8,label = sh_read]
+
+task -> task[fontsize = 8,label = terminate_task]
+
+}

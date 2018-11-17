@@ -1,0 +1,51 @@
+digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+path -> process_memory[fontsize = 8,label = named_process]
+
+inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+path -> inode[fontsize = 8,label = named]
+
+task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
+
+inode -> task[fontsize = 8,label = open]
+
+task -> process_memory[fontsize = 8,label = memory_write]
+
+task -> task[fontsize = 8,label = version_activity]
+
+process_memory -> process_memory[fontsize = 8,label = version_entity]
+
+process_memory -> inode[fontsize = 8,label = sh_write]
+
+inode -> inode[fontsize = 8,label = version_entity]
+
+inode -> task[fontsize = 8,label = file_sigio]
+
+process_memory -> task[fontsize = 8,label = memory_read]
+
+task -> inode[fontsize = 8,label = inode_create]
+
+inode -> process_memory[fontsize = 8,label = sh_read]
+
+inode -> task[fontsize = 8,label = perm_exec]
+
+inode -> task[fontsize = 8,label = perm_read]
+
+inode -> task[fontsize = 8,label = perm_append]
+
+inode -> task[fontsize = 8,label = perm_write]
+
+iattr[fontsize = 8,label = iattr,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+task -> iattr[fontsize = 8,label = setattr]
+
+iattr -> iattr[fontsize = 8,label = version_entity]
+
+iattr -> inode[fontsize = 8,label = setattr_inode]
+
+task -> task[fontsize = 8,label = terminate_task]
+
+}
