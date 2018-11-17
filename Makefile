@@ -102,15 +102,19 @@ config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
 
 hooklist:
+	echo 'Generating HOOKS.md...'
 	ruby ./scripts/hooklist.rb > docs/HOOKS.md
 
 relationlist:
+	echo 'Generating RELATIONS.md...'
 	ruby ./scripts/relationlist.rb > docs/RELATIONS.md
 
 vertexlist:
+	echo 'Generating VERTICES.md...'
 	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
 graphs:
+	echo 'Generating models...'
 	ruby ./scripts/graphs.rb
 
 doc: hooklist relationlist vertexlist graphs
