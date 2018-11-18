@@ -178,7 +178,7 @@ __x64_sys_mknodat|13|
 __x64_sys_fchown|12|
 __x64_sys_write|5|
 __x64_sys_getpgid|1|
-__x64_sys_mmap_pgoff|20|
+__x64_sys_mmap_pgoff|21|
 __x64_sys_select|3|
 __x64_sys_sched_getparam|4|
 __x64_sys_kill|7|
@@ -187,7 +187,7 @@ __x64_sys_fchmod|12|
 __x64_sys_shmctl|8|
 __x64_sys_setresgid|8|
 __x64_sys_mq_timedsend|12|
-__x64_sys_finit_module|18|
+__x64_sys_finit_module|21|
 __x64_sys_setresgid16|8|
 __x64_sys_fanotify_init|9|
 __x64_sys_io_submit|7|
@@ -212,7 +212,7 @@ __x64_sys_connect|4|
 __x64_sys_semop|8|
 __x64_sys_fstatfs|4|
 __x64_sys_process_vm_writev|10|
-__x64_sys_kexec_file_load|15|
+__x64_sys_kexec_file_load|18|
 __x64_sys_preadv|5|
 __x64_sys_clock_getres|3|
 __x64_sys_remap_file_pages|13|
@@ -244,7 +244,7 @@ __x64_sys_io_setup|13|
 __x64_sys_inotify_add_watch|13|
 __x64_sys_chmod|17|
 __x64_sys_getpriority|3|
-__x64_sys_mmap|20|
+__x64_sys_mmap|21|
 __x64_sys_sysctl|3|
 __x64_sys_pwrite64|5|
 __x64_sys_pselect6|3|
@@ -311,7 +311,7 @@ __x64_sys_dup2|4|
 __x64_sys_dup3|4|
 __x64_sys_timerfd_settime|5|
 __x64_sys_chroot|14|
-__x64_sys_shmat|23|
+__x64_sys_shmat|24|
 __x64_sys_kexec_load|6|
 __x64_sys_rename|12|
 __x64_sys_unshare|14|
@@ -417,16 +417,15 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 12|14|
 13|11|
 14|22|
-15|9|
+15|8|
 16|6|
 17|8|
 18|2|
 19|3|
-20|2|
-21|1|
+21|4|
 22|3|
-23|5|
-24|1|
+23|4|
+24|2|
 26|2|
 27|1|
 30|1|
@@ -436,7 +435,7 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 ## Statistics of System Calls Arranged by Weighted API Importance
 WEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 --------------------------------------------|------------------------|
-mmap|20|
+mmap|21|
 vfork|22|
 exit|19|
 exit_group|19|
@@ -543,7 +542,7 @@ pwrite64|5|
 inotify_init|9|
 lgetxattr|15|
 setxattr|16|
-shmat|23|
+shmat|24|
 prctl|9|
 inotify_rm_watch|4|
 listen|4|
@@ -659,7 +658,7 @@ epoll_create|9|
 munlockall|8|
 truncate|17|
 init_module|10|
-finit_module|18|
+finit_module|21|
 adjtimex|5|
 waitid|9|
 perf_event_open|10|
@@ -760,7 +759,7 @@ get_kernel_syms|N/A|
 UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 ----------------------------------------------|------------------------|
 exit|19|
-mmap|20|
+mmap|21|
 write|5|
 exit_group|19|
 open|23|
@@ -845,7 +844,7 @@ getpeername|4|
 shmdt|9|
 fchmod|12|
 shmctl|8|
-shmat|23|
+shmat|24|
 sigaltstack|3|
 fsync|4|
 listen|4|
@@ -1035,7 +1034,7 @@ vmsplice|9|
 init_module|10|
 kcmp|N/A|
 fanotify_init|9|
-finit_module|18|
+finit_module|21|
 sched_rr_get_interval|4|
 process_vm_writev|10|
 fanotify_mark|13|
