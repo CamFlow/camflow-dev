@@ -129,7 +129,7 @@ update_commit:
 compile: compile_security compile_kernel compile_us doc
 
 compile_security_only:
-	cd ./build/linux-stable && $(MAKE) security W=1
+	cd ./build/linux-stable && $(MAKE) security
 
 compile_security: copy_change compile_security_only doc
 

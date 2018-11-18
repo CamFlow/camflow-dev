@@ -30,7 +30,6 @@
 
 #temp files
 *~
-*.txt
 *.db
 *.tmp
 

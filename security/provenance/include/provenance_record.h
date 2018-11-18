@@ -203,10 +203,10 @@ static inline int record_kernel_link(struct provenance *node)
 	    !provenance_is_recorded(prov_elt(node)))
 		return 0;
 	spin_lock(prov_lock(node));
-	//rc = record_relation(RL_RAN_ON, &prov_machine, prov_entry(node), NULL, 0);
-	//set_kernel_recorded(prov_elt(node));
+	rc = record_relation(RL_RAN_ON, prov_machine, prov_entry(node), NULL, 0);
+	set_kernel_recorded(prov_elt(node));
 	spin_unlock(prov_lock(node));
-	return 0;
+	return rc;
 }
 
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
@@ -449,9 +449,6 @@ static __always_inline int informs(const uint64_t type,
 	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
 
-// reference to node representing the machine/kernel
-extern union long_prov_elt prov_machine;
-
 static __always_inline int influences_kernel(const uint64_t type,
 						struct provenance *entity,
 				    struct provenance *activity,
@@ -470,7 +467,7 @@ static __always_inline int influences_kernel(const uint64_t type,
 	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(type, prov_entry(activity), &prov_machine, NULL, 0);
+	rc = record_relation(type, prov_entry(activity), prov_machine, NULL, 0);
 out:
 	return rc;
 }
@@ -478,6 +475,6 @@ out:
 static __always_inline void record_machine(void)
 {
 	pr_info("Provenance: recording machine node...");
-	__write_node(&prov_machine);
+	__write_node(prov_machine);
 }
 #endif

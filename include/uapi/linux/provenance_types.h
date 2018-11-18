@@ -187,6 +187,7 @@
 #define prov_is_used(val) prov_is_type(val, RL_USED)
 #define prov_is_informed(val) prov_is_type(val, RL_INFORMED)
 #define prov_is_influenced(val) prov_is_type(val, RL_INFLUENCED)
+#define prov_is_associated(val) prov_is_type(val, RL_ASSOCIATED)
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
 #define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
 
