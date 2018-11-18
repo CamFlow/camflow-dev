@@ -4,6 +4,10 @@ process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#
 
 path -> process_memory[fontsize = 8,label = named_process]
 
+machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+
+machine -> process_memory[fontsize = 8,label = ran_on]
+
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
 process_memory -> task[fontsize = 8,label = getpgid]
