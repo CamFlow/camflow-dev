@@ -62,9 +62,10 @@ jobs:
               cd camflow-dev
               git checkout $TARGET_BRANCH
               echo "Copying..."
-              cp -a ../../docs/. ./docs
-              cp -a ../../docs/img/. ./docs/img
-              cp -a ../../docs/dot/. ./docs/dot
+              cp -af ../../docs/. ./docs
+              cp -af ../../docs/img/. ./docs/img
+              cp -af ../../docs/dot/. ./docs/dot
+              cp -f ../../scripts/syshooks.txt ./scripts/syshooks.txt
               echo "Check files are there"
               ls -l ./docs/img
               ls -l ./docs/dot
