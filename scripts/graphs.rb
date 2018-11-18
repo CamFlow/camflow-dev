@@ -181,7 +181,6 @@ if File.file?('./scripts/syshooks.txt')
     end
     g.from_string(str) unless str == ''
     dot = g.get_dot unless str == ''
-    puts dot
     g.reset unless str == ''
     File.open('./docs/dot/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
   end

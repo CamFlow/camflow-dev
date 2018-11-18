@@ -11,6 +11,5 @@ Dir.glob('./docs/dot/*.dot') do |item|
   puts item
   img = item.sub '.dot', '.png'
   img = img.sub '/dot/', '/img/'
-  puts img
   system('dot -Tpng '+item+' -o '+img)
 end
