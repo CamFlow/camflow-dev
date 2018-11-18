@@ -4,4 +4,8 @@ process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#
 
 path -> process_memory[fontsize = 8,label = named_process]
 
+machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+
+machine -> process_memory[fontsize = 8,label = ran_on]
+
 }
