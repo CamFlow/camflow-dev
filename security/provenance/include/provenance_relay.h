@@ -24,7 +24,7 @@
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
 #define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
-#define PROV_INITIAL_LONG_BUFF_SIZE 256
+#define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 extern bool relay_ready;
 
