@@ -66,6 +66,7 @@ jobs:
               cp -af ../../docs/img/. ./docs/img
               cp -af ../../docs/dot/. ./docs/dot
               cp -f ../../scripts/syshooks.txt ./scripts/syshooks.txt
+              cp -f ../../scripts/syslist.txt ./scripts/syslist.txt
               echo "Check files are there"
               ls -l ./docs/img
               ls -l ./docs/dot
