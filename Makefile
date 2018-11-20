@@ -270,3 +270,8 @@ update_linuxkit:
 	cp ./build/linux-stable/0002-camflow-patch.patch ./build/linuxkit/projects/camflow/kernel/patches-4.14.x/0002-camflow-patch.patch
 	cd ./build/linuxkit && git add .
 	cd ./build/linuxkit && git commit -a -m "Travis updated camflow patch $(shell date --iso=seconds)"
+
+fedora_dependencies:
+	sudo dnf groupinstall -y 'Development Tools'
+	sudo dnf install -y ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto bison flex
+	sudo dnf install -y ruby
