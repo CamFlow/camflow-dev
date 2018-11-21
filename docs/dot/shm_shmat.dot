@@ -26,6 +26,12 @@ process_memory -> inode[fontsize = 8,label = sh_write]
 
 inode -> inode[fontsize = 8,label = version_entity]
 
-shm -> task[fontsize = 8,label = sh_attach_write]
+process_memory -> task[fontsize = 8,label = memory_read]
+
+task -> shm[fontsize = 8,label = sh_attach_write]
+
+shm -> shm[fontsize = 8,label = version_entity]
+
+inode -> process_memory[fontsize = 8,label = sh_read]
 
 }

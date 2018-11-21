@@ -56,7 +56,9 @@ shm[fontsize = 8,label = shm,shape = ellipse, fillcolor="#fffacd", style = fille
 
 shm -> task[fontsize = 8,label = sh_attach_read]
 
-shm -> task[fontsize = 8,label = sh_attach_write]
+task -> shm[fontsize = 8,label = sh_attach_write]
+
+shm -> shm[fontsize = 8,label = version_entity]
 
 task -> task[fontsize = 8,label = terminate_task]
 
