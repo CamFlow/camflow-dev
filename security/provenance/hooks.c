@@ -1666,7 +1666,7 @@ static int provenance_shm_alloc_security(struct kern_ipc_perm *shp)
 	prov_elt(sprov)->shm_info.mode = shp->mode;
 	shp->provenance = sprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	rc = generates(RL_SH_CREATE_READ, sprov, tprov, cprov, NULL, 0);
+	rc = generates(RL_SH_CREATE_READ, cprov, tprov, sprov, NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = generates(RL_SH_CREATE_WRITE, cprov, tprov, sprov, NULL, 0);
@@ -1729,7 +1729,7 @@ static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr,
 		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
 		if (rc < 0)
 			goto out;
-		rc = uses(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
+		rc = uses(RL_SH_ATTACH_WRITE, sprov, tprov, cprov, NULL, shmflg);
 	}
 out:
 	spin_unlock(prov_lock(sprov));
