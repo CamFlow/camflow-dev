@@ -68,17 +68,30 @@ bool relay_initialized;
  */
 void write_boot_buffer(void)
 {
+	int i;
 	if (prov_machine_id==0 || prov_boot_id==0 || !relay_initialized)
 		return;
 
 	relay_ready = true;
-	if (boot_buffer->nb_entry > 0)
+	if (boot_buffer->nb_entry > 0){
+		for (i=0; i<boot_buffer->nb_entry; i++){
+			if (relation_identifier(&(boot_buffer->buffer[i])).boot_id == 0)
+				relation_identifier(&(boot_buffer->buffer[i])).boot_id = prov_boot_id;
+			relation_identifier(&(boot_buffer->buffer[i])).machine_id = prov_machine_id;
+		}
 		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
+	}
 	kfree(boot_buffer);
 	boot_buffer = NULL;
 
-	if (long_boot_buffer->nb_entry > 0)
+	if (long_boot_buffer->nb_entry > 0){
+		for (i=0; i<long_boot_buffer->nb_entry; i++){
+			if (relation_identifier(&(long_boot_buffer->buffer[i])).boot_id == 0)
+				relation_identifier(&(long_boot_buffer->buffer[i])).boot_id = prov_boot_id;
+			relation_identifier(&(long_boot_buffer->buffer[i])).machine_id = prov_machine_id;
+		}
 		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_elt));
+	}
 	kfree(long_boot_buffer);
 	long_boot_buffer = NULL;
 }
