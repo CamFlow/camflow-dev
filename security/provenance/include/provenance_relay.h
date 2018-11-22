@@ -74,6 +74,15 @@ struct prov_long_boot_buffer {
 	uint32_t nb_entry;
 };
 
+static __always_inline void tighten_provenance(union prov_identifier *id)
+{
+	if (id->node_id.type == ENT_PACKET)
+		return;
+	if (id->node_id.boot_id == 0)
+		id->node_id.boot_id = prov_boot_id;
+	id->node_id.machine_id = prov_machine_id;
+}
+
 extern struct prov_boot_buffer *boot_buffer;
 
 /*!
@@ -177,7 +186,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
 	if (!prov_is_packet(node) && !provenance_is_recorded(node))
-		node_identifier(node).machine_id = prov_machine_id;
+		tighten_provenance(&get_prov_identifier(node));
 	if ( provenance_is_long(node) )
 		long_prov_write(node);
 	else
