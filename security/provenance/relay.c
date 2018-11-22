@@ -76,9 +76,6 @@ static void write_boot_buffer(void)
 	long_boot_buffer = NULL;
 }
 
-bool relay_ready;
-extern struct workqueue_struct *prov_queue;
-
 /*!
  * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
  *
@@ -124,6 +121,7 @@ out:
 	return rc;
 }
 
+bool relay_ready;
 /*!
  * @brief Initialize relay buffer for provenance.
  *
