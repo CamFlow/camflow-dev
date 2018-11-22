@@ -75,11 +75,7 @@ void write_boot_buffer(void)
 	relay_ready = true;
 	if (boot_buffer->nb_entry > 0){
 		for (i=0; i<boot_buffer->nb_entry; i++){
-			if (prov_is_packet(&(boot_buffer->buffer[i])))
-				continue;
-			if (relation_identifier(&(boot_buffer->buffer[i])).boot_id == 0)
-				relation_identifier(&(boot_buffer->buffer[i])).boot_id = prov_boot_id;
-			relation_identifier(&(boot_buffer->buffer[i])).machine_id = prov_machine_id;
+			tighten_provenance(&get_prov_identifier(&(boot_buffer->buffer[i])));
 		}
 		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
 	}
@@ -88,11 +84,7 @@ void write_boot_buffer(void)
 
 	if (long_boot_buffer->nb_entry > 0){
 		for (i=0; i<long_boot_buffer->nb_entry; i++){
-			if (prov_is_packet(&(long_boot_buffer->buffer[i])))
-				continue;
-			if (relation_identifier(&(long_boot_buffer->buffer[i])).boot_id == 0)
-				relation_identifier(&(long_boot_buffer->buffer[i])).boot_id = prov_boot_id;
-			relation_identifier(&(long_boot_buffer->buffer[i])).machine_id = prov_machine_id;
+			tighten_provenance(&get_prov_identifier(&(long_boot_buffer->buffer[i])));
 		}
 		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_elt));
 	}
