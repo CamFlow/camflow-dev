@@ -75,6 +75,8 @@ void write_boot_buffer(void)
 	relay_ready = true;
 	if (boot_buffer->nb_entry > 0){
 		for (i=0; i<boot_buffer->nb_entry; i++){
+			if (prov_is_packet(&(boot_buffer->buffer[i])))
+				continue;
 			if (relation_identifier(&(boot_buffer->buffer[i])).boot_id == 0)
 				relation_identifier(&(boot_buffer->buffer[i])).boot_id = prov_boot_id;
 			relation_identifier(&(boot_buffer->buffer[i])).machine_id = prov_machine_id;
@@ -86,6 +88,8 @@ void write_boot_buffer(void)
 
 	if (long_boot_buffer->nb_entry > 0){
 		for (i=0; i<long_boot_buffer->nb_entry; i++){
+			if (prov_is_packet(&(long_boot_buffer->buffer[i])))
+				continue;
 			if (relation_identifier(&(long_boot_buffer->buffer[i])).boot_id == 0)
 				relation_identifier(&(long_boot_buffer->buffer[i])).boot_id = prov_boot_id;
 			relation_identifier(&(long_boot_buffer->buffer[i])).machine_id = prov_machine_id;
