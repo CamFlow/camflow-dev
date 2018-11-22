@@ -76,6 +76,10 @@ void write_boot_buffer(void)
 	if (boot_buffer->nb_entry > 0){
 		for (i=0; i<boot_buffer->nb_entry; i++){
 			tighten_provenance(&get_prov_identifier(&(boot_buffer->buffer[i])));
+			if(prov_is_relation(&(boot_buffer->buffer[i]))) {
+				tighten_provenance(&(boot_buffer->buffer[i].relation_info.snd));
+				tighten_provenance(&(boot_buffer->buffer[i].relation_info.rcv));
+			}
 		}
 		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
 	}

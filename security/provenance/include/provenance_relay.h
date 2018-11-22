@@ -185,8 +185,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 {
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
-	if (!prov_is_packet(node) && !provenance_is_recorded(node))
-		tighten_provenance(&get_prov_identifier(node));
+	tighten_provenance(&get_prov_identifier(node));
 	if ( provenance_is_long(node) )
 		long_prov_write(node);
 	else
