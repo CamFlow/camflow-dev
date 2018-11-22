@@ -128,6 +128,9 @@ declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_dupl
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
+	if (prov_machine_id!=0) // it has already been set
+		return -EPERM;
+
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -138,6 +141,7 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 		return -EAGAIN;
 
 	pr_info("Provenance: machine ID %d\n", prov_machine_id);
+	write_boot_buffer();
 	return count; // read only
 }
 
@@ -157,6 +161,9 @@ declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_ma
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
+	if (prov_boot_id!=0) // it has already been set
+		return -EPERM;
+
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -167,6 +174,7 @@ static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 		return -EAGAIN;
 
 	pr_info("Provenance: boot ID %d\n", prov_boot_id);
+	write_boot_buffer();
 	return count; // read only
 }
 

@@ -26,8 +26,6 @@
 #define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
 
-extern bool relay_ready;
-
 /*!
  * @brief A list of relay channel data structure.
  *
@@ -43,6 +41,9 @@ struct relay_list {
 extern struct list_head relay_list;
 
 int prov_create_channel(char *buffer, size_t len);
+void write_boot_buffer(void);
+
+extern bool relay_ready;
 
 /*!
  * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.

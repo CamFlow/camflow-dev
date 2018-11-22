@@ -55,16 +55,23 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
+bool relay_ready;
+bool relay_initialized;
 /*!
  * @brief Write whatever in boot buffer to relay buffer when relay buffer is ready.
  *
  * This function writes what's in boot_buffer to relay buffer for regular provenance entries,
  * and what's in long_boot_buffer to relay buffer for long provenance entries.
  * It also frees memory after it is done writing.
+ * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
  *
  */
-static void write_boot_buffer(void)
+void write_boot_buffer(void)
 {
+	if (prov_machine_id==0 || prov_boot_id==0 || !relay_initialized)
+		return;
+
+	relay_ready = true;
 	if (boot_buffer->nb_entry > 0)
 		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
 	kfree(boot_buffer);
@@ -121,14 +128,12 @@ out:
 	return rc;
 }
 
-bool relay_ready;
 /*!
  * @brief Initialize relay buffer for provenance.
  *
  * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,
  * and a base relay buffer for long provenance entries.
  * This will become the first relay channel in the relay_list.
- * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
  * Then we can write down whatever is in the boot buffer to relay buffer.
  * Head of the relay_list is defined in hooks.c file.
  * @return 0 if no error occurred.
@@ -144,8 +149,7 @@ static int __init relay_prov_init(void)
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
 	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
-	relay_ready = true;
-
+	relay_initialized = true;
 	write_boot_buffer();
 	pr_info("Provenance: relay ready.\n");
 	return 0;

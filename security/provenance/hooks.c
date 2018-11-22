@@ -2575,6 +2575,7 @@ struct capture_policy prov_policy;
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
 uint32_t epoch;
+spinlock_t boot_lock;
 
 /*!
  * @brief Operations to start provenance capture.
@@ -2607,7 +2608,7 @@ void __init provenance_add_hooks(void)
 	prov_policy.should_duplicate = false;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
-	prov_machine_id = 1;
+	prov_machine_id = 0;
 	prov_boot_id = 0;
 	epoch = 1;
 	provenance_cache = kmem_cache_create("provenance_struct",
@@ -2620,6 +2621,7 @@ void __init provenance_add_hooks(void)
 						  0, SLAB_PANIC, NULL);
 	if (unlikely(!long_provenance_cache))
 		panic("Provenance: could not allocate long_provenance_cache.");
+	spin_lock_init(&boot_lock);
 	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);     // Initalize boot buffer to record provenance before relayfs is ready.
 	if (unlikely(!boot_buffer))
 		panic("Provenance: could not allocate boot_buffer.");
