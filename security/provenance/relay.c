@@ -75,10 +75,10 @@ void write_boot_buffer(void)
 	relay_ready = true;
 	if (boot_buffer->nb_entry > 0){
 		for (i=0; i<boot_buffer->nb_entry; i++){
-			tighten_provenance(&get_prov_identifier(&(boot_buffer->buffer[i])));
+			tighten_identifier(&get_prov_identifier(&(boot_buffer->buffer[i])));
 			if(prov_is_relation(&(boot_buffer->buffer[i]))) {
-				tighten_provenance(&(boot_buffer->buffer[i].relation_info.snd));
-				tighten_provenance(&(boot_buffer->buffer[i].relation_info.rcv));
+				tighten_identifier(&(boot_buffer->buffer[i].relation_info.snd));
+				tighten_identifier(&(boot_buffer->buffer[i].relation_info.rcv));
 			}
 		}
 		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
@@ -88,7 +88,7 @@ void write_boot_buffer(void)
 
 	if (long_boot_buffer->nb_entry > 0){
 		for (i=0; i<long_boot_buffer->nb_entry; i++){
-			tighten_provenance(&get_prov_identifier(&(long_boot_buffer->buffer[i])));
+			tighten_identifier(&get_prov_identifier(&(long_boot_buffer->buffer[i])));
 		}
 		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_elt));
 	}
