@@ -74,11 +74,23 @@ struct prov_long_boot_buffer {
 	uint32_t nb_entry;
 };
 
-#define insert_in_boot_buffer(msg, buf, entry_size, max_entry)\
-if (likely(buf->nb_entry < max_entry)) {\
-	memcpy(&(buf->buffer[buf->nb_entry]), msg, entry_size);\
-	buf->nb_entry++;\
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)\
+static inline void fcn_name(msg_type *msg, buffer_type *buf)\
+{\
+	if (likely(buf->nb_entry < max_entry)) {\
+		memcpy(&(buf->buffer[buf->nb_entry]), msg, sizeof(msg_type));\
+		buf->nb_entry++;\
+	}\
 }\
+
+declare_insert_buffer_fcn(insert_boot_buffer,
+													union prov_elt,
+													struct prov_boot_buffer,
+													PROV_INITIAL_BUFF_SIZE);
+declare_insert_buffer_fcn(insert_long_boot_buffer,
+													union long_prov_elt,
+													struct prov_long_boot_buffer,
+													PROV_INITIAL_LONG_BUFF_SIZE);
 
 extern struct prov_boot_buffer *boot_buffer;
 
@@ -102,7 +114,7 @@ static __always_inline void prov_write(union prov_elt *msg)
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		insert_in_boot_buffer(msg, boot_buffer, sizeof(union prov_elt), PROV_INITIAL_BUFF_SIZE);
+		insert_boot_buffer(msg, boot_buffer);
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
@@ -128,7 +140,7 @@ static inline void long_prov_write(union long_prov_elt *msg)
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		insert_in_boot_buffer(msg, long_boot_buffer, sizeof(union long_prov_elt), PROV_INITIAL_LONG_BUFF_SIZE);
+		insert_long_boot_buffer(msg, long_boot_buffer);
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
