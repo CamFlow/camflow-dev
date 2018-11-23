@@ -110,8 +110,7 @@ static __always_inline void prov_write(union prov_elt *msg)
 			provtmp = &(boot_buffer->buffer[boot_buffer->nb_entry]);
 			memcpy(provtmp, msg, sizeof(union prov_elt));
 			boot_buffer->nb_entry++;
-		} else
-			pr_err("Provenance: boot buffer is full.\n");
+		}
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
@@ -142,8 +141,7 @@ static inline void long_prov_write(union long_prov_elt *msg)
 			provtmp = &(long_boot_buffer->buffer[long_boot_buffer->nb_entry]);
 			memcpy(provtmp, msg, sizeof(union long_prov_elt));
 			long_boot_buffer->nb_entry++;
-		} else
-			pr_err("Provenance: long boot buffer is full.\n");
+		}
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
