@@ -85,6 +85,12 @@ static __always_inline void tighten_identifier(union prov_identifier *id)
 
 extern struct prov_boot_buffer *boot_buffer;
 
+#define insert_in_boot_buffer(msg, buf, entry_size, max_entry)\
+if (likely(buf->nb_entry < max_entry)) {\
+	memcpy(&(buf->buffer[buf->nb_entry]), msg, entry_size);\
+	buf->nb_entry++;\
+}\
+
 /*!
  * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
  *
@@ -102,15 +108,10 @@ extern struct prov_boot_buffer *boot_buffer;
 static __always_inline void prov_write(union prov_elt *msg)
 {
 	struct relay_list *tmp;
-	union prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
-			provtmp = &(boot_buffer->buffer[boot_buffer->nb_entry]);
-			memcpy(provtmp, msg, sizeof(union prov_elt));
-			boot_buffer->nb_entry++;
-		}
+		insert_in_boot_buffer(msg, boot_buffer, sizeof(union prov_elt), PROV_INITIAL_BUFF_SIZE);
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
@@ -133,15 +134,10 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 static inline void long_prov_write(union long_prov_elt *msg)
 {
 	struct relay_list *tmp;
-	union long_prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE)) {
-			provtmp = &(long_boot_buffer->buffer[long_boot_buffer->nb_entry]);
-			memcpy(provtmp, msg, sizeof(union long_prov_elt));
-			long_boot_buffer->nb_entry++;
-		}
+		insert_in_boot_buffer(msg, long_boot_buffer, sizeof(union long_prov_elt), PROV_INITIAL_LONG_BUFF_SIZE);
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
