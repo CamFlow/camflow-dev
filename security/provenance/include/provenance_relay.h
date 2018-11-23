@@ -74,22 +74,13 @@ struct prov_long_boot_buffer {
 	uint32_t nb_entry;
 };
 
-static __always_inline void tighten_identifier(union prov_identifier *id)
-{
-	if (id->node_id.type == ENT_PACKET)
-		return;
-	if (id->node_id.boot_id == 0)
-		id->node_id.boot_id = prov_boot_id;
-	id->node_id.machine_id = prov_machine_id;
-}
-
-extern struct prov_boot_buffer *boot_buffer;
-
 #define insert_in_boot_buffer(msg, buf, entry_size, max_entry)\
 if (likely(buf->nb_entry < max_entry)) {\
 	memcpy(&(buf->buffer[buf->nb_entry]), msg, entry_size);\
 	buf->nb_entry++;\
 }\
+
+extern struct prov_boot_buffer *boot_buffer;
 
 /*!
  * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
@@ -159,6 +150,16 @@ static inline void prov_flush(void)
 			relay_flush(tmp->long_prov);
 		}
 	}
+}
+
+
+static __always_inline void tighten_identifier(union prov_identifier *id)
+{
+	if (id->node_id.type == ENT_PACKET)
+		return;
+	if (id->node_id.boot_id == 0)
+		id->node_id.boot_id = prov_boot_id;
+	id->node_id.machine_id = prov_machine_id;
 }
 
 /*!
