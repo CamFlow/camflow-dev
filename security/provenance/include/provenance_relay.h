@@ -23,7 +23,7 @@
 #define PROV_RELAY_BUFF_EXP         24 // 16MB
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
-#define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
+#define PROV_INITIAL_BUFF_SIZE      (1024 * 8)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 /*!
@@ -80,22 +80,17 @@ struct prov_long_boot_buffer {
 static inline void fcn_name(msg_type *msg, buffer_type *buf)\
 {\
 	buffer_type *tmp = buf;\
-	spin_lock(&lock);\
-	while (tmp!=NULL) {\
-		if (tmp->nb_entry==max_entry) {\
-			if (tmp->next == NULL) {\
-				tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);\
-				if (unlikely(!tmp->next))\
-					goto out;\
-			}\
-			tmp = tmp->next;\
-		} else {\
-			memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));\
-			tmp->nb_entry++;\
-		}\
+	while (tmp->next!=NULL) {\
+		tmp = tmp->next;\
 	}\
-out:\
-	spin_unlock(&lock);\
+	if (tmp->nb_entry >= max_entry){\
+		tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);\
+		if (unlikely(!tmp->next))\
+			panic("Provenance: could not allocate boot_buffer.");\
+		tmp = tmp->next;\
+	}\
+	memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));\
+	tmp->nb_entry++;\
 }\
 
 extern spinlock_t boot_lock;
@@ -159,7 +154,7 @@ static inline void long_prov_write(union long_prov_elt *msg)
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		insert_long_boot_buffer(msg, long_boot_buffer);
+		//insert_long_boot_buffer(msg, long_boot_buffer);
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
