@@ -40,6 +40,8 @@
 
 ### v0.4.6
 ```
+- Reworked boot buffer.
+- Represent kernel more explicitly in the provenance graph.
 - Provide API to get commit ID to help with issue tracking.
 - Update to kernel version 4.19.1.
 ```

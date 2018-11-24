@@ -23,7 +23,7 @@
 #define PROV_RELAY_BUFF_EXP         24 // 16MB
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
-#define PROV_INITIAL_BUFF_SIZE      (1024 * 8)
+#define PROV_INITIAL_BUFF_SIZE      (1024 * 16)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 /*!
@@ -76,7 +76,7 @@ struct prov_long_boot_buffer {
 	struct prov_long_boot_buffer *next;
 };
 
-#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry, lock)\
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)\
 static inline void fcn_name(msg_type *msg, buffer_type *buf)\
 {\
 	buffer_type *tmp = buf;\
@@ -93,18 +93,14 @@ static inline void fcn_name(msg_type *msg, buffer_type *buf)\
 	tmp->nb_entry++;\
 }\
 
-extern spinlock_t boot_lock;
 declare_insert_buffer_fcn(insert_boot_buffer,
 													union prov_elt,
 													struct prov_boot_buffer,
-													PROV_INITIAL_BUFF_SIZE,
-													boot_lock);
-extern spinlock_t long_boot_lock;
+													PROV_INITIAL_BUFF_SIZE);
 declare_insert_buffer_fcn(insert_long_boot_buffer,
 													union long_prov_elt,
 													struct prov_long_boot_buffer,
-													PROV_INITIAL_LONG_BUFF_SIZE,
-													long_boot_lock);
+													PROV_INITIAL_LONG_BUFF_SIZE);
 
 extern struct prov_boot_buffer *boot_buffer;
 
