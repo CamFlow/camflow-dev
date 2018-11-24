@@ -23,7 +23,7 @@
 #define PROV_RELAY_BUFF_EXP         24 // 16MB
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 #define PROV_NB_SUBBUF              32
-#define PROV_INITIAL_BUFF_SIZE      (1024 * 16)
+#define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 /*!
@@ -79,20 +79,22 @@ struct prov_long_boot_buffer {
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry, lock)\
 static inline void fcn_name(msg_type *msg, buffer_type *buf)\
 {\
+	buffer_type *tmp = buf;\
 	spin_lock(&lock);\
-	while (buf!=NULL) {\
-		if (buf->nb_entry>=max_entry) {\
-			if (buf->next == NULL) {\
-				buf->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);\
-				if (unlikely(!buf))\
-					panic("Provenance: could not allocate boot_buffer.");\
+	while (tmp!=NULL) {\
+		if (tmp->nb_entry==max_entry) {\
+			if (tmp->next == NULL) {\
+				tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);\
+				if (unlikely(!tmp->next))\
+					goto out;\
 			}\
-			buf = buf->next;\
+			tmp = tmp->next;\
 		} else {\
-			memcpy(&(buf->buffer[buf->nb_entry]), msg, sizeof(msg_type));\
-			buf->nb_entry++;\
+			memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));\
+			tmp->nb_entry++;\
 		}\
 	}\
+out:\
 	spin_unlock(&lock);\
 }\
 

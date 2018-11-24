@@ -79,11 +79,11 @@ void write_boot_buffer(void)
 	spin_lock(&boot_lock);
 	tmp = boot_buffer;
 	boot_buffer = NULL;
-	spin_lock(&boot_lock);
+	spin_unlock(&boot_lock);
 	spin_lock(&long_boot_lock);
 	ltmp = long_boot_buffer;
 	long_boot_buffer = NULL;
-	spin_lock(&long_boot_lock);
+	spin_unlock(&long_boot_lock);
 
 	while(tmp!=NULL){
 		if (tmp->nb_entry > 0){
