@@ -67,30 +67,47 @@ static inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *
 struct prov_boot_buffer {
 	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];
 	uint32_t nb_entry;
+	struct prov_boot_buffer *next;
 };
 
 struct prov_long_boot_buffer {
 	union long_prov_elt buffer[PROV_INITIAL_LONG_BUFF_SIZE];
 	uint32_t nb_entry;
+	struct prov_long_boot_buffer *next;
 };
 
-#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)\
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry, lock)\
 static inline void fcn_name(msg_type *msg, buffer_type *buf)\
 {\
-	if (likely(buf->nb_entry < max_entry)) {\
-		memcpy(&(buf->buffer[buf->nb_entry]), msg, sizeof(msg_type));\
-		buf->nb_entry++;\
+	spin_lock(&lock);\
+	while (buf!=NULL) {\
+		if (buf->nb_entry>=max_entry) {\
+			if (buf->next == NULL) {\
+				buf->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);\
+				if (unlikely(!buf))\
+					panic("Provenance: could not allocate boot_buffer.");\
+			}\
+			buf = buf->next;\
+		} else {\
+			memcpy(&(buf->buffer[buf->nb_entry]), msg, sizeof(msg_type));\
+			buf->nb_entry++;\
+		}\
 	}\
+	spin_unlock(&lock);\
 }\
 
+extern spinlock_t boot_lock;
 declare_insert_buffer_fcn(insert_boot_buffer,
 													union prov_elt,
 													struct prov_boot_buffer,
-													PROV_INITIAL_BUFF_SIZE);
+													PROV_INITIAL_BUFF_SIZE,
+													boot_lock);
+extern spinlock_t long_boot_lock;
 declare_insert_buffer_fcn(insert_long_boot_buffer,
 													union long_prov_elt,
 													struct prov_long_boot_buffer,
-													PROV_INITIAL_LONG_BUFF_SIZE);
+													PROV_INITIAL_LONG_BUFF_SIZE,
+													long_boot_lock);
 
 extern struct prov_boot_buffer *boot_buffer;
 

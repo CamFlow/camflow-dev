@@ -69,31 +69,48 @@ bool relay_initialized;
 void write_boot_buffer(void)
 {
 	int i;
+	struct prov_boot_buffer *tmp, *tmp2;
+	struct prov_long_boot_buffer *ltmp, *ltmp2;
+
 	if (prov_machine_id==0 || prov_boot_id==0 || !relay_initialized)
 		return;
 
 	relay_ready = true;
-	if (boot_buffer->nb_entry > 0){
-		for (i=0; i<boot_buffer->nb_entry; i++){
-			tighten_identifier(&get_prov_identifier(&(boot_buffer->buffer[i])));
-			if(prov_is_relation(&(boot_buffer->buffer[i]))) {
-				tighten_identifier(&(boot_buffer->buffer[i].relation_info.snd));
-				tighten_identifier(&(boot_buffer->buffer[i].relation_info.rcv));
-			}
-		}
-		relay_write(prov_chan, boot_buffer->buffer, boot_buffer->nb_entry * sizeof(union prov_elt));
-	}
-	kfree(boot_buffer);
+	spin_lock(&boot_lock);
+	tmp = boot_buffer;
 	boot_buffer = NULL;
-
-	if (long_boot_buffer->nb_entry > 0){
-		for (i=0; i<long_boot_buffer->nb_entry; i++){
-			tighten_identifier(&get_prov_identifier(&(long_boot_buffer->buffer[i])));
-		}
-		relay_write(long_prov_chan, long_boot_buffer->buffer, long_boot_buffer->nb_entry * sizeof(union long_prov_elt));
-	}
-	kfree(long_boot_buffer);
+	spin_lock(&boot_lock);
+	spin_lock(&long_boot_lock);
+	ltmp = long_boot_buffer;
 	long_boot_buffer = NULL;
+	spin_lock(&long_boot_lock);
+
+	while(tmp!=NULL){
+		if (tmp->nb_entry > 0){
+			for (i=0; i<tmp->nb_entry; i++){
+				tighten_identifier(&get_prov_identifier(&(tmp->buffer[i])));
+				if(prov_is_relation(&(tmp->buffer[i]))) {
+					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
+					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
+				}
+			}
+			relay_write(prov_chan, tmp->buffer, tmp->nb_entry * sizeof(union prov_elt));
+		}
+		tmp2 = tmp;
+		tmp = tmp->next;
+		kfree(tmp2);
+	}
+	while (ltmp!=NULL) {
+		if (ltmp->nb_entry > 0){
+			for (i=0; i<ltmp->nb_entry; i++){
+				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
+			}
+			relay_write(long_prov_chan, ltmp->buffer, ltmp->nb_entry * sizeof(union long_prov_elt));
+		}
+		ltmp2 = ltmp;
+		ltmp = ltmp->next;
+		kfree(ltmp2);
+	}
 }
 
 /*!
