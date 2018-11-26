@@ -43,7 +43,7 @@
 - Reworked boot buffer.
 - Represent kernel more explicitly in the provenance graph.
 - Provide API to get commit ID to help with issue tracking.
-- Update to kernel version 4.19.1.
+- Update to kernel version 4.19.4.
 ```
 
 ### v0.4.5
