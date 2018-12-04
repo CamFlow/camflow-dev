@@ -49,7 +49,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
 
 		if (provenance_records_packet(prov_elt(iprov)))
-			provenance_packet_content(skb, &pckprov);
+			record_packet_content(skb, &pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
 		call_provenance_alloc((prov_entry_t*)&pckprov);

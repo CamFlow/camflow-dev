@@ -116,9 +116,9 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('record_read_xattr(')
     str += ',' unless str == ''
     str += Instruction.record_read_xattr_to_relation
-  elsif line.include?('provenance_packet_content(')
+  elsif line.include?('record_packet_content(')
     str += ',' unless str == ''
-    str += Instruction.provenance_packet_content_to_relation
+    str += Instruction.record_packet_content_to_relation
   elsif line.include?('prov_record_args(')
     str += ',' unless str == ''
     str += Instruction.prov_record_args_to_relation

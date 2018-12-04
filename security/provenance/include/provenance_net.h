@@ -336,7 +336,7 @@ out:
 	return rc;
 }
 
-static __always_inline void provenance_packet_content(struct sk_buff *skb,
+static __always_inline void record_packet_content(struct sk_buff *skb,
 						      struct provenance *pckprov)
 {
 	union long_prov_elt *cnt;
