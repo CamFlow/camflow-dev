@@ -109,14 +109,14 @@ class Instruction
   end
 
   def self.get_cred_provenance_to_relation
-    return 'path-' + self.relation_to_str('RL_NAMED_PROCESS') + '->process_memory,machine-' + self.relation_to_str('RL_RAN_ON') + '->process_memory' 
+    return 'path-' + self.relation_to_str('RL_NAMED_PROCESS') + '->process_memory,machine-' + self.relation_to_str('RL_RAN_ON') + '->process_memory'
   end
 
   def self.inode_provenance_to_relation
     return 'path-' + self.relation_to_str('RL_NAMED') + '->inode'
   end
 
-  def self.provenance_record_address_to_relation
+  def self.record_address_to_relation
     return 'address-' + self.relation_to_str('RL_NAMED') + '->inode'
   end
 

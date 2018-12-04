@@ -107,9 +107,9 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('refresh_inode_provenance(')
     str += ',' unless str == ''
     str += Instruction.inode_provenance_to_relation
-  elsif line.include?('provenance_record_address(')
+  elsif line.include?('record_address(')
     str += ',' unless str == ''
-    str += Instruction.provenance_record_address_to_relation
+    str += Instruction.record_address_to_relation
   elsif line.include?('record_write_xattr(')
     str += ',' unless str == ''
     str += Instruction.record_write_xattr_to_relation(line)

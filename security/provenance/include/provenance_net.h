@@ -314,7 +314,7 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation function or unknown.
  *
  */
-static __always_inline int provenance_record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
+static __always_inline int record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
 	int rc = 0;

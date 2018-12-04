@@ -1916,7 +1916,7 @@ static int provenance_socket_bind(struct socket *sock,
 		if ((op & PROV_SET_RECORD) != 0)
 			set_record_packet(prov_elt(iprov));     // We want to record packet content.
 	}
-	rc = provenance_record_address(address, addrlen, iprov);
+	rc = record_address(address, addrlen, iprov);
 	if (rc < 0)
 		return rc;
 	rc = generates(RL_BIND, cprov, tprov, iprov, NULL, 0);
@@ -1974,7 +1974,7 @@ static int provenance_socket_connect(struct socket *sock,
 		if ((op & PROV_SET_RECORD) != 0)
 			set_record_packet(prov_elt(iprov));
 	}
-	rc = provenance_record_address(address, addrlen, iprov);
+	rc = record_address(address, addrlen, iprov);
 	if (rc < 0)
 		goto out;
 	rc = generates(RL_CONNECT, cprov, tprov, iprov, NULL, 0);
