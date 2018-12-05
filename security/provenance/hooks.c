@@ -1042,7 +1042,7 @@ static int provenance_file_permission(struct file *file, int mask)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, true);
+	struct provenance *iprov = get_file_provenance(file, true);
 	struct inode *inode = file_inode(file);
 	uint32_t perms;
 	unsigned long irqflags;
@@ -1121,8 +1121,8 @@ static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *inprov = file_provenance(in, true);
-	struct provenance *outprov = file_provenance(out, true);
+	struct provenance *inprov = get_file_provenance(in, true);
+	struct provenance *outprov = get_file_provenance(out, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1146,7 +1146,7 @@ static int provenance_kernel_read_file(struct file *file
 																						, enum kernel_read_file_id id)
 {
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, true);
+	struct provenance *iprov = get_file_provenance(file, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1178,7 +1178,7 @@ static int provenance_file_open(struct file *file)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, true);
+	struct provenance *iprov = get_file_provenance(file, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1206,7 +1206,7 @@ static int provenance_file_receive(struct file *file)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, true);
+	struct provenance *iprov = get_file_provenance(file, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1232,7 +1232,7 @@ static int provenance_file_lock(struct file *file, unsigned int cmd)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, false);
+	struct provenance *iprov = get_file_provenance(file, false);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1261,7 +1261,7 @@ static int provenance_file_send_sigiotask(struct task_struct *task,
 					  struct fown_struct *fown, int signum)
 {
 	struct file *file = container_of(fown, struct file, f_owner);
-	struct provenance *iprov = file_provenance(file, false);
+	struct provenance *iprov = get_file_provenance(file, false);
 	struct provenance *tprov = task->provenance;
 	struct provenance *cprov = task_cred_xxx(task, provenance);
 	unsigned long irqflags;
@@ -1321,7 +1321,7 @@ static int provenance_mmap_file(struct file *file,
 
 	if (unlikely(!file))
 		return rc;
-	iprov = file_provenance(file, true);
+	iprov = get_file_provenance(file, true);
 	if (!iprov)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
@@ -1396,7 +1396,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 	if ( vm_mayshare(flags) ) {     // It is a shared mmap.
 		mmapf = vma->vm_file;
 		if (mmapf) {
-			iprov = file_provenance(mmapf, false);
+			iprov = get_file_provenance(mmapf, false);
 			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 			generates(RL_MUNMAP, cprov, tprov, iprov, mmapf, flags);
@@ -1429,7 +1429,7 @@ static int provenance_file_ioctl(struct file *file,
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(file, true);
+	struct provenance *iprov = get_file_provenance(file, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -2303,7 +2303,7 @@ static int provenance_unix_may_send(struct socket *sock,
 static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = file_provenance(bprm->file, true);
+	struct provenance *iprov = get_file_provenance(bprm->file, true);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -2338,7 +2338,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *tprov = get_task_provenance();
-	struct provenance *iprov = file_provenance(bprm->file, false);
+	struct provenance *iprov = get_file_provenance(bprm->file, false);
 
 	if (!nprov)
 		return -ENOMEM;
@@ -2378,7 +2378,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = file_provenance(bprm->file, true);
+	struct provenance *iprov = get_file_provenance(bprm->file, true);
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(iprov))) {

@@ -181,7 +181,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			flags = vma->vm_flags;
-			mmprov = file_provenance(mmapf, false);
+			mmprov = get_file_provenance(mmapf, false);
 			if (mmprov) {
 				if (vm_read_exec_mayshare(flags) && read)
 					rc = record_relation(RL_SH_READ, prov_entry(mmprov), prov_entry(cprov), mmapf, flags);
@@ -229,7 +229,7 @@ static inline int record_task_name(struct task_struct *task,
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
-		fprov = file_provenance(exe_file, false);
+		fprov = get_file_provenance(exe_file, false);
 		if (provenance_is_opaque(prov_elt(fprov))) {
 			set_opaque(prov_elt(prov));
 			goto out;

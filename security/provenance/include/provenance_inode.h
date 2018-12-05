@@ -350,7 +350,7 @@ static __always_inline struct provenance *get_dentry_provenance(struct dentry *d
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *file_provenance(struct file *file, bool may_sleep)
+static __always_inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
