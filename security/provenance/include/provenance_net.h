@@ -33,20 +33,20 @@
  * @return The provenance entry pointer of the socket or NULL if it does not exist.
  *
  */
-static inline struct provenance *socket_inode_provenance(struct socket *sock)
+static inline struct provenance *get_socket_inode_provenance(struct socket *sock)
 {
 	struct inode *inode = SOCK_INODE(sock);
 	struct provenance *iprov = NULL;
 
 	if (inode)
-		iprov = inode_provenance(inode, false);
+		iprov = get_inode_provenance(inode, false);
 	return iprov;
 }
 
 /*!
  * @brief Returns the provenance entry pointer of the inode associated with sk.
  *
- * This function calls the function socket_inode_provenance.
+ * This function calls the function get_socket_inode_provenance.
  * This is becasue only socket has an inode associated with it.
  * We obtain the socket structure from sk structure: @sk->sk_socket.
  * We obtain socket from sock and return the provenance entry pointer.
@@ -54,13 +54,13 @@ static inline struct provenance *socket_inode_provenance(struct socket *sock)
  * @return The provenance entry pointer of the corresponding socket.
  *
  */
-static inline struct provenance *sk_inode_provenance(struct sock *sk)
+static inline struct provenance *get_sk_inode_provenance(struct sock *sk)
 {
 	struct socket *sock = sk->sk_socket;
 
 	if (!sock)
 		return NULL;
-	return socket_inode_provenance(sock);
+	return get_socket_inode_provenance(sock);
 }
 
 /*!
@@ -70,7 +70,7 @@ static inline struct provenance *sk_inode_provenance(struct sock *sk)
  * @return The provenance entry pointer.
  *
  */
-static inline struct provenance *sk_provenance(struct sock *sk)
+static inline struct provenance *get_sk_provenance(struct sock *sk)
 {
 	struct provenance *prov = sk->sk_provenance;
 
@@ -86,13 +86,13 @@ static inline struct provenance *sk_provenance(struct sock *sk)
  * @return The provenance entry pointer.
  *
  */
-static inline struct provenance *socket_provenance(struct socket *sock)
+static inline struct provenance *get_socket_provenance(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 
 	if (!sk)
 		return NULL;
-	return sk_provenance(sk);
+	return get_sk_provenance(sk);
 }
 
 #define ihlen(ih) (ih->ihl * 4)

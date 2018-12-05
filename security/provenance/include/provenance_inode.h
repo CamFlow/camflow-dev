@@ -309,7 +309,7 @@ free_buf:
  * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
-static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
+static __always_inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *prov = inode->i_provenance;
 
@@ -324,29 +324,29 @@ static __always_inline struct provenance *inode_provenance(struct inode *inode, 
 /*!
  * @brief This function returns the provenance of the given directory entry based on its inode.
  *
- * This function ultimately calls "inode_provenance" function.
+ * This function ultimately calls "get_inode_provenance" function.
  * We find the inode of the dentry (if this dentry were to be opened as a file) by calling "d_backing_inode" function.
  * @param dentry The dentry whose provenance is to be returned.
- * @param may_sleep Bool value used in "inode_provenance" function (See above)
+ * @param may_sleep Bool value used in "get_inode_provenance" function (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
+static __always_inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, may_sleep);
+	return get_inode_provenance(inode, may_sleep);
 }
 
 /*!
  * @brief This function returns the provenance of the given file based on its inode.
  *
- * This function ultimately calls "inode_provenance" function.
+ * This function ultimately calls "get_inode_provenance" function.
  * We find the inode of the file by calling "file_inode" function.
  * @param file The file whose provenance is to be returned.
- * @param may_sleep Bool value used in "inode_provenance" function (See above)
+ * @param may_sleep Bool value used in "get_inode_provenance" function (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
@@ -356,7 +356,7 @@ static __always_inline struct provenance *file_provenance(struct file *file, boo
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, may_sleep);
+	return get_inode_provenance(inode, may_sleep);
 }
 
 static inline void save_provenance(struct dentry *dentry)
@@ -366,7 +366,7 @@ static inline void save_provenance(struct dentry *dentry)
 
 	if (!dentry)
 		return;
-	prov = dentry_provenance(dentry, false);
+	prov = get_dentry_provenance(dentry, false);
 	if (!prov)
 		return;
 	spin_lock(prov_lock(prov));
