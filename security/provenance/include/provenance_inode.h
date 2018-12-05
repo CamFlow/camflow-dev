@@ -190,10 +190,9 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
  * @param inode The inode in question whose provenance entry to be updated.
  *
  */
-static inline void refresh_inode_provenance(struct inode *inode)
+static __always_inline void refresh_inode_provenance(struct inode *inode,
+																						struct provenance *prov)
 {
-	struct provenance *prov = inode->i_provenance;
-
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
 	record_inode_name(inode, prov);
@@ -248,9 +247,10 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
  * @return 0 if no error occurred; -ENOMEM if no more memory to allocate for the provenance entry. Other error codes inherited or unknown.
  *
  */
-static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
+static inline int inode_init_provenance(struct inode *inode,
+																				struct dentry *opt_dentry,
+																				struct provenance *prov)
 {
-	struct provenance *prov = inode->i_provenance;
 	union prov_elt *buf;
 	struct dentry *dentry;
 	int rc = 0;
@@ -315,9 +315,9 @@ static __always_inline struct provenance *inode_provenance(struct inode *inode, 
 
 	might_sleep_if(may_sleep);
 	if (!provenance_is_initialized(prov_elt(prov)) && may_sleep)
-		inode_init_provenance(inode, NULL);
+		inode_init_provenance(inode, NULL, prov);
 	if (may_sleep)
-		refresh_inode_provenance(inode);
+		refresh_inode_provenance(inode, prov);
 	return prov;
 }
 
