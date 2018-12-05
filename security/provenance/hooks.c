@@ -460,8 +460,8 @@ static int provenance_inode_create(struct inode *dir,
  */
 static int provenance_inode_permission(struct inode *inode, int mask)
 {
-	struct provenance *cprov = get_cred_provenance();
-	struct provenance *tprov = get_task_provenance();
+	struct provenance *cprov = NULL;
+	struct provenance *tprov = NULL;
 	struct provenance *iprov = NULL;
 	unsigned long irqflags;
 	int rc = 0;
@@ -470,6 +470,8 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 		return 0;
 	if (unlikely(IS_PRIVATE(inode)))
 		return 0;
+	cprov = get_cred_provenance();
+	tprov = get_task_provenance();
 	iprov = inode_provenance(inode, false);
 	if (!iprov)
 		return -ENOMEM;
