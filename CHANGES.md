@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.4.6           | 4.19.4         | N/A        |
+| 0.4.6           | 4.19.6         | N/A        |
 | 0.4.5           | 4.18.16        | 24/10/2018 |
 | 0.4.4           | 4.17.17        | 19/08/2018 |
 | 0.4.3           | 4.17.4         | 06/07/2018 |
@@ -43,7 +43,7 @@
 - Reworked boot buffer.
 - Represent kernel more explicitly in the provenance graph.
 - Provide API to get commit ID to help with issue tracking.
-- Update to kernel version 4.19.4.
+- Update to kernel version 4.19.6.
 ```
 
 ### v0.4.5
