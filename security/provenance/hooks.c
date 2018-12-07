@@ -2329,9 +2329,9 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * This hook may be called multiple times during a single execve;
  * and in each pass set_creds is called first.
  * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque (i.e., do not track).
- * The relations between the bprm arguments and bprm->cred are recorded by calling prov_record_args function.
+ * The relations between the bprm arguments and bprm->cred are recorded by calling record_args function.
  * @param bprm The linux_binprm structure.
- * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from prov_record_args function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from record_args function or unknown.
  *
  */
 static int provenance_bprm_check_security(struct linux_binprm *bprm)
@@ -2348,7 +2348,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 		set_opaque(prov_elt(tprov));
 		return 0;
 	}
-	return prov_record_args(nprov, bprm);
+	return record_args(nprov, bprm);
 }
 
 /*!

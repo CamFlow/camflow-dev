@@ -519,7 +519,7 @@ out:
 /*!
  * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
  *
- * This is a helper funtion used by prov_record_args function.
+ * This is a helper funtion used by record_args function.
  * It records @arg by:
  * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
  * 2. Recording a provenance relation @etype (either RL_ARG or RL_ENV depending on @vtype) between the @arg and @prov
@@ -534,7 +534,7 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation function or unknown.
  *
  */
-static __always_inline int prov_record_arg(struct provenance *prov,
+static __always_inline int record_arg(struct provenance *prov,
 					   uint64_t vtype,
 					   uint64_t etype,
 					   const char *arg,
@@ -561,13 +561,13 @@ static __always_inline int prov_record_arg(struct provenance *prov,
  *
  * We will only record all the arguments if @prov is tracked or capture all is set.
  * We record both ENT_ARG and ENT_ENV types of arguments and relations RL_ARG and RL_ENV between those arguments and @prov,
- * by calling prov_record_arg function.
+ * by calling record_arg function.
  * @param prov The provenance entry pointer where arguments should be associated with.
  * @param bprm The binary parameter structure.
  * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
  *
  */
-static inline int prov_record_args(struct provenance *prov,
+static inline int record_args(struct provenance *prov,
 				   struct linux_binprm *bprm)
 {
 	char* argv;
@@ -592,12 +592,12 @@ static inline int prov_record_args(struct provenance *prov,
 	ptr = argv;
 	while (argc-- > 0) {
 		size = strnlen(ptr, len);
-		prov_record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
+		record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
 		ptr += size + 1;
 	}
 	while (envc-- > 0) {
 		size = strnlen(ptr, len);
-		prov_record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
+		record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
 		ptr += size + 1;
 	}
 	kfree(argv);
