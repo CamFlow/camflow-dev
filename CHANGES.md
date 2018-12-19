@@ -40,6 +40,7 @@
 
 ### v0.4.6
 ```
+- Take into account propagate node policy.
 - Reworked boot buffer.
 - Represent kernel more explicitly in the provenance graph.
 - Provide API to get commit ID to help with issue tracking.
