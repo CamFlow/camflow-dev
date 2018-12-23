@@ -1,4 +1,4 @@
-kernel-version=4.19.6
+kernel-version=4.19.12
 lsm-version=0.4.6
 arch=x86_64
 
