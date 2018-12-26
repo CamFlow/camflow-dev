@@ -157,6 +157,9 @@ delete_kernel:
 	cd ./build && rm -rf ./linux-stable
 	cd ./build && rm -rf ./information-flow-patch
 
+delete:
+	rm -rf ./build
+
 test: copy_change
 	@echo "Running sparse, result in /tmp/sparse.txt"
 	-cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
