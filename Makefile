@@ -1,4 +1,4 @@
-kernel-version=4.19.6
+kernel-version=4.20
 lsm-version=0.4.6
 arch=x86_64
 
@@ -176,6 +176,9 @@ delete_kernel:
 	cd ./build && rm -rf ./pristine
 	cd ./build && rm -rf ./linux-stable
 	cd ./build && rm -rf ./information-flow-patch
+
+delete:
+	rm -rf ./build
 
 test: copy_change
 	@echo "Running sparse, result in /tmp/sparse.txt"
