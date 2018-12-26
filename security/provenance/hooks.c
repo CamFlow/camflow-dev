@@ -346,7 +346,7 @@ static int provenance_task_getpgid(struct task_struct *p)
  * @return 0 if permission is granted.
  *
  */
-static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
+static int provenance_task_kill(struct task_struct *p, struct kernel_siginfo *info,
 				int sig, const struct cred *cred)
 {
 	return 0;
