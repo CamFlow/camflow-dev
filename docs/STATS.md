@@ -89,7 +89,7 @@ __x64_sys_setresuid16|9|
 __x64_sys_tee|4|
 __x64_sys_epoll_wait|3|
 __x64_sys_sched_getattr|4|
-__x64_sys_ioctl|9|
+__x64_sys_ioctl|10|
 __x64_sys_sigpending|3|
 __x64_sys_statfs64|14|
 __x64_sys_copy_file_range|7|
@@ -411,8 +411,8 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 6|16|
 7|15|
 8|25|
-9|42|
-10|8|
+9|41|
+10|9|
 11|8|
 12|14|
 13|11|
@@ -476,7 +476,7 @@ setpgid|4|
 sched_setscheduler|6|
 sched_setparam|6|
 mremap|9|
-ioctl|9|
+ioctl|10|
 access|14|
 socket|13|
 connect|4|
@@ -798,7 +798,7 @@ vfork|22|
 setresgid|8|
 setresuid|9|
 sched_setparam|6|
-ioctl|9|
+ioctl|10|
 mremap|9|
 access|14|
 socket|13|
