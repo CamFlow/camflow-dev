@@ -210,6 +210,10 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
 
+uncrustify_clean:
+	rm ./security/provenance/*backup*~
+	rm ./security/provenance/include/*backup*~
+
 patch: copy_change
 	cd build/linux-stable && rm -f .config
 	cd build/linux-stable && rm -f  config_sav
