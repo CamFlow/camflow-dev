@@ -76,31 +76,31 @@ struct prov_long_boot_buffer {
 	struct prov_long_boot_buffer *next;
 };
 
-#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)\
-static inline void fcn_name(msg_type *msg, buffer_type *buf)\
-{\
-	buffer_type *tmp = buf;\
-	while (tmp->next!=NULL) {\
-		tmp = tmp->next;\
-	}\
-	if (tmp->nb_entry >= max_entry){\
-		tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);\
-		if (unlikely(!tmp->next))\
-			panic("Provenance: could not allocate boot_buffer.");\
-		tmp = tmp->next;\
-	}\
-	memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));\
-	tmp->nb_entry++;\
-}\
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry) \
+	static inline void fcn_name(msg_type * msg, buffer_type * buf) \
+	{ \
+		buffer_type *tmp = buf; \
+		while (tmp->next != NULL) { \
+			tmp = tmp->next; \
+		} \
+		if (tmp->nb_entry >= max_entry) { \
+			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC); \
+			if (unlikely(!tmp->next)) \
+				panic("Provenance: could not allocate boot_buffer."); \
+			tmp = tmp->next; \
+		} \
+		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type)); \
+		tmp->nb_entry++; \
+	} \
 
 declare_insert_buffer_fcn(insert_boot_buffer,
-													union prov_elt,
-													struct prov_boot_buffer,
-													PROV_INITIAL_BUFF_SIZE);
+			  union prov_elt,
+			  struct prov_boot_buffer,
+			  PROV_INITIAL_BUFF_SIZE);
 declare_insert_buffer_fcn(insert_long_boot_buffer,
-													union long_prov_elt,
-													struct prov_long_boot_buffer,
-													PROV_INITIAL_LONG_BUFF_SIZE);
+			  union long_prov_elt,
+			  struct prov_long_boot_buffer,
+			  PROV_INITIAL_LONG_BUFF_SIZE);
 
 extern struct prov_boot_buffer *boot_buffer;
 
@@ -123,9 +123,9 @@ static __always_inline void prov_write(union prov_elt *msg)
 	struct relay_list *tmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready)) {
+	if (unlikely(!relay_ready))
 		insert_boot_buffer(msg, boot_buffer);
-	} else {
+	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->prov, msg, sizeof(union prov_elt));

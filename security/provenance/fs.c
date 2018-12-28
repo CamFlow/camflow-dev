@@ -128,7 +128,7 @@ declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_dupl
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	if (prov_machine_id!=0) // it has already been set
+	if (prov_machine_id != 0) // it has already been set
 		return -EPERM;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -161,7 +161,7 @@ declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_ma
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	if (prov_boot_id!=0) // it has already been set
+	if (prov_boot_id != 0) // it has already been set
 		return -EPERM;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -920,7 +920,7 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 declare_file_operations(prov_version, no_write, prov_read_version);
 
 static ssize_t prov_read_commit(struct file *filp, char __user *buf,
-				 size_t count, loff_t *ppos)
+				size_t count, loff_t *ppos)
 {
 	size_t len = strlen(CAMFLOW_COMMIT);
 
@@ -960,7 +960,7 @@ out:
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
 static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
-				  size_t count, loff_t *ppos)
+				size_t count, loff_t *ppos)
 {
 	epoch++;
 	refresh_prov_machine();

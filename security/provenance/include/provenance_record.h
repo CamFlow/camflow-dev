@@ -450,9 +450,9 @@ static __always_inline int informs(const uint64_t type,
 }
 
 static __always_inline int influences_kernel(const uint64_t type,
-						struct provenance *entity,
-				    struct provenance *activity,
-						const struct file *file)
+					     struct provenance *entity,
+					     struct provenance *activity,
+					     const struct file *file)
 {
 	int rc;
 

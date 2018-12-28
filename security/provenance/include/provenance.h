@@ -142,34 +142,40 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 }
 
 #define set_recorded(node) __set_recorded((union long_prov_elt*)node)
-static inline void __set_recorded(union long_prov_elt *node) {
-	node->msg_info.epoch=epoch;
+static inline void __set_recorded(union long_prov_elt *node)
+{
+	node->msg_info.epoch = epoch;
 }
 
 #define clear_recorded(node) __clear_recorded((union long_prov_elt*)node)
-static inline void __clear_recorded(union long_prov_elt *node) {
+static inline void __clear_recorded(union long_prov_elt *node)
+{
 	node->msg_info.epoch = 0;
 }
 
 #define provenance_is_recorded(node) __provenance_is_recorded((union long_prov_elt*)node)
-static inline bool __provenance_is_recorded(union long_prov_elt *node) {
+static inline bool __provenance_is_recorded(union long_prov_elt *node)
+{
 	if (epoch > node->msg_info.epoch)
 		return false;
 	return true;
 }
 
 #define set_name_recorded(node) __set_name_recorded((union long_prov_elt*)node)
-static inline void __set_name_recorded(union long_prov_elt *node) {
-	node->msg_info.nepoch=epoch;
+static inline void __set_name_recorded(union long_prov_elt *node)
+{
+	node->msg_info.nepoch = epoch;
 }
 
 #define clear_name_recorded(node) __clear_name_recorded((union long_prov_elt*)node)
-static inline void __clear_name_recorded(union long_prov_elt *node) {
+static inline void __clear_name_recorded(union long_prov_elt *node)
+{
 	node->msg_info.nepoch = 0;
 }
 
 #define provenance_is_name_recorded(node) __provenance_is_name_recorded((union long_prov_elt*)node)
-static inline bool __provenance_is_name_recorded(union long_prov_elt *node) {
+static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
+{
 	if (epoch > node->msg_info.nepoch)
 		return false;
 	return true;
@@ -179,12 +185,14 @@ static inline bool __provenance_is_name_recorded(union long_prov_elt *node) {
 extern union long_prov_elt *prov_machine;
 
 #define set_kernel_recorded(node) __set_kernel_recorded((union long_prov_elt*)node)
-static inline void __set_kernel_recorded(union long_prov_elt *node) {
-	node_kernel_version(node)=node_identifier(prov_machine).version;
+static inline void __set_kernel_recorded(union long_prov_elt *node)
+{
+	node_kernel_version(node) = node_identifier(prov_machine).version;
 }
 
 #define provenance_is_kernel_recorded(node) __provenance_is_kernel_recorded((union long_prov_elt*)node)
-static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node) {
+static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node)
+{
 	if (node_kernel_version(node) < node_identifier(prov_machine).version)
 		return false;
 	return true;

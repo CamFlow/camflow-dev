@@ -72,7 +72,7 @@ void write_boot_buffer(void)
 	struct prov_boot_buffer *tmp, *tmp2;
 	struct prov_long_boot_buffer *ltmp, *ltmp2;
 
-	if (prov_machine_id==0 || prov_boot_id==0 || !relay_initialized)
+	if (prov_machine_id == 0 || prov_boot_id == 0 || !relay_initialized)
 		return;
 
 	relay_ready = true;
@@ -81,11 +81,11 @@ void write_boot_buffer(void)
 	ltmp = long_boot_buffer;
 	long_boot_buffer = NULL;
 
-	while(tmp!=NULL){
-		if (tmp->nb_entry > 0){
-			for (i=0; i<tmp->nb_entry; i++){
+	while (tmp != NULL) {
+		if (tmp->nb_entry > 0) {
+			for (i = 0; i < tmp->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(tmp->buffer[i])));
-				if(prov_is_relation(&(tmp->buffer[i]))) {
+				if (prov_is_relation(&(tmp->buffer[i]))) {
 					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
 					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
 				}
@@ -96,11 +96,10 @@ void write_boot_buffer(void)
 		tmp = tmp->next;
 		kfree(tmp2);
 	}
-	while (ltmp!=NULL) {
-		if (ltmp->nb_entry > 0){
-			for (i=0; i<ltmp->nb_entry; i++){
+	while (ltmp != NULL) {
+		if (ltmp->nb_entry > 0) {
+			for (i = 0; i < ltmp->nb_entry; i++)
 				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
-			}
 			relay_write(long_prov_chan, ltmp->buffer, ltmp->nb_entry * sizeof(union long_prov_elt));
 		}
 		ltmp2 = ltmp;

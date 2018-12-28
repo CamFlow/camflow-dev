@@ -191,7 +191,7 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
  *
  */
 static __always_inline void refresh_inode_provenance(struct inode *inode,
-																						struct provenance *prov)
+						     struct provenance *prov)
 {
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
@@ -248,8 +248,8 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
  *
  */
 static inline int inode_init_provenance(struct inode *inode,
-																				struct dentry *opt_dentry,
-																				struct provenance *prov)
+					struct dentry *opt_dentry,
+					struct provenance *prov)
 {
 	union prov_elt *buf;
 	struct dentry *dentry;
