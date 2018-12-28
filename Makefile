@@ -214,6 +214,7 @@ test_travis:
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/machine.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/propagate.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/query.c
@@ -222,6 +223,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_machine.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_ns.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_policy.h
