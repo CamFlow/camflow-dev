@@ -40,6 +40,7 @@
 
 ### v0.4.6
 ```
+- Hotfix: fix  tracking issue.
 - Update to kernel version 4.20.
 ```
 
