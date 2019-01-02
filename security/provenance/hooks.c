@@ -1813,6 +1813,11 @@ static int provenance_socket_post_create(struct socket *sock,
 		return 0;
 	if (!iprov)
 		return -ENOMEM;
+
+	if (provenance_is_tracked(prov_elt(cprov))
+			|| provenance_is_tracked(prov_elt(tprov)))
+		set_tracked(prov_elt(iprov));
+
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
@@ -2331,10 +2336,8 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 		set_opaque(prov_elt(tprov));
 		return 0;
 	}
-	if (provenance_is_tracked(prov_elt(iprov))) {
+	if (provenance_is_tracked(prov_elt(iprov)))
 		set_tracked(prov_elt(nprov));
-		return 0;
-	}
 	return prov_record_args(nprov, bprm);
 }
 
