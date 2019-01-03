@@ -1,6 +1,6 @@
 # Author: Xueyuan Han <hanx@g.harvard.edu>
 #
-# Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
+# Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2, as
