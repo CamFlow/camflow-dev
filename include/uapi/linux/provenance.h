@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -25,7 +25,7 @@
 
 #define CAMFLOW_VERSION_MAJOR     0
 #define CAMFLOW_VERSION_MINOR     4
-#define CAMFLOW_VERSION_PATCH     6
+#define CAMFLOW_VERSION_PATCH     7
 #define CAMFLOW_VERSION_STR "v"xstr(CAMFLOW_VERSION_MAJOR)\
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\

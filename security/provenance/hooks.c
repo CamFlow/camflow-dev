@@ -2,7 +2,7 @@
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
- * Copyright (C) 2015-2018 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -1836,6 +1836,11 @@ static int provenance_socket_post_create(struct socket *sock,
 		return 0;
 	if (!iprov)
 		return -ENOMEM;
+
+	if (provenance_is_tracked(prov_elt(cprov))
+	    || provenance_is_tracked(prov_elt(tprov)))
+		set_tracked(prov_elt(iprov));
+
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);

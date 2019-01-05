@@ -2,7 +2,8 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.4.6           | 4.20           | N/A        |
+| 0.4.7           | 4.20           | N/A				|
+| 0.4.6           | 4.20           | 05/01/2019 |
 | 0.4.5           | 4.18.16        | 24/10/2018 |
 | 0.4.4           | 4.17.17        | 19/08/2018 |
 | 0.4.3           | 4.17.4         | 06/07/2018 |
@@ -38,12 +39,18 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-### v0.4.6
+### v0.4.7
 ```
 - Take into account propagate node policy.
 - Reworked boot buffer.
 - Represent kernel more explicitly in the provenance graph.
 - Provide API to get commit ID to help with issue tracking.
+- Update to kernel version 4.20.
+```
+
+### v0.4.6
+```
+- Hotfix: fix  tracking issue.
 - Update to kernel version 4.20.
 ```
 

@@ -1,5 +1,5 @@
 kernel-version=4.20
-lsm-version=0.4.6
+lsm-version=0.4.7
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -176,6 +176,12 @@ delete_kernel:
 	cd ./build && rm -rf ./pristine
 	cd ./build && rm -rf ./linux-stable
 	cd ./build && rm -rf ./information-flow-patch
+
+delete_us:
+	cd ./build && rm -rf ./camconfd
+	cd ./build && rm -rf ./camflow-cli
+	cd ./build && rm -rf ./camflowd
+	cd ./build && rm -rf ./libprovenance
 
 delete:
 	rm -rf ./build
