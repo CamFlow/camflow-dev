@@ -16,8 +16,8 @@
 #include <linux/provenance_query.h>
 
 static inline int call_provenance_flow(prov_entry_t *from,
-					   prov_entry_t *edge,
-					 	 prov_entry_t *to)
+				       prov_entry_t *edge,
+				       prov_entry_t *to)
 {
 	int rc = 0;
 	struct list_head *listentry, *listtmp;

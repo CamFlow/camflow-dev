@@ -52,6 +52,7 @@ config_kernel:
 	cp -f ./.config ../build/linux-stable/
 	cd .. && $(MAKE) config_circle
 	cd ../build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
+	cd ../build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config
 
 config_sqlite:
 	cd ../build/linux-stable && touch create_db.sh

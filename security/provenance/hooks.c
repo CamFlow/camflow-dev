@@ -128,6 +128,7 @@ static int provenance_task_alloc(struct task_struct *task,
 static void provenance_task_free(struct task_struct *task)
 {
 	struct provenance *tprov = task->provenance;
+
 	if (tprov) {
 		record_terminate(RL_TERMINATE_TASK, tprov);
 		free_provenance(tprov);
@@ -193,6 +194,7 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 static void provenance_cred_free(struct cred *cred)
 {
 	struct provenance *cprov = cred->provenance;
+
 	if (cprov) {
 		record_terminate(RL_TERMINATE_PROC, cprov);
 		free_provenance(cprov);
@@ -232,9 +234,8 @@ static int provenance_cred_prepare(struct cred *new,
 		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
 		// System will crash if attempt to update those values.
 		tprov = current->provenance;
-		if (tprov != NULL) {
+		if (tprov != NULL)
 			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
-		}
 	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	new->provenance = nprov;
@@ -346,7 +347,7 @@ static int provenance_task_getpgid(struct task_struct *p)
  * @return 0 if permission is granted.
  *
  */
-static int provenance_task_kill(struct task_struct *p, struct siginfo *info,
+static int provenance_task_kill(struct task_struct *p, struct kernel_siginfo *info,
 				int sig, const struct cred *cred)
 {
 	return 0;
@@ -393,6 +394,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 static void provenance_inode_free_security(struct inode *inode)
 {
 	struct provenance *iprov = inode->i_provenance;
+
 	if (iprov) {
 		record_terminate(RL_FREED, iprov);
 		free_provenance(iprov);
@@ -1151,7 +1153,7 @@ out:
  * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses function or unknown.
  *
  */
-static int provenance_file_open(struct file *file, const struct cred *cred)
+static int provenance_file_open(struct file *file)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
@@ -1472,6 +1474,7 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
 	struct provenance *mprov = msg->provenance;
+
 	if (mprov) {
 		record_terminate(RL_FREED, mprov);
 		free_provenance(mprov);
@@ -1665,6 +1668,7 @@ out:
 static void provenance_shm_free_security(struct kern_ipc_perm *shp)
 {
 	struct provenance *sprov = shp->provenance;
+
 	if (sprov) {
 		record_terminate(RL_FREED, sprov);
 		free_provenance(sprov);
@@ -1809,6 +1813,11 @@ static int provenance_socket_post_create(struct socket *sock,
 		return 0;
 	if (!iprov)
 		return -ENOMEM;
+
+	if (provenance_is_tracked(prov_elt(cprov))
+	    || provenance_is_tracked(prov_elt(tprov)))
+		set_tracked(prov_elt(iprov));
+
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	rc = generates(RL_SOCKET_CREATE, cprov, tprov, iprov, NULL, 0);
@@ -1817,7 +1826,8 @@ static int provenance_socket_post_create(struct socket *sock,
 	return rc;
 }
 
-static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb) {
+static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb)
+{
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprova = socket_inode_provenance(socka);
@@ -2316,6 +2326,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(bprm->file, false);
+	int rc;
 
 	if (!nprov)
 		return -ENOMEM;
@@ -2325,6 +2336,8 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 		set_opaque(prov_elt(tprov));
 		return 0;
 	}
+	if (provenance_is_tracked(prov_elt(iprov)))
+		set_tracked(prov_elt(nprov));
 	return prov_record_args(nprov, bprm);
 }
 

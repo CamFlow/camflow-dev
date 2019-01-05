@@ -329,6 +329,12 @@ static __always_inline int generates(const uint64_t type,
 	apply_target(prov_elt(activity));
 	apply_target(prov_elt(entity));
 
+	if (provenance_is_tracked(prov_elt(activity_mem)))
+		set_tracked(prov_elt(activity));
+
+	if (provenance_is_opaque(prov_elt(activity_mem)))
+		set_opaque(prov_elt(activity));
+
 	if (provenance_is_opaque(prov_elt(entity))
 	    || provenance_is_opaque(prov_elt(activity))
 	    || provenance_is_opaque(prov_elt(activity_mem)))
@@ -339,6 +345,7 @@ static __always_inline int generates(const uint64_t type,
 	    && !provenance_is_tracked(prov_elt(entity))
 	    && !prov_policy.prov_all)
 		return 0;
+
 	if (!should_record_relation(type, prov_entry(activity), prov_entry(entity)))
 		return 0;
 

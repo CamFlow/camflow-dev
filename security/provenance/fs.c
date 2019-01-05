@@ -932,7 +932,7 @@ out:
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
 static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
-				  size_t count, loff_t *ppos)
+				size_t count, loff_t *ppos)
 {
 	epoch++;
 	return count;

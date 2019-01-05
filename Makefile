@@ -1,5 +1,5 @@
-kernel-version=4.18.16
-lsm-version=0.4.5
+kernel-version=4.20
+lsm-version=0.4.6
 arch=x86_64
 
 
@@ -157,6 +157,15 @@ delete_kernel:
 	cd ./build && rm -rf ./linux-stable
 	cd ./build && rm -rf ./information-flow-patch
 
+delete_us:
+	cd ./build && rm -rf ./camconfd
+	cd ./build && rm -rf ./camflow-cli
+	cd ./build && rm -rf ./camflowd
+	cd ./build && rm -rf ./libprovenance
+
+delete:
+	rm -rf ./build
+
 test: copy_change
 	@echo "Running sparse, result in /tmp/sparse.txt"
 	-cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
@@ -206,6 +215,10 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+
+uncrustify_clean:
+	rm ./security/provenance/*backup*~
+	rm ./security/provenance/include/*backup*~
 
 patch: copy_change
 	cd build/linux-stable && rm -f .config
