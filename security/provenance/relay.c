@@ -66,6 +66,8 @@ bool relay_initialized;
  * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
  *
  */
+extern union long_prov_elt *prov_machine;
+void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
 	int i;
@@ -80,6 +82,9 @@ void write_boot_buffer(void)
 	boot_buffer = NULL;
 	ltmp = long_boot_buffer;
 	long_boot_buffer = NULL;
+
+	refresh_prov_machine();
+	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
 	while (tmp != NULL) {
 		if (tmp->nb_entry > 0) {
