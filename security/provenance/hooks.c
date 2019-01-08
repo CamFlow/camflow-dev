@@ -1158,7 +1158,7 @@ static int provenance_kernel_read_file(struct file *file
 		return 0;
 	spin_lock_irqsave_nested(prov_lock(tprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
+	rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(tprov), irqflags);
 	return rc;
