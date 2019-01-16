@@ -170,6 +170,9 @@ static inline int record_node_name(struct provenance *node,
 	union long_prov_elt *fname_prov;
 	int rc;
 
+	if (provenance_is_opaque(prov_elt(node)))
+		return 0;
+
 	if ( (provenance_is_name_recorded(prov_elt(node)) && !force)
 	     || !provenance_is_recorded(prov_elt(node)))
 		return 0;
