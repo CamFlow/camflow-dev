@@ -313,7 +313,6 @@ static inline struct provenance *get_cred_provenance(void)
 	if (provenance_is_opaque(prov_elt(prov)))
 		goto out;
 	record_task_name(current, prov);
-	record_kernel_link(prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
 	prov_elt(prov)->proc_info.utsns = current_utsns();
@@ -341,12 +340,14 @@ out:
  *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
-static inline struct provenance *get_task_provenance( void )
+static __always_inline struct provenance *get_task_provenance( bool link )
 {
 	struct provenance *prov = current->provenance;
 
 	prov_elt(prov)->task_info.pid = task_pid_nr(current);
 	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	if (!provenance_is_opaque(prov_elt(prov)) && link)
+		record_kernel_link(prov);
 	return prov;
 }
 

@@ -751,7 +751,7 @@ out:
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *tprov = get_task_provenance();
+	struct provenance *tprov = get_task_provenance(false);
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
@@ -763,7 +763,7 @@ declare_file_operations(prov_log_ops, prov_write_log, no_read);
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct provenance *tprov = get_task_provenance();
+	struct provenance *tprov = get_task_provenance(false);
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;

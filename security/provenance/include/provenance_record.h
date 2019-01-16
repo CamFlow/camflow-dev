@@ -198,7 +198,7 @@ static inline int record_node_name(struct provenance *node,
 	return rc;
 }
 
-static inline int record_kernel_link(struct provenance *node)
+static __always_inline int record_kernel_link(struct provenance *node)
 {
 	int rc;
 
