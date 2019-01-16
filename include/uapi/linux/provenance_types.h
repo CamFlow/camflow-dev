@@ -45,25 +45,24 @@
 /* DERIVED SUBTYPES */
 #define RL_NAMED              (RL_DERIVED   | (0x0000000000000001ULL))
 #define RL_VERSION            (RL_DERIVED   | (0x0000000000000001ULL<<1))
-#define RL_MMAP               (RL_DERIVED   | (0x0000000000000001ULL<<2))
-#define RL_SND_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<3))
-#define RL_SND_UNIX         	(RL_DERIVED   | (0x0000000000000001ULL<<4))
-#define RL_RCV_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<5))
-#define RL_RCV_UNIX         	(RL_DERIVED   | (0x0000000000000001ULL<<6))
-#define RL_FREED             	(RL_DERIVED   | (0x0000000000000001ULL<<7))
-#define RL_SETATTR_INODE      (RL_DERIVED   | (0x0000000000000001ULL<<8))
-#define RL_ACCEPT_SOCKET      (RL_DERIVED   | (0x0000000000000001ULL<<9))
-#define RL_GETXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<10))
-#define RL_SETXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<11))
-#define RL_RMVXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<12))
-#define RL_EXEC               (RL_DERIVED   | (0x0000000000000001ULL<<13))
-#define RL_TERMINATE_PROC     (RL_DERIVED   | (0x0000000000000001ULL<<14))
-#define RL_ARG                (RL_DERIVED   | (0x0000000000000001ULL<<15))
-#define RL_ENV                (RL_DERIVED   | (0x0000000000000001ULL<<16))
-#define RL_SH_READ            (RL_DERIVED   | (0x0000000000000001ULL<<17))
-#define RL_SH_WRITE           (RL_DERIVED   | (0x0000000000000001ULL<<18))
-#define RL_EXEC_TASK       		(RL_DERIVED   | (0x0000000000000001ULL<<19))
-#define RL_PCK_CNT	       		(RL_DERIVED   | (0x0000000000000001ULL<<20))
+#define RL_SND_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<2))
+#define RL_SND_UNIX         	(RL_DERIVED   | (0x0000000000000001ULL<<3))
+#define RL_RCV_PACKET         (RL_DERIVED   | (0x0000000000000001ULL<<4))
+#define RL_RCV_UNIX         	(RL_DERIVED   | (0x0000000000000001ULL<<5))
+#define RL_FREED             	(RL_DERIVED   | (0x0000000000000001ULL<<6))
+#define RL_SETATTR_INODE      (RL_DERIVED   | (0x0000000000000001ULL<<7))
+#define RL_ACCEPT_SOCKET      (RL_DERIVED   | (0x0000000000000001ULL<<8))
+#define RL_GETXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<9))
+#define RL_SETXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<10))
+#define RL_RMVXATTR_INODE     (RL_DERIVED   | (0x0000000000000001ULL<<11))
+#define RL_EXEC               (RL_DERIVED   | (0x0000000000000001ULL<<12))
+#define RL_TERMINATE_PROC     (RL_DERIVED   | (0x0000000000000001ULL<<13))
+#define RL_ARG                (RL_DERIVED   | (0x0000000000000001ULL<<14))
+#define RL_ENV                (RL_DERIVED   | (0x0000000000000001ULL<<15))
+#define RL_SH_READ            (RL_DERIVED   | (0x0000000000000001ULL<<16))
+#define RL_SH_WRITE           (RL_DERIVED   | (0x0000000000000001ULL<<17))
+#define RL_EXEC_TASK       		(RL_DERIVED   | (0x0000000000000001ULL<<18))
+#define RL_PCK_CNT	       		(RL_DERIVED   | (0x0000000000000001ULL<<19))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */
@@ -94,9 +93,8 @@
 #define RL_SH_CREATE_READ     (RL_GENERATED | (0x0000000000000001ULL<<24))
 #define RL_SH_CREATE_WRITE    (RL_GENERATED | (0x0000000000000001ULL<<25))
 #define RL_FILE_LOCK          (RL_GENERATED | (0x0000000000000001ULL<<26))
-#define RL_MMAP_WRITE         (RL_GENERATED | (0x0000000000000001ULL<<27))
-#define RL_MUNMAP          		(RL_GENERATED | (0x0000000000000001ULL<<28))
-#define RL_SPLICE_OUT					(RL_GENERATED | (0x0000000000000001ULL<<29))
+#define RL_MUNMAP          		(RL_GENERATED | (0x0000000000000001ULL<<27))
+#define RL_SPLICE_OUT					(RL_GENERATED | (0x0000000000000001ULL<<28))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -126,7 +124,11 @@
 #define RL_SPLICE_IN					(RL_USED 			| (0x0000000000000001ULL<<23))
 #define RL_MMAP_READ          (RL_USED			| (0x0000000000000001ULL<<24))
 #define RL_MMAP_EXEC          (RL_USED			| (0x0000000000000001ULL<<25))
-#define RL_LOAD_FILE   				(RL_USED			| (0x0000000000000001ULL<<26))
+#define RL_MMAP_WRITE         (RL_USED			| (0x0000000000000001ULL<<26))
+#define RL_MMAP_READ_PRIVATE  (RL_USED			| (0x0000000000000001ULL<<27))
+#define RL_MMAP_EXEC_PRIVATE  (RL_USED			| (0x0000000000000001ULL<<28))
+#define RL_MMAP_WRITE_PRIVATE (RL_USED			| (0x0000000000000001ULL<<29))
+#define RL_LOAD_FILE   				(RL_USED			| (0x0000000000000001ULL<<30))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
@@ -159,20 +161,19 @@
 #define ENT_INODE_BLOCK       (DM_ENTITY    | (0x0000000000000001ULL<<12))
 #define ENT_INODE_PIPE        (DM_ENTITY    | (0x0000000000000001ULL<<13))
 #define ENT_INODE_SOCKET      (DM_ENTITY    | (0x0000000000000001ULL<<14))
-#define ENT_INODE_MMAP        (DM_ENTITY    | (0x0000000000000001ULL<<15))
-#define ENT_MSG               (DM_ENTITY    | (0x0000000000000001ULL<<16))
-#define ENT_SHM               (DM_ENTITY    | (0x0000000000000001ULL<<17))
-#define ENT_ADDR              (DM_ENTITY    | (0x0000000000000001ULL<<18))
-#define ENT_SBLCK             (DM_ENTITY    | (0x0000000000000001ULL<<19))
-#define ENT_PATH         			(DM_ENTITY    | (0x0000000000000001ULL<<20))
-#define ENT_PACKET            (DM_ENTITY    | (0x0000000000000001ULL<<21))
-#define ENT_DISC              (DM_ENTITY    | (0x0000000000000001ULL<<22))
-#define ENT_IATTR             (DM_ENTITY    | (0x0000000000000001ULL<<23))
-#define ENT_XATTR             (DM_ENTITY    | (0x0000000000000001ULL<<24))
-#define ENT_PCKCNT            (DM_ENTITY    | (0x0000000000000001ULL<<25))
-#define ENT_ARG               (DM_ENTITY    | (0x0000000000000001ULL<<26))
-#define ENT_ENV               (DM_ENTITY    | (0x0000000000000001ULL<<27))
-#define ENT_PROC              (DM_ENTITY    | (0x0000000000000001ULL<<28))
+#define ENT_MSG               (DM_ENTITY    | (0x0000000000000001ULL<<15))
+#define ENT_SHM               (DM_ENTITY    | (0x0000000000000001ULL<<16))
+#define ENT_ADDR              (DM_ENTITY    | (0x0000000000000001ULL<<17))
+#define ENT_SBLCK             (DM_ENTITY    | (0x0000000000000001ULL<<18))
+#define ENT_PATH         			(DM_ENTITY    | (0x0000000000000001ULL<<19))
+#define ENT_PACKET            (DM_ENTITY    | (0x0000000000000001ULL<<20))
+#define ENT_DISC              (DM_ENTITY    | (0x0000000000000001ULL<<21))
+#define ENT_IATTR             (DM_ENTITY    | (0x0000000000000001ULL<<22))
+#define ENT_XATTR             (DM_ENTITY    | (0x0000000000000001ULL<<23))
+#define ENT_PCKCNT            (DM_ENTITY    | (0x0000000000000001ULL<<24))
+#define ENT_ARG               (DM_ENTITY    | (0x0000000000000001ULL<<25))
+#define ENT_ENV               (DM_ENTITY    | (0x0000000000000001ULL<<26))
+#define ENT_PROC              (DM_ENTITY    | (0x0000000000000001ULL<<27))
 
 #define prov_type(prov) ((prov)->node_info.identifier.node_id.type)
 #define node_type(node) prov_type(node)
@@ -207,7 +208,6 @@ static inline bool prov_has_uidgid(uint64_t type)
   	case ENT_INODE_BLOCK:
   	case ENT_INODE_PIPE:
   	case ENT_INODE_SOCKET:
-  	case ENT_INODE_MMAP:
   		return true;
   	default: return false;
 	}
@@ -224,7 +224,6 @@ static inline bool prov_is_inode(uint64_t type)
   	case ENT_INODE_BLOCK:
   	case ENT_INODE_PIPE:
   	case ENT_INODE_SOCKET:
-  	case ENT_INODE_MMAP:
   		return true;
   	default: return false;
 	}
@@ -242,7 +241,6 @@ static inline bool prov_has_secid(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-	case ENT_INODE_MMAP:
 		return true;
 	default: return false;
 	}

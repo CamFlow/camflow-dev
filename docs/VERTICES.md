@@ -25,7 +25,6 @@ ENT_DISC_ACTIVITY|disc_activity|descilosed node representing an activity|
 ENT_DISC_AGENT|disc_agent|disclosed node representing an agent|
 ENT_MACHINE|machine|machine representing an agent|
 ENT_PACKET|packet|network packet|
-ENT_INODE_MMAP|mmaped_file|privately mmaped file|
 ENT_IATTR|iattr|inode attributes value|
 ENT_XATTR|xattr|extended attributes value|
 ENT_PCKCNT|packet_content|the content of network packet|

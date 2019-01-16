@@ -41,6 +41,7 @@
 
 ### v0.5.0
 ```
+- Reworking mmap handling logic (was last modified in 0.4.0).
 - Take into account propagate node policy.
 - Reworked boot buffer.
 - Represent kernel more explicitly in the provenance graph.

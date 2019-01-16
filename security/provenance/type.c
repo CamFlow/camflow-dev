@@ -27,7 +27,6 @@ static const char RL_STR_INODE_CREATE[] = "inode_create";               // creat
 static const char RL_STR_SETUID[] = "setuid";                           // setuid
 static const char RL_STR_SETGID[] = "setpgid";                          // setpgid
 static const char RL_STR_GETGID[] = "getpgid";                          // getpgid
-static const char RL_STR_MMAP_WRITE[] = "mmap_write";                   // mmap mounting with write perm
 static const char RL_STR_SH_WRITE[] = "sh_write";                       // writing to shared state
 static const char RL_STR_PROC_WRITE[] = "memory_write";                 // writing to process memory (i.e. shared between thread)
 static const char RL_STR_BIND[] = "bind";                               // socket bind operation
@@ -39,7 +38,6 @@ static const char RL_STR_FILE_RCV[] = "file_rcv";                       // open 
 static const char RL_STR_FILE_LOCK[] = "file_lock";                     // represent file lock operation
 static const char RL_STR_FILE_SIGIO[] = "file_sigio";                   // represent IO signal
 static const char RL_STR_VERSION[] = "version_entity";                  // connect version of entity object
-static const char RL_STR_MMAP[] = "mmap";                               // mmap operation
 static const char RL_STR_MUNMAP[] = "munmap";                           // munmap operation
 static const char RL_STR_SHMDT[] = "shmdt";                             // shmdt operation
 static const char RL_STR_LINK[] = "link";                               // create a link
@@ -68,9 +66,13 @@ static const char RL_STR_GETXATTR_INODE[] = "getxattr_inode";           // getxa
 static const char RL_STR_LSTXATTR[] = "listxattr";                      // listxattr operation
 static const char RL_STR_READ_LINK[] = "read_link";                     // readlink operation
 static const char RL_STR_MMAP_READ[] = "mmap_read";                     // mmap mounting with read perm
+static const char RL_STR_MMAP_EXEC[] = "mmap_exec";                     // mmap mounting with exec perm
+static const char RL_STR_MMAP_WRITE[] = "mmap_write";                   // mmap mounting with write perm
+static const char RL_STR_MMAP_READ_PRIVATE[] = "mmap_read_private";     // mmap private mounting with read perm
+static const char RL_STR_MMAP_EXEC_PRIVATE[] = "mmap_exec_private";     // mmap private mounting with exec perm
+static const char RL_STR_MMAP_WRITE_PRIVATE[] = "mmap_write_private";   // mmap private  mounting with write perm
 static const char RL_STR_SH_READ[] = "sh_read";                         // sh_read operation
 static const char RL_STR_PROC_READ[] = "memory_read";                   // read from process memory
-static const char RL_STR_MMAP_EXEC[] = "mmap_exec";                     // mmap mounting with exec perm
 static const char RL_STR_SND[] = "send";                                // send over socket
 static const char RL_STR_SND_PACKET[] = "send_packet";                  // connect socket to packet on send operation
 static const char RL_STR_SND_UNIX[] = "send_unix";                      // send over unix socket
@@ -121,7 +123,6 @@ static const char ND_STR_DISC_ACTIVITY[] = "disc_activity";             // desci
 static const char ND_STR_DISC_AGENT[] = "disc_agent";                   // disclosed node representing an agent
 static const char ND_STR_MACHINE[] = "machine";                         // machine representing an agent
 static const char ND_STR_PACKET[] = "packet";                           // network packet
-static const char ND_STR_INODE_MMAP[] = "mmaped_file";                  // privately mmaped file
 static const char ND_STR_IATTR[] = "iattr";                             // inode attributes value
 static const char ND_STR_XATTR[] = "xattr";                             // extended attributes value
 static const char ND_STR_PCKCNT[] = "packet_content";                   // the content of network packet
@@ -158,8 +159,6 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SETGID;
 	case RL_GETGID:
 		return RL_STR_GETGID;
-	case RL_MMAP_WRITE:
-		return RL_STR_MMAP_WRITE;
 	case RL_BIND:
 		return RL_STR_BIND;
 	case RL_CONNECT:
@@ -178,8 +177,6 @@ const char* relation_str(uint64_t type)
 		return RL_STR_FILE_SIGIO;
 	case RL_VERSION:
 		return RL_STR_VERSION;
-	case RL_MMAP:
-		return RL_STR_MMAP;
 	case RL_MUNMAP:
 		return RL_STR_MUNMAP;
 	case RL_SHMDT:
@@ -238,6 +235,14 @@ const char* relation_str(uint64_t type)
 		return RL_STR_MMAP_READ;
 	case RL_MMAP_EXEC:
 		return RL_STR_MMAP_EXEC;
+	case RL_MMAP_WRITE:
+		return RL_STR_MMAP_WRITE;
+	case RL_MMAP_READ_PRIVATE:
+		return RL_STR_MMAP_READ_PRIVATE;
+	case RL_MMAP_EXEC_PRIVATE:
+		return RL_STR_MMAP_EXEC_PRIVATE;
+	case RL_MMAP_WRITE_PRIVATE:
+		return RL_STR_MMAP_WRITE_PRIVATE;
 	case RL_SND:
 		return RL_STR_SND;
 	case RL_SND_PACKET:
@@ -321,7 +326,6 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SETUID, RL_SETUID);
 	MATCH_AND_RETURN(str, RL_STR_SETGID, RL_SETGID);
 	MATCH_AND_RETURN(str, RL_STR_GETGID, RL_GETGID);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);
 	MATCH_AND_RETURN(str, RL_STR_LISTEN, RL_LISTEN);
@@ -331,7 +335,6 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_FILE_LOCK, RL_FILE_LOCK);
 	MATCH_AND_RETURN(str, RL_STR_FILE_SIGIO, RL_FILE_SIGIO);
 	MATCH_AND_RETURN(str, RL_STR_VERSION, RL_VERSION);
-	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
 	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
@@ -361,6 +364,10 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_LSTXATTR, RL_LSTXATTR);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_READ, RL_MMAP_READ);
 	MATCH_AND_RETURN(str, RL_STR_MMAP_EXEC, RL_MMAP_EXEC);
+	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_MMAP_READ_PRIVATE, RL_MMAP_READ_PRIVATE);
+	MATCH_AND_RETURN(str, RL_STR_MMAP_EXEC_PRIVATE, RL_MMAP_EXEC_PRIVATE);
+	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE_PRIVATE, RL_MMAP_WRITE_PRIVATE);
 	MATCH_AND_RETURN(str, RL_STR_SND, RL_SND);
 	MATCH_AND_RETURN(str, RL_STR_SND_PACKET, RL_SND_PACKET);
 	MATCH_AND_RETURN(str, RL_STR_SND_UNIX, RL_SND_UNIX);
@@ -420,8 +427,6 @@ const char* node_str(uint64_t type)
 		return ND_STR_INODE_PIPE;
 	case ENT_INODE_SOCKET:
 		return ND_STR_INODE_SOCKET;
-	case ENT_INODE_MMAP:
-		return ND_STR_INODE_MMAP;
 	case ENT_MSG:
 		return ND_STR_MSG;
 	case ENT_SHM:
@@ -472,7 +477,6 @@ uint64_t node_id(const char* str)
 	MATCH_AND_RETURN(str, ND_STR_INODE_BLOCK, ENT_INODE_BLOCK);
 	MATCH_AND_RETURN(str, ND_STR_INODE_PIPE, ENT_INODE_PIPE);
 	MATCH_AND_RETURN(str, ND_STR_INODE_SOCKET, ENT_INODE_SOCKET);
-	MATCH_AND_RETURN(str, ND_STR_INODE_MMAP, ENT_INODE_MMAP);
 	MATCH_AND_RETURN(str, ND_STR_MSG, ENT_MSG);
 	MATCH_AND_RETURN(str, ND_STR_SHM, ENT_SHM);
 	MATCH_AND_RETURN(str, ND_STR_ADDR, ENT_ADDR);

@@ -44,27 +44,21 @@ task -> xattr[fontsize = 8,label = setxattr]
 
 xattr -> inode[fontsize = 8,label = setxattr_inode]
 
-task -> inode[fontsize = 8,label = mmap_write]
-
-inode -> process_memory[fontsize = 8,label = sh_read]
+inode -> task[fontsize = 8,label = mmap_write]
 
 inode -> task[fontsize = 8,label = mmap_read]
 
 inode -> task[fontsize = 8,label = mmap_exec]
 
-mmaped_file[fontsize = 8,label = mmaped_file,shape = ellipse, fillcolor="#fffacd", style = filled]
+inode -> task[fontsize = 8,label = mmap_write_private]
 
-inode -> mmaped_file[fontsize = 8,label = mmap]
+inode -> task[fontsize = 8,label = mmap_read_private]
 
-mmaped_file -> mmaped_file[fontsize = 8,label = version_entity]
-
-task -> mmaped_file[fontsize = 8,label = mmap_write]
-
-mmaped_file -> task[fontsize = 8,label = mmap_read]
-
-mmaped_file -> task[fontsize = 8,label = mmap_exec]
+inode -> task[fontsize = 8,label = mmap_exec_private]
 
 task -> inode[fontsize = 8,label = munmap]
+
+inode -> process_memory[fontsize = 8,label = sh_read]
 
 shm[fontsize = 8,label = shm,shape = ellipse, fillcolor="#fffacd", style = filled]
 

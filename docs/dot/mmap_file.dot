@@ -14,36 +14,26 @@ path -> inode[fontsize = 8,label = named]
 
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
-process_memory -> task[fontsize = 8,label = memory_read]
-
-task -> inode[fontsize = 8,label = mmap_write]
-
-task -> task[fontsize = 8,label = version_activity]
-
-inode -> inode[fontsize = 8,label = version_entity]
-
-inode -> process_memory[fontsize = 8,label = sh_read]
-
-process_memory -> process_memory[fontsize = 8,label = version_entity]
-
-inode -> task[fontsize = 8,label = mmap_read]
+inode -> task[fontsize = 8,label = mmap_write]
 
 task -> process_memory[fontsize = 8,label = memory_write]
 
+task -> task[fontsize = 8,label = version_activity]
+
+process_memory -> process_memory[fontsize = 8,label = version_entity]
+
 process_memory -> inode[fontsize = 8,label = sh_write]
+
+inode -> inode[fontsize = 8,label = version_entity]
+
+inode -> task[fontsize = 8,label = mmap_read]
 
 inode -> task[fontsize = 8,label = mmap_exec]
 
-mmaped_file[fontsize = 8,label = mmaped_file,shape = ellipse, fillcolor="#fffacd", style = filled]
+inode -> task[fontsize = 8,label = mmap_write_private]
 
-inode -> mmaped_file[fontsize = 8,label = mmap]
+inode -> task[fontsize = 8,label = mmap_read_private]
 
-mmaped_file -> mmaped_file[fontsize = 8,label = version_entity]
-
-task -> mmaped_file[fontsize = 8,label = mmap_write]
-
-mmaped_file -> task[fontsize = 8,label = mmap_read]
-
-mmaped_file -> task[fontsize = 8,label = mmap_exec]
+inode -> task[fontsize = 8,label = mmap_exec_private]
 
 }
