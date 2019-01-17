@@ -311,7 +311,7 @@ static inline struct provenance *get_cred_provenance(void)
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
-		goto out;
+		return;
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
@@ -326,7 +326,6 @@ static inline struct provenance *get_cred_provenance(void)
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
 	update_proc_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
-out:
 	return prov;
 }
 
@@ -347,7 +346,7 @@ static __always_inline struct provenance *get_task_provenance( bool link )
 	prov_elt(prov)->task_info.pid = task_pid_nr(current);
 	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
 	if (!provenance_is_opaque(prov_elt(prov)) && link)
-		record_kernel_link(prov);
+		record_kernel_link(prov_entry(prov));
 	return prov;
 }
 

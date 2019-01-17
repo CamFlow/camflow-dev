@@ -198,17 +198,15 @@ static inline int record_node_name(struct provenance *node,
 	return rc;
 }
 
-static __always_inline int record_kernel_link(struct provenance *node)
+static __always_inline int record_kernel_link(prov_entry_t *node)
 {
 	int rc;
 
-	if (provenance_is_kernel_recorded(prov_elt(node)) ||
-	    !provenance_is_recorded(prov_elt(node)))
+	if (provenance_is_kernel_recorded(node) ||
+	    !provenance_is_recorded(node))
 		return 0;
-	spin_lock(prov_lock(node));
-	rc = record_relation(RL_RAN_ON, prov_machine, prov_entry(node), NULL, 0);
-	set_kernel_recorded(prov_elt(node));
-	spin_unlock(prov_lock(node));
+	rc = record_relation(RL_RAN_ON, prov_machine, node, NULL, 0);
+	set_kernel_recorded(node);
 	return rc;
 }
 
