@@ -24,6 +24,10 @@ packet_content -> packet[fontsize = 8,label = packet_content]
 
 packet -> inode[fontsize = 8,label = receive_packet]
 
+machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+
+machine -> process_memory[fontsize = 8,label = ran_on]
+
 process_memory -> task[fontsize = 8,label = memory_read]
 
 task -> process_memory[fontsize = 8,label = setuid]

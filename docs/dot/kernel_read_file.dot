@@ -1,4 +1,10 @@
-digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
+digraph RGL__DirectedAdjacencyGraph {machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+
+process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+machine -> process_memory[fontsize = 8,label = ran_on]
+
+path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
@@ -9,8 +15,6 @@ task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = f
 inode -> task[fontsize = 8,label = load_file]
 
 task -> task[fontsize = 8,label = version_activity]
-
-machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
 task -> machine[fontsize = 8,label = load_module]
 

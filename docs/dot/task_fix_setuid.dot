@@ -1,4 +1,8 @@
-digraph RGL__DirectedAdjacencyGraph {process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+digraph RGL__DirectedAdjacencyGraph {machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+
+process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+machine -> process_memory[fontsize = 8,label = ran_on]
 
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
