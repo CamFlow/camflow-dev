@@ -263,13 +263,14 @@ static __always_inline int uses(const uint64_t type,
 
 	rc = record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
 	if (rc < 0)
-		goto out;
+		return rc;
+	rc = record_kernel_link(prov_entry(activity));
+	if (rc < 0)
+		return rc;
 	rc = record_relation(RL_PROC_WRITE, prov_entry(activity), prov_entry(activity_mem), NULL, 0);
 	if (rc < 0)
-		goto out;
-	rc = current_update_shst(activity_mem, false);
-out:
-	return rc;
+		return rc;
+	return current_update_shst(activity_mem, false);
 }
 
 /*!
@@ -291,6 +292,8 @@ static __always_inline int uses_two(const uint64_t type,
 				    const struct file *file,
 				    const uint64_t flags)
 {
+	int rc;
+
 	BUILD_BUG_ON(!prov_is_used(type));
 
 	apply_target(prov_elt(entity));
@@ -306,7 +309,10 @@ static __always_inline int uses_two(const uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 		return 0;
-	return record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
+	rc = record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
+	if (rc < 0)
+		return rc;
+	return record_kernel_link(prov_entry(activity));
 }
 
 /*!
@@ -366,12 +372,14 @@ static __always_inline int generates(const uint64_t type,
 
 	rc = current_update_shst(activity_mem, true);
 	if (rc < 0)
-		goto out;
+		return rc;
 	rc = record_relation(RL_PROC_READ, prov_entry(activity_mem), prov_entry(activity), NULL, 0);
 	if (rc < 0)
-		goto out;
+		return rc;
+	rc = record_kernel_link(prov_entry(activity));
+	if (rc < 0)
+		return rc;
 	rc = record_relation(type, prov_entry(activity), prov_entry(entity), file, flags);
-out:
 	return rc;
 }
 
@@ -438,6 +446,8 @@ static __always_inline int informs(const uint64_t type,
 				   const struct file *file,
 				   const uint64_t flags)
 {
+	int rc;
+
 	BUILD_BUG_ON(!prov_is_informed(type));
 
 	apply_target(prov_elt(from));
@@ -453,7 +463,12 @@ static __always_inline int informs(const uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
-
+	rc = record_kernel_link(prov_entry(from));
+	if (rc < 0)
+		return rc;
+	rc = record_kernel_link(prov_entry(to));
+	if (rc < 0)
+		return rc;
 	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 }
 
