@@ -311,7 +311,7 @@ static inline struct provenance *get_cred_provenance(void)
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
-		return;
+		return prov;
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
