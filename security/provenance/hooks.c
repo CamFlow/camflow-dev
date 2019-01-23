@@ -1156,11 +1156,9 @@ static int provenance_kernel_read_file(struct file *file
 		return 0;
 	if (id != READING_MODULE)       // there is other such as X509 or frimware, we leave it for now
 		return 0;
-	spin_lock_irqsave_nested(prov_lock(tprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
 	rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
-	spin_unlock(prov_lock(iprov));
-	spin_unlock_irqrestore(prov_lock(tprov), irqflags);
+	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
 }
 
