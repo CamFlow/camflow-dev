@@ -2326,7 +2326,6 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 	struct provenance *nprov = bprm->cred->provenance;
 	struct provenance *tprov = get_task_provenance();
 	struct provenance *iprov = file_provenance(bprm->file, false);
-	int rc;
 
 	if (!nprov)
 		return -ENOMEM;
