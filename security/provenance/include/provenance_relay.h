@@ -20,9 +20,9 @@
 #include "provenance_filter.h"
 #include "provenance_query.h"
 
-#define PROV_RELAY_BUFF_EXP         24 // 16MB
+#define PROV_RELAY_BUFF_EXP         12
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
-#define PROV_NB_SUBBUF              32
+#define PROV_NB_SUBBUF              64
 #define PROV_INITIAL_BUFF_SIZE      (1024 * 16)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
 
