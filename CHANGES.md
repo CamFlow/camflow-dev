@@ -43,6 +43,7 @@
 ```
 - Reworking mmap handling logic (was last modified in 0.4.0).
 - Take into account propagate node policy.
+- Fix memory deadlock issue on boot for some configurations.
 - Reworked boot buffer.
 - Represent kernel more explicitly in the provenance graph.
 - Provide API to get commit ID to help with issue tracking.
