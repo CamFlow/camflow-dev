@@ -23,6 +23,7 @@ void refresh_prov_machine(void)
 	node_identifier(prov_machine).id = djb2_hash(CAMFLOW_COMMIT);
 	node_identifier(prov_machine).boot_id = prov_boot_id;
 	node_identifier(prov_machine).machine_id = prov_machine_id;
+	clear_recorded(prov_machine);
 }
 
 void init_prov_machine(void)
