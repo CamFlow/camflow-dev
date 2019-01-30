@@ -20,13 +20,11 @@
 #include "provenance_filter.h"
 #include "provenance_query.h"
 
-#define PROV_RELAY_BUFF_EXP         24 // 16MB
+#define PROV_RELAY_BUFF_EXP         20
 #define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
-#define PROV_NB_SUBBUF              32
-#define PROV_INITIAL_BUFF_SIZE      (1024 * 4)
-#define PROV_INITIAL_LONG_BUFF_SIZE 256
-
-extern bool relay_ready;
+#define PROV_NB_SUBBUF              64
+#define PROV_INITIAL_BUFF_SIZE      (1024 * 16)
+#define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 /*!
  * @brief A list of relay channel data structure.
@@ -43,6 +41,9 @@ struct relay_list {
 extern struct list_head relay_list;
 
 int prov_create_channel(char *buffer, size_t len);
+void write_boot_buffer(void);
+
+extern bool relay_ready;
 
 /*!
  * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
@@ -66,12 +67,40 @@ static inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *
 struct prov_boot_buffer {
 	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];
 	uint32_t nb_entry;
+	struct prov_boot_buffer *next;
 };
 
 struct prov_long_boot_buffer {
 	union long_prov_elt buffer[PROV_INITIAL_LONG_BUFF_SIZE];
 	uint32_t nb_entry;
+	struct prov_long_boot_buffer *next;
 };
+
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry) \
+	static inline void fcn_name(msg_type * msg, buffer_type * buf) \
+	{ \
+		buffer_type *tmp = buf; \
+		while (tmp->next != NULL) { \
+			tmp = tmp->next; \
+		} \
+		if (tmp->nb_entry >= max_entry) { \
+			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC); \
+			if (unlikely(!tmp->next)) \
+				panic("Provenance: could not allocate boot_buffer."); \
+			tmp = tmp->next; \
+		} \
+		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type)); \
+		tmp->nb_entry++; \
+	} \
+
+declare_insert_buffer_fcn(insert_boot_buffer,
+			  union prov_elt,
+			  struct prov_boot_buffer,
+			  PROV_INITIAL_BUFF_SIZE);
+declare_insert_buffer_fcn(insert_long_boot_buffer,
+			  union long_prov_elt,
+			  struct prov_long_boot_buffer,
+			  PROV_INITIAL_LONG_BUFF_SIZE);
 
 extern struct prov_boot_buffer *boot_buffer;
 
@@ -92,17 +121,11 @@ extern struct prov_boot_buffer *boot_buffer;
 static __always_inline void prov_write(union prov_elt *msg)
 {
 	struct relay_list *tmp;
-	union prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready)) {
-		if (likely(boot_buffer->nb_entry < PROV_INITIAL_BUFF_SIZE)) {
-			provtmp = &(boot_buffer->buffer[boot_buffer->nb_entry]);
-			memcpy(provtmp, msg, sizeof(union prov_elt));
-			boot_buffer->nb_entry++;
-		} else
-			pr_err("Provenance: boot buffer is full.\n");
-	} else {
+	if (unlikely(!relay_ready))
+		insert_boot_buffer(msg, boot_buffer);
+	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->prov, msg, sizeof(union prov_elt));
@@ -124,16 +147,10 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 static inline void long_prov_write(union long_prov_elt *msg)
 {
 	struct relay_list *tmp;
-	union long_prov_elt *provtmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready)) {
-		if (likely(long_boot_buffer->nb_entry < PROV_INITIAL_LONG_BUFF_SIZE)) {
-			provtmp = &(long_boot_buffer->buffer[long_boot_buffer->nb_entry]);
-			memcpy(provtmp, msg, sizeof(union long_prov_elt));
-			long_boot_buffer->nb_entry++;
-		} else
-			pr_err("Provenance: long boot buffer is full.\n");
+		//insert_long_boot_buffer(msg, long_boot_buffer);
 	} else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
@@ -157,6 +174,16 @@ static inline void prov_flush(void)
 	}
 }
 
+
+static __always_inline void tighten_identifier(union prov_identifier *id)
+{
+	if (id->node_id.type == ENT_PACKET)
+		return;
+	if (id->node_id.boot_id == 0)
+		id->node_id.boot_id = prov_boot_id;
+	id->node_id.machine_id = prov_machine_id;
+}
+
 /*!
  * @brief Write provenance node to relay buffer.
  *
@@ -175,8 +202,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 {
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
-	if (!prov_is_packet(node) && !provenance_is_recorded(node))
-		node_identifier(node).machine_id = prov_machine_id;
+	tighten_identifier(&get_prov_identifier(node));
 	if ( provenance_is_long(node) )
 		long_prov_write(node);
 	else

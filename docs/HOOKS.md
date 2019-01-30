@@ -41,6 +41,7 @@ file_receive| ![file_receive graph](./img/file_receive.png)|
 file_lock| ![file_lock graph](./img/file_lock.png)|
 file_send_sigiotask| ![file_send_sigiotask graph](./img/file_send_sigiotask.png)|
 file_splice_pipe_to_pipe| ![file_splice_pipe_to_pipe graph](./img/file_splice_pipe_to_pipe.png)|
+kernel_read_file| ![kernel_read_file graph](./img/kernel_read_file.png)|
 msg_msg_alloc_security| ![msg_msg_alloc_security graph](./img/msg_msg_alloc_security.png)|
 msg_msg_free_security| ![msg_msg_free_security graph](./img/msg_msg_free_security.png)|
 msg_queue_msgsnd| ![msg_queue_msgsnd graph](./img/msg_queue_msgsnd.png)|

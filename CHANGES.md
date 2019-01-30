@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.5.0           | 4.20.5         | 30/01/2019	|
 | 0.4.6           | 4.20           | 05/01/2019 |
 | 0.4.5           | 4.18.16        | 24/10/2018 |
 | 0.4.4           | 4.17.17        | 19/08/2018 |
@@ -37,6 +38,17 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.5.0
+```
+- Reworking mmap handling logic (was last modified in 0.4.0).
+- Take into account propagate node policy.
+- Fix memory deadlock issue on boot for some configurations.
+- Reworked boot buffer.
+- Represent kernel more explicitly in the provenance graph.
+- Provide API to get commit ID to help with issue tracking.
+- Update to kernel version 4.20.5.
+```
 
 ### v0.4.6
 ```

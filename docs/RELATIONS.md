@@ -17,7 +17,6 @@ RL_INODE_CREATE|inode_create|create inode|
 RL_SETUID|setuid|setuid|
 RL_SETGID|setpgid|setpgid|
 RL_GETGID|getpgid|getpgid|
-RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
 RL_SH_WRITE|sh_write|writing to shared state|
 RL_PROC_WRITE|memory_write|writing to process memory |
 RL_BIND|bind|socket bind operation|
@@ -29,7 +28,6 @@ RL_FILE_RCV|file_rcv|open file descriptor recevied through IPC|
 RL_FILE_LOCK|file_lock|represent file lock operation|
 RL_FILE_SIGIO|file_sigio|represent IO signal|
 RL_VERSION|version_entity|connect version of entity object|
-RL_MMAP|mmap|mmap operation|
 RL_MUNMAP|munmap|munmap operation|
 RL_SHMDT|shmdt|shmdt operation|
 RL_LINK|link|create a link|
@@ -58,9 +56,13 @@ RL_GETXATTR_INODE|getxattr_inode|getxattr operation |
 RL_LSTXATTR|listxattr|listxattr operation|
 RL_READ_LINK|read_link|readlink operation|
 RL_MMAP_READ|mmap_read|mmap mounting with read perm|
+RL_MMAP_EXEC|mmap_exec|mmap mounting with exec perm|
+RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
+RL_MMAP_READ_PRIVATE|mmap_read_private|mmap private mounting with read perm|
+RL_MMAP_EXEC_PRIVATE|mmap_exec_private|mmap private mounting with exec perm|
+RL_MMAP_WRITE_PRIVATE|mmap_write_private|mmap private  mounting with write perm|
 RL_SH_READ|sh_read|sh_read operation|
 RL_PROC_READ|memory_read|read from process memory|
-RL_MMAP_EXEC|mmap_exec|mmap mounting with exec perm|
 RL_SND|send|send over socket|
 RL_SND_PACKET|send_packet|connect socket to packet on send operation|
 RL_SND_UNIX|send_unix|send over unix socket|
@@ -85,3 +87,6 @@ RL_SH_ATTACH_READ|sh_attach_read|attach sh with read perm|
 RL_SH_ATTACH_WRITE|sh_attach_write|attach sh with write perm|
 RL_SH_CREATE_READ|sh_create_read|sh create with read perm|
 RL_SH_CREATE_WRITE|sh_create_write|sh create with write perm|
+RL_LOAD_FILE|load_file|load file into kernel|
+RL_LOAD_MODULE|load_module|load file into kernel|
+RL_RAN_ON|ran_on|load file into kernel|

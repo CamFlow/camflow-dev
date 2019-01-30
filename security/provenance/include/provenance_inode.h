@@ -190,10 +190,9 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
  * @param inode The inode in question whose provenance entry to be updated.
  *
  */
-static inline void refresh_inode_provenance(struct inode *inode)
+static __always_inline void refresh_inode_provenance(struct inode *inode,
+						     struct provenance *prov)
 {
-	struct provenance *prov = inode->i_provenance;
-
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
 	record_inode_name(inode, prov);
@@ -202,38 +201,6 @@ static inline void refresh_inode_provenance(struct inode *inode)
 	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
 	security_inode_getsecid(inode, &(prov_elt(prov)->inode_info.secid));
 	update_inode_type(inode->i_mode, prov);
-}
-/*!
- * @brief Create a new provenance node if mmap is not shared.
- *
- * If a process mmap a file but set the flag as MAP_PRIAVTE,
- * other processes do not see the updates to the mapping, and thus the calling process should have its own mmap.
- * That is, the mapping has a new branch.
- * We create a new provenance entry ENT_INODE_MMAP and copy information from the original file's provenance entry @iprov,
- * unless either the original file or the calling process is set not to be tracked or the capture all is unset.
- * It is also possible that there is not enough memory to be allocated for a new provenance node, in which case, a NULL pointer is returned.
- * Note that this provenance node is short-lived and will be freed once a relation is recorded.
- * @param iprov The provenance entry pointer of the mmap'ed inode.
- * @param cprov The cred provenance entry pointer of the calling process.
- * @return The pointer to the new provenance entry node or NULL.
- *
- */
-static inline struct provenance *branch_mmap(struct provenance *iprov, struct provenance *cprov)
-{
-	struct provenance *prov;
-
-	if (!provenance_is_tracked(prov_elt(iprov)) && !provenance_is_tracked(prov_elt(cprov)) && !prov_policy.prov_all)
-		return NULL;
-	prov = alloc_provenance(ENT_INODE_MMAP, GFP_ATOMIC);
-	if (!prov)
-		return NULL;
-	set_tracked(prov_elt(prov));
-	node_uid(prov_elt(prov)) = prov_elt(iprov)->inode_info.uid;
-	node_gid(prov_elt(prov)) = prov_elt(iprov)->inode_info.gid;
-	prov_elt(prov)->inode_info.mode = prov_elt(iprov)->inode_info.mode;
-	prov_elt(prov)->inode_info.ino = prov_elt(iprov)->inode_info.ino;
-	memcpy(prov_elt(prov)->inode_info.sb_uuid, prov_elt(iprov)->inode_info.sb_uuid, 16 * sizeof(uint8_t));
-	return prov;
 }
 
 /*!
@@ -248,9 +215,10 @@ static inline struct provenance *branch_mmap(struct provenance *iprov, struct pr
  * @return 0 if no error occurred; -ENOMEM if no more memory to allocate for the provenance entry. Other error codes inherited or unknown.
  *
  */
-static inline int inode_init_provenance(struct inode *inode, struct dentry *opt_dentry)
+static inline int inode_init_provenance(struct inode *inode,
+					struct dentry *opt_dentry,
+					struct provenance *prov)
 {
-	struct provenance *prov = inode->i_provenance;
 	union prov_elt *buf;
 	struct dentry *dentry;
 	int rc = 0;
@@ -309,54 +277,54 @@ free_buf:
  * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
-static __always_inline struct provenance *inode_provenance(struct inode *inode, bool may_sleep)
+static __always_inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *prov = inode->i_provenance;
 
 	might_sleep_if(may_sleep);
 	if (!provenance_is_initialized(prov_elt(prov)) && may_sleep)
-		inode_init_provenance(inode, NULL);
+		inode_init_provenance(inode, NULL, prov);
 	if (may_sleep)
-		refresh_inode_provenance(inode);
+		refresh_inode_provenance(inode, prov);
 	return prov;
 }
 
 /*!
  * @brief This function returns the provenance of the given directory entry based on its inode.
  *
- * This function ultimately calls "inode_provenance" function.
+ * This function ultimately calls "get_inode_provenance" function.
  * We find the inode of the dentry (if this dentry were to be opened as a file) by calling "d_backing_inode" function.
  * @param dentry The dentry whose provenance is to be returned.
- * @param may_sleep Bool value used in "inode_provenance" function (See above)
+ * @param may_sleep Bool value used in "get_inode_provenance" function (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *dentry_provenance(struct dentry *dentry, bool may_sleep)
+static __always_inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, may_sleep);
+	return get_inode_provenance(inode, may_sleep);
 }
 
 /*!
  * @brief This function returns the provenance of the given file based on its inode.
  *
- * This function ultimately calls "inode_provenance" function.
+ * This function ultimately calls "get_inode_provenance" function.
  * We find the inode of the file by calling "file_inode" function.
  * @param file The file whose provenance is to be returned.
- * @param may_sleep Bool value used in "inode_provenance" function (See above)
+ * @param may_sleep Bool value used in "get_inode_provenance" function (See above)
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *file_provenance(struct file *file, bool may_sleep)
+static __always_inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
 	if (!inode)
 		return NULL;
-	return inode_provenance(inode, may_sleep);
+	return get_inode_provenance(inode, may_sleep);
 }
 
 static inline void save_provenance(struct dentry *dentry)
@@ -366,7 +334,7 @@ static inline void save_provenance(struct dentry *dentry)
 
 	if (!dentry)
 		return;
-	prov = dentry_provenance(dentry, false);
+	prov = get_dentry_provenance(dentry, false);
 	if (!prov)
 		return;
 	spin_lock(prov_lock(prov));

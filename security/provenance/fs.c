@@ -25,6 +25,7 @@
 #include "provenance_inode.h"
 #include "provenance_net.h"
 #include "provenance_task.h"
+#include "provenance_machine.h"
 
 #define TMPBUFLEN       12
 
@@ -127,6 +128,9 @@ declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_dupl
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
+	if (prov_machine_id != 0) // it has already been set
+		return -EPERM;
+
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -137,6 +141,7 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 		return -EAGAIN;
 
 	pr_info("Provenance: machine ID %d\n", prov_machine_id);
+	write_boot_buffer();
 	return count; // read only
 }
 
@@ -156,6 +161,9 @@ declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_ma
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
+	if (prov_boot_id != 0) // it has already been set
+		return -EPERM;
+
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
@@ -166,6 +174,7 @@ static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 		return -EAGAIN;
 
 	pr_info("Provenance: boot ID %d\n", prov_boot_id);
+	write_boot_buffer();
 	return count; // read only
 }
 
@@ -187,7 +196,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 
 {
-	struct provenance *cprov = get_cred_provenance();
+	struct provenance *cprov = current_provenance();
 	union long_prov_elt *node = NULL;
 
 	if (!capable(CAP_AUDIT_WRITE))
@@ -282,7 +291,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = get_cred_provenance();
+	struct provenance *prov = current_provenance();
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
@@ -297,7 +306,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = get_cred_provenance();
+	struct provenance *cprov = current_provenance();
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
@@ -742,7 +751,7 @@ out:
 static ssize_t prov_write_log(struct file *file, const char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *tprov = get_task_provenance();
+	struct provenance *tprov = get_task_provenance(false);
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
@@ -754,7 +763,7 @@ declare_file_operations(prov_log_ops, prov_write_log, no_read);
 static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
-	struct provenance *tprov = get_task_provenance();
+	struct provenance *tprov = get_task_provenance(false);
 
 	if (count <= 0 || count >= PATH_MAX)
 		return -ENOMEM;
@@ -817,6 +826,12 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	}
 	/* LSM version */
 	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
+	if (rc) {
+		pos = -EAGAIN;
+		goto out;
+	}
+	/* commit */
+	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -900,9 +915,22 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 		return -ENOMEM;
 	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
 		return -EAGAIN;
-	return sizeof(struct prov_type);
+	return len;
 }
 declare_file_operations(prov_version, no_write, prov_read_version);
+
+static ssize_t prov_read_commit(struct file *filp, char __user *buf,
+				size_t count, loff_t *ppos)
+{
+	size_t len = strlen(CAMFLOW_COMMIT);
+
+	if ( count < len )
+		return -ENOMEM;
+	if ( copy_to_user(buf, CAMFLOW_COMMIT, len) )
+		return -EAGAIN;
+	return len;
+}
+declare_file_operations(prov_commit, no_write, prov_read_commit);
 
 static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
@@ -984,6 +1012,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("gid", 0644, &prov_gid_filter_ops);
 	prov_create_file("type", 0444, &prov_type_ops);
 	prov_create_file("version", 0444, &prov_version);
+	prov_create_file("commit", 0444, &prov_commit);
 	prov_create_file("channel", 0644, &prov_channel_ops);
 	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
 	prov_create_file("epoch", 0644, &prov_epoch_ops);

@@ -17,7 +17,8 @@ static int flow(prov_entry_t *from, prov_entry_t *edge, prov_entry_t *to)
 {
 	if (provenance_does_propagate(from) && provenance_is_tracked(from)) {
 		// can propagate over edge?
-		if (!filter_propagate_relation(prov_type(edge))) {
+		if (!filter_propagate_relation(prov_type(edge)) &&
+		    !filter_propagate_node(to)) {
 			set_tracked(to);
 			set_propagate(to);
 			prov_bloom_merge(prov_taint(to), prov_taint(from));

@@ -1,7 +1,6 @@
-kernel-version=4.20
-lsm-version=0.4.6
+kernel-version=4.20.5
+lsm-version=0.5.0
 arch=x86_64
-
 
 cont-email != $(git log --format="%ae" HEAD^!)
 cont-name != $(git log --format="%ae" HEAD^!)
@@ -62,12 +61,22 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-copy_change:
+copy_change: update_commit
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
-copy_config:
+config_def:
+	echo "Default method to retrieve configuration"
 	cp -f /boot/config-$(shell uname -r) .config
+
+config_pi:
+	echo "Pi method to retrieve configuration"
+	sudo modprobe configs
+	zcat /proc/config.gz > /tmp/config.new
+	cp -f /tmp/config.new .config
+
+copy_config:
+	test -f /boot/config-$(shell uname -r) && $(MAKE) config_def || $(MAKE) config_pi
 	cd ./build/linux-stable && cp ../../.config .config
 
 config: copy_change copy_config
@@ -93,18 +102,29 @@ config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
 
 hooklist:
+	echo 'Generating HOOKS.md...'
 	ruby ./scripts/hooklist.rb > docs/HOOKS.md
 
 relationlist:
+	echo 'Generating RELATIONS.md...'
 	ruby ./scripts/relationlist.rb > docs/RELATIONS.md
 
 vertexlist:
+	echo 'Generating VERTICES.md...'
 	ruby ./scripts/vertexlist.rb > docs/VERTICES.md
 
-graphs:
+generate_dot:
+	echo 'Generating dot files...'
 	ruby ./scripts/graphs.rb
 
-doc: hooklist relationlist vertexlist graphs
+convert_png:
+	echo 'Converting to png...'
+	ruby ./scripts/convert.rb
+
+doc: hooklist relationlist vertexlist generate_dot convert_png
+
+update_commit:
+	ruby ./scripts/commit.rb
 
 compile: compile_security compile_kernel compile_us doc
 
@@ -200,6 +220,7 @@ test_travis:
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/hooks.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/machine.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/netfilter.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/propagate.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/query.c
@@ -208,6 +229,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_machine.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_net.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_ns.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_policy.h
@@ -263,3 +285,8 @@ update_linuxkit:
 	cp ./build/linux-stable/0002-camflow-patch.patch ./build/linuxkit/projects/camflow/kernel/patches-4.14.x/0002-camflow-patch.patch
 	cd ./build/linuxkit && git add .
 	cd ./build/linuxkit && git commit -a -m "Travis updated camflow patch $(shell date --iso=seconds)"
+
+fedora_dependencies:
+	sudo dnf groupinstall -y 'Development Tools'
+	sudo dnf install -y ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto bison flex
+	sudo dnf install -y ruby

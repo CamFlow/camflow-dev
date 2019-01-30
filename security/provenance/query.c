@@ -11,6 +11,7 @@
  *
  */
 #include <linux/rculist.h>
+#include <uapi/asm-generic/errno-base.h>
 
 #include "provenance_query.h"
 

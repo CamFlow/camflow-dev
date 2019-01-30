@@ -52,12 +52,26 @@ jobs:
             if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
               git config --global user.email $GH_EMAIL
               git config --global user.name $GH_NAME
+              git status
+              ls -l ./docs/img
+              ls -l ./docs/dot
               mkdir -p output
               cd output
+              echo "Cloning..."
               git clone https://github.com/camflow/camflow-dev
               cd camflow-dev
               git checkout $TARGET_BRANCH
-              cp -a ../../docs/. ./docs
+              echo "Copying..."
+              cp -af ../../docs/. ./docs
+              cp -af ../../docs/img/. ./docs/img
+              cp -af ../../docs/dot/. ./docs/dot
+              cp -f ../../scripts/syshooks.txt ./scripts/syshooks.txt
+              cp -f ../../scripts/syslist.txt ./scripts/syslist.txt
+              echo "Check files are there"
+              ls -l ./docs/img
+              ls -l ./docs/dot
+              git status
+              git add .
               git status
               # is there any change
               if ! git diff-index --exit-code --quiet HEAD; then

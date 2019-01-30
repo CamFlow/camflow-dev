@@ -99,6 +99,19 @@ class Instruction
     return a + '-' + relation + '->' + b + ',' + self.version(b)
   end
 
+  def self.influences_kernel_to_relation str
+    str = str.strip.delete(' ')
+    elements = str.match(/influences_kernel\(([A-Z_]+),&*([a-z_]+),([a-z_]+)/)
+    relation = self.relation_to_str elements[1]
+    a = self.prov_to_type elements[2]
+    b = self.prov_to_type elements[3]
+    return a + '-' + self.relation_to_str('RL_LOAD_FILE') + '->' + b + ',' + self.version(b) + ',' + b + '-' + self.relation_to_str('RL_LOAD_MODULE') + '-> machine' + ',' + self.version('machine')
+  end
+
+  def self.get_task_provenance_to_relation
+    return 'machine-' + self.relation_to_str('RL_RAN_ON') + '->process_memory'
+  end
+
   def self.get_cred_provenance_to_relation
     return 'path-' + self.relation_to_str('RL_NAMED_PROCESS') + '->process_memory'
   end
@@ -107,7 +120,7 @@ class Instruction
     return 'path-' + self.relation_to_str('RL_NAMED') + '->inode'
   end
 
-  def self.provenance_record_address_to_relation
+  def self.record_address_to_relation
     return 'address-' + self.relation_to_str('RL_NAMED') + '->inode'
   end
 
@@ -131,7 +144,7 @@ class Instruction
     return 'inode-' + self.relation_to_str('RL_GETXATTR_INODE') + '->xattr,xattr-'+self.relation_to_str('RL_GETXATTR')+'->task,task-'+self.relation_to_str('RL_PROC_WRITE')+'->process_memory' + ',' + self.version('task') + ',' + self.version('process_memory')
   end
 
-  def self.provenance_packet_content_to_relation
+  def self.record_packet_content_to_relation
     return 'packet_content-' + self.relation_to_str('RL_PCK_CNT') + '->packet'
   end
 

@@ -13,23 +13,24 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
-#ifndef __KERNEL__
-#include <linux/limits.h>
-#else
+#ifdef __KERNEL__
 #include <linux/socket.h>
-#include <linux/limits.h>
 #include <linux/mutex.h>
 #endif
+#include <linux/limits.h>
+#include <linux/utsname.h>
 
 #define xstr(s) str(s)
 #define str(s) # s
 
 #define CAMFLOW_VERSION_MAJOR     0
-#define CAMFLOW_VERSION_MINOR     4
-#define CAMFLOW_VERSION_PATCH     6
+#define CAMFLOW_VERSION_MINOR     5
+#define CAMFLOW_VERSION_PATCH     0
 #define CAMFLOW_VERSION_STR "v"xstr(CAMFLOW_VERSION_MAJOR)\
   "."xstr(CAMFLOW_VERSION_MINOR)\
   "."xstr(CAMFLOW_VERSION_PATCH)\
+
+#define CAMFLOW_COMMIT "a2ff4c57c1f87ce9cc92db152351e3c0d0ba7a50"
 
 #define PROVENANCE_HASH "sha256"
 
@@ -145,6 +146,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define PROV_GID_FILTER												"/sys/kernel/security/provenance/gid"
 #define PROV_TYPE															"/sys/kernel/security/provenance/type"
 #define PROV_VERSION													"/sys/kernel/security/provenance/version"
+#define PROV_COMMIT 													"/sys/kernel/security/provenance/commit"
 #define PROV_CHANNEL													"/sys/kernel/security/provenance/channel"
 #define PROV_DUPLICATE_FILE										"/sys/kernel/security/provenance/duplicate"
 #define PROV_EPOCH_FILE   										"/sys/kernel/security/provenance/epoch"
@@ -166,6 +168,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define node_gid(node)              	((node)->node_info.gid)
 #define node_previous_id(node)        ((node)->node_info.previous_id)
 #define node_previous_type(node)      ((node)->node_info.previous_type)
+#define node_kernel_version(node)      ((node)->node_info.k_version)
 
 
 #define prov_flag(prov) ((prov)->msg_info.internal_flag)
@@ -254,7 +257,7 @@ union prov_identifier {
 
 
 #define basic_elements union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
-#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
+#define shared_node_elements uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;
@@ -402,6 +405,14 @@ struct arg_struct {
 	uint8_t truncated;
 };
 
+struct disc_node_struct {
+	basic_elements;
+  shared_node_elements;
+	size_t length;
+	char content[PATH_MAX];
+	union prov_identifier parent;
+};
+
 #define PROV_XATTR_NAME_SIZE    256
 #define PROV_XATTR_VALUE_SIZE   (PATH_MAX - PROV_XATTR_NAME_SIZE)
 struct xattr_prov_struct {
@@ -412,12 +423,14 @@ struct xattr_prov_struct {
 	size_t size;
 };
 
-struct disc_node_struct {
+struct machine_struct {
 	basic_elements;
   shared_node_elements;
-	size_t length;
-	char content[PATH_MAX];
-	union prov_identifier parent;
+  uint8_t cam_major;
+  uint8_t cam_minor;
+  uint8_t cam_patch;
+  struct new_utsname utsname;
+  char commit[256];
 };
 
 union long_prov_elt {
@@ -439,6 +452,7 @@ union long_prov_elt {
 	struct pckcnt_struct pckcnt_info;
 	struct disc_node_struct disc_node_info;
 	struct xattr_prov_struct xattr_info;
+  struct machine_struct machine_info;
 };
 
 typedef union long_prov_elt prov_entry_t;

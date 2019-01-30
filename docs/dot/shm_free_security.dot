@@ -1,0 +1,5 @@
+digraph RGL__DirectedAdjacencyGraph {shm[fontsize = 8,label = shm,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+shm -> shm[fontsize = 8,label = free]
+
+}

@@ -26,10 +26,10 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   if  line.include?('int __mq_msgsnd(') || line.include?('int __mq_msgrcv(')
     g.from_string(str) unless str == ''
     dot = g.get_dot unless str == ''
-    File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-    system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
+    File.open('./docs/dot/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
+    system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
     if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
-      system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+      system('dot -Tpng ./docs/dot/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
       hook_map[hook+'_always'] = str unless str == ''
     end
     g.reset unless str == ''
@@ -44,32 +44,29 @@ File.readlines('./security/provenance/hooks.c').each do |line|
     if line.include?('provenance_'+h+'(')
       g.from_string(str) unless str == ''
       dot = g.get_dot unless str == ''
-      File.open('/tmp/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
+      File.open('./docs/dot/'+hook+'.dot', 'w') { |f| f.write(dot) } unless str == ''
       puts hook
       if hook == 'socket_sendmsg' || hook == 'socket_recvmsg'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'_always.png')  unless str == ''
+        File.open('./docs/dot/'+hook+'_always.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map[hook+'_always'] = str unless str == ''
       elsif hook == 'inode_link'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/inode_rename.png')  unless str == ''
+        File.open('./docs/dot/inode_rename.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map[hook] = str unless str == ''
         hook_map['inode_rename'] = str unless str == ''
       elsif hook == '__mq_msgsnd'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgsnd.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedsend.png')  unless str == ''
+        File.open('./docs/dot/msg_queue_msgsnd.dot', 'w') { |f| f.write(dot) } unless str == ''
+        File.open('./docs/dot/mq_timedsend.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map['msg_queue_msgsnd'] = str unless str == ''
         hook_map['mq_timedsend'] = str unless str == ''
       elsif hook == '__mq_msgrcv'
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/msg_queue_msgrcv.png')  unless str == ''
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/mq_timedreceive.png')  unless str == ''
+        File.open('./docs/dot/msg_queue_msgrcv.dot', 'w') { |f| f.write(dot) } unless str == ''
+        File.open('./docs/dot/mq_timedreceive.dot', 'w') { |f| f.write(dot) } unless str == ''
         hook_map['msg_queue_msgrcv'] = str unless str == ''
         hook_map['mq_timedreceive'] = str unless str == ''
       elsif hook == 'msg_queue_msgrcv' || hook == 'mq_timedreceive' || hook == 'mq_timedsend' || hook == 'msg_queue_msgsnd'
         puts 'Skipping '+hook
       else
-        system('dot -Tpng /tmp/'+hook+'.dot -o ./docs/img/'+hook+'.png')  unless str == ''
         hook_map.store(hook, str) unless str == ''
       end
       g.reset unless str == ''
@@ -92,6 +89,12 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('uses_two(')
     str += ',' unless str == ''
     str += Instruction.uses_two_to_relation(line)
+  elsif line.include?('influences_kernel(')
+    str += ',' unless str == ''
+    str += Instruction.influences_kernel_to_relation(line)
+  elsif line.include?('get_task_provenance(')
+    str += ',' unless str == ''
+    str += Instruction.get_task_provenance_to_relation
   elsif line.include?('get_cred_provenance(')
     str += ',' unless str == ''
     str += Instruction.get_cred_provenance_to_relation
@@ -107,18 +110,18 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('refresh_inode_provenance(')
     str += ',' unless str == ''
     str += Instruction.inode_provenance_to_relation
-  elsif line.include?('provenance_record_address(')
+  elsif line.include?('record_address(')
     str += ',' unless str == ''
-    str += Instruction.provenance_record_address_to_relation
+    str += Instruction.record_address_to_relation
   elsif line.include?('record_write_xattr(')
     str += ',' unless str == ''
     str += Instruction.record_write_xattr_to_relation(line)
   elsif line.include?('record_read_xattr(')
     str += ',' unless str == ''
     str += Instruction.record_read_xattr_to_relation
-  elsif line.include?('provenance_packet_content(')
+  elsif line.include?('record_packet_content(')
     str += ',' unless str == ''
-    str += Instruction.provenance_packet_content_to_relation
+    str += Instruction.record_packet_content_to_relation
   elsif line.include?('prov_record_args(')
     str += ',' unless str == ''
     str += Instruction.prov_record_args_to_relation
@@ -182,7 +185,6 @@ if File.file?('./scripts/syshooks.txt')
     g.from_string(str) unless str == ''
     dot = g.get_dot unless str == ''
     g.reset unless str == ''
-    File.open('/tmp/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
-    system('dot -Tpng /tmp/'+call_name+'.dot -o ./docs/img/'+call_name+'.png')  unless str == ''
+    File.open('./docs/dot/'+call_name+'.dot', 'w') { |f| f.write(dot) } unless str == ''
   end
 end

@@ -181,7 +181,7 @@ static __always_inline int current_update_shst(struct provenance *cprov, bool re
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			flags = vma->vm_flags;
-			mmprov = file_provenance(mmapf, false);
+			mmprov = get_file_provenance(mmapf, false);
 			if (mmprov) {
 				if (vm_read_exec_mayshare(flags) && read)
 					rc = record_relation(RL_SH_READ, prov_entry(mmprov), prov_entry(cprov), mmapf, flags);
@@ -229,7 +229,7 @@ static inline int record_task_name(struct task_struct *task,
 	exe_file = get_mm_exe_file(mm);
 	mmput_async(mm);
 	if (exe_file) {
-		fprov = file_provenance(exe_file, false);
+		fprov = get_file_provenance(exe_file, false);
 		if (provenance_is_opaque(prov_elt(fprov))) {
 			set_opaque(prov_elt(prov));
 			goto out;
@@ -311,7 +311,7 @@ static inline struct provenance *get_cred_provenance(void)
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
-		goto out;
+		return prov;
 	record_task_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
@@ -326,7 +326,6 @@ static inline struct provenance *get_cred_provenance(void)
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
 	update_proc_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
-out:
 	return prov;
 }
 
@@ -340,12 +339,14 @@ out:
  *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
-static inline struct provenance *get_task_provenance( void )
+static __always_inline struct provenance *get_task_provenance( bool link )
 {
 	struct provenance *prov = current->provenance;
 
 	prov_elt(prov)->task_info.pid = task_pid_nr(current);
 	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
+	if (!provenance_is_opaque(prov_elt(prov)) && link)
+		record_kernel_link(prov_entry(prov));
 	return prov;
 }
 
@@ -518,7 +519,7 @@ out:
 /*!
  * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
  *
- * This is a helper funtion used by prov_record_args function.
+ * This is a helper funtion used by record_args function.
  * It records @arg by:
  * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
  * 2. Recording a provenance relation @etype (either RL_ARG or RL_ENV depending on @vtype) between the @arg and @prov
@@ -533,11 +534,11 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation function or unknown.
  *
  */
-static __always_inline int prov_record_arg(struct provenance *prov,
-					   uint64_t vtype,
-					   uint64_t etype,
-					   const char *arg,
-					   size_t len)
+static __always_inline int record_arg(struct provenance *prov,
+				      uint64_t vtype,
+				      uint64_t etype,
+				      const char *arg,
+				      size_t len)
 {
 	union long_prov_elt *aprov;
 	int rc = 0;
@@ -560,14 +561,14 @@ static __always_inline int prov_record_arg(struct provenance *prov,
  *
  * We will only record all the arguments if @prov is tracked or capture all is set.
  * We record both ENT_ARG and ENT_ENV types of arguments and relations RL_ARG and RL_ENV between those arguments and @prov,
- * by calling prov_record_arg function.
+ * by calling record_arg function.
  * @param prov The provenance entry pointer where arguments should be associated with.
  * @param bprm The binary parameter structure.
  * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
  *
  */
-static inline int prov_record_args(struct provenance *prov,
-				   struct linux_binprm *bprm)
+static inline int record_args(struct provenance *prov,
+			      struct linux_binprm *bprm)
 {
 	char* argv;
 	char* ptr;
@@ -591,12 +592,12 @@ static inline int prov_record_args(struct provenance *prov,
 	ptr = argv;
 	while (argc-- > 0) {
 		size = strnlen(ptr, len);
-		prov_record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
+		record_arg(prov, ENT_ARG, RL_ARG, ptr, size);
 		ptr += size + 1;
 	}
 	while (envc-- > 0) {
 		size = strnlen(ptr, len);
-		prov_record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
+		record_arg(prov, ENT_ENV, RL_ENV, ptr, size);
 		ptr += size + 1;
 	}
 	kfree(argv);

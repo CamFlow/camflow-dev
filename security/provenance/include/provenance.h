@@ -40,7 +40,6 @@ extern uint32_t epoch;
 
 enum {
 	PROVENANCE_LOCK_PROC,
-	PROVENANCE_LOCK_TASK,
 	PROVENANCE_LOCK_DIR,
 	PROVENANCE_LOCK_INODE,
 	PROVENANCE_LOCK_MSG,
@@ -177,6 +176,23 @@ static inline void __clear_name_recorded(union long_prov_elt *node)
 static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 {
 	if (epoch > node->msg_info.nepoch)
+		return false;
+	return true;
+}
+
+// reference to node representing the machine/kernel
+extern union long_prov_elt *prov_machine;
+
+#define set_kernel_recorded(node) __set_kernel_recorded((union long_prov_elt*)node)
+static inline void __set_kernel_recorded(union long_prov_elt *node)
+{
+	node_kernel_version(node) = node_identifier(prov_machine).version;
+}
+
+#define provenance_is_kernel_recorded(node) __provenance_is_kernel_recorded((union long_prov_elt*)node)
+static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node)
+{
+	if (node_kernel_version(node) < node_identifier(prov_machine).version)
 		return false;
 	return true;
 }
