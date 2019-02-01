@@ -42,6 +42,7 @@
 
 ### v0.5.1
 ```
+- Return error if machine or boot ID are set to 0.
 - Update to kernel version 4.20.5.
 ```
 
