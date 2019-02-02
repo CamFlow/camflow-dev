@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.5.1           | 4.20.5         | N/A				|
+| 0.5.1           | 4.20.6         | N/A				|
 | 0.5.0           | 4.20.5         | 30/01/2019	|
 | 0.4.6           | 4.20           | 05/01/2019 |
 | 0.4.5           | 4.18.16        | 24/10/2018 |
@@ -43,7 +43,7 @@
 ### v0.5.1
 ```
 - Return error if machine or boot ID are set to 0.
-- Update to kernel version 4.20.5.
+- Update to kernel version 4.20.6.
 ```
 
 ### v0.5.0
