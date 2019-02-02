@@ -203,11 +203,11 @@ static __always_inline void __write_node(prov_entry_t *node)
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
+	set_recorded(node);
 	if ( provenance_is_long(node) )
 		long_prov_write(node);
 	else
 		prov_write((union prov_elt*)node);
-	set_recorded(node);
 }
 
 static __always_inline void prepare_relation(const uint64_t type,
@@ -229,6 +229,7 @@ static __always_inline void prepare_relation(const uint64_t type,
 		relation->relation_info.offset = file->f_pos;
 	}
 	relation->relation_info.flags = flags;
+	relation->msg_info.epoch = epoch;
 }
 
 /*!

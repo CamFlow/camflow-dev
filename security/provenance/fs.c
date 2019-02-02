@@ -969,6 +969,7 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	epoch++;
+	pr_info("Provenance: epoch changed to %d.", epoch);
 	return count;
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);

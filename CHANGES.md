@@ -42,6 +42,7 @@
 
 ### v0.5.1
 ```
+- Properly associate epoch with relation.
 - Return error if machine or boot ID are set to 0.
 - Update to kernel version 4.20.6.
 ```
