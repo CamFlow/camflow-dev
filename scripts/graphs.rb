@@ -159,6 +159,8 @@ if File.file?('./scripts/syshooks.txt')
       clean = hook.match(/u'([\w]+)'/).captures[0].gsub('security_', '').strip
       if clean == 'sock_rcv_skb' then
         clean = 'socket_sock_rcv_skb'
+      elsif clean == 'prepare_creds'
+        clean = 'cred_prepare'
       end
 
       a_used << clean unless to_remove.include?(clean)

@@ -216,7 +216,7 @@ static void provenance_cred_free(struct cred *cred)
  * @return 0 if no error occured. Other error codes unknown.
  *
  */
-static int provenance_prepare_creds(struct cred *new,
+static int provenance_cred_prepare(struct cred *new,
 				   const struct cred *old,
 				   gfp_t gfp)
 {
@@ -2471,7 +2471,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* task related hooks */
 	LSM_HOOK_INIT(cred_free,		provenance_cred_free),
 	LSM_HOOK_INIT(cred_alloc_blank,		provenance_cred_alloc_blank),
-	LSM_HOOK_INIT(cred_prepare,		provenance_prepare_creds),
+	LSM_HOOK_INIT(cred_prepare,		provenance_cred_prepare),
 	LSM_HOOK_INIT(cred_transfer,		provenance_cred_transfer),
 	LSM_HOOK_INIT(task_alloc,		provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,		provenance_task_free),
