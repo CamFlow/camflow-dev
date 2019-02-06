@@ -6,15 +6,15 @@ path -> process_memory[fontsize = 8,label = named_process]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
-machine -> process_memory[fontsize = 8,label = ran_on]
+task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
+
+machine -> task[fontsize = 8,label = ran_on]
 
 inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 process_memory -> inode[fontsize = 8,label = send_unix]
 
 inode -> inode[fontsize = 8,label = version_entity]
-
-task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
 inode -> task[fontsize = 8,label = receive_msg]
 

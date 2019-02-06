@@ -109,7 +109,7 @@ class Instruction
   end
 
   def self.get_task_provenance_to_relation
-    return 'machine-' + self.relation_to_str('RL_RAN_ON') + '->process_memory'
+    return 'machine-' + self.relation_to_str('RL_RAN_ON') + '->task'
   end
 
   def self.get_cred_provenance_to_relation
