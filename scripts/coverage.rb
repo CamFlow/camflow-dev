@@ -30,10 +30,10 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   h = hook.captures[0].gsub('_security', '').strip unless hook.nil?
   if h == 'cred_prepare'
     h = 'prepare_creds'
-  elsif clean == 'socket_sock_rcv_skb' then
-    clean = 'sock_rcv_skb'
+  elsif h == 'socket_sock_rcv_skb' then
+    h = 'sock_rcv_skb'
   end
-  implemented_hooks << h
+  implemented_hooks << h unless h == ''
 end
 File.readlines('./scripts/syshooks.txt').each do |line|
   used = 0
