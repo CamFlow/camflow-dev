@@ -18,7 +18,7 @@ inode -> inode[fontsize = 8,label = version_entity]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
-machine -> process_memory[fontsize = 8,label = ran_on]
+machine -> task[fontsize = 8,label = ran_on]
 
 msg[fontsize = 8,label = msg,shape = ellipse, fillcolor="#fffacd", style = filled]
 

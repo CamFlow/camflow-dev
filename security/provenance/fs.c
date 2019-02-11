@@ -140,6 +140,9 @@ static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 	if (copy_from_user(&prov_machine_id, buf, sizeof(uint32_t)))
 		return -EAGAIN;
 
+	if (prov_machine_id == 0)
+		return -EINVAL;
+
 	pr_info("Provenance: machine ID %d\n", prov_machine_id);
 	write_boot_buffer();
 	return count; // read only
@@ -172,6 +175,9 @@ static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 
 	if (copy_from_user(&prov_boot_id, buf, sizeof(uint32_t)))
 		return -EAGAIN;
+
+	if (prov_boot_id == 0)
+		return -EINVAL;
 
 	pr_info("Provenance: boot ID %d\n", prov_boot_id);
 	write_boot_buffer();
@@ -963,6 +969,7 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
 {
 	epoch++;
+	pr_info("Provenance: epoch changed to %d.", epoch);
 	return count;
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);

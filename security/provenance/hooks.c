@@ -2640,6 +2640,7 @@ void __init provenance_add_hooks(void)
 	cred_init_provenance();
 	init_prov_machine();
 	print_prov_machine();
+	pr_info("Provenance: starting in epoch %d.", epoch);
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 	pr_info("Provenance: hooks ready.\n");
 }
