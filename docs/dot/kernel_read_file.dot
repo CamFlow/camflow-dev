@@ -10,12 +10,20 @@ inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = f
 
 path -> inode[fontsize = 8,label = named]
 
-inode -> task[fontsize = 8,label = load_file]
+inode -> task[fontsize = 8,label = load_unknown]
 
 task -> task[fontsize = 8,label = version_activity]
 
 task -> machine[fontsize = 8,label = load_module]
 
 machine -> machine[fontsize = 8,label = version_entity]
+
+inode -> task[fontsize = 8,label = load_firmware]
+
+inode -> task[fontsize = 8,label = load_module]
+
+inode -> task[fontsize = 8,label = load_policy]
+
+inode -> task[fontsize = 8,label = load_certificate]
 
 }

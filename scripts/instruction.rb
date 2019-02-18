@@ -105,7 +105,7 @@ class Instruction
     relation = self.relation_to_str elements[1]
     a = self.prov_to_type elements[2]
     b = self.prov_to_type elements[3]
-    return a + '-' + self.relation_to_str('RL_LOAD_FILE') + '->' + b + ',' + self.version(b) + ',' + b + '-' + self.relation_to_str('RL_LOAD_MODULE') + '-> machine' + ',' + self.version('machine')
+    return a + '-' + relation + '->' + b + ',' + self.version(b) + ',' + b + '-' + self.relation_to_str('RL_LOAD_MODULE') + '-> machine' + ',' + self.version('machine')
   end
 
   def self.get_task_provenance_to_relation
