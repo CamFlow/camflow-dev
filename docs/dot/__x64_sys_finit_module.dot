@@ -44,19 +44,19 @@ inode -> process_memory[fontsize = 8,label = exec]
 
 inode -> task[fontsize = 8,label = file_sigio]
 
-inode -> task[fontsize = 8,label = load_unknown]
+inode -> task[fontsize = 8,label = load_file]
 
-task -> machine[fontsize = 8,label = load_module]
+task -> machine[fontsize = 8,label = load_unknown]
 
 machine -> machine[fontsize = 8,label = version_entity]
 
-inode -> task[fontsize = 8,label = load_firmware]
+task -> machine[fontsize = 8,label = load_firmware]
 
-inode -> task[fontsize = 8,label = load_module]
+task -> machine[fontsize = 8,label = load_module]
 
-inode -> task[fontsize = 8,label = load_policy]
+task -> machine[fontsize = 8,label = load_policy]
 
-inode -> task[fontsize = 8,label = load_certificate]
+task -> machine[fontsize = 8,label = load_certificate]
 
 packet_content[fontsize = 8,label = packet_content,shape = ellipse, fillcolor="#fffacd", style = filled]
 
