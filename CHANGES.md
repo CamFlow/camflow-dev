@@ -43,6 +43,7 @@
 
 ### v0.5.2
 ```
+- Track more data loaded to kernel (firmware, policy, certificates and modules, previously only modules).
 - Update to kernel version 4.20.10.
 ```
 
