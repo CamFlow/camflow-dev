@@ -2364,20 +2364,11 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = get_file_provenance(bprm->file, true);
 	unsigned long irqflags;
 
-	if (provenance_is_opaque(prov_elt(iprov))) {
-		set_opaque(prov_elt(nprov));
-		set_opaque(prov_elt(tprov));
-		return;
-	}
 	record_node_name(cprov, bprm->interp, false);
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	derives(RL_EXEC_TASK, cprov, nprov, NULL, 0);
-	derives(RL_EXEC, iprov, nprov, NULL, 0);
-	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
 
