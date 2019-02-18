@@ -16,20 +16,14 @@ path -> inode[fontsize = 8,label = named]
 
 process_memory -> task[fontsize = 8,label = memory_read]
 
-directory[fontsize = 8,label = directory,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-task -> directory[fontsize = 8,label = unlink]
+task -> inode[fontsize = 8,label = unlink]
 
 task -> task[fontsize = 8,label = version_activity]
 
-directory -> directory[fontsize = 8,label = version_entity]
+inode -> inode[fontsize = 8,label = version_entity]
 
 inode -> process_memory[fontsize = 8,label = sh_read]
 
 process_memory -> process_memory[fontsize = 8,label = version_entity]
-
-task -> inode[fontsize = 8,label = unlink]
-
-inode -> inode[fontsize = 8,label = version_entity]
 
 }

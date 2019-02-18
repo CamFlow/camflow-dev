@@ -532,7 +532,6 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = NULL;
-	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -540,20 +539,10 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	if (!iprov)
 		return -ENOMEM;
 
-	dprov = get_inode_provenance(dir, true);
-	if (!dprov)
-		return -ENOMEM;
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_LINK, cprov, tprov, dprov, NULL, 0);
-	if (rc < 0)
-		goto out;
 	rc = generates(RL_LINK, cprov, tprov, iprov, NULL, 0);
-out:
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	record_inode_name_from_dentry(new_dentry, iprov, true);
 	return rc;
@@ -570,7 +559,6 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = NULL;
-	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -578,20 +566,10 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 	if (!iprov)
 		return -ENOMEM;
 
-	dprov = get_inode_provenance(dir, true);
-	if (!dprov)
-		return -ENOMEM;
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_UNLINK, cprov, tprov, dprov, NULL, 0);
-	if (rc < 0)
-		goto out;
 	rc = generates(RL_UNLINK, cprov, tprov, iprov, NULL, 0);
-out:
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
@@ -611,7 +589,6 @@ static int provenance_inode_symlink(struct inode *dir,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = NULL;
-	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -619,20 +596,10 @@ static int provenance_inode_symlink(struct inode *dir,
 	if (!iprov)
 		return 0; // do not touch!
 
-	dprov = get_inode_provenance(dir, true);
-	if (!dprov)
-		return 0; // do not touch!
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SYMLINK, cprov, tprov, dprov, NULL, 0);
-	if (rc < 0)
-		goto out;
 	rc = generates(RL_SYMLINK, cprov, tprov, iprov, NULL, 0);
-out:
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	record_node_name(iprov, name, true);
 	return rc;
