@@ -22,6 +22,10 @@ task -> machine[fontsize = 8,label = load_firmware]
 
 task -> machine[fontsize = 8,label = load_module]
 
+task -> machine[fontsize = 8,label = load_kexec_image]
+
+task -> machine[fontsize = 8,label = load_kexec_initramfs]
+
 task -> machine[fontsize = 8,label = load_policy]
 
 task -> machine[fontsize = 8,label = load_certificate]

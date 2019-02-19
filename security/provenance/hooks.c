@@ -1132,6 +1132,12 @@ static int provenance_kernel_read_file(struct file *file
 		case READING_MODULE:
 			rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
 			break;
+		case READING_KEXEC_IMAGE:
+			rc = record_influences_kernel(RL_LOAD_KEXEC_IMAGE, iprov, tprov, file);
+			break;
+		case READING_KEXEC_INITRAMFS:
+			rc = record_influences_kernel(RL_LOAD_KEXEC_INITRAMFS, iprov, tprov, file);
+			break;
 		case READING_POLICY:
 			rc = record_influences_kernel(RL_LOAD_POLICY, iprov, tprov, file);
 			break;

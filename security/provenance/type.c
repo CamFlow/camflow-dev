@@ -102,6 +102,8 @@ static const char RL_STR_RAN_ON[] = "ran_on";                     // load file i
 static const char RL_STR_LOAD_UNKNOWN[] = "load_unknown";                      // load file into kernel
 static const char RL_STR_LOAD_FIRMWARE[] = "load_firmware";                       // load file into kernel
 static const char RL_STR_LOAD_MODULE[] = "load_module";                    // load file into kernel
+static const char RL_STR_LOAD_KEXEC_IMAGE[] = "load_kexec_image";                    // load file into kernel
+static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";                    // load file into kernel
 static const char RL_STR_LOAD_POLICY[] = "load_policy";                    // load file into kernel
 static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";                            // load file into kernel
 
@@ -311,6 +313,10 @@ const char* relation_str(uint64_t type)
 		return RL_STR_LOAD_FIRMWARE;
 	case RL_LOAD_MODULE:
 		return RL_STR_LOAD_MODULE;
+	case RL_LOAD_KEXEC_IMAGE:
+		return RL_STR_LOAD_KEXEC_IMAGE;
+	case RL_LOAD_KEXEC_INITRAMFS:
+		return RL_STR_LOAD_KEXEC_INITRAMFS;
 	case RL_LOAD_POLICY:
 		return RL_STR_LOAD_POLICY;
 	case RL_LOAD_CERTIFICATE:
@@ -412,6 +418,8 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNKNOWN, RL_LOAD_UNKNOWN);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE, RL_LOAD_FIRMWARE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_MODULE, RL_LOAD_MODULE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_IMAGE, RL_LOAD_KEXEC_IMAGE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_POLICY, RL_LOAD_POLICY);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
 	MATCH_AND_RETURN(str, RL_STR_RAN_ON, RL_RAN_ON);
