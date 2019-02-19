@@ -2298,7 +2298,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 		set_opaque(prov_elt(nprov));
 		return 0;
 	}
-	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
+	spin_lock_irqsave(prov_lock(iprov), irqflags);
 	rc = derives(RL_EXEC, iprov, nprov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
@@ -2362,12 +2362,11 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct provenance *cprov = get_cred_provenance();
-	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *nprov = bprm->cred->provenance;
 	unsigned long irqflags;
 
 	record_node_name(cprov, bprm->interp, false);
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_irqsave(prov_lock(cprov), irqflags);
 	derives(RL_EXEC_TASK, cprov, nprov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
