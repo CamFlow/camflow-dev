@@ -1119,11 +1119,9 @@ static int provenance_kernel_read_file(struct file *file
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (id >= READING_MAX_ID) // should not happen
-		return 0;
-
 	if (!iprov) // not sure it could happen, ignore it for now
 		return 0;
+
 	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
 	switch(id) {
 		case READING_UNKNOWN:
