@@ -1119,7 +1119,10 @@ static int provenance_kernel_read_file(struct file *file
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!iprov)                     // not sure it could happen, ignore it for now
+	if (id >= READING_MAX_ID) // should not happen
+		return 0;
+
+	if (!iprov) // not sure it could happen, ignore it for now
 		return 0;
 	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
 	switch(id) {
@@ -1128,6 +1131,9 @@ static int provenance_kernel_read_file(struct file *file
 			break;
 		case READING_FIRMWARE:
 			rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
+			break;
+		case READING_FIRMWARE_PREALLOC_BUFFER:
+			rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
 			break;
 		case READING_MODULE:
 			rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);

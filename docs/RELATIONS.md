@@ -91,6 +91,7 @@ RL_LOAD_FILE|load_file|load file into kernel|
 RL_RAN_ON|ran_on|load file into kernel|
 RL_LOAD_UNKNOWN|load_unknown|load file into kernel|
 RL_LOAD_FIRMWARE|load_firmware|load file into kernel|
+RL_LOAD_FIRMWARE_PREALLOC_BUFFER|load_firmware_prealloc_buffer|load file into kernel|
 RL_LOAD_MODULE|load_module|load file into kernel|
 RL_LOAD_KEXEC_IMAGE|load_kexec_image|load file into kernel|
 RL_LOAD_KEXEC_INITRAMFS|load_kexec_initramfs|load file into kernel|
