@@ -97,16 +97,16 @@ static const char RL_STR_SH_ATTACH_READ[] = "sh_attach_read";           // attac
 static const char RL_STR_SH_ATTACH_WRITE[] = "sh_attach_write";         // attach sh with write perm
 static const char RL_STR_SH_CREATE_READ[] = "sh_create_read";           // sh create with read perm
 static const char RL_STR_SH_CREATE_WRITE[] = "sh_create_write";         // sh create with write perm
-static const char RL_STR_LOAD_FILE[] = "load_file";                // load file into kernel
-static const char RL_STR_RAN_ON[] = "ran_on";                     // load file into kernel
-static const char RL_STR_LOAD_UNKNOWN[] = "load_unknown";                      // load file into kernel
-static const char RL_STR_LOAD_FIRMWARE[] = "load_firmware";                       // load file into kernel
-static const char RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER[] = "load_firmware_prealloc_buffer";                       // load file into kernel
+static const char RL_STR_LOAD_FILE[] = "load_file";                			// load file into kernel
+static const char RL_STR_RAN_ON[] = "ran_on";                     			// task run on this machine
+static const char RL_STR_LOAD_UNKNOWN[] = "load_unknown";               // load file into kernel
+static const char RL_STR_LOAD_FIRMWARE[] = "load_firmware";             // load file into kernel
+static const char RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER[] = "load_firmware_prealloc_buffer";	// load file into kernel
 static const char RL_STR_LOAD_MODULE[] = "load_module";                    // load file into kernel
-static const char RL_STR_LOAD_KEXEC_IMAGE[] = "load_kexec_image";                    // load file into kernel
-static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";                    // load file into kernel
+static const char RL_STR_LOAD_KEXEC_IMAGE[] = "load_kexec_image";          // load file into kernel
+static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";  // load file into kernel
 static const char RL_STR_LOAD_POLICY[] = "load_policy";                    // load file into kernel
-static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";                            // load file into kernel
+static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";          // load file into kernel
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                         // unkown node type should normally not appear
