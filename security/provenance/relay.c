@@ -71,6 +71,58 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
+static void handle_boot_buffer(struct prov_boot_buffer *buf) {
+	int i;
+	int cpu;
+	struct prov_boot_buffer *tmp;
+
+	while (buf != NULL) {
+		if (buf->nb_entry > 0) {
+			cpu = get_cpu();
+			for (i = 0; i < buf->nb_entry; i++) {
+				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
+				if (prov_is_relation(&(buf->buffer[i]))) {
+					tighten_identifier(&(buf->buffer[i].relation_info.snd));
+					tighten_identifier(&(buf->buffer[i].relation_info.rcv));
+				}
+				if (is_relay_full(prov_chan, cpu)){
+					// TODO do something
+				} else {
+					relay_write(prov_chan, &buf->buffer[i], sizeof(union prov_elt));
+				}
+			}
+			put_cpu();
+		}
+		tmp = buf;
+		buf = buf->next;
+		kfree(tmp);
+	}
+}
+
+static void handle_long_boot_buffer(struct prov_long_boot_buffer *buf) {
+	int i;
+	int cpu;
+	struct prov_long_boot_buffer *tmp;
+
+	while (buf != NULL) {
+		if (buf->nb_entry > 0) {
+			cpu = get_cpu();
+			for (i = 0; i < buf->nb_entry; i++) {
+				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
+				if (is_relay_full(long_prov_chan, cpu)){
+					// TODO do something
+				} else {
+					relay_write(long_prov_chan, &buf->buffer[i], sizeof(union long_prov_elt));
+				}
+			}
+			put_cpu();
+		}
+		tmp = buf;
+		buf = buf->next;
+		kfree(tmp);
+	}
+}
+
 bool relay_ready;
 bool relay_initialized;
 /*!
@@ -86,10 +138,8 @@ extern union long_prov_elt *prov_machine;
 void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
-	int i;
-	int cpu;
-	struct prov_boot_buffer *tmp, *tmp2;
-	struct prov_long_boot_buffer *ltmp, *ltmp2;
+	struct prov_boot_buffer *tmp;
+	struct prov_long_boot_buffer *ltmp;
 
 	if (prov_machine_id == 0 || prov_boot_id == 0 || !relay_initialized)
 		return;
@@ -103,44 +153,8 @@ void write_boot_buffer(void)
 	refresh_prov_machine();
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
-	while (tmp != NULL) {
-		if (tmp->nb_entry > 0) {
-			cpu = get_cpu();
-			for (i = 0; i < tmp->nb_entry; i++) {
-				tighten_identifier(&get_prov_identifier(&(tmp->buffer[i])));
-				if (prov_is_relation(&(tmp->buffer[i]))) {
-					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
-					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
-				}
-				if (is_relay_full(prov_chan, cpu)){
-					// TODO do something
-				} else {
-					relay_write(prov_chan, &tmp->buffer[i], sizeof(union prov_elt));
-				}
-			}
-			put_cpu();
-		}
-		tmp2 = tmp;
-		tmp = tmp->next;
-		kfree(tmp2);
-	}
-	while (ltmp != NULL) {
-		if (ltmp->nb_entry > 0) {
-			cpu = get_cpu();
-			for (i = 0; i < ltmp->nb_entry; i++) {
-				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
-				if (is_relay_full(long_prov_chan, cpu)){
-					// TODO do something
-				} else {
-					relay_write(long_prov_chan, &ltmp->buffer[i], sizeof(union long_prov_elt));
-				}
-			}
-			put_cpu();
-		}
-		ltmp2 = ltmp;
-		ltmp = ltmp->next;
-		kfree(ltmp2);
-	}
+	handle_boot_buffer(tmp);
+	handle_long_boot_buffer(ltmp);
 }
 
 /*!
