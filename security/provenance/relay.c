@@ -114,8 +114,9 @@ void write_boot_buffer(void)
 				}
 				if (is_relay_full(prov_chan, cpu)){
 					// TODO do something
+				} else {
+					relay_write(prov_chan, &tmp->buffer[i], sizeof(union prov_elt));
 				}
-				relay_write(prov_chan, &tmp->buffer[i], sizeof(union prov_elt));
 			}
 			put_cpu();
 		}
@@ -130,8 +131,9 @@ void write_boot_buffer(void)
 				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
 				if (is_relay_full(long_prov_chan, cpu)){
 					// TODO do something
+				} else {
+					relay_write(long_prov_chan, &ltmp->buffer[i], sizeof(union long_prov_elt));
 				}
-				relay_write(long_prov_chan, &ltmp->buffer[i], sizeof(union long_prov_elt));
 			}
 			put_cpu();
 		}
