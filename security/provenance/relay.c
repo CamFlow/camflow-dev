@@ -26,17 +26,16 @@ static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
-bool is_relay_full(struct rchan *chan) {
-	int i, ret, rc=0;
+bool is_relay_full(struct rchan *chan, int cpu) {
+	int ret;
+	int rc=0;
 	struct rchan_buf *buf;
 
-	for_each_possible_cpu(i) {
-		if ((buf = *per_cpu_ptr(chan->buf, i))){
-			ret = relay_buf_full(buf);
-			if (ret)
-				pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, i);
-			rc+=ret;
-		}
+	if ((buf = *per_cpu_ptr(chan->buf, cpu))){
+		ret = relay_buf_full(buf);
+		if (ret)
+			pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, cpu);
+		rc+=ret;
 	}
 	if (rc)
 		return true;
@@ -88,6 +87,7 @@ void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
 	int i;
+	int cpu;
 	struct prov_boot_buffer *tmp, *tmp2;
 	struct prov_long_boot_buffer *ltmp, *ltmp2;
 
@@ -105,17 +105,19 @@ void write_boot_buffer(void)
 
 	while (tmp != NULL) {
 		if (tmp->nb_entry > 0) {
+			cpu = get_cpu();
 			for (i = 0; i < tmp->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(tmp->buffer[i])));
 				if (prov_is_relation(&(tmp->buffer[i]))) {
 					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
 					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
 				}
-				if (is_relay_full(prov_chan)){
+				if (is_relay_full(prov_chan, cpu)){
 					// TODO do something
 				}
 				relay_write(prov_chan, &tmp->buffer[i], sizeof(union prov_elt));
 			}
+			put_cpu();
 		}
 		tmp2 = tmp;
 		tmp = tmp->next;
@@ -123,13 +125,15 @@ void write_boot_buffer(void)
 	}
 	while (ltmp != NULL) {
 		if (ltmp->nb_entry > 0) {
+			cpu = get_cpu();
 			for (i = 0; i < ltmp->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
-				if (is_relay_full(long_prov_chan)){
+				if (is_relay_full(long_prov_chan, cpu)){
 					// TODO do something
 				}
 				relay_write(long_prov_chan, &ltmp->buffer[i], sizeof(union long_prov_elt));
 			}
+			put_cpu();
 		}
 		ltmp2 = ltmp;
 		ltmp = ltmp->next;
