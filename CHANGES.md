@@ -44,6 +44,7 @@
 ### v0.5.2
 ```
 - Reworked on the "link" family is represented.
+- Fix issue where kenrel loading was ignoring all option.
 - Track more data loaded to kernel (firmware, policy, certificates and modules, previously only modules).
 - Update to kernel version 4.20.10.
 ```
