@@ -26,6 +26,23 @@ static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
+bool is_relay_full(struct rchan *chan) {
+	int i, ret, rc=0;
+	struct rchan_buf *buf;
+
+	for_each_possible_cpu(i) {
+		if ((buf = *per_cpu_ptr(chan->buf, i))){
+			ret = relay_buf_full(buf);
+			if (ret)
+				pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, i);
+			rc+=ret;
+		}
+	}
+	if (rc)
+		return true;
+	return false;
+}
+
 /*!
  * @brief Callback function of function "create_buf_file". This callback function creates relay file in "debugfs".
  */
@@ -94,6 +111,9 @@ void write_boot_buffer(void)
 					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
 					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
 				}
+				if (is_relay_full(prov_chan)){
+					// TODO do something
+				}
 				relay_write(prov_chan, &tmp->buffer[i], sizeof(union prov_elt));
 			}
 		}
@@ -105,6 +125,9 @@ void write_boot_buffer(void)
 		if (ltmp->nb_entry > 0) {
 			for (i = 0; i < ltmp->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
+				if (is_relay_full(long_prov_chan)){
+					// TODO do something
+				}
 				relay_write(long_prov_chan, &ltmp->buffer[i], sizeof(union long_prov_elt));
 			}
 		}
