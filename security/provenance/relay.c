@@ -94,8 +94,8 @@ void write_boot_buffer(void)
 					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
 					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
 				}
+				relay_write(prov_chan, &tmp->buffer[i], sizeof(union prov_elt));
 			}
-			relay_write(prov_chan, tmp->buffer, tmp->nb_entry * sizeof(union prov_elt));
 		}
 		tmp2 = tmp;
 		tmp = tmp->next;
@@ -103,9 +103,10 @@ void write_boot_buffer(void)
 	}
 	while (ltmp != NULL) {
 		if (ltmp->nb_entry > 0) {
-			for (i = 0; i < ltmp->nb_entry; i++)
+			for (i = 0; i < ltmp->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
-			relay_write(long_prov_chan, ltmp->buffer, ltmp->nb_entry * sizeof(union long_prov_elt));
+				relay_write(long_prov_chan, &ltmp->buffer[i], sizeof(union long_prov_elt));
+			}
 		}
 		ltmp2 = ltmp;
 		ltmp = ltmp->next;
