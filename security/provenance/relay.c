@@ -13,6 +13,8 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/debugfs.h>
+#include <linux/async.h>
+#include <linux/delay.h>
 
 #include "provenance.h"
 #include "provenance_relay.h"
@@ -71,11 +73,14 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
-static void handle_boot_buffer(struct prov_boot_buffer *buf) {
+static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
 	int i;
 	int cpu;
 	struct prov_boot_buffer *tmp;
+	struct prov_boot_buffer *buf = _buf;
 
+	msleep(1000);
+	pr_info("Provenance: async boot buffer task %llu running...", cookie);
 	while (buf != NULL) {
 		if (buf->nb_entry > 0) {
 			cpu = get_cpu();
@@ -86,7 +91,9 @@ static void handle_boot_buffer(struct prov_boot_buffer *buf) {
 					tighten_identifier(&(buf->buffer[i].relation_info.rcv));
 				}
 				if (is_relay_full(prov_chan, cpu)){
-					// TODO do something
+					cookie = async_schedule(__async_handle_boot_buffer, buf);
+					pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+					return;
 				} else {
 					relay_write(prov_chan, &buf->buffer[i], sizeof(union prov_elt));
 				}
@@ -97,6 +104,7 @@ static void handle_boot_buffer(struct prov_boot_buffer *buf) {
 		buf = buf->next;
 		kfree(tmp);
 	}
+	pr_info("Provenance: finished task %llu.", cookie);
 }
 
 static void handle_long_boot_buffer(struct prov_long_boot_buffer *buf) {
@@ -140,6 +148,7 @@ void write_boot_buffer(void)
 {
 	struct prov_boot_buffer *tmp;
 	struct prov_long_boot_buffer *ltmp;
+	async_cookie_t cookie;
 
 	if (prov_machine_id == 0 || prov_boot_id == 0 || !relay_initialized)
 		return;
@@ -153,7 +162,8 @@ void write_boot_buffer(void)
 	refresh_prov_machine();
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
-	handle_boot_buffer(tmp);
+	cookie = async_schedule(__async_handle_boot_buffer, tmp);
+	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 	handle_long_boot_buffer(ltmp);
 }
 
