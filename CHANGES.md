@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.5.2           | 4.20.10        | N/A        |
+| 0.5.2           | 4.20.11        | N/A        |
 | 0.5.1           | 4.20.7         | 11/02/2019 |
 | 0.5.0           | 4.20.5         | 30/01/2019	|
 | 0.4.6           | 4.20           | 05/01/2019 |
@@ -43,10 +43,11 @@
 
 ### v0.5.2
 ```
+- Dump boot buffer in async mode.
 - Reworked on the "link" family is represented.
-- Fix issue where kenrel loading was ignoring all option.
+- Fix issue where kernel loading (module, firmware etc.) was ignoring all option.
 - Track more data loaded to kernel (firmware, policy, certificates and modules, previously only modules).
-- Update to kernel version 4.20.10.
+- Update to kernel version 4.20.11.
 ```
 
 ### v0.5.1
