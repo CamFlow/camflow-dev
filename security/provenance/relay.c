@@ -81,6 +81,7 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
 
 	msleep(1000);
 	pr_info("Provenance: async boot buffer task %llu running...", cookie);
+
 	while (buf != NULL) {
 		if (buf->nb_entry > 0) {
 			cpu = get_cpu();
@@ -91,6 +92,7 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
 					tighten_identifier(&(buf->buffer[i].relation_info.rcv));
 				}
 				if (is_relay_full(prov_chan, cpu)){
+					// we try again later
 					cookie = async_schedule(__async_handle_boot_buffer, buf);
 					pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 					return;
@@ -107,10 +109,14 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
 	pr_info("Provenance: finished task %llu.", cookie);
 }
 
-static void handle_long_boot_buffer(struct prov_long_boot_buffer *buf) {
+static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie) {
 	int i;
 	int cpu;
 	struct prov_long_boot_buffer *tmp;
+	struct prov_long_boot_buffer *buf = _buf;
+
+	msleep(1000);
+	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
 
 	while (buf != NULL) {
 		if (buf->nb_entry > 0) {
@@ -118,7 +124,10 @@ static void handle_long_boot_buffer(struct prov_long_boot_buffer *buf) {
 			for (i = 0; i < buf->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
 				if (is_relay_full(long_prov_chan, cpu)){
-					// TODO do something
+					// we try again later
+					cookie = async_schedule(__async_handle_long_boot_buffer, buf);
+					pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+					return;
 				} else {
 					relay_write(long_prov_chan, &buf->buffer[i], sizeof(union long_prov_elt));
 				}
@@ -129,6 +138,7 @@ static void handle_long_boot_buffer(struct prov_long_boot_buffer *buf) {
 		buf = buf->next;
 		kfree(tmp);
 	}
+	pr_info("Provenance: finished task %llu.", cookie);
 }
 
 bool relay_ready;
@@ -162,9 +172,13 @@ void write_boot_buffer(void)
 	refresh_prov_machine();
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
+	//asynchronously empty the buffer
 	cookie = async_schedule(__async_handle_boot_buffer, tmp);
 	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
-	handle_long_boot_buffer(ltmp);
+
+	//asynchronously empty the buffer
+	cookie = async_schedule(__async_handle_long_boot_buffer, ltmp);
+	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 }
 
 /*!
