@@ -97,9 +97,16 @@ static const char RL_STR_SH_ATTACH_READ[] = "sh_attach_read";           // attac
 static const char RL_STR_SH_ATTACH_WRITE[] = "sh_attach_write";         // attach sh with write perm
 static const char RL_STR_SH_CREATE_READ[] = "sh_create_read";           // sh create with read perm
 static const char RL_STR_SH_CREATE_WRITE[] = "sh_create_write";         // sh create with write perm
-static const char RL_STR_LOAD_FILE[] = "load_file";                     // load file into kernel
-static const char RL_STR_LOAD_MODULE[] = "load_module";                 // load file into kernel
-static const char RL_STR_RAN_ON[] = "ran_on";                           // load file into kernel
+static const char RL_STR_LOAD_FILE[] = "load_file";                			// load file into kernel
+static const char RL_STR_RAN_ON[] = "ran_on";                     			// task run on this machine
+static const char RL_STR_LOAD_UNKNOWN[] = "load_unknown";               // load file into kernel
+static const char RL_STR_LOAD_FIRMWARE[] = "load_firmware";             // load file into kernel
+static const char RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER[] = "load_firmware_prealloc_buffer";	// load file into kernel
+static const char RL_STR_LOAD_MODULE[] = "load_module";                    // load file into kernel
+static const char RL_STR_LOAD_KEXEC_IMAGE[] = "load_kexec_image";          // load file into kernel
+static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";  // load file into kernel
+static const char RL_STR_LOAD_POLICY[] = "load_policy";                    // load file into kernel
+static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";          // load file into kernel
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                         // unkown node type should normally not appear
@@ -301,8 +308,22 @@ const char* relation_str(uint64_t type)
 		return RL_STR_SH_CREATE_WRITE;
 	case RL_LOAD_FILE:
 		return RL_STR_LOAD_FILE;
+	case RL_LOAD_UNKNOWN:
+		return RL_STR_LOAD_UNKNOWN;
+	case RL_LOAD_FIRMWARE:
+		return RL_STR_LOAD_FIRMWARE;
+	case RL_LOAD_FIRMWARE_PREALLOC_BUFFER:
+		return RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER;
 	case RL_LOAD_MODULE:
 		return RL_STR_LOAD_MODULE;
+	case RL_LOAD_KEXEC_IMAGE:
+		return RL_STR_LOAD_KEXEC_IMAGE;
+	case RL_LOAD_KEXEC_INITRAMFS:
+		return RL_STR_LOAD_KEXEC_INITRAMFS;
+	case RL_LOAD_POLICY:
+		return RL_STR_LOAD_POLICY;
+	case RL_LOAD_CERTIFICATE:
+		return RL_STR_LOAD_CERTIFICATE;
 	case RL_RAN_ON:
 		return RL_STR_RAN_ON;
 	default:
@@ -397,7 +418,14 @@ uint64_t relation_id(const char* str)
 	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_READ, RL_SH_CREATE_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_WRITE, RL_SH_CREATE_WRITE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FILE, RL_LOAD_FILE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_UNKNOWN, RL_LOAD_UNKNOWN);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE, RL_LOAD_FIRMWARE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER, RL_LOAD_FIRMWARE_PREALLOC_BUFFER);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_MODULE, RL_LOAD_MODULE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_IMAGE, RL_LOAD_KEXEC_IMAGE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_POLICY, RL_LOAD_POLICY);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
 	MATCH_AND_RETURN(str, RL_STR_RAN_ON, RL_RAN_ON);
 	return 0;
 }

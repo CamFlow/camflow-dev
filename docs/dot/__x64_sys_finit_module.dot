@@ -46,9 +46,23 @@ inode -> task[fontsize = 8,label = file_sigio]
 
 inode -> task[fontsize = 8,label = load_file]
 
-task -> machine[fontsize = 8,label = load_module]
+task -> machine[fontsize = 8,label = load_unknown]
 
 machine -> machine[fontsize = 8,label = version_entity]
+
+task -> machine[fontsize = 8,label = load_firmware]
+
+task -> machine[fontsize = 8,label = load_firmware_prealloc_buffer]
+
+task -> machine[fontsize = 8,label = load_module]
+
+task -> machine[fontsize = 8,label = load_kexec_image]
+
+task -> machine[fontsize = 8,label = load_kexec_initramfs]
+
+task -> machine[fontsize = 8,label = load_policy]
+
+task -> machine[fontsize = 8,label = load_certificate]
 
 packet_content[fontsize = 8,label = packet_content,shape = ellipse, fillcolor="#fffacd", style = filled]
 

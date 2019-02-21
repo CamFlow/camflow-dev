@@ -42,6 +42,7 @@ extern struct list_head relay_list;
 
 int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
+bool is_relay_full(struct rchan *chan, int cpu);
 
 extern bool relay_ready;
 

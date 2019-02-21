@@ -532,7 +532,6 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = NULL;
-	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -540,20 +539,10 @@ static int provenance_inode_link(struct dentry *old_dentry,
 	if (!iprov)
 		return -ENOMEM;
 
-	dprov = get_inode_provenance(dir, true);
-	if (!dprov)
-		return -ENOMEM;
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_LINK, cprov, tprov, dprov, NULL, 0);
-	if (rc < 0)
-		goto out;
 	rc = generates(RL_LINK, cprov, tprov, iprov, NULL, 0);
-out:
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	record_inode_name_from_dentry(new_dentry, iprov, true);
 	return rc;
@@ -570,7 +559,6 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = NULL;
-	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -578,20 +566,10 @@ static int provenance_inode_unlink(struct inode *dir, struct dentry *dentry)
 	if (!iprov)
 		return -ENOMEM;
 
-	dprov = get_inode_provenance(dir, true);
-	if (!dprov)
-		return -ENOMEM;
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_UNLINK, cprov, tprov, dprov, NULL, 0);
-	if (rc < 0)
-		goto out;
 	rc = generates(RL_UNLINK, cprov, tprov, iprov, NULL, 0);
-out:
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
@@ -611,7 +589,6 @@ static int provenance_inode_symlink(struct inode *dir,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = NULL;
-	struct provenance *dprov = NULL;
 	unsigned long irqflags;
 	int rc;
 
@@ -619,20 +596,10 @@ static int provenance_inode_symlink(struct inode *dir,
 	if (!iprov)
 		return 0; // do not touch!
 
-	dprov = get_inode_provenance(dir, true);
-	if (!dprov)
-		return 0; // do not touch!
-
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(dprov), PROVENANCE_LOCK_DIR);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_SYMLINK, cprov, tprov, dprov, NULL, 0);
-	if (rc < 0)
-		goto out;
 	rc = generates(RL_SYMLINK, cprov, tprov, iprov, NULL, 0);
-out:
 	spin_unlock(prov_lock(iprov));
-	spin_unlock(prov_lock(dprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	record_node_name(iprov, name, true);
 	return rc;
@@ -1152,12 +1119,38 @@ static int provenance_kernel_read_file(struct file *file
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (!iprov)                     // not sure it could happen, ignore it for now
+	if (!iprov) // not sure it could happen, ignore it for now
 		return 0;
-	if (id != READING_MODULE)       // there is other such as X509 or frimware, we leave it for now
-		return 0;
+
 	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
-	rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
+	switch(id) {
+		case READING_UNKNOWN:
+			rc = record_influences_kernel(RL_LOAD_UNKNOWN, iprov, tprov, file);
+			break;
+		case READING_FIRMWARE:
+			rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
+			break;
+		case READING_FIRMWARE_PREALLOC_BUFFER:
+			rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
+			break;
+		case READING_MODULE:
+			rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
+			break;
+		case READING_KEXEC_IMAGE:
+			rc = record_influences_kernel(RL_LOAD_KEXEC_IMAGE, iprov, tprov, file);
+			break;
+		case READING_KEXEC_INITRAMFS:
+			rc = record_influences_kernel(RL_LOAD_KEXEC_INITRAMFS, iprov, tprov, file);
+			break;
+		case READING_POLICY:
+			rc = record_influences_kernel(RL_LOAD_POLICY, iprov, tprov, file);
+			break;
+		case READING_X509_CERTIFICATE:
+			rc = record_influences_kernel(RL_LOAD_CERTIFICATE, iprov, tprov, file);
+			break;
+		default:
+			break;
+	}
 	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
 }
@@ -2315,7 +2308,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 		set_opaque(prov_elt(nprov));
 		return 0;
 	}
-	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
+	spin_lock_irqsave(prov_lock(iprov), irqflags);
 	rc = derives(RL_EXEC, iprov, nprov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
@@ -2338,7 +2331,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 static int provenance_bprm_check_security(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *tprov = get_task_provenance(true);
+	struct provenance *tprov = get_task_provenance(false);
 	struct provenance *iprov = get_file_provenance(bprm->file, false);
 
 	if (!nprov)
@@ -2378,23 +2371,14 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
  */
 static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 {
-	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
+	struct provenance *cprov = get_cred_provenance();
 	struct provenance *nprov = bprm->cred->provenance;
-	struct provenance *iprov = get_file_provenance(bprm->file, true);
 	unsigned long irqflags;
 
-	if (provenance_is_opaque(prov_elt(iprov))) {
-		set_opaque(prov_elt(nprov));
-		set_opaque(prov_elt(tprov));
-		return;
-	}
 	record_node_name(cprov, bprm->interp, false);
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	derives(RL_EXEC_TASK, cprov, nprov, NULL, 0);
-	derives(RL_EXEC, iprov, nprov, NULL, 0);
-	spin_unlock(prov_lock(iprov));
+	spin_lock_irqsave(prov_lock(cprov), irqflags);
+	generates(RL_EXEC_TASK, cprov, tprov, nprov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 }
 

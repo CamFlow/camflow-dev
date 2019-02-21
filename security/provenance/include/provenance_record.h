@@ -488,9 +488,9 @@ static __always_inline int record_influences_kernel(const uint64_t type,
 	    || provenance_is_opaque(prov_elt(activity)))
 		return 0;
 	if (!provenance_is_tracked(prov_elt(entity))
-	    && !provenance_is_tracked(prov_elt(activity)))
+	    && !provenance_is_tracked(prov_elt(activity))
+			&& !prov_policy.prov_all)
 		return 0;
-
 	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
 	if (rc < 0)
 		goto out;

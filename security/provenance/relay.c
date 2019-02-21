@@ -13,6 +13,8 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/debugfs.h>
+#include <linux/async.h>
+#include <linux/delay.h>
 
 #include "provenance.h"
 #include "provenance_relay.h"
@@ -25,6 +27,22 @@ static struct rchan *prov_chan;
 static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
+
+bool is_relay_full(struct rchan *chan, int cpu) {
+	int ret;
+	int rc=0;
+	struct rchan_buf *buf;
+
+	if ((buf = *per_cpu_ptr(chan->buf, cpu))){
+		ret = relay_buf_full(buf);
+		if (ret)
+			pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, cpu);
+		rc+=ret;
+	}
+	if (rc)
+		return true;
+	return false;
+}
 
 /*!
  * @brief Callback function of function "create_buf_file". This callback function creates relay file in "debugfs".
@@ -55,6 +73,74 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
+static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
+	int i;
+	int cpu;
+	struct prov_boot_buffer *tmp;
+	struct prov_boot_buffer *buf = _buf;
+
+	msleep(1000);
+	pr_info("Provenance: async boot buffer task %llu running...", cookie);
+
+	while (buf != NULL) {
+		if (buf->nb_entry > 0) {
+			cpu = get_cpu();
+			for (i = 0; i < buf->nb_entry; i++) {
+				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
+				if (prov_is_relation(&(buf->buffer[i]))) {
+					tighten_identifier(&(buf->buffer[i].relation_info.snd));
+					tighten_identifier(&(buf->buffer[i].relation_info.rcv));
+				}
+				if (is_relay_full(prov_chan, cpu)){
+					// we try again later
+					cookie = async_schedule(__async_handle_boot_buffer, buf);
+					pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+					return;
+				} else {
+					relay_write(prov_chan, &buf->buffer[i], sizeof(union prov_elt));
+				}
+			}
+			put_cpu();
+		}
+		tmp = buf;
+		buf = buf->next;
+		kfree(tmp);
+	}
+	pr_info("Provenance: finished task %llu.", cookie);
+}
+
+static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie) {
+	int i;
+	int cpu;
+	struct prov_long_boot_buffer *tmp;
+	struct prov_long_boot_buffer *buf = _buf;
+
+	msleep(1000);
+	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
+
+	while (buf != NULL) {
+		if (buf->nb_entry > 0) {
+			cpu = get_cpu();
+			for (i = 0; i < buf->nb_entry; i++) {
+				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
+				if (is_relay_full(long_prov_chan, cpu)){
+					// we try again later
+					cookie = async_schedule(__async_handle_long_boot_buffer, buf);
+					pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+					return;
+				} else {
+					relay_write(long_prov_chan, &buf->buffer[i], sizeof(union long_prov_elt));
+				}
+			}
+			put_cpu();
+		}
+		tmp = buf;
+		buf = buf->next;
+		kfree(tmp);
+	}
+	pr_info("Provenance: finished task %llu.", cookie);
+}
+
 bool relay_ready;
 bool relay_initialized;
 /*!
@@ -70,9 +156,9 @@ extern union long_prov_elt *prov_machine;
 void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
-	int i;
-	struct prov_boot_buffer *tmp, *tmp2;
-	struct prov_long_boot_buffer *ltmp, *ltmp2;
+	struct prov_boot_buffer *tmp;
+	struct prov_long_boot_buffer *ltmp;
+	async_cookie_t cookie;
 
 	if (prov_machine_id == 0 || prov_boot_id == 0 || !relay_initialized)
 		return;
@@ -86,31 +172,13 @@ void write_boot_buffer(void)
 	refresh_prov_machine();
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
-	while (tmp != NULL) {
-		if (tmp->nb_entry > 0) {
-			for (i = 0; i < tmp->nb_entry; i++) {
-				tighten_identifier(&get_prov_identifier(&(tmp->buffer[i])));
-				if (prov_is_relation(&(tmp->buffer[i]))) {
-					tighten_identifier(&(tmp->buffer[i].relation_info.snd));
-					tighten_identifier(&(tmp->buffer[i].relation_info.rcv));
-				}
-			}
-			relay_write(prov_chan, tmp->buffer, tmp->nb_entry * sizeof(union prov_elt));
-		}
-		tmp2 = tmp;
-		tmp = tmp->next;
-		kfree(tmp2);
-	}
-	while (ltmp != NULL) {
-		if (ltmp->nb_entry > 0) {
-			for (i = 0; i < ltmp->nb_entry; i++)
-				tighten_identifier(&get_prov_identifier(&(ltmp->buffer[i])));
-			relay_write(long_prov_chan, ltmp->buffer, ltmp->nb_entry * sizeof(union long_prov_elt));
-		}
-		ltmp2 = ltmp;
-		ltmp = ltmp->next;
-		kfree(ltmp2);
-	}
+	//asynchronously empty the buffer
+	cookie = async_schedule(__async_handle_boot_buffer, tmp);
+	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+
+	//asynchronously empty the buffer
+	cookie = async_schedule(__async_handle_long_boot_buffer, ltmp);
+	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 }
 
 /*!
