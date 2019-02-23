@@ -23,10 +23,10 @@ jobs:
           command: 'apt-get install --reinstall make'
       - run:
           name: uncrutify
-          command: 'make uncrutify'
+          command: 'make uncrustify'
       - run:
           name: uncrutify_clean
-          command: 'make uncrutify_clean'
+          command: 'make uncrustify_clean'
       - run:
           name: prepare-analysis
           command: 'cd ./scripts && make prepare'
