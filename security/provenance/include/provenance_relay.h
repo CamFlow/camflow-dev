@@ -168,10 +168,12 @@ static inline void prov_flush(void)
 	struct relay_list *tmp;
 
 	if (unlikely(!relay_ready))
-		list_for_each_entry(tmp, &relay_list, list) {
-			relay_flush(tmp->prov);
-			relay_flush(tmp->long_prov);
-		}
+		return;
+
+	list_for_each_entry(tmp, &relay_list, list) {
+		relay_flush(tmp->prov);
+		relay_flush(tmp->long_prov);
+	}
 }
 
 
