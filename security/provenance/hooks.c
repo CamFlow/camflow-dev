@@ -594,7 +594,7 @@ static int provenance_inode_symlink(struct inode *dir,
 
 	iprov = get_dentry_provenance(dentry, true);
 	if (!iprov)
-		return 0; // do not touch!
+		return 0;  // do not touch!
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);

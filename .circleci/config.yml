@@ -17,10 +17,16 @@ jobs:
           command: 'apt-get install -y sudo'
       - run:
           name: dependencies
-          command: 'apt-get install -y build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+          command: 'apt-get install -y  uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run:
           name: reinstall-make
           command: 'apt-get install --reinstall make'
+      - run:
+          name: uncrutify
+          command: 'make uncrustify'
+      - run:
+          name: uncrutify_clean
+          command: 'make uncrustify_clean'
       - run:
           name: prepare-analysis
           command: 'cd ./scripts && make prepare'
@@ -62,11 +68,9 @@ jobs:
               cd camflow-dev
               git checkout $TARGET_BRANCH
               echo "Copying..."
-              cp -af ../../docs/. ./docs
-              cp -af ../../docs/img/. ./docs/img
-              cp -af ../../docs/dot/. ./docs/dot
-              cp -f ../../scripts/syshooks.txt ./scripts/syshooks.txt
-              cp -f ../../scripts/syslist.txt ./scripts/syslist.txt
+              rsync -r ../../docs/ ./docs
+              rsync -r ../../scripts/ ./scripts
+              rsync -r ../../security/ ./security
               echo "Check files are there"
               ls -l ./docs/img
               ls -l ./docs/dot
