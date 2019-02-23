@@ -28,16 +28,17 @@ static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
-bool is_relay_full(struct rchan *chan, int cpu) {
+bool is_relay_full(struct rchan *chan, int cpu)
+{
 	int ret;
-	int rc=0;
+	int rc = 0;
 	struct rchan_buf *buf;
 
-	if ((buf = *per_cpu_ptr(chan->buf, cpu))){
+	if ((buf = *per_cpu_ptr(chan->buf, cpu))) {
 		ret = relay_buf_full(buf);
 		if (ret)
 			pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, cpu);
-		rc+=ret;
+		rc += ret;
 	}
 	if (rc)
 		return true;
@@ -73,7 +74,8 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file	= remove_buf_file_handler,
 };
 
-static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
+static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
+{
 	int i;
 	int cpu;
 	struct prov_boot_buffer *tmp;
@@ -91,14 +93,13 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
 					tighten_identifier(&(buf->buffer[i].relation_info.snd));
 					tighten_identifier(&(buf->buffer[i].relation_info.rcv));
 				}
-				if (is_relay_full(prov_chan, cpu)){
+				if (is_relay_full(prov_chan, cpu)) {
 					// we try again later
 					cookie = async_schedule(__async_handle_boot_buffer, buf);
 					pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 					return;
-				} else {
+				} else
 					relay_write(prov_chan, &buf->buffer[i], sizeof(union prov_elt));
-				}
 			}
 			put_cpu();
 		}
@@ -109,7 +110,8 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie) {
 	pr_info("Provenance: finished task %llu.", cookie);
 }
 
-static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie) {
+static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
+{
 	int i;
 	int cpu;
 	struct prov_long_boot_buffer *tmp;
@@ -123,14 +125,13 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie) {
 			cpu = get_cpu();
 			for (i = 0; i < buf->nb_entry; i++) {
 				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
-				if (is_relay_full(long_prov_chan, cpu)){
+				if (is_relay_full(long_prov_chan, cpu)) {
 					// we try again later
 					cookie = async_schedule(__async_handle_long_boot_buffer, buf);
 					pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 					return;
-				} else {
+				} else
 					relay_write(long_prov_chan, &buf->buffer[i], sizeof(union long_prov_elt));
-				}
 			}
 			put_cpu();
 		}

@@ -1123,33 +1123,33 @@ static int provenance_kernel_read_file(struct file *file
 		return 0;
 
 	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
-	switch(id) {
-		case READING_UNKNOWN:
-			rc = record_influences_kernel(RL_LOAD_UNKNOWN, iprov, tprov, file);
-			break;
-		case READING_FIRMWARE:
-			rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
-			break;
-		case READING_FIRMWARE_PREALLOC_BUFFER:
-			rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
-			break;
-		case READING_MODULE:
-			rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
-			break;
-		case READING_KEXEC_IMAGE:
-			rc = record_influences_kernel(RL_LOAD_KEXEC_IMAGE, iprov, tprov, file);
-			break;
-		case READING_KEXEC_INITRAMFS:
-			rc = record_influences_kernel(RL_LOAD_KEXEC_INITRAMFS, iprov, tprov, file);
-			break;
-		case READING_POLICY:
-			rc = record_influences_kernel(RL_LOAD_POLICY, iprov, tprov, file);
-			break;
-		case READING_X509_CERTIFICATE:
-			rc = record_influences_kernel(RL_LOAD_CERTIFICATE, iprov, tprov, file);
-			break;
-		default:
-			break;
+	switch (id) {
+	case READING_UNKNOWN:
+		rc = record_influences_kernel(RL_LOAD_UNKNOWN, iprov, tprov, file);
+		break;
+	case READING_FIRMWARE:
+		rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
+		break;
+	case READING_FIRMWARE_PREALLOC_BUFFER:
+		rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
+		break;
+	case READING_MODULE:
+		rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
+		break;
+	case READING_KEXEC_IMAGE:
+		rc = record_influences_kernel(RL_LOAD_KEXEC_IMAGE, iprov, tprov, file);
+		break;
+	case READING_KEXEC_INITRAMFS:
+		rc = record_influences_kernel(RL_LOAD_KEXEC_INITRAMFS, iprov, tprov, file);
+		break;
+	case READING_POLICY:
+		rc = record_influences_kernel(RL_LOAD_POLICY, iprov, tprov, file);
+		break;
+	case READING_X509_CERTIFICATE:
+		rc = record_influences_kernel(RL_LOAD_CERTIFICATE, iprov, tprov, file);
+		break;
+	default:
+		break;
 	}
 	spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	return rc;
@@ -1822,7 +1822,7 @@ static int provenance_socket_post_create(struct socket *sock,
 		return -ENOMEM;
 
 	if (provenance_is_tracked(prov_elt(cprov))
-			|| provenance_is_tracked(prov_elt(tprov)))
+	    || provenance_is_tracked(prov_elt(tprov)))
 		set_tracked(prov_elt(iprov));
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
