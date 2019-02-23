@@ -80,7 +80,7 @@ struct prov_long_boot_buffer {
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry) \
 	static inline void fcn_name(msg_type * msg, buffer_type * buf) \
 	{ \
-		buffer_type *tmp = buf; \
+		buffer_type *tmp = buf;	\
 		while (tmp->next != NULL) { \
 			tmp = tmp->next; \
 		} \

@@ -375,7 +375,7 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	}
 #define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
 	{ \
-		return __read_filter(filp, buf, count, filter); \
+		return __read_filter(filp, buf, count, filter);	\
 	}
 
 declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
@@ -602,13 +602,13 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 	{ \
 		struct filters *s; \
 		if (count < sizeof(struct info)) \
-			return -ENOMEM; \
+			return -ENOMEM;	\
 		s = kzalloc(sizeof(struct filters), GFP_KERNEL); \
-		if (!s) \
-			return -ENOMEM; \
+		if (!s)	\
+			return -ENOMEM;	\
 		if (copy_from_user(&s->filter, buf, sizeof(struct info))) { \
 			kfree(s); \
-			return -EAGAIN; \
+			return -EAGAIN;	\
 		} \
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
 			add_function(s); \
@@ -622,15 +622,15 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct filters *tmp; \
-		size_t pos = 0; \
+		size_t pos = 0;	\
 		if (count < sizeof(struct info)) \
-			return -ENOMEM; \
+			return -ENOMEM;	\
 		list_for_each_safe(listentry, listtmp, &filters) { \
 			tmp = list_entry(listentry, struct filters, list); \
 			if (count < pos + sizeof(struct info)) \
-				return -ENOMEM; \
+				return -ENOMEM;	\
 			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) \
-				return -EAGAIN; \
+				return -EAGAIN;	\
 			pos += sizeof(struct info); \
 		} \
 		return pos; \
@@ -781,8 +781,8 @@ declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
 #define hash_filters(filters, filters_type, tmp, tmp_type) \
 	list_for_each_safe(listentry, listtmp, &filters) { \
-		tmp = list_entry(listentry, struct filters_type, list); \
-		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type)); \
+		tmp = list_entry(listentry, struct filters_type, list);	\
+		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type));	\
 		if (rc) { \
 			pr_err("Provenance: error updating hash."); \
 			pos = -EAGAIN; \

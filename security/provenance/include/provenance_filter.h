@@ -163,8 +163,8 @@ static inline bool should_record_relation(const uint64_t type,
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) { \
-			tmp = list_entry(listentry, struct type, list); \
+		list_for_each_safe(listentry, listtmp, &type) {	\
+			tmp = list_entry(listentry, struct type, list);	\
 			if (tmp->filter.variable == variable) \
 				return tmp->filter.op; \
 		} \
@@ -179,8 +179,8 @@ static inline bool should_record_relation(const uint64_t type,
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) { \
-			tmp = list_entry(listentry, struct type, list); \
+		list_for_each_safe(listentry, listtmp, &type) {	\
+			tmp = list_entry(listentry, struct type, list);	\
 			if (tmp->filter.variable == f->filter.variable) { \
 				list_del(listentry); \
 				kfree(tmp); \
@@ -198,8 +198,8 @@ static inline bool should_record_relation(const uint64_t type,
 	{ \
 		struct list_head *listentry, *listtmp; \
 		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) { \
-			tmp = list_entry(listentry, struct type, list); \
+		list_for_each_safe(listentry, listtmp, &type) {	\
+			tmp = list_entry(listentry, struct type, list);	\
 			if (tmp->filter.variable == f->filter.variable) { \
 				tmp->filter.op = f->filter.op; \
 				return 0; \
