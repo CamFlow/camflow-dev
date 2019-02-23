@@ -80,7 +80,7 @@ jobs:
               # is there any change
               if ! git diff-index --exit-code --quiet HEAD; then
                 echo 'Committing...'
-                git commit -a -m "[ci skip] CircleCI automated documentation generation, based on commit ${CIRCLE_SHA1}"
+                git commit -a -m "[ci skip] CircleCI automated documentation generation and code formatting, based on commit ${CIRCLE_SHA1}"
                 git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git $TARGET_BRANCH
               else
                 echo 'Nothing to commit.'
