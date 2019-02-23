@@ -16,9 +16,9 @@
 #include <linux/types.h>
 #include <uapi/linux/provenance_types.h>
 
-const char* relation_str(uint64_t type);
-uint64_t relation_id(const char* str);
-const char* node_str(uint64_t type);
-uint64_t node_id(const char* str);
+const char *relation_str(uint64_t type);
+uint64_t relation_id(const char *str);
+const char *node_str(uint64_t type);
+uint64_t node_id(const char *str);
 
 #endif /* _PROVENANCE_TYPES_H */

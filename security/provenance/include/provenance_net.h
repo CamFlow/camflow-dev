@@ -95,7 +95,7 @@ static inline struct provenance *get_socket_provenance(struct socket *sock)
 	return get_sk_provenance(sk);
 }
 
-#define ihlen(ih) (ih->ihl * 4)
+#define ihlen(ih)    (ih->ihl * 4)
 
 /*!
  * @brief Extract TCP header information and store it in packet_identifier struct of provenance entry.
@@ -117,7 +117,7 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
 
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
-	tcpoff = offset + ihlen(ih);    //Point to tcp packet.
+	tcpoff = offset + ihlen(ih);    // Point to tcp packet.
 	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
 	if (!th)
 		return;
@@ -141,12 +141,12 @@ static inline void __extract_udp_info(struct sk_buff *skb,
 				      struct packet_identifier *id)
 {
 	struct udphdr _udph;
-	struct udphdr   *uh;
+	struct udphdr *uh;
 	int udpoff;
 
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
-	udpoff = offset + ihlen(ih); //point to udp packet
+	udpoff = offset + ihlen(ih);  // point to udp packet
 	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
 	if (!uh)
 		return;
@@ -211,8 +211,8 @@ struct ipv4_filters {
 extern struct list_head ingress_ipv4filters;
 extern struct list_head egress_ipv4filters;
 
-#define prov_ipv4_ingressOP(ip, port) prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
-#define prov_ipv4_egressOP(ip, port) prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
+#define prov_ipv4_ingressOP(ip, port)           prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
+#define prov_ipv4_egressOP(ip, port)            prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
 /*!
  * @brief Returns op value of the filter of a specific IP and/or port.

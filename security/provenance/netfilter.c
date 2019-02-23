@@ -52,9 +52,9 @@ static unsigned int provenance_ipv4_out(void *priv,
 			record_packet_content(skb, &pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
-		call_provenance_alloc((prov_entry_t*)&pckprov);
+		call_provenance_alloc((prov_entry_t *)&pckprov);
 		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);
-		call_provenance_free((prov_entry_t*)&pckprov);
+		call_provenance_free((prov_entry_t *)&pckprov);
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
 	}
 	return NF_ACCEPT;
@@ -82,8 +82,8 @@ static void __net_exit provenance_nf_unregister(struct net *net)
 }
 
 static struct pernet_operations provenance_net_ops = {
-	.init	= provenance_nf_register,
-	.exit	= provenance_nf_unregister,
+	.init = provenance_nf_register,
+	.exit = provenance_nf_unregister,
 };
 
 /*!

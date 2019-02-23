@@ -237,10 +237,16 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
+	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 
 uncrustify_clean:
 	rm ./security/provenance/*backup*~
 	rm ./security/provenance/include/*backup*~
+	rm ./security/include/linux/*backup*~
+	rm ./security/include/uapi/linux/*backup*~
 
 patch: copy_change
 	cd build/linux-stable && rm -f .config
