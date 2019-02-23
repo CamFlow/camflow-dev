@@ -15,19 +15,19 @@
 
  #include <uapi/linux/provenance.h>
 
- #define PROVENANCE_RAISE_WARNING  1
- #define PROVENANCE_PREVENT_FLOW   2
+ #define PROVENANCE_RAISE_WARNING       1
+ #define PROVENANCE_PREVENT_FLOW        2
 
- #define QUERY_HOOK_INIT(HEAD, HOOK) .HEAD=&HOOK
+ #define QUERY_HOOK_INIT(HEAD, HOOK)    .HEAD = &HOOK
 
 struct provenance_query_hooks {
-  struct list_head list;
-  int (*flow)(prov_entry_t*, prov_entry_t*, prov_entry_t*);
-  int (*alloc)(prov_entry_t*);
-  int (*free)(prov_entry_t*);
+	struct list_head list;
+	int (*flow)(prov_entry_t *, prov_entry_t *, prov_entry_t *);
+	int (*alloc)(prov_entry_t *);
+	int (*free)(prov_entry_t *);
 };
 
- extern struct list_head provenance_query_hooks;
+extern struct list_head provenance_query_hooks;
 
 int register_provenance_query_hooks( struct provenance_query_hooks *hook);
 int unregister_provenance_query_hooks( struct provenance_query_hooks *hook);

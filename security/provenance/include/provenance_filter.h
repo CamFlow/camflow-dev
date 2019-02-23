@@ -18,10 +18,10 @@
 #include "provenance_policy.h"
 #include "provenance_ns.h"
 
-#define HIT_FILTER(filter, data) ((filter & data) != 0)
+#define HIT_FILTER(filter, data)        ((filter & data) != 0)
 
-#define filter_node(node) __filter_node(prov_policy.prov_node_filter, node)
-#define filter_propagate_node(node) __filter_node(prov_policy.prov_propagate_node_filter, node)
+#define filter_node(node)               __filter_node(prov_policy.prov_node_filter, node)
+#define filter_propagate_node(node)     __filter_node(prov_policy.prov_propagate_node_filter, node)
 
 /*!
  * @brief This function decides whether or not a node should be filtered.
@@ -149,64 +149,64 @@ static inline bool should_record_relation(const uint64_t type,
  * @brief Define an abstract list. See concrete example below.
  */
 #define declare_filter_list(filter_name, type) \
-	struct filter_name { \
-		struct list_head list; \
-		struct type filter; \
-	}; \
+	struct filter_name {		       \
+		struct list_head list;	       \
+		struct type filter;	       \
+	};				       \
 	extern struct list_head filter_name;
 
 /*!
  * @brief Define an abstract operation that returns op value of an item in a list. See concrete example below.
  */
-#define declare_filter_whichOP(function_name, type, variable) \
-	static inline uint8_t function_name(uint32_t variable) \
-	{ \
-		struct list_head *listentry, *listtmp; \
-		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) {	\
+#define declare_filter_whichOP(function_name, type, variable)		\
+	static inline uint8_t function_name(uint32_t variable)		\
+	{								\
+		struct list_head *listentry, *listtmp;			\
+		struct type *tmp;					\
+		list_for_each_safe(listentry, listtmp, &type) {		\
 			tmp = list_entry(listentry, struct type, list);	\
-			if (tmp->filter.variable == variable) \
-				return tmp->filter.op; \
-		} \
-		return 0; \
+			if (tmp->filter.variable == variable) {		\
+				return tmp->filter.op; }		\
+		}							\
+		return 0;						\
 	}
 
 /*!
  * @brief Define an abstract operation that deletes an item from a list. See concrete example below.
  */
-#define declare_filter_delete(function_name, type, variable) \
-	static inline uint8_t function_name(struct type *f) \
-	{ \
-		struct list_head *listentry, *listtmp; \
-		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) {	\
-			tmp = list_entry(listentry, struct type, list);	\
+#define declare_filter_delete(function_name, type, variable)		  \
+	static inline uint8_t function_name(struct type *f)		  \
+	{								  \
+		struct list_head *listentry, *listtmp;			  \
+		struct type *tmp;					  \
+		list_for_each_safe(listentry, listtmp, &type) {		  \
+			tmp = list_entry(listentry, struct type, list);	  \
 			if (tmp->filter.variable == f->filter.variable) { \
-				list_del(listentry); \
-				kfree(tmp); \
-				return 0; \
-			} \
-		} \
-		return 0; \
+				list_del(listentry);			  \
+				kfree(tmp);				  \
+				return 0;				  \
+			}						  \
+		}							  \
+		return 0;						  \
 	}
 
 /*!
  * @brief Define an abstract operation that adds/updates the op value of an item from a list. See concrete example below.
  */
-#define declare_filter_add_or_update(function_name, type, variable) \
-	static inline uint8_t function_name(struct type *f) \
-	{ \
-		struct list_head *listentry, *listtmp; \
-		struct type *tmp; \
-		list_for_each_safe(listentry, listtmp, &type) {	\
-			tmp = list_entry(listentry, struct type, list);	\
+#define declare_filter_add_or_update(function_name, type, variable)	  \
+	static inline uint8_t function_name(struct type *f)		  \
+	{								  \
+		struct list_head *listentry, *listtmp;			  \
+		struct type *tmp;					  \
+		list_for_each_safe(listentry, listtmp, &type) {		  \
+			tmp = list_entry(listentry, struct type, list);	  \
 			if (tmp->filter.variable == f->filter.variable) { \
-				tmp->filter.op = f->filter.op; \
-				return 0; \
-			} \
-		} \
-		list_add_tail(&(f->list), &type); \
-		return 0; \
+				tmp->filter.op = f->filter.op;		  \
+				return 0;				  \
+			}						  \
+		}							  \
+		list_add_tail(&(f->list), &type);			  \
+		return 0;						  \
 	}
 
 declare_filter_list(secctx_filters, secinfo);                                   // A list of secinfo structs (defined in /include/uapi/linux/provenance.h, same as the following)

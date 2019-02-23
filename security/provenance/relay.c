@@ -19,8 +19,8 @@
 #include "provenance.h"
 #include "provenance_relay.h"
 
-#define PROV_BASE_NAME "provenance"
-#define LONG_PROV_BASE_NAME "long_provenance"
+#define PROV_BASE_NAME          "provenance"
+#define LONG_PROV_BASE_NAME     "long_provenance"
 
 /* Global variables: variable declarations in provenance.h */
 static struct rchan *prov_chan;
@@ -70,8 +70,8 @@ static int remove_buf_file_handler(struct dentry *dentry)
 
 /* Relay interface callback functions */
 static struct rchan_callbacks relay_callbacks = {
-	.create_buf_file	= create_buf_file_handler,
-	.remove_buf_file	= remove_buf_file_handler,
+	.create_buf_file = create_buf_file_handler,
+	.remove_buf_file = remove_buf_file_handler,
 };
 
 static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
@@ -173,11 +173,11 @@ void write_boot_buffer(void)
 	refresh_prov_machine();
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
-	//asynchronously empty the buffer
+	// asynchronously empty the buffer
 	cookie = async_schedule(__async_handle_boot_buffer, tmp);
 	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
-	//asynchronously empty the buffer
+	// asynchronously empty the buffer
 	cookie = async_schedule(__async_handle_long_boot_buffer, ltmp);
 	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 }

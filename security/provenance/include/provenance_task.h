@@ -32,14 +32,14 @@
 #include "provenance_inode.h"
 #include "provenance_policy.h"
 
-#define KB 1024
-#define MB (1024 * KB)
-#define KB_MASK (~(KB - 1))
+#define KB              1024
+#define MB              (1024 * KB)
+#define KB_MASK         (~(KB - 1))
 
 /*!
  * @summary The following current_XXX functions are to obtain XXX information of the current process.
  */
-#define current_pid() (current->pid)
+#define current_pid()    (current->pid)
 static inline uint32_t current_cgroupns(void)
 {
 	uint32_t id = 0;
@@ -143,12 +143,12 @@ static inline uint32_t current_pidns(void)
 	return id;
 }
 
-#define vm_write(flags)   ((flags & VM_WRITE) == VM_WRITE)
-#define vm_read(flags)    ((flags & VM_READ) == VM_READ)
-#define vm_exec(flags)    ((flags & VM_EXEC) == VM_EXEC)
-#define vm_mayshare(flags) ((flags & (VM_SHARED | VM_MAYSHARE)) != 0)
-#define vm_write_mayshare(flags) (vm_write(flags) && vm_mayshare(flags))
-#define vm_read_exec_mayshare(flags) ((vm_read(flags) || vm_exec(flags)) && vm_mayshare(flags))
+#define vm_write(flags)                 ((flags & VM_WRITE) == VM_WRITE)
+#define vm_read(flags)                  ((flags & VM_READ) == VM_READ)
+#define vm_exec(flags)                  ((flags & VM_EXEC) == VM_EXEC)
+#define vm_mayshare(flags)              ((flags & (VM_SHARED | VM_MAYSHARE)) != 0)
+#define vm_write_mayshare(flags)        (vm_write(flags) && vm_mayshare(flags))
+#define vm_read_exec_mayshare(flags)    ((vm_read(flags) || vm_exec(flags)) && vm_mayshare(flags))
 
 /*!
  * @brief Record shared mmap relations of a process.
@@ -307,7 +307,7 @@ static inline void update_proc_perf(struct task_struct *task,
  */
 static inline struct provenance *get_cred_provenance(void)
 {
-	struct provenance *prov = current_provenance(); // current_provenance returns provenance pointer of current_cred().
+	struct provenance *prov = current_provenance();      // current_provenance returns provenance pointer of current_cred().
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
@@ -547,7 +547,7 @@ static __always_inline int record_arg(struct provenance *prov,
 	if (!aprov)
 		return -ENOMEM;
 	aprov->arg_info.length = len;
-	if ( len >= PATH_MAX)
+	if (len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
 	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
 
@@ -570,8 +570,8 @@ static __always_inline int record_arg(struct provenance *prov,
 static inline int record_args(struct provenance *prov,
 			      struct linux_binprm *bprm)
 {
-	char* argv;
-	char* ptr;
+	char *argv;
+	char *ptr;
 	unsigned long len;
 	size_t size;
 	int rc = 0;

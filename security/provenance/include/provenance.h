@@ -35,8 +35,8 @@ extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 extern uint32_t epoch;
 
-#define prov_next_relation_id() ((uint64_t)atomic64_inc_return(&prov_relation_id))
-#define prov_next_node_id() ((uint64_t)atomic64_inc_return(&prov_node_id))
+#define prov_next_relation_id()         ((uint64_t)atomic64_inc_return(&prov_relation_id))
+#define prov_next_node_id()             ((uint64_t)atomic64_inc_return(&prov_node_id))
 
 enum {
 	PROVENANCE_LOCK_PROC,
@@ -53,11 +53,11 @@ struct provenance {
 	spinlock_t lock;
 };
 
-#define prov_elt(provenance) (&(provenance->msg))
-#define prov_lock(provenance) (&(provenance->lock))
-#define prov_entry(provenance) ((prov_entry_t*)prov_elt(provenance))
+#define prov_elt(provenance)            (&(provenance->msg))
+#define prov_lock(provenance)           (&(provenance->lock))
+#define prov_entry(provenance)          ((prov_entry_t *)prov_elt(provenance))
 
-#define ASSIGN_NODE_ID 0
+#define ASSIGN_NODE_ID    0
 
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
@@ -140,19 +140,19 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 	kmem_cache_free(long_provenance_cache, prov);
 }
 
-#define set_recorded(node) __set_recorded((union long_prov_elt*)node)
+#define set_recorded(node)                      __set_recorded((union long_prov_elt *)node)
 static inline void __set_recorded(union long_prov_elt *node)
 {
 	node->msg_info.epoch = epoch;
 }
 
-#define clear_recorded(node) __clear_recorded((union long_prov_elt*)node)
+#define clear_recorded(node)                    __clear_recorded((union long_prov_elt *)node)
 static inline void __clear_recorded(union long_prov_elt *node)
 {
 	node->msg_info.epoch = 0;
 }
 
-#define provenance_is_recorded(node) __provenance_is_recorded((union long_prov_elt*)node)
+#define provenance_is_recorded(node)            __provenance_is_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_recorded(union long_prov_elt *node)
 {
 	if (epoch > node->msg_info.epoch)
@@ -160,19 +160,19 @@ static inline bool __provenance_is_recorded(union long_prov_elt *node)
 	return true;
 }
 
-#define set_name_recorded(node) __set_name_recorded((union long_prov_elt*)node)
+#define set_name_recorded(node)                 __set_name_recorded((union long_prov_elt *)node)
 static inline void __set_name_recorded(union long_prov_elt *node)
 {
 	node->msg_info.nepoch = epoch;
 }
 
-#define clear_name_recorded(node) __clear_name_recorded((union long_prov_elt*)node)
+#define clear_name_recorded(node)               __clear_name_recorded((union long_prov_elt *)node)
 static inline void __clear_name_recorded(union long_prov_elt *node)
 {
 	node->msg_info.nepoch = 0;
 }
 
-#define provenance_is_name_recorded(node) __provenance_is_name_recorded((union long_prov_elt*)node)
+#define provenance_is_name_recorded(node)       __provenance_is_name_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 {
 	if (epoch > node->msg_info.nepoch)
@@ -183,13 +183,13 @@ static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 // reference to node representing the machine/kernel
 extern union long_prov_elt *prov_machine;
 
-#define set_kernel_recorded(node) __set_kernel_recorded((union long_prov_elt*)node)
+#define set_kernel_recorded(node)               __set_kernel_recorded((union long_prov_elt *)node)
 static inline void __set_kernel_recorded(union long_prov_elt *node)
 {
 	node_kernel_version(node) = node_identifier(prov_machine).version;
 }
 
-#define provenance_is_kernel_recorded(node) __provenance_is_kernel_recorded((union long_prov_elt*)node)
+#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node)
 {
 	if (node_kernel_version(node) < node_identifier(prov_machine).version)
