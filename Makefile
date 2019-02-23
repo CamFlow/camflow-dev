@@ -245,8 +245,8 @@ uncrustify:
 uncrustify_clean:
 	rm ./security/provenance/*backup*~
 	rm ./security/provenance/include/*backup*~
-	rm ./security/include/linux/*backup*~
-	rm ./security/include/uapi/linux/*backup*~
+	rm ./include/linux/*backup*~
+	rm ./include/uapi/linux/*backup*~
 
 patch: copy_change
 	cd build/linux-stable && rm -f .config
@@ -256,9 +256,9 @@ patch: copy_change
 	cd build/linux-stable && rm -f certs/signing_key.x509
 	cd build/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
 	cd build && rm -f patch-$(kernel-version)-v$(lsm-version)
-	cd ./build/linux-stable && $(MAKE) clean
-	cd ./build/linux-stable && $(MAKE) mrproper
-	cd ./build && diff -uprN -b -B ./pristine/linux-stable ./linux-stable > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
+	cd build/linux-stable && $(MAKE) clean
+	cd build/linux-stable && $(MAKE) mrproper
+	cd build && diff -uprN -b -B ./pristine/linux-stable ./linux-stable > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
 
 prepare_release_travis:
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
