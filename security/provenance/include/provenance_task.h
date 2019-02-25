@@ -341,13 +341,13 @@ static inline struct provenance *get_cred_provenance(void)
  */
 static __always_inline struct provenance *get_task_provenance( bool link )
 {
-	struct provenance *prov = current->provenance;
+	struct provenance *tprov = current->provenance;
 
-	prov_elt(prov)->task_info.pid = task_pid_nr(current);
-	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
-	if (!provenance_is_opaque(prov_elt(prov)) && link)
-		record_kernel_link(prov_entry(prov));
-	return prov;
+	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
+	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+	if (!provenance_is_opaque(prov_elt(tprov)) && link)
+		record_kernel_link(prov_entry(tprov));
+	return tprov;
 }
 
 /*!
