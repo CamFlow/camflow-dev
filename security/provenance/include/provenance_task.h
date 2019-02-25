@@ -305,7 +305,7 @@ static inline void update_proc_perf(struct task_struct *task,
  * @return The pointer to the cred provenance entry.
  *
  */
-static inline struct provenance *get_cred_provenance(void)
+static inline struct provenance *get_cred_provenance()
 {
 	struct provenance *prov = current_provenance();      // current_provenance returns provenance pointer of current_cred().
 	unsigned long irqflags;
