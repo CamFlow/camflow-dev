@@ -72,9 +72,9 @@ static inline struct provenance *get_sk_inode_provenance(struct sock *sk)
  */
 static inline struct provenance *get_sk_provenance(struct sock *sk)
 {
-	struct provenance *prov = sk->sk_provenance;
+	struct provenance *pprov = sk->sk_provenance;
 
-	return prov;
+	return pprov;
 }
 
 /*!
