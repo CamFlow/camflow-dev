@@ -35,7 +35,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = NULL;
-	struct provenance pckprov;
+	struct provenance *pckprov;
 	unsigned long irqflags;
 
 	if (!cprov)
@@ -45,17 +45,17 @@ static unsigned int provenance_ipv4_out(void *priv,
 		if (!iprov)
 			return NF_ACCEPT;
 
-		memset(&pckprov, 0, sizeof(struct provenance));
-		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
+		pckprov = provenance_parse_skb_ipv4(skb);
+		if(!pckprov)
+			return -ENOMEM;
 
 		if (provenance_records_packet(prov_elt(iprov)))
-			record_packet_content(skb, &pckprov);
+			record_packet_content(skb, pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
-		call_provenance_alloc((prov_entry_t *)&pckprov);
-		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);
-		call_provenance_free((prov_entry_t *)&pckprov);
+		derives(RL_SND_PACKET, iprov, pckprov, NULL, 0);
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
+		free_provenance(pckprov);
 	}
 	return NF_ACCEPT;
 }

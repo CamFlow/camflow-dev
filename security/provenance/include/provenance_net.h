@@ -164,9 +164,11 @@ static inline void __extract_udp_info(struct sk_buff *skb,
  * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
  *
  */
-static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_elt *prov)
+static inline struct provenance* provenance_parse_skb_ipv4(struct sk_buff *skb)
 {
 	struct packet_identifier *id;
+	struct provenance *p;
+	union prov_elt *prov;
 	int offset;
 	struct iphdr _iph;
 	struct iphdr *ih;
@@ -174,14 +176,15 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 	offset = skb_network_offset(skb);
 	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);      // We obtain the IP header.
 	if (!ih)
-		return -EINVAL;
+		return NULL;
 
 	if (ihlen(ih) < sizeof(_iph))
-		return -EINVAL;
+		return NULL;
 
-	memset(prov, 0, sizeof(union prov_elt));
+	p =  kmem_cache_zalloc(provenance_cache, GFP_ATOMIC);
+	prov = prov_elt(p);
+
 	id = &packet_identifier(prov);  // We are going fo fill the information.
-
 	id->type = ENT_PACKET;
 	// Collect IP element of prov identifier.
 	id->id = ih->id;
@@ -200,7 +203,8 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 	default:
 		break;
 	}
-	return 0;
+	call_provenance_alloc(prov_entry(p));
+	return p;
 }
 
 struct ipv4_filters {

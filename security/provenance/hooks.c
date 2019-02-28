@@ -2191,7 +2191,7 @@ out:
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 {
 	struct provenance *iprov;
-	struct provenance pckprov;
+	struct provenance *pckprov;
 	uint16_t family = sk->sk_family;
 	unsigned long irqflags;
 	int rc = 0;
@@ -2202,17 +2202,17 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (!iprov)
 		return -ENOMEM;
 	if (provenance_is_tracked(prov_elt(iprov))) {
-		memset(&pckprov, 0, sizeof(struct provenance));
-		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
+		pckprov = provenance_parse_skb_ipv4(skb);
+		if(!pckprov)
+			return -ENOMEM;
 
 		if (provenance_records_packet(prov_elt(iprov)))
-			record_packet_content(skb, &pckprov);
+			record_packet_content(skb, pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
-		call_provenance_alloc((prov_entry_t *)&pckprov);
-		rc = derives(RL_RCV_PACKET, &pckprov, iprov, NULL, 0);
-		call_provenance_free((prov_entry_t *)&pckprov);
+		rc = derives(RL_RCV_PACKET, pckprov, iprov, NULL, 0);
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
+		free_provenance(pckprov);
 	}
 	return rc;
 }
