@@ -166,9 +166,7 @@ static __always_inline void __extract_udp_info(struct sk_buff *skb,
  */
 static __always_inline struct provenance* provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
 {
-	struct packet_identifier *id;
-	struct provenance *p;
-	union prov_elt *prov;
+	struct provenance *prov;
 	int offset;
 	struct iphdr _iph;
 	struct iphdr *ih;
@@ -181,30 +179,28 @@ static __always_inline struct provenance* provenance_alloc_with_ipv4_skb(uint64_
 	if (ihlen(ih) < sizeof(_iph))
 		return NULL;
 
-	p =  kmem_cache_zalloc(provenance_cache, GFP_ATOMIC);
-	prov = prov_elt(p);
+	prov =  kmem_cache_zalloc(provenance_cache, GFP_ATOMIC);
 
-	id = &packet_identifier(prov);  // We are going fo fill the information.
-	id->type = type;
+	packet_identifier(prov_elt(prov)).type = type;
 	// Collect IP element of prov identifier.
-	id->id = ih->id;
-	id->snd_ip = ih->saddr;
-	id->rcv_ip = ih->daddr;
-	id->protocol = ih->protocol;
-	prov->pck_info.length = ih->tot_len;
+	packet_identifier(prov_elt(prov)).id = ih->id;
+	packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
+	packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
+	packet_identifier(prov_elt(prov)).protocol = ih->protocol;
+	packet_info(prov_elt(prov)).length = ih->tot_len;
 
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
-		__extract_tcp_info(skb, ih, offset, id);
+		__extract_tcp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
 		break;
 	case IPPROTO_UDP:
-		__extract_udp_info(skb, ih, offset, id);
+		__extract_udp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
 		break;
 	default:
 		break;
 	}
-	call_provenance_alloc(prov_entry(p));
-	return p;
+	call_provenance_alloc(prov_entry(prov));
+	return prov;
 }
 
 struct ipv4_filters {
