@@ -45,7 +45,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 		if (!iprov)
 			return NF_ACCEPT;
 
-		pckprov = provenance_parse_skb_ipv4(skb);
+		pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
 		if(!pckprov)
 			return -ENOMEM;
 

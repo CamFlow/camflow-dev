@@ -106,7 +106,7 @@ static inline struct provenance *get_socket_provenance(struct socket *sock)
  * @param id The packet identifier structure of provenance entry.
  *
  */
-static inline void __extract_tcp_info(struct sk_buff *skb,
+static __always_inline void __extract_tcp_info(struct sk_buff *skb,
 				      struct iphdr *ih,
 				      int offset,
 				      struct packet_identifier *id)
@@ -135,7 +135,7 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
  * @param id The packet identifier structure of provenance entry.
  *
  */
-static inline void __extract_udp_info(struct sk_buff *skb,
+static __always_inline void __extract_udp_info(struct sk_buff *skb,
 				      struct iphdr *ih,
 				      int offset,
 				      struct packet_identifier *id)
@@ -164,7 +164,7 @@ static inline void __extract_udp_info(struct sk_buff *skb,
  * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
  *
  */
-static inline struct provenance* provenance_parse_skb_ipv4(struct sk_buff *skb)
+static __always_inline struct provenance* provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
 {
 	struct packet_identifier *id;
 	struct provenance *p;
@@ -185,7 +185,7 @@ static inline struct provenance* provenance_parse_skb_ipv4(struct sk_buff *skb)
 	prov = prov_elt(p);
 
 	id = &packet_identifier(prov);  // We are going fo fill the information.
-	id->type = ENT_PACKET;
+	id->type = type;
 	// Collect IP element of prov identifier.
 	id->id = ih->id;
 	id->snd_ip = ih->saddr;

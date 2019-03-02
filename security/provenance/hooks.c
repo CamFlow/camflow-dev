@@ -2202,7 +2202,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (!iprov)
 		return -ENOMEM;
 	if (provenance_is_tracked(prov_elt(iprov))) {
-		pckprov = provenance_parse_skb_ipv4(skb);
+		pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
 		if(!pckprov)
 			return -ENOMEM;
 

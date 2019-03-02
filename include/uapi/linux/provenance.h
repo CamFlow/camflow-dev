@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "70e9dc97217fdf237fc1f64b6bee7c439ba842eb"
+#define CAMFLOW_COMMIT "66213a636c1c3a457d334a5c58e1e1619fe8b72c"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -165,6 +165,7 @@ static inline bool prov_bloom_empty(const uint8_t bloom[PROV_N_BYTES])
 #define relation_identifier(relation)           ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)               ((node)->node_info.identifier)
 #define packet_identifier(packet)               ((packet)->pck_info.identifier.packet_id)
+#define packet_info(packet)											((packet)->pck_info)
 #define node_secid(node)                        ((node)->node_info.secid)
 #define node_uid(node)                          ((node)->node_info.uid)
 #define node_gid(node)                          ((node)->node_info.gid)
