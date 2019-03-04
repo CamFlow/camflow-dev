@@ -358,7 +358,7 @@ __x64_sys_getsockname	[u'security_release_secctx', u'security_file_send_sigiotas
 __x64_sys_getpeername	[u'security_socket_getpeername', u'security_release_secctx', u'security_task_free', u'security_file_send_sigiotask']
 __x64_sys_send	[u'security_socket_sendmsg_always', u'security_release_secctx', u'security_file_send_sigiotask', u'security_socket_sendmsg', u'security_task_free']
 __x64_sys_sendto	[u'security_socket_sendmsg_always', u'security_release_secctx', u'security_file_send_sigiotask', u'security_socket_sendmsg', u'security_task_free']
-__x64_sys_sendmsg	[u'security_socket_sendmsg_always', u'security_release_secctx', u'security_file_send_sigiotask', u'security_socket_sendmsg', u'security_task_free']
+__x64_sys_sendmsg	[u'security_socket_sendmsg_always', u'security_release_secctx', u'security_file_send_sigiotask', u'security_task_free', u'security_socket_sendmsg']
 __x64_sys_sendmmsg	[u'security_socket_sendmsg_always', u'security_release_secctx', u'security_file_send_sigiotask', u'security_socket_sendmsg', u'security_task_free']
 __x64_sys_recv	[u'security_release_secctx', u'security_socket_recvmsg', u'security_task_free', u'security_socket_recvmsg_always', u'security_file_send_sigiotask']
 __x64_sys_recvfrom	[u'security_release_secctx', u'security_socket_recvmsg', u'security_task_free', u'security_socket_recvmsg_always', u'security_file_send_sigiotask']
