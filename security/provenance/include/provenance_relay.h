@@ -20,11 +20,11 @@
 #include "provenance_filter.h"
 #include "provenance_query.h"
 
-#define PROV_RELAY_BUFF_EXP         20
-#define PROV_RELAY_BUFF_SIZE        ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
-#define PROV_NB_SUBBUF              64
-#define PROV_INITIAL_BUFF_SIZE      (1024 * 16)
-#define PROV_INITIAL_LONG_BUFF_SIZE 512
+#define PROV_RELAY_BUFF_EXP             20
+#define PROV_RELAY_BUFF_SIZE            ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
+#define PROV_NB_SUBBUF                  64
+#define PROV_INITIAL_BUFF_SIZE          (1024 * 16)
+#define PROV_INITIAL_LONG_BUFF_SIZE     512
 
 /*!
  * @brief A list of relay channel data structure.
@@ -77,22 +77,22 @@ struct prov_long_boot_buffer {
 	struct prov_long_boot_buffer *next;
 };
 
-#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry) \
-	static inline void fcn_name(msg_type * msg, buffer_type * buf) \
-	{ \
-		buffer_type *tmp = buf; \
-		while (tmp->next != NULL) { \
-			tmp = tmp->next; \
-		} \
-		if (tmp->nb_entry >= max_entry) { \
-			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC); \
-			if (unlikely(!tmp->next)) \
-				panic("Provenance: could not allocate boot_buffer."); \
-			tmp = tmp->next; \
-		} \
-		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type)); \
-		tmp->nb_entry++; \
-	} \
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
+	static inline void fcn_name(msg_type * msg, buffer_type * buf)			\
+	{										\
+		buffer_type *tmp = buf;							\
+		while (tmp->next != NULL) {						\
+			tmp = tmp->next;						\
+		}									\
+		if (tmp->nb_entry >= max_entry) {					\
+			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);		\
+			if (unlikely(!tmp->next)) {					\
+				panic("Provenance: could not allocate boot_buffer."); }	\
+			tmp = tmp->next;						\
+		}									\
+		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));		\
+		tmp->nb_entry++;							\
+	}										\
 
 declare_insert_buffer_fcn(insert_boot_buffer,
 			  union prov_elt,
@@ -119,7 +119,7 @@ extern struct prov_boot_buffer *boot_buffer;
  * @return NULL
  *
  */
-static __always_inline void prov_write(union prov_elt *msg)
+static __always_inline void prov_write(union prov_elt *msg, size_t size)
 {
 	struct relay_list *tmp;
 
@@ -129,7 +129,7 @@ static __always_inline void prov_write(union prov_elt *msg)
 	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
-			relay_write(tmp->prov, msg, sizeof(union prov_elt));
+			relay_write(tmp->prov, msg, size);
 		}
 	}
 }
@@ -145,17 +145,17 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
  * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
  *
  */
-static inline void long_prov_write(union long_prov_elt *msg)
+static inline void long_prov_write(union long_prov_elt *msg, size_t size)
 {
 	struct relay_list *tmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready)) {
-		//insert_long_boot_buffer(msg, long_boot_buffer);
-	} else {
+	if (unlikely(!relay_ready))
+		insert_long_boot_buffer(msg, long_boot_buffer);
+	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
-			relay_write(tmp->long_prov, msg, sizeof(union long_prov_elt));
+			relay_write(tmp->long_prov, msg, size);
 		}
 	}
 }
@@ -167,11 +167,12 @@ static inline void prov_flush(void)
 {
 	struct relay_list *tmp;
 
-	if (unlikely(!relay_ready)) {
-		list_for_each_entry(tmp, &relay_list, list) {
-			relay_flush(tmp->prov);
-			relay_flush(tmp->long_prov);
-		}
+	if (unlikely(!relay_ready))
+		return;
+
+	list_for_each_entry(tmp, &relay_list, list) {
+		relay_flush(tmp->prov);
+		relay_flush(tmp->long_prov);
 	}
 }
 
@@ -205,10 +206,10 @@ static __always_inline void __write_node(prov_entry_t *node)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
 	set_recorded(node);
-	if ( provenance_is_long(node) )
-		long_prov_write(node);
+	if (provenance_is_long(node))
+		long_prov_write(node, sizeof(union long_prov_elt));
 	else
-		prov_write((union prov_elt*)node);
+		prov_write((union prov_elt *)node, sizeof(union prov_elt));
 }
 
 static __always_inline void prepare_relation(const uint64_t type,
@@ -266,8 +267,8 @@ static __always_inline int __write_relation(const uint64_t type,
 	__write_node(f);
 	__write_node(t);
 	prepare_relation(type, &relation, f, t, file, flags);
-	rc = call_query_hooks(f, t, (prov_entry_t*)&relation);  // Call query hooks for propagate tracking.
-	prov_write(&relation);                                  // Finally record the relation (i.e., edge) to relay buffer.
+	rc = call_query_hooks(f, t, (prov_entry_t *)&relation); // Call query hooks for propagate tracking.
+	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
 }
 #endif

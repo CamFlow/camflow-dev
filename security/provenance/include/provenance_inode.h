@@ -22,9 +22,9 @@
 #include "provenance_policy.h"
 #include "provenance_filter.h"
 
-#define is_inode_dir(inode) S_ISDIR(inode->i_mode)
-#define is_inode_socket(inode) S_ISSOCK(inode->i_mode)
-#define is_inode_file(inode) S_ISREG(inode->i_mode)
+#define is_inode_dir(inode)             S_ISDIR(inode->i_mode)
+#define is_inode_socket(inode)          S_ISSOCK(inode->i_mode)
+#define is_inode_file(inode)            S_ISREG(inode->i_mode)
 
 /*!
  * @brief Update the type of the provenance inode node based on the mode of the inode, and create a version relation between old and new provenance node.
@@ -233,7 +233,7 @@ static inline int inode_init_provenance(struct inode *inode,
 		set_initialized(prov_elt(prov));
 	spin_unlock(prov_lock(prov));
 	update_inode_type(inode->i_mode, prov);
-	if (!(inode->i_opflags & IOP_XATTR)) // xattr not supported on this inode
+	if (!(inode->i_opflags & IOP_XATTR))   // xattr not supported on this inode
 		return 0;
 	if (opt_dentry)
 		dentry = dget(opt_dentry);
@@ -407,7 +407,7 @@ static __always_inline int record_write_xattr(uint64_t type,
 		if (size < PROV_XATTR_VALUE_SIZE) {
 			xattr->xattr_info.size = size;
 			memcpy(xattr->xattr_info.value, value, size);
-		} else{
+		} else {
 			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
 			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
 		}
@@ -480,13 +480,13 @@ out:
 	return rc;
 }
 
-#define FILE__EXECUTE   0x00000001UL
-#define FILE__READ      0x00000002UL
-#define FILE__APPEND    0x00000004UL
-#define FILE__WRITE     0x00000008UL
-#define DIR__SEARCH     0x00000010UL
-#define DIR__WRITE      0x00000020UL
-#define DIR__READ       0x00000040UL
+#define FILE__EXECUTE           0x00000001UL
+#define FILE__READ              0x00000002UL
+#define FILE__APPEND            0x00000004UL
+#define FILE__WRITE             0x00000008UL
+#define DIR__SEARCH             0x00000010UL
+#define DIR__WRITE              0x00000020UL
+#define DIR__READ               0x00000040UL
 
 /*!
  * @brief Helper function to return permissions of a file/directory from mask.

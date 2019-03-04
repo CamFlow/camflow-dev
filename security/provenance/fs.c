@@ -27,12 +27,12 @@
 #include "provenance_task.h"
 #include "provenance_machine.h"
 
-#define TMPBUFLEN       12
+#define TMPBUFLEN    12
 
-#define declare_file_operations(ops_name, write_op, read_op) static const struct file_operations ops_name = { \
-		.write	= write_op, \
-		.read	= read_op, \
-		.llseek = generic_file_llseek, \
+#define declare_file_operations(ops_name, write_op, read_op)    static const struct file_operations ops_name = { \
+		.write = write_op,										 \
+		.read = read_op,										 \
+		.llseek = generic_file_llseek,									 \
 }
 
 static ssize_t no_read(struct file *filp, char __user *buf, size_t count, loff_t *ppos)
@@ -62,7 +62,7 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char*)get_zeroed_page(GFP_KERNEL);
+	page = (char *)get_zeroed_page(GFP_KERNEL);
 	if (!page)
 		return -ENOMEM;
 
@@ -93,13 +93,13 @@ static ssize_t __read_flag(struct file *filp, char __user *buf,
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
 }
 
-#define declare_write_flag_fcn(fcn_name, flag) static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		return __write_flag(file, buf, count, ppos, &flag); \
+#define declare_write_flag_fcn(fcn_name, flag)          static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
+	{																	       \
+		return __write_flag(file, buf, count, ppos, &flag);										       \
 	}
-#define declare_read_flag_fcn(fcn_name, flag) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		return __read_flag(filp, buf, count, ppos, flag); \
+#define declare_read_flag_fcn(fcn_name, flag)           static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
+	{																	 \
+		return __read_flag(filp, buf, count, ppos, flag);										 \
 	}
 
 declare_write_flag_fcn(prov_write_enable, prov_policy.prov_enabled);
@@ -128,7 +128,7 @@ declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_dupl
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
-	if (prov_machine_id != 0) // it has already been set
+	if (prov_machine_id != 0)   // it has already been set
 		return -EPERM;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -164,7 +164,7 @@ declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_ma
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
 {
-	if (prov_boot_id != 0) // it has already been set
+	if (prov_boot_id != 0)   // it has already been set
 		return -EPERM;
 
 	if (!capable(CAP_AUDIT_CONTROL))
@@ -229,12 +229,12 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		node_identifier(node).boot_id = prov_boot_id;
 		node_identifier(node).machine_id = prov_machine_id;
 		__write_node(node);
-	} else{ // the node is not of disclosed type
+	} else { // the node is not of disclosed type
 		count = -EINVAL;
 		goto out;
 	}
 
-	if (copy_to_user((void*)buf, &node, count)) {
+	if (copy_to_user((void *)buf, &node, count)) {
 		count = -ENOMEM;
 		goto out;
 	}
@@ -259,7 +259,7 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 	if (copy_from_user(&relation, buf, sizeof(struct relation_struct)))
 		return -ENOMEM;
 
-	prov_write(&relation);
+	prov_write(&relation, sizeof(union prov_elt));
 	return count;
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
@@ -369,13 +369,13 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	return count;
 }
 
-#define declare_write_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		return __write_filter(file, buf, count, &filter); \
+#define declare_write_filter_fcn(fcn_name, filter)      static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
+	{																	       \
+		return __write_filter(file, buf, count, &filter);										       \
 	}
-#define declare_reader_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		return __read_filter(filp, buf, count, filter); \
+#define declare_reader_filter_fcn(fcn_name, filter)     static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
+	{																	 \
+		return __read_filter(filp, buf, count, filter);											 \
 	}
 
 declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
@@ -538,13 +538,13 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 	return pos;
 }
 
-#define declare_write_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		return __write_ipv4_filter(file, buf, count, &filter); \
+#define declare_write_ipv4_filter_fcn(fcn_name, filter)         static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
+	{																		       \
+		return __write_ipv4_filter(file, buf, count, &filter);											       \
 	}
-#define declare_reader_ipv4_filter_fcn(fcn_name, filter) static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		return __read_ipv4_filter(filp, buf, count, &filter); \
+#define declare_reader_ipv4_filter_fcn(fcn_name, filter)        static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
+	{																		 \
+		return __read_ipv4_filter(filp, buf, count, &filter);											 \
 	}
 
 declare_write_ipv4_filter_fcn(prov_write_ipv4_ingress_filter, ingress_ipv4filters);
@@ -589,7 +589,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	data->len = len;
 out:
 	security_release_secctx(ctx, len); // security module dealloc
-	if ( copy_to_user(buf, data, sizeof(struct secinfo)) )
+	if (copy_to_user(buf, data, sizeof(struct secinfo)))
 		rtn = -EAGAIN;
 dealloc:
 	kfree(data);
@@ -597,43 +597,43 @@ dealloc:
 }
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
-#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
+#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function)	    \
 	static ssize_t function_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		struct filters *s; \
-		if (count < sizeof(struct info)) \
-			return -ENOMEM; \
-		s = kzalloc(sizeof(struct filters), GFP_KERNEL); \
-		if (!s) \
-			return -ENOMEM; \
-		if (copy_from_user(&s->filter, buf, sizeof(struct info))) { \
-			kfree(s); \
-			return -EAGAIN; \
-		} \
-		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) \
-			add_function(s); \
-		else \
-			delete_function(s); \
-		return sizeof(struct filters); \
+	{												    \
+		struct filters *s;									    \
+		if (count < sizeof(struct info)) {							    \
+			return -ENOMEM; }								    \
+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);					    \
+		if (!s) {										    \
+			return -ENOMEM; }								    \
+		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {				    \
+			kfree(s);									    \
+			return -EAGAIN;									    \
+		}											    \
+		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) {				    \
+			add_function(s); }								    \
+		else {											    \
+			delete_function(s); }								    \
+		return sizeof(struct filters);								    \
 	}
 
-#define declare_generic_filter_read(function_name, filters, info) \
+#define declare_generic_filter_read(function_name, filters, info)				      \
 	static ssize_t function_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{ \
-		struct list_head *listentry, *listtmp; \
-		struct filters *tmp; \
-		size_t pos = 0; \
-		if (count < sizeof(struct info)) \
-			return -ENOMEM; \
-		list_for_each_safe(listentry, listtmp, &filters) { \
-			tmp = list_entry(listentry, struct filters, list); \
-			if (count < pos + sizeof(struct info)) \
-				return -ENOMEM; \
-			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) \
-				return -EAGAIN; \
-			pos += sizeof(struct info); \
-		} \
-		return pos; \
+	{											      \
+		struct list_head *listentry, *listtmp;						      \
+		struct filters *tmp;								      \
+		size_t pos = 0;									      \
+		if (count < sizeof(struct info)) {						      \
+			return -ENOMEM; }							      \
+		list_for_each_safe(listentry, listtmp, &filters) {				      \
+			tmp = list_entry(listentry, struct filters, list);			      \
+			if (count < pos + sizeof(struct info)) {				      \
+				return -ENOMEM; }						      \
+			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) {	      \
+				return -EAGAIN; }						      \
+			pos += sizeof(struct info);						      \
+		}										      \
+		return pos;									      \
 	}
 
 static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
@@ -743,7 +743,7 @@ static inline int record_log(union prov_elt *tprov, const char __user *buf, size
 		rc = -EAGAIN;
 		goto out;
 	}
-	str->str_info.str[count] = '\0'; // Make sure the string is null terminated.
+	str->str_info.str[count] = '\0';        // Make sure the string is null terminated.
 	str->str_info.length = count;
 
 	rc = __write_relation(RL_LOG, str, tprov, NULL, 0);
@@ -779,15 +779,15 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
-#define hash_filters(filters, filters_type, tmp, tmp_type) \
-	list_for_each_safe(listentry, listtmp, &filters) { \
-		tmp = list_entry(listentry, struct filters_type, list); \
-		rc = crypto_shash_update(hashdesc, (u8*)&tmp->filter, sizeof(struct tmp_type)); \
-		if (rc) { \
-			pr_err("Provenance: error updating hash."); \
-			pos = -EAGAIN; \
-			goto out; \
-		} \
+#define hash_filters(filters, filters_type, tmp, tmp_type)					 \
+	list_for_each_safe(listentry, listtmp, &filters) {					 \
+		tmp = list_entry(listentry, struct filters_type, list);				 \
+		rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
+		if (rc) {									 \
+			pr_err("Provenance: error updating hash.");				 \
+			pos = -EAGAIN;								 \
+			goto out;								 \
+		}										 \
 	}
 
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
@@ -831,19 +831,19 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* LSM version */
-	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* commit */
-	rc = crypto_shash_update(hashdesc, (u8*)CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* general policy */
-	rc = crypto_shash_update(hashdesc, (u8*)&prov_policy, sizeof(struct capture_policy));
+	rc = crypto_shash_update(hashdesc, (u8 *)&prov_policy, sizeof(struct capture_policy));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -885,11 +885,11 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 {
 	struct prov_type type_info;
 
-	if ( count < sizeof(struct prov_type) ) {
+	if (count < sizeof(struct prov_type)) {
 		pr_err("Provenance: failed retrieving object id, wrong string length.");
 		return -ENOMEM;
 	}
-	if ( copy_from_user(&type_info, buf, sizeof(struct prov_type)) ) {
+	if (copy_from_user(&type_info, buf, sizeof(struct prov_type))) {
 		pr_err("Provenance: failed retrieving object id, could not copy from user.");
 		return -EAGAIN;
 	}
@@ -898,13 +898,13 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 			strcpy(type_info.str, relation_str(type_info.id));
 		else
 			type_info.id = relation_id(type_info.str);
-	}else{
+	} else {
 		if (type_info.id)
 			strcpy(type_info.str, node_str(type_info.id));
 		else
 			type_info.id = node_id(type_info.str);
 	}
-	if ( copy_to_user(buf, &type_info, sizeof(struct prov_type)) ) {
+	if (copy_to_user(buf, &type_info, sizeof(struct prov_type))) {
 		pr_err("Provenance: failed retrieving object id, could not copy to user.");
 		return -EAGAIN;
 	}
@@ -917,9 +917,9 @@ static ssize_t prov_read_version(struct file *filp, char __user *buf,
 {
 	size_t len = strlen(CAMFLOW_VERSION_STR);
 
-	if ( count < len )
+	if (count < len)
 		return -ENOMEM;
-	if ( copy_to_user(buf, CAMFLOW_VERSION_STR, len) )
+	if (copy_to_user(buf, CAMFLOW_VERSION_STR, len))
 		return -EAGAIN;
 	return len;
 }
@@ -930,9 +930,9 @@ static ssize_t prov_read_commit(struct file *filp, char __user *buf,
 {
 	size_t len = strlen(CAMFLOW_COMMIT);
 
-	if ( count < len )
+	if (count < len)
 		return -ENOMEM;
-	if ( copy_to_user(buf, CAMFLOW_COMMIT, len) )
+	if (copy_to_user(buf, CAMFLOW_COMMIT, len))
 		return -EAGAIN;
 	return len;
 }
@@ -974,7 +974,7 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 
-#define prov_create_file(name, perm, fun_ptr) \
+#define prov_create_file(name, perm, fun_ptr)				      \
 	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
 	provenance_mark_as_opaque_dentry(dentry)
 

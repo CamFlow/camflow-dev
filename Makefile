@@ -1,5 +1,5 @@
-kernel-version=4.20.11
-lsm-version=0.5.2
+kernel-version=4.20.13
+lsm-version=0.5.3
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -61,7 +61,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-copy_change: update_commit
+copy_change: update_commit uncrustify uncrustify_clean
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
@@ -237,10 +237,16 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
+	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 
 uncrustify_clean:
 	rm ./security/provenance/*backup*~
 	rm ./security/provenance/include/*backup*~
+	rm ./include/linux/*backup*~
+	rm ./include/uapi/linux/*backup*~
 
 patch: copy_change
 	cd build/linux-stable && rm -f .config
@@ -250,9 +256,9 @@ patch: copy_change
 	cd build/linux-stable && rm -f certs/signing_key.x509
 	cd build/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
 	cd build && rm -f patch-$(kernel-version)-v$(lsm-version)
-	cd ./build/linux-stable && $(MAKE) clean
-	cd ./build/linux-stable && $(MAKE) mrproper
-	cd ./build && diff -uprN -b -B ./pristine/linux-stable ./linux-stable > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
+	cd build/linux-stable && $(MAKE) clean
+	cd build/linux-stable && $(MAKE) mrproper
+	cd build && diff -uprN -b -B ./pristine/linux-stable ./linux-stable > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
 
 prepare_release_travis:
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch

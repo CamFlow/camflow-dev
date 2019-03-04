@@ -173,8 +173,8 @@ static inline int record_node_name(struct provenance *node,
 	if (provenance_is_opaque(prov_elt(node)))
 		return 0;
 
-	if ( (provenance_is_name_recorded(prov_elt(node)) && !force)
-	     || !provenance_is_recorded(prov_elt(node)))
+	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
+	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
 
 	fname_prov = alloc_long_provenance(ENT_PATH);
@@ -189,7 +189,7 @@ static inline int record_node_name(struct provenance *node,
 	if (prov_type(prov_elt(node)) == ACT_TASK) {
 		rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
-	} else{
+	} else {
 		rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
 	}
@@ -473,9 +473,9 @@ static __always_inline int informs(const uint64_t type,
 }
 
 static __always_inline int record_influences_kernel(const uint64_t type,
-					     struct provenance *entity,
-					     struct provenance *activity,
-					     const struct file *file)
+						    struct provenance *entity,
+						    struct provenance *activity,
+						    const struct file *file)
 {
 	int rc;
 
@@ -489,7 +489,7 @@ static __always_inline int record_influences_kernel(const uint64_t type,
 		return 0;
 	if (!provenance_is_tracked(prov_elt(entity))
 	    && !provenance_is_tracked(prov_elt(activity))
-			&& !prov_policy.prov_all)
+	    && !prov_policy.prov_all)
 		return 0;
 	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
 	if (rc < 0)
