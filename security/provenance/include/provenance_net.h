@@ -107,9 +107,9 @@ static inline struct provenance *get_socket_provenance(struct socket *sock)
  *
  */
 static __always_inline void __extract_tcp_info(struct sk_buff *skb,
-				      struct iphdr *ih,
-				      int offset,
-				      struct packet_identifier *id)
+					       struct iphdr *ih,
+					       int offset,
+					       struct packet_identifier *id)
 {
 	struct tcphdr _tcph;
 	struct tcphdr *th;
@@ -136,9 +136,9 @@ static __always_inline void __extract_tcp_info(struct sk_buff *skb,
  *
  */
 static __always_inline void __extract_udp_info(struct sk_buff *skb,
-				      struct iphdr *ih,
-				      int offset,
-				      struct packet_identifier *id)
+					       struct iphdr *ih,
+					       int offset,
+					       struct packet_identifier *id)
 {
 	struct udphdr _udph;
 	struct udphdr *uh;
@@ -164,7 +164,7 @@ static __always_inline void __extract_udp_info(struct sk_buff *skb,
  * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
  *
  */
-static __always_inline struct provenance* provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
+static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
 {
 	struct provenance *prov;
 	int offset;
