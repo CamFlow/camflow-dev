@@ -44,6 +44,7 @@
 
 ### v0.5.3
 ```
+- Fix issue with latest gcc release.
 - Update to kernel version 4.20.13.
 ```
 
