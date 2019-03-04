@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.5.3           | 4.20.13        | N/A				|
+| 0.5.3           | 4.20.13        | 04/03/2019 |
 | 0.5.2           | 4.20.11        | 21/02/2019 |
 | 0.5.1           | 4.20.7         | 11/02/2019 |
 | 0.5.0           | 4.20.5         | 30/01/2019	|
@@ -44,7 +44,7 @@
 
 ### v0.5.3
 ```
-- Fix issue with latest gcc release.
+- Hot Fix: fix issue with latest gcc release.
 - Update to kernel version 4.20.13.
 ```
 
