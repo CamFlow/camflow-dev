@@ -22,12 +22,6 @@ jobs:
           name: reinstall-make
           command: 'apt-get install --reinstall make'
       - run:
-          name: uncrutify
-          command: 'make uncrustify'
-      - run:
-          name: uncrutify_clean
-          command: 'make uncrustify_clean'
-      - run:
           name: prepare-analysis
           command: 'cd ./scripts && make prepare'
       - run:
@@ -70,7 +64,6 @@ jobs:
               echo "Copying..."
               rsync -r ../../docs/ ./docs
               rsync -r ../../scripts/ ./scripts
-              rsync -r ../../security/ ./security
               echo "Check files are there"
               ls -l ./docs/img
               ls -l ./docs/dot

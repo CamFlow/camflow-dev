@@ -150,9 +150,9 @@ static inline void long_prov_write(union long_prov_elt *msg, size_t size)
 	struct relay_list *tmp;
 
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready)) {
+	if (unlikely(!relay_ready))
 		insert_long_boot_buffer(msg, long_boot_buffer);
-	} else {
+	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->long_prov, msg, size);
@@ -268,7 +268,7 @@ static __always_inline int __write_relation(const uint64_t type,
 	__write_node(t);
 	prepare_relation(type, &relation, f, t, file, flags);
 	rc = call_query_hooks(f, t, (prov_entry_t *)&relation); // Call query hooks for propagate tracking.
-	prov_write(&relation, sizeof(union prov_elt));                                  // Finally record the relation (i.e., edge) to relay buffer.
+	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
 }
 #endif
