@@ -1,5 +1,5 @@
-kernel-version=4.20.12
-lsm-version=0.5.3
+kernel-version=4.20.13
+lsm-version=0.5.4
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -61,7 +61,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-copy_change: update_commit
+copy_change: update_commit uncrustify uncrustify_clean
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 

@@ -17,7 +17,7 @@ before_install:
   - sudo apt-get -y install build-essential
   - sudo apt-get -y install libncurses-dev cmake clang g++ wget git libssl-dev
   - sudo apt-get -y install bc nano patch mosquitto
-  - sudo apt-get -y install libelf-dev sparse flawfinder
+  - sudo apt-get -y install libelf-dev sparse flawfinder uncrustify
   - sudo apt-get -y install libedit-dev
   - sudo apt-get -y install coccinelle
   - sudo apt-get -y install ruby
