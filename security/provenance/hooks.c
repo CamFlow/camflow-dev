@@ -2452,11 +2452,13 @@ static int provenance_sb_kern_mount(struct super_block *sb,
  * @brief Add provenance hooks to security_hook_list.
  */
 static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
-	/* task related hooks */
+	/* cred related hooks */
 	LSM_HOOK_INIT(cred_free,                provenance_cred_free),
 	LSM_HOOK_INIT(cred_alloc_blank,         provenance_cred_alloc_blank),
 	LSM_HOOK_INIT(cred_prepare,             provenance_cred_prepare),
 	LSM_HOOK_INIT(cred_transfer,            provenance_cred_transfer),
+
+	/* task related hooks */
 	LSM_HOOK_INIT(task_alloc,               provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,                provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,          provenance_task_fix_setuid),
