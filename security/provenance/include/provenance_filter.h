@@ -14,6 +14,7 @@
 #define _PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
+#include <uapi/linux/provenance_fs.h>
 
 #include "provenance_policy.h"
 #include "provenance_ns.h"
