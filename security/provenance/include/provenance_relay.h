@@ -206,7 +206,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
 	set_recorded(node);
-	if (provenance_is_long(node))
+	if (prov_type_is_long(node_type(node)))
 		long_prov_write(node, sizeof(union long_prov_elt));
 	else
 		prov_write((union prov_elt *)node, sizeof(union prov_elt));

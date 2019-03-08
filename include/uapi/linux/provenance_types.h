@@ -155,11 +155,15 @@
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK                                (DM_ACTIVITY  | 0x0000000000000001ULL)
 #define ACT_DISC                                (DM_ACTIVITY  | (0x0000000000000001ULL << 1))
+
 /* AGENT SUBTYPES */
 #define AGT_USR                                 (DM_AGENT       | (0x0000000000000001ULL << 2))
 #define AGT_GRP                                 (DM_AGENT       | (0x0000000000000001ULL << 3))
 #define AGT_DISC                                (DM_AGENT       | (0x0000000000000001ULL << 4))
-#define AGT_MACHINE                             (DM_AGENT       | (0x0000000000000001ULL << 5))
+
+/* LONG NODE */
+#define AGT_MACHINE                             (DM_AGENT | ND_LONG     | (0x0000000000000001ULL << 5))
+
 /* ENTITY SUBTYPES */
 #define ENT_INODE_UNKNOWN                       (DM_ENTITY    | (0x0000000000000001ULL << 6))
 #define ENT_INODE_LINK                          (DM_ENTITY    | (0x0000000000000001ULL << 7))
