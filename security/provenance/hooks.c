@@ -2431,9 +2431,7 @@ static void provenance_sb_free_security(struct super_block *sb)
  * @return always return 0.
  *
  */
-static int provenance_sb_kern_mount(struct super_block *sb,
-				    int flags,
-				    void *data)
+static int provenance_sb_kern_mount(struct super_block *sb)
 {
 	int i;
 	uint8_t c = 0;
