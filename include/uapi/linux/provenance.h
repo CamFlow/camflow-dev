@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "dd1bb5b93b79f38d6f9b8fa9dde838ebcbbe0bfc"
+#define CAMFLOW_COMMIT "be2153173969f03b8a520190c281fe081b7c83be"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -236,17 +236,17 @@ union prov_identifier {
 #define clear_record_packet(node)               prov_clear_flag(node, RECORD_PACKET_BIT)
 #define provenance_records_packet(node)         prov_check_flag(node, RECORD_PACKET_BIT)
 
-#define OUTGOING_BIT            5
+#define OUTGOING_BIT            4
 #define set_has_outgoing(node)                  prov_set_flag(node, OUTGOING_BIT)
 #define clear_has_outgoing(node)                prov_clear_flag(node, OUTGOING_BIT)
 #define provenance_has_outgoing(node)           prov_check_flag(node, OUTGOING_BIT)
 
-#define INITIALIZED_BIT         6
+#define INITIALIZED_BIT         5
 #define set_initialized(node)                   prov_set_flag(node, INITIALIZED_BIT)
 #define clear_initialized(node)                 prov_clear_flag(node, INITIALIZED_BIT)
 #define provenance_is_initialized(node)         prov_check_flag(node, INITIALIZED_BIT)
 
-#define SAVED_BIT               7
+#define SAVED_BIT               6
 #define set_saved(node)                         prov_set_flag(node, SAVED_BIT)
 #define clear_saved(node)                       prov_clear_flag(node, SAVED_BIT)
 #define provenance_is_saved(node)               prov_check_flag(node, SAVED_BIT)
