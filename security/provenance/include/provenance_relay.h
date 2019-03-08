@@ -119,9 +119,11 @@ extern struct prov_boot_buffer *boot_buffer;
  * @return NULL
  *
  */
-static __always_inline void prov_write(union prov_elt *msg, size_t size)
+static void prov_write(union prov_elt *msg, size_t size)
 {
 	struct relay_list *tmp;
+
+	BUG_ON(prov_type_is_long(prov_type(msg)));
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready))
@@ -145,9 +147,11 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
  * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
  *
  */
-static inline void long_prov_write(union long_prov_elt *msg, size_t size)
+static void long_prov_write(union long_prov_elt *msg, size_t size)
 {
 	struct relay_list *tmp;
+
+	BUG_ON(!prov_type_is_long(prov_type(msg)));
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready))
@@ -202,6 +206,8 @@ static __always_inline void tighten_identifier(union prov_identifier *id)
  */
 static __always_inline void __write_node(prov_entry_t *node)
 {
+	BUG_ON(prov_type_is_relation(node_type(node)));
+
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
