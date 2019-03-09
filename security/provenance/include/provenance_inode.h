@@ -380,13 +380,13 @@ static inline void save_provenance(struct dentry *dentry)
  *
  */
 static __always_inline int record_write_xattr(uint64_t type,
-				     struct provenance *iprov,
-				     struct provenance *tprov,
-				     struct provenance *cprov,
-				     const char *name,
-				     const void *value,
-				     size_t size,
-				     const uint64_t flags)
+					      struct provenance *iprov,
+					      struct provenance *tprov,
+					      struct provenance *cprov,
+					      const char *name,
+					      const void *value,
+					      size_t size,
+					      const uint64_t flags)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
@@ -446,9 +446,9 @@ out:
  *
  */
 static __always_inline int record_read_xattr(struct provenance *cprov,
-				    struct provenance *tprov,
-				    struct provenance *iprov,
-				    const char *name)
+					     struct provenance *tprov,
+					     struct provenance *iprov,
+					     const char *name)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;

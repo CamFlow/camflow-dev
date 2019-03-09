@@ -82,7 +82,7 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 void long_prov_write(union long_prov_elt *msg, size_t size);
 
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
-	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)			\
+	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)		\
 	{										\
 		buffer_type *tmp = buf;							\
 		while (tmp->next != NULL) {						\
@@ -162,11 +162,11 @@ static __always_inline void __write_node(prov_entry_t *node)
 }
 
 static __always_inline void __prepare_relation(const uint64_t type,
-				      union prov_elt *relation,
-				      prov_entry_t *f,
-				      prov_entry_t *t,
-				      const struct file *file,
-				      const uint64_t flags)
+					       union prov_elt *relation,
+					       prov_entry_t *f,
+					       prov_entry_t *t,
+					       const struct file *file,
+					       const uint64_t flags)
 {
 	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 	prov_type(relation) = type;
@@ -199,10 +199,10 @@ static __always_inline void __prepare_relation(const uint64_t type,
  *
  */
 static __always_inline int __write_relation(const uint64_t type,
-				   void *from,
-				   void *to,
-				   const struct file *file,
-				   const uint64_t flags)
+					    void *from,
+					    void *to,
+					    const struct file *file,
+					    const uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;
