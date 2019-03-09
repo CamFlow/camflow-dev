@@ -30,6 +30,8 @@
 #define DM_ACTIVITY                             0x4000000000000000UL
 #define DM_ENTITY                               0x2000000000000000UL
 #define DM_AGENT                                0x1000000000000000UL
+/* NODE IS LONG*/
+#define ND_LONG                                                   0x0400000000000000UL
 /* ALLOWED/DISALLOWED */
 #define RL_ALLOWED                              0x0200000000000000UL
 #define RL_DISALLOWED                           0x0100000000000000UL
@@ -153,34 +155,40 @@
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK                                (DM_ACTIVITY  | 0x0000000000000001ULL)
 #define ACT_DISC                                (DM_ACTIVITY  | (0x0000000000000001ULL << 1))
+
 /* AGENT SUBTYPES */
 #define AGT_USR                                 (DM_AGENT       | (0x0000000000000001ULL << 2))
 #define AGT_GRP                                 (DM_AGENT       | (0x0000000000000001ULL << 3))
 #define AGT_DISC                                (DM_AGENT       | (0x0000000000000001ULL << 4))
-#define AGT_MACHINE                             (DM_AGENT       | (0x0000000000000001ULL << 5))
+
+/* LONG NODE */
+#define AGT_MACHINE                             (DM_AGENT | ND_LONG     | (0x0000000000000001ULL << 5))
+
 /* ENTITY SUBTYPES */
-#define ENT_STR                                 (DM_ENTITY    | (0x0000000000000001ULL << 6))
-#define ENT_INODE_UNKNOWN                       (DM_ENTITY    | (0x0000000000000001ULL << 7))
-#define ENT_INODE_LINK                          (DM_ENTITY    | (0x0000000000000001ULL << 8))
-#define ENT_INODE_FILE                          (DM_ENTITY    | (0x0000000000000001ULL << 9))
-#define ENT_INODE_DIRECTORY                     (DM_ENTITY    | (0x0000000000000001ULL << 10))
-#define ENT_INODE_CHAR                          (DM_ENTITY    | (0x0000000000000001ULL << 11))
-#define ENT_INODE_BLOCK                         (DM_ENTITY    | (0x0000000000000001ULL << 12))
-#define ENT_INODE_PIPE                          (DM_ENTITY    | (0x0000000000000001ULL << 13))
-#define ENT_INODE_SOCKET                        (DM_ENTITY    | (0x0000000000000001ULL << 14))
-#define ENT_MSG                                 (DM_ENTITY    | (0x0000000000000001ULL << 15))
-#define ENT_SHM                                 (DM_ENTITY    | (0x0000000000000001ULL << 16))
-#define ENT_ADDR                                (DM_ENTITY    | (0x0000000000000001ULL << 17))
-#define ENT_SBLCK                               (DM_ENTITY    | (0x0000000000000001ULL << 18))
-#define ENT_PATH                                (DM_ENTITY    | (0x0000000000000001ULL << 19))
-#define ENT_PACKET                              (DM_ENTITY    | (0x0000000000000001ULL << 20))
-#define ENT_DISC                                (DM_ENTITY    | (0x0000000000000001ULL << 21))
-#define ENT_IATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 22))
-#define ENT_XATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 23))
-#define ENT_PCKCNT                              (DM_ENTITY    | (0x0000000000000001ULL << 24))
-#define ENT_ARG                                 (DM_ENTITY    | (0x0000000000000001ULL << 25))
-#define ENT_ENV                                 (DM_ENTITY    | (0x0000000000000001ULL << 26))
-#define ENT_PROC                                (DM_ENTITY    | (0x0000000000000001ULL << 27))
+#define ENT_INODE_UNKNOWN                       (DM_ENTITY    | (0x0000000000000001ULL << 6))
+#define ENT_INODE_LINK                          (DM_ENTITY    | (0x0000000000000001ULL << 7))
+#define ENT_INODE_FILE                          (DM_ENTITY    | (0x0000000000000001ULL << 8))
+#define ENT_INODE_DIRECTORY                     (DM_ENTITY    | (0x0000000000000001ULL << 9))
+#define ENT_INODE_CHAR                          (DM_ENTITY    | (0x0000000000000001ULL << 10))
+#define ENT_INODE_BLOCK                         (DM_ENTITY    | (0x0000000000000001ULL << 11))
+#define ENT_INODE_PIPE                          (DM_ENTITY    | (0x0000000000000001ULL << 12))
+#define ENT_INODE_SOCKET                        (DM_ENTITY    | (0x0000000000000001ULL << 13))
+#define ENT_MSG                                 (DM_ENTITY    | (0x0000000000000001ULL << 14))
+#define ENT_SHM                                 (DM_ENTITY    | (0x0000000000000001ULL << 15))
+#define ENT_SBLCK                               (DM_ENTITY    | (0x0000000000000001ULL << 16))
+#define ENT_PACKET                              (DM_ENTITY    | (0x0000000000000001ULL << 17))
+#define ENT_DISC                                (DM_ENTITY    | (0x0000000000000001ULL << 18))
+#define ENT_IATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 19))
+#define ENT_PROC                                (DM_ENTITY    | (0x0000000000000001ULL << 20))
+
+/* LONG NODE */
+#define ENT_STR                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 21))
+#define ENT_ADDR                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 22))
+#define ENT_PATH                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 23))
+#define ENT_XATTR                               (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 24))
+#define ENT_PCKCNT                              (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 25))
+#define ENT_ARG                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 26))
+#define ENT_ENV                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 27))
 
 #define prov_type(prov)                 ((prov)->node_info.identifier.node_id.type)
 #define node_type(node)                 prov_type(node)
@@ -192,6 +200,7 @@
 #define prov_is_type(val, type)         ((val & type) == type)
 #define prov_type_is_relation(val)      prov_is_type(val, DM_RELATION)
 #define prov_type_is_node(val)          (!prov_is_type(val, DM_RELATION))
+#define prov_type_is_long(val)          (prov_is_type(val, ND_LONG) && prov_type_is_node(val))
 #define prov_is_used(val)               prov_is_type(val, RL_USED)
 #define prov_is_informed(val)           prov_is_type(val, RL_INFORMED)
 #define prov_is_influenced(val)         prov_is_type(val, RL_INFLUENCED)

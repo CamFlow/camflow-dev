@@ -165,7 +165,7 @@ static inline uint32_t current_pidns(void)
  * @return 0 if no error occurred or "mm" is NULL; Other error codes inherited from record_relation function or unknown.
  *
  */
-static __always_inline int current_update_shst(struct provenance *cprov, bool read)
+static inline int current_update_shst(struct provenance *cprov, bool read)
 {
 	struct mm_struct *mm = get_task_mm(current);
 	struct vm_area_struct *vma;
@@ -339,7 +339,7 @@ static inline struct provenance *get_cred_provenance(void)
  *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
-static __always_inline struct provenance *get_task_provenance( bool link )
+static inline struct provenance *get_task_provenance( bool link )
 {
 	struct provenance *tprov = current->provenance;
 
@@ -534,11 +534,11 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation function or unknown.
  *
  */
-static __always_inline int record_arg(struct provenance *prov,
-				      uint64_t vtype,
-				      uint64_t etype,
-				      const char *arg,
-				      size_t len)
+static inline int record_arg(struct provenance *prov,
+			     uint64_t vtype,
+			     uint64_t etype,
+			     const char *arg,
+			     size_t len)
 {
 	union long_prov_elt *aprov;
 	int rc = 0;

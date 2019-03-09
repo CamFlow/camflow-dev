@@ -70,12 +70,16 @@ struct prov_boot_buffer {
 	uint32_t nb_entry;
 	struct prov_boot_buffer *next;
 };
+extern struct prov_boot_buffer *boot_buffer;
+void prov_write(union prov_elt *msg, size_t size);
 
 struct prov_long_boot_buffer {
 	union long_prov_elt buffer[PROV_INITIAL_LONG_BUFF_SIZE];
 	uint32_t nb_entry;
 	struct prov_long_boot_buffer *next;
 };
+extern struct prov_long_boot_buffer *long_boot_buffer;
+void long_prov_write(union long_prov_elt *msg, size_t size);
 
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
 	static inline void fcn_name(msg_type * msg, buffer_type * buf)			\
@@ -103,63 +107,6 @@ declare_insert_buffer_fcn(insert_long_boot_buffer,
 			  struct prov_long_boot_buffer,
 			  PROV_INITIAL_LONG_BUFF_SIZE);
 
-extern struct prov_boot_buffer *boot_buffer;
-
-/*!
- * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
- *
- * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
- * However, in an unlikely event that the boot buffer is full, an error is thrown.
- * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
- * If relay buffer is ready, write to relay buffer.
- * It will write to every relay buffer in the relay_list for every CamQuery query use.
- * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
- * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
- * @param msg Provenance information to be written to either boot buffer or relay buffer.
- * @return NULL
- *
- */
-static __always_inline void prov_write(union prov_elt *msg, size_t size)
-{
-	struct relay_list *tmp;
-
-	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready))
-		insert_boot_buffer(msg, boot_buffer);
-	else {
-		prov_policy.prov_written = true;
-		list_for_each_entry(tmp, &relay_list, list) {
-			relay_write(tmp->prov, msg, size);
-		}
-	}
-}
-
-
-extern struct prov_long_boot_buffer *long_boot_buffer;
-
-/*!
- * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
- *
- * This function performs the same function as "prov_write" function except that it writes a long provenance information,
- * instead of regular provenance information to the buffer.
- * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
- *
- */
-static inline void long_prov_write(union long_prov_elt *msg, size_t size)
-{
-	struct relay_list *tmp;
-
-	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready))
-		insert_long_boot_buffer(msg, long_boot_buffer);
-	else {
-		prov_policy.prov_written = true;
-		list_for_each_entry(tmp, &relay_list, list) {
-			relay_write(tmp->long_prov, msg, size);
-		}
-	}
-}
-
 /*!
  * @brief Flush every relay buffer element in the relay list.
  */
@@ -177,7 +124,7 @@ static inline void prov_flush(void)
 }
 
 
-static __always_inline void tighten_identifier(union prov_identifier *id)
+static inline void tighten_identifier(union prov_identifier *id)
 {
 	if (id->node_id.type == ENT_PACKET)
 		return;
@@ -200,24 +147,26 @@ static __always_inline void tighten_identifier(union prov_identifier *id)
  * @param node Provenance node (could be either regular or long)
  *
  */
-static __always_inline void __write_node(prov_entry_t *node)
+static inline void __write_node(prov_entry_t *node)
 {
+	BUG_ON(prov_type_is_relation(node_type(node)));
+
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
 	set_recorded(node);
-	if (provenance_is_long(node))
+	if (prov_type_is_long(node_type(node)))
 		long_prov_write(node, sizeof(union long_prov_elt));
 	else
 		prov_write((union prov_elt *)node, sizeof(union prov_elt));
 }
 
-static __always_inline void prepare_relation(const uint64_t type,
-					     union prov_elt *relation,
-					     prov_entry_t *f,
-					     prov_entry_t *t,
-					     const struct file *file,
-					     const uint64_t flags)
+static inline void __prepare_relation(const uint64_t type,
+				      union prov_elt *relation,
+				      prov_entry_t *f,
+				      prov_entry_t *t,
+				      const struct file *file,
+				      const uint64_t flags)
 {
 	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 	prov_type(relation) = type;
@@ -249,11 +198,11 @@ static __always_inline void prepare_relation(const uint64_t type,
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
-static __always_inline int __write_relation(const uint64_t type,
-					    void *from,
-					    void *to,
-					    const struct file *file,
-					    const uint64_t flags)
+static inline int __write_relation(const uint64_t type,
+				   void *from,
+				   void *to,
+				   const struct file *file,
+				   const uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;
@@ -266,7 +215,7 @@ static __always_inline int __write_relation(const uint64_t type,
 	// Record the two end nodes
 	__write_node(f);
 	__write_node(t);
-	prepare_relation(type, &relation, f, t, file, flags);
+	__prepare_relation(type, &relation, f, t, file, flags);
 	rc = call_query_hooks(f, t, (prov_entry_t *)&relation); // Call query hooks for propagate tracking.
 	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;

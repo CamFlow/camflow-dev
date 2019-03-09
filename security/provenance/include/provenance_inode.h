@@ -190,8 +190,8 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
  * @param inode The inode in question whose provenance entry to be updated.
  *
  */
-static __always_inline void refresh_inode_provenance(struct inode *inode,
-						     struct provenance *prov)
+static inline void refresh_inode_provenance(struct inode *inode,
+					    struct provenance *prov)
 {
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
@@ -277,7 +277,7 @@ free_buf:
  * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
-static __always_inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
+static inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
 {
 	struct provenance *iprov = inode->i_provenance;
 
@@ -299,7 +299,7 @@ static __always_inline struct provenance *get_inode_provenance(struct inode *ino
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
+static inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
 
@@ -318,7 +318,7 @@ static __always_inline struct provenance *get_dentry_provenance(struct dentry *d
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
+static inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
@@ -379,14 +379,14 @@ static inline void save_provenance(struct dentry *dentry)
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static __always_inline int record_write_xattr(uint64_t type,
-					      struct provenance *iprov,
-					      struct provenance *tprov,
-					      struct provenance *cprov,
-					      const char *name,
-					      const void *value,
-					      size_t size,
-					      const uint64_t flags)
+static inline int record_write_xattr(uint64_t type,
+				     struct provenance *iprov,
+				     struct provenance *tprov,
+				     struct provenance *cprov,
+				     const char *name,
+				     const void *value,
+				     size_t size,
+				     const uint64_t flags)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
@@ -445,10 +445,10 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static __always_inline int record_read_xattr(struct provenance *cprov,
-					     struct provenance *tprov,
-					     struct provenance *iprov,
-					     const char *name)
+static inline int record_read_xattr(struct provenance *cprov,
+				    struct provenance *tprov,
+				    struct provenance *iprov,
+				    const char *name)
 {
 	union long_prov_elt *xattr;
 	int rc = 0;
