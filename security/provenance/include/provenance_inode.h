@@ -379,7 +379,7 @@ static inline void save_provenance(struct dentry *dentry)
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static inline int record_write_xattr(uint64_t type,
+static __always_inline int record_write_xattr(uint64_t type,
 				     struct provenance *iprov,
 				     struct provenance *tprov,
 				     struct provenance *cprov,
@@ -445,7 +445,7 @@ out:
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
  *
  */
-static inline int record_read_xattr(struct provenance *cprov,
+static __always_inline int record_read_xattr(struct provenance *cprov,
 				    struct provenance *tprov,
 				    struct provenance *iprov,
 				    const char *name)
