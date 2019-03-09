@@ -228,6 +228,62 @@ out:
 }
 
 /*!
+ * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
+ *
+ * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
+ * However, in an unlikely event that the boot buffer is full, an error is thrown.
+ * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
+ * If relay buffer is ready, write to relay buffer.
+ * It will write to every relay buffer in the relay_list for every CamQuery query use.
+ * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
+ * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
+ * @param msg Provenance information to be written to either boot buffer or relay buffer.
+ * @return NULL
+ *
+ */
+void prov_write(union prov_elt *msg, size_t size)
+{
+	struct relay_list *tmp;
+
+	BUG_ON(prov_type_is_long(prov_type(msg)));
+
+	prov_jiffies(msg) = get_jiffies_64();
+	if (unlikely(!relay_ready))
+		insert_boot_buffer(msg, boot_buffer);
+	else {
+		prov_policy.prov_written = true;
+		list_for_each_entry(tmp, &relay_list, list) {
+			relay_write(tmp->prov, msg, size);
+		}
+	}
+}
+
+/*!
+ * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
+ *
+ * This function performs the same function as "prov_write" function except that it writes a long provenance information,
+ * instead of regular provenance information to the buffer.
+ * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
+ *
+ */
+void long_prov_write(union long_prov_elt *msg, size_t size)
+{
+	struct relay_list *tmp;
+
+	BUG_ON(!prov_type_is_long(prov_type(msg)));
+
+	prov_jiffies(msg) = get_jiffies_64();
+	if (unlikely(!relay_ready))
+		insert_long_boot_buffer(msg, long_boot_buffer);
+	else {
+		prov_policy.prov_written = true;
+		list_for_each_entry(tmp, &relay_list, list) {
+			relay_write(tmp->long_prov, msg, size);
+		}
+	}
+}
+
+/*!
  * @brief Initialize relay buffer for provenance.
  *
  * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,

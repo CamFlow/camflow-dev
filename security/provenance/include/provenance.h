@@ -76,7 +76,7 @@ extern struct kmem_cache *long_provenance_cache;
  * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
  *
  */
-static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
+static inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
 	struct provenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
 
@@ -114,7 +114,7 @@ static inline void free_provenance(struct provenance *prov)
  * @reference GFP_ATOMIC https://www.linuxjournal.com/article/6930
  *
  */
-static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
+static inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
 {
 	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
