@@ -54,7 +54,7 @@ extern bool relay_ready;
  *
  * @todo Failure case checking is missing.
  */
-static inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
+static __always_inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
 {
 	struct relay_list *list;
 
@@ -82,7 +82,7 @@ extern struct prov_long_boot_buffer *long_boot_buffer;
 void long_prov_write(union long_prov_elt *msg, size_t size);
 
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
-	static inline void fcn_name(msg_type * msg, buffer_type * buf)			\
+	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)		\
 	{										\
 		buffer_type *tmp = buf;							\
 		while (tmp->next != NULL) {						\
@@ -110,7 +110,7 @@ declare_insert_buffer_fcn(insert_long_boot_buffer,
 /*!
  * @brief Flush every relay buffer element in the relay list.
  */
-static inline void prov_flush(void)
+static __always_inline void prov_flush(void)
 {
 	struct relay_list *tmp;
 
@@ -124,7 +124,7 @@ static inline void prov_flush(void)
 }
 
 
-static inline void tighten_identifier(union prov_identifier *id)
+static __always_inline void tighten_identifier(union prov_identifier *id)
 {
 	if (id->node_id.type == ENT_PACKET)
 		return;
@@ -147,7 +147,7 @@ static inline void tighten_identifier(union prov_identifier *id)
  * @param node Provenance node (could be either regular or long)
  *
  */
-static inline void __write_node(prov_entry_t *node)
+static __always_inline void __write_node(prov_entry_t *node)
 {
 	BUG_ON(prov_type_is_relation(node_type(node)));
 
@@ -161,12 +161,12 @@ static inline void __write_node(prov_entry_t *node)
 		prov_write((union prov_elt *)node, sizeof(union prov_elt));
 }
 
-static inline void __prepare_relation(const uint64_t type,
-				      union prov_elt *relation,
-				      prov_entry_t *f,
-				      prov_entry_t *t,
-				      const struct file *file,
-				      const uint64_t flags)
+static __always_inline void __prepare_relation(const uint64_t type,
+					       union prov_elt *relation,
+					       prov_entry_t *f,
+					       prov_entry_t *t,
+					       const struct file *file,
+					       const uint64_t flags)
 {
 	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 	prov_type(relation) = type;
@@ -198,11 +198,11 @@ static inline void __prepare_relation(const uint64_t type,
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
-static inline int __write_relation(const uint64_t type,
-				   void *from,
-				   void *to,
-				   const struct file *file,
-				   const uint64_t flags)
+static __always_inline int __write_relation(const uint64_t type,
+					    void *from,
+					    void *to,
+					    const struct file *file,
+					    const uint64_t flags)
 {
 	union prov_elt relation;
 	prov_entry_t *f = from;
