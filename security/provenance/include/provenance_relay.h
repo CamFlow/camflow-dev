@@ -26,24 +26,11 @@
 #define PROV_INITIAL_BUFF_SIZE          (1024 * 16)
 #define PROV_INITIAL_LONG_BUFF_SIZE     512
 
-/*!
- * @brief A list of relay channel data structure.
- *
- * struct rchan is defined in /include/linux/relay.h Linux kernel source code.
- */
-struct relay_list {
-	struct list_head list;
-	char *name;                     // The name of the relay channel.
-	struct rchan *prov;             // Relay buffer for regular provenance entries.
-	struct rchan *long_prov;        // Relay buffer for long provenance entries.
-};
-
-extern struct list_head relay_list;
-
 int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan, int cpu);
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
+void prov_flush(void);
 
 extern bool relay_ready;
 
@@ -62,23 +49,6 @@ struct prov_long_boot_buffer {
 };
 extern struct prov_long_boot_buffer *long_boot_buffer;
 void long_prov_write(union long_prov_elt *msg, size_t size);
-
-/*!
- * @brief Flush every relay buffer element in the relay list.
- */
-static __always_inline void prov_flush(void)
-{
-	struct relay_list *tmp;
-
-	if (unlikely(!relay_ready))
-		return;
-
-	list_for_each_entry(tmp, &relay_list, list) {
-		relay_flush(tmp->prov);
-		relay_flush(tmp->long_prov);
-	}
-}
-
 
 static __always_inline void tighten_identifier(union prov_identifier *id)
 {

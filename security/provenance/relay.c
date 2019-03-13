@@ -23,6 +23,19 @@
 #define LONG_PROV_BASE_NAME     "long_provenance"
 
 /*!
+ * @brief A list of relay channel data structure.
+ *
+ * struct rchan is defined in /include/linux/relay.h Linux kernel source code.
+ */
+struct relay_list {
+	struct list_head list;
+	char *name;                     // The name of the relay channel.
+	struct rchan *prov;             // Relay buffer for regular provenance entries.
+	struct rchan *long_prov;        // Relay buffer for long provenance entries.
+};
+LIST_HEAD(relay_list);
+
+/*!
  * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
  * @param name Member of the element in the relay list
  * @param prov Member of the element in the relay list. This is a relay channel pointer.
@@ -39,6 +52,22 @@ void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
 	list->prov = prov;
 	list->long_prov = long_prov;
 	list_add_tail(&(list->list), &relay_list);
+}
+
+/*!
+ * @brief Flush every relay buffer element in the relay list.
+ */
+void prov_flush(void)
+{
+	struct relay_list *tmp;
+
+	if (unlikely(!relay_ready))
+		return;
+
+	list_for_each_entry(tmp, &relay_list, list) {
+		relay_flush(tmp->prov);
+		relay_flush(tmp->long_prov);
+	}
 }
 
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
