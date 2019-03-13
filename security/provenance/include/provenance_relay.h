@@ -43,27 +43,9 @@ extern struct list_head relay_list;
 int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan, int cpu);
+void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 
 extern bool relay_ready;
-
-/*!
- * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
- * @param name Member of the element in the relay list
- * @param prov Member of the element in the relay list. This is a relay channel pointer.
- * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
- *
- * @todo Failure case checking is missing.
- */
-static __always_inline void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
-{
-	struct relay_list *list;
-
-	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
-	list->name = name;
-	list->prov = prov;
-	list->long_prov = long_prov;
-	list_add_tail(&(list->list), &relay_list);
-}
 
 struct prov_boot_buffer {
 	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];

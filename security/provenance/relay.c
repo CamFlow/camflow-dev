@@ -22,6 +22,25 @@
 #define PROV_BASE_NAME          "provenance"
 #define LONG_PROV_BASE_NAME     "long_provenance"
 
+/*!
+ * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
+ * @param name Member of the element in the relay list
+ * @param prov Member of the element in the relay list. This is a relay channel pointer.
+ * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
+ *
+ * @todo Failure case checking is missing.
+ */
+void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
+{
+	struct relay_list *list;
+
+	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
+	list->name = name;
+	list->prov = prov;
+	list->long_prov = long_prov;
+	list_add_tail(&(list->list), &relay_list);
+}
+
 #define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
 	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)		\
 	{										\
