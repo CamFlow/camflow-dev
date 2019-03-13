@@ -45,6 +45,8 @@
 
 ### v0.5.4
 ```
+- Internal refactoring.
+- Split uapi/linux/provenance.h between uapi/linux/provenance.h, uapi/linux/provenance_fs.h, uapi/linux/provenance_utils.h
 - Update to kernel version 5.O.1.
 ```
 
