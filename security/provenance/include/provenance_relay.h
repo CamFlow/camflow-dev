@@ -81,32 +81,6 @@ struct prov_long_boot_buffer {
 extern struct prov_long_boot_buffer *long_boot_buffer;
 void long_prov_write(union long_prov_elt *msg, size_t size);
 
-#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
-	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)		\
-	{										\
-		buffer_type *tmp = buf;							\
-		while (tmp->next != NULL) {						\
-			tmp = tmp->next;						\
-		}									\
-		if (tmp->nb_entry >= max_entry) {					\
-			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);		\
-			if (unlikely(!tmp->next)) {					\
-				panic("Provenance: could not allocate boot_buffer."); }	\
-			tmp = tmp->next;						\
-		}									\
-		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));		\
-		tmp->nb_entry++;							\
-	}										\
-
-declare_insert_buffer_fcn(insert_boot_buffer,
-			  union prov_elt,
-			  struct prov_boot_buffer,
-			  PROV_INITIAL_BUFF_SIZE);
-declare_insert_buffer_fcn(insert_long_boot_buffer,
-			  union long_prov_elt,
-			  struct prov_long_boot_buffer,
-			  PROV_INITIAL_LONG_BUFF_SIZE);
-
 /*!
  * @brief Flush every relay buffer element in the relay list.
  */
