@@ -239,9 +239,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
-	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_fs.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_types.h
-	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_utils.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 
 uncrustify_clean:
