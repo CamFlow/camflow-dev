@@ -350,6 +350,13 @@ static inline struct provenance *get_task_provenance( bool link )
 	return tprov;
 }
 
+static __always_inline uint64_t current_provid(void)
+{
+	struct provenance *prov = current->provenance;
+
+	return node_identifier(prov_elt(prov)).id;
+}
+
 /*!
  * @brief Return process's provenance from @pid.
  *

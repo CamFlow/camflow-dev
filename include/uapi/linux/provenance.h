@@ -31,7 +31,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "c8b635a48af5c5dd96f46093cab2518e37010a48"
+#define CAMFLOW_COMMIT "0080956978f11faaf1648e49a6a1e61d61d8cc5b"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -148,6 +148,7 @@ struct relation_struct {
 	uint8_t set;
 	int64_t offset;
 	uint64_t flags;
+	uint64_t task_id;
 };
 
 struct node_struct {
