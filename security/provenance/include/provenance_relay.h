@@ -166,7 +166,7 @@ static __always_inline uint64_t current_provid(void)
 {
 	struct provenance *prov = current->provenance;
 
-	if(!prov)
+	if (!prov)
 		return 0;
 	return node_identifier(prov_elt(prov)).id;
 }
