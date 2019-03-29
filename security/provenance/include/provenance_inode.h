@@ -139,17 +139,17 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
-        // Should not sleep.
-        buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-        if (!buffer)
-            return -ENOMEM;
-        ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-        if (IS_ERR(ptr))
-            return PTR_ERR(ptr);
-        rc = record_node_name(prov, ptr, force);
-        kfree(buffer);
-        return rc;
-    }
+		// Should not sleep.
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		if (!buffer)
+			return -ENOMEM;
+		ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
+		if (IS_ERR(ptr))
+			return PTR_ERR(ptr);
+		rc = record_node_name(prov, ptr, force);
+		kfree(buffer);
+		return rc;
+	}
 }
 
 /*!
@@ -172,13 +172,13 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
-        dentry = d_find_alias(inode);
-        if (!dentry)    // We did not find a dentry, not sure if it should ever happen.
-            return 0;
-        rc = record_inode_name_from_dentry(dentry, prov, false);
-        dput(dentry);
-        return rc;
-    }
+		dentry = d_find_alias(inode);
+		if (!dentry) // We did not find a dentry, not sure if it should ever happen.
+			return 0;
+		rc = record_inode_name_from_dentry(dentry, prov, false);
+		dput(dentry);
+		return rc;
+	}
 }
 
 /*!

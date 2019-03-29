@@ -322,17 +322,17 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
-        addr_info = alloc_long_provenance(ENT_ADDR);
-        if (!addr_info) {
-            rc = -ENOMEM;
-            goto out;
-        }
-        addr_info->address_info.length = addrlen;
-        memcpy(&(addr_info->address_info.addr), address, addrlen);
+		addr_info = alloc_long_provenance(ENT_ADDR);
+		if (!addr_info) {
+			rc = -ENOMEM;
+			goto out;
+		}
+		addr_info->address_info.length = addrlen;
+		memcpy(&(addr_info->address_info.addr), address, addrlen);
 
-        rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
-        set_name_recorded(prov_elt(prov));
-    }
+		rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
+		set_name_recorded(prov_elt(prov));
+	}
 out:
 	free_long_provenance(addr_info);
 	return rc;

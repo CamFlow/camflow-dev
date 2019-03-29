@@ -224,31 +224,31 @@ static inline int record_task_name(struct task_struct *task,
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
-        mm = get_task_mm(task);
-        if (!mm)
-            goto out;
-        exe_file = get_mm_exe_file(mm);
-        mmput_async(mm);
-        if (exe_file) {
-            fprov = get_file_provenance(exe_file, false);
-            if (provenance_is_opaque(prov_elt(fprov))) {
-                set_opaque(prov_elt(prov));
-                goto out;
-            }
+		mm = get_task_mm(task);
+		if (!mm)
+			goto out;
+		exe_file = get_mm_exe_file(mm);
+		mmput_async(mm);
+		if (exe_file) {
+			fprov = get_file_provenance(exe_file, false);
+			if (provenance_is_opaque(prov_elt(fprov))) {
+				set_opaque(prov_elt(prov));
+				goto out;
+			}
 
-            buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);   // Memory allocation not allowed to sleep.
-            if (!buffer) {
-                pr_err("Provenance: could not allocate memory\n");
-                fput(exe_file); // Release the file.
-                rc = -ENOMEM;
-                goto out;
-            }
-            ptr = file_path(exe_file, buffer, PATH_MAX);
-            fput(exe_file); // Release the file.
-            rc = record_node_name(prov, ptr, false);
-            kfree(buffer);
-        }
-    }
+			buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC); // Memory allocation not allowed to sleep.
+			if (!buffer) {
+				pr_err("Provenance: could not allocate memory\n");
+				fput(exe_file); // Release the file.
+				rc = -ENOMEM;
+				goto out;
+			}
+			ptr = file_path(exe_file, buffer, PATH_MAX);
+			fput(exe_file); // Release the file.
+			rc = record_node_name(prov, ptr, false);
+			kfree(buffer);
+		}
+	}
 out:
 	// put_cred(cred);
 	return rc;
