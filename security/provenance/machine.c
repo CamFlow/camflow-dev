@@ -35,7 +35,6 @@ void init_prov_machine(void)
 	memcpy(prov_machine->machine_info.commit, CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
 	prov_type(prov_machine) = AGT_MACHINE;
 	node_identifier(prov_machine).version = 1;
-	set_is_long(prov_machine);
 	refresh_prov_machine();
 	call_provenance_alloc(prov_machine);
 }

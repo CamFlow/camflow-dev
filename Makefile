@@ -1,5 +1,5 @@
-kernel-version=4.20.12
-lsm-version=0.5.3
+kernel-version=5.0
+lsm-version=0.5.4
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -61,7 +61,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-copy_change: update_commit
+copy_change: update_commit uncrustify uncrustify_clean
 	cd ./build/linux-stable && cp -r ../../security .
 	cd ./build/linux-stable && cp -r ../../include .
 
@@ -239,7 +239,9 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_fs.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_utils.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 
 uncrustify_clean:

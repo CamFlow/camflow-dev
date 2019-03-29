@@ -52,14 +52,6 @@ task -> inode[fontsize = 8,label = send_msg]
 
 inode -> inode[fontsize = 8,label = receive_unix]
 
-packet_content[fontsize = 8,label = packet_content,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-packet[fontsize = 8,label = packet,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-packet_content -> packet[fontsize = 8,label = packet_content]
-
-packet -> inode[fontsize = 8,label = receive_packet]
-
 task -> inode[fontsize = 8,label = socket_pair_create]
 
 task -> task[fontsize = 8,label = terminate_task]

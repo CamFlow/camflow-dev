@@ -119,6 +119,7 @@ static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype
 	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
 	BUILD_BUG_ON(!prov_type_is_node(ntype));
+	BUILD_BUG_ON(!prov_type_is_long(ntype));
 
 	if (!prov)
 		return NULL;
@@ -126,7 +127,6 @@ static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype
 	node_identifier(prov).id = prov_next_node_id();
 	node_identifier(prov).boot_id = prov_boot_id;
 	node_identifier(prov).machine_id = prov_machine_id;
-	set_is_long(prov);
 	call_provenance_alloc(prov);
 	return prov;
 }
