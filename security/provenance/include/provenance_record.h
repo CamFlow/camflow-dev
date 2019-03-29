@@ -176,26 +176,27 @@ static __always_inline int record_node_name(struct provenance *node,
 	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
 	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
+    else {
+        fname_prov = alloc_long_provenance(ENT_PATH);
+        if (!fname_prov)
+            return -ENOMEM;
 
-	fname_prov = alloc_long_provenance(ENT_PATH);
-	if (!fname_prov)
-		return -ENOMEM;
+        strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+        fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
-
-	// Here we record the relation.
-	spin_lock(prov_lock(node));
-	if (prov_type(prov_elt(node)) == ACT_TASK) {
-		rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	} else {
-		rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	}
-	spin_unlock(prov_lock(node));
-	free_long_provenance(fname_prov);
-	return rc;
+        // Here we record the relation.
+        spin_lock(prov_lock(node));
+        if (prov_type(prov_elt(node)) == ACT_TASK) {
+            rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
+            set_name_recorded(prov_elt(node));
+        } else {
+            rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
+            set_name_recorded(prov_elt(node));
+        }
+        spin_unlock(prov_lock(node));
+        free_long_provenance(fname_prov);
+        return rc;
+    }
 }
 
 static __always_inline int record_kernel_link(prov_entry_t *node)
