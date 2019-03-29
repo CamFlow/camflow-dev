@@ -45,6 +45,7 @@
 
 ### v0.5.4
 ```
+- Associate task_id with relations.
 - Update to kernel version 5.O.
 ```
 
