@@ -161,6 +161,14 @@ static __always_inline void __write_node(prov_entry_t *node)
 		prov_write((union prov_elt *)node, sizeof(union prov_elt));
 }
 
+
+static __always_inline uint64_t current_provid(void)
+{
+	struct provenance *prov = current->provenance;
+
+	return node_identifier(prov_elt(prov)).id;
+}
+
 static __always_inline void __prepare_relation(const uint64_t type,
 					       union prov_elt *relation,
 					       prov_entry_t *f,
@@ -181,6 +189,7 @@ static __always_inline void __prepare_relation(const uint64_t type,
 	}
 	relation->relation_info.flags = flags;
 	relation->msg_info.epoch = epoch;
+	relation->relation_info.task_id = current_provid();
 }
 
 /*!
