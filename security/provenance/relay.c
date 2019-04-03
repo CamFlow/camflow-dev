@@ -22,6 +22,80 @@
 #define PROV_BASE_NAME          "provenance"
 #define LONG_PROV_BASE_NAME     "long_provenance"
 
+/*!
+ * @brief A list of relay channel data structure.
+ *
+ * struct rchan is defined in /include/linux/relay.h Linux kernel source code.
+ */
+struct relay_list {
+	struct list_head list;
+	char *name;                     // The name of the relay channel.
+	struct rchan *prov;             // Relay buffer for regular provenance entries.
+	struct rchan *long_prov;        // Relay buffer for long provenance entries.
+};
+LIST_HEAD(relay_list);
+
+/*!
+ * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
+ * @param name Member of the element in the relay list
+ * @param prov Member of the element in the relay list. This is a relay channel pointer.
+ * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
+ *
+ * @todo Failure case checking is missing.
+ */
+void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
+{
+	struct relay_list *list;
+
+	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
+	list->name = name;
+	list->prov = prov;
+	list->long_prov = long_prov;
+	list_add_tail(&(list->list), &relay_list);
+}
+
+/*!
+ * @brief Flush every relay buffer element in the relay list.
+ */
+void prov_flush(void)
+{
+	struct relay_list *tmp;
+
+	if (unlikely(!relay_ready))
+		return;
+
+	list_for_each_entry(tmp, &relay_list, list) {
+		relay_flush(tmp->prov);
+		relay_flush(tmp->long_prov);
+	}
+}
+
+#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
+	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)		\
+	{										\
+		buffer_type *tmp = buf;							\
+		while (tmp->next != NULL) {						\
+			tmp = tmp->next;						\
+		}									\
+		if (tmp->nb_entry >= max_entry) {					\
+			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);		\
+			if (unlikely(!tmp->next)) {					\
+				panic("Provenance: could not allocate boot_buffer."); }	\
+			tmp = tmp->next;						\
+		}									\
+		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));		\
+		tmp->nb_entry++;							\
+	}										\
+
+declare_insert_buffer_fcn(insert_boot_buffer,
+			  union prov_elt,
+			  struct prov_boot_buffer,
+			  PROV_INITIAL_BUFF_SIZE);
+declare_insert_buffer_fcn(insert_long_boot_buffer,
+			  union long_prov_elt,
+			  struct prov_long_boot_buffer,
+			  PROV_INITIAL_LONG_BUFF_SIZE);
+
 /* Global variables: variable declarations in provenance.h */
 static struct rchan *prov_chan;
 static struct rchan *long_prov_chan;

@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.5.4           | 5.0			       | N/A				|
+| 0.5.4           | 5.0.6		       | N/A				|
 | 0.5.3           | 4.20.13        | 04/03/2019	|
 | 0.5.2           | 4.20.11        | 21/02/2019 |
 | 0.5.1           | 4.20.7         | 11/02/2019 |
@@ -46,7 +46,9 @@
 ### v0.5.4
 ```
 - Associate task_id with relations.
-- Update to kernel version 5.O.
+- Internal refactoring.
+- Split uapi/linux/provenance.h between uapi/linux/provenance.h, uapi/linux/provenance_fs.h, uapi/linux/provenance_utils.h
+- Update to kernel version 5.O.6.
 ```
 
 ### v0.5.3
