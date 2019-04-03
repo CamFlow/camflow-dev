@@ -32,6 +32,7 @@ RL_VERSION|version_entity|connect version of entity object|
 RL_MUNMAP|munmap|munmap operation|
 RL_SHMDT|shmdt|shmdt operation|
 RL_LINK|link|create a link|
+RL_RENAME|rename|rename inode|
 RL_UNLINK|unlink|delete a link|
 RL_SYMLINK|symlink|create a symlink|
 RL_SPLICE_IN|splice_in|pipe splice operation from in file|

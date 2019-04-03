@@ -622,7 +622,24 @@ static int provenance_inode_rename(struct inode *old_dir,
 				   struct inode *new_dir,
 				   struct dentry *new_dentry)
 {
-	return provenance_inode_link(old_dentry, new_dir, new_dentry);
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance(true);
+	struct provenance *iprov = NULL;
+	unsigned long irqflags;
+	int rc;
+
+	iprov = get_dentry_provenance(old_dentry, true);
+	if (!iprov)
+		return -ENOMEM;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_RENAME, cprov, tprov, iprov, NULL, 0);
+	clear_name_recorded(prov_elt(iprov));
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	record_inode_name_from_dentry(new_dentry, iprov, true);
+	return rc;
 }
 
 /*!

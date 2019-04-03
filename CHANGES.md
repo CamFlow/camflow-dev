@@ -45,6 +45,7 @@
 
 ### v0.5.4
 ```
+- Add RL_RENAME relation.
 - Add RL_CONNECT_UNIX_STREAM relation.
 - Add RL_LOAD_UNDEFINED relation.
 - Ensure sk_alloc_security does not generate provenance.

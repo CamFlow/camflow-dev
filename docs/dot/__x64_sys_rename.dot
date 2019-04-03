@@ -36,7 +36,7 @@ path -> inode[fontsize = 8,label = named]
 
 process_memory -> task[fontsize = 8,label = memory_read]
 
-task -> inode[fontsize = 8,label = link]
+task -> inode[fontsize = 8,label = rename]
 
 inode -> process_memory[fontsize = 8,label = sh_read]
 

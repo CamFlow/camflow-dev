@@ -42,6 +42,7 @@ static const char RL_STR_VERSION[] = "version_entity";                          
 static const char RL_STR_MUNMAP[] = "munmap";                                                           // munmap operation
 static const char RL_STR_SHMDT[] = "shmdt";                                                             // shmdt operation
 static const char RL_STR_LINK[] = "link";                                                               // create a link
+static const char RL_STR_RENAME[] = "rename";                                                           // rename inode
 static const char RL_STR_UNLINK[] = "unlink";                                                           // delete a link
 static const char RL_STR_SYMLINK[] = "symlink";                                                         // create a symlink
 static const char RL_STR_SPLICE_IN[] = "splice_in";                                                     // pipe splice operation from in file
@@ -194,6 +195,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_SHMDT;
 	case RL_LINK:
 		return RL_STR_LINK;
+	case RL_RENAME:
+		return RL_STR_RENAME;
 	case RL_UNLINK:
 		return RL_STR_UNLINK;
 	case RL_SYMLINK:
@@ -366,6 +369,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
 	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
+	MATCH_AND_RETURN(str, RL_STR_RENAME, RL_RENAME);
 	MATCH_AND_RETURN(str, RL_STR_UNLINK, RL_UNLINK);
 	MATCH_AND_RETURN(str, RL_STR_SYMLINK, RL_SYMLINK);
 	MATCH_AND_RETURN(str, RL_STR_SPLICE_IN, RL_SPLICE_IN);
