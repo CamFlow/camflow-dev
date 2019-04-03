@@ -107,6 +107,7 @@ static const char RL_STR_LOAD_KEXEC_IMAGE[] = "load_kexec_image";               
 static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";                               // load file into kernel
 static const char RL_STR_LOAD_POLICY[] = "load_policy";                                                 // load file into kernel
 static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";                                       // load file into kernel
+static const char RL_STR_LOAD_UNDEFINED[] = "load_undefined";                                           // load file into kernel
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                                 // unkown node type should normally not appear
@@ -324,6 +325,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_LOAD_POLICY;
 	case RL_LOAD_CERTIFICATE:
 		return RL_STR_LOAD_CERTIFICATE;
+	case RL_LOAD_UNDEFINED:
+		return RL_STR_LOAD_UNDEFINED;
 	case RL_RAN_ON:
 		return RL_STR_RAN_ON;
 	default:
@@ -426,6 +429,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_POLICY, RL_LOAD_POLICY);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_UNDEFINED, RL_LOAD_UNDEFINED);
 	MATCH_AND_RETURN(str, RL_STR_RAN_ON, RL_RAN_ON);
 	return 0;
 }

@@ -1148,7 +1148,8 @@ static int provenance_kernel_read_file(struct file *file
 	case READING_X509_CERTIFICATE:
 		rc = record_influences_kernel(RL_LOAD_CERTIFICATE, iprov, tprov, file);
 		break;
-	default:
+	default: // should not happen
+		rc = record_influences_kernel(RL_LOAD_UNDEFINED, iprov, tprov, file);
 		break;
 	}
 	spin_unlock_irqrestore(prov_lock(iprov), irqflags);

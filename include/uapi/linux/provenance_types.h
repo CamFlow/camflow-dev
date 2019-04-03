@@ -148,6 +148,7 @@
 #define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 5))
 #define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 6))
 #define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 7))
+#define RL_LOAD_UNDEFINED                               (RL_INFLUENCED | (0x0000000000000001ULL << 8))
 
 /* ASSOCIATED  SUBTYPES */
 #define RL_RAN_ON                               (RL_ASSOCIATED | (0x0000000000000001ULL))
