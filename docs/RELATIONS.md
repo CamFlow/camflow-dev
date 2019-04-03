@@ -21,6 +21,7 @@ RL_SH_WRITE|sh_write|writing to shared state|
 RL_PROC_WRITE|memory_write|writing to process memory |
 RL_BIND|bind|socket bind operation|
 RL_CONNECT|connect|socket connection operation|
+RL_CONNECT_UNIX_STREAM|connect_unix_stream|unix stream socket connection operation|
 RL_LISTEN|listen|socket listen operation|
 RL_ACCEPT|accept|socket accept operation|
 RL_OPEN|open|file open operation|

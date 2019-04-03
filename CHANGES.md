@@ -45,7 +45,8 @@
 
 ### v0.5.4
 ```
-- Add RL_STR_LOAD_UNDEFINED relation. 
+- Add RL_CONNECT_UNIX_STREAM relation.
+- Add RL_LOAD_UNDEFINED relation.
 - Ensure sk_alloc_security does not generate provenance.
 - Ensure inode_setxattr does not generate provenance.
 - Ensure inode_getsecurity does not generate provenance.

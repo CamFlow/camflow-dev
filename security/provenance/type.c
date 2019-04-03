@@ -31,6 +31,7 @@ static const char RL_STR_SH_WRITE[] = "sh_write";                               
 static const char RL_STR_PROC_WRITE[] = "memory_write";                                                 // writing to process memory (i.e. shared between thread)
 static const char RL_STR_BIND[] = "bind";                                                               // socket bind operation
 static const char RL_STR_CONNECT[] = "connect";                                                         // socket connection operation
+static const char RL_STR_CONNECT_UNIX_STREAM[] = "connect_unix_stream";                                 // unix stream socket connection operation
 static const char RL_STR_LISTEN[] = "listen";                                                           // socket listen operation
 static const char RL_STR_ACCEPT[] = "accept";                                                           // socket accept operation
 static const char RL_STR_OPEN[] = "open";                                                               // file open operation
@@ -171,6 +172,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_BIND;
 	case RL_CONNECT:
 		return RL_STR_CONNECT;
+	case RL_CONNECT_UNIX_STREAM:
+		return RL_STR_CONNECT_UNIX_STREAM;
 	case RL_LISTEN:
 		return RL_STR_LISTEN;
 	case RL_ACCEPT:
@@ -352,6 +355,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_GETGID, RL_GETGID);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);
+	MATCH_AND_RETURN(str, RL_STR_CONNECT_UNIX_STREAM, RL_CONNECT_UNIX_STREAM);
 	MATCH_AND_RETURN(str, RL_STR_LISTEN, RL_LISTEN);
 	MATCH_AND_RETURN(str, RL_STR_ACCEPT, RL_ACCEPT);
 	MATCH_AND_RETURN(str, RL_STR_OPEN, RL_OPEN);

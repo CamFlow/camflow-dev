@@ -2245,7 +2245,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_CONNECT, cprov, tprov, iprov, NULL, 0);
+	rc = generates(RL_CONNECT_UNIX_STREAM, cprov, tprov, iprov, NULL, 0);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
