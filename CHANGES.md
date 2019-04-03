@@ -45,6 +45,7 @@
 
 ### v0.5.4
 ```
+- Ensure inode_setxattr does not generate provenance.
 - Ensure inode_getsecurity does not generate provenance.
 - Associate task_id with relations.
 - Internal refactoring.

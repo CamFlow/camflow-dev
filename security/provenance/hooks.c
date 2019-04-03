@@ -765,7 +765,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 	if (strcmp(name, XATTR_NAME_PROVENANCE) == 0) { // Provenance xattr
 		if (size != sizeof(union prov_elt))
 			return -ENOMEM;
-		prov = get_dentry_provenance(dentry, true);
+		prov = get_dentry_provenance(dentry, false);
 		setting = (union prov_elt *)value;
 
 		if (provenance_is_tracked(setting))
