@@ -45,6 +45,7 @@
 
 ### v0.5.4
 ```
+- Ensure inode_getsecurity does not generate provenance.
 - Associate task_id with relations.
 - Internal refactoring.
 - Split uapi/linux/provenance.h between uapi/linux/provenance.h, uapi/linux/provenance_fs.h, uapi/linux/provenance_utils.h

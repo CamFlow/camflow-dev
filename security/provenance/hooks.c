@@ -946,7 +946,7 @@ static int provenance_inode_getsecurity(struct inode *inode,
 					void **buffer,
 					bool alloc)
 {
-	struct provenance *iprov = get_inode_provenance(inode, true);
+	struct provenance *iprov = get_inode_provenance(inode, false);
 
 	if (unlikely(!iprov))
 		return -ENOMEM;
