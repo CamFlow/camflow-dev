@@ -1772,7 +1772,7 @@ static int provenance_sk_alloc_security(struct sock *sk,
 					int family,
 					gfp_t priority)
 {
-	struct provenance *skprov = get_cred_provenance();
+	struct provenance *skprov = current_provenance();
 
 	if (!skprov)
 		return -ENOMEM;
