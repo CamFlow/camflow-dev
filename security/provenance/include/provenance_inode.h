@@ -199,7 +199,6 @@ static inline void refresh_inode_provenance(struct inode *inode,
 {
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
 	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
 	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
@@ -288,8 +287,10 @@ static inline struct provenance *get_inode_provenance(struct inode *inode, bool 
 	might_sleep_if(may_sleep);
 	if (!provenance_is_initialized(prov_elt(iprov)) && may_sleep)
 		inode_init_provenance(inode, NULL, iprov);
-	if (may_sleep)
+	if (may_sleep) {
 		refresh_inode_provenance(inode, iprov);
+		record_inode_name(inode, iprov);
+	}
 	return iprov;
 }
 
