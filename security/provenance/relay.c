@@ -80,7 +80,9 @@ void prov_flush(void)
 		if (tmp->nb_entry >= max_entry) {					\
 			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);		\
 			if (unlikely(!tmp->next)) {					\
-				panic("Provenance: could not allocate boot_buffer."); }	\
+				pr_warn("Provenance: could not allocate boot_buffer.");	\
+				return;							\
+			}								\
 			tmp = tmp->next;						\
 		}									\
 		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));		\
@@ -347,8 +349,8 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
 	BUG_ON(!prov_type_is_long(prov_type(msg)));
 
 	prov_jiffies(msg) = get_jiffies_64();
-	if (unlikely(!relay_ready))
-		insert_long_boot_buffer(msg, long_boot_buffer);
+	if (unlikely(!relay_ready));
+	// insert_long_boot_buffer(msg, long_boot_buffer);
 	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
