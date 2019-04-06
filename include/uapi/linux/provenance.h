@@ -31,7 +31,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "59ede260b95b33298127bc672f0a49bff44bb5da"
+#define CAMFLOW_COMMIT "9e4c5a0dd6d400f59bd3aeaa6104ddcba1e1b67b"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -130,7 +130,7 @@ union prov_identifier {
 
 
 
-#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES];
+#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]; void *next
 #define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {

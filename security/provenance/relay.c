@@ -70,32 +70,6 @@ void prov_flush(void)
 	}
 }
 
-#define declare_insert_buffer_fcn(fcn_name, msg_type, buffer_type, max_entry)		\
-	static __always_inline void fcn_name(msg_type * msg, buffer_type * buf)		\
-	{										\
-		buffer_type *tmp = buf;							\
-		while (tmp->next != NULL) {						\
-			tmp = tmp->next;						\
-		}									\
-		if (tmp->nb_entry >= max_entry) {					\
-			tmp->next = kzalloc(sizeof(buffer_type), GFP_ATOMIC);		\
-			if (unlikely(!tmp->next)) {					\
-				panic("Provenance: could not allocate boot_buffer."); }	\
-			tmp = tmp->next;						\
-		}									\
-		memcpy(&(tmp->buffer[tmp->nb_entry]), msg, sizeof(msg_type));		\
-		tmp->nb_entry++;							\
-	}										\
-
-declare_insert_buffer_fcn(insert_boot_buffer,
-			  union prov_elt,
-			  struct prov_boot_buffer,
-			  PROV_INITIAL_BUFF_SIZE);
-declare_insert_buffer_fcn(insert_long_boot_buffer,
-			  union long_prov_elt,
-			  struct prov_long_boot_buffer,
-			  PROV_INITIAL_LONG_BUFF_SIZE);
-
 /* Global variables: variable declarations in provenance.h */
 static struct rchan *prov_chan;
 static struct rchan *long_prov_chan;
@@ -148,70 +122,61 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file = remove_buf_file_handler,
 };
 
+extern union prov_elt *buffer_head;
+extern union long_prov_elt *long_buffer_head;
+
 static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 {
-	int i;
 	int cpu;
-	struct prov_boot_buffer *tmp;
-	struct prov_boot_buffer *buf = _buf;
+	union prov_elt *tmp = buffer_head;
 
 	msleep(1000);
 	pr_info("Provenance: async boot buffer task %llu running...", cookie);
 
-	while (buf != NULL) {
-		if (buf->nb_entry > 0) {
-			cpu = get_cpu();
-			for (i = 0; i < buf->nb_entry; i++) {
-				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
-				if (prov_is_relation(&(buf->buffer[i]))) {
-					tighten_identifier(&(buf->buffer[i].relation_info.snd));
-					tighten_identifier(&(buf->buffer[i].relation_info.rcv));
-				}
-				if (is_relay_full(prov_chan, cpu)) {
-					// we try again later
-					cookie = async_schedule(__async_handle_boot_buffer, buf);
-					pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
-					return;
-				} else
-					relay_write(prov_chan, &buf->buffer[i], sizeof(union prov_elt));
-			}
+	while (tmp != NULL) {
+		cpu = get_cpu();
+		if (is_relay_full(prov_chan, cpu)) {
+			cookie = async_schedule(__async_handle_boot_buffer, NULL);
+			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 			put_cpu();
+			return;
 		}
-		tmp = buf;
-		buf = buf->next;
-		kfree(tmp);
+		put_cpu();
+		tighten_identifier(&get_prov_identifier(tmp));
+		if (prov_is_relation(tmp)) {
+			tighten_identifier(&(tmp->relation_info.snd));
+			tighten_identifier(&(tmp->relation_info.rcv));
+		}
+		relay_write(prov_chan, tmp, sizeof(union prov_elt));
+		buffer_head = tmp->msg_info.next;
+		kmem_cache_free(provenance_cache, tmp);
+		tmp = buffer_head;
 	}
 	pr_info("Provenance: finished task %llu.", cookie);
 }
 
 static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 {
-	int i;
 	int cpu;
-	struct prov_long_boot_buffer *tmp;
-	struct prov_long_boot_buffer *buf = _buf;
+	union long_prov_elt *tmp = long_buffer_head;
 
 	msleep(1000);
-	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
+	pr_info("Provenance: async boot buffer task %llu running...", cookie);
 
-	while (buf != NULL) {
-		if (buf->nb_entry > 0) {
-			cpu = get_cpu();
-			for (i = 0; i < buf->nb_entry; i++) {
-				tighten_identifier(&get_prov_identifier(&(buf->buffer[i])));
-				if (is_relay_full(long_prov_chan, cpu)) {
-					// we try again later
-					cookie = async_schedule(__async_handle_long_boot_buffer, buf);
-					pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
-					return;
-				} else
-					relay_write(long_prov_chan, &buf->buffer[i], sizeof(union long_prov_elt));
-			}
+	while (tmp != NULL) {
+		cpu = get_cpu();
+		if (is_relay_full(prov_chan, cpu)) {
+			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
+			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 			put_cpu();
+			return;
 		}
-		tmp = buf;
-		buf = buf->next;
-		kfree(tmp);
+		put_cpu();
+		tighten_identifier(&get_prov_identifier(tmp));
+		relay_write(long_prov_chan, tmp, sizeof(union long_prov_elt));
+		long_buffer_head = tmp->msg_info.next;
+		kmem_cache_free(long_provenance_cache, tmp);
+		tmp = long_buffer_head;
 	}
 	pr_info("Provenance: finished task %llu.", cookie);
 }
@@ -231,28 +196,22 @@ extern union long_prov_elt *prov_machine;
 void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
-	struct prov_boot_buffer *tmp;
-	struct prov_long_boot_buffer *ltmp;
 	async_cookie_t cookie;
 
 	if (prov_machine_id == 0 || prov_boot_id == 0 || !relay_initialized)
 		return;
 
 	relay_ready = true;
-	tmp = boot_buffer;
-	boot_buffer = NULL;
-	ltmp = long_boot_buffer;
-	long_boot_buffer = NULL;
 
 	refresh_prov_machine();
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
 	// asynchronously empty the buffer
-	cookie = async_schedule(__async_handle_boot_buffer, tmp);
+	cookie = async_schedule(__async_handle_boot_buffer, NULL);
 	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
 	// asynchronously empty the buffer
-	cookie = async_schedule(__async_handle_long_boot_buffer, ltmp);
+	cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
 	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 }
 
@@ -301,6 +260,16 @@ out:
 	return rc;
 }
 
+
+static void insert_boot_buffer(union prov_elt *msg)
+{
+	union prov_elt *tmp = kmem_cache_alloc(provenance_cache, GFP_ATOMIC);
+
+	memcpy(tmp, msg, sizeof(union prov_elt));
+	tmp->msg_info.next = buffer_head;
+	buffer_head = tmp;
+}
+
 /*!
  * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
  *
@@ -323,13 +292,22 @@ void prov_write(union prov_elt *msg, size_t size)
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready))
-		insert_boot_buffer(msg, boot_buffer);
+		insert_boot_buffer(msg);
 	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->prov, msg, size);
 		}
 	}
+}
+
+static void insert_long_boot_buffer(union long_prov_elt *msg)
+{
+	union long_prov_elt *tmp = kmem_cache_alloc(long_provenance_cache, GFP_ATOMIC);
+
+	memcpy(tmp, msg, sizeof(union long_prov_elt));
+	tmp->msg_info.next = long_buffer_head;
+	long_buffer_head = tmp;
 }
 
 /*!
@@ -348,7 +326,7 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
 
 	prov_jiffies(msg) = get_jiffies_64();
 	if (unlikely(!relay_ready))
-		insert_long_boot_buffer(msg, long_boot_buffer);
+		insert_long_boot_buffer(msg);
 	else {
 		prov_policy.prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
