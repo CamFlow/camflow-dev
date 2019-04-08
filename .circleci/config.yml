@@ -42,6 +42,23 @@ jobs:
           key: v1-doc-docs-{{ .Environment.CIRCLE_SHA1 }}
           paths:
             - ~/circulate/docs
+  config:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - restore_cache:
+          keys:
+            - v1-prepare-{{ .Environment.CIRCLE_SHA1 }}
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'make config_travis'
+      - save_cache:
+          key: v1-config-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/circulate/build/linux-stable/.config
   sparse:
     docker:
       - image: moul/kernel-builder:latest
@@ -50,6 +67,7 @@ jobs:
       - restore_cache:
           keys:
             - v1-prepare-{{ .Environment.CIRCLE_SHA1 }}
+            - v1-config-{{ .Environment.CIRCLE_SHA1 }}
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
@@ -65,6 +83,9 @@ workflows:
       - doc:
           requires:
             - checkout
+      - config:
+          requires:
+            checkout
       - sparse:
           requires:
-            - checkout
+            - config
