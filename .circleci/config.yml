@@ -57,6 +57,8 @@ jobs:
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
+      - run: cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
+    	- run: cd .build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config
       - run: 'make sparse'
       - run: 'cat ./test/sparse.txt'
 workflows:
