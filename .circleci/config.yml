@@ -38,8 +38,8 @@ workflows:
     jobs:
       - checkout
       - build:
-        requires:
-          - checkout
+          requires:
+            - checkout
       - test:
-        requires:
-          - checkout
+          requires:
+            - checkout
