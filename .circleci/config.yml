@@ -62,6 +62,26 @@ jobs:
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/circulate/test/sparse.txt'
       - run: 'cat ./test/sparse.txt'
+  flawfinder:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - restore_cache:
+          keys:
+            - v1-prepare-{{ .Environment.CIRCLE_SHA1 }}
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y sparse'
+      - run: 'apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'mkdir -p test'
+      - run: 'cd ./build/linux-stable && flawfinder ./security/provenance > ~/circulate/test/flawfinder.txt'
+      - run: 'cat ./test/flawfinder.txt'
 workflows:
   version: 2
   build-and-deploy:
