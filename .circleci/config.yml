@@ -85,7 +85,7 @@ workflows:
             - checkout
       - config:
           requires:
-            checkout
+            - checkout
       - sparse:
           requires:
             - config
