@@ -36,10 +36,10 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
-      - prepare
+      - checkout
       - build:
         requires:
-          prepare
+          checkout
       - test:
         requires:
-          prepare
+          checkout
