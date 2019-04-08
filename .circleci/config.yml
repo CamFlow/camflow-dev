@@ -9,76 +9,19 @@ jobs:
       - TARGET_BRANCH: dev
     steps:
       - checkout
-      - run:
-          name: update
-          command: 'apt-get update -qq'
-      - run:
-          name: sudo
-          command: 'apt-get install -y sudo'
-      - run:
-          name: dependencies
-          command: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run:
-          name: reinstall-make
-          command: 'apt-get install --reinstall make'
-      - run:
-          name: prepare-analysis
-          command: 'cd ./scripts && make prepare'
-      - run:
-          name: prepare-kernel
-          command: 'make prepare_kernel'
-      - run:
-          name: config
-          command: 'cd ./scripts && make config'
-      - run:
-          name: compile
-          command: 'cd ./scripts && make compile'
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'cd ./scripts && make prepare'
+      - run: 'make prepare_kernel'
+      - run: 'cd ./scripts && make config'
+      - run: 'cd ./scripts && make compile'
           no_output_timeout: '30m'
-      - run:
-          name: analyse
-          command: 'cd ./scripts && make run'
-      - run:
-          name: syslist
-          command: 'cd ./scripts && cat syslist.txt'
-      - run:
-          name: syshooks
-          command: 'cd ./scripts && cat syshooks.txt'
-      - run:
-          name: docs
-          command: 'make doc'
-      - deploy:
-          name: Deploy
-          command: |
-            if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
-              git config --global user.email $GH_EMAIL
-              git config --global user.name $GH_NAME
-              git status
-              ls -l ./docs/img
-              ls -l ./docs/dot
-              mkdir -p output
-              cd output
-              echo "Cloning..."
-              git clone https://github.com/camflow/camflow-dev
-              cd camflow-dev
-              git checkout $TARGET_BRANCH
-              echo "Copying..."
-              rsync -r ../../docs/ ./docs
-              rsync -r ../../scripts/ ./scripts
-              echo "Check files are there"
-              ls -l ./docs/img
-              ls -l ./docs/dot
-              git status
-              git add .
-              git status
-              # is there any change
-              if ! git diff-index --exit-code --quiet HEAD; then
-                echo 'Committing...'
-                git commit -a -m "[ci skip] CircleCI automated documentation generation and code formatting, based on commit ${CIRCLE_SHA1}"
-                git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git $TARGET_BRANCH
-              else
-                echo 'Nothing to commit.'
-              fi
-            fi
+      - run: 'cd ./scripts && make run'
+      - run: 'cd ./scripts && cat syslist.txt'
+      - run: 'cd ./scripts && cat syshooks.txt'
+      - run: 'make doc'
   test:
     docker:
       - image: moul/kernel-builder:latest
@@ -88,24 +31,12 @@ jobs:
       - TARGET_BRANCH: dev
     steps:
       - checkout
-      - run:
-          name: update
-          command: 'apt-get update -qq'
-      - run:
-          name: sudo
-          command: 'apt-get install -y sudo'
-      - run:
-          name: dependencies
-          command: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run:
-          name: reinstall-make
-          command: 'apt-get install --reinstall make'
-      - run:
-          name: prepare-kernel
-          command: 'make prepare_kernel'
-      - run:
-          name: test
-          command: 'echo 1'
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'make prepare_kernel'
+      - run: 'echo 1'
 workflows:
   version: 2
   myjob:
