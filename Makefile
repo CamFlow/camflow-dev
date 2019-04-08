@@ -189,7 +189,7 @@ delete:
 sparse:
 	@echo "Running sparse, result in test/sparse.txt"
 	mkdir -p test
-	cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ > ../../test/sparse.txt
+	cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ &> ../../test/sparse.txt
 
 checkpatch:
 	@echo "Running checkpatch, result in ./test/checkpatch.txt"
