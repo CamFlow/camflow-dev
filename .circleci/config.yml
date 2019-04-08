@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
@@ -106,3 +106,8 @@ jobs:
       - run:
           name: test
           command: 'echo 1'
+workflows:
+  version: 2
+  myjob:
+    - build
+    - test
