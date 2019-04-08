@@ -194,15 +194,15 @@ sparse:
 checkpatch:
 	@echo "Running checkpatch, result in ./test/checkpatch.txt"
 	mkdir -p test
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c > ./test/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> ./test/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> ./test/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> ./test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c > ../../test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> ../../test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> ../../test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> ../../test/checkpatch.txt
 
 flawfinder:
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
 	mkdir -p test
-	-cd ./build/linux-stable && flawfinder ./security/provenance > ./test/flawfinder.txt
+	-cd ./build/linux-stable && flawfinder ./security/provenance > ../../test/flawfinder.txt
 
 test: copy_change sparse checkpatch flawfinder
 	@echo "Running smatch..."
