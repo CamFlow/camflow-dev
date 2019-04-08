@@ -54,7 +54,8 @@ jobs:
       - run: 'apt-get install -y sudo'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
-
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
       - save_cache:
           key: v1-config-{{ .Environment.CIRCLE_SHA1 }}
           paths:
