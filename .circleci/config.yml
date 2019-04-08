@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  modelling:
+  build:
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
@@ -79,3 +79,30 @@ jobs:
                 echo 'Nothing to commit.'
               fi
             fi
+  test:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    environment:
+      - SOURCE_BRANCH: dev
+      - TARGET_BRANCH: dev
+    steps:
+      - checkout
+      - run:
+          name: update
+          command: 'apt-get update -qq'
+      - run:
+          name: sudo
+          command: 'apt-get install -y sudo'
+      - run:
+          name: dependencies
+          command: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run:
+          name: reinstall-make
+          command: 'apt-get install --reinstall make'
+      - run:
+          name: prepare-kernel
+          command: 'make prepare_kernel'
+      - run:
+          name: test
+          command: 'echo 1'
