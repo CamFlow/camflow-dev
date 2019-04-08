@@ -186,16 +186,25 @@ delete_us:
 delete:
 	rm -rf ./build
 
-test: copy_change
-	@echo "Running sparse, result in /tmp/sparse.txt"
-	-cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
-	@echo "Running checkpatch, result in /tmp/checkpatch.txt"
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c > /tmp/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> /tmp/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> /tmp/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
+sparse:
+	@echo "Running sparse, result in test/sparse.txt"
+	mkdir -p test
+	cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ &> ./test/sparse.txt
+
+checkpatch:
+	@echo "Running checkpatch, result in ./test/checkpatch.txt"
+	mkdir -p test
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c > ./test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> ./test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> ./test/checkpatch.txt
+	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> ./test/checkpatch.txt
+
+flawfinder:
 	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
-	-cd ./build/linux-stable && flawfinder ./security/provenance > /tmp/flawfinder.txt
+	mkdir -p test
+	-cd ./build/linux-stable && flawfinder ./security/provenance > ./test/flawfinder.txt
+
+test: copy_change sparse checkpatch flawfinder
 	@echo "Running smatch..."
 	-cd ./build/linux-stable && $(MAKE) clean
 	-cd ./build/linux-stable && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
@@ -205,6 +214,7 @@ test: copy_change
 
 run_ltp:
 	cd /opt/ltp && sudo ./runltp -R -o /tmp/ltp.txt -l /tmp/ltp.log -g /tmp/ltp.html -K /tmp/kernel -a tfjmp@seas.harvard.edu
+
 
 test_travis:
 	@echo "Running sparse..."
