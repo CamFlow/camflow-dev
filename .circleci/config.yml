@@ -93,3 +93,6 @@ workflows:
       - sparse:
           requires:
             - checkout
+      - flawfinder:
+          requires:
+            - checkout
