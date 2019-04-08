@@ -1,6 +1,6 @@
 version: 2.0
 jobs:
-  prepare:
+  checkout:
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
@@ -31,10 +31,10 @@ jobs:
       - restore_cache:
           keys:
             - v1-prepare-{{ .Environment.CIRCLE_SHA1 }}
-      - run: 'echo 1'
+      - run: 'echo 2'
 workflows:
   version: 2
-  build_and_test:
+  build-and-deploy:
     jobs:
       - prepare
       - build:
