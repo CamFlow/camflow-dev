@@ -57,9 +57,10 @@ jobs:
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
-      - run: cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
-      - run: cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config
-      - run: 'make sparse'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'mkdir -p test'
+      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/circulate/test/sparse.txt'
       - run: 'cat ./test/sparse.txt'
 workflows:
   version: 2
