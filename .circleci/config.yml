@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  modelling:
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
