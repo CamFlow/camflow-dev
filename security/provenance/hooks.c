@@ -2547,8 +2547,8 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 struct kmem_cache *provenance_cache __ro_after_init;
 struct kmem_cache *long_provenance_cache __ro_after_init;
 
-struct prov_boot_buffer *boot_buffer;
-struct prov_long_boot_buffer *long_boot_buffer;
+union prov_elt *buffer_head;
+union long_prov_elt *long_buffer_head;
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
@@ -2608,12 +2608,8 @@ void __init provenance_add_hooks(void)
 						  0, SLAB_PANIC, NULL);
 	if (unlikely(!long_provenance_cache))
 		panic("Provenance: could not allocate long_provenance_cache.");
-	boot_buffer = kzalloc(sizeof(struct prov_boot_buffer), GFP_KERNEL);     // Initalize boot buffer to record provenance before relayfs is ready.
-	if (unlikely(!boot_buffer))
-		panic("Provenance: could not allocate boot_buffer.");
-	long_boot_buffer = kzalloc(sizeof(struct prov_long_boot_buffer), GFP_KERNEL);
-	if (unlikely(!long_boot_buffer))
-		panic("Provenance: could not allocate long_boot_buffer.");
+	buffer_head = NULL;
+	long_buffer_head = NULL;
 
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 	prov_queue = alloc_workqueue("prov_queue", 0, 0);

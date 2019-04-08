@@ -33,21 +33,7 @@ void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
 extern bool relay_ready;
-
-struct prov_boot_buffer {
-	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];
-	uint32_t nb_entry;
-	struct prov_boot_buffer *next;
-};
-extern struct prov_boot_buffer *boot_buffer;
 void prov_write(union prov_elt *msg, size_t size);
-
-struct prov_long_boot_buffer {
-	union long_prov_elt buffer[PROV_INITIAL_LONG_BUFF_SIZE];
-	uint32_t nb_entry;
-	struct prov_long_boot_buffer *next;
-};
-extern struct prov_long_boot_buffer *long_boot_buffer;
 void long_prov_write(union long_prov_elt *msg, size_t size);
 
 static __always_inline void tighten_identifier(union prov_identifier *id)
