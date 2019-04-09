@@ -138,7 +138,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && sed -i '/options = --use-gitgrep/d' .cocciconfig'
+      - run: 'cd ./build/linux-stable && sed -i "/options = --use-gitgrep/d" .cocciconfig'
       - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance'
 workflows:
   version: 2
