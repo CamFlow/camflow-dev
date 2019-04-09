@@ -80,7 +80,7 @@ bool is_relay_full(struct rchan *chan, int cpu)
 {
 	int ret;
 	int rc = 0;
-	struct rchan_buf* __percpu buf = *per_cpu_ptr(chan->buf, cpu);
+	struct rchan_buf __percpu *buf = *per_cpu_ptr(chan->buf, cpu);
 
 	if (buf) {
 		ret = relay_buf_full(buf);
