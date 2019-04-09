@@ -975,8 +975,10 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 
 #define prov_create_file(name, perm, fun_ptr)				      \
-	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
-	provenance_mark_as_opaque_dentry(dentry)
+	do {
+		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
+		provenance_mark_as_opaque_dentry(dentry); \
+	} while(0)
 
 static int __init init_prov_fs(void)
 {
