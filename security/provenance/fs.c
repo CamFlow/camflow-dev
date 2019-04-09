@@ -780,15 +780,17 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
 #define hash_filters(filters, filters_type, tmp, tmp_type)					 \
-	list_for_each_safe(listentry, listtmp, &filters) {					 \
-		tmp = list_entry(listentry, struct filters_type, list);				 \
-		rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
-		if (rc) {									 \
-			pr_err("Provenance: error updating hash.");				 \
-			pos = -EAGAIN;								 \
-			goto out;								 \
-		}										 \
-	}
+	do { \
+		list_for_each_safe(listentry, listtmp, &filters) {					 \
+			tmp = list_entry(listentry, struct filters_type, list);				 \
+			rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
+			if (rc) {									 \
+				pr_err("Provenance: error updating hash.");				 \
+				pos = -EAGAIN;								 \
+				goto out;								 \
+			}										 \
+		} \
+	}while(0)
 
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 				     size_t count, loff_t *ppos)
