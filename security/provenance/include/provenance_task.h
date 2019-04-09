@@ -337,7 +337,7 @@ static inline struct provenance *get_cred_provenance(void)
  *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
-static inline struct provenance *get_task_provenance( bool link )
+static inline struct provenance *get_task_provenance(bool link)
 {
 	struct provenance *prov = current->provenance;
 

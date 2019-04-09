@@ -33,6 +33,11 @@ jobs:
       - run: 'cd ./scripts && make run'
       - run: 'cd ./scripts && cat syslist.txt'
       - run: 'make doc'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docs
+              - docs
   sparse:
     docker:
       - image: moul/kernel-builder:latest
