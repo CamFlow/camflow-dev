@@ -100,9 +100,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c > ~/circulate/test/checkpatch.txt'
-      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h >>  ~/circulate/test/checkpatch.txt'
-      - run: 'cat ./test/checkpatch.txt'
+      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c'
+      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h'
   smatch:
     docker:
       - image: moul/kernel-builder:latest
