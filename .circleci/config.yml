@@ -120,6 +120,26 @@ jobs:
       - run: 'cd ./build/linux-stable && make clean'
       - run: 'cd ./build/linux-stable && make security CHECK="../smatch/smatch -p=kernel" C=1 >  ~/circulate/test/smatch.txt'
       - run: 'cat ./test/smatch.txt'
+  coccinelle:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'apt-get install -y coccinelle'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'mkdir -p test'
+      - run: 'cd ./build/linux-stable && sed -i '/options = --use-gitgrep/d' .cocciconfig'
+      - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance'
 workflows:
   version: 2
   build-and-deploy:
@@ -138,5 +158,8 @@ workflows:
           requires:
             - checkout
       - smatch:
+          requires:
+            - checkout
+      - coccinelle:
           requires:
             - checkout
