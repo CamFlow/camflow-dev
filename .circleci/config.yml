@@ -186,8 +186,6 @@ jobs:
           paths:
             - test/cocci.txt
   deploy:
-    branches:
-      only: dev
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
@@ -261,6 +259,8 @@ workflows:
           requires:
             - security
       - deploy:
+          branches:
+            only: dev
           requires:
             - doc
             - sparse
