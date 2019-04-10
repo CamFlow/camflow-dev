@@ -1,0 +1,919 @@
+scripts/kconfig/conf  --syncconfig Kconfig
+  SYSTBL  arch/x86/include/generated/asm/syscalls_32.h
+  SYSHDR  arch/x86/include/generated/asm/unistd_32_ia32.h
+  SYSHDR  arch/x86/include/generated/asm/unistd_64_x32.h
+  SYSTBL  arch/x86/include/generated/asm/syscalls_64.h
+  HYPERCALLS arch/x86/include/generated/asm/xen-hypercalls.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_32.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_64.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_x32.h
+  HOSTCC  arch/x86/tools/relocs_32.o
+  HOSTCC  arch/x86/tools/relocs_64.o
+  HOSTCC  arch/x86/tools/relocs_common.o
+  HOSTLD  arch/x86/tools/relocs
+  UPD     include/config/kernel.release
+  WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
+  WRAP    arch/x86/include/generated/uapi/asm/poll.h
+  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
+  WRAP    arch/x86/include/generated/asm/early_ioremap.h
+  WRAP    arch/x86/include/generated/asm/export.h
+  WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
+  WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
+  UPD     include/generated/uapi/linux/version.h
+  UPD     include/generated/utsrelease.h
+  HOSTCC  scripts/selinux/genheaders/genheaders
+  HOSTCC  scripts/selinux/mdp/mdp
+  HOSTCC  scripts/bin2c
+  HOSTCC  scripts/kallsyms
+  HOSTCC  scripts/pnmtologo
+  HOSTCC  scripts/conmakehash
+  HOSTCC  scripts/recordmcount
+  HOSTCC  scripts/sortextable
+  HOSTCC  scripts/asn1_compiler
+  HOSTCC  scripts/sign-file
+  HOSTCC  scripts/extract-cert
+  CHECK   scripts/mod/empty.c
+  CC      scripts/mod/empty.o
+  HOSTCC  scripts/mod/mk_elfconfig
+  MKELF   scripts/mod/elfconfig.h
+  HOSTCC  scripts/mod/modpost.o
+  CC      scripts/mod/devicetable-offsets.s
+  UPD     scripts/mod/devicetable-offsets.h
+  HOSTCC  scripts/mod/file2alias.o
+  HOSTCC  scripts/mod/sumversion.o
+  HOSTLD  scripts/mod/modpost
+  CC      kernel/bounds.s
+  UPD     include/generated/bounds.h
+  UPD     include/generated/timeconst.h
+  CC      arch/x86/kernel/asm-offsets.s
+  UPD     include/generated/asm-offsets.h
+  CALL    scripts/checksyscalls.sh
+  DESCEND  objtool
+  HOSTCC   /root/circulate/build/linux-stable/tools/objtool/fixdep.o
+  HOSTLD   /root/circulate/build/linux-stable/tools/objtool/fixdep-in.o
+  LINK     /root/circulate/build/linux-stable/tools/objtool/fixdep
+  CC       /root/circulate/build/linux-stable/tools/objtool/exec-cmd.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/help.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/pager.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/parse-options.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/run-command.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/sigchain.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/subcmd-config.o
+  LD       /root/circulate/build/linux-stable/tools/objtool/libsubcmd-in.o
+  AR       /root/circulate/build/linux-stable/tools/objtool/libsubcmd.a
+  GEN      /root/circulate/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
+  CC       /root/circulate/build/linux-stable/tools/objtool/arch/x86/decode.o
+  LD       /root/circulate/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/builtin-check.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/builtin-orc.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/check.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/orc_gen.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/orc_dump.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/elf.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/special.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/objtool.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/libstring.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
+  LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
+  LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
+  CHECK   security/provenance/relay.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/init.h:122:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:160:8: error: too many errors
+  CC      security/provenance/relay.o
+  CHECK   security/provenance/hooks.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:167:8: error: too many errors
+  CC      security/provenance/hooks.o
+  CHECK   security/provenance/query.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:167:8: error: too many errors
+  CC      security/provenance/query.o
+  CHECK   security/provenance/fs.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:167:8: error: too many errors
+  CC      security/provenance/fs.o
+  CHECK   security/provenance/netfilter.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/cmpxchg_64.h:5:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:25:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:41:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:67:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:108:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:123:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:137:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:152:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:165:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:177:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:182:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:192:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:198:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:203:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:216:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:225:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:233:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic.h:250:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:20:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:32:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:74:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:86:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:100:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:116:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:130:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:145:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:158:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:163:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:173:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:178:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:184:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:189:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:194:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:211:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:219:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:228:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/atomic64_64.h:236:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:19:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:25:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:31:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:37:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:49:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:55:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:69:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:79:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:107:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:116:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:125:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:141:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:147:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:153:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:159:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:165:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:171:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:177:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:189:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:195:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:257:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:266:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:275:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:284:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:291:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:303:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:309:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:315:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:321:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:327:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:333:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:339:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:345:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:351:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:357:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:363:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:369:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:377:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:386:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:395:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/atomic-instrumented.h:404:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/atomic.h:573:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/atomic.h:595:8: error: too many errors
+  CC      security/provenance/netfilter.o
+  CHECK   security/provenance/propagate.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:167:8: error: too many errors
+  CC      security/provenance/propagate.o
+  CHECK   security/provenance/type.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/uapi/linux/provenance_types.h:213:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/provenance_types.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/provenance_types.h:246:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: too many errors
+  CC      security/provenance/type.o
+  CHECK   security/provenance/machine.c
+./arch/x86/include/asm/nospec-branch.h:146:38: warning: Unknown escape '@'
+./include/linux/compiler.h:190:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:208:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:214:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/barrier.h:36:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:9:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/kasan-checks.h:11:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:271:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/compiler.h:302:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:95:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:110:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:132:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:138:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:183:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:197:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:218:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:245:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:264:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:297:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:317:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:322:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:328:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:360:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:374:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:388:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:410:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:451:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/bitops.h:493:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/sched.h:13:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:17:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:28:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:33:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/asm/arch_hweight.h:45:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:8:8: error: attribute '__gnu_inline__': unknown attribute
+./arch/x86/include/uapi/asm/swab.h:15:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:47:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:65:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:87:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:161:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:174:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:187:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:202:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:217:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:230:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:242:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:255:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:270:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/swab.h:285:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:44:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:48:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:52:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:56:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:60:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:64:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:72:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:76:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:80:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:84:8: error: attribute '__gnu_inline__': unknown attribute
+./include/uapi/linux/byteorder/little_endian.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:144:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:149:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:168:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:176:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:181:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:186:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:191:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/byteorder/generic.h:199:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:12:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:18:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:24:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:53:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:58:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:63:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:68:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:73:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:78:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:83:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:88:8: error: attribute '__gnu_inline__': unknown attribute
+./include/asm-generic/bitops/le.h:93:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:43:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:51:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:61:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:71:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:81:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:91:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:101:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:111:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:121:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:131:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:143:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:154:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:160:8: error: attribute '__gnu_inline__': unknown attribute
+./include/linux/bitops.h:167:8: error: too many errors
+  CC      security/provenance/machine.o
+  AR      security/provenance/built-in.a
