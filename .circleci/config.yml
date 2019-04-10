@@ -186,12 +186,11 @@ jobs:
           paths:
             - test/cocci.txt
   deploy:
+    branches:
+      only: dev
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
-    branches:
-      only:
-        - dev
     steps:
       - checkout
       - attach_workspace:
