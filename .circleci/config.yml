@@ -75,6 +75,10 @@ jobs:
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/circulate/test/sparse.txt'
       - run: 'cat ./test/sparse.txt'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/sparse.txt
   flawfinder:
     docker:
       - image: moul/kernel-builder:latest
@@ -95,6 +99,10 @@ jobs:
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && flawfinder ./security/provenance > ~/circulate/test/flawfinder.txt'
       - run: 'cat ./test/flawfinder.txt'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/flawfinder.txt
   checkpatch:
     docker:
       - image: moul/kernel-builder:latest
@@ -116,6 +124,11 @@ jobs:
       - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/include/*.h > ~/circulate/test/headers_checkpatch.txt || true'
       - run: 'cat ./test/checkpatch.txt'
       - run: 'cat ./test/headers_checkpatch.txt'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/checkpatch.txt
+            - test/headers_checkpatch.txt
   smatch:
     docker:
       - image: moul/kernel-builder:latest
@@ -137,6 +150,10 @@ jobs:
       - run: 'cd ./build/linux-stable && make clean'
       - run: 'cd ./build/linux-stable && make security CHECK="../smatch/smatch -p=kernel" C=1 >  ~/circulate/test/smatch.txt'
       - run: 'cat ./test/smatch.txt'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/smatch.txt
   coccinelle:
     docker:
       - image: moul/kernel-builder:latest
@@ -159,6 +176,10 @@ jobs:
       - run: 'cd ./build/linux-stable && sed -i "/options = --use-gitgrep/d" .cocciconfig'
       - run: 'cd ./build/linux-stable && make coccicheck MODE=report DEBUG_FILE=../../test/cocci.txt M=security/provenance || true'
       - run: 'cat ./test/cocci.txt'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/cocci.txt
 workflows:
   version: 2
   build-and-deploy:
