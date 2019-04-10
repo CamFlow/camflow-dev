@@ -461,14 +461,9 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = kzalloc(sizeof(struct prov_process_config), GFP_KERNEL);
-	if (!msg)
-		return -ENOMEM;
-
-	if (copy_from_user(msg, buf, sizeof(struct prov_process_config))) {
-		rtn = -ENOMEM;
-		goto out;
-	}
+	msg = memdup_user(buf, sizeof(struct prov_process_config));
+	if (IS_ERR(msg))
+		return PTR_ERR(msg);
 
 	prov = prov_from_vpid(msg->vpid);
 	if (!prov) {
@@ -564,14 +559,9 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
 
-	data = kzalloc(sizeof(struct secinfo), GFP_KERNEL);
-	if (!data)
-		return -ENOMEM;
-
-	if (copy_from_user(data, buf, sizeof(struct secinfo))) {
-		rtn = -EAGAIN;
-		goto dealloc;
-	}
+	data = memdup_user(buf, sizeof(struct secinfo));
+	if (IS_ERR(data))
+		return PTR_ERR(data);
 	// in case US does not check returned value
 	data->secctx[0] = '\0';
 	data->len = 0;
@@ -589,7 +579,6 @@ out:
 	security_release_secctx(ctx, len); // security module dealloc
 	if (copy_to_user(buf, data, sizeof(struct secinfo)))
 		rtn = -EAGAIN;
-dealloc:
 	kfree(data);
 	return rtn;
 }
@@ -946,14 +935,11 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 
 	if (count <= 0 || count > PATH_MAX)
 		return -ENOMEM;
-	buffer = kzalloc(count, GFP_KERNEL);
-	if (!buffer)
-		return -ENOMEM;
 
-	if (copy_from_user(buffer, buf, count)) {
-		rtn = -ENOMEM;
-		goto out;
-	}
+	buffer = memdup_user(buf, count);
+	if (IS_ERR(buffer))
+		return PTR_ERR(buffer);
+
 	if (strlen(buffer) > count) {
 		rtn = -ENOMEM;
 		goto out;
