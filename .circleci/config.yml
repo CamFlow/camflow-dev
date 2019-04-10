@@ -185,7 +185,7 @@ jobs:
           root: .
           paths:
             - test/cocci.txt
-  deploy:
+  deploy_dev:
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
@@ -210,7 +210,7 @@ jobs:
             echo "Cloning..."
             git clone https://github.com/camflow/camflow-dev
             cd camflow-dev
-            git checkout $TARGET_BRANCH
+            git checkout dev
             echo "Copying..."
             mkdir -p docs
             mkdir -p scripts
@@ -228,7 +228,7 @@ jobs:
             if ! git diff-index --exit-code --quiet HEAD; then
               echo 'Committing...'
               git commit -a -m "[ci skip] CircleCI automated documentation generation and testing, based on commit ${CIRCLE_SHA1}"
-              git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git $TARGET_BRANCH
+              git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git dev
             else
               echo 'Nothing to commit.'
             fi
@@ -258,7 +258,7 @@ workflows:
       - coccinelle:
           requires:
             - security
-      - deploy:
+      - deploy_dev:
           filters:
             branches:
               only:
