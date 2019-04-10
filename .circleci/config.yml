@@ -180,18 +180,18 @@ jobs:
           root: .
           paths:
             - test/cocci.txt
-deploy:
-  docker:
-    - image: moul/kernel-builder:latest
-  working_directory: ~/circulate
-  steps:
-    - checkout
-    - attach_workspace:
-        at: ~/circulate
-    - run: 'apt-get update -qq'
-    - run: 'apt-get install -y sudo'
-    - run: 'apt-get install -y git'
-    - run: 'cd test && ls'
+  deploy:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y git'
+      - run: 'cd test && ls'
 workflows:
   version: 2
   build-and-deploy:
