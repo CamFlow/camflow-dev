@@ -189,6 +189,9 @@ jobs:
     docker:
       - image: moul/kernel-builder:latest
     working_directory: ~/circulate
+    branches:
+      only:
+        - dev
     steps:
       - checkout
       - attach_workspace:
@@ -200,39 +203,37 @@ jobs:
       - deploy:
           name: Deploy
           command: |
-            if [ "$CIRCLE_BRANCH" == "$SOURCE_BRANCH" ]; then
-              git config --global user.email $GH_EMAIL
-              git config --global user.name $GH_NAME
-              git status
-              ls -l ./docs/img
-              ls -l ./docs/dot
-              mkdir -p output
-              cd output
-              echo "Cloning..."
-              git clone https://github.com/camflow/camflow-dev
-              cd camflow-dev
-              git checkout $TARGET_BRANCH
-              echo "Copying..."
-              mkdir -p docs
-              mkdir -p scripts
-              mkdir -p test
-              rsync -r ../../docs/ ./docs
-              rsync -r ../../scripts/ ./scripts
-              rsync -r ../../test/ ./test
-              echo "Check files are there"
-              ls -l ./docs/img
-              ls -l ./docs/dot
-              git status
-              git add .
-              git status
-              # is there any change
-              if ! git diff-index --exit-code --quiet HEAD; then
-                echo 'Committing...'
-                git commit -a -m "[ci skip] CircleCI automated documentation generation and testing, based on commit ${CIRCLE_SHA1}"
-                git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git $TARGET_BRANCH
-              else
-                echo 'Nothing to commit.'
-              fi
+            git config --global user.email $GH_EMAIL
+            git config --global user.name $GH_NAME
+            git status
+            ls -l ./docs/img
+            ls -l ./docs/dot
+            mkdir -p output
+            cd output
+            echo "Cloning..."
+            git clone https://github.com/camflow/camflow-dev
+            cd camflow-dev
+            git checkout $TARGET_BRANCH
+            echo "Copying..."
+            mkdir -p docs
+            mkdir -p scripts
+            mkdir -p test
+            rsync -r ../../docs/ ./docs
+            rsync -r ../../scripts/ ./scripts
+            rsync -r ../../test/ ./test
+            echo "Check files are there"
+            ls -l ./docs/img
+            ls -l ./docs/dot
+            git status
+            git add .
+            git status
+            # is there any change
+            if ! git diff-index --exit-code --quiet HEAD; then
+              echo 'Committing...'
+              git commit -a -m "[ci skip] CircleCI automated documentation generation and testing, based on commit ${CIRCLE_SHA1}"
+              git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git $TARGET_BRANCH
+            else
+              echo 'Nothing to commit.'
             fi
 workflows:
   version: 2
