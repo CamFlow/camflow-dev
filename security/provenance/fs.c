@@ -766,8 +766,8 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
-#define hash_filters(filters, filters_type, tmp, tmp_type)					 \
-	do { \
+#define hash_filters(filters, filters_type, tmp, tmp_type)						 \
+	do {												 \
 		list_for_each_safe(listentry, listtmp, &filters) {					 \
 			tmp = list_entry(listentry, struct filters_type, list);				 \
 			rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
@@ -776,8 +776,8 @@ declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 				pos = -EAGAIN;								 \
 				goto out;								 \
 			}										 \
-		} \
-	}while(0)
+		}											 \
+	} while (0)
 
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 				     size_t count, loff_t *ppos)
@@ -960,13 +960,14 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 
-#define prov_create_file(name, perm, fun_ptr)				      \
-	do { \
+#define prov_create_file(name, perm, fun_ptr)					      \
+	do {									      \
 		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
-		provenance_mark_as_opaque_dentry(dentry); \
-	} while(0)
+		provenance_mark_as_opaque_dentry(dentry);			      \
+	} while (0)
 
-static int __init init_prov_fs(void) {
+static int __init init_prov_fs(void)
+{
 	struct dentry *prov_dir;
 	struct dentry *dentry;
 

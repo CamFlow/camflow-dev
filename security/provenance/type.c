@@ -135,7 +135,7 @@ static const char ND_STR_ARG[] = "argv";                                        
 static const char ND_STR_ENV[] = "envp";                                        // environment parameter
 static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
-#define MATCH_AND_RETURN(str1, str2, v)    do{if (strcmp(str1, str2) == 0) return v;}while(0)
+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
 /* transform from relation ID to string representation */
 const char *relation_str(uint64_t type)
 {
