@@ -38,6 +38,22 @@ jobs:
           paths:
             - docs
             - scripts
+security:
+  docker:
+    - image: moul/kernel-builder:latest
+  working_directory: ~/circulate
+  steps:
+    - checkout
+    - attach_workspace:
+        at: ~/circulate
+    - run: 'apt-get update -qq'
+    - run: 'apt-get install -y sudo'
+    - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+    - run: 'apt-get install -y sparse'
+    - run: 'apt-get install --reinstall make'
+    - run: 'cp -f scripts/.config build/linux-stable/'
+    - run: 'make config_circle'
+    - run: 'make compile_security_only'
   sparse:
     docker:
       - image: moul/kernel-builder:latest
@@ -146,21 +162,24 @@ workflows:
   build-and-deploy:
     jobs:
       - checkout
+      - security:
+          requires:
+            - checkout
       - doc:
           requires:
-            - checkout
+            - security
       - sparse:
           requires:
-            - checkout
+            - security
       - flawfinder:
           requires:
-            - checkout
+            - security
       - checkpatch:
           requires:
-            - checkout
+            - security
       - smatch:
           requires:
-            - checkout
+            - security
       - coccinelle:
           requires:
-            - checkout
+            - security
