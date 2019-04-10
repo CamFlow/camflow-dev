@@ -40,6 +40,14 @@ inode -> task[fontsize = 8,label = perm_append]
 
 inode -> task[fontsize = 8,label = perm_write]
 
+packet_content[fontsize = 8,label = packet_content,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+packet[fontsize = 8,label = packet,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+packet_content -> packet[fontsize = 8,label = packet_content]
+
+packet -> inode[fontsize = 8,label = receive_packet]
+
 task -> task[fontsize = 8,label = terminate_task]
 
 }
