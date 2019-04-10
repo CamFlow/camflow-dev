@@ -179,14 +179,12 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && sed -i "/options = --use-gitgrep/d" .cocciconfig'
-      - run: 'cd ./build/linux-stable && make coccicheck MODE=context DEBUG_FILE=../../test/cocci.log M=security/provenance > ~/circulate/test/cocci.txt || true'
+      - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance > ~/circulate/test/cocci.txt || true'
       - run: 'cat ./test/cocci.txt'
-      - run: 'cat ./test/cocci.log'
       - persist_to_workspace:
           root: .
           paths:
             - test/cocci.txt
-            - test/cocci.log
   deploy:
     docker:
       - image: moul/kernel-builder:latest
