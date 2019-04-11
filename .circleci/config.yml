@@ -55,6 +55,77 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_security_only'
+  compile_default:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'make compile'
+  compile_no_flow_friendly:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_SECURITY_FLOW_FRIENDLY=y/CONFIG_SECURITY_FLOW_FRIENDLY=n/" .config'
+      - run: 'make compile'
+  compile_whole:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/# CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM is not set/CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM=y/" .config'
+      - run: 'make compile'
+  compile_persist:
+    docker:
+      - image: moul/kernel-builder:latest
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'apt-get update -qq'
+      - run: 'apt-get install -y sudo'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/# CONFIG_SECURITY_PROVENANCE_PERSISTENCE is not set/CONFIG_SECURITY_PROVENANCE_PERSISTENCE=y/" .config'
+      - run: 'make compile'
   sparse:
     docker:
       - image: moul/kernel-builder:latest
@@ -240,24 +311,54 @@ workflows:
       - security:
           requires:
             - checkout
+      - compile_default:
+          requires:
+            - security
+      - compile_no_flow_friendly:
+          requires:
+            - security
+      - compile_whole:
+          requires:
+            - security
+      - compile_persist:
+          requires:
+            - security
       - doc:
           requires:
-            - security
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
       - sparse:
           requires:
-            - security
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
       - flawfinder:
           requires:
-            - security
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
       - checkpatch:
           requires:
-            - security
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
       - smatch:
           requires:
-            - security
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
       - coccinelle:
           requires:
-            - security
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
       - deploy_dev:
           filters:
             branches:
