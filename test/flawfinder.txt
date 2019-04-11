@@ -1,24 +1,24 @@
 Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
 Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
-Examining ./security/provenance/include/provenance.h
-Examining ./security/provenance/include/provenance_relay.h
-Examining ./security/provenance/include/provenance_machine.h
-Examining ./security/provenance/include/provenance_record.h
-Examining ./security/provenance/include/provenance_net.h
-Examining ./security/provenance/include/provenance_query.h
 Examining ./security/provenance/include/provenance_ns.h
-Examining ./security/provenance/include/provenance_inode.h
-Examining ./security/provenance/include/provenance_filter.h
 Examining ./security/provenance/include/provenance_policy.h
+Examining ./security/provenance/include/provenance_machine.h
+Examining ./security/provenance/include/provenance_inode.h
 Examining ./security/provenance/include/provenance_task.h
-Examining ./security/provenance/fs.c
-Examining ./security/provenance/netfilter.c
+Examining ./security/provenance/include/provenance_filter.h
+Examining ./security/provenance/include/provenance_record.h
+Examining ./security/provenance/include/provenance_relay.h
+Examining ./security/provenance/include/provenance_query.h
+Examining ./security/provenance/include/provenance_net.h
+Examining ./security/provenance/include/provenance.h
 Examining ./security/provenance/machine.c
+Examining ./security/provenance/fs.c
+Examining ./security/provenance/type.c
+Examining ./security/provenance/netfilter.c
 Examining ./security/provenance/query.c
 Examining ./security/provenance/hooks.c
-Examining ./security/provenance/type.c
-Examining ./security/provenance/propagate.c
 Examining ./security/provenance/relay.c
+Examining ./security/provenance/propagate.c
 
 FINAL RESULTS:
 
@@ -152,7 +152,7 @@ FINAL RESULTS:
 ANALYSIS SUMMARY:
 
 Hits = 41
-Lines analyzed = 7616 in approximately 0.09 seconds (84943 lines/second)
+Lines analyzed = 7616 in approximately 0.09 seconds (83375 lines/second)
 Physical Source Lines of Code (SLOC) = 4883
 Hits@level = [0]   0 [1]  15 [2]  26 [3]   0 [4]   0 [5]   0
 Hits@level+ = [0+]  41 [1+]  41 [2+]  26 [3+]   0 [4+]   0 [5+]   0
