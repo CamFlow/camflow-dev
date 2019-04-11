@@ -201,7 +201,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 
 {
 	struct provenance *cprov = current_provenance();
-	union long_prov_elt *node = NULL;
+	union long_prov_elt *node;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -209,14 +209,10 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = kzalloc(sizeof(union long_prov_elt), GFP_KERNEL);
-	if (!node)
-		return -ENOMEM;
+	node = memdup_user(buf, sizeof(struct disc_node_struct));
+	if (IS_ERR(node))
+		return PTR_ERR(node);
 
-	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
-		count = -ENOMEM;
-		goto out;
-	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock(prov_lock(cprov));
 		// TODO redo
@@ -884,12 +880,12 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 
 	if (type_info->is_relation) {
 		if (type_info->id)
-			strncpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
+			strncpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN-1);
 		else
 			type_info->id = relation_id(type_info->str);
 	} else {
 		if (type_info->id)
-			strncpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
+			strncpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN-1);
 		else
 			type_info->id = node_id(type_info->str);
 	}
