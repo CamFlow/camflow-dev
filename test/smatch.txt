@@ -115,12 +115,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      security/integrity/digsig.o
   CHECK   security/integrity/digsig_asymmetric.c
   CC      security/integrity/digsig_asymmetric.o
-  CHECK   security/integrity/platform_certs/platform_keyring.c
-  CC      security/integrity/platform_certs/platform_keyring.o
-  CHECK   security/integrity/platform_certs/efi_parser.c
-  CC      security/integrity/platform_certs/efi_parser.o
-  CHECK   security/integrity/platform_certs/load_uefi.c
-  CC      security/integrity/platform_certs/load_uefi.o
   AR      security/integrity/built-in.a
   CHECK   security/keys/encrypted-keys/encrypted.c
   CC      security/keys/encrypted-keys/encrypted.o
