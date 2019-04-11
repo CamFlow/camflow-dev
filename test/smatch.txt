@@ -115,6 +115,12 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      security/integrity/digsig.o
   CHECK   security/integrity/digsig_asymmetric.c
   CC      security/integrity/digsig_asymmetric.o
+  CHECK   security/integrity/platform_certs/platform_keyring.c
+  CC      security/integrity/platform_certs/platform_keyring.o
+  CHECK   security/integrity/platform_certs/efi_parser.c
+  CC      security/integrity/platform_certs/efi_parser.o
+  CHECK   security/integrity/platform_certs/load_uefi.c
+  CC      security/integrity/platform_certs/load_uefi.o
   AR      security/integrity/built-in.a
   CHECK   security/keys/encrypted-keys/encrypted.c
   CC      security/keys/encrypted-keys/encrypted.o
@@ -352,7 +358,7 @@ security/provenance/hooks.c:2170 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
-security/provenance/fs.c:864 prov_read_policy_hash() warn: possible memory leak of 'buff'
+security/provenance/fs.c:860 prov_read_policy_hash() warn: possible memory leak of 'buff'
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
   CC      security/provenance/netfilter.o
