@@ -227,12 +227,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		count = -EINVAL;
 		goto out;
 	}
-
-	if (copy_to_user((void *)buf, &node, count)) {
+	if (copy_to_user((void *)buf, &node, count))
 		count = -ENOMEM;
-		goto out;
-	}
-
 out:
 	kfree(node);
 	return count;
@@ -869,6 +865,7 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 				   size_t count, loff_t *ppos)
 {
 	struct prov_type *type_info;
+	ssize_t rc = sizeof(struct prov_type);
 
 	if (count < sizeof(struct prov_type)) {
 		pr_err("Provenance: failed retrieving object id, wrong string length.");
@@ -890,8 +887,9 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 			type_info->id = node_id(type_info->str);
 	}
 	if (copy_to_user(buf, type_info, sizeof(struct prov_type)))
-		return -EAGAIN;
-	return sizeof(struct prov_type);
+		rc = -EAGAIN;
+	kfree(type_info);
+	return rc;
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 
