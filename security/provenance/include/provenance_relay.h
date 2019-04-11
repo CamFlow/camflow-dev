@@ -1,14 +1,12 @@
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_RELAY_H
 #define _PROVENANCE_RELAY_H
@@ -33,21 +31,7 @@ void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
 extern bool relay_ready;
-
-struct prov_boot_buffer {
-	union prov_elt buffer[PROV_INITIAL_BUFF_SIZE];
-	uint32_t nb_entry;
-	struct prov_boot_buffer *next;
-};
-extern struct prov_boot_buffer *boot_buffer;
 void prov_write(union prov_elt *msg, size_t size);
-
-struct prov_long_boot_buffer {
-	union long_prov_elt buffer[PROV_INITIAL_LONG_BUFF_SIZE];
-	uint32_t nb_entry;
-	struct prov_long_boot_buffer *next;
-};
-extern struct prov_long_boot_buffer *long_boot_buffer;
 void long_prov_write(union long_prov_elt *msg, size_t size);
 
 static __always_inline void tighten_identifier(union prov_identifier *id)

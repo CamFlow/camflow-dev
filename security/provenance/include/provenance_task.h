@@ -1,14 +1,12 @@
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_TASK_H
 #define _PROVENANCE_TASK_H
@@ -341,7 +339,7 @@ static inline struct provenance *get_cred_provenance(void)
  *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
-static inline struct provenance *get_task_provenance( bool link )
+static inline struct provenance *get_task_provenance(bool link)
 {
 	struct provenance *tprov = current->provenance;
 

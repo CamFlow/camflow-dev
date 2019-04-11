@@ -1,14 +1,12 @@
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #include <linux/provenance_types.h>
 #include "provenance.h"
@@ -140,7 +138,7 @@ static const char ND_STR_ARG[] = "argv";                                        
 static const char ND_STR_ENV[] = "envp";                                        // environment parameter
 static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
-#define MATCH_AND_RETURN(str1, str2, v)    if (strcmp(str1, str2) == 0) return v
+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
 /* transform from relation ID to string representation */
 const char *relation_str(uint64_t type)
 {

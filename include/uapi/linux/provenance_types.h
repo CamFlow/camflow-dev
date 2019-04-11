@@ -1,14 +1,12 @@
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _UAPI_LINUX_PROVENANCE_TYPES_H
 #define _UAPI_LINUX_PROVENANCE_TYPES_H
@@ -265,9 +263,10 @@ static inline bool prov_has_secid(uint64_t type)
 	}
 }
 
+#define PROV_TYPE_STR_MAX_LEN 256
 struct prov_type {
 	uint64_t id;
-	char str[256];
+	char str[PROV_TYPE_STR_MAX_LEN];
 	uint8_t is_relation;
 };
 

@@ -1,14 +1,12 @@
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 
 /*!
@@ -203,7 +201,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 
 {
 	struct provenance *cprov = current_provenance();
-	union long_prov_elt *node = NULL;
+	union long_prov_elt *node;
 
 	if (!capable(CAP_AUDIT_WRITE))
 		return -EPERM;
@@ -211,14 +209,10 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
-	node = kzalloc(sizeof(union long_prov_elt), GFP_KERNEL);
-	if (!node)
-		return -ENOMEM;
+	node = memdup_user(buf, sizeof(struct disc_node_struct));
+	if (IS_ERR(node))
+		return PTR_ERR(node);
 
-	if (copy_from_user(node, buf, sizeof(struct disc_node_struct))) {
-		count = -ENOMEM;
-		goto out;
-	}
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
 		spin_lock(prov_lock(cprov));
 		// TODO redo
@@ -233,12 +227,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		count = -EINVAL;
 		goto out;
 	}
-
-	if (copy_to_user((void *)buf, &node, count)) {
+	if (copy_to_user((void *)buf, &node, count))
 		count = -ENOMEM;
-		goto out;
-	}
-
 out:
 	kfree(node);
 	return count;
@@ -463,14 +453,9 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
 
-	msg = kzalloc(sizeof(struct prov_process_config), GFP_KERNEL);
-	if (!msg)
-		return -ENOMEM;
-
-	if (copy_from_user(msg, buf, sizeof(struct prov_process_config))) {
-		rtn = -ENOMEM;
-		goto out;
-	}
+	msg = memdup_user(buf, sizeof(struct prov_process_config));
+	if (IS_ERR(msg))
+		return PTR_ERR(msg);
 
 	prov = prov_from_vpid(msg->vpid);
 	if (!prov) {
@@ -566,14 +551,9 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 	if (count < sizeof(struct secinfo))
 		return -ENOMEM;
 
-	data = kzalloc(sizeof(struct secinfo), GFP_KERNEL);
-	if (!data)
-		return -ENOMEM;
-
-	if (copy_from_user(data, buf, sizeof(struct secinfo))) {
-		rtn = -EAGAIN;
-		goto dealloc;
-	}
+	data = memdup_user(buf, sizeof(struct secinfo));
+	if (IS_ERR(data))
+		return PTR_ERR(data);
 	// in case US does not check returned value
 	data->secctx[0] = '\0';
 	data->len = 0;
@@ -591,7 +571,6 @@ out:
 	security_release_secctx(ctx, len); // security module dealloc
 	if (copy_to_user(buf, data, sizeof(struct secinfo)))
 		rtn = -EAGAIN;
-dealloc:
 	kfree(data);
 	return rtn;
 }
@@ -779,16 +758,18 @@ static ssize_t prov_write_logp(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_logp_ops, prov_write_logp, no_read);
 
-#define hash_filters(filters, filters_type, tmp, tmp_type)					 \
-	list_for_each_safe(listentry, listtmp, &filters) {					 \
-		tmp = list_entry(listentry, struct filters_type, list);				 \
-		rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
-		if (rc) {									 \
-			pr_err("Provenance: error updating hash.");				 \
-			pos = -EAGAIN;								 \
-			goto out;								 \
-		}										 \
-	}
+#define hash_filters(filters, filters_type, tmp, tmp_type)						 \
+	do {												 \
+		list_for_each_safe(listentry, listtmp, &filters) {					 \
+			tmp = list_entry(listentry, struct filters_type, list);				 \
+			rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
+			if (rc) {									 \
+				pr_err("Provenance: error updating hash.");				 \
+				pos = -EAGAIN;								 \
+				goto out;								 \
+			}										 \
+		}											 \
+	} while (0)
 
 static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 				     size_t count, loff_t *ppos)
@@ -883,32 +864,32 @@ declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
 static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 				   size_t count, loff_t *ppos)
 {
-	struct prov_type type_info;
+	struct prov_type *type_info;
+	ssize_t rc = sizeof(struct prov_type);
 
 	if (count < sizeof(struct prov_type)) {
 		pr_err("Provenance: failed retrieving object id, wrong string length.");
 		return -ENOMEM;
 	}
-	if (copy_from_user(&type_info, buf, sizeof(struct prov_type))) {
-		pr_err("Provenance: failed retrieving object id, could not copy from user.");
-		return -EAGAIN;
-	}
-	if (type_info.is_relation) {
-		if (type_info.id)
-			strcpy(type_info.str, relation_str(type_info.id));
+	type_info = memdup_user(buf, sizeof(struct prov_type));
+	if (IS_ERR(type_info))
+		return PTR_ERR(type_info);
+
+	if (type_info->is_relation) {
+		if (type_info->id)
+			strncpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
 		else
-			type_info.id = relation_id(type_info.str);
+			type_info->id = relation_id(type_info->str);
 	} else {
-		if (type_info.id)
-			strcpy(type_info.str, node_str(type_info.id));
+		if (type_info->id)
+			strncpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
 		else
-			type_info.id = node_id(type_info.str);
+			type_info->id = node_id(type_info->str);
 	}
-	if (copy_to_user(buf, &type_info, sizeof(struct prov_type))) {
-		pr_err("Provenance: failed retrieving object id, could not copy to user.");
-		return -EAGAIN;
-	}
-	return sizeof(struct prov_type);
+	if (copy_to_user(buf, type_info, sizeof(struct prov_type)))
+		rc = -EAGAIN;
+	kfree(type_info);
+	return rc;
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 
@@ -946,14 +927,11 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 
 	if (count <= 0 || count > PATH_MAX)
 		return -ENOMEM;
-	buffer = kzalloc(count, GFP_KERNEL);
-	if (!buffer)
-		return -ENOMEM;
 
-	if (copy_from_user(buffer, buf, count)) {
-		rtn = -ENOMEM;
-		goto out;
-	}
+	buffer = memdup_user(buf, count);
+	if (IS_ERR(buffer))
+		return PTR_ERR(buffer);
+
 	if (strlen(buffer) > count) {
 		rtn = -ENOMEM;
 		goto out;
@@ -974,9 +952,11 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 
-#define prov_create_file(name, perm, fun_ptr)				      \
-	dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
-	provenance_mark_as_opaque_dentry(dentry)
+#define prov_create_file(name, perm, fun_ptr)					      \
+	do {									      \
+		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
+		provenance_mark_as_opaque_dentry(dentry);			      \
+	} while (0)
 
 static int __init init_prov_fs(void)
 {
