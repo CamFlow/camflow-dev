@@ -2509,7 +2509,9 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(shm_alloc_security,       provenance_shm_alloc_security),
 	LSM_HOOK_INIT(shm_free_security,        provenance_shm_free_security),
 	LSM_HOOK_INIT(shm_shmat,                provenance_shm_shmat),
+#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 	LSM_HOOK_INIT(shm_shmdt,                provenance_shm_shmdt),
+#endif
 
 	/* socket related hooks */
 	LSM_HOOK_INIT(sk_alloc_security,        provenance_sk_alloc_security),
