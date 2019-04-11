@@ -872,31 +872,29 @@ declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
 static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 				   size_t count, loff_t *ppos)
 {
-	struct prov_type type_info;
+	struct prov_type *type_info;
 
 	if (count < sizeof(struct prov_type)) {
 		pr_err("Provenance: failed retrieving object id, wrong string length.");
 		return -ENOMEM;
 	}
-	if (copy_from_user(&type_info, buf, sizeof(struct prov_type))) {
-		pr_err("Provenance: failed retrieving object id, could not copy from user.");
-		return -EAGAIN;
-	}
-	if (type_info.is_relation) {
-		if (type_info.id)
-			strcpy(type_info.str, relation_str(type_info.id));
+	type_info = memdup_user(buf, sizeof(struct prov_type));
+	if (IS_ERR(type_info))
+		return PTR_ERR(type_info);
+
+	if (type_info->is_relation) {
+		if (type_info->id)
+			strncpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
 		else
-			type_info.id = relation_id(type_info.str);
+			type_info->id = relation_id(type_info->str);
 	} else {
-		if (type_info.id)
-			strcpy(type_info.str, node_str(type_info.id));
+		if (type_info->id)
+			strncpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
 		else
-			type_info.id = node_id(type_info.str);
+			type_info->id = node_id(type_info->str);
 	}
-	if (copy_to_user(buf, &type_info, sizeof(struct prov_type))) {
-		pr_err("Provenance: failed retrieving object id, could not copy to user.");
+	if (copy_to_user(buf, type_info, sizeof(struct prov_type)))
 		return -EAGAIN;
-	}
 	return sizeof(struct prov_type);
 }
 declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);

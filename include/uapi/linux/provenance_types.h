@@ -260,9 +260,10 @@ static inline bool prov_has_secid(uint64_t type)
 	}
 }
 
+#define PROV_TYPE_STR_MAX_LEN 256
 struct prov_type {
 	uint64_t id;
-	char str[256];
+	char str[PROV_TYPE_STR_MAX_LEN];
 	uint8_t is_relation;
 };
 
