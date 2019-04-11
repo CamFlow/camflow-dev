@@ -63,8 +63,8 @@ static inline void queue_save_provenance(struct provenance *provenance,
 
 	if (!prov_queue)
 		return;
-	if (!provenance_is_initialized(prov_elt(prov))
-	    || provenance_is_saved(prov_elt(prov)))
+	if (!provenance_is_initialized(prov_elt(provenance))
+	    || provenance_is_saved(prov_elt(provenance)))
 		return;
 	work = kmalloc(sizeof(struct save_work), GFP_ATOMIC);
 	if (!work)
