@@ -1,34 +1,34 @@
 Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
 Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
-Examining ./security/provenance/relay.c
-Examining ./security/provenance/type.c
-Examining ./security/provenance/include/provenance_task.h
-Examining ./security/provenance/include/provenance_net.h
-Examining ./security/provenance/include/provenance_query.h
-Examining ./security/provenance/include/provenance_machine.h
-Examining ./security/provenance/include/provenance_relay.h
-Examining ./security/provenance/include/provenance_filter.h
-Examining ./security/provenance/include/provenance_policy.h
-Examining ./security/provenance/include/provenance.h
-Examining ./security/provenance/include/provenance_inode.h
-Examining ./security/provenance/include/provenance_ns.h
-Examining ./security/provenance/include/provenance_record.h
-Examining ./security/provenance/hooks.c
-Examining ./security/provenance/machine.c
-Examining ./security/provenance/fs.c
-Examining ./security/provenance/propagate.c
 Examining ./security/provenance/query.c
+Examining ./security/provenance/fs.c
 Examining ./security/provenance/netfilter.c
+Examining ./security/provenance/include/provenance_record.h
+Examining ./security/provenance/include/provenance_filter.h
+Examining ./security/provenance/include/provenance_ns.h
+Examining ./security/provenance/include/provenance_task.h
+Examining ./security/provenance/include/provenance_policy.h
+Examining ./security/provenance/include/provenance_net.h
+Examining ./security/provenance/include/provenance_relay.h
+Examining ./security/provenance/include/provenance_inode.h
+Examining ./security/provenance/include/provenance_query.h
+Examining ./security/provenance/include/provenance.h
+Examining ./security/provenance/include/provenance_machine.h
+Examining ./security/provenance/machine.c
+Examining ./security/provenance/relay.c
+Examining ./security/provenance/hooks.c
+Examining ./security/provenance/propagate.c
+Examining ./security/provenance/type.c
 
 FINAL RESULTS:
 
-./security/provenance/fs.c:212:  [2] (buffer) memcpy:
+./security/provenance/fs.c:211:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/fs.c:459:  [2] (buffer) memcpy:
+./security/provenance/fs.c:458:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/fs.c:560:  [2] (buffer) memcpy:
+./security/provenance/fs.c:559:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
 ./security/provenance/hooks.c:378:  [2] (buffer) memcpy:
@@ -117,11 +117,11 @@ FINAL RESULTS:
 ANALYSIS SUMMARY:
 
 Hits = 30
-Lines analyzed = 7603 in approximately 0.10 seconds (73295 lines/second)
-Physical Source Lines of Code (SLOC) = 4872
+Lines analyzed = 7602 in approximately 0.11 seconds (71472 lines/second)
+Physical Source Lines of Code (SLOC) = 4871
 Hits@level = [0]   0 [1]   5 [2]  25 [3]   0 [4]   0 [5]   0
 Hits@level+ = [0+]  30 [1+]  30 [2+]  25 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 6.15764 [1+] 6.15764 [2+] 5.13136 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 6.1589 [1+] 6.1589 [2+] 5.13242 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!
