@@ -12,6 +12,7 @@ jobs:
       - run:
           name: 'Prepare build environment...'
           command: |
+            cd build && ls
             if [ -d "/root/circulate/build/linux-stable" ]; then
               apt-get update -qq
               apt-get install -y sudo
