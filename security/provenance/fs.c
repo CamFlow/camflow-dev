@@ -932,11 +932,7 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 	if (IS_ERR(buffer))
 		return PTR_ERR(buffer);
 
-	if (strlen(buffer) > count) {
-		rtn = -ENOMEM;
-		goto out;
-	}
-	rtn = prov_create_channel(buffer, strlen(buffer));
+	rtn = prov_create_channel(buffer, count);
 out:
 	kfree(buffer);
 	return rtn;
