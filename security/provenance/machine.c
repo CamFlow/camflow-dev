@@ -30,7 +30,7 @@ void init_prov_machine(void)
 	prov_machine->machine_info.cam_major = CAMFLOW_VERSION_MAJOR;
 	prov_machine->machine_info.cam_minor = CAMFLOW_VERSION_MINOR;
 	prov_machine->machine_info.cam_patch = CAMFLOW_VERSION_PATCH;
-	memcpy(prov_machine->machine_info.commit, CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
+	memcpy(prov_machine->machine_info.commit, CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, 256));
 	prov_type(prov_machine) = AGT_MACHINE;
 	node_identifier(prov_machine).version = 1;
 	refresh_prov_machine();
