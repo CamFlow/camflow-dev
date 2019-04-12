@@ -12,6 +12,7 @@ jobs:
       - run: 'make prepare_kernel'
       - run: 'cd build/linux-stable && rm -rf .git'
       - run: 'cd build/pristine/linux-stable && rm -rf .git'
+      - run: 'cb build && rm -rf information-flow-patch'
       - persist_to_workspace:
           root: .
           paths: build
