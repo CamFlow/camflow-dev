@@ -239,7 +239,7 @@ int prov_create_channel(char *buffer, size_t len)
 		}
 	}
 
-	if (strlen(buffer) > len)
+	if (len > PATH_MAX)
 		return -ENOMEM;
 	snprintf(long_name, PATH_MAX, "long_%s", buffer);
 	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
