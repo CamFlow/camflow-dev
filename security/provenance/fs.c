@@ -877,12 +877,12 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 
 	if (type_info->is_relation) {
 		if (type_info->id)
-			strncpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
+			strlcpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
 		else
 			type_info->id = relation_id(type_info->str);
 	} else {
 		if (type_info->id)
-			strncpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN - 1);
+			strlcpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
 		else
 			type_info->id = node_id(type_info->str);
 	}
