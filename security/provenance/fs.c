@@ -909,7 +909,7 @@ declare_file_operations(prov_version, no_write, prov_read_version);
 static ssize_t prov_read_commit(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	size_t len = strlen(CAMFLOW_COMMIT);
+	size_t len = strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH);
 
 	if (count < len)
 		return -ENOMEM;
