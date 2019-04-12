@@ -1,22 +1,22 @@
 Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
 Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
-Examining ./security/provenance/include/provenance_ns.h
-Examining ./security/provenance/include/provenance_policy.h
-Examining ./security/provenance/include/provenance_machine.h
-Examining ./security/provenance/include/provenance_inode.h
-Examining ./security/provenance/include/provenance_task.h
-Examining ./security/provenance/include/provenance_filter.h
-Examining ./security/provenance/include/provenance_record.h
-Examining ./security/provenance/include/provenance_relay.h
-Examining ./security/provenance/include/provenance_query.h
-Examining ./security/provenance/include/provenance_net.h
-Examining ./security/provenance/include/provenance.h
-Examining ./security/provenance/machine.c
+Examining ./security/provenance/netfilter.c
+Examining ./security/provenance/hooks.c
 Examining ./security/provenance/fs.c
 Examining ./security/provenance/type.c
-Examining ./security/provenance/netfilter.c
+Examining ./security/provenance/machine.c
+Examining ./security/provenance/include/provenance_machine.h
+Examining ./security/provenance/include/provenance_net.h
+Examining ./security/provenance/include/provenance_record.h
+Examining ./security/provenance/include/provenance.h
+Examining ./security/provenance/include/provenance_query.h
+Examining ./security/provenance/include/provenance_relay.h
+Examining ./security/provenance/include/provenance_task.h
+Examining ./security/provenance/include/provenance_ns.h
+Examining ./security/provenance/include/provenance_filter.h
+Examining ./security/provenance/include/provenance_policy.h
+Examining ./security/provenance/include/provenance_inode.h
 Examining ./security/provenance/query.c
-Examining ./security/provenance/hooks.c
 Examining ./security/provenance/relay.c
 Examining ./security/provenance/propagate.c
 
@@ -102,30 +102,6 @@ FINAL RESULTS:
 ./security/provenance/relay.c:306:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/fs.c:815:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:821:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:880:  [1] (buffer) strncpy:
-  Easily used incorrectly; doesn't always \0-terminate or check for invalid
-  pointers (CWE-120).
-./security/provenance/fs.c:885:  [1] (buffer) strncpy:
-  Easily used incorrectly; doesn't always \0-terminate or check for invalid
-  pointers (CWE-120).
-./security/provenance/fs.c:899:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:912:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:935:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:939:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
 ./security/provenance/include/provenance_record.h:211:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
@@ -138,12 +114,6 @@ FINAL RESULTS:
 ./security/provenance/include/provenance_task.h:186:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/machine.c:33:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/relay.c:242:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
 ./security/provenance/relay.c:244:  [1] (port) snprintf:
   On some very old systems, snprintf is incorrectly implemented and permits
   buffer overflows; there are also incompatible standard definitions of it.
@@ -151,12 +121,12 @@ FINAL RESULTS:
 
 ANALYSIS SUMMARY:
 
-Hits = 41
-Lines analyzed = 7616 in approximately 0.09 seconds (83375 lines/second)
-Physical Source Lines of Code (SLOC) = 4883
-Hits@level = [0]   0 [1]  15 [2]  26 [3]   0 [4]   0 [5]   0
-Hits@level+ = [0+]  41 [1+]  41 [2+]  26 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 8.39648 [1+] 8.39648 [2+] 5.3246 [3+]   0 [4+]   0 [5+]   0
+Hits = 31
+Lines analyzed = 7611 in approximately 0.10 seconds (78607 lines/second)
+Physical Source Lines of Code (SLOC) = 4878
+Hits@level = [0]   0 [1]   5 [2]  26 [3]   0 [4]   0 [5]   0
+Hits@level+ = [0+]  31 [1+]  31 [2+]  26 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 6.35506 [1+] 6.35506 [2+] 5.33005 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!
