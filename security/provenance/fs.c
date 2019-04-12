@@ -812,13 +812,13 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* LSM version */
-	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR, strlen(CAMFLOW_VERSION_STR));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR, strnlen(CAMFLOW_VERSION_STR, 32));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* commit */
-	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT, strlen(CAMFLOW_COMMIT));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
