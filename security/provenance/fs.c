@@ -48,9 +48,8 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos, bool *flag)
 
 {
-	char *page = NULL;
-	ssize_t length;
-	bool new_value;
+	char *str;
+	ssize_t rc;
 	uint32_t tmp;
 
 	/* no partial write */
@@ -60,24 +59,19 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
 
-	page = (char *)get_zeroed_page(GFP_KERNEL);
-	if (!page)
-		return -ENOMEM;
+	str = memdup_user(buf, count);
+	if (IS_ERR(str))
+		return PTR_ERR(str);
 
-	length =  -EFAULT;
-	if (copy_from_user(page, buf, count))
+	rc = kstrtouint(str, 2, &tmp);
+	if (rc)
 		goto out;
 
-	length = kstrtouint(page, 2, &tmp);
-	if (length)
-		goto out;
-
-	new_value = tmp;
-	(*flag) = new_value;
-	length = count;
+	(*flag) = tmp;
+	rc = count;
 out:
-	free_page((unsigned long)page);
-	return length;
+	kfree(str);
+	return rc;
 }
 
 static ssize_t __read_flag(struct file *filp, char __user *buf,
