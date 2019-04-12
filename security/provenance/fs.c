@@ -933,7 +933,6 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 		return PTR_ERR(buffer);
 
 	rtn = prov_create_channel(buffer, count);
-out:
 	kfree(buffer);
 	return rtn;
 }
