@@ -137,10 +137,10 @@ security/provenance/hooks.c:1601:42: warning: dereference of noderef expression
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
-security/provenance/fs.c:230:27: warning: cast removes address space '<asn:1>' of expression
-security/provenance/fs.c:230:27: warning: incorrect type in argument 1 (different address spaces)
-security/provenance/fs.c:230:27:    expected void [noderef] <asn:1> *to
-security/provenance/fs.c:230:27:    got void *
+security/provenance/fs.c:228:27: warning: cast removes address space '<asn:1>' of expression
+security/provenance/fs.c:228:27: warning: incorrect type in argument 1 (different address spaces)
+security/provenance/fs.c:228:27:    expected void [noderef] <asn:1> *to
+security/provenance/fs.c:228:27:    got void *
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
 ./security/provenance/include/provenance_net.h:185:16: warning: incorrect type in assignment (different base types)
