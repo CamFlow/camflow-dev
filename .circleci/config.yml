@@ -146,7 +146,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/circulate/test/sparse.txt'
+      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/circulate/test/sparse.txt' || true
       - run: 'cat ./test/sparse.txt'
       - persist_to_workspace:
           root: .
