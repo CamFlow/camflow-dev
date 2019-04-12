@@ -10,6 +10,8 @@ jobs:
       - run: 'apt-get install -y sudo'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'make prepare_kernel'
+      - run: 'cd build/linux-stable && rm -rf .git'
+      - run: 'cd build/pristine/linux-stable && rm -rf .git'
       - persist_to_workspace:
           root: .
           paths: build
