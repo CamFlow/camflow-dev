@@ -68,7 +68,6 @@ static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 		goto out;
 
 	(*flag) = tmp;
-	rc = count;
 out:
 	kfree(str);
 	return rc;
