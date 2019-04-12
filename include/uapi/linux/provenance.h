@@ -295,6 +295,7 @@ struct xattr_prov_struct {
 	size_t size;
 };
 
+#define PROV_COMMIT_MAX_LENGTH 256
 struct machine_struct {
 	basic_elements;
 	shared_node_elements;
@@ -302,7 +303,7 @@ struct machine_struct {
 	uint8_t cam_minor;
 	uint8_t cam_patch;
 	struct new_utsname utsname;
-	char commit[256];
+	char commit[PROV_COMMIT_MAX_LENGTH];
 };
 
 union long_prov_elt {
