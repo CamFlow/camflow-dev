@@ -46,15 +46,10 @@ static ssize_t no_write(struct file *file, const char __user *buf,
 
 static inline ssize_t __write_flag(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos, bool *flag)
-
 {
 	char *str;
 	ssize_t rc;
 	uint32_t tmp;
-
-	/* no partial write */
-	if (*ppos > 0)
-		return -EINVAL;
 
 	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
