@@ -255,3 +255,8 @@ patch_git:
 	cd ./build/linux-stable && git add .
 	cd ./build/linux-stable && git commit -a -m 'camflow patch'
 	cd ./build/linux-stable && git format-patch HEAD~~ -s
+
+save_space:
+	cd build && rm -rf information-flow-patch
+	cd build/linux-stable && rm -rf .git
+	cd build/pristine/linux-stable && rm -rf .git
