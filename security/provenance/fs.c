@@ -83,12 +83,10 @@ out:
 static ssize_t __read_flag(struct file *filp, char __user *buf,
 			   size_t count, loff_t *ppos, bool flag)
 {
-	char tmpbuf[TMPBUFLEN];
-	ssize_t length;
-	int tmp = flag;
-
-	length = scnprintf(tmpbuf, TMPBUFLEN, "%d", tmp);
-	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
+	if (flag)
+		return simple_read_from_buffer(buf, count, ppos, "1", 2);
+	else
+		return simple_read_from_buffer(buf, count, ppos, "0", 2);
 }
 
 #define declare_write_flag_fcn(fcn_name, flag)          static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
