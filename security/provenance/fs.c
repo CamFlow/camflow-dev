@@ -896,7 +896,7 @@ declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 static ssize_t prov_read_version(struct file *filp, char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	size_t len = strlen(CAMFLOW_VERSION_STR);
+	size_t len = strnlen(CAMFLOW_VERSION_STR, 32);
 
 	if (count < len)
 		return -ENOMEM;
