@@ -475,7 +475,7 @@ fail:
  *
  */
 static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
-				 unsigned long len)
+				 size_t len)
 {
 	int rv = 0;
 	unsigned long ofs, bytes;
