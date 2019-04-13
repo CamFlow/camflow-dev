@@ -25,6 +25,7 @@
 #include "provenance_net.h"
 #include "provenance_task.h"
 #include "provenance_machine.h"
+#include "memcpy_ss.h"
 
 #define TMPBUFLEN    12
 
@@ -204,7 +205,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		spin_lock(prov_lock(cprov));
 		// TODO redo
 		__write_node(prov_entry(cprov));
-		memcpy(&node->disc_node_info.parent, &prov_elt(cprov)->node_info.identifier, sizeof(union prov_identifier));
+		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier), &prov_elt(cprov)->node_info.identifier, sizeof(union prov_identifier));
 		spin_unlock(prov_lock(cprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
@@ -451,7 +452,7 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	}
 
 	spin_lock(prov_lock(prov));
-	memcpy(&msg->prov, prov_elt(prov), sizeof(union prov_elt));
+	__memcpy_ss(&msg->prov, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
 	spin_unlock(prov_lock(prov));
 
 	if (copy_to_user(buf, msg, sizeof(struct prov_process_config)))
@@ -552,7 +553,7 @@ static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 		rtn = -ENOMEM;
 		goto out;
 	}
-	memcpy(data->secctx, ctx, len);
+	__memcpy_ss(data->secctx, PATH_MAX, ctx, len);
 	data->len = len;
 out:
 	security_release_secctx(ctx, len); // security module dealloc
