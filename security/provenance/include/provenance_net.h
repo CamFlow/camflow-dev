@@ -24,6 +24,7 @@
 #include "provenance.h"
 #include "provenance_policy.h"
 #include "provenance_inode.h"
+#include "memcpy_ss.h"
 
 /*!
  * @brief Returns the provenance entry pointer of the inode associated with sock.
@@ -326,7 +327,7 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 		goto out;
 	}
 	addr_info->address_info.length = addrlen;
-	memcpy(&(addr_info->address_info.addr), address, addrlen);
+	__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr), address, addrlen);
 
 	rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
 	set_name_recorded(prov_elt(prov));
@@ -347,9 +348,9 @@ static inline void record_packet_content(struct sk_buff *skb,
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length >= PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
-		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
+		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, PATH_MAX);
 	} else
-		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
+		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, cnt->pckcnt_info.length);
 	record_relation(RL_PCK_CNT, cnt, prov_entry(pckprov), NULL, 0);
 	free_long_provenance(cnt);
 }

@@ -9,4 +9,9 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
+#ifndef _MEMCPY_SS
+#define _MEMCPY_SS
+
 extern int __memcpy_ss(void *, __kernel_size_t, const void *, __kernel_size_t);
+
+#endif // _MEMCPY_SS
