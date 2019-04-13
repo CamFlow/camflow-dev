@@ -14,6 +14,7 @@
 
 #include "provenance.h"
 #include "provenance_relay.h"
+#include "memcpy_ss.h"
 
 /*!
  * @brief This function updates the version of a provenance node.
@@ -47,9 +48,9 @@ static __always_inline int __update_version(const uint64_t type,
 	if (filter_update_node(type))
 		return 0;
 
-	memcpy(&old_prov, prov, sizeof(union prov_elt));        // Copy the current provenance prov to old_prov.
+	__memcpy_ss(&old_prov, sizeof(union prov_elt), prov, sizeof(union prov_elt));   // Copy the current provenance prov to old_prov.
 
-	node_identifier(prov).version++;                        // Update the version of prov to the newer version.
+	node_identifier(prov).version++;                                                // Update the version of prov to the newer version.
 	clear_recorded(prov);
 
 	// Record the version relation between two versions of the same identity.
@@ -136,7 +137,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 		return 0;
 	if (filter_node(prov_entry(prov)))
 		return 0;
-	memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+	__memcpy_ss(&old_prov, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 
