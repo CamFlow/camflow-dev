@@ -358,7 +358,7 @@ security/provenance/hooks.c:2170 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
-security/provenance/fs.c:851 prov_read_policy_hash() warn: possible memory leak of 'buff'
+security/provenance/fs.c:846 prov_read_policy_hash() warn: possible memory leak of 'buff'
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
   CC      security/provenance/netfilter.o
