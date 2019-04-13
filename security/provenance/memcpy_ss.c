@@ -11,6 +11,7 @@
  */
 #include <linux/string.h>
 #include <linux/errno.h>
+#include <linux/printk.h>
 
 #include "include/memcpy_ss.h"
 
@@ -20,27 +21,37 @@ int __memcpy_ss(void *dest, __kernel_size_t dmax, const void *src, __kernel_size
   uint8_t *dp = dest;
   const uint8_t *sp = src;
 
-  if (unlikely(!dp))
+  if (unlikely(!dp)){
+    pr_err("__memcpy_ss: dest is null.");
     return -EFAULT;
-  if (unlikely(dmax == 0))
+  }
+  if (unlikely(dmax == 0)){
+    pr_err("__memcpy_ss: dmax is 0.");
     return -EINVAL;
-  if (unlikely(dmax > RSIZE_MAX_MEM))
+  }
+  if (unlikely(dmax > RSIZE_MAX_MEM)){
+    pr_err("__memcpy_ss: dmax is too large.");
     return -EINVAL;
+  }
   if (unlikely(!sp)){
+    pr_err("__memcpy_ss: sp is null.");
     memset(dp, 0, dmax);
     return -EFAULT;
   }
   if (unlikely(smax == 0)){ // nothing to copy
+    pr_err("__memcpy_ss: smax is 0.");
     memset(dp, 0, dmax);
     return 0;
   }
   if (unlikely(smax > dmax)){
+    pr_err("__memcpy_ss: smax greater than dmax.");
     memset(dp, 0, dmax);
     return -EINVAL;
   }
   // check for overlap
   if ( unlikely(((dp>sp) && (dp<(sp+smax))) ||
        ((sp>dp) && (sp<(dp+smax)))) ) {
+    pr_err("__memcpy_ss: dest and src overlap.");
     memset(dp, 0, dmax);
     return -EINVAL;
  }
