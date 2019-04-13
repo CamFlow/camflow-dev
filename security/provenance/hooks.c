@@ -26,6 +26,7 @@
 #include "provenance_inode.h"
 #include "provenance_task.h"
 #include "provenance_machine.h"
+#include "memcpy_ss.h"
 
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 // If provenance is set to be persistant (saved between reboots).
@@ -381,7 +382,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	if (unlikely(!iprov))
 		return -ENOMEM;
 	sprov = inode->i_sb->s_provenance;
-	memcpy(prov_elt(iprov)->inode_info.sb_uuid, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
+	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	inode->i_provenance = iprov;
 	refresh_inode_provenance(inode, iprov);
 	return 0;
@@ -960,7 +961,7 @@ static int provenance_inode_getsecurity(struct inode *inode,
 	if (!alloc)
 		goto out;
 	*buffer = kmalloc(sizeof(union prov_elt), GFP_KERNEL);
-	memcpy(*buffer, prov_elt(iprov), sizeof(union prov_elt));
+	__memcpy_ss(*buffer, sizeof(union prov_elt), prov_elt(iprov), sizeof(union prov_elt));
 out:
 	return sizeof(union prov_elt);
 }
@@ -986,7 +987,7 @@ static int provenance_inode_listsecurity(struct inode *inode,
 	const int len = sizeof(XATTR_NAME_PROVENANCE);
 
 	if (buffer && len <= buffer_size)
-		memcpy(buffer, XATTR_NAME_PROVENANCE, len);
+		__memcpy_ss(buffer, buffer_size, XATTR_NAME_PROVENANCE, len);
 	return len;
 }
 

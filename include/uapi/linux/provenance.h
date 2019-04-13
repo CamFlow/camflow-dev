@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "3abd4048eb5227b0ed2b30363bcda021ceb55a0c"
+#define CAMFLOW_COMMIT "ee8a0bf781c71b48e437a8434bfa8b28b419c508"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -183,12 +183,13 @@ struct task_prov_struct {
 	uint32_t vpid;
 };
 
+#define PROV_SBUUID_LEN 16
 struct inode_prov_struct {
 	basic_elements;
 	shared_node_elements;
 	uint64_t ino;
 	uint16_t mode;
-	uint8_t sb_uuid[16];
+	uint8_t sb_uuid[PROV_SBUUID_LEN];
 };
 
 struct iattr_prov_struct {
