@@ -198,6 +198,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/query.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/type.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/memcpy_ss.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
@@ -209,6 +210,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/memcpy_ss.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_fs.h
