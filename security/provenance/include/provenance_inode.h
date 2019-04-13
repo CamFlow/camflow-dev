@@ -20,6 +20,7 @@
 #include "provenance_record.h"
 #include "provenance_policy.h"
 #include "provenance_filter.h"
+#include "memcpy_ss.h"
 
 #define is_inode_dir(inode)             S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode)          S_ISSOCK(inode->i_mode)
@@ -65,7 +66,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	if (prov_elt(prov)->inode_info.mode != 0
 	    && prov_elt(prov)->inode_info.mode != mode
 	    && provenance_is_recorded(prov_elt(prov))) {
-		memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+		__memcpy_ss(&old_prov, sizeof(union prov_elt), prov_elt(prov), sizeof(old_prov));
 		// We update the info of the new version and record it.
 		prov_elt(prov)->inode_info.mode = mode;
 		prov_type(prov_elt(prov)) = type;
@@ -257,7 +258,7 @@ static inline int inode_init_provenance(struct inode *inode,
 			goto free_buf;
 		}
 	}
-	memcpy(prov_elt(prov), buf, sizeof(union prov_elt));
+	__memcpy_ss(prov_elt(prov), sizeof(union prov_elt), buf, sizeof(union prov_elt));
 	rc = 0;
 free_buf:
 	kfree(buf);
@@ -343,7 +344,7 @@ static inline void save_provenance(struct dentry *dentry)
 		spin_unlock(prov_lock(prov));
 		return;
 	}
-	memcpy(&buf, prov_elt(prov), sizeof(union prov_elt));
+	__memcpy_ss(&buf, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
 	set_saved(prov_elt(prov));
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
@@ -400,15 +401,15 @@ static __always_inline int record_write_xattr(uint64_t type,
 	xattr = alloc_long_provenance(ENT_XATTR);
 	if (!xattr)
 		return -ENOMEM;
-	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
+	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	if (value) {
 		if (size < PROV_XATTR_VALUE_SIZE) {
 			xattr->xattr_info.size = size;
-			memcpy(xattr->xattr_info.value, value, size);
+			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, size);
 		} else {
 			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
-			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
+			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, PROV_XATTR_VALUE_SIZE);
 		}
 	}
 	rc = record_relation(RL_PROC_READ, prov_entry(cprov), prov_entry(tprov), NULL, 0);
@@ -464,7 +465,7 @@ static __always_inline int record_read_xattr(struct provenance *cprov,
 		rc = -ENOMEM;
 		goto out;
 	}
-	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
+	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 
 	rc = record_relation(RL_GETXATTR_INODE, prov_entry(iprov), xattr, NULL, 0);
