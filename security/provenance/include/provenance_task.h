@@ -236,7 +236,7 @@ static inline int record_task_name(struct task_struct *task,
 
 		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);   // Memory allocation not allowed to sleep.
 		if (!buffer) {
-			fput(exe_file); // Release the file.
+			fput(exe_file);                                 // Release the file.
 			rc = -ENOMEM;
 			goto out;
 		}
