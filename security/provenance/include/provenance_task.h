@@ -30,6 +30,7 @@
 #include "provenance_relay.h"
 #include "provenance_inode.h"
 #include "provenance_policy.h"
+#include "memcpy_ss.h"
 
 #define KB              1024
 #define MB              (1024 * KB)
@@ -498,7 +499,7 @@ static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 		kaddr = kmap(page);
 		flush_cache_page(bprm->vma, ofs, page_to_pfn(page));
 		bytes = min_t(unsigned int, len, PAGE_SIZE - ofs);
-		memcpy(buff, kaddr + ofs, bytes);
+		__memcpy_ss(buff, len, kaddr + ofs, bytes);
 		src += bytes;
 		buff += bytes;
 		len -= bytes;
