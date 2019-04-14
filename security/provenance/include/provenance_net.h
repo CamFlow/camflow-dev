@@ -327,7 +327,7 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 		goto out;
 	}
 	addr_info->address_info.length = addrlen;
-	__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr), address, addrlen);
+	__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr_storage), address, addrlen);
 
 	rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
 	set_name_recorded(prov_elt(prov));

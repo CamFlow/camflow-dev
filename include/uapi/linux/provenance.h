@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "0406bcf367102f72c44aaa65b75318e9c9e62088"
+#define CAMFLOW_COMMIT "4e395740aa2ac363f1fc0438b2c255a098ca4b6c"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -258,8 +258,8 @@ struct file_name_struct {
 struct address_struct {
 	basic_elements;
 	shared_node_elements;
-	struct sockaddr addr;
 	size_t length;
+	struct sockaddr_storage addr;
 };
 
 #define PROV_TRUNCATED    1
