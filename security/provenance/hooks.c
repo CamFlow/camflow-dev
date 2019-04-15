@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -25,6 +26,7 @@
 #include "provenance_inode.h"
 #include "provenance_task.h"
 #include "provenance_machine.h"
+#include "memcpy_ss.h"
 
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 // If provenance is set to be persistant (saved between reboots).
@@ -144,16 +146,21 @@ static void provenance_task_free(struct task_struct *task)
  * Current process's cred struct's provenance pointer now points to the provenance node.
  *
  */
-static void cred_init_provenance(void)
+static void task_init_provenance(void)
 {
 	struct cred *cred = (struct cred *)current->real_cred;
-	struct provenance *prov = alloc_provenance(ENT_PROC, GFP_KERNEL);
+	struct provenance *cprov = alloc_provenance(ENT_PROC, GFP_KERNEL);
+	struct provenance *tprov = alloc_provenance(ACT_TASK, GFP_KERNEL);
 
-	if (!prov)
+	if (!cprov || !tprov)
 		panic("Provenance:  Failed to initialize initial task.\n");
-	node_uid(prov_elt(prov)) = __kuid_val(cred->euid);
-	node_gid(prov_elt(prov)) = __kgid_val(cred->egid);
-	cred->provenance = prov;
+	node_uid(prov_elt(cprov)) = __kuid_val(cred->euid);
+	node_gid(prov_elt(cprov)) = __kgid_val(cred->egid);
+	cred->provenance = cprov;
+
+	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
+	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+	current->provenance = tprov;
 }
 
 /*!
@@ -375,7 +382,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	if (unlikely(!iprov))
 		return -ENOMEM;
 	sprov = inode->i_sb->s_provenance;
-	memcpy(prov_elt(iprov)->inode_info.sb_uuid, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
+	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	inode->i_provenance = iprov;
 	refresh_inode_provenance(inode, iprov);
 	return 0;
@@ -971,7 +978,7 @@ static int provenance_inode_getsecurity(struct inode *inode,
 	if (!alloc)
 		goto out;
 	*buffer = kmalloc(sizeof(union prov_elt), GFP_KERNEL);
-	memcpy(*buffer, prov_elt(iprov), sizeof(union prov_elt));
+	__memcpy_ss(*buffer, sizeof(union prov_elt), prov_elt(iprov), sizeof(union prov_elt));
 out:
 	return sizeof(union prov_elt);
 }
@@ -997,7 +1004,7 @@ static int provenance_inode_listsecurity(struct inode *inode,
 	const int len = sizeof(XATTR_NAME_PROVENANCE);
 
 	if (buffer && len <= buffer_size)
-		memcpy(buffer, XATTR_NAME_PROVENANCE, len);
+		__memcpy_ss(buffer, buffer_size, XATTR_NAME_PROVENANCE, len);
 	return len;
 }
 
@@ -2596,7 +2603,7 @@ uint32_t epoch;
  * 7. Set up boot buffer for long provenance entries (NULL on failure).
  * (Note that we set up boot buffer because relayfs is not ready at this point.)
  * 8. Initialize a workqueue (NULL on failure).
- * 9. Initialize security for provenance task ("cred_init_provenance" function).
+ * 9. Initialize security for provenance task ("task_init_provenance" function).
  * 10. Register provenance security hooks.
  * Work_queue helps persiste provenance of inodes (if needed) during the operations that cannot sleep,
  * since persists provenance requires writing to disk (which means sleep is needed).
@@ -2637,7 +2644,7 @@ void __init provenance_add_hooks(void)
 
 #endif
 	relay_ready = false;
-	cred_init_provenance();
+	task_init_provenance();
 	init_prov_machine();
 	print_prov_machine();
 	pr_info("Provenance: starting in epoch %d.", epoch);

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -29,6 +30,7 @@
 #include "provenance_relay.h"
 #include "provenance_inode.h"
 #include "provenance_policy.h"
+#include "memcpy_ss.h"
 
 #define KB              1024
 #define MB              (1024 * KB)
@@ -248,7 +250,6 @@ static inline int record_task_name(struct task_struct *task,
 		}
 	}
 out:
-	// put_cred(cred);
 	return rc;
 }
 
@@ -477,7 +478,7 @@ fail:
  *
  */
 static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
-				 unsigned long len)
+				 size_t len)
 {
 	int rv = 0;
 	unsigned long ofs, bytes;
@@ -501,7 +502,7 @@ static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 		kaddr = kmap(page);
 		flush_cache_page(bprm->vma, ofs, page_to_pfn(page));
 		bytes = min_t(unsigned int, len, PAGE_SIZE - ofs);
-		memcpy(buff, kaddr + ofs, bytes);
+		__memcpy_ss(buff, len, kaddr + ofs, bytes);
 		src += bytes;
 		buff += bytes;
 		len -= bytes;

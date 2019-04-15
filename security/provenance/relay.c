@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -16,6 +17,7 @@
 
 #include "provenance.h"
 #include "provenance_relay.h"
+#include "memcpy_ss.h"
 
 #define PROV_BASE_NAME          "provenance"
 #define LONG_PROV_BASE_NAME     "long_provenance"
@@ -239,7 +241,7 @@ int prov_create_channel(char *buffer, size_t len)
 		}
 	}
 
-	if (strlen(buffer) > len)
+	if (len > PATH_MAX - 5)
 		return -ENOMEM;
 	snprintf(long_name, PATH_MAX, "long_%s", buffer);
 	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
@@ -263,7 +265,7 @@ static void insert_boot_buffer(union prov_elt *msg)
 {
 	union prov_elt *tmp = kmem_cache_alloc(provenance_cache, GFP_ATOMIC);
 
-	memcpy(tmp, msg, sizeof(union prov_elt));
+	__memcpy_ss(tmp, sizeof(struct provenance), msg, sizeof(union prov_elt));
 	tmp->msg_info.next = buffer_head;
 	buffer_head = tmp;
 }
@@ -303,7 +305,7 @@ static void insert_long_boot_buffer(union long_prov_elt *msg)
 {
 	union long_prov_elt *tmp = kmem_cache_alloc(long_provenance_cache, GFP_ATOMIC);
 
-	memcpy(tmp, msg, sizeof(union long_prov_elt));
+	__memcpy_ss(tmp, sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
 	tmp->msg_info.next = long_buffer_head;
 	long_buffer_head = tmp;
 }

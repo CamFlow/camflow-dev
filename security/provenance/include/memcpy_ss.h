@@ -9,14 +9,9 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
-#ifndef _PROVENANCE_MACHINE_H
-#define _PROVENANCE_MACHINE_H
+#ifndef _MEMCPY_SS
+#define _MEMCPY_SS
 
-#include <uapi/linux/provenance.h>
+extern int __memcpy_ss(void *, __kernel_size_t, const void *, __kernel_size_t);
 
-#include <uapi/linux/provenance.h>
-
-void init_prov_machine(void);
-void refresh_prov_machine(void);
-void print_prov_machine(void);
-#endif
+#endif // _MEMCPY_SS

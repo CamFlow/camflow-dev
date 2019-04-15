@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -184,12 +185,13 @@ struct task_prov_struct {
 	uint32_t vpid;
 };
 
+#define PROV_SBUUID_LEN 16
 struct inode_prov_struct {
 	basic_elements;
 	shared_node_elements;
 	uint64_t ino;
 	uint16_t mode;
-	uint8_t sb_uuid[16];
+	uint8_t sb_uuid[PROV_SBUUID_LEN];
 };
 
 struct iattr_prov_struct {
@@ -258,8 +260,8 @@ struct file_name_struct {
 struct address_struct {
 	basic_elements;
 	shared_node_elements;
-	struct sockaddr addr;
 	size_t length;
+	struct sockaddr_storage addr;
 };
 
 #define PROV_TRUNCATED    1
@@ -297,6 +299,7 @@ struct xattr_prov_struct {
 	size_t size;
 };
 
+#define PROV_COMMIT_MAX_LENGTH 256
 struct machine_struct {
 	basic_elements;
 	shared_node_elements;
@@ -304,7 +307,7 @@ struct machine_struct {
 	uint8_t cam_minor;
 	uint8_t cam_patch;
 	struct new_utsname utsname;
-	char commit[256];
+	char commit[PROV_COMMIT_MAX_LENGTH];
 };
 
 union long_prov_elt {

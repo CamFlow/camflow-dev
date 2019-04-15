@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -17,6 +18,7 @@
 
 #include "provenance_filter.h"
 #include "provenance_query.h"
+#include "memcpy_ss.h"
 
 #define PROV_RELAY_BUFF_EXP             20
 #define PROV_RELAY_BUFF_SIZE            ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
@@ -93,8 +95,8 @@ static __always_inline void __prepare_relation(const uint64_t type,
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
 	relation_identifier(relation).machine_id = prov_machine_id;
-	memcpy(&(relation->relation_info.snd), &get_prov_identifier(f), sizeof(union prov_identifier));
-	memcpy(&(relation->relation_info.rcv), &get_prov_identifier(t), sizeof(union prov_identifier));
+	__memcpy_ss(&(relation->relation_info.snd), sizeof(union prov_identifier), &get_prov_identifier(f), sizeof(union prov_identifier));
+	__memcpy_ss(&(relation->relation_info.rcv), sizeof(union prov_identifier), &get_prov_identifier(t), sizeof(union prov_identifier));
 	if (file) {
 		relation->relation_info.set = FILE_INFO_SET;
 		relation->relation_info.offset = file->f_pos;

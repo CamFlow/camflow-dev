@@ -1,162 +1,57 @@
 Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
 Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
-Examining ./security/provenance/query.c
-Examining ./security/provenance/propagate.c
-Examining ./security/provenance/fs.c
-Examining ./security/provenance/type.c
-Examining ./security/provenance/machine.c
-Examining ./security/provenance/hooks.c
-Examining ./security/provenance/relay.c
 Examining ./security/provenance/include/provenance_machine.h
-Examining ./security/provenance/include/provenance_inode.h
-Examining ./security/provenance/include/provenance_ns.h
-Examining ./security/provenance/include/provenance_task.h
-Examining ./security/provenance/include/provenance_record.h
-Examining ./security/provenance/include/provenance_net.h
-Examining ./security/provenance/include/provenance_relay.h
-Examining ./security/provenance/include/provenance_policy.h
-Examining ./security/provenance/include/provenance.h
 Examining ./security/provenance/include/provenance_filter.h
+Examining ./security/provenance/include/provenance_inode.h
+Examining ./security/provenance/include/provenance.h
+Examining ./security/provenance/include/provenance_ns.h
+Examining ./security/provenance/include/provenance_net.h
+Examining ./security/provenance/include/provenance_policy.h
+Examining ./security/provenance/include/memcpy_ss.h
+Examining ./security/provenance/include/provenance_record.h
 Examining ./security/provenance/include/provenance_query.h
+Examining ./security/provenance/include/provenance_task.h
+Examining ./security/provenance/include/provenance_relay.h
+Examining ./security/provenance/memcpy_ss.c
+Examining ./security/provenance/fs.c
+Examining ./security/provenance/machine.c
+Examining ./security/provenance/relay.c
 Examining ./security/provenance/netfilter.c
+Examining ./security/provenance/hooks.c
+Examining ./security/provenance/propagate.c
+Examining ./security/provenance/type.c
+Examining ./security/provenance/query.c
 
 FINAL RESULTS:
 
-./security/provenance/fs.c:86:  [2] (buffer) char:
-  Statically-sized arrays can be improperly restricted, leading to potential
-  overflows or other issues (CWE-119:CWE-120). Perform bounds checking, use
-  functions that limit length, or ensure that the size is larger than the
-  maximum possible length.
-./security/provenance/fs.c:220:  [2] (buffer) memcpy:
+./security/provenance/memcpy_ss.c:60:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/fs.c:467:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/fs.c:568:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/hooks.c:378:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/hooks.c:957:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/hooks.c:983:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:67:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:259:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:345:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:402:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:407:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:410:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_inode.h:466:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_net.h:328:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_net.h:349:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_net.h:351:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_record.h:49:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_record.h:138:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_relay.h:86:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_relay.h:87:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/include/provenance_task.h:502:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/machine.c:20:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/machine.c:33:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/relay.c:266:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/relay.c:306:  [2] (buffer) memcpy:
-  Does not check for buffer overflows when copying to destination (CWE-120).
-  Make sure destination can always hold the source data.
-./security/provenance/fs.c:815:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:821:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:880:  [1] (buffer) strncpy:
-  Easily used incorrectly; doesn't always \0-terminate or check for invalid
-  pointers (CWE-120).
-./security/provenance/fs.c:885:  [1] (buffer) strncpy:
-  Easily used incorrectly; doesn't always \0-terminate or check for invalid
-  pointers (CWE-120).
-./security/provenance/fs.c:899:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:912:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:935:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/fs.c:939:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/include/provenance_record.h:211:  [1] (buffer) read:
+./security/provenance/include/provenance_record.h:213:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:166:  [1] (buffer) read:
-  Check buffer boundaries if used in a loop including recursive loops
-  (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:184:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:168:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
 ./security/provenance/include/provenance_task.h:186:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/machine.c:33:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/relay.c:242:  [1] (buffer) strlen:
-  Does not handle strings that are not \0-terminated; if given one it may
-  perform an over-read (it could cause a crash if unprotected) (CWE-126).
-./security/provenance/relay.c:244:  [1] (port) snprintf:
+./security/provenance/include/provenance_task.h:188:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+./security/provenance/relay.c:246:  [1] (port) snprintf:
   On some very old systems, snprintf is incorrectly implemented and permits
   buffer overflows; there are also incompatible standard definitions of it.
   Check it during installation, or use something else.
 
 ANALYSIS SUMMARY:
 
-Hits = 41
-Lines analyzed = 7616 in approximately 0.09 seconds (81830 lines/second)
-Physical Source Lines of Code (SLOC) = 4883
-Hits@level = [0]   0 [1]  15 [2]  26 [3]   0 [4]   0 [5]   0
-Hits@level+ = [0+]  41 [1+]  41 [2+]  26 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 8.39648 [1+] 8.39648 [2+] 5.3246 [3+]   0 [4+]   0 [5+]   0
+Hits = 6
+Lines analyzed = 7707 in approximately 0.19 seconds (40522 lines/second)
+Physical Source Lines of Code (SLOC) = 4931
+Hits@level = [0]   0 [1]   5 [2]   1 [3]   0 [4]   0 [5]   0
+Hits@level+ = [0+]   6 [1+]   6 [2+]   1 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 1.21679 [1+] 1.21679 [2+] 0.202799 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!
