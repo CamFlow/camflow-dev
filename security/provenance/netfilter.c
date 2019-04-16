@@ -99,4 +99,11 @@ static int __init provenance_nf_ip_init(void)
 	return 0;
 }
 
-__initcall(provenance_nf_ip_init);
+static void __exit provenance_nf_ip_exit(void)
+{
+	pr_info("Provenance: unregistering netfilter hooks.\n");
+	unregister_pernet_subsys(&provenance_net_ops);
+}
+
+module_init(provenance_nf_ip_init);
+module_exit(provenance_nf_ip_exit);
