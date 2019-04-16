@@ -2125,11 +2125,7 @@ WARNING:LONG_LINE: line over 80 characters
 #80: FILE: security/provenance/netfilter.c:80:
 +	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
 
-WARNING:USE_DEVICE_INITCALL: please use device_initcall() or more appropriate function instead of __initcall() (see include/linux/init.h)
-#102: FILE: security/provenance/netfilter.c:102:
-+__initcall(provenance_nf_ip_init);
-
-total: 0 errors, 7 warnings, 102 lines checked
+total: 0 errors, 6 warnings, 109 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
