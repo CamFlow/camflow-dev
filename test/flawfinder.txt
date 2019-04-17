@@ -1,26 +1,26 @@
 Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
 Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
-Examining ./security/provenance/include/provenance_machine.h
-Examining ./security/provenance/include/provenance_filter.h
-Examining ./security/provenance/include/provenance_inode.h
-Examining ./security/provenance/include/provenance.h
-Examining ./security/provenance/include/provenance_ns.h
-Examining ./security/provenance/include/provenance_net.h
-Examining ./security/provenance/include/provenance_policy.h
-Examining ./security/provenance/include/memcpy_ss.h
-Examining ./security/provenance/include/provenance_record.h
-Examining ./security/provenance/include/provenance_query.h
-Examining ./security/provenance/include/provenance_task.h
-Examining ./security/provenance/include/provenance_relay.h
-Examining ./security/provenance/memcpy_ss.c
-Examining ./security/provenance/fs.c
-Examining ./security/provenance/machine.c
-Examining ./security/provenance/relay.c
-Examining ./security/provenance/netfilter.c
-Examining ./security/provenance/hooks.c
-Examining ./security/provenance/propagate.c
-Examining ./security/provenance/type.c
-Examining ./security/provenance/query.c
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
 
 FINAL RESULTS:
 
@@ -47,11 +47,11 @@ FINAL RESULTS:
 ANALYSIS SUMMARY:
 
 Hits = 6
-Lines analyzed = 7707 in approximately 0.19 seconds (40522 lines/second)
-Physical Source Lines of Code (SLOC) = 4931
+Stat removed
+Physical Source Lines of Code (SLOC) = 4937
 Hits@level = [0]   0 [1]   5 [2]   1 [3]   0 [4]   0 [5]   0
 Hits@level+ = [0+]   6 [1+]   6 [2+]   1 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 1.21679 [1+] 1.21679 [2+] 0.202799 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 1.21531 [1+] 1.21531 [2+] 0.202552 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!

@@ -288,6 +288,8 @@ jobs:
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
       - run: 'apt-get install -y git rsync'
+      - run: 'apt-get install -y ruby'
+      - run: 'ruby ./scripts/clean_test.rb' 
       - run: 'cd test && ls'
       - deploy:
           name: Deploy
