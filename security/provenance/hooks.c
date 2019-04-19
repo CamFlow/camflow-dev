@@ -384,7 +384,6 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	sprov = inode->i_sb->s_provenance;
 	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	inode->i_provenance = iprov;
-	refresh_inode_provenance(inode, iprov);
 	return 0;
 }
 
