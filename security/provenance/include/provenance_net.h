@@ -321,7 +321,7 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	addr_info = alloc_long_provenance(ENT_ADDR);
+	addr_info = alloc_long_provenance(ENT_ADDR, 0);
 	if (!addr_info) {
 		rc = -ENOMEM;
 		goto out;
@@ -341,7 +341,7 @@ static inline void record_packet_content(struct sk_buff *skb,
 {
 	union long_prov_elt *cnt;
 
-	cnt = alloc_long_provenance(ENT_PCKCNT);
+	cnt = alloc_long_provenance(ENT_PCKCNT, 0);
 	if (!cnt)
 		return;
 

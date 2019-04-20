@@ -703,7 +703,7 @@ static inline int record_log(union prov_elt *tprov, const char __user *buf, size
 	union long_prov_elt *str;
 	int rc = 0;
 
-	str = alloc_long_provenance(ENT_STR);
+	str = alloc_long_provenance(ENT_STR, 0);
 	if (!str)
 		return -ENOMEM;
 	if (copy_from_user(str->str_info.str, buf, count)) {

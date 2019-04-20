@@ -541,7 +541,7 @@ static __always_inline int record_arg(struct provenance *prov,
 	union long_prov_elt *aprov;
 	int rc = 0;
 
-	aprov = alloc_long_provenance(vtype);
+	aprov = alloc_long_provenance(vtype, 0);
 	if (!aprov)
 		return -ENOMEM;
 	aprov->arg_info.length = len;

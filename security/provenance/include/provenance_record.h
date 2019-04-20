@@ -177,7 +177,7 @@ static __always_inline int record_node_name(struct provenance *node,
 	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
 
-	fname_prov = alloc_long_provenance(ENT_PATH);
+	fname_prov = alloc_long_provenance(ENT_PATH, djb2_hash(name));
 	if (!fname_prov)
 		return -ENOMEM;
 

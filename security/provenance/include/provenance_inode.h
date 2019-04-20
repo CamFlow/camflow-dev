@@ -398,7 +398,7 @@ static __always_inline int record_write_xattr(uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_entry(cprov), prov_entry(iprov)))
 		return 0;
-	xattr = alloc_long_provenance(ENT_XATTR);
+	xattr = alloc_long_provenance(ENT_XATTR, 0);
 	if (!xattr)
 		return -ENOMEM;
 	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
@@ -460,7 +460,7 @@ static __always_inline int record_read_xattr(struct provenance *cprov,
 		return 0;
 	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 		return 0;
-	xattr = alloc_long_provenance(ENT_XATTR);
+	xattr = alloc_long_provenance(ENT_XATTR, 0);
 	if (!xattr) {
 		rc = -ENOMEM;
 		goto out;
