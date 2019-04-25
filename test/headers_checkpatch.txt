@@ -96,45 +96,45 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 
 WARNING:LONG_LINE: line over 80 characters
 #116: FILE: security/provenance/include/provenance.h:116:
-+static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
++static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
 
 WARNING:LONG_LINE: line over 80 characters
 #118: FILE: security/provenance/include/provenance.h:118:
 +	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
 WARNING:LONG_LINE: line over 80 characters
-#142: FILE: security/provenance/include/provenance.h:142:
+#145: FILE: security/provenance/include/provenance.h:145:
 +#define set_recorded(node)                      __set_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#148: FILE: security/provenance/include/provenance.h:148:
+#151: FILE: security/provenance/include/provenance.h:151:
 +#define clear_recorded(node)                    __clear_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#154: FILE: security/provenance/include/provenance.h:154:
+#157: FILE: security/provenance/include/provenance.h:157:
 +#define provenance_is_recorded(node)            __provenance_is_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#162: FILE: security/provenance/include/provenance.h:162:
+#165: FILE: security/provenance/include/provenance.h:165:
 +#define set_name_recorded(node)                 __set_name_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#168: FILE: security/provenance/include/provenance.h:168:
+#171: FILE: security/provenance/include/provenance.h:171:
 +#define clear_name_recorded(node)               __clear_name_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#174: FILE: security/provenance/include/provenance.h:174:
+#177: FILE: security/provenance/include/provenance.h:177:
 +#define provenance_is_name_recorded(node)       __provenance_is_name_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#185: FILE: security/provenance/include/provenance.h:185:
+#188: FILE: security/provenance/include/provenance.h:188:
 +#define set_kernel_recorded(node)               __set_kernel_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#191: FILE: security/provenance/include/provenance.h:191:
+#194: FILE: security/provenance/include/provenance.h:194:
 +#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
 
-total: 0 errors, 25 warnings, 198 lines checked
+total: 0 errors, 25 warnings, 201 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.

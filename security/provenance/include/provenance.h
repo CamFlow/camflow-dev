@@ -113,7 +113,7 @@ static inline void free_provenance(struct provenance *prov)
  * @reference GFP_ATOMIC https://www.linuxjournal.com/article/6930
  *
  */
-static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
+static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
 {
 	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
@@ -123,7 +123,10 @@ static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype
 	if (!prov)
 		return NULL;
 	prov_type(prov) = ntype;
-	node_identifier(prov).id = prov_next_node_id();
+	if (id == 0)
+		node_identifier(prov).id = prov_next_node_id();
+	else
+		node_identifier(prov).id = id;
 	node_identifier(prov).boot_id = prov_boot_id;
 	node_identifier(prov).machine_id = prov_machine_id;
 	call_provenance_alloc(prov);
