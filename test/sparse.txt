@@ -91,30 +91,30 @@ security/provenance/hooks.c:108:22: warning: incorrect type in assignment (diffe
 security/provenance/hooks.c:108:22:    expected struct cred const *cred
 security/provenance/hooks.c:108:22:    got struct cred const [noderef] <asn:4> *real_cred
 security/provenance/hooks.c:152:30: warning: cast removes address space '<asn:4>' of expression
-security/provenance/hooks.c:1911:22: warning: incorrect type in argument 2 (different base types)
-security/provenance/hooks.c:1911:22:    expected unsigned int [usertype] ip
-security/provenance/hooks.c:1911:22:    got restricted __be32 [usertype] s_addr
-security/provenance/hooks.c:1911:22: warning: incorrect type in argument 3 (different base types)
-security/provenance/hooks.c:1911:22:    expected unsigned int [usertype] port
-security/provenance/hooks.c:1911:22:    got restricted __be16 [usertype] sin_port
-security/provenance/hooks.c:1969:22: warning: incorrect type in argument 2 (different base types)
-security/provenance/hooks.c:1969:22:    expected unsigned int [usertype] ip
-security/provenance/hooks.c:1969:22:    got restricted __be32 [usertype] s_addr
-security/provenance/hooks.c:1969:22: warning: incorrect type in argument 3 (different base types)
-security/provenance/hooks.c:1969:22:    expected unsigned int [usertype] port
-security/provenance/hooks.c:1969:22:    got restricted __be16 [usertype] sin_port
-./security/provenance/include/provenance_net.h:187:16: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:187:16:    expected unsigned short [usertype] id
-./security/provenance/include/provenance_net.h:187:16:    got restricted __be16 [usertype] id
-./security/provenance/include/provenance_net.h:188:20: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:188:20:    expected unsigned int [usertype] snd_ip
-./security/provenance/include/provenance_net.h:188:20:    got restricted __be32 [usertype] saddr
-./security/provenance/include/provenance_net.h:189:20: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:189:20:    expected unsigned int [usertype] rcv_ip
-./security/provenance/include/provenance_net.h:189:20:    got restricted __be32 [usertype] daddr
-./security/provenance/include/provenance_net.h:191:31: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:191:31:    expected unsigned short [usertype] length
-./security/provenance/include/provenance_net.h:191:31:    got restricted __be16 [usertype] tot_len
+security/provenance/hooks.c:1928:22: warning: incorrect type in argument 2 (different base types)
+security/provenance/hooks.c:1928:22:    expected unsigned int [usertype] ip
+security/provenance/hooks.c:1928:22:    got restricted __be32 [usertype] s_addr
+security/provenance/hooks.c:1928:22: warning: incorrect type in argument 3 (different base types)
+security/provenance/hooks.c:1928:22:    expected unsigned int [usertype] port
+security/provenance/hooks.c:1928:22:    got restricted __be16 [usertype] sin_port
+security/provenance/hooks.c:1986:22: warning: incorrect type in argument 2 (different base types)
+security/provenance/hooks.c:1986:22:    expected unsigned int [usertype] ip
+security/provenance/hooks.c:1986:22:    got restricted __be32 [usertype] s_addr
+security/provenance/hooks.c:1986:22: warning: incorrect type in argument 3 (different base types)
+security/provenance/hooks.c:1986:22:    expected unsigned int [usertype] port
+security/provenance/hooks.c:1986:22:    got restricted __be16 [usertype] sin_port
+./security/provenance/include/provenance_net.h:186:46: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:186:46:    expected unsigned short [usertype] id
+./security/provenance/include/provenance_net.h:186:46:    got restricted __be16 [usertype] id
+./security/provenance/include/provenance_net.h:187:50: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:187:50:    expected unsigned int [usertype] snd_ip
+./security/provenance/include/provenance_net.h:187:50:    got restricted __be32 [usertype] saddr
+./security/provenance/include/provenance_net.h:188:50: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:188:50:    expected unsigned int [usertype] rcv_ip
+./security/provenance/include/provenance_net.h:188:50:    got restricted __be32 [usertype] daddr
+./security/provenance/include/provenance_net.h:190:44: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:190:44:    expected unsigned short [usertype] length
+./security/provenance/include/provenance_net.h:190:44:    got restricted __be16 [usertype] tot_len
 ./security/provenance/include/provenance_net.h:124:22: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:124:22:    expected unsigned short [usertype] snd_port
 ./security/provenance/include/provenance_net.h:124:22:    got restricted __be16 [usertype] source
@@ -130,9 +130,9 @@ security/provenance/hooks.c:1969:22:    got restricted __be16 [usertype] sin_por
 ./security/provenance/include/provenance_net.h:154:22: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:154:22:    expected unsigned short [usertype] rcv_port
 ./security/provenance/include/provenance_net.h:154:22:    got restricted __be16 [usertype] dest
-security/provenance/hooks.c:2560:16: warning: symbol 'buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:2561:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:1610:42: warning: dereference of noderef expression
+security/provenance/hooks.c:2577:16: warning: symbol 'buffer_head' was not declared. Should it be static?
+security/provenance/hooks.c:2578:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
+security/provenance/hooks.c:1627:42: warning: dereference of noderef expression
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
@@ -143,18 +143,18 @@ security/provenance/fs.c:218:27:    expected void [noderef] <asn:1> *to
 security/provenance/fs.c:218:27:    got void *
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
-./security/provenance/include/provenance_net.h:187:16: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:187:16:    expected unsigned short [usertype] id
-./security/provenance/include/provenance_net.h:187:16:    got restricted __be16 [usertype] id
-./security/provenance/include/provenance_net.h:188:20: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:188:20:    expected unsigned int [usertype] snd_ip
-./security/provenance/include/provenance_net.h:188:20:    got restricted __be32 [usertype] saddr
-./security/provenance/include/provenance_net.h:189:20: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:189:20:    expected unsigned int [usertype] rcv_ip
-./security/provenance/include/provenance_net.h:189:20:    got restricted __be32 [usertype] daddr
-./security/provenance/include/provenance_net.h:191:31: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:191:31:    expected unsigned short [usertype] length
-./security/provenance/include/provenance_net.h:191:31:    got restricted __be16 [usertype] tot_len
+./security/provenance/include/provenance_net.h:186:46: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:186:46:    expected unsigned short [usertype] id
+./security/provenance/include/provenance_net.h:186:46:    got restricted __be16 [usertype] id
+./security/provenance/include/provenance_net.h:187:50: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:187:50:    expected unsigned int [usertype] snd_ip
+./security/provenance/include/provenance_net.h:187:50:    got restricted __be32 [usertype] saddr
+./security/provenance/include/provenance_net.h:188:50: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:188:50:    expected unsigned int [usertype] rcv_ip
+./security/provenance/include/provenance_net.h:188:50:    got restricted __be32 [usertype] daddr
+./security/provenance/include/provenance_net.h:190:44: warning: incorrect type in assignment (different base types)
+./security/provenance/include/provenance_net.h:190:44:    expected unsigned short [usertype] length
+./security/provenance/include/provenance_net.h:190:44:    got restricted __be16 [usertype] tot_len
 ./security/provenance/include/provenance_net.h:124:22: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:124:22:    expected unsigned short [usertype] snd_port
 ./security/provenance/include/provenance_net.h:124:22:    got restricted __be16 [usertype] source
