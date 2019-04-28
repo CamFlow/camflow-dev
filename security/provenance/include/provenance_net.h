@@ -319,6 +319,8 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 	union long_prov_elt *addr_info;
 	int rc = 0;
 
+	pr_info("Provenance: record_address");
+
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
@@ -330,7 +332,7 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 		addr_info->address_info.length = addrlen;
 		__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr_storage), address, addrlen);
 
-		rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
+		rc = record_relation(RL_ADDRESSED, addr_info, prov_entry(prov), NULL, 0);
 		set_name_recorded(prov_elt(prov));
 	}
 out:

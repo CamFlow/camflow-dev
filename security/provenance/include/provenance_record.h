@@ -186,13 +186,8 @@ static __always_inline int record_node_name(struct provenance *node,
 
 		// Here we record the relation.
 		spin_lock(prov_lock(node));
-		if (prov_type(prov_elt(node)) == ACT_TASK) {
-			rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
-			set_name_recorded(prov_elt(node));
-		} else {
-			rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
-			set_name_recorded(prov_elt(node));
-		}
+		rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
+		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 		free_long_provenance(fname_prov);
 		return rc;

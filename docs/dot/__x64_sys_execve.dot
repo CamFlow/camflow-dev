@@ -20,7 +20,7 @@ task -> task[fontsize = 8,label = version_activity]
 
 inode -> process_memory[fontsize = 8,label = sh_read]
 
-path -> process_memory[fontsize = 8,label = named_process]
+path -> process_memory[fontsize = 8,label = named]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 

@@ -45,6 +45,7 @@
 
 ### v0.6.0
 ```
+- Add RL_ADDRESSED relation.
 - Add RL_RENAME relation.
 - Add RL_CONNECT_UNIX_STREAM relation.
 - Add RL_LOAD_UNDEFINED relation.

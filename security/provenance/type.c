@@ -54,7 +54,7 @@ static const char RL_STR_SETXATTR_INODE[] = "setxattr_inode";                   
 static const char RL_STR_RMVXATTR[] = "removexattr";                                                    // remove xattr operation (task -> xattr)
 static const char RL_STR_RMVXATTR_INODE[] = "removexattr_inode";                                        // remove xattr operation (xattr -> inode)
 static const char RL_STR_NAMED[] = "named";                                                             // connect path to inode
-static const char RL_STR_NAMED_PROCESS[] = "named_process";                                             // connect path to process_memory
+static const char RL_STR_ADDRESSED[] = "addressed";                                                     // connect address to inode
 static const char RL_STR_EXEC[] = "exec";                                                               // exec operation
 static const char RL_STR_EXEC_TASK[] = "exec_task";                                                     // exec operation
 static const char RL_STR_PCK_CNT[] = "packet_content";                                                  // connect netwrok packet to its content
@@ -220,8 +220,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_RMVXATTR_INODE;
 	case RL_NAMED:
 		return RL_STR_NAMED;
-	case RL_NAMED_PROCESS:
-		return RL_STR_NAMED_PROCESS;
+	case RL_ADDRESSED:
+		return RL_STR_ADDRESSED;
 	case RL_EXEC:
 		return RL_STR_EXEC;
 	case RL_EXEC_TASK:
@@ -382,7 +382,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_RMVXATTR_INODE, RL_RMVXATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_READ_LINK, RL_READ_LINK);
 	MATCH_AND_RETURN(str, RL_STR_NAMED, RL_NAMED);
-	MATCH_AND_RETURN(str, RL_STR_NAMED_PROCESS, RL_NAMED_PROCESS);
+	MATCH_AND_RETURN(str, RL_STR_ADDRESSED, RL_ADDRESSED);
 	MATCH_AND_RETURN(str, RL_STR_EXEC, RL_EXEC);
 	MATCH_AND_RETURN(str, RL_STR_EXEC_TASK, RL_EXEC_TASK);
 	MATCH_AND_RETURN(str, RL_STR_PCK_CNT, RL_PCK_CNT);

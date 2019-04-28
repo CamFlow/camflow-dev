@@ -26,7 +26,7 @@ msg -> task[fontsize = 8,label = receive_msg_queue]
 
 path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-path -> process_memory[fontsize = 8,label = named_process]
+path -> process_memory[fontsize = 8,label = named]
 
 process_memory -> task[fontsize = 8,label = memory_read]
 
