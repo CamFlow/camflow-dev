@@ -76,7 +76,7 @@
 #define RL_WRITE_IOCTL                          (RL_GENERATED | (0x0000000000000001ULL << 6))
 #define RL_PROC_WRITE                           (RL_GENERATED | (0x0000000000000001ULL << 7))
 #define RL_CONNECT                              (RL_GENERATED | (0x0000000000000001ULL << 8))
-#define RL_CONNECT_UNIX_STREAM                                    (RL_GENERATED | (0x0000000000000001ULL << 9))
+#define RL_CONNECT_UNIX_STREAM                  (RL_GENERATED | (0x0000000000000001ULL << 9))
 #define RL_LISTEN                               (RL_GENERATED | (0x0000000000000001ULL << 10))
 #define RL_BIND                                 (RL_GENERATED | (0x0000000000000001ULL << 11))
 #define RL_SND                                  (RL_GENERATED | (0x0000000000000001ULL << 12))
