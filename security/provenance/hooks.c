@@ -1912,32 +1912,17 @@ static int provenance_socket_bind(struct socket *sock,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = get_socket_inode_provenance(sock);
-	struct sockaddr_in *ipv4_addr;
-	uint8_t op;
 	int rc = 0;
 
 	if (!iprov)
 		return -ENOMEM;
-
-	if (provenance_is_opaque(prov_elt(cprov)))      // We perform a check here so that we won't accidentally start tracking/propagating @iprov and @cprov
+	// We perform a check here so that we won't accidentally
+	// start tracking/propagating @iprov and @cprov
+	if (provenance_is_opaque(prov_elt(cprov)))
+		return 0;
+	rc = check_track_socket(address, addrlen, cprov, iprov);
+	if (rc < 0)
 		return rc;
-
-	if (address->sa_family == PF_INET) {
-		if (addrlen < sizeof(struct sockaddr_in))
-			return -EINVAL;
-		ipv4_addr = (struct sockaddr_in *)address;
-		op = prov_ipv4_ingressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		if ((op & PROV_SET_TRACKED) != 0) {
-			set_tracked(prov_elt(iprov));
-			set_tracked(prov_elt(cprov));
-		}
-		if ((op & PROV_SET_PROPAGATE) != 0) {
-			set_propagate(prov_elt(iprov));
-			set_propagate(prov_elt(cprov));
-		}
-		if ((op & PROV_SET_RECORD) != 0)
-			set_record_packet(prov_elt(iprov));     // We want to record packet content.
-	}
 	rc = record_address(address, addrlen, iprov);
 	if (rc < 0)
 		return rc;
@@ -1965,9 +1950,7 @@ static int provenance_socket_connect(struct socket *sock,
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = get_socket_inode_provenance(sock);
-	struct sockaddr_in *ipv4_addr;
 	unsigned long irqflags;
-	uint8_t op;
 	int rc = 0;
 
 	if (!iprov)
@@ -1977,25 +1960,9 @@ static int provenance_socket_connect(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (provenance_is_opaque(prov_elt(cprov)))
 		goto out;
-
-	if (address->sa_family == PF_INET) {
-		if (addrlen < sizeof(struct sockaddr_in)) {
-			rc = -EINVAL;
-			goto out;
-		}
-		ipv4_addr = (struct sockaddr_in *)address;
-		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
-		if ((op & PROV_SET_TRACKED) != 0) {
-			set_tracked(prov_elt(iprov));
-			set_tracked(prov_elt(cprov));
-		}
-		if ((op & PROV_SET_PROPAGATE) != 0) {
-			set_propagate(prov_elt(iprov));
-			set_propagate(prov_elt(cprov));
-		}
-		if ((op & PROV_SET_RECORD) != 0)
-			set_record_packet(prov_elt(iprov));
-	}
+	rc = check_track_socket(address, addrlen, cprov, iprov);
+	if (rc < 0)
+		goto out;
 	rc = record_address(address, addrlen, iprov);
 	if (rc < 0)
 		goto out;
