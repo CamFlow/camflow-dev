@@ -370,8 +370,6 @@ static __always_inline int check_track_socket(const struct sockaddr *address,
 	uint8_t op;
 
 	if (address->sa_family == PF_INET) {
-		if (addrlen > sizeof(struct sockaddr_in))
-			return -EINVAL;
 		ipv4_addr = (struct sockaddr_in *)address;
 		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 		if ((op & PROV_SET_TRACKED) != 0) {
