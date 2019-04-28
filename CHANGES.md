@@ -45,6 +45,7 @@
 
 ### v0.6.0
 ```
+- Remove RL_NAMED_PROCESS as it was not used.
 - Add RL_ADDRESSED relation.
 - Add RL_RENAME relation.
 - Add RL_CONNECT_UNIX_STREAM relation.
