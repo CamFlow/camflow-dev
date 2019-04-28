@@ -91,18 +91,18 @@ security/provenance/hooks.c:108:22: warning: incorrect type in assignment (diffe
 security/provenance/hooks.c:108:22:    expected struct cred const *cred
 security/provenance/hooks.c:108:22:    got struct cred const [noderef] <asn:4> *real_cred
 security/provenance/hooks.c:152:30: warning: cast removes address space '<asn:4>' of expression
-security/provenance/hooks.c:1928:22: warning: incorrect type in argument 2 (different base types)
-security/provenance/hooks.c:1928:22:    expected unsigned int [usertype] ip
-security/provenance/hooks.c:1928:22:    got restricted __be32 [usertype] s_addr
-security/provenance/hooks.c:1928:22: warning: incorrect type in argument 3 (different base types)
-security/provenance/hooks.c:1928:22:    expected unsigned int [usertype] port
-security/provenance/hooks.c:1928:22:    got restricted __be16 [usertype] sin_port
-security/provenance/hooks.c:1986:22: warning: incorrect type in argument 2 (different base types)
-security/provenance/hooks.c:1986:22:    expected unsigned int [usertype] ip
-security/provenance/hooks.c:1986:22:    got restricted __be32 [usertype] s_addr
-security/provenance/hooks.c:1986:22: warning: incorrect type in argument 3 (different base types)
-security/provenance/hooks.c:1986:22:    expected unsigned int [usertype] port
-security/provenance/hooks.c:1986:22:    got restricted __be16 [usertype] sin_port
+./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 2 (different base types)
+./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] ip
+./security/provenance/include/provenance_net.h:374:22:    got restricted __be32 [usertype] s_addr
+./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 3 (different base types)
+./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] port
+./security/provenance/include/provenance_net.h:374:22:    got restricted __be16 [usertype] sin_port
+./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 2 (different base types)
+./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] ip
+./security/provenance/include/provenance_net.h:374:22:    got restricted __be32 [usertype] s_addr
+./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 3 (different base types)
+./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] port
+./security/provenance/include/provenance_net.h:374:22:    got restricted __be16 [usertype] sin_port
 ./security/provenance/include/provenance_net.h:186:46: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:186:46:    expected unsigned short [usertype] id
 ./security/provenance/include/provenance_net.h:186:46:    got restricted __be16 [usertype] id
@@ -130,9 +130,9 @@ security/provenance/hooks.c:1986:22:    got restricted __be16 [usertype] sin_por
 ./security/provenance/include/provenance_net.h:154:22: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:154:22:    expected unsigned short [usertype] rcv_port
 ./security/provenance/include/provenance_net.h:154:22:    got restricted __be16 [usertype] dest
-security/provenance/hooks.c:2577:16: warning: symbol 'buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:2578:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:1627:42: warning: dereference of noderef expression
+security/provenance/hooks.c:2545:16: warning: symbol 'buffer_head' was not declared. Should it be static?
+security/provenance/hooks.c:2546:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
+security/provenance/hooks.c:1628:42: warning: dereference of noderef expression
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
