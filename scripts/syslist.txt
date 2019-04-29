@@ -108,7 +108,7 @@ __x64_sys_setrlimit	18218
 __x64_sys_getrusage	18223
 __x64_sys_umask	18230
 __x64_sys_prctl	18234
-__x64_sys_getcpu	812
+__x64_sys_getcpu	811
 __x64_sys_sysinfo	18258
 __x64_sys_iopl	4445
 __x64_sys_ioperm	4441
@@ -137,9 +137,9 @@ __x64_sys_shmdt	33213
 __x64_sys_vmsplice	31789
 __x64_sys_splice	31805
 __x64_sys_tee	31814
-__x64_sys_time	814
+__x64_sys_time	813
 __x64_sys_stime	13955
-__x64_sys_gettimeofday	813
+__x64_sys_gettimeofday	812
 __x64_sys_settimeofday	13973
 __x64_sys_adjtimex	13985
 __x64_sys_nanosleep	14234
