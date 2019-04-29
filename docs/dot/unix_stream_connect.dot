@@ -2,7 +2,7 @@ digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = elli
 
 process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-path -> process_memory[fontsize = 8,label = named_process]
+path -> process_memory[fontsize = 8,label = named]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
@@ -14,7 +14,7 @@ process_memory -> task[fontsize = 8,label = memory_read]
 
 inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-task -> inode[fontsize = 8,label = connect]
+task -> inode[fontsize = 8,label = connect_unix_stream]
 
 task -> task[fontsize = 8,label = version_activity]
 

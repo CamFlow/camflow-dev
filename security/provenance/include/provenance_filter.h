@@ -1,19 +1,19 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_FILTER_H
 #define _PROVENANCE_FILTER_H
 
 #include <uapi/linux/provenance.h>
+#include <uapi/linux/provenance_fs.h>
 
 #include "provenance_policy.h"
 #include "provenance_ns.h"
@@ -37,7 +37,7 @@
  * @return true (i.e., should be filtered out) or false (i.e., should not be filtered out).
  *
  */
-static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
+static __always_inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 {
 	if (!prov_policy.prov_enabled)
 		return true;
@@ -53,15 +53,13 @@ static inline bool __filter_node(uint64_t filter, prov_entry_t *node)
  * @param relation_type The type of the relation (i.e., edge)
  *
  */
-static inline bool filter_update_node(const uint64_t relation_type)
+static __always_inline bool filter_update_node(const uint64_t relation_type)
 {
 	if (relation_type == RL_VERSION_TASK)
 		return true;
 	if (relation_type == RL_VERSION)
 		return true;
 	if (relation_type == RL_NAMED)
-		return true;
-	if (relation_type == RL_NAMED_PROCESS)
 		return true;
 	return false;
 }
@@ -78,7 +76,7 @@ static inline bool filter_update_node(const uint64_t relation_type)
  * @return true if the relation should be filtered out (i.e., not recorded) or false if otherwise.
  *
  */
-static inline bool filter_relation(const uint64_t type)
+static __always_inline bool filter_relation(const uint64_t type)
 {
 	if (prov_is_derived(type)) {
 		if (HIT_FILTER(prov_policy.prov_derived_filter, type))
@@ -105,7 +103,7 @@ static inline bool filter_relation(const uint64_t type)
  * @return true if the relation should be filtered out during propagation or false if otherwise.
  *
  */
-static inline bool filter_propagate_relation(uint64_t type)
+static __always_inline bool filter_propagate_relation(uint64_t type)
 {
 	if (prov_is_derived(type)) {
 		if (HIT_FILTER(prov_policy.prov_propagate_derived_filter, type))
@@ -134,9 +132,9 @@ static inline bool filter_propagate_relation(uint64_t type)
  * @return True if the relation of type 'type' should be recorded; False if otherwise.
  *
  */
-static inline bool should_record_relation(const uint64_t type,
-					  prov_entry_t *from,
-					  prov_entry_t *to)
+static __always_inline bool should_record_relation(const uint64_t type,
+						   prov_entry_t *from,
+						   prov_entry_t *to)
 {
 	if (filter_relation(type))
 		return false;
@@ -159,7 +157,7 @@ static inline bool should_record_relation(const uint64_t type,
  * @brief Define an abstract operation that returns op value of an item in a list. See concrete example below.
  */
 #define declare_filter_whichOP(function_name, type, variable)		\
-	static inline uint8_t function_name(uint32_t variable)		\
+	static __always_inline uint8_t function_name(uint32_t variable)	\
 	{								\
 		struct list_head *listentry, *listtmp;			\
 		struct type *tmp;					\
@@ -175,7 +173,7 @@ static inline bool should_record_relation(const uint64_t type,
  * @brief Define an abstract operation that deletes an item from a list. See concrete example below.
  */
 #define declare_filter_delete(function_name, type, variable)		  \
-	static inline uint8_t function_name(struct type *f)		  \
+	static __always_inline uint8_t function_name(struct type *f)	  \
 	{								  \
 		struct list_head *listentry, *listtmp;			  \
 		struct type *tmp;					  \
@@ -194,7 +192,7 @@ static inline bool should_record_relation(const uint64_t type,
  * @brief Define an abstract operation that adds/updates the op value of an item from a list. See concrete example below.
  */
 #define declare_filter_add_or_update(function_name, type, variable)	  \
-	static inline uint8_t function_name(struct type *f)		  \
+	static __always_inline uint8_t function_name(struct type *f)	  \
 	{								  \
 		struct list_head *listentry, *listtmp;			  \
 		struct type *tmp;					  \
@@ -241,7 +239,7 @@ declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
  * @param prov The provenance node in question.
  *
  */
-static inline void apply_target(union prov_elt *prov)
+static __always_inline void apply_target(union prov_elt *prov)
 {
 	uint8_t op = 0;
 

@@ -18,13 +18,13 @@ inode -> inode[fontsize = 8,label = version_entity]
 
 path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-path -> inode[fontsize = 8,label = named]
-
-path -> process_memory[fontsize = 8,label = named_process]
+path -> process_memory[fontsize = 8,label = named]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
 machine -> task[fontsize = 8,label = ran_on]
+
+path -> inode[fontsize = 8,label = named]
 
 xattr[fontsize = 8,label = xattr,shape = ellipse, fillcolor="#fffacd", style = filled]
 

@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_H
 #define _PROVENANCE_H
@@ -114,19 +113,22 @@ static inline void free_provenance(struct provenance *prov)
  * @reference GFP_ATOMIC https://www.linuxjournal.com/article/6930
  *
  */
-static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype)
+static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
 {
 	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
 	BUILD_BUG_ON(!prov_type_is_node(ntype));
+	BUILD_BUG_ON(!prov_type_is_long(ntype));
 
 	if (!prov)
 		return NULL;
 	prov_type(prov) = ntype;
-	node_identifier(prov).id = prov_next_node_id();
+	if (id == 0)
+		node_identifier(prov).id = prov_next_node_id();
+	else
+		node_identifier(prov).id = id;
 	node_identifier(prov).boot_id = prov_boot_id;
 	node_identifier(prov).machine_id = prov_machine_id;
-	set_is_long(prov);
 	call_provenance_alloc(prov);
 	return prov;
 }

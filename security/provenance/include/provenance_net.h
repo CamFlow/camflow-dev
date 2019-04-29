@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_NET_H
 #define _PROVENANCE_NET_H
@@ -25,6 +24,7 @@
 #include "provenance.h"
 #include "provenance_policy.h"
 #include "provenance_inode.h"
+#include "memcpy_ss.h"
 
 /*!
  * @brief Returns the provenance entry pointer of the inode associated with sock.
@@ -72,9 +72,9 @@ static inline struct provenance *get_sk_inode_provenance(struct sock *sk)
  */
 static inline struct provenance *get_sk_provenance(struct sock *sk)
 {
-	struct provenance *prov = sk->sk_provenance;
+	struct provenance *pprov = sk->sk_provenance;
 
-	return prov;
+	return pprov;
 }
 
 /*!
@@ -106,10 +106,10 @@ static inline struct provenance *get_socket_provenance(struct socket *sock)
  * @param id The packet identifier structure of provenance entry.
  *
  */
-static inline void __extract_tcp_info(struct sk_buff *skb,
-				      struct iphdr *ih,
-				      int offset,
-				      struct packet_identifier *id)
+static __always_inline void __extract_tcp_info(struct sk_buff *skb,
+					       struct iphdr *ih,
+					       int offset,
+					       struct packet_identifier *id)
 {
 	struct tcphdr _tcph;
 	struct tcphdr *th;
@@ -135,10 +135,10 @@ static inline void __extract_tcp_info(struct sk_buff *skb,
  * @param id The packet identifier structure of provenance entry.
  *
  */
-static inline void __extract_udp_info(struct sk_buff *skb,
-				      struct iphdr *ih,
-				      int offset,
-				      struct packet_identifier *id)
+static __always_inline void __extract_udp_info(struct sk_buff *skb,
+					       struct iphdr *ih,
+					       int offset,
+					       struct packet_identifier *id)
 {
 	struct udphdr _udph;
 	struct udphdr *uh;
@@ -164,9 +164,9 @@ static inline void __extract_udp_info(struct sk_buff *skb,
  * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
  *
  */
-static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union prov_elt *prov)
+static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
 {
-	struct packet_identifier *id;
+	struct provenance *prov;
 	int offset;
 	struct iphdr _iph;
 	struct iphdr *ih;
@@ -174,33 +174,33 @@ static inline unsigned int provenance_parse_skb_ipv4(struct sk_buff *skb, union 
 	offset = skb_network_offset(skb);
 	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);      // We obtain the IP header.
 	if (!ih)
-		return -EINVAL;
+		return NULL;
 
 	if (ihlen(ih) < sizeof(_iph))
-		return -EINVAL;
+		return NULL;
 
-	memset(prov, 0, sizeof(union prov_elt));
-	id = &packet_identifier(prov);  // We are going fo fill the information.
+	prov =  kmem_cache_zalloc(provenance_cache, GFP_ATOMIC);
 
-	id->type = ENT_PACKET;
+	packet_identifier(prov_elt(prov)).type = type;
 	// Collect IP element of prov identifier.
-	id->id = ih->id;
-	id->snd_ip = ih->saddr;
-	id->rcv_ip = ih->daddr;
-	id->protocol = ih->protocol;
-	prov->pck_info.length = ih->tot_len;
+	packet_identifier(prov_elt(prov)).id = ih->id;
+	packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
+	packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
+	packet_identifier(prov_elt(prov)).protocol = ih->protocol;
+	packet_info(prov_elt(prov)).length = ih->tot_len;
 
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
-		__extract_tcp_info(skb, ih, offset, id);
+		__extract_tcp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
 		break;
 	case IPPROTO_UDP:
-		__extract_udp_info(skb, ih, offset, id);
+		__extract_udp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
 		break;
 	default:
 		break;
 	}
-	return 0;
+	call_provenance_alloc(prov_entry(prov));
+	return prov;
 }
 
 struct ipv4_filters {
@@ -319,39 +319,70 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 	union long_prov_elt *addr_info;
 	int rc = 0;
 
+	pr_info("Provenance: record_address");
+
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	addr_info = alloc_long_provenance(ENT_ADDR);
-	if (!addr_info) {
-		rc = -ENOMEM;
-		goto out;
-	}
-	addr_info->address_info.length = addrlen;
-	memcpy(&(addr_info->address_info.addr), address, addrlen);
+	else {
+		addr_info = alloc_long_provenance(ENT_ADDR, 0);
+		if (!addr_info) {
+			rc = -ENOMEM;
+			goto out;
+		}
+		addr_info->address_info.length = addrlen;
+		__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr_storage), address, addrlen);
 
-	rc = record_relation(RL_NAMED, addr_info, prov_entry(prov), NULL, 0);
-	set_name_recorded(prov_elt(prov));
+		rc = record_relation(RL_ADDRESSED, addr_info, prov_entry(prov), NULL, 0);
+		set_name_recorded(prov_elt(prov));
+	}
 out:
 	free_long_provenance(addr_info);
 	return rc;
 }
 
-static __always_inline void record_packet_content(struct sk_buff *skb,
-						  struct provenance *pckprov)
+static inline void record_packet_content(struct sk_buff *skb,
+					 struct provenance *pckprov)
 {
 	union long_prov_elt *cnt;
 
-	cnt = alloc_long_provenance(ENT_PCKCNT);
+	cnt = alloc_long_provenance(ENT_PCKCNT, 0);
 	if (!cnt)
 		return;
 
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length >= PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
-		memcpy(cnt->pckcnt_info.content, skb->head, PATH_MAX);
+		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, PATH_MAX);
 	} else
-		memcpy(cnt->pckcnt_info.content, skb->head, cnt->pckcnt_info.length);
+		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, cnt->pckcnt_info.length);
 	record_relation(RL_PCK_CNT, cnt, prov_entry(pckprov), NULL, 0);
 	free_long_provenance(cnt);
+}
+
+
+
+static __always_inline int check_track_socket(const struct sockaddr *address,
+					      const int addrlen,
+					      struct provenance *cprov,
+					      struct provenance *iprov)
+{
+	struct sockaddr_in *ipv4_addr;
+	uint8_t op;
+
+	if (address->sa_family == PF_INET) {
+		ipv4_addr = (struct sockaddr_in *)address;
+		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		if ((op & PROV_SET_TRACKED) != 0) {
+			set_tracked(prov_elt(iprov));
+			set_tracked(prov_elt(cprov));
+		}
+		if ((op & PROV_SET_PROPAGATE) != 0) {
+			set_propagate(prov_elt(iprov));
+			set_propagate(prov_elt(cprov));
+		}
+		if ((op & PROV_SET_RECORD) != 0)
+			set_record_packet(prov_elt(iprov));
+	}
+	return 0;
 }
 #endif

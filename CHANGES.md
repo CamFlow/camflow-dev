@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.6.0           | 5.0.10	       | 29/04/2019 |
 | 0.5.3           | 4.20.13        | 04/03/2019	|
 | 0.5.2           | 4.20.11        | 21/02/2019 |
 | 0.5.1           | 4.20.7         | 11/02/2019 |
@@ -42,9 +43,27 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.6.0
+```
+- Remove RL_NAMED_PROCESS as it was not used.
+- Add RL_ADDRESSED relation.
+- Add RL_RENAME relation.
+- Add RL_CONNECT_UNIX_STREAM relation.
+- Add RL_LOAD_UNDEFINED relation.
+- Ensure inode_alloc_security does not generate provenance.
+- Ensure sk_alloc_security does not generate provenance.
+- Ensure inode_setxattr does not generate provenance.
+- Ensure inode_getsecurity does not generate provenance.
+- Associate task_id with relations.
+- Simplified boot buffer implementation.
+- Internal refactoring.
+- Split uapi/linux/provenance.h between uapi/linux/provenance.h, uapi/linux/provenance_fs.h, uapi/linux/provenance_utils.h
+- Update to kernel version 5.O.10.
+```
+
 ### v0.5.3
 ```
-- Fix issue with latest gcc release.
+- Hot Fix: fix issue with latest gcc release.
 - Update to kernel version 4.20.13.
 ```
 

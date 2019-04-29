@@ -1,0 +1,59 @@
+Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
+Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+File name removed
+
+FINAL RESULTS:
+
+./security/provenance/memcpy_ss.c:60:  [2] (buffer) memcpy:
+  Does not check for buffer overflows when copying to destination (CWE-120).
+  Make sure destination can always hold the source data.
+./security/provenance/include/provenance_record.h:211:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+./security/provenance/include/provenance_task.h:168:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+./security/provenance/include/provenance_task.h:186:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+./security/provenance/include/provenance_task.h:188:  [1] (buffer) read:
+  Check buffer boundaries if used in a loop including recursive loops
+  (CWE-120, CWE-20).
+./security/provenance/relay.c:246:  [1] (port) snprintf:
+  On some very old systems, snprintf is incorrectly implemented and permits
+  buffer overflows; there are also incompatible standard definitions of it.
+  Check it during installation, or use something else.
+
+ANALYSIS SUMMARY:
+
+Hits = 6
+Stat removed
+Physical Source Lines of Code (SLOC) = 4977
+Hits@level = [0]   0 [1]   5 [2]   1 [3]   0 [4]   0 [5]   0
+Hits@level+ = [0+]   6 [1+]   6 [2+]   1 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 1.20555 [1+] 1.20555 [2+] 0.200924 [3+]   0 [4+]   0 [5+]   0
+Minimum risk level = 1
+Not every hit is necessarily a security vulnerability.
+There may be other security vulnerabilities; review your code!
+See 'Secure Programming for Linux and Unix HOWTO'
+(http://www.dwheeler.com/secure-programs) for more information.

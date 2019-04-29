@@ -1,5 +1,5 @@
-kernel-version=4.20.13
-lsm-version=0.5.3
+kernel-version=5.0.10
+lsm-version=0.6.0
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -186,36 +186,8 @@ delete_us:
 delete:
 	rm -rf ./build
 
-test: copy_change
-	@echo "Running sparse, result in /tmp/sparse.txt"
-	-cd ./build/linux-stable && $(MAKE) C=2 security/provenance/ &> /tmp/sparse.txt
-	@echo "Running checkpatch, result in /tmp/checkpatch.txt"
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c > /tmp/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h >> /tmp/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h >> /tmp/checkpatch.txt
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h >> /tmp/checkpatch.txt
-	@echo "Running flawfinder, result in /tmp/flawfinder.txt"
-	-cd ./build/linux-stable && flawfinder ./security/provenance > /tmp/flawfinder.txt
-	@echo "Running smatch..."
-	-cd ./build/linux-stable && $(MAKE) clean
-	-cd ./build/linux-stable && $(MAKE) security CHECK="../smatch/smatch -p=kernel" C=1
-	@echo "Running coccinelle"
-	-cd ./build/linux-stable && sed -i '/options = --use-gitgrep/d' .cocciconfig
-	-cd ./build/linux-stable && $(MAKE) coccicheck MODE=report M=security/provenance
-
 run_ltp:
-	cd /opt/ltp && sudo ./runltp -R -o /tmp/ltp.txt -l /tmp/ltp.log -g /tmp/ltp.html -K /tmp/kernel -a tfjmp@seas.harvard.edu
-
-test_travis:
-	@echo "Running sparse..."
-	-cd ./build/linux-stable && $(MAKE) C=2 security/provenance/
-	@echo "Running checkpatch..."
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/*.c
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file security/provenance/include/*.h
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/camflow.h
-	-cd ./build/linux-stable && ./scripts/checkpatch.pl --file include/uapi/linux/provenance.h
-	@echo "Running flawfinder..."
-	-cd ./build/linux-stable && flawfinder ./security/provenance
+	cd /opt/ltp && sudo ./runltp -R -o /tmp/ltp.txt -l /tmp/ltp.log -g /tmp/ltp.html -K /tmp/kernel
 
 uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/fs.c
@@ -226,6 +198,7 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/query.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/relay.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/type.c
+	uncrustify -c uncrustify.cfg --replace security/provenance/memcpy_ss.c
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_filter.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_inode.h
@@ -237,9 +210,12 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/memcpy_ss.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_fs.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_types.h
+	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_utils.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 
 uncrustify_clean:
@@ -266,11 +242,9 @@ prepare_release_travis:
 test_patch:
 	cd ./build/pristine/linux-stable && patch -p2 < ../../patch-$(kernel-version)-v$(lsm-version)
 
-
 prepare_git:
 	mkdir -p build
 	cd build && git clone -b v$(kernel-version) git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-
 
 patch_git:
 	git config --global user.email $(cont-email)
@@ -284,15 +258,7 @@ patch_git:
 	cd ./build/linux-stable && git commit -a -m 'camflow patch'
 	cd ./build/linux-stable && git format-patch HEAD~~ -s
 
-update_linuxkit:
-	cd ./build && git clone https://github.com/CamFlow/linuxkit.git
-	mkdir -p ./build/linuxkit/projects/camflow/kernel/patches-4.14.x
-	cp ./build/linux-stable/0001-information-flow-patch.patch ./build/linuxkit/projects/camflow/kernel/patches-4.14.x/0001-information-flow-patch.patch
-	cp ./build/linux-stable/0002-camflow-patch.patch ./build/linuxkit/projects/camflow/kernel/patches-4.14.x/0002-camflow-patch.patch
-	cd ./build/linuxkit && git add .
-	cd ./build/linuxkit && git commit -a -m "Travis updated camflow patch $(shell date --iso=seconds)"
-
-fedora_dependencies:
-	sudo dnf groupinstall -y 'Development Tools'
-	sudo dnf install -y ncurses-devel cmake clang gcc-c++ wget git openssl-devel zlib patch mosquitto bison flex
-	sudo dnf install -y ruby
+save_space:
+	cd build && rm -rf information-flow-patch
+	cd build/linux-stable && rm -rf .git
+	cd build/pristine/linux-stable && rm -rf .git

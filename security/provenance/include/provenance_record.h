@@ -1,20 +1,20 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_RECORD_H
 #define _PROVENANCE_RECORD_H
 
 #include "provenance.h"
 #include "provenance_relay.h"
+#include "memcpy_ss.h"
 
 /*!
  * @brief This function updates the version of a provenance node.
@@ -48,9 +48,9 @@ static __always_inline int __update_version(const uint64_t type,
 	if (filter_update_node(type))
 		return 0;
 
-	memcpy(&old_prov, prov, sizeof(union prov_elt));        // Copy the current provenance prov to old_prov.
+	__memcpy_ss(&old_prov, sizeof(union prov_elt), prov, sizeof(union prov_elt));   // Copy the current provenance prov to old_prov.
 
-	node_identifier(prov).version++;                        // Update the version of prov to the newer version.
+	node_identifier(prov).version++;                                                // Update the version of prov to the newer version.
 	clear_recorded(prov);
 
 	// Record the version relation between two versions of the same identity.
@@ -137,7 +137,7 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 		return 0;
 	if (filter_node(prov_entry(prov)))
 		return 0;
-	memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+	__memcpy_ss(&old_prov, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 
@@ -163,9 +163,9 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
  * @return 0 if no error occurred. -ENOMEM if no memory can be allocated for long provenance name node. Other error codes unknown.
  *
  */
-static inline int record_node_name(struct provenance *node,
-				   const char *name,
-				   bool force)
+static __always_inline int record_node_name(struct provenance *node,
+					    const char *name,
+					    bool force)
 {
 	union long_prov_elt *fname_prov;
 	int rc;
@@ -176,26 +176,22 @@ static inline int record_node_name(struct provenance *node,
 	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
 	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
+	else {
+		fname_prov = alloc_long_provenance(ENT_PATH, djb2_hash(name));
+		if (!fname_prov)
+			return -ENOMEM;
 
-	fname_prov = alloc_long_provenance(ENT_PATH);
-	if (!fname_prov)
-		return -ENOMEM;
+		strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+		fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-	fname_prov->file_name_info.length = strnlen(fname_prov->file_name_info.name, PATH_MAX);
-
-	// Here we record the relation.
-	spin_lock(prov_lock(node));
-	if (prov_type(prov_elt(node)) == ACT_TASK) {
-		rc = record_relation(RL_NAMED_PROCESS, fname_prov, prov_entry(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-	} else {
+		// Here we record the relation.
+		spin_lock(prov_lock(node));
 		rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
+		spin_unlock(prov_lock(node));
+		free_long_provenance(fname_prov);
+		return rc;
 	}
-	spin_unlock(prov_lock(node));
-	free_long_provenance(fname_prov);
-	return rc;
 }
 
 static __always_inline int record_kernel_link(prov_entry_t *node)
@@ -205,9 +201,11 @@ static __always_inline int record_kernel_link(prov_entry_t *node)
 	if (provenance_is_kernel_recorded(node) ||
 	    !provenance_is_recorded(node))
 		return 0;
-	rc = record_relation(RL_RAN_ON, prov_machine, node, NULL, 0);
-	set_kernel_recorded(node);
-	return rc;
+	else {
+		rc = record_relation(RL_RAN_ON, prov_machine, node, NULL, 0);
+		set_kernel_recorded(node);
+		return rc;
+	}
 }
 
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);

@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_TASK_H
 #define _PROVENANCE_TASK_H
@@ -31,6 +30,7 @@
 #include "provenance_relay.h"
 #include "provenance_inode.h"
 #include "provenance_policy.h"
+#include "memcpy_ss.h"
 
 #define KB              1024
 #define MB              (1024 * KB)
@@ -223,32 +223,33 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	mm = get_task_mm(task);
-	if (!mm)
-		goto out;
-	exe_file = get_mm_exe_file(mm);
-	mmput_async(mm);
-	if (exe_file) {
-		fprov = get_file_provenance(exe_file, false);
-		if (provenance_is_opaque(prov_elt(fprov))) {
-			set_opaque(prov_elt(prov));
+	else {
+		mm = get_task_mm(task);
+		if (!mm)
 			goto out;
-		}
+		exe_file = get_mm_exe_file(mm);
+		mmput_async(mm);
+		if (exe_file) {
+			fprov = get_file_provenance(exe_file, false);
+			if (provenance_is_opaque(prov_elt(fprov))) {
+				set_opaque(prov_elt(prov));
+				goto out;
+			}
 
-		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);   // Memory allocation not allowed to sleep.
-		if (!buffer) {
-			pr_err("Provenance: could not allocate memory\n");
+			buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC); // Memory allocation not allowed to sleep.
+			if (!buffer) {
+				pr_err("Provenance: could not allocate memory\n");
+				fput(exe_file); // Release the file.
+				rc = -ENOMEM;
+				goto out;
+			}
+			ptr = file_path(exe_file, buffer, PATH_MAX);
 			fput(exe_file); // Release the file.
-			rc = -ENOMEM;
-			goto out;
+			rc = record_node_name(prov, ptr, false);
+			kfree(buffer);
 		}
-		ptr = file_path(exe_file, buffer, PATH_MAX);
-		fput(exe_file); // Release the file.
-		rc = record_node_name(prov, ptr, false);
-		kfree(buffer);
 	}
 out:
-	// put_cred(cred);
 	return rc;
 }
 
@@ -339,15 +340,15 @@ static inline struct provenance *get_cred_provenance(void)
  *
  * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
  */
-static __always_inline struct provenance *get_task_provenance( bool link )
+static inline struct provenance *get_task_provenance(bool link)
 {
-	struct provenance *prov = current->provenance;
+	struct provenance *tprov = current->provenance;
 
-	prov_elt(prov)->task_info.pid = task_pid_nr(current);
-	prov_elt(prov)->task_info.vpid = task_pid_vnr(current);
-	if (!provenance_is_opaque(prov_elt(prov)) && link)
-		record_kernel_link(prov_entry(prov));
-	return prov;
+	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
+	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+	if (!provenance_is_opaque(prov_elt(tprov)) && link)
+		record_kernel_link(prov_entry(tprov));
+	return tprov;
 }
 
 /*!
@@ -477,7 +478,7 @@ fail:
  *
  */
 static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
-				 unsigned long len)
+				 size_t len)
 {
 	int rv = 0;
 	unsigned long ofs, bytes;
@@ -501,7 +502,7 @@ static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 		kaddr = kmap(page);
 		flush_cache_page(bprm->vma, ofs, page_to_pfn(page));
 		bytes = min_t(unsigned int, len, PAGE_SIZE - ofs);
-		memcpy(buff, kaddr + ofs, bytes);
+		__memcpy_ss(buff, len, kaddr + ofs, bytes);
 		src += bytes;
 		buff += bytes;
 		len -= bytes;
@@ -543,7 +544,7 @@ static __always_inline int record_arg(struct provenance *prov,
 	union long_prov_elt *aprov;
 	int rc = 0;
 
-	aprov = alloc_long_provenance(vtype);
+	aprov = alloc_long_provenance(vtype, 0);
 	if (!aprov)
 		return -ENOMEM;
 	aprov->arg_info.length = len;

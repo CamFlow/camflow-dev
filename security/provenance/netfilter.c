@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #include <net/net_namespace.h>
 
@@ -35,7 +34,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 {
 	struct provenance *cprov = current_provenance();
 	struct provenance *iprov = NULL;
-	struct provenance pckprov;
+	struct provenance *pckprov;
 	unsigned long irqflags;
 
 	if (!cprov)
@@ -45,17 +44,17 @@ static unsigned int provenance_ipv4_out(void *priv,
 		if (!iprov)
 			return NF_ACCEPT;
 
-		memset(&pckprov, 0, sizeof(struct provenance));
-		provenance_parse_skb_ipv4(skb, prov_elt((&pckprov)));
+		pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
+		if (!pckprov)
+			return -ENOMEM;
 
 		if (provenance_records_packet(prov_elt(iprov)))
-			record_packet_content(skb, &pckprov);
+			record_packet_content(skb, pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
-		call_provenance_alloc((prov_entry_t *)&pckprov);
-		derives(RL_SND_PACKET, iprov, &pckprov, NULL, 0);
-		call_provenance_free((prov_entry_t *)&pckprov);
+		derives(RL_SND_PACKET, iprov, pckprov, NULL, 0);
 		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
+		free_provenance(pckprov);
 	}
 	return NF_ACCEPT;
 }
@@ -100,4 +99,11 @@ static int __init provenance_nf_ip_init(void)
 	return 0;
 }
 
-__initcall(provenance_nf_ip_init);
+static void __exit provenance_nf_ip_exit(void)
+{
+	pr_info("Provenance: unregistering netfilter hooks.\n");
+	unregister_pernet_subsys(&provenance_net_ops);
+}
+
+module_init(provenance_nf_ip_init);
+module_exit(provenance_nf_ip_exit);

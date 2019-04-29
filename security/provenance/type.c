@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #include <linux/provenance_types.h>
 #include "provenance.h"
@@ -31,6 +30,7 @@ static const char RL_STR_SH_WRITE[] = "sh_write";                               
 static const char RL_STR_PROC_WRITE[] = "memory_write";                                                 // writing to process memory (i.e. shared between thread)
 static const char RL_STR_BIND[] = "bind";                                                               // socket bind operation
 static const char RL_STR_CONNECT[] = "connect";                                                         // socket connection operation
+static const char RL_STR_CONNECT_UNIX_STREAM[] = "connect_unix_stream";                                 // unix stream socket connection operation
 static const char RL_STR_LISTEN[] = "listen";                                                           // socket listen operation
 static const char RL_STR_ACCEPT[] = "accept";                                                           // socket accept operation
 static const char RL_STR_OPEN[] = "open";                                                               // file open operation
@@ -41,6 +41,7 @@ static const char RL_STR_VERSION[] = "version_entity";                          
 static const char RL_STR_MUNMAP[] = "munmap";                                                           // munmap operation
 static const char RL_STR_SHMDT[] = "shmdt";                                                             // shmdt operation
 static const char RL_STR_LINK[] = "link";                                                               // create a link
+static const char RL_STR_RENAME[] = "rename";                                                           // rename inode
 static const char RL_STR_UNLINK[] = "unlink";                                                           // delete a link
 static const char RL_STR_SYMLINK[] = "symlink";                                                         // create a symlink
 static const char RL_STR_SPLICE_IN[] = "splice_in";                                                     // pipe splice operation from in file
@@ -53,7 +54,7 @@ static const char RL_STR_SETXATTR_INODE[] = "setxattr_inode";                   
 static const char RL_STR_RMVXATTR[] = "removexattr";                                                    // remove xattr operation (task -> xattr)
 static const char RL_STR_RMVXATTR_INODE[] = "removexattr_inode";                                        // remove xattr operation (xattr -> inode)
 static const char RL_STR_NAMED[] = "named";                                                             // connect path to inode
-static const char RL_STR_NAMED_PROCESS[] = "named_process";                                             // connect path to process_memory
+static const char RL_STR_ADDRESSED[] = "addressed";                                                     // connect address to inode
 static const char RL_STR_EXEC[] = "exec";                                                               // exec operation
 static const char RL_STR_EXEC_TASK[] = "exec_task";                                                     // exec operation
 static const char RL_STR_PCK_CNT[] = "packet_content";                                                  // connect netwrok packet to its content
@@ -107,6 +108,7 @@ static const char RL_STR_LOAD_KEXEC_IMAGE[] = "load_kexec_image";               
 static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";                               // load file into kernel
 static const char RL_STR_LOAD_POLICY[] = "load_policy";                                                 // load file into kernel
 static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";                                       // load file into kernel
+static const char RL_STR_LOAD_UNDEFINED[] = "load_undefined";                                           // load file into kernel
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                                 // unkown node type should normally not appear
@@ -137,7 +139,7 @@ static const char ND_STR_ARG[] = "argv";                                        
 static const char ND_STR_ENV[] = "envp";                                        // environment parameter
 static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
-#define MATCH_AND_RETURN(str1, str2, v)    if (strcmp(str1, str2) == 0) return v
+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
 /* transform from relation ID to string representation */
 const char *relation_str(uint64_t type)
 {
@@ -170,6 +172,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_BIND;
 	case RL_CONNECT:
 		return RL_STR_CONNECT;
+	case RL_CONNECT_UNIX_STREAM:
+		return RL_STR_CONNECT_UNIX_STREAM;
 	case RL_LISTEN:
 		return RL_STR_LISTEN;
 	case RL_ACCEPT:
@@ -190,6 +194,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_SHMDT;
 	case RL_LINK:
 		return RL_STR_LINK;
+	case RL_RENAME:
+		return RL_STR_RENAME;
 	case RL_UNLINK:
 		return RL_STR_UNLINK;
 	case RL_SYMLINK:
@@ -214,8 +220,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_RMVXATTR_INODE;
 	case RL_NAMED:
 		return RL_STR_NAMED;
-	case RL_NAMED_PROCESS:
-		return RL_STR_NAMED_PROCESS;
+	case RL_ADDRESSED:
+		return RL_STR_ADDRESSED;
 	case RL_EXEC:
 		return RL_STR_EXEC;
 	case RL_EXEC_TASK:
@@ -324,6 +330,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_LOAD_POLICY;
 	case RL_LOAD_CERTIFICATE:
 		return RL_STR_LOAD_CERTIFICATE;
+	case RL_LOAD_UNDEFINED:
+		return RL_STR_LOAD_UNDEFINED;
 	case RL_RAN_ON:
 		return RL_STR_RAN_ON;
 	default:
@@ -349,6 +357,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_GETGID, RL_GETGID);
 	MATCH_AND_RETURN(str, RL_STR_BIND, RL_BIND);
 	MATCH_AND_RETURN(str, RL_STR_CONNECT, RL_CONNECT);
+	MATCH_AND_RETURN(str, RL_STR_CONNECT_UNIX_STREAM, RL_CONNECT_UNIX_STREAM);
 	MATCH_AND_RETURN(str, RL_STR_LISTEN, RL_LISTEN);
 	MATCH_AND_RETURN(str, RL_STR_ACCEPT, RL_ACCEPT);
 	MATCH_AND_RETURN(str, RL_STR_OPEN, RL_OPEN);
@@ -359,6 +368,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
 	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
+	MATCH_AND_RETURN(str, RL_STR_RENAME, RL_RENAME);
 	MATCH_AND_RETURN(str, RL_STR_UNLINK, RL_UNLINK);
 	MATCH_AND_RETURN(str, RL_STR_SYMLINK, RL_SYMLINK);
 	MATCH_AND_RETURN(str, RL_STR_SPLICE_IN, RL_SPLICE_IN);
@@ -372,7 +382,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_RMVXATTR_INODE, RL_RMVXATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_READ_LINK, RL_READ_LINK);
 	MATCH_AND_RETURN(str, RL_STR_NAMED, RL_NAMED);
-	MATCH_AND_RETURN(str, RL_STR_NAMED_PROCESS, RL_NAMED_PROCESS);
+	MATCH_AND_RETURN(str, RL_STR_ADDRESSED, RL_ADDRESSED);
 	MATCH_AND_RETURN(str, RL_STR_EXEC, RL_EXEC);
 	MATCH_AND_RETURN(str, RL_STR_EXEC_TASK, RL_EXEC_TASK);
 	MATCH_AND_RETURN(str, RL_STR_PCK_CNT, RL_PCK_CNT);
@@ -426,6 +436,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_POLICY, RL_LOAD_POLICY);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_UNDEFINED, RL_LOAD_UNDEFINED);
 	MATCH_AND_RETURN(str, RL_STR_RAN_ON, RL_RAN_ON);
 	return 0;
 }

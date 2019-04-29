@@ -21,6 +21,7 @@ RL_SH_WRITE|sh_write|writing to shared state|
 RL_PROC_WRITE|memory_write|writing to process memory |
 RL_BIND|bind|socket bind operation|
 RL_CONNECT|connect|socket connection operation|
+RL_CONNECT_UNIX_STREAM|connect_unix_stream|unix stream socket connection operation|
 RL_LISTEN|listen|socket listen operation|
 RL_ACCEPT|accept|socket accept operation|
 RL_OPEN|open|file open operation|
@@ -31,6 +32,7 @@ RL_VERSION|version_entity|connect version of entity object|
 RL_MUNMAP|munmap|munmap operation|
 RL_SHMDT|shmdt|shmdt operation|
 RL_LINK|link|create a link|
+RL_RENAME|rename|rename inode|
 RL_UNLINK|unlink|delete a link|
 RL_SYMLINK|symlink|create a symlink|
 RL_SPLICE_IN|splice_in|pipe splice operation from in file|
@@ -43,7 +45,7 @@ RL_SETXATTR_INODE|setxattr_inode|setxattr operation |
 RL_RMVXATTR|removexattr|remove xattr operation |
 RL_RMVXATTR_INODE|removexattr_inode|remove xattr operation |
 RL_NAMED|named|connect path to inode|
-RL_NAMED_PROCESS|named_process|connect path to process_memory|
+RL_ADDRESSED|addressed|connect address to inode|
 RL_EXEC|exec|exec operation|
 RL_EXEC_TASK|exec_task|exec operation|
 RL_PCK_CNT|packet_content|connect netwrok packet to its content|
@@ -97,3 +99,4 @@ RL_LOAD_KEXEC_IMAGE|load_kexec_image|load file into kernel|
 RL_LOAD_KEXEC_INITRAMFS|load_kexec_initramfs|load file into kernel|
 RL_LOAD_POLICY|load_policy|load file into kernel|
 RL_LOAD_CERTIFICATE|load_certificate|load file into kernel|
+RL_LOAD_UNDEFINED|load_undefined|load file into kernel|

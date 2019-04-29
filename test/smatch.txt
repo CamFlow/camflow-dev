@@ -1,0 +1,446 @@
+  HOSTCC  scripts/basic/fixdep
+  HOSTCC  scripts/kconfig/conf.o
+  HOSTCC  scripts/kconfig/confdata.o
+  HOSTCC  scripts/kconfig/expr.o
+  HOSTCC  scripts/kconfig/symbol.o
+  HOSTCC  scripts/kconfig/preprocess.o
+  LEX     scripts/kconfig/zconf.lex.c
+  YACC    scripts/kconfig/zconf.tab.h
+  HOSTCC  scripts/kconfig/zconf.lex.o
+  YACC    scripts/kconfig/zconf.tab.c
+  HOSTCC  scripts/kconfig/zconf.tab.o
+  HOSTLD  scripts/kconfig/conf
+scripts/kconfig/conf  --syncconfig Kconfig
+  SYSTBL  arch/x86/include/generated/asm/syscalls_32.h
+  SYSHDR  arch/x86/include/generated/asm/unistd_32_ia32.h
+  SYSHDR  arch/x86/include/generated/asm/unistd_64_x32.h
+  SYSTBL  arch/x86/include/generated/asm/syscalls_64.h
+  HYPERCALLS arch/x86/include/generated/asm/xen-hypercalls.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_32.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_64.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_x32.h
+  HOSTCC  arch/x86/tools/relocs_32.o
+  HOSTCC  arch/x86/tools/relocs_64.o
+  HOSTCC  arch/x86/tools/relocs_common.o
+  HOSTLD  arch/x86/tools/relocs
+  UPD     include/config/kernel.release
+  WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
+  WRAP    arch/x86/include/generated/uapi/asm/poll.h
+  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
+  WRAP    arch/x86/include/generated/asm/early_ioremap.h
+  WRAP    arch/x86/include/generated/asm/export.h
+  WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
+  WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
+  UPD     include/generated/uapi/linux/version.h
+  UPD     include/generated/utsrelease.h
+  HOSTCC  scripts/selinux/genheaders/genheaders
+  HOSTCC  scripts/selinux/mdp/mdp
+  HOSTCC  scripts/bin2c
+  HOSTCC  scripts/kallsyms
+  HOSTCC  scripts/pnmtologo
+  HOSTCC  scripts/conmakehash
+  HOSTCC  scripts/recordmcount
+  HOSTCC  scripts/sortextable
+  HOSTCC  scripts/asn1_compiler
+  HOSTCC  scripts/sign-file
+  HOSTCC  scripts/extract-cert
+  CHECK   scripts/mod/empty.c
+  CC      scripts/mod/empty.o
+  HOSTCC  scripts/mod/mk_elfconfig
+  MKELF   scripts/mod/elfconfig.h
+  HOSTCC  scripts/mod/modpost.o
+  CC      scripts/mod/devicetable-offsets.s
+  UPD     scripts/mod/devicetable-offsets.h
+  HOSTCC  scripts/mod/file2alias.o
+  HOSTCC  scripts/mod/sumversion.o
+  HOSTLD  scripts/mod/modpost
+  CC      kernel/bounds.s
+  UPD     include/generated/bounds.h
+  UPD     include/generated/timeconst.h
+  CC      arch/x86/kernel/asm-offsets.s
+  UPD     include/generated/asm-offsets.h
+  CALL    scripts/checksyscalls.sh
+  DESCEND  objtool
+  HOSTCC   /root/circulate/build/linux-stable/tools/objtool/fixdep.o
+  HOSTLD   /root/circulate/build/linux-stable/tools/objtool/fixdep-in.o
+  LINK     /root/circulate/build/linux-stable/tools/objtool/fixdep
+  CC       /root/circulate/build/linux-stable/tools/objtool/exec-cmd.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/help.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/pager.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/parse-options.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/run-command.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/sigchain.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/subcmd-config.o
+  LD       /root/circulate/build/linux-stable/tools/objtool/libsubcmd-in.o
+  AR       /root/circulate/build/linux-stable/tools/objtool/libsubcmd.a
+  GEN      /root/circulate/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
+  CC       /root/circulate/build/linux-stable/tools/objtool/arch/x86/decode.o
+  LD       /root/circulate/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/builtin-check.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/builtin-orc.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/check.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/orc_gen.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/orc_dump.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/elf.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/special.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/objtool.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/libstring.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
+  LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
+  LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
+  CHECK   security/integrity/ima/ima_fs.c
+  CC      security/integrity/ima/ima_fs.o
+  CHECK   security/integrity/ima/ima_queue.c
+  CC      security/integrity/ima/ima_queue.o
+  CHECK   security/integrity/ima/ima_init.c
+  CC      security/integrity/ima/ima_init.o
+  CHECK   security/integrity/ima/ima_main.c
+  CC      security/integrity/ima/ima_main.o
+  CHECK   security/integrity/ima/ima_crypto.c
+  CC      security/integrity/ima/ima_crypto.o
+  CHECK   security/integrity/ima/ima_api.c
+  CC      security/integrity/ima/ima_api.o
+  CHECK   security/integrity/ima/ima_policy.c
+  CC      security/integrity/ima/ima_policy.o
+  CHECK   security/integrity/ima/ima_template.c
+  CC      security/integrity/ima/ima_template.o
+  CHECK   security/integrity/ima/ima_template_lib.c
+  CC      security/integrity/ima/ima_template_lib.o
+  AR      security/integrity/ima/built-in.a
+  CHECK   security/integrity/iint.c
+  CC      security/integrity/iint.o
+  CHECK   security/integrity/integrity_audit.c
+  CC      security/integrity/integrity_audit.o
+  CHECK   security/integrity/digsig.c
+  CC      security/integrity/digsig.o
+  CHECK   security/integrity/digsig_asymmetric.c
+  CC      security/integrity/digsig_asymmetric.o
+  CHECK   security/integrity/platform_certs/platform_keyring.c
+  CC      security/integrity/platform_certs/platform_keyring.o
+  CHECK   security/integrity/platform_certs/efi_parser.c
+  CC      security/integrity/platform_certs/efi_parser.o
+  CHECK   security/integrity/platform_certs/load_uefi.c
+  CC      security/integrity/platform_certs/load_uefi.o
+  AR      security/integrity/built-in.a
+  CHECK   security/keys/encrypted-keys/encrypted.c
+  CC      security/keys/encrypted-keys/encrypted.o
+  CHECK   security/keys/encrypted-keys/ecryptfs_format.c
+  CC      security/keys/encrypted-keys/ecryptfs_format.o
+  AR      security/keys/encrypted-keys/built-in.a
+  CHECK   security/keys/gc.c
+  CC      security/keys/gc.o
+  CHECK   security/keys/key.c
+  CC      security/keys/key.o
+  CHECK   security/keys/keyring.c
+  CC      security/keys/keyring.o
+  CHECK   security/keys/keyctl.c
+  CC      security/keys/keyctl.o
+  CHECK   security/keys/permission.c
+  CC      security/keys/permission.o
+  CHECK   security/keys/process_keys.c
+  CC      security/keys/process_keys.o
+  CHECK   security/keys/request_key.c
+security/keys/request_key.c:282 construct_get_dest_keyring() warn: missing break? reassigning 'dest_keyring->usage'
+  CC      security/keys/request_key.o
+  CHECK   security/keys/request_key_auth.c
+  CC      security/keys/request_key_auth.o
+  CHECK   security/keys/user_defined.c
+  CC      security/keys/user_defined.o
+  CHECK   security/keys/compat.c
+  CC      security/keys/compat.o
+  CHECK   security/keys/compat_dh.c
+  CC      security/keys/compat_dh.o
+  CHECK   security/keys/proc.c
+  CC      security/keys/proc.o
+  CHECK   security/keys/sysctl.c
+  CC      security/keys/sysctl.o
+  CHECK   security/keys/persistent.c
+  CC      security/keys/persistent.o
+  CHECK   security/keys/dh.c
+  CC      security/keys/dh.o
+  CHECK   security/keys/keyctl_pkey.c
+  CC      security/keys/keyctl_pkey.o
+  CHECK   security/keys/big_key.c
+  CC      security/keys/big_key.o
+  AR      security/keys/built-in.a
+  CHECK   security/provenance/relay.c
+security/provenance/relay.c:51 prov_add_relay() error: potential null dereference 'list'.  (kzalloc returns null)
+security/provenance/relay.c:245 prov_create_channel() warn: possible memory leak of 'long_name'
+  CC      security/provenance/relay.o
+  CHECK   security/provenance/hooks.c
+security/provenance/hooks.c:443 provenance_inode_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 437
+  Unlocked on: line 443
+security/provenance/hooks.c:443 provenance_inode_create() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 443
+  Unlocked on: line 437
+security/provenance/hooks.c:514 provenance_inode_permission() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 480
+               line 482
+               line 487
+  Unlocked on: line 514
+security/provenance/hooks.c:514 provenance_inode_permission() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 514
+  Unlocked on: line 480
+               line 482
+               line 487
+security/provenance/hooks.c:556 provenance_inode_link() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 548
+  Unlocked on: line 556
+security/provenance/hooks.c:556 provenance_inode_link() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 556
+  Unlocked on: line 548
+security/provenance/hooks.c:582 provenance_inode_unlink() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 575
+  Unlocked on: line 582
+security/provenance/hooks.c:582 provenance_inode_unlink() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 582
+  Unlocked on: line 575
+security/provenance/hooks.c:613 provenance_inode_symlink() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 613
+  Unlocked on: line 605
+security/provenance/hooks.c:650 provenance_inode_rename() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 641
+  Unlocked on: line 650
+security/provenance/hooks.c:650 provenance_inode_rename() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 650
+  Unlocked on: line 641
+security/provenance/hooks.c:708 provenance_inode_setattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 683
+               line 686
+  Unlocked on: line 708
+security/provenance/hooks.c:708 provenance_inode_setattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 708
+  Unlocked on: line 683
+               line 686
+security/provenance/hooks.c:737 provenance_inode_getattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 730
+  Unlocked on: line 737
+security/provenance/hooks.c:737 provenance_inode_getattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 737
+  Unlocked on: line 730
+security/provenance/hooks.c:766 provenance_inode_readlink() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 759
+  Unlocked on: line 766
+security/provenance/hooks.c:766 provenance_inode_readlink() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 766
+  Unlocked on: line 759
+security/provenance/hooks.c:853 provenance_inode_post_setxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 844
+               line 847
+  Unlocked on: line 853
+security/provenance/hooks.c:853 provenance_inode_post_setxattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 853
+  Unlocked on: line 844
+               line 847
+security/provenance/hooks.c:887 provenance_inode_getxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 878
+               line 881
+  Unlocked on: line 887
+security/provenance/hooks.c:887 provenance_inode_getxattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 887
+  Unlocked on: line 878
+               line 881
+security/provenance/hooks.c:916 provenance_inode_listxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 910
+  Unlocked on: line 916
+security/provenance/hooks.c:916 provenance_inode_listxattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 916
+  Unlocked on: line 910
+security/provenance/hooks.c:952 provenance_inode_removexattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 941
+               line 944
+  Unlocked on: line 952
+security/provenance/hooks.c:952 provenance_inode_removexattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 952
+  Unlocked on: line 941
+               line 944
+security/provenance/hooks.c:1099 provenance_file_permission() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1046
+  Unlocked on: line 1099
+security/provenance/hooks.c:1099 provenance_file_permission() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1099
+  Unlocked on: line 1046
+security/provenance/hooks.c:1135 provenance_file_splice_pipe_to_pipe() warn: inconsistent returns 'spin_lock:&outprov->lock'.
+  Locked on:   line 1124
+  Unlocked on: line 1135
+security/provenance/hooks.c:1135 provenance_file_splice_pipe_to_pipe() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1135
+  Unlocked on: line 1124
+security/provenance/hooks.c:1211 provenance_file_open() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1205
+  Unlocked on: line 1211
+security/provenance/hooks.c:1211 provenance_file_open() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1211
+  Unlocked on: line 1205
+security/provenance/hooks.c:1239 provenance_file_receive() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1233
+  Unlocked on: line 1239
+security/provenance/hooks.c:1239 provenance_file_receive() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1239
+  Unlocked on: line 1233
+security/provenance/hooks.c:1265 provenance_file_lock() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1259
+  Unlocked on: line 1265
+security/provenance/hooks.c:1265 provenance_file_lock() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1265
+  Unlocked on: line 1259
+security/provenance/hooks.c:1298 provenance_file_send_sigiotask() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1290
+  Unlocked on: line 1298
+security/provenance/hooks.c:1298 provenance_file_send_sigiotask() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1298
+  Unlocked on: line 1290
+security/provenance/hooks.c:1378 provenance_mmap_file() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1341
+               line 1344
+  Unlocked on: line 1378
+security/provenance/hooks.c:1378 provenance_mmap_file() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1378
+  Unlocked on: line 1341
+               line 1344
+security/provenance/hooks.c:1460 provenance_file_ioctl() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1449
+  Unlocked on: line 1460
+security/provenance/hooks.c:1460 provenance_file_ioctl() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1460
+  Unlocked on: line 1449
+security/provenance/hooks.c:1753 provenance_shm_shmat() warn: inconsistent returns 'spin_lock:&sprov->lock'.
+  Locked on:   line 1739
+  Unlocked on: line 1753
+security/provenance/hooks.c:1753 provenance_shm_shmat() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1753
+  Unlocked on: line 1739
+security/provenance/hooks.c:1780 provenance_shm_shmdt() warn: inconsistent returns 'spin_lock:&sprov->lock'.
+  Locked on:   line 1775
+  Unlocked on: line 1780
+security/provenance/hooks.c:1780 provenance_shm_shmdt() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1780
+  Unlocked on: line 1775
+security/provenance/hooks.c:1859 provenance_socket_post_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1846
+               line 1848
+  Unlocked on: line 1859
+security/provenance/hooks.c:1859 provenance_socket_post_create() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1859
+  Unlocked on: line 1846
+               line 1848
+security/provenance/hooks.c:1882 provenance_socket_socketpair() error: double lock 'spin_lock:'
+security/provenance/hooks.c:1887 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:&iprova->lock'.
+  Locked on:   line 1872
+               line 1874
+  Unlocked on: line 1887
+security/provenance/hooks.c:1887 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:&iprovb->lock'.
+  Locked on:   line 1872
+               line 1874
+               line 1887
+  Unlocked on: line 1887
+security/provenance/hooks.c:1887 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1887
+  Unlocked on: line 1872
+               line 1874
+security/provenance/hooks.c:1973 provenance_socket_connect() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1957
+  Unlocked on: line 1973
+security/provenance/hooks.c:1973 provenance_socket_connect() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1973
+  Unlocked on: line 1957
+security/provenance/hooks.c:2001 provenance_socket_listen() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1995
+  Unlocked on: line 2001
+security/provenance/hooks.c:2001 provenance_socket_listen() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 2001
+  Unlocked on: line 1995
+security/provenance/hooks.c:2100 provenance_socket_sendmsg_always() warn: inconsistent returns 'spin_lock:&iprova->lock'.
+  Locked on:   line 2078
+  Unlocked on: line 2100
+security/provenance/hooks.c:2164 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 2141
+  Unlocked on: line 2164
+security/provenance/hooks.c:2164 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 2164
+  Unlocked on: line 2141
+  CC      security/provenance/hooks.o
+  CHECK   security/provenance/query.c
+  CC      security/provenance/query.o
+  CHECK   security/provenance/fs.c
+security/provenance/fs.c:848 prov_read_policy_hash() warn: possible memory leak of 'buff'
+  CC      security/provenance/fs.o
+  CHECK   security/provenance/netfilter.c
+  CC      security/provenance/netfilter.o
+  CHECK   security/provenance/propagate.c
+  CC      security/provenance/propagate.o
+  CHECK   security/provenance/type.c
+  CC      security/provenance/type.o
+  CHECK   security/provenance/machine.c
+  CC      security/provenance/machine.o
+  CHECK   security/provenance/memcpy_ss.c
+  CC      security/provenance/memcpy_ss.o
+  AR      security/provenance/built-in.a
+  GEN     security/selinux/flask.h security/selinux/av_permissions.h
+  CHECK   security/selinux/avc.c
+  CC      security/selinux/avc.o
+  CHECK   security/selinux/hooks.c
+security/selinux/hooks.c:2590 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
+  Locked on:   line 2590
+  Unlocked on: line 2558
+  CC      security/selinux/hooks.o
+  CHECK   security/selinux/selinuxfs.c
+  CC      security/selinux/selinuxfs.o
+  CHECK   security/selinux/netlink.c
+  CC      security/selinux/netlink.o
+  CHECK   security/selinux/nlmsgtab.c
+  CC      security/selinux/nlmsgtab.o
+  CHECK   security/selinux/netif.c
+  CC      security/selinux/netif.o
+  CHECK   security/selinux/netnode.c
+  CC      security/selinux/netnode.o
+  CHECK   security/selinux/netport.c
+  CC      security/selinux/netport.o
+  CHECK   security/selinux/ibpkey.c
+  CC      security/selinux/ibpkey.o
+  CHECK   security/selinux/exports.c
+  CC      security/selinux/exports.o
+  CHECK   security/selinux/ss/ebitmap.c
+security/selinux/ss/ebitmap.c:188 ebitmap_netlbl_import() info: ignoring unreachable code.
+  CC      security/selinux/ss/ebitmap.o
+  CHECK   security/selinux/ss/hashtab.c
+  CC      security/selinux/ss/hashtab.o
+  CHECK   security/selinux/ss/symtab.c
+  CC      security/selinux/ss/symtab.o
+  CHECK   security/selinux/ss/sidtab.c
+security/selinux/ss/sidtab.c:468 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
+  CC      security/selinux/ss/sidtab.o
+  CHECK   security/selinux/ss/avtab.c
+  CC      security/selinux/ss/avtab.o
+  CHECK   security/selinux/ss/policydb.c
+  CC      security/selinux/ss/policydb.o
+  CHECK   security/selinux/ss/services.c
+  CC      security/selinux/ss/services.o
+  CHECK   security/selinux/ss/conditional.c
+  CC      security/selinux/ss/conditional.o
+  CHECK   security/selinux/ss/mls.c
+  CC      security/selinux/ss/mls.o
+  CHECK   security/selinux/ss/status.c
+  CC      security/selinux/ss/status.o
+  CHECK   security/selinux/xfrm.c
+  CC      security/selinux/xfrm.o
+  CHECK   security/selinux/netlabel.c
+  CC      security/selinux/netlabel.o
+  AR      security/selinux/built-in.a
+  CHECK   security/yama/yama_lsm.c
+  CC      security/yama/yama_lsm.o
+  AR      security/yama/built-in.a
+  CHECK   security/commoncap.c
+  CC      security/commoncap.o
+  CHECK   security/min_addr.c
+  CC      security/min_addr.o
+  CHECK   security/security.c
+  CC      security/security.o
+  CHECK   security/inode.c
+  CC      security/inode.o
+  CHECK   security/lsm_audit.c
+  CC      security/lsm_audit.o
+  CHECK   security/device_cgroup.c
+  CC      security/device_cgroup.o
+  AR      security/built-in.a

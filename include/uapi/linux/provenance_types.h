@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _UAPI_LINUX_PROVENANCE_TYPES_H
 #define _UAPI_LINUX_PROVENANCE_TYPES_H
@@ -30,6 +29,8 @@
 #define DM_ACTIVITY                             0x4000000000000000UL
 #define DM_ENTITY                               0x2000000000000000UL
 #define DM_AGENT                                0x1000000000000000UL
+/* NODE IS LONG*/
+#define ND_LONG                                                   0x0400000000000000UL
 /* ALLOWED/DISALLOWED */
 #define RL_ALLOWED                              0x0200000000000000UL
 #define RL_DISALLOWED                           0x0100000000000000UL
@@ -62,6 +63,7 @@
 #define RL_SH_READ                              (RL_DERIVED   | (0x0000000000000001ULL << 16))
 #define RL_SH_WRITE                             (RL_DERIVED   | (0x0000000000000001ULL << 17))
 #define RL_PCK_CNT                              (RL_DERIVED   | (0x0000000000000001ULL << 18))
+#define RL_ADDRESSED                            (RL_DERIVED   | (0x0000000000000001ULL << 19))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */
@@ -74,27 +76,29 @@
 #define RL_WRITE_IOCTL                          (RL_GENERATED | (0x0000000000000001ULL << 6))
 #define RL_PROC_WRITE                           (RL_GENERATED | (0x0000000000000001ULL << 7))
 #define RL_CONNECT                              (RL_GENERATED | (0x0000000000000001ULL << 8))
-#define RL_LISTEN                               (RL_GENERATED | (0x0000000000000001ULL << 9))
-#define RL_BIND                                 (RL_GENERATED | (0x0000000000000001ULL << 10))
-#define RL_SND                                  (RL_GENERATED | (0x0000000000000001ULL << 11))
-#define RL_SND_MSG                              (RL_GENERATED | (0x0000000000000001ULL << 12))
-#define RL_SND_MSG_Q                            (RL_GENERATED | (0x0000000000000001ULL << 13))
-#define RL_LINK                                 (RL_GENERATED | (0x0000000000000001ULL << 14))
-#define RL_UNLINK                               (RL_GENERATED | (0x0000000000000001ULL << 15))
-#define RL_SYMLINK                              (RL_GENERATED | (0x0000000000000001ULL << 16))
-#define RL_SETATTR                              (RL_GENERATED | (0x0000000000000001ULL << 17))
-#define RL_SETXATTR                             (RL_GENERATED | (0x0000000000000001ULL << 18))
-#define RL_RMVXATTR                             (RL_GENERATED | (0x0000000000000001ULL << 19))
-#define RL_SHMDT                                (RL_GENERATED | (0x0000000000000001ULL << 20))
-#define RL_SETUID                               (RL_GENERATED | (0x0000000000000001ULL << 21))
-#define RL_SETGID                               (RL_GENERATED | (0x0000000000000001ULL << 22))
-#define RL_SH_ATTACH_WRITE                      (RL_GENERATED | (0x0000000000000001ULL << 23))
-#define RL_SH_CREATE_READ                       (RL_GENERATED | (0x0000000000000001ULL << 24))
-#define RL_SH_CREATE_WRITE                      (RL_GENERATED | (0x0000000000000001ULL << 25))
-#define RL_FILE_LOCK                            (RL_GENERATED | (0x0000000000000001ULL << 26))
-#define RL_MUNMAP                               (RL_GENERATED | (0x0000000000000001ULL << 27))
-#define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 28))
-#define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 29))
+#define RL_CONNECT_UNIX_STREAM                  (RL_GENERATED | (0x0000000000000001ULL << 9))
+#define RL_LISTEN                               (RL_GENERATED | (0x0000000000000001ULL << 10))
+#define RL_BIND                                 (RL_GENERATED | (0x0000000000000001ULL << 11))
+#define RL_SND                                  (RL_GENERATED | (0x0000000000000001ULL << 12))
+#define RL_SND_MSG                              (RL_GENERATED | (0x0000000000000001ULL << 13))
+#define RL_SND_MSG_Q                            (RL_GENERATED | (0x0000000000000001ULL << 14))
+#define RL_LINK                                 (RL_GENERATED | (0x0000000000000001ULL << 15))
+#define RL_RENAME                               (RL_GENERATED | (0x0000000000000001ULL << 16))
+#define RL_UNLINK                               (RL_GENERATED | (0x0000000000000001ULL << 17))
+#define RL_SYMLINK                              (RL_GENERATED | (0x0000000000000001ULL << 18))
+#define RL_SETATTR                              (RL_GENERATED | (0x0000000000000001ULL << 19))
+#define RL_SETXATTR                             (RL_GENERATED | (0x0000000000000001ULL << 20))
+#define RL_RMVXATTR                             (RL_GENERATED | (0x0000000000000001ULL << 21))
+#define RL_SHMDT                                (RL_GENERATED | (0x0000000000000001ULL << 22))
+#define RL_SETUID                               (RL_GENERATED | (0x0000000000000001ULL << 23))
+#define RL_SETGID                               (RL_GENERATED | (0x0000000000000001ULL << 24))
+#define RL_SH_ATTACH_WRITE                      (RL_GENERATED | (0x0000000000000001ULL << 25))
+#define RL_SH_CREATE_READ                       (RL_GENERATED | (0x0000000000000001ULL << 26))
+#define RL_SH_CREATE_WRITE                      (RL_GENERATED | (0x0000000000000001ULL << 27))
+#define RL_FILE_LOCK                            (RL_GENERATED | (0x0000000000000001ULL << 28))
+#define RL_MUNMAP                               (RL_GENERATED | (0x0000000000000001ULL << 29))
+#define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 30))
+#define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 31))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -113,22 +117,21 @@
 #define RL_READ_LINK                            (RL_USED        | (0x0000000000000001ULL << 12))
 #define RL_GETXATTR                             (RL_USED        | (0x0000000000000001ULL << 13))
 #define RL_LSTXATTR                             (RL_USED        | (0x0000000000000001ULL << 14))
-#define RL_NAMED_PROCESS                        (RL_USED        | (0x0000000000000001ULL << 15))
-#define RL_LOG                                  (RL_USED        | (0x0000000000000001ULL << 16))
-#define RL_PERM_READ                            (RL_USED        | (0x0000000000000001ULL << 17))
-#define RL_PERM_WRITE                           (RL_USED        | (0x0000000000000001ULL << 18))
-#define RL_PERM_EXEC                            (RL_USED        | (0x0000000000000001ULL << 19))
-#define RL_PERM_APPEND                          (RL_USED        | (0x0000000000000001ULL << 20))
-#define RL_SH_ATTACH_READ                       (RL_USED        | (0x0000000000000001ULL << 21))
-#define RL_GETGID                               (RL_USED        | (0x0000000000000001ULL << 22))
-#define RL_SPLICE_IN                            (RL_USED        | (0x0000000000000001ULL << 23))
-#define RL_MMAP_READ                            (RL_USED        | (0x0000000000000001ULL << 24))
-#define RL_MMAP_EXEC                            (RL_USED        | (0x0000000000000001ULL << 25))
-#define RL_MMAP_WRITE                           (RL_USED        | (0x0000000000000001ULL << 26))
-#define RL_MMAP_READ_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 27))
-#define RL_MMAP_EXEC_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 28))
-#define RL_MMAP_WRITE_PRIVATE                   (RL_USED        | (0x0000000000000001ULL << 29))
-#define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 30))
+#define RL_LOG                                  (RL_USED        | (0x0000000000000001ULL << 15))
+#define RL_PERM_READ                            (RL_USED        | (0x0000000000000001ULL << 16))
+#define RL_PERM_WRITE                           (RL_USED        | (0x0000000000000001ULL << 17))
+#define RL_PERM_EXEC                            (RL_USED        | (0x0000000000000001ULL << 18))
+#define RL_PERM_APPEND                          (RL_USED        | (0x0000000000000001ULL << 19))
+#define RL_SH_ATTACH_READ                       (RL_USED        | (0x0000000000000001ULL << 20))
+#define RL_GETGID                               (RL_USED        | (0x0000000000000001ULL << 21))
+#define RL_SPLICE_IN                            (RL_USED        | (0x0000000000000001ULL << 22))
+#define RL_MMAP_READ                            (RL_USED        | (0x0000000000000001ULL << 23))
+#define RL_MMAP_EXEC                            (RL_USED        | (0x0000000000000001ULL << 24))
+#define RL_MMAP_WRITE                           (RL_USED        | (0x0000000000000001ULL << 25))
+#define RL_MMAP_READ_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 26))
+#define RL_MMAP_EXEC_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 27))
+#define RL_MMAP_WRITE_PRIVATE                   (RL_USED        | (0x0000000000000001ULL << 28))
+#define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 29))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
@@ -146,6 +149,7 @@
 #define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 5))
 #define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 6))
 #define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 7))
+#define RL_LOAD_UNDEFINED                               (RL_INFLUENCED | (0x0000000000000001ULL << 8))
 
 /* ASSOCIATED  SUBTYPES */
 #define RL_RAN_ON                               (RL_ASSOCIATED | (0x0000000000000001ULL))
@@ -153,34 +157,40 @@
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK                                (DM_ACTIVITY  | 0x0000000000000001ULL)
 #define ACT_DISC                                (DM_ACTIVITY  | (0x0000000000000001ULL << 1))
+
 /* AGENT SUBTYPES */
 #define AGT_USR                                 (DM_AGENT       | (0x0000000000000001ULL << 2))
 #define AGT_GRP                                 (DM_AGENT       | (0x0000000000000001ULL << 3))
 #define AGT_DISC                                (DM_AGENT       | (0x0000000000000001ULL << 4))
-#define AGT_MACHINE                             (DM_AGENT       | (0x0000000000000001ULL << 5))
+
+/* LONG NODE */
+#define AGT_MACHINE                             (DM_AGENT | ND_LONG     | (0x0000000000000001ULL << 5))
+
 /* ENTITY SUBTYPES */
-#define ENT_STR                                 (DM_ENTITY    | (0x0000000000000001ULL << 6))
-#define ENT_INODE_UNKNOWN                       (DM_ENTITY    | (0x0000000000000001ULL << 7))
-#define ENT_INODE_LINK                          (DM_ENTITY    | (0x0000000000000001ULL << 8))
-#define ENT_INODE_FILE                          (DM_ENTITY    | (0x0000000000000001ULL << 9))
-#define ENT_INODE_DIRECTORY                     (DM_ENTITY    | (0x0000000000000001ULL << 10))
-#define ENT_INODE_CHAR                          (DM_ENTITY    | (0x0000000000000001ULL << 11))
-#define ENT_INODE_BLOCK                         (DM_ENTITY    | (0x0000000000000001ULL << 12))
-#define ENT_INODE_PIPE                          (DM_ENTITY    | (0x0000000000000001ULL << 13))
-#define ENT_INODE_SOCKET                        (DM_ENTITY    | (0x0000000000000001ULL << 14))
-#define ENT_MSG                                 (DM_ENTITY    | (0x0000000000000001ULL << 15))
-#define ENT_SHM                                 (DM_ENTITY    | (0x0000000000000001ULL << 16))
-#define ENT_ADDR                                (DM_ENTITY    | (0x0000000000000001ULL << 17))
-#define ENT_SBLCK                               (DM_ENTITY    | (0x0000000000000001ULL << 18))
-#define ENT_PATH                                (DM_ENTITY    | (0x0000000000000001ULL << 19))
-#define ENT_PACKET                              (DM_ENTITY    | (0x0000000000000001ULL << 20))
-#define ENT_DISC                                (DM_ENTITY    | (0x0000000000000001ULL << 21))
-#define ENT_IATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 22))
-#define ENT_XATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 23))
-#define ENT_PCKCNT                              (DM_ENTITY    | (0x0000000000000001ULL << 24))
-#define ENT_ARG                                 (DM_ENTITY    | (0x0000000000000001ULL << 25))
-#define ENT_ENV                                 (DM_ENTITY    | (0x0000000000000001ULL << 26))
-#define ENT_PROC                                (DM_ENTITY    | (0x0000000000000001ULL << 27))
+#define ENT_INODE_UNKNOWN                       (DM_ENTITY    | (0x0000000000000001ULL << 6))
+#define ENT_INODE_LINK                          (DM_ENTITY    | (0x0000000000000001ULL << 7))
+#define ENT_INODE_FILE                          (DM_ENTITY    | (0x0000000000000001ULL << 8))
+#define ENT_INODE_DIRECTORY                     (DM_ENTITY    | (0x0000000000000001ULL << 9))
+#define ENT_INODE_CHAR                          (DM_ENTITY    | (0x0000000000000001ULL << 10))
+#define ENT_INODE_BLOCK                         (DM_ENTITY    | (0x0000000000000001ULL << 11))
+#define ENT_INODE_PIPE                          (DM_ENTITY    | (0x0000000000000001ULL << 12))
+#define ENT_INODE_SOCKET                        (DM_ENTITY    | (0x0000000000000001ULL << 13))
+#define ENT_MSG                                 (DM_ENTITY    | (0x0000000000000001ULL << 14))
+#define ENT_SHM                                 (DM_ENTITY    | (0x0000000000000001ULL << 15))
+#define ENT_SBLCK                               (DM_ENTITY    | (0x0000000000000001ULL << 16))
+#define ENT_PACKET                              (DM_ENTITY    | (0x0000000000000001ULL << 17))
+#define ENT_DISC                                (DM_ENTITY    | (0x0000000000000001ULL << 18))
+#define ENT_IATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 19))
+#define ENT_PROC                                (DM_ENTITY    | (0x0000000000000001ULL << 20))
+
+/* LONG NODE */
+#define ENT_STR                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 21))
+#define ENT_ADDR                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 22))
+#define ENT_PATH                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 23))
+#define ENT_XATTR                               (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 24))
+#define ENT_PCKCNT                              (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 25))
+#define ENT_ARG                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 26))
+#define ENT_ENV                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 27))
 
 #define prov_type(prov)                 ((prov)->node_info.identifier.node_id.type)
 #define node_type(node)                 prov_type(node)
@@ -192,6 +202,7 @@
 #define prov_is_type(val, type)         ((val & type) == type)
 #define prov_type_is_relation(val)      prov_is_type(val, DM_RELATION)
 #define prov_type_is_node(val)          (!prov_is_type(val, DM_RELATION))
+#define prov_type_is_long(val)          (prov_is_type(val, ND_LONG) && prov_type_is_node(val))
 #define prov_is_used(val)               prov_is_type(val, RL_USED)
 #define prov_is_informed(val)           prov_is_type(val, RL_INFORMED)
 #define prov_is_influenced(val)         prov_is_type(val, RL_INFLUENCED)
@@ -253,9 +264,10 @@ static inline bool prov_has_secid(uint64_t type)
 	}
 }
 
+#define PROV_TYPE_STR_MAX_LEN 256
 struct prov_type {
 	uint64_t id;
-	char str[256];
+	char str[PROV_TYPE_STR_MAX_LEN];
 	uint8_t is_relation;
 };
 

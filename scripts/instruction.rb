@@ -113,7 +113,7 @@ class Instruction
   end
 
   def self.get_cred_provenance_to_relation
-    return 'path-' + self.relation_to_str('RL_NAMED_PROCESS') + '->process_memory'
+    return 'path-' + self.relation_to_str('RL_NAMED') + '->process_memory'
   end
 
   def self.inode_provenance_to_relation
@@ -121,7 +121,7 @@ class Instruction
   end
 
   def self.record_address_to_relation
-    return 'address-' + self.relation_to_str('RL_NAMED') + '->inode'
+    return 'address-' + self.relation_to_str('RL_ADDRESSED') + '->inode'
   end
 
   def self.record_write_xattr_to_relation str

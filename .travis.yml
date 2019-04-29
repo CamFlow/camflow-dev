@@ -34,7 +34,6 @@ script:
   - make config_travis
   - make compile_security
   - make compile_kernel
-  - make test_travis
   - make test_patch
 
 after_success:

@@ -1,14 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
- *
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- *
  */
 #ifndef _PROVENANCE_INODE_H
 #define _PROVENANCE_INODE_H
@@ -21,6 +20,7 @@
 #include "provenance_record.h"
 #include "provenance_policy.h"
 #include "provenance_filter.h"
+#include "memcpy_ss.h"
 
 #define is_inode_dir(inode)             S_ISDIR(inode->i_mode)
 #define is_inode_socket(inode)          S_ISSOCK(inode->i_mode)
@@ -66,7 +66,7 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	if (prov_elt(prov)->inode_info.mode != 0
 	    && prov_elt(prov)->inode_info.mode != mode
 	    && provenance_is_recorded(prov_elt(prov))) {
-		memcpy(&old_prov, prov_elt(prov), sizeof(old_prov));
+		__memcpy_ss(&old_prov, sizeof(union prov_elt), prov_elt(prov), sizeof(old_prov));
 		// We update the info of the new version and record it.
 		prov_elt(prov)->inode_info.mode = mode;
 		prov_type(prov_elt(prov)) = type;
@@ -138,16 +138,18 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	// Should not sleep.
-	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-	if (!buffer)
-		return -ENOMEM;
-	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-	if (IS_ERR(ptr))
-		return PTR_ERR(ptr);
-	rc = record_node_name(prov, ptr, force);
-	kfree(buffer);
-	return rc;
+	else {
+		// Should not sleep.
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		if (!buffer)
+			return -ENOMEM;
+		ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
+		if (IS_ERR(ptr))
+			return PTR_ERR(ptr);
+		rc = record_node_name(prov, ptr, force);
+		kfree(buffer);
+		return rc;
+	}
 }
 
 /*!
@@ -169,12 +171,14 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 
 	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	dentry = d_find_alias(inode);
-	if (!dentry)    // We did not find a dentry, not sure if it should ever happen.
-		return 0;
-	rc = record_inode_name_from_dentry(dentry, prov, false);
-	dput(dentry);
-	return rc;
+	else {
+		dentry = d_find_alias(inode);
+		if (!dentry) // We did not find a dentry, not sure if it should ever happen.
+			return 0;
+		rc = record_inode_name_from_dentry(dentry, prov, false);
+		dput(dentry);
+		return rc;
+	}
 }
 
 /*!
@@ -190,12 +194,11 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
  * @param inode The inode in question whose provenance entry to be updated.
  *
  */
-static __always_inline void refresh_inode_provenance(struct inode *inode,
-						     struct provenance *prov)
+static inline void refresh_inode_provenance(struct inode *inode,
+					    struct provenance *prov)
 {
 	if (provenance_is_opaque(prov_elt(prov)))
 		return;
-	record_inode_name(inode, prov);
 	prov_elt(prov)->inode_info.ino = inode->i_ino;
 	node_uid(prov_elt(prov)) = __kuid_val(inode->i_uid);
 	node_gid(prov_elt(prov)) = __kgid_val(inode->i_gid);
@@ -258,7 +261,7 @@ static inline int inode_init_provenance(struct inode *inode,
 			goto free_buf;
 		}
 	}
-	memcpy(prov_elt(prov), buf, sizeof(union prov_elt));
+	__memcpy_ss(prov_elt(prov), sizeof(union prov_elt), buf, sizeof(union prov_elt));
 	rc = 0;
 free_buf:
 	kfree(buf);
@@ -277,16 +280,18 @@ free_buf:
  * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
-static __always_inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
+static inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
 {
-	struct provenance *prov = inode->i_provenance;
+	struct provenance *iprov = inode->i_provenance;
 
 	might_sleep_if(may_sleep);
-	if (!provenance_is_initialized(prov_elt(prov)) && may_sleep)
-		inode_init_provenance(inode, NULL, prov);
-	if (may_sleep)
-		refresh_inode_provenance(inode, prov);
-	return prov;
+	if (!provenance_is_initialized(prov_elt(iprov)) && may_sleep)
+		inode_init_provenance(inode, NULL, iprov);
+	if (may_sleep) {
+		refresh_inode_provenance(inode, iprov);
+		record_inode_name(inode, iprov);
+	}
+	return iprov;
 }
 
 /*!
@@ -299,7 +304,7 @@ static __always_inline struct provenance *get_inode_provenance(struct inode *ino
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
+static inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
 {
 	struct inode *inode = d_backing_inode(dentry);
 
@@ -318,7 +323,7 @@ static __always_inline struct provenance *get_dentry_provenance(struct dentry *d
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static __always_inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
+static inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
@@ -344,7 +349,7 @@ static inline void save_provenance(struct dentry *dentry)
 		spin_unlock(prov_lock(prov));
 		return;
 	}
-	memcpy(&buf, prov_elt(prov), sizeof(union prov_elt));
+	__memcpy_ss(&buf, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
 	set_saved(prov_elt(prov));
 	spin_unlock(prov_lock(prov));
 	clear_recorded(&buf);
@@ -398,18 +403,18 @@ static __always_inline int record_write_xattr(uint64_t type,
 		return 0;
 	if (!should_record_relation(type, prov_entry(cprov), prov_entry(iprov)))
 		return 0;
-	xattr = alloc_long_provenance(ENT_XATTR);
+	xattr = alloc_long_provenance(ENT_XATTR, 0);
 	if (!xattr)
 		return -ENOMEM;
-	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
+	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 	if (value) {
 		if (size < PROV_XATTR_VALUE_SIZE) {
 			xattr->xattr_info.size = size;
-			memcpy(xattr->xattr_info.value, value, size);
+			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, size);
 		} else {
 			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
-			memcpy(xattr->xattr_info.value, value, PROV_XATTR_VALUE_SIZE);
+			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, PROV_XATTR_VALUE_SIZE);
 		}
 	}
 	rc = record_relation(RL_PROC_READ, prov_entry(cprov), prov_entry(tprov), NULL, 0);
@@ -460,12 +465,12 @@ static __always_inline int record_read_xattr(struct provenance *cprov,
 		return 0;
 	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 		return 0;
-	xattr = alloc_long_provenance(ENT_XATTR);
+	xattr = alloc_long_provenance(ENT_XATTR, 0);
 	if (!xattr) {
 		rc = -ENOMEM;
 		goto out;
 	}
-	memcpy(xattr->xattr_info.name, name, PROV_XATTR_NAME_SIZE - 1);
+	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 
 	rc = record_relation(RL_GETXATTR_INODE, prov_entry(iprov), xattr, NULL, 0);

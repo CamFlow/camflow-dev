@@ -18,7 +18,7 @@ inode -> inode[fontsize = 8,label = version_entity]
 
 path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-path -> process_memory[fontsize = 8,label = named_process]
+path -> process_memory[fontsize = 8,label = named]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
@@ -36,7 +36,7 @@ path -> inode[fontsize = 8,label = named]
 
 process_memory -> task[fontsize = 8,label = memory_read]
 
-task -> inode[fontsize = 8,label = link]
+task -> inode[fontsize = 8,label = rename]
 
 inode -> process_memory[fontsize = 8,label = sh_read]
 
