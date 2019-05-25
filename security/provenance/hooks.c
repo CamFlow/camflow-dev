@@ -97,18 +97,18 @@ static inline void queue_save_provenance(struct provenance *provenance,
 static int provenance_task_alloc(struct task_struct *task,
 				 unsigned long clone_flags)
 {
-	struct provenance *ntprov = alloc_provenance(ACT_TASK, GFP_KERNEL);
+	struct provenance *ntprov = provenance_task(task);
 	const struct cred *cred;
 	struct task_struct *t = current;
 	struct provenance *tprov;
 	struct provenance *cprov;
 
-	task->provenance = ntprov;
+	init_provenance_struct(ACT_TASK, ntprov);
 	if (t != NULL) {
 		cred = t->real_cred;
-		tprov = t->provenance;
+		tprov = provenance_task(t);
 		if (cred != NULL) {
-			cprov = cred->provenance;
+			cprov = provenance_cred(cred);
 			if (tprov != NULL &&  cprov != NULL) {
 				record_task_name(current, cprov);
 				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
@@ -130,13 +130,10 @@ static int provenance_task_alloc(struct task_struct *task,
  */
 static void provenance_task_free(struct task_struct *task)
 {
-	struct provenance *tprov = task->provenance;
+	struct provenance *tprov = provenance_task(task);
 
-	if (tprov) {
+	if (tprov)
 		record_terminate(RL_TERMINATE_TASK, tprov);
-		free_provenance(tprov);
-	}
-	task->provenance = NULL;
 }
 
 /*!
