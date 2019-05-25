@@ -63,6 +63,15 @@ struct provenance {
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
+static __always_inline void init_provenance_struct(uint64_t ntype,
+																						struct provenance *prov) {
+	spin_lock_init(prov_lock(prov));
+	prov_type(prov_elt(prov)) = ntype;
+	node_identifier(prov_elt(prov)).id = prov_next_node_id();
+	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;
+	node_identifier(prov_elt(prov)).machine_id = prov_machine_id;
+	call_provenance_alloc(prov_entry(prov));
+}
 /*!
  * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
  *
@@ -85,12 +94,7 @@ static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t
 
 	if (!prov)
 		return NULL;
-	spin_lock_init(prov_lock(prov));
-	prov_type(prov_elt(prov)) = ntype;
-	node_identifier(prov_elt(prov)).id = prov_next_node_id();
-	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;
-	node_identifier(prov_elt(prov)).machine_id = prov_machine_id;
-	call_provenance_alloc(prov_entry(prov));
+	init_provenance_struct(ntype, prov);
 	return prov;
 }
 
