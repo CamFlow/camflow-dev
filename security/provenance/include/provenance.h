@@ -16,6 +16,7 @@
 #include <linux/types.h>
 #include <linux/bug.h>
 #include <linux/socket.h>
+#include <linux/lsm_hooks.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/provenance_types.h>
@@ -216,7 +217,7 @@ static inline struct provenance *provenance_file(const struct file *file)
 }
 
 static inline struct provenance *provenance_inode(
-						const struct inode *inode)
+	const struct inode *inode)
 {
 	if (unlikely(!inode->i_security))
 		return NULL;
@@ -224,13 +225,13 @@ static inline struct provenance *provenance_inode(
 }
 
 static inline struct provenance *provenance_msg_msg(
-						const struct msg_msg *msg_msg)
+	const struct msg_msg *msg_msg)
 {
 	return msg_msg->security + provenance_blob_sizes.lbs_msg_msg;
 }
 
 static inline struct provenance *provenance_ipc(
-						const struct kern_ipc_perm *ipc)
+	const struct kern_ipc_perm *ipc)
 {
 	return ipc->security + provenance_blob_sizes.lbs_ipc;
 }
