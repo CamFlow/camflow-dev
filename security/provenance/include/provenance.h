@@ -17,6 +17,7 @@
 #include <linux/bug.h>
 #include <linux/socket.h>
 #include <linux/lsm_hooks.h>
+#include <linux/msg.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/provenance_types.h>
