@@ -208,7 +208,7 @@ static inline struct provenance *provenance_cred(const struct cred *cred)
 
 static inline struct provenance *provenance_task(const struct task_struct *task)
 {
-	return cred->security + provenance_blob_sizes.lbs_task;
+	return task->security + provenance_blob_sizes.lbs_task;
 }
 
 static inline struct provenance *provenance_file(const struct file *file)
