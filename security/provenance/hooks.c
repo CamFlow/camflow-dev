@@ -173,14 +173,13 @@ static void task_init_provenance(void)
  */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 {
-	struct provenance *prov = alloc_provenance(ENT_PROC, gfp);
+	struct provenance *prov = provenance_cred(cred);
 
 	if (!prov)
 		return -ENOMEM;
 
 	node_uid(prov_elt(prov)) = __kuid_val(cred->euid);
 	node_gid(prov_elt(prov)) = __kgid_val(cred->egid);
-	cred->provenance = prov;
 	return 0;
 }
 
@@ -196,13 +195,10 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
  */
 static void provenance_cred_free(struct cred *cred)
 {
-	struct provenance *cprov = cred->provenance;
+	struct provenance *cprov = provenance_cred(cred);
 
-	if (cprov) {
+	if (cprov)
 		record_terminate(RL_TERMINATE_PROC, cprov);
-		free_provenance(cprov);
-	}
-	cred->provenance = NULL;
 }
 
 /*!
@@ -222,27 +218,27 @@ static int provenance_cred_prepare(struct cred *new,
 				   const struct cred *old,
 				   gfp_t gfp)
 {
-	struct provenance *old_prov = old->provenance;
-	struct provenance *nprov = alloc_provenance(ENT_PROC, gfp);
+	struct provenance *old_prov = provenance_cred(old);
+	struct provenance *nprov = provenance_cred(new);
 	struct provenance *tprov;
 	unsigned long irqflags;
 	int rc = 0;
 
 	if (!nprov)
 		return -ENOMEM;
+	init_provenance_struct(ENT_PROC, nprov);
 	node_uid(prov_elt(nprov)) = __kuid_val(new->euid);
 	node_gid(prov_elt(nprov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	if (current != NULL) {
 		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
 		// System will crash if attempt to update those values.
-		tprov = current->provenance;
+		tprov = provenance_task(current);
 		if (tprov != NULL)
 			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
 	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	record_task_name(current, nprov);
-	new->provenance = nprov;
 	return rc;
 }
 
