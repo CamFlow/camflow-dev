@@ -2439,6 +2439,15 @@ static int provenance_sb_kern_mount(struct super_block *sb)
 	return 0;
 }
 
+struct lsm_blob_sizes provenance_blob_sizes __lsm_ro_after_init = {
+	.lbs_cred = sizeof(struct provenance),
+	.lbs_file = sizeof(struct provenance),
+	.lbs_inode = sizeof(struct provenance),
+	.lbs_ipc = sizeof(struct provenance),
+	.lbs_msg_msg = sizeof(struct provenance),
+	.lbs_task = sizeof(struct provenance),
+};
+
 /*!
  * @brief Add provenance hooks to security_hook_list.
  */
@@ -2578,7 +2587,7 @@ uint32_t epoch;
  * since persists provenance requires writing to disk (which means sleep is needed).
  *
  */
-void __init provenance_add_hooks(void)
+static int __init provenance_init(void)
 {
 	prov_policy.prov_enabled = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
@@ -2610,7 +2619,6 @@ void __init provenance_add_hooks(void)
 	prov_queue = alloc_workqueue("prov_queue", 0, 0);
 	if (!prov_queue)
 		pr_err("Provenance: could not initialize work queue.");
-
 #endif
 	relay_ready = false;
 	task_init_provenance();
@@ -2621,4 +2629,8 @@ void __init provenance_add_hooks(void)
 	pr_info("Provenance: hooks ready.\n");
 }
 
-// DO NOT USE DEFINE_LSM we ensure we are loaded last in security/security.c
+DEFINE_LSM(provenance) = {
+	.name = "provenance",
+	.blobs = &provenance_blob_sizes,
+	.init = provenance_init,
+};

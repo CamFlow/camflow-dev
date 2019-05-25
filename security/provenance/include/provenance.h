@@ -198,4 +198,40 @@ static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node)
 		return false;
 	return true;
 }
+
+extern struct lsm_blob_sizes provenance_blob_sizes;
+static inline struct provenance *provenance_cred(const struct cred *cred)
+{
+	return cred->security + provenance_blob_sizes.lbs_cred;
+}
+
+static inline struct provenance *provenance_task(const struct task_struct *task)
+{
+	return cred->security + provenance_blob_sizes.lbs_task;
+}
+
+static inline struct provenance *provenance_file(const struct file *file)
+{
+	return file->f_security + provenance_blob_sizes.lbs_file;
+}
+
+static inline struct provenance *provenance_inode(
+						const struct inode *inode)
+{
+	if (unlikely(!inode->i_security))
+		return NULL;
+	return inode->i_security + provenance_blob_sizes.lbs_inode;
+}
+
+static inline struct provenance *provenance_msg_msg(
+						const struct msg_msg *msg_msg)
+{
+	return msg_msg->security + provenance_blob_sizes.lbs_msg_msg;
+}
+
+static inline struct provenance *provenance_ipc(
+						const struct kern_ipc_perm *ipc)
+{
+	return ipc->security + provenance_blob_sizes.lbs_ipc;
+}
 #endif
