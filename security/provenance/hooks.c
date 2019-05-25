@@ -147,18 +147,16 @@ static void provenance_task_free(struct task_struct *task)
 static void task_init_provenance(void)
 {
 	struct cred *cred = (struct cred *)current->real_cred;
-	struct provenance *cprov = alloc_provenance(ENT_PROC, GFP_KERNEL);
-	struct provenance *tprov = alloc_provenance(ACT_TASK, GFP_KERNEL);
+	struct provenance *cprov = provenance_cred(cred);
+	struct provenance *tprov = provenance_task(current);
 
 	if (!cprov || !tprov)
 		panic("Provenance:  Failed to initialize initial task.\n");
 	node_uid(prov_elt(cprov)) = __kuid_val(cred->euid);
 	node_gid(prov_elt(cprov)) = __kgid_val(cred->egid);
-	cred->provenance = cprov;
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
-	current->provenance = tprov;
 }
 
 /*!
