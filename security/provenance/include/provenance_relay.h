@@ -76,7 +76,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 
 static __always_inline uint64_t current_provid(void)
 {
-	struct provenance *prov = current->provenance;
+	struct provenance *prov = provenance_task(current);
 
 	if (!prov)
 		return 0;
