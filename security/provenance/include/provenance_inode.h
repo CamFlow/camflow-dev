@@ -89,7 +89,7 @@ static inline void provenance_mark_as_opaque_dentry(const struct dentry *dentry)
 
 	if (IS_ERR(dentry))
 		return;
-	prov = dentry->d_inode->i_provenance;
+	prov = provenance_inode(dentry->d_inode);
 	if (prov)
 		set_opaque(prov_elt(prov));
 }
@@ -212,7 +212,6 @@ static inline void refresh_inode_provenance(struct inode *inode,
  * We do not initialize the inode if it has already been initialized, or failure occurred.
  * Provenance extended attributes are copied to the inode provenance in this function,
  * unless the inode does not support xattr.
- * inode struct contains @inode->i_provenance to store provenance.
  * @param inode The inode structure in which we initialize provenance.
  * @param opt_dentry The directory entry pointer.
  * @return 0 if no error occurred; -ENOMEM if no more memory to allocate for the provenance entry. Other error codes inherited or unknown.
@@ -282,7 +281,7 @@ free_buf:
  */
 static inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
 {
-	struct provenance *iprov = inode->i_provenance;
+	struct provenance *iprov = provenance_inode(inode);
 
 	might_sleep_if(may_sleep);
 	if (!provenance_is_initialized(prov_elt(iprov)) && may_sleep)
