@@ -1776,7 +1776,7 @@ static int provenance_sk_alloc_security(struct sock *sk,
 					int family,
 					gfp_t priority)
 {
-	struct provenance *skprov = current_provenance();
+	struct provenance *skprov = provenance_task(current);
 
 	if (!skprov)
 		return -ENOMEM;
@@ -2267,7 +2267,7 @@ static int provenance_unix_may_send(struct socket *sock,
  */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 {
-	struct provenance *nprov = bprm->cred->provenance;
+	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *iprov = get_file_provenance(bprm->file, true);
 	unsigned long irqflags;
 	int rc = 0;
@@ -2301,7 +2301,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  */
 static int provenance_bprm_check_security(struct linux_binprm *bprm)
 {
-	struct provenance *nprov = bprm->cred->provenance;
+	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *tprov = get_task_provenance(false);
 	struct provenance *iprov = get_file_provenance(bprm->file, false);
 
@@ -2344,7 +2344,7 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 {
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *cprov = get_cred_provenance();
-	struct provenance *nprov = bprm->cred->provenance;
+	struct provenance *nprov = provenance_cred(bprm->cred);
 	unsigned long irqflags;
 
 	record_node_name(cprov, bprm->interp, false);
@@ -2605,6 +2605,7 @@ static int __init provenance_init(void)
 	pr_info("Provenance: starting in epoch %d.", epoch);
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 	pr_info("Provenance: hooks ready.\n");
+	return 0;
 }
 
 DEFINE_LSM(provenance) = {
