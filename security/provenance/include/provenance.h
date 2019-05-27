@@ -90,7 +90,7 @@ static __always_inline void init_provenance_struct(uint64_t ntype,
  */
 static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 {
-	struct pstruct provenancerovenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
+	struct provenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
 
 	BUILD_BUG_ON(!prov_type_is_node(ntype));
 

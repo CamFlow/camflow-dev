@@ -46,6 +46,7 @@
 
 ### v0.6.1
 ```
+- Remove extra pr_info in record address (left from debugging).
 - Update to kernel version 5.1.4.
 ```
 
