@@ -1465,16 +1465,14 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *mprov;
+	struct provenance *mprov = provenance_msg_msg(msg);
 	unsigned long irqflags;
 	int rc = 0;
 
-	mprov = alloc_provenance(ENT_MSG, GFP_KERNEL);
-
 	if (!mprov)
 		return -ENOMEM;
+	init_provenance_struct(ENT_MSG, mprov);
 	prov_elt(mprov)->msg_msg_info.type = msg->m_type;
-	msg->provenance = mprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	rc = generates(RL_MSG_CREATE, cprov, tprov, mprov, NULL, 0);
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
@@ -1492,13 +1490,10 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
  */
 static void provenance_msg_msg_free_security(struct msg_msg *msg)
 {
-	struct provenance *mprov = msg->provenance;
+	struct provenance *mprov = provenance_msg_msg(msg);
 
-	if (mprov) {
+	if (mprov)
 		record_terminate(RL_FREED, mprov);
-		free_provenance(mprov);
-	}
-	msg->provenance = NULL;
 }
 
 /*!
@@ -1514,7 +1509,7 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *mprov = msg->provenance;
+	struct provenance *mprov = provenance_msg_msg(msg);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1575,7 +1570,7 @@ static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
  */
 static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
 {
-	struct provenance *mprov = msg->provenance;
+	struct provenance *mprov = provenance_msg_msg(msg);
 	struct provenance *tprov = get_task_provenance(true);
 	unsigned long irqflags;
 	int rc = 0;
@@ -1611,7 +1606,7 @@ static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
 				       long type,
 				       int mode)
 {
-	struct provenance *cprov = target->cred->provenance;
+	struct provenance *cprov = provenance_cred_from_task(target);
 
 	return __mq_msgrcv(cprov, msg);
 }
