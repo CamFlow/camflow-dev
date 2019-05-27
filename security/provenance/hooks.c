@@ -1653,14 +1653,14 @@ static int provenance_shm_alloc_security(struct kern_ipc_perm *shp)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *sprov = alloc_provenance(ENT_SHM, GFP_KERNEL);
+	struct provenance *sprov = provenance_ipc(shp);
 	unsigned long irqflags;
 	int rc = 0;
 
 	if (!sprov)
 		return -ENOMEM;
+	init_provenance_struct(ENT_SHM, sprov);
 	prov_elt(sprov)->shm_info.mode = shp->mode;
-	shp->provenance = sprov;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	rc = generates(RL_SH_CREATE_READ, cprov, tprov, sprov, NULL, 0);
 	if (rc < 0)
@@ -1681,13 +1681,10 @@ out:
  */
 static void provenance_shm_free_security(struct kern_ipc_perm *shp)
 {
-	struct provenance *sprov = shp->provenance;
+	struct provenance *sprov = provenance_ipc(shp);
 
-	if (sprov) {
+	if (sprov)
 		record_terminate(RL_FREED, sprov);
-		free_provenance(sprov);
-	}
-	shp->provenance = NULL;
 }
 
 /*!
@@ -1712,7 +1709,7 @@ static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr,
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *sprov = shp->provenance;
+	struct provenance *sprov = provenance_ipc(shp);
 	unsigned long irqflags;
 	int rc = 0;
 
@@ -1749,7 +1746,7 @@ static void provenance_shm_shmdt(struct kern_ipc_perm *shp)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *sprov = shp->provenance;
+	struct provenance *sprov = provenance_ipc(shp);
 	unsigned long irqflags;
 
 	if (!sprov)
