@@ -311,13 +311,11 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	const struct cred *cred = get_task_cred(p);
-	struct provenance *nprov = provenance_cred(cred);
+	struct provenance *nprov = provenance_cred_from_task(p);
 	int rc;
 
 	prov_elt(nprov)->proc_info.gid = pgid;
 	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
-	put_cred(cred); // Release cred.
 	return rc;
 }
 
@@ -325,12 +323,10 @@ static int provenance_task_getpgid(struct task_struct *p)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	const struct cred *cred = get_task_cred(p);
-	struct provenance *nprov = provenance_cred(cred);
+	struct provenance *nprov = provenance_cred_from_task(task);
 	int rc;
 
 	rc = uses(RL_GETGID, nprov, tprov, cprov, NULL, 0);
-	put_cred(cred); // Release cred.
 	return rc;
 }
 
@@ -371,14 +367,14 @@ static int provenance_task_kill(struct task_struct *p, struct kernel_siginfo *in
  */
 static int provenance_inode_alloc_security(struct inode *inode)
 {
-	struct provenance *iprov = alloc_provenance(ENT_INODE_UNKNOWN, GFP_KERNEL);
+	struct provenance *iprov = provenance_inode(inode);
 	struct provenance *sprov;
 
 	if (unlikely(!iprov))
 		return -ENOMEM;
+	init_provenance_struct(ENT_INODE_UNKNOWN, iprov);
 	sprov = inode->i_sb->s_provenance;
 	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
-	inode->i_provenance = iprov;
 	refresh_inode_provenance(inode, iprov);
 	return 0;
 }
@@ -395,13 +391,10 @@ static int provenance_inode_alloc_security(struct inode *inode)
  */
 static void provenance_inode_free_security(struct inode *inode)
 {
-	struct provenance *iprov = inode->i_provenance;
+	struct provenance *iprov = provenance_inode(inode);
 
-	if (iprov) {
+	if (iprov)
 		record_terminate(RL_FREED, iprov);
-		free_provenance(iprov);
-	}
-	inode->i_provenance = NULL;
 }
 
 /*!
@@ -1274,7 +1267,7 @@ static int provenance_file_send_sigiotask(struct task_struct *task,
 {
 	struct file *file = container_of(fown, struct file, f_owner);
 	struct provenance *iprov = get_file_provenance(file, false);
-	struct provenance *tprov = task->provenance;
+	struct provenance *tprov = provenance_task(task);
 	struct provenance *cprov = task_cred_xxx(task, provenance);
 	unsigned long irqflags;
 	int rc = 0;

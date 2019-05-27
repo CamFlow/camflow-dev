@@ -217,6 +217,17 @@ static inline struct provenance *provenance_task(const struct task_struct *task)
 	return task->security + provenance_blob_sizes.lbs_task;
 }
 
+static inline struct provenance *provenance_cred_from_task(
+																	const struct task_struct *task)
+{
+	struct provenance *prov;
+	const struct cred *cred = get_task_cred(p);
+	
+	prov = cred->security + provenance_blob_sizes.lbs_cred;
+	put_cred(cred); // Release cred.
+	return prov;
+}
+
 static inline struct provenance *provenance_file(const struct file *file)
 {
 	return file->f_security + provenance_blob_sizes.lbs_file;
