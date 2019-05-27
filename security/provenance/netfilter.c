@@ -32,7 +32,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 					struct sk_buff *skb,
 					const struct nf_hook_state *state)
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = provenance_cred_from_task(current);
 	struct provenance *iprov = NULL;
 	struct provenance *pckprov;
 	unsigned long irqflags;
