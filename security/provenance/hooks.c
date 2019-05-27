@@ -254,8 +254,10 @@ static int provenance_cred_prepare(struct cred *new,
  */
 static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 {
-	const struct provenance *old_prov = old->provenance;
-	struct provenance *cprov = new->provenance;
+	// this is like this in SELinux, looks weird with 5.1.x changes,
+	// but let it be for now
+	const struct provenance *old_prov = provenance_cred(old);
+	struct provenance *cprov = provenance_cred(new);
 
 	*cprov =  *old_prov;
 }
@@ -279,8 +281,8 @@ static int provenance_task_fix_setuid(struct cred *new,
 				      const struct cred *old,
 				      int flags)
 {
-	struct provenance *old_prov = old->provenance;
-	struct provenance *nprov = new->provenance;
+	struct provenance *old_prov = provenance_cred(old);
+	struct provenance *nprov = provenance_cred(new);
 	struct provenance *tprov = get_task_provenance(true);
 	unsigned long irqflags;
 	int rc;
@@ -310,7 +312,7 @@ static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	const struct cred *cred = get_task_cred(p);
-	struct provenance *nprov = cred->provenance;
+	struct provenance *nprov = provenance_cred(cred);
 	int rc;
 
 	prov_elt(nprov)->proc_info.gid = pgid;
@@ -324,7 +326,7 @@ static int provenance_task_getpgid(struct task_struct *p)
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
 	const struct cred *cred = get_task_cred(p);
-	struct provenance *nprov = cred->provenance;
+	struct provenance *nprov = provenance_cred(cred);
 	int rc;
 
 	rc = uses(RL_GETGID, nprov, tprov, cprov, NULL, 0);
