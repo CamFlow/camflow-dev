@@ -323,7 +323,7 @@ static int provenance_task_getpgid(struct task_struct *p)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *nprov = provenance_cred_from_task(task);
+	struct provenance *nprov = provenance_cred_from_task(p);
 	int rc;
 
 	rc = uses(RL_GETGID, nprov, tprov, cprov, NULL, 0);
@@ -1268,7 +1268,7 @@ static int provenance_file_send_sigiotask(struct task_struct *task,
 	struct file *file = container_of(fown, struct file, f_owner);
 	struct provenance *iprov = get_file_provenance(file, false);
 	struct provenance *tprov = provenance_task(task);
-	struct provenance *cprov = task_cred_xxx(task, provenance);
+	struct provenance *cprov = provenance_cred_from_task(task);
 	unsigned long irqflags;
 	int rc = 0;
 

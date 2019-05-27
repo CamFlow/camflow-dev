@@ -218,11 +218,11 @@ static inline struct provenance *provenance_task(const struct task_struct *task)
 }
 
 static inline struct provenance *provenance_cred_from_task(
-																	const struct task_struct *task)
+	struct task_struct *task)
 {
 	struct provenance *prov;
-	const struct cred *cred = get_task_cred(p);
-	
+	const struct cred *cred = get_task_cred(task);
+
 	prov = cred->security + provenance_blob_sizes.lbs_cred;
 	put_cred(cred); // Release cred.
 	return prov;
