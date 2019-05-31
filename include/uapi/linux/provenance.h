@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "70bceaca48677ba7745b87ed852d6d68d9397adf"
+#define CAMFLOW_COMMIT "d375377a507cb6efdd9c95a29065dc5a0078d378"
 
 #define PROVENANCE_HASH                 "sha256"
 
