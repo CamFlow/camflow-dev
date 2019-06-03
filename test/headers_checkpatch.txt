@@ -1,6 +1,10 @@
 ---------------------------------------
 security/provenance/include/memcpy_ss.h
 ---------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/memcpy_ss.h', please use '/*' instead
+#1: FILE: security/provenance/include/memcpy_ss.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/memcpy_ss.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -25,7 +29,7 @@ WARNING:FUNCTION_ARGUMENTS: function definition argument '__kernel_size_t' shoul
 #15: FILE: security/provenance/include/memcpy_ss.h:15:
 +extern int __memcpy_ss(void *, __kernel_size_t, const void *, __kernel_size_t);
 
-total: 0 errors, 6 warnings, 17 lines checked
+total: 0 errors, 7 warnings, 17 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -34,6 +38,10 @@ security/provenance/include/memcpy_ss.h has style problems, please review.
 ----------------------------------------
 security/provenance/include/provenance.h
 ----------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -43,98 +51,98 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
 WARNING:LONG_LINE: line over 80 characters
-#37: FILE: security/provenance/include/provenance.h:37:
+#40: FILE: security/provenance/include/provenance.h:40:
 +#define prov_next_relation_id()         ((uint64_t)atomic64_inc_return(&prov_relation_id))
 
 WARNING:LONG_LINE: line over 80 characters
-#38: FILE: security/provenance/include/provenance.h:38:
+#41: FILE: security/provenance/include/provenance.h:41:
 +#define prov_next_node_id()             ((uint64_t)atomic64_inc_return(&prov_node_id))
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#65: FILE: security/provenance/include/provenance.h:65:
+#78: FILE: security/provenance/include/provenance.h:78:
 + * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#68: FILE: security/provenance/include/provenance.h:68:
+#81: FILE: security/provenance/include/provenance.h:81:
 + * The type of the provenance node provided in the argument list must align with the allowed provenance node type (i.e., not a relation type).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#69: FILE: security/provenance/include/provenance.h:69:
+#82: FILE: security/provenance/include/provenance.h:82:
 + * Allowed provenance node types are defined in "include/uapi/linux/provenance_types.h"
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#71: FILE: security/provenance/include/provenance.h:71:
+#84: FILE: security/provenance/include/provenance.h:84:
 + * Implicitly, the "version" member of "node_identifier" structure is set to 0 through "zalloc".
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#75: FILE: security/provenance/include/provenance.h:75:
+#88: FILE: security/provenance/include/provenance.h:88:
 + * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
 
 WARNING:LONG_LINE: line over 80 characters
-#78: FILE: security/provenance/include/provenance.h:78:
+#91: FILE: security/provenance/include/provenance.h:91:
 +static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#105: FILE: security/provenance/include/provenance.h:105:
+#113: FILE: security/provenance/include/provenance.h:113:
 + * @brief Allocate memory for a new long provenance node and set the provenance "LONG" flag (in basic_elements).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#107: FILE: security/provenance/include/provenance.h:107:
+#115: FILE: security/provenance/include/provenance.h:115:
 + * Similar to "alloc_provenance" function above, this function allocate memory for long_prove_elt union structure.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#109: FILE: security/provenance/include/provenance.h:109:
+#117: FILE: security/provenance/include/provenance.h:117:
 + * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#110: FILE: security/provenance/include/provenance.h:110:
+#118: FILE: security/provenance/include/provenance.h:118:
 + * Spin lock is not needed because at most one thread will access the structure at a time, since it is a transient element.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#112: FILE: security/provenance/include/provenance.h:112:
+#120: FILE: security/provenance/include/provenance.h:120:
 + * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
 
 WARNING:LONG_LINE: line over 80 characters
-#116: FILE: security/provenance/include/provenance.h:116:
+#124: FILE: security/provenance/include/provenance.h:124:
 +static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
 
 WARNING:LONG_LINE: line over 80 characters
-#118: FILE: security/provenance/include/provenance.h:118:
+#126: FILE: security/provenance/include/provenance.h:126:
 +	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 
 WARNING:LONG_LINE: line over 80 characters
-#145: FILE: security/provenance/include/provenance.h:145:
+#153: FILE: security/provenance/include/provenance.h:153:
 +#define set_recorded(node)                      __set_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#151: FILE: security/provenance/include/provenance.h:151:
+#159: FILE: security/provenance/include/provenance.h:159:
 +#define clear_recorded(node)                    __clear_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#157: FILE: security/provenance/include/provenance.h:157:
+#165: FILE: security/provenance/include/provenance.h:165:
 +#define provenance_is_recorded(node)            __provenance_is_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#165: FILE: security/provenance/include/provenance.h:165:
+#173: FILE: security/provenance/include/provenance.h:173:
 +#define set_name_recorded(node)                 __set_name_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#171: FILE: security/provenance/include/provenance.h:171:
+#179: FILE: security/provenance/include/provenance.h:179:
 +#define clear_name_recorded(node)               __clear_name_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#177: FILE: security/provenance/include/provenance.h:177:
+#185: FILE: security/provenance/include/provenance.h:185:
 +#define provenance_is_name_recorded(node)       __provenance_is_name_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#188: FILE: security/provenance/include/provenance.h:188:
+#196: FILE: security/provenance/include/provenance.h:196:
 +#define set_kernel_recorded(node)               __set_kernel_recorded((union long_prov_elt *)node)
 
 WARNING:LONG_LINE: line over 80 characters
-#194: FILE: security/provenance/include/provenance.h:194:
+#202: FILE: security/provenance/include/provenance.h:202:
 +#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
 
-total: 0 errors, 25 warnings, 201 lines checked
+total: 0 errors, 26 warnings, 256 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -143,6 +151,10 @@ security/provenance/include/provenance.h has style problems, please review.
 -----------------------------------------------
 security/provenance/include/provenance_filter.h
 -----------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_filter.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_filter.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_filter.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -323,7 +335,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #235: FILE: security/provenance/include/provenance_filter.h:235:
 + * 1. ns (i.e., namespace) elements: ipcns, mntns, pidns, netns, cgroupns, if the node is of type ENT_PROC, and
 
-total: 0 errors, 34 warnings, 272 lines checked
+total: 0 errors, 35 warnings, 272 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -332,6 +344,10 @@ security/provenance/include/provenance_filter.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_inode.h
 ----------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_inode.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_inode.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_inode.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -455,187 +471,187 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 + * Provenance extended attributes are copied to the inode provenance in this function,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#218: FILE: security/provenance/include/provenance_inode.h:218:
+#217: FILE: security/provenance/include/provenance_inode.h:217:
 + * @return 0 if no error occurred; -ENOMEM if no more memory to allocate for the provenance entry. Other error codes inherited or unknown.
 
 WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#235: FILE: security/provenance/include/provenance_inode.h:235:
+#234: FILE: security/provenance/include/provenance_inode.h:234:
 +		return 0;
 +	} else
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#239: FILE: security/provenance/include/provenance_inode.h:239:
+#238: FILE: security/provenance/include/provenance_inode.h:238:
 +	if (!(inode->i_opflags & IOP_XATTR))   // xattr not supported on this inode
 
 WARNING:LONG_LINE: line over 80 characters
-#253: FILE: security/provenance/include/provenance_inode.h:253:
+#252: FILE: security/provenance/include/provenance_inode.h:252:
 +	rc = __vfs_getxattr(dentry, inode, XATTR_NAME_PROVENANCE, buf, sizeof(union prov_elt));
 
 WARNING:LONG_LINE: line over 80 characters
-#264: FILE: security/provenance/include/provenance_inode.h:264:
+#263: FILE: security/provenance/include/provenance_inode.h:263:
 +	__memcpy_ss(prov_elt(prov), sizeof(union prov_elt), buf, sizeof(union prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#274: FILE: security/provenance/include/provenance_inode.h:274:
+#273: FILE: security/provenance/include/provenance_inode.h:273:
 + * This function either initialize the provenance of the inode (if not initialized) and/or refreshes the provenance of the inode if needed.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#275: FILE: security/provenance/include/provenance_inode.h:275:
+#274: FILE: security/provenance/include/provenance_inode.h:274:
 + * If the function can sleep, provenance information of the inode should be refreshed.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#280: FILE: security/provenance/include/provenance_inode.h:280:
+#279: FILE: security/provenance/include/provenance_inode.h:279:
 + * @todo Error checking in this function should be included since "inode_init_provenance" can fail (i.e., non-zero return value).
 
 WARNING:LONG_LINE: line over 80 characters
-#283: FILE: security/provenance/include/provenance_inode.h:283:
+#282: FILE: security/provenance/include/provenance_inode.h:282:
 +static inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#298: FILE: security/provenance/include/provenance_inode.h:298:
+#297: FILE: security/provenance/include/provenance_inode.h:297:
 + * @brief This function returns the provenance of the given directory entry based on its inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#301: FILE: security/provenance/include/provenance_inode.h:301:
+#300: FILE: security/provenance/include/provenance_inode.h:300:
 + * We find the inode of the dentry (if this dentry were to be opened as a file) by calling "d_backing_inode" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#303: FILE: security/provenance/include/provenance_inode.h:303:
+#302: FILE: security/provenance/include/provenance_inode.h:302:
 + * @param may_sleep Bool value used in "get_inode_provenance" function (See above)
 
 WARNING:LONG_LINE: line over 80 characters
-#307: FILE: security/provenance/include/provenance_inode.h:307:
+#306: FILE: security/provenance/include/provenance_inode.h:306:
 +static inline struct provenance *get_dentry_provenance(struct dentry *dentry, bool may_sleep)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#317: FILE: security/provenance/include/provenance_inode.h:317:
+#316: FILE: security/provenance/include/provenance_inode.h:316:
 + * @brief This function returns the provenance of the given file based on its inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#322: FILE: security/provenance/include/provenance_inode.h:322:
+#321: FILE: security/provenance/include/provenance_inode.h:321:
 + * @param may_sleep Bool value used in "get_inode_provenance" function (See above)
 
 WARNING:LONG_LINE: line over 80 characters
-#326: FILE: security/provenance/include/provenance_inode.h:326:
+#325: FILE: security/provenance/include/provenance_inode.h:325:
 +static inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
 
 WARNING:LONG_LINE: line over 80 characters
-#352: FILE: security/provenance/include/provenance_inode.h:352:
+#351: FILE: security/provenance/include/provenance_inode.h:351:
 +	__memcpy_ss(&buf, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
 
 WARNING:LONG_LINE: line over 80 characters
-#359: FILE: security/provenance/include/provenance_inode.h:359:
+#358: FILE: security/provenance/include/provenance_inode.h:358:
 +	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE, &buf, sizeof(union prov_elt), 0);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#363: FILE: security/provenance/include/provenance_inode.h:363:
+#362: FILE: security/provenance/include/provenance_inode.h:362:
 + * @brief This function records relations related to setting extended file attributes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#365: FILE: security/provenance/include/provenance_inode.h:365:
+#364: FILE: security/provenance/include/provenance_inode.h:364:
 + * xattr is a long provenance entry and is transient (i.e., freed after recorded).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#366: FILE: security/provenance/include/provenance_inode.h:366:
+#365: FILE: security/provenance/include/provenance_inode.h:365:
 + * Unless certain criteria are met, several relations are recorded when a process attempts to write xattr of a file:
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#367: FILE: security/provenance/include/provenance_inode.h:367:
+#366: FILE: security/provenance/include/provenance_inode.h:366:
 + * 1. Record a RL_PROC_READ relation between a task process and its cred. Information flows from cred to the task process, and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#368: FILE: security/provenance/include/provenance_inode.h:368:
+#367: FILE: security/provenance/include/provenance_inode.h:367:
 + * 2. Record a given type @type of relation between the process and xattr provenance entry. Information flows from the task to the xattr, and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#369: FILE: security/provenance/include/provenance_inode.h:369:
+#368: FILE: security/provenance/include/provenance_inode.h:368:
 + * 3-1. If the given type is RL_SETXATTR, then record a RL_SETXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode;
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#370: FILE: security/provenance/include/provenance_inode.h:370:
+#369: FILE: security/provenance/include/provenance_inode.h:369:
 + * 3-2. otherwise (the only other case is that the given type is RL_RMVXATTR_INODE), record a RL_RMVXATTR_INODE relation between xattr and the file inode. Information flows from xattr to inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#372: FILE: security/provenance/include/provenance_inode.h:372:
+#371: FILE: security/provenance/include/provenance_inode.h:371:
 + * 1. If any of the cred, task, and inode provenance are not tracked and if the capture all is not set, or
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#384: FILE: security/provenance/include/provenance_inode.h:384:
+#383: FILE: security/provenance/include/provenance_inode.h:383:
 + * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#409: FILE: security/provenance/include/provenance_inode.h:409:
+#408: FILE: security/provenance/include/provenance_inode.h:408:
 +	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
 
 WARNING:LONG_LINE: line over 80 characters
-#414: FILE: security/provenance/include/provenance_inode.h:414:
+#413: FILE: security/provenance/include/provenance_inode.h:413:
 +			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, size);
 
 WARNING:LONG_LINE: line over 80 characters
-#417: FILE: security/provenance/include/provenance_inode.h:417:
+#416: FILE: security/provenance/include/provenance_inode.h:416:
 +			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, PROV_XATTR_VALUE_SIZE);
 
 WARNING:LONG_LINE: line over 80 characters
-#420: FILE: security/provenance/include/provenance_inode.h:420:
+#419: FILE: security/provenance/include/provenance_inode.h:419:
 +	rc = record_relation(RL_PROC_READ, prov_entry(cprov), prov_entry(tprov), NULL, 0);
 
 WARNING:LONG_LINE: line over 80 characters
-#427: FILE: security/provenance/include/provenance_inode.h:427:
+#426: FILE: security/provenance/include/provenance_inode.h:426:
 +		rc = record_relation(RL_SETXATTR_INODE, xattr, prov_entry(iprov), NULL, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#429: FILE: security/provenance/include/provenance_inode.h:429:
+#428: FILE: security/provenance/include/provenance_inode.h:428:
 +		rc = record_relation(RL_RMVXATTR_INODE, xattr, prov_entry(iprov), NULL, flags);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#436: FILE: security/provenance/include/provenance_inode.h:436:
+#435: FILE: security/provenance/include/provenance_inode.h:435:
 + * @brief This function records relations related to reading extended file attributes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#438: FILE: security/provenance/include/provenance_inode.h:438:
+#437: FILE: security/provenance/include/provenance_inode.h:437:
 + * xattr is a long provenance entry and is transient (i.e., freed after recorded).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#439: FILE: security/provenance/include/provenance_inode.h:439:
+#438: FILE: security/provenance/include/provenance_inode.h:438:
 + * Unless certain criteria are met, several relations are recorded when a process attempts to read xattr of a file:
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#440: FILE: security/provenance/include/provenance_inode.h:440:
+#439: FILE: security/provenance/include/provenance_inode.h:439:
 + * 1. Record a RL_GETXATTR_INODE relation between inode and xattr. Information flows from inode to xattr (to get xattr of an inode).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#441: FILE: security/provenance/include/provenance_inode.h:441:
+#440: FILE: security/provenance/include/provenance_inode.h:440:
 + * 2. Record a RL_GETXATTR relation between xattr and task process. Information flows from xattr to the task (task reads the xattr).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#442: FILE: security/provenance/include/provenance_inode.h:442:
+#441: FILE: security/provenance/include/provenance_inode.h:441:
 + * 3. Record a RL_PROC_WRITE relation between task and its cred. Information flows from task to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#444: FILE: security/provenance/include/provenance_inode.h:444:
+#443: FILE: security/provenance/include/provenance_inode.h:443:
 + * 1. If any of the cred, task, and inode provenance are not tracked and if the capture all is not set, or
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#450: FILE: security/provenance/include/provenance_inode.h:450:
+#449: FILE: security/provenance/include/provenance_inode.h:449:
 + * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache to create a new long provenance entry. Other error codes from "record_relation" function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#466: FILE: security/provenance/include/provenance_inode.h:466:
+#465: FILE: security/provenance/include/provenance_inode.h:465:
 +	if (!should_record_relation(RL_GETXATTR, prov_entry(iprov), prov_entry(cprov)))
 
 WARNING:LONG_LINE: line over 80 characters
-#473: FILE: security/provenance/include/provenance_inode.h:473:
+#472: FILE: security/provenance/include/provenance_inode.h:472:
 +	__memcpy_ss(xattr->xattr_info.name, PROV_XATTR_NAME_SIZE, name, PROV_XATTR_NAME_SIZE - 1);
 
 WARNING:LONG_LINE: line over 80 characters
-#476: FILE: security/provenance/include/provenance_inode.h:476:
+#475: FILE: security/provenance/include/provenance_inode.h:475:
 +	rc = record_relation(RL_GETXATTR_INODE, prov_entry(iprov), xattr, NULL, 0);
 
 WARNING:LONG_LINE: line over 80 characters
-#482: FILE: security/provenance/include/provenance_inode.h:482:
+#481: FILE: security/provenance/include/provenance_inode.h:481:
 +	rc = record_relation(RL_PROC_WRITE, prov_entry(tprov), prov_entry(cprov), NULL, 0);
 
-total: 0 errors, 75 warnings, 528 lines checked
+total: 0 errors, 76 warnings, 527 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -644,6 +660,10 @@ security/provenance/include/provenance_inode.h has style problems, please review
 ------------------------------------------------
 security/provenance/include/provenance_machine.h
 ------------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_machine.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_machine.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_machine.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -652,7 +672,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_machine.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
-total: 0 errors, 2 warnings, 22 lines checked
+total: 0 errors, 3 warnings, 22 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -661,6 +681,10 @@ security/provenance/include/provenance_machine.h has style problems, please revi
 --------------------------------------------
 security/provenance/include/provenance_net.h
 --------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_net.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_net.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_net.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -781,40 +805,36 @@ WARNING:LONG_LINE: line over 80 characters
 #317: FILE: security/provenance/include/provenance_net.h:317:
 +static __always_inline int record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using 'record_address', this function's name, in a string
-#322: FILE: security/provenance/include/provenance_net.h:322:
-+	pr_info("Provenance: record_address");
-
 WARNING:LONG_LINE: line over 80 characters
-#324: FILE: security/provenance/include/provenance_net.h:324:
+#322: FILE: security/provenance/include/provenance_net.h:322:
 +	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 
 WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#326: FILE: security/provenance/include/provenance_net.h:326:
+#324: FILE: security/provenance/include/provenance_net.h:324:
 +		return 0;
 +	else {
 
 WARNING:LONG_LINE: line over 80 characters
-#333: FILE: security/provenance/include/provenance_net.h:333:
+#331: FILE: security/provenance/include/provenance_net.h:331:
 +		__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr_storage), address, addrlen);
 
 WARNING:LONG_LINE: line over 80 characters
-#335: FILE: security/provenance/include/provenance_net.h:335:
+#333: FILE: security/provenance/include/provenance_net.h:333:
 +		rc = record_relation(RL_ADDRESSED, addr_info, prov_entry(prov), NULL, 0);
 
 WARNING:LONG_LINE: line over 80 characters
-#355: FILE: security/provenance/include/provenance_net.h:355:
+#353: FILE: security/provenance/include/provenance_net.h:353:
 +		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, PATH_MAX);
 
 WARNING:LONG_LINE: line over 80 characters
-#357: FILE: security/provenance/include/provenance_net.h:357:
+#355: FILE: security/provenance/include/provenance_net.h:355:
 +		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, cnt->pckcnt_info.length);
 
 WARNING:LONG_LINE: line over 80 characters
-#374: FILE: security/provenance/include/provenance_net.h:374:
+#372: FILE: security/provenance/include/provenance_net.h:372:
 +		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 
-total: 0 errors, 38 warnings, 388 lines checked
+total: 0 errors, 38 warnings, 386 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -823,6 +843,10 @@ security/provenance/include/provenance_net.h has style problems, please review.
 -------------------------------------------
 security/provenance/include/provenance_ns.h
 -------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_ns.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_ns.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_ns.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -887,7 +911,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #97: FILE: security/provenance/include/provenance_ns.h:97:
 + * @param f The ns_filter that is checked against to update the filter in the list.
 
-total: 0 errors, 16 warnings, 122 lines checked
+total: 0 errors, 17 warnings, 122 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -896,6 +920,10 @@ security/provenance/include/provenance_ns.h has style problems, please review.
 -----------------------------------------------
 security/provenance/include/provenance_policy.h
 -----------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_policy.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_policy.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_policy.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -968,7 +996,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #35: FILE: security/provenance/include/provenance_policy.h:35:
 +	uint64_t prov_propagate_informed_filter;        // Edge of category "informed" to be filtered out if it is part of propagate.
 
-total: 0 errors, 18 warnings, 40 lines checked
+total: 0 errors, 19 warnings, 40 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -977,6 +1005,10 @@ security/provenance/include/provenance_policy.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_query.h
 ----------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_query.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_query.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_query.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -1009,7 +1041,7 @@ WARNING:PREFER_PR_LEVEL: Prefer pr_warn(... to pr_warning(...
 #79: FILE: security/provenance/include/provenance_query.h:79:
 +		pr_warning("Provenance: warning raised.\n");
 
-total: 0 errors, 8 warnings, 87 lines checked
+total: 0 errors, 9 warnings, 87 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1018,6 +1050,10 @@ security/provenance/include/provenance_query.h has style problems, please review
 -----------------------------------------------
 security/provenance/include/provenance_record.h
 -----------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_record.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_record.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_record.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -1321,7 +1357,7 @@ WARNING:LONG_LINE: line over 80 characters
 #492: FILE: security/provenance/include/provenance_record.h:492:
 +	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
 
-total: 0 errors, 75 warnings, 505 lines checked
+total: 0 errors, 76 warnings, 505 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1330,6 +1366,10 @@ security/provenance/include/provenance_record.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_relay.h
 ----------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_relay.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_relay.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_relay.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -1398,7 +1438,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #143: FILE: security/provenance/include/provenance_relay.h:143:
 +	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 
-total: 0 errors, 17 warnings, 146 lines checked
+total: 0 errors, 18 warnings, 146 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1407,6 +1447,10 @@ security/provenance/include/provenance_relay.h has style problems, please review
 ---------------------------------------------
 security/provenance/include/provenance_task.h
 ---------------------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_task.h', please use '/*' instead
+#1: FILE: security/provenance/include/provenance_task.h:1:
++// SPDX-License-Identifier: GPL-2.0
+
 WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
 #1: FILE: security/provenance/include/provenance_task.h:1:
 +// SPDX-License-Identifier: GPL-2.0
@@ -1505,63 +1549,59 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #305: FILE: security/provenance/include/provenance_task.h:305:
 + * The cred provenance entry is also updated with UID, GID, namespaces, secid, and perform information.
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#311: FILE: security/provenance/include/provenance_task.h:311:
-+	struct provenance *prov = current_provenance();      // current_provenance returns provenance pointer of current_cred().
-
 WARNING:LONG_LINE: line over 80 characters
-#317: FILE: security/provenance/include/provenance_task.h:317:
+#318: FILE: security/provenance/include/provenance_task.h:318:
 +	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#337: FILE: security/provenance/include/provenance_task.h:337:
+#338: FILE: security/provenance/include/provenance_task.h:338:
 + * We need to update pid and vpid here because when the task is first initialized,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#341: FILE: security/provenance/include/provenance_task.h:341:
+#342: FILE: security/provenance/include/provenance_task.h:342:
 + * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#364: FILE: security/provenance/include/provenance_task.h:364:
+#365: FILE: security/provenance/include/provenance_task.h:365:
 +	struct task_struct *dest = find_task_by_vpid(pid);      // Function is in /kernel/pid.c
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#521: FILE: security/provenance/include/provenance_task.h:521:
+#522: FILE: security/provenance/include/provenance_task.h:522:
 + * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#525: FILE: security/provenance/include/provenance_task.h:525:
+#526: FILE: security/provenance/include/provenance_task.h:526:
 + * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#526: FILE: security/provenance/include/provenance_task.h:526:
+#527: FILE: security/provenance/include/provenance_task.h:527:
 + * 2. Recording a provenance relation @etype (either RL_ARG or RL_ENV depending on @vtype) between the @arg and @prov
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#527: FILE: security/provenance/include/provenance_task.h:527:
+#528: FILE: security/provenance/include/provenance_task.h:528:
 + * The length of the argument should not be longer than PATH_MAX, otherwise we have to truncate the argument.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#535: FILE: security/provenance/include/provenance_task.h:535:
+#536: FILE: security/provenance/include/provenance_task.h:536:
 + * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#563: FILE: security/provenance/include/provenance_task.h:563:
+#564: FILE: security/provenance/include/provenance_task.h:564:
 + * We will only record all the arguments if @prov is tracked or capture all is set.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#564: FILE: security/provenance/include/provenance_task.h:564:
+#565: FILE: security/provenance/include/provenance_task.h:565:
 + * We record both ENT_ARG and ENT_ENV types of arguments and relations RL_ARG and RL_ENV between those arguments and @prov,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#566: FILE: security/provenance/include/provenance_task.h:566:
+#567: FILE: security/provenance/include/provenance_task.h:567:
 + * @param prov The provenance entry pointer where arguments should be associated with.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#568: FILE: security/provenance/include/provenance_task.h:568:
+#569: FILE: security/provenance/include/provenance_task.h:569:
 + * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
 
-total: 0 errors, 38 warnings, 607 lines checked
+total: 0 errors, 38 warnings, 608 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
