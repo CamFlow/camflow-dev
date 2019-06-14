@@ -188,7 +188,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *tprov = provenance_task(current);
 	union long_prov_elt *node;
 
 	if (!capable(CAP_AUDIT_WRITE))
@@ -202,11 +202,11 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		return PTR_ERR(node);
 
 	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
-		spin_lock(prov_lock(cprov));
+		spin_lock(prov_lock(tprov));
 		// TODO redo
-		__write_node(prov_entry(cprov));
-		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier), &prov_elt(cprov)->node_info.identifier, sizeof(union prov_identifier));
-		spin_unlock(prov_lock(cprov));
+		__write_node(prov_entry(tprov));
+		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier), &prov_elt(tprov)->node_info.identifier, sizeof(union prov_identifier));
+		spin_unlock(prov_lock(tprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
 		node_identifier(node).machine_id = prov_machine_id;
@@ -275,7 +275,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = current_provenance();
+	struct provenance *prov = provenance_task(current);
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
@@ -290,7 +290,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = current_provenance();
+	struct provenance *cprov = provenance_cred_from_task(current);
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;

@@ -308,7 +308,8 @@ static inline void update_proc_perf(struct task_struct *task,
  */
 static inline struct provenance *get_cred_provenance(void)
 {
-	struct provenance *prov = current_provenance();      // current_provenance returns provenance pointer of current_cred().
+	// returns provenance pointer of current_cred().
+	struct provenance *prov = provenance_cred(current_cred());
 	unsigned long irqflags;
 
 	if (provenance_is_opaque(prov_elt(prov)))
@@ -342,7 +343,7 @@ static inline struct provenance *get_cred_provenance(void)
  */
 static inline struct provenance *get_task_provenance(bool link)
 {
-	struct provenance *tprov = current->provenance;
+	struct provenance *tprov = provenance_task(current);
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
@@ -360,16 +361,16 @@ static inline struct provenance *get_task_provenance(bool link)
  */
 static inline struct provenance *prov_from_vpid(pid_t pid)
 {
-	struct provenance *tprov;
+	struct provenance *cprov;
 	struct task_struct *dest = find_task_by_vpid(pid);      // Function is in /kernel/pid.c
 
 	if (!dest)
 		return NULL;
 
-	tprov = __task_cred(dest)->provenance;
-	if (!tprov)
+	cprov = provenance_cred(__task_cred(dest));
+	if (!cprov)
 		return NULL;
-	return tprov;
+	return cprov;
 }
 
 /*!

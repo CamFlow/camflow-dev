@@ -14,6 +14,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   UPD     include/config/kernel.release
   WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
   WRAP    arch/x86/include/generated/uapi/asm/poll.h
+  WRAP    arch/x86/include/generated/uapi/asm/socket.h
   WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
@@ -48,6 +49,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      arch/x86/kernel/asm-offsets.s
   UPD     include/generated/asm-offsets.h
   CALL    scripts/checksyscalls.sh
+  CALL    scripts/atomic/check-atomics.sh
   DESCEND  objtool
   HOSTCC   /root/circulate/build/linux-stable/tools/objtool/fixdep.o
   HOSTLD   /root/circulate/build/linux-stable/tools/objtool/fixdep-in.o
@@ -90,19 +92,19 @@ security/provenance/relay.c:185:6: warning: symbol 'relay_initialized' was not d
 security/provenance/hooks.c:108:22: warning: incorrect type in assignment (different address spaces)
 security/provenance/hooks.c:108:22:    expected struct cred const *cred
 security/provenance/hooks.c:108:22:    got struct cred const [noderef] <asn:4> *real_cred
-security/provenance/hooks.c:152:30: warning: cast removes address space '<asn:4>' of expression
-./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 2 (different base types)
-./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] ip
-./security/provenance/include/provenance_net.h:374:22:    got restricted __be32 [usertype] s_addr
-./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 3 (different base types)
-./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] port
-./security/provenance/include/provenance_net.h:374:22:    got restricted __be16 [usertype] sin_port
-./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 2 (different base types)
-./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] ip
-./security/provenance/include/provenance_net.h:374:22:    got restricted __be32 [usertype] s_addr
-./security/provenance/include/provenance_net.h:374:22: warning: incorrect type in argument 3 (different base types)
-./security/provenance/include/provenance_net.h:374:22:    expected unsigned int [usertype] port
-./security/provenance/include/provenance_net.h:374:22:    got restricted __be16 [usertype] sin_port
+security/provenance/hooks.c:149:30: warning: cast removes address space '<asn:4>' of expression
+./security/provenance/include/provenance_net.h:372:22: warning: incorrect type in argument 2 (different base types)
+./security/provenance/include/provenance_net.h:372:22:    expected unsigned int [usertype] ip
+./security/provenance/include/provenance_net.h:372:22:    got restricted __be32 [usertype] s_addr
+./security/provenance/include/provenance_net.h:372:22: warning: incorrect type in argument 3 (different base types)
+./security/provenance/include/provenance_net.h:372:22:    expected unsigned int [usertype] port
+./security/provenance/include/provenance_net.h:372:22:    got restricted __be16 [usertype] sin_port
+./security/provenance/include/provenance_net.h:372:22: warning: incorrect type in argument 2 (different base types)
+./security/provenance/include/provenance_net.h:372:22:    expected unsigned int [usertype] ip
+./security/provenance/include/provenance_net.h:372:22:    got restricted __be32 [usertype] s_addr
+./security/provenance/include/provenance_net.h:372:22: warning: incorrect type in argument 3 (different base types)
+./security/provenance/include/provenance_net.h:372:22:    expected unsigned int [usertype] port
+./security/provenance/include/provenance_net.h:372:22:    got restricted __be16 [usertype] sin_port
 ./security/provenance/include/provenance_net.h:186:46: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:186:46:    expected unsigned short [usertype] id
 ./security/provenance/include/provenance_net.h:186:46:    got restricted __be16 [usertype] id
@@ -130,9 +132,8 @@ security/provenance/hooks.c:152:30: warning: cast removes address space '<asn:4>
 ./security/provenance/include/provenance_net.h:154:22: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:154:22:    expected unsigned short [usertype] rcv_port
 ./security/provenance/include/provenance_net.h:154:22:    got restricted __be16 [usertype] dest
-security/provenance/hooks.c:2545:16: warning: symbol 'buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:2546:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:1628:42: warning: dereference of noderef expression
+security/provenance/hooks.c:2532:16: warning: symbol 'buffer_head' was not declared. Should it be static?
+security/provenance/hooks.c:2533:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o

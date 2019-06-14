@@ -10,6 +10,8 @@ inode -> process_memory[fontsize = 8,label = exec]
 
 process_memory -> process_memory[fontsize = 8,label = version_entity]
 
+process_memory -> process_memory[fontsize = 8,label = terminate_proc]
+
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
 process_memory -> task[fontsize = 8,label = memory_read]

@@ -16,6 +16,22 @@ process_memory -> inode[fontsize = 8,label = sh_write]
 
 inode -> inode[fontsize = 8,label = version_entity]
 
+path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+path -> process_memory[fontsize = 8,label = named]
+
+machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+
+machine -> task[fontsize = 8,label = ran_on]
+
+inode -> task[fontsize = 8,label = perm_exec]
+
+inode -> task[fontsize = 8,label = perm_read]
+
+inode -> task[fontsize = 8,label = perm_append]
+
+inode -> task[fontsize = 8,label = perm_write]
+
 task -> task[fontsize = 8,label = terminate_task]
 
 }

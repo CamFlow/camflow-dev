@@ -308,6 +308,7 @@ struct sock_common {
   *	@sk_peek_off: current peek_offset value
   *	@sk_send_head: front of stuff to transmit
   *	@sk_security: used by security modules
+  *	@sk_provenance: used by provenance modules
   *	@sk_mark: generic packet mark
   *	@sk_cgrp_data: cgroup data for this cgroup
   *	@sk_memcg: this socket's memory cgroup association
@@ -814,6 +815,7 @@ enum sock_flags {
 	SOCK_RCU_FREE, /* wait rcu grace period in sk_destruct() */
 	SOCK_TXTIME,
 	SOCK_XDP, /* XDP is attached */
+	SOCK_TSTAMP_NEW, /* Indicates 64 bit timestamps always */
 };
 
 #define SK_FLAGS_TIMESTAMP ((1UL << SOCK_TIMESTAMP) | (1UL << SOCK_TIMESTAMPING_RX_SOFTWARE))
@@ -2086,12 +2088,6 @@ static inline bool skwq_has_sleeper(struct socket_wq *wq)
  * @p:              poll_table
  *
  * See the comments in the wq_has_sleeper function.
- *
- * Do not derive sock from filp->private_data here. An SMC socket establishes
- * an internal TCP socket that is used in the fallback case. All socket
- * operations on the SMC socket are then forwarded to the TCP socket. In case of
- * poll, the filp->private_data pointer references the SMC socket because the
- * TCP socket has no file assigned.
  */
 static inline void sock_poll_wait(struct file *filp, struct socket *sock,
 				  poll_table *p)

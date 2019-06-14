@@ -16,6 +16,9 @@
 #include <linux/types.h>
 #include <linux/bug.h>
 #include <linux/socket.h>
+#include <linux/lsm_hooks.h>
+#include <linux/msg.h>
+#include <linux/cred.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/provenance_types.h>
@@ -61,6 +64,16 @@ struct provenance {
 extern struct kmem_cache *provenance_cache;
 extern struct kmem_cache *long_provenance_cache;
 
+static __always_inline void init_provenance_struct(uint64_t ntype,
+						   struct provenance *prov)
+{
+	spin_lock_init(prov_lock(prov));
+	prov_type(prov_elt(prov)) = ntype;
+	node_identifier(prov_elt(prov)).id = prov_next_node_id();
+	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;
+	node_identifier(prov_elt(prov)).machine_id = prov_machine_id;
+	call_provenance_alloc(prov_entry(prov));
+}
 /*!
  * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
  *
@@ -83,12 +96,7 @@ static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t
 
 	if (!prov)
 		return NULL;
-	spin_lock_init(prov_lock(prov));
-	prov_type(prov_elt(prov)) = ntype;
-	node_identifier(prov_elt(prov)).id = prov_next_node_id();
-	node_identifier(prov_elt(prov)).boot_id = prov_boot_id;
-	node_identifier(prov_elt(prov)).machine_id = prov_machine_id;
-	call_provenance_alloc(prov_entry(prov));
+	init_provenance_struct(ntype, prov);
 	return prov;
 }
 
@@ -197,5 +205,52 @@ static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node)
 	if (node_kernel_version(node) < node_identifier(prov_machine).version)
 		return false;
 	return true;
+}
+
+extern struct lsm_blob_sizes provenance_blob_sizes;
+static inline struct provenance *provenance_cred(const struct cred *cred)
+{
+	return cred->security + provenance_blob_sizes.lbs_cred;
+}
+
+static inline struct provenance *provenance_task(const struct task_struct *task)
+{
+	return task->security + provenance_blob_sizes.lbs_task;
+}
+
+static inline struct provenance *provenance_cred_from_task(
+	struct task_struct *task)
+{
+	struct provenance *prov;
+	const struct cred *cred = get_task_cred(task);
+
+	prov = cred->security + provenance_blob_sizes.lbs_cred;
+	put_cred(cred); // Release cred.
+	return prov;
+}
+
+static inline struct provenance *provenance_file(const struct file *file)
+{
+	return file->f_security + provenance_blob_sizes.lbs_file;
+}
+
+static inline struct provenance *provenance_inode(
+	const struct inode *inode)
+{
+	if (unlikely(!inode->i_security))
+		return NULL;
+	return inode->i_security + provenance_blob_sizes.lbs_inode;
+}
+
+static inline struct provenance *provenance_msg_msg(
+	const struct msg_msg *msg_msg)
+{
+	return msg_msg->security + provenance_blob_sizes.lbs_msg_msg;
+}
+
+static inline struct provenance *provenance_ipc(
+	const struct kern_ipc_perm *ipc)
+{
+	return ipc->security + provenance_blob_sizes.lbs_ipc;
 }
 #endif
