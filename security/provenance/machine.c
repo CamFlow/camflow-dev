@@ -13,7 +13,7 @@
 #include "provenance_machine.h"
 #include "memcpy_ss.h"
 
-union long_prov_elt __prov_machine;
+static union long_prov_elt __prov_machine;
 union long_prov_elt *prov_machine;
 
 void refresh_prov_machine(void)
