@@ -13,6 +13,7 @@
 #include "provenance_machine.h"
 #include "memcpy_ss.h"
 
+union long_prov_elt __prov_machine;
 union long_prov_elt *prov_machine;
 
 void refresh_prov_machine(void)
@@ -28,7 +29,7 @@ void refresh_prov_machine(void)
 
 void init_prov_machine(void)
 {
-	prov_machine = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+	prov_machine = &__prov_machine;
 	prov_machine->machine_info.cam_major = CAMFLOW_VERSION_MAJOR;
 	prov_machine->machine_info.cam_minor = CAMFLOW_VERSION_MINOR;
 	prov_machine->machine_info.cam_patch = CAMFLOW_VERSION_PATCH;
