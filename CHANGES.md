@@ -2,7 +2,8 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.6.1           | 5.1.4	       	 | 14/06/2019	|
+| 0.6.2           | 5.1.9	       	 | N/A				|
+| 0.6.1           | 5.1.9	       	 | 14/06/2019	|
 | 0.6.0           | 5.0.10	       | 29/04/2019 |
 | 0.5.3           | 4.20.13        | 04/03/2019	|
 | 0.5.2           | 4.20.11        | 21/02/2019 |
@@ -44,10 +45,15 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
+### v0.6.2
+```
+- Hotfix: fix issue when load order changes.
+```
+
 ### v0.6.1
 ```
 - Remove extra pr_info in record address (left from debugging).
-- Update to kernel version 5.1.4.
+- Update to kernel version 5.1.9.
 ```
 
 ### v0.6.0
