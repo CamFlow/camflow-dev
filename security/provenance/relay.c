@@ -363,4 +363,4 @@ static int __init relay_prov_init(void)
 	pr_info("Provenance: relay ready.\n");
 	return 0;
 }
-core_initcall(relay_prov_init);
+fs_initcall(relay_prov_init);

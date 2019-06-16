@@ -989,4 +989,4 @@ static int __init init_prov_fs(void)
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
-core_initcall(init_prov_fs);
+fs_initcall(init_prov_fs);
