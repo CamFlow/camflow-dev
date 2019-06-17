@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.6.2           | 5.1.9	       	 | N/A				|
+| 0.6.2           | 5.1.9	       	 | 17/06/2019	|
 | 0.6.1           | 5.1.9	       	 | 14/06/2019	|
 | 0.6.0           | 5.0.10	       | 29/04/2019 |
 | 0.5.3           | 4.20.13        | 04/03/2019	|
@@ -47,7 +47,7 @@
 
 ### v0.6.2
 ```
-- Ensure that the propagate query is on from the start.
+- Ensure that the propagate query is on from the start
 - Fix interaction with process self-provenance.
 - Hotfix: fix issue when load order changes.
 ```
