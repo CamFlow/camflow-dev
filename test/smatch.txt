@@ -166,7 +166,7 @@ security/keys/request_key.c:284 construct_get_dest_keyring() warn: missing break
   CC      security/keys/big_key.o
   AR      security/keys/built-in.a
   CHECK   security/provenance/relay.c
-security/provenance/relay.c:245 prov_create_channel() warn: possible memory leak of 'long_name'
+security/provenance/relay.c:246 prov_create_channel() warn: possible memory leak of 'long_name'
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
 security/provenance/hooks.c:429 provenance_inode_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
@@ -365,7 +365,7 @@ security/provenance/hooks.c:2142 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
-security/provenance/fs.c:848 prov_read_policy_hash() warn: possible memory leak of 'buff'
+security/provenance/fs.c:849 prov_read_policy_hash() warn: possible memory leak of 'buff'
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
   CC      security/provenance/netfilter.o
