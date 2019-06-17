@@ -47,6 +47,8 @@
 
 ### v0.6.2
 ```
+- Ensure that the propagate query is on from the start.
+- Fix interaction with process self-provenance.
 - Hotfix: fix issue when load order changes.
 ```
 
