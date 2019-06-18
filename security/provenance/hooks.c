@@ -53,7 +53,7 @@ free_work:
 	kfree(w);
 }
 
-static struct workqueue_struct *prov_queue __ro_after_init;
+static struct workqueue_struct *provq __ro_after_init;
 
 /*!
  * @brief Create workqueue to persist provenance.
@@ -63,7 +63,7 @@ static inline void queue_save_provenance(struct provenance *provenance,
 {
 	struct save_work *work;
 
-	if (!prov_queue)
+	if (!provq)
 		return;
 	if (!provenance_is_initialized(prov_elt(provenance))
 	    || provenance_is_saved(prov_elt(provenance)))
@@ -73,7 +73,7 @@ static inline void queue_save_provenance(struct provenance *provenance,
 		return;
 	work->dentry = dentry;
 	INIT_WORK(&work->work, __do_prov_save);
-	queue_work(prov_queue, &work->work);
+	queue_work(provq, &work->work);
 }
 #else
 static inline void queue_save_provenance(struct provenance *provenance,
@@ -2546,6 +2546,39 @@ uint32_t prov_machine_id;
 uint32_t prov_boot_id;
 uint32_t epoch;
 
+
+static void __init init_prov_policy(void)
+{
+	pr_info("Provenance: policy initialization started...");
+	prov_policy.prov_enabled = true;
+	prov_policy.prov_written = false;
+	prov_policy.should_duplicate = false;
+	prov_policy.should_compress_node = true;
+	prov_policy.should_compress_edge = true;
+#ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
+	prov_policy.prov_all = true;
+#else
+	prov_policy.prov_all = false;
+#endif
+	pr_info("Provenance: policy initialization finished.");
+}
+
+static void __init init_prov_cache(void)
+{
+	pr_info("Provenance: cache initialization started...");
+	provenance_cache = kmem_cache_create("provenance_struct",
+					     sizeof(struct provenance),
+					     0, SLAB_PANIC, NULL);
+	if (unlikely(!provenance_cache))
+		panic("Provenance: could not allocate provenance_cache.");
+	long_provenance_cache = kmem_cache_create("long_provenance_struct",
+						  sizeof(union long_prov_elt),
+						  0, SLAB_PANIC, NULL);
+	if (unlikely(!long_provenance_cache))
+		panic("Provenance: could not allocate long_provenance_cache.");
+	pr_info("Provenance: cache initialization finished.");
+}
+
 /*!
  * @brief Operations to start provenance capture.
  *
@@ -2567,47 +2600,32 @@ uint32_t epoch;
  */
 static int __init provenance_init(void)
 {
-	prov_policy.prov_enabled = true;
-#ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
-	prov_policy.prov_all = true;
-#else
-	prov_policy.prov_all = false;
-#endif
-	prov_policy.prov_written = false;
-	prov_policy.should_duplicate = false;
-	prov_policy.should_compress_node = true;
-	prov_policy.should_compress_edge = true;
+	pr_info("Provenance: initialization started...");
+	init_prov_policy();
 	prov_machine_id = 0;
 	prov_boot_id = 0;
 	epoch = 1;
-	provenance_cache = kmem_cache_create("provenance_struct",
-					     sizeof(struct provenance),
-					     0, SLAB_PANIC, NULL);
-	if (unlikely(!provenance_cache))
-		panic("Provenance: could not allocate provenance_cache.");
-	long_provenance_cache = kmem_cache_create("long_provenance_struct",
-						  sizeof(union long_prov_elt),
-						  0, SLAB_PANIC, NULL);
-	if (unlikely(!long_provenance_cache))
-		panic("Provenance: could not allocate long_provenance_cache.");
+	init_prov_cache();
 	buffer_head = NULL;
 	long_buffer_head = NULL;
-
+	relay_ready = false;
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
-	prov_queue = alloc_workqueue("prov_queue", 0, 0);
-	if (!prov_queue)
+	provq = alloc_workqueue("provq", 0, 0);
+	if (!provq)
 		pr_err("Provenance: could not initialize work queue.");
 #endif
-	relay_ready = false;
 	task_init_provenance();
 	init_prov_machine();
 	print_prov_machine();
+	pr_info("Provenance: init propagate query.");
+	init_prov_propagate();
 	pr_info("Provenance: starting in epoch %d.", epoch);
 	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 	pr_info("Provenance: hooks ready.\n");
 	return 0;
 }
 
+/* set blob size and init function */
 DEFINE_LSM(provenance) = {
 	.name = "provenance",
 	.blobs = &provenance_blob_sizes,

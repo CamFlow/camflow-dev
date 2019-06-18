@@ -1,5 +1,5 @@
 kernel-version=5.1.9
-lsm-version=0.6.1
+lsm-version=0.6.2
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -84,6 +84,7 @@ config: copy_change copy_config
 	cd ./build/linux-stable &&  mv .config config_sav
 	cd ./build/linux-stable &&  mv config_strip .config
 	cd ./build/linux-stable && $(MAKE) menuconfig
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
 	cd ./build/linux-stable && cp .config ../../.config
 	cp -f .config ./scripts/.config
 
@@ -93,13 +94,17 @@ config_travis: copy_change copy_config
 	cd ./build/linux-stable &&  mv config_strip .config
 	cd ./build/linux-stable && $(MAKE) olddefconfig
 	cd ./build/linux-stable && $(MAKE) oldconfig
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
 
 config_old: copy_change copy_config
-	 cd ./build/linux-stable && $(MAKE) olddefconfig
-	 cd ./build/linux-stable && $(MAKE) menuconfig
+	cd ./build/linux-stable && $(MAKE) olddefconfig
+	cd ./build/linux-stable && $(MAKE) menuconfig
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+
 
 config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
 
 hooklist:
 	echo 'Generating HOOKS.md...'

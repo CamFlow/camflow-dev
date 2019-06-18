@@ -14,6 +14,8 @@
 
 #include <linux/provenance_query.h>
 
+int init_prov_propagate(void);
+
 static inline int call_provenance_flow(prov_entry_t *from,
 				       prov_entry_t *edge,
 				       prov_entry_t *to)

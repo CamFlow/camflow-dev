@@ -32,10 +32,9 @@ struct provenance_query_hooks hooks = {
 /*!
  * Register the propagate hooks.
  */
-static int __init init_prov_propagate(void)
+int init_prov_propagate(void)
 {
 	register_provenance_query_hooks(&hooks);
 	pr_info("Provenance: propagate ready.\n");
 	return 0;
 }
-early_initcall(init_prov_propagate);

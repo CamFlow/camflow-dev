@@ -244,7 +244,6 @@ declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
 static inline void update_prov_config(union prov_elt *setting, uint8_t op, struct provenance *prov)
 {
-	spin_lock(prov_lock(prov));
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
 			set_tracked(prov_elt(prov));
@@ -268,14 +267,16 @@ static inline void update_prov_config(union prov_elt *setting, uint8_t op, struc
 
 	if ((op & PROV_SET_TAINT) != 0)
 		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
-	spin_unlock(prov_lock(prov));
 }
 
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = provenance_task(current);
+	struct provenance *prov = provenance_cred_from_task(current);
+
+	if (!prov)
+		return -EINVAL;
 
 	if (count < sizeof(struct prov_process_config))
 		return -EINVAL;
@@ -989,4 +990,4 @@ static int __init init_prov_fs(void)
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
-core_initcall(init_prov_fs);
+fs_initcall(init_prov_fs);

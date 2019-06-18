@@ -17,6 +17,7 @@
 
 #include "provenance.h"
 #include "provenance_relay.h"
+#include "provenance_machine.h"
 #include "memcpy_ss.h"
 
 #define PROV_BASE_NAME          "provenance"
@@ -357,8 +358,9 @@ static int __init relay_prov_init(void)
 		panic("Provenance: relay_open failure\n");
 	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
 	relay_initialized = true;
+	init_prov_machine();
 	write_boot_buffer();
 	pr_info("Provenance: relay ready.\n");
 	return 0;
 }
-core_initcall(relay_prov_init);
+fs_initcall(relay_prov_init);

@@ -79,14 +79,14 @@ scripts/kconfig/conf  --syncconfig Kconfig
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
   CHECK   security/provenance/relay.c
-security/provenance/relay.c:36:1: warning: symbol 'relay_list' was not declared. Should it be static?
-security/provenance/relay.c:83:42: warning: incorrect type in initializer (different address spaces)
-security/provenance/relay.c:83:42:    expected struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:83:42:    got struct rchan_buf *
-security/provenance/relay.c:86:38: warning: incorrect type in argument 1 (different address spaces)
-security/provenance/relay.c:86:38:    expected struct rchan_buf *buf
-security/provenance/relay.c:86:38:    got struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:185:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
+security/provenance/relay.c:37:1: warning: symbol 'relay_list' was not declared. Should it be static?
+security/provenance/relay.c:84:42: warning: incorrect type in initializer (different address spaces)
+security/provenance/relay.c:84:42:    expected struct rchan_buf [noderef] <asn:3> *buf
+security/provenance/relay.c:84:42:    got struct rchan_buf *
+security/provenance/relay.c:87:38: warning: incorrect type in argument 1 (different address spaces)
+security/provenance/relay.c:87:38:    expected struct rchan_buf *buf
+security/provenance/relay.c:87:38:    got struct rchan_buf [noderef] <asn:3> *buf
+security/provenance/relay.c:186:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
 security/provenance/hooks.c:108:22: warning: incorrect type in assignment (different address spaces)
