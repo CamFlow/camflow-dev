@@ -382,9 +382,9 @@ security/provenance/fs.c:849 prov_read_policy_hash() warn: possible memory leak 
   CHECK   security/selinux/avc.c
   CC      security/selinux/avc.o
   CHECK   security/selinux/hooks.c
-security/selinux/hooks.c:2571 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
-  Locked on:   line 2571
-  Unlocked on: line 2539
+security/selinux/hooks.c:2580 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
+  Locked on:   line 2580
+  Unlocked on: line 2548
   CC      security/selinux/hooks.o
   CHECK   security/selinux/selinuxfs.c
   CC      security/selinux/selinuxfs.o
