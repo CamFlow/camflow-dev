@@ -780,8 +780,10 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	if (IS_ERR(policy_shash_tfm))
 		return -ENOMEM;
 	pos = crypto_shash_digestsize(policy_shash_tfm);
-	if (count < pos)
-		return -ENOMEM;
+	if (count < pos) {
+		pos = -ENOMEM;
+		goto out;
+	}
 	buff = kzalloc(pos, GFP_KERNEL);
 	if (!buff) {
 		pos = -ENOMEM;
