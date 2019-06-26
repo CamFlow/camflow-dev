@@ -48,6 +48,8 @@
 
 ### v0.6.3
 ```
+- Fix potential memory leak when reading policy hash.
+- Fix potential memory leak when creating new relay channel.
 - Update to kernel version 5.1.9.
 ```
 
