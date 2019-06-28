@@ -840,17 +840,14 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		pos = -EAGAIN;
 		goto out;
 	}
-	if (copy_to_user(buf, buff, pos)) {
+	if (copy_to_user(buf, buff, pos))
 		pos = -EAGAIN;
-		goto out;
-	}
 out:
 	if (!buff)
 		kfree(buff);
 	if (!hashdesc)
 		kfree(hashdesc);
-	if (!IS_ERR(policy_shash_tfm))
-		crypto_free_shash(policy_shash_tfm);
+	crypto_free_shash(policy_shash_tfm);
 	return pos;
 }
 declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
