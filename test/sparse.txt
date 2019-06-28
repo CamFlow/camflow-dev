@@ -26,13 +26,13 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/pnmtologo
   HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
   HOSTCC  scripts/sortextable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
+  HOSTCC  scripts/insert-sys-cert
   CHECK   scripts/mod/empty.c
   CC      scripts/mod/empty.o
   HOSTCC  scripts/mod/mk_elfconfig
