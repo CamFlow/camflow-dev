@@ -38,13 +38,13 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/pnmtologo
   HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
   HOSTCC  scripts/sortextable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
+  HOSTCC  scripts/insert-sys-cert
   CHECK   scripts/mod/empty.c
   CC      scripts/mod/empty.o
   HOSTCC  scripts/mod/mk_elfconfig
@@ -90,6 +90,62 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
+  CHECK   security/apparmor/apparmorfs.c
+  CC      security/apparmor/apparmorfs.o
+  CHECK   security/apparmor/audit.c
+  CC      security/apparmor/audit.o
+  GEN     security/apparmor/capability_names.h
+  CHECK   security/apparmor/capability.c
+  CC      security/apparmor/capability.o
+  CHECK   security/apparmor/task.c
+  CC      security/apparmor/task.o
+  CHECK   security/apparmor/ipc.c
+  CC      security/apparmor/ipc.o
+  CHECK   security/apparmor/lib.c
+  CC      security/apparmor/lib.o
+  CHECK   security/apparmor/match.c
+  CC      security/apparmor/match.o
+  CHECK   security/apparmor/path.c
+  CC      security/apparmor/path.o
+  CHECK   security/apparmor/domain.c
+  CC      security/apparmor/domain.o
+  CHECK   security/apparmor/policy.c
+  CC      security/apparmor/policy.o
+  CHECK   security/apparmor/policy_unpack.c
+  CC      security/apparmor/policy_unpack.o
+  CHECK   security/apparmor/procattr.c
+  CC      security/apparmor/procattr.o
+  CHECK   security/apparmor/lsm.c
+  CC      security/apparmor/lsm.o
+  GEN     security/apparmor/rlim_names.h
+  CHECK   security/apparmor/resource.c
+  CC      security/apparmor/resource.o
+  CHECK   security/apparmor/secid.c
+  CC      security/apparmor/secid.o
+  CHECK   security/apparmor/file.c
+  CC      security/apparmor/file.o
+  CHECK   security/apparmor/policy_ns.c
+  CC      security/apparmor/policy_ns.o
+  CHECK   security/apparmor/label.c
+  CC      security/apparmor/label.o
+  CHECK   security/apparmor/mount.c
+  CC      security/apparmor/mount.o
+  GEN     security/apparmor/net_names.h
+  GEN     security/apparmor/net_names.h
+  CHECK   security/apparmor/net.c
+  CC      security/apparmor/net.o
+  CHECK   security/apparmor/crypto.c
+  CC      security/apparmor/crypto.o
+  AR      security/apparmor/built-in.a
+  CHECK   security/integrity/evm/evm_main.c
+  CC      security/integrity/evm/evm_main.o
+  CHECK   security/integrity/evm/evm_crypto.c
+  CC      security/integrity/evm/evm_crypto.o
+  CHECK   security/integrity/evm/evm_secfs.c
+  CC      security/integrity/evm/evm_secfs.o
+  CHECK   security/integrity/evm/evm_posix_acl.c
+  CC      security/integrity/evm/evm_posix_acl.o
+  AR      security/integrity/evm/built-in.a
   CHECK   security/integrity/ima/ima_fs.c
   CC      security/integrity/ima/ima_fs.o
   CHECK   security/integrity/ima/ima_queue.c
@@ -108,6 +164,8 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      security/integrity/ima/ima_template.o
   CHECK   security/integrity/ima/ima_template_lib.c
   CC      security/integrity/ima/ima_template_lib.o
+  CHECK   security/integrity/ima/ima_appraise.c
+  CC      security/integrity/ima/ima_appraise.o
   AR      security/integrity/ima/built-in.a
   CHECK   security/integrity/iint.c
   CC      security/integrity/iint.o
@@ -117,17 +175,13 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      security/integrity/digsig.o
   CHECK   security/integrity/digsig_asymmetric.c
   CC      security/integrity/digsig_asymmetric.o
-  CHECK   security/integrity/platform_certs/platform_keyring.c
-  CC      security/integrity/platform_certs/platform_keyring.o
-  CHECK   security/integrity/platform_certs/efi_parser.c
-  CC      security/integrity/platform_certs/efi_parser.o
-  CHECK   security/integrity/platform_certs/load_uefi.c
-  CC      security/integrity/platform_certs/load_uefi.o
   AR      security/integrity/built-in.a
   CHECK   security/keys/encrypted-keys/encrypted.c
   CC      security/keys/encrypted-keys/encrypted.o
   CHECK   security/keys/encrypted-keys/ecryptfs_format.c
   CC      security/keys/encrypted-keys/ecryptfs_format.o
+  CHECK   security/keys/encrypted-keys/masterkey_trusted.c
+  CC      security/keys/encrypted-keys/masterkey_trusted.o
   AR      security/keys/encrypted-keys/built-in.a
   CHECK   security/keys/gc.c
   CC      security/keys/gc.o
@@ -164,6 +218,8 @@ security/keys/request_key.c:284 construct_get_dest_keyring() warn: missing break
   CC      security/keys/keyctl_pkey.o
   CHECK   security/keys/big_key.c
   CC      security/keys/big_key.o
+  CHECK   security/keys/trusted.c
+  CC      security/keys/trusted.o
   AR      security/keys/built-in.a
   CHECK   security/provenance/relay.c
   CC      security/provenance/relay.o
@@ -364,7 +420,7 @@ security/provenance/hooks.c:2142 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
-security/provenance/fs.c:851 prov_read_policy_hash() warn: possible memory leak of 'buff'
+security/provenance/fs.c:854 prov_read_policy_hash() warn: possible memory leak of 'buff'
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
   CC      security/provenance/netfilter.o
@@ -421,11 +477,63 @@ security/selinux/ss/sidtab.c:468 sidtab_destroy_tree() error: buffer overflow 'n
   CC      security/selinux/ss/mls.o
   CHECK   security/selinux/ss/status.c
   CC      security/selinux/ss/status.o
-  CHECK   security/selinux/xfrm.c
-  CC      security/selinux/xfrm.o
   CHECK   security/selinux/netlabel.c
   CC      security/selinux/netlabel.o
   AR      security/selinux/built-in.a
+  CHECK   security/smack/smack_lsm.c
+security/smack/smack_lsm.c:3401 smack_d_instantiate() warn: missing break? reassigning 'final->list'
+security/smack/smack_lsm.c:3887 smack_socket_sock_rcv_skb() error: we previously assumed 'skb' could be null (see line 3863)
+security/smack/smack_lsm.c:3909 smack_socket_sock_rcv_skb() warn: variable dereferenced before check 'skb' (see line 3851)
+security/smack/smack_lsm.c:4011 smack_socket_getpeersec_dgram() error: we previously assumed 'skb' could be null (see line 3993)
+security/smack/smack_lsm.c:4129 smack_inet_conn_request() error: we previously assumed 'skb' could be null (see line 4108)
+security/smack/smack_lsm.c:4353 smack_audit_rule_init() error: potential null dereference 'skp'.  (smk_import_entry returns null)
+  CC      security/smack/smack_lsm.o
+  CHECK   security/smack/smack_access.c
+  CC      security/smack/smack_access.o
+  CHECK   security/smack/smackfs.c
+security/smack/smackfs.c:907 smk_set_cipso() error: potential null dereference 'skp'.  (smk_import_entry returns null)
+  CC      security/smack/smackfs.o
+  CHECK   security/smack/smack_netfilter.c
+  CC      security/smack/smack_netfilter.o
+  AR      security/smack/built-in.a
+  CHECK   security/tomoyo/audit.c
+  CC      security/tomoyo/audit.o
+  POLICY  security/tomoyo/builtin-policy.h
+  CHECK   security/tomoyo/common.c
+security/tomoyo/common.c:1650 tomoyo_read_domain() warn: missing break? reassigning 'head->r.index'
+  CC      security/tomoyo/common.o
+  CHECK   security/tomoyo/condition.c
+security/tomoyo/condition.c:222 tomoyo_scan_bprm() warn: possible memory leak of 'checked'
+security/tomoyo/condition.c:564 tomoyo_get_condition() error: strncmp() 'left_word' too small (1 vs 10)
+security/tomoyo/condition.c:579 tomoyo_get_condition() error: strncmp() 'left_word' too small (1 vs 11)
+  CC      security/tomoyo/condition.o
+  CHECK   security/tomoyo/domain.c
+  CC      security/tomoyo/domain.o
+  CHECK   security/tomoyo/environ.c
+  CC      security/tomoyo/environ.o
+  CHECK   security/tomoyo/file.c
+  CC      security/tomoyo/file.o
+  CHECK   security/tomoyo/gc.c
+  CC      security/tomoyo/gc.o
+  CHECK   security/tomoyo/group.c
+  CC      security/tomoyo/group.o
+  CHECK   security/tomoyo/load_policy.c
+  CC      security/tomoyo/load_policy.o
+  CHECK   security/tomoyo/memory.c
+  CC      security/tomoyo/memory.o
+  CHECK   security/tomoyo/mount.c
+  CC      security/tomoyo/mount.o
+  CHECK   security/tomoyo/network.c
+  CC      security/tomoyo/network.o
+  CHECK   security/tomoyo/realpath.c
+  CC      security/tomoyo/realpath.o
+  CHECK   security/tomoyo/securityfs_if.c
+  CC      security/tomoyo/securityfs_if.o
+  CHECK   security/tomoyo/tomoyo.c
+  CC      security/tomoyo/tomoyo.o
+  CHECK   security/tomoyo/util.c
+  CC      security/tomoyo/util.o
+  AR      security/tomoyo/built-in.a
   CHECK   security/yama/yama_lsm.c
   CC      security/yama/yama_lsm.o
   AR      security/yama/built-in.a

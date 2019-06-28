@@ -642,70 +642,70 @@ WARNING:LONG_LINE: line over 80 characters
 +		}											 \
 
 WARNING:LONG_LINE: line over 80 characters
-#792: FILE: security/provenance/fs.c:792:
+#794: FILE: security/provenance/fs.c:794:
 +	size = sizeof(struct shash_desc) + crypto_shash_descsize(policy_shash_tfm);
 
 WARNING:LONG_LINE: line over 80 characters
-#806: FILE: security/provenance/fs.c:806:
+#808: FILE: security/provenance/fs.c:808:
 +	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR, strnlen(CAMFLOW_VERSION_STR, 32));
 
 WARNING:LONG_LINE: line over 80 characters
-#812: FILE: security/provenance/fs.c:812:
+#814: FILE: security/provenance/fs.c:814:
 +	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
 
 WARNING:LONG_LINE: line over 80 characters
-#818: FILE: security/provenance/fs.c:818:
+#820: FILE: security/provenance/fs.c:820:
 +	rc = crypto_shash_update(hashdesc, (u8 *)&prov_policy, sizeof(struct capture_policy));
 
 WARNING:LONG_LINE: line over 80 characters
-#824: FILE: security/provenance/fs.c:824:
+#826: FILE: security/provenance/fs.c:826:
 +	hash_filters(ingress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 
 WARNING:LONG_LINE: line over 80 characters
-#826: FILE: security/provenance/fs.c:826:
+#828: FILE: security/provenance/fs.c:828:
 +	hash_filters(egress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 
 WARNING:LONG_LINE: line over 80 characters
-#871: FILE: security/provenance/fs.c:871:
+#874: FILE: security/provenance/fs.c:874:
 +			strlcpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
 
 WARNING:LONG_LINE: line over 80 characters
-#876: FILE: security/provenance/fs.c:876:
+#879: FILE: security/provenance/fs.c:879:
 +			strlcpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
 
 WARNING:LONG_LINE: line over 80 characters
-#941: FILE: security/provenance/fs.c:941:
+#944: FILE: security/provenance/fs.c:944:
 +#define prov_create_file(name, perm, fun_ptr)					      \
 
 WARNING:LONG_LINE: line over 80 characters
-#942: FILE: security/provenance/fs.c:942:
+#945: FILE: security/provenance/fs.c:945:
 +	do {									      \
 
 WARNING:LONG_LINE: line over 80 characters
-#943: FILE: security/provenance/fs.c:943:
+#946: FILE: security/provenance/fs.c:946:
 +		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
 
 WARNING:LONG_LINE: line over 80 characters
-#944: FILE: security/provenance/fs.c:944:
+#947: FILE: security/provenance/fs.c:947:
 +		provenance_mark_as_opaque_dentry(dentry);			      \
 
 WARNING:LONG_LINE: line over 80 characters
-#970: FILE: security/provenance/fs.c:970:
+#973: FILE: security/provenance/fs.c:973:
 +	prov_create_file("propagate_derived_filter", 0644, &prov_propagate_derived_filter_ops);
 
 WARNING:LONG_LINE: line over 80 characters
-#971: FILE: security/provenance/fs.c:971:
+#974: FILE: security/provenance/fs.c:974:
 +	prov_create_file("propagate_generated_filter", 0644, &prov_propagate_generated_filter_ops);
 
 WARNING:LONG_LINE: line over 80 characters
-#972: FILE: security/provenance/fs.c:972:
+#975: FILE: security/provenance/fs.c:975:
 +	prov_create_file("propagate_used_filter", 0644, &prov_propagate_used_filter_ops);
 
 WARNING:LONG_LINE: line over 80 characters
-#973: FILE: security/provenance/fs.c:973:
+#976: FILE: security/provenance/fs.c:976:
 +	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
 
-total: 0 errors, 160 warnings, 995 lines checked
+total: 0 errors, 160 warnings, 998 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.

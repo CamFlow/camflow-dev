@@ -44,6 +44,20 @@ inode -> process_memory[fontsize = 8,label = exec]
 
 inode -> task[fontsize = 8,label = file_sigio]
 
+inode -> task[fontsize = 8,label = perm_exec]
+
+inode -> task[fontsize = 8,label = perm_read]
+
+inode -> task[fontsize = 8,label = perm_append]
+
+inode -> task[fontsize = 8,label = perm_write]
+
+xattr[fontsize = 8,label = xattr,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+task -> xattr[fontsize = 8,label = setxattr]
+
+xattr -> inode[fontsize = 8,label = setxattr_inode]
+
 inode -> task[fontsize = 8,label = load_file]
 
 task -> machine[fontsize = 8,label = load_unknown]
