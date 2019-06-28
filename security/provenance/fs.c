@@ -777,8 +777,10 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct group_filters *group_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
-	if (IS_ERR(policy_shash_tfm))
-		return -ENOMEM;
+	if (IS_ERR(policy_shash_tfm)) {
+		pos = -ENOMEM;
+		goto out;
+	}
 	pos = crypto_shash_digestsize(policy_shash_tfm);
 	if (count < pos) {
 		pos = -ENOMEM;
@@ -847,7 +849,8 @@ out:
 		kfree(buff);
 	if (!hashdesc)
 		kfree(hashdesc);
-	crypto_free_shash(policy_shash_tfm);
+	if (!IS_ERR(policy_shash_tfm))
+		crypto_free_shash(policy_shash_tfm);
 	return pos;
 }
 declare_file_operations(prov_policy_hash_ops, no_write, prov_read_policy_hash);
