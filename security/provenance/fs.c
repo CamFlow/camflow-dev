@@ -777,25 +777,23 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	struct group_filters *group_tmp;
 
 	policy_shash_tfm = crypto_alloc_shash(PROVENANCE_HASH, 0, 0);
-	if (IS_ERR(policy_shash_tfm)) {
-		pos = -ENOMEM;
-		goto out;
-	}
+	if (IS_ERR(policy_shash_tfm))
+		return -ENOMEM;
 	pos = crypto_shash_digestsize(policy_shash_tfm);
 	if (count < pos) {
 		pos = -ENOMEM;
-		goto out;
-	}
-	buff = kzalloc(pos, GFP_KERNEL);
-	if (!buff) {
-		pos = -ENOMEM;
-		goto out;
+		goto out_shash;
 	}
 	size = sizeof(struct shash_desc) + crypto_shash_descsize(policy_shash_tfm);
 	hashdesc = kzalloc(size, GFP_KERNEL);
 	if (!hashdesc) {
 		pos = -ENOMEM;
-		goto out;
+		goto out_shash;
+	}
+	buff = kzalloc(pos, GFP_KERNEL);
+	if (!buff) {
+		pos = -ENOMEM;
+		goto out_hashdesc;
 	}
 	hashdesc->tfm = policy_shash_tfm;
 	hashdesc->flags = 0x0;
@@ -843,10 +841,10 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	if (copy_to_user(buf, buff, pos))
 		pos = -EAGAIN;
 out:
-	if (!buff)
-		kfree(buff);
-	if (!hashdesc)
-		kfree(hashdesc);
+	kfree(buff);
+out_hashdesc:
+	kfree(hashdesc);
+out_shash:
 	crypto_free_shash(policy_shash_tfm);
 	return pos;
 }
