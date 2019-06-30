@@ -1,14 +1,6 @@
 ---------------------------------------
 security/provenance/include/memcpy_ss.h
 ---------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/memcpy_ss.h', please use '/*' instead
-#1: FILE: security/provenance/include/memcpy_ss.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/memcpy_ss.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/memcpy_ss.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -29,7 +21,7 @@ WARNING:FUNCTION_ARGUMENTS: function definition argument '__kernel_size_t' shoul
 #15: FILE: security/provenance/include/memcpy_ss.h:15:
 +extern int __memcpy_ss(void *, __kernel_size_t, const void *, __kernel_size_t);
 
-total: 0 errors, 7 warnings, 17 lines checked
+total: 0 errors, 5 warnings, 17 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -38,14 +30,6 @@ security/provenance/include/memcpy_ss.h has style problems, please review.
 ----------------------------------------
 security/provenance/include/provenance.h
 ----------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -142,7 +126,7 @@ WARNING:LONG_LINE: line over 80 characters
 #202: FILE: security/provenance/include/provenance.h:202:
 +#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
 
-total: 0 errors, 26 warnings, 256 lines checked
+total: 0 errors, 24 warnings, 256 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -151,14 +135,6 @@ security/provenance/include/provenance.h has style problems, please review.
 -----------------------------------------------
 security/provenance/include/provenance_filter.h
 -----------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_filter.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_filter.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_filter.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_filter.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -335,7 +311,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #235: FILE: security/provenance/include/provenance_filter.h:235:
 + * 1. ns (i.e., namespace) elements: ipcns, mntns, pidns, netns, cgroupns, if the node is of type ENT_PROC, and
 
-total: 0 errors, 35 warnings, 272 lines checked
+total: 0 errors, 33 warnings, 272 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -344,14 +320,6 @@ security/provenance/include/provenance_filter.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_inode.h
 ----------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_inode.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_inode.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_inode.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_inode.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -651,7 +619,7 @@ WARNING:LONG_LINE: line over 80 characters
 #481: FILE: security/provenance/include/provenance_inode.h:481:
 +	rc = record_relation(RL_PROC_WRITE, prov_entry(tprov), prov_entry(cprov), NULL, 0);
 
-total: 0 errors, 76 warnings, 527 lines checked
+total: 0 errors, 74 warnings, 527 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -660,19 +628,11 @@ security/provenance/include/provenance_inode.h has style problems, please review
 ------------------------------------------------
 security/provenance/include/provenance_machine.h
 ------------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_machine.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_machine.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_machine.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_machine.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
-total: 0 errors, 3 warnings, 22 lines checked
+total: 0 errors, 1 warnings, 22 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -681,14 +641,6 @@ security/provenance/include/provenance_machine.h has style problems, please revi
 --------------------------------------------
 security/provenance/include/provenance_net.h
 --------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_net.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_net.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_net.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_net.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -834,7 +786,7 @@ WARNING:LONG_LINE: line over 80 characters
 #372: FILE: security/provenance/include/provenance_net.h:372:
 +		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 
-total: 0 errors, 38 warnings, 386 lines checked
+total: 0 errors, 36 warnings, 386 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -843,14 +795,6 @@ security/provenance/include/provenance_net.h has style problems, please review.
 -------------------------------------------
 security/provenance/include/provenance_ns.h
 -------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_ns.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_ns.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_ns.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_ns.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -911,7 +855,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #97: FILE: security/provenance/include/provenance_ns.h:97:
 + * @param f The ns_filter that is checked against to update the filter in the list.
 
-total: 0 errors, 17 warnings, 122 lines checked
+total: 0 errors, 15 warnings, 122 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -920,14 +864,6 @@ security/provenance/include/provenance_ns.h has style problems, please review.
 -----------------------------------------------
 security/provenance/include/provenance_policy.h
 -----------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_policy.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_policy.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_policy.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_policy.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -996,7 +932,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #35: FILE: security/provenance/include/provenance_policy.h:35:
 +	uint64_t prov_propagate_informed_filter;        // Edge of category "informed" to be filtered out if it is part of propagate.
 
-total: 0 errors, 19 warnings, 40 lines checked
+total: 0 errors, 17 warnings, 40 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1005,14 +941,6 @@ security/provenance/include/provenance_policy.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_query.h
 ----------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_query.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_query.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_query.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_query.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -1041,7 +969,7 @@ WARNING:PREFER_PR_LEVEL: Prefer pr_warn(... to pr_warning(...
 #81: FILE: security/provenance/include/provenance_query.h:81:
 +		pr_warning("Provenance: warning raised.\n");
 
-total: 0 errors, 9 warnings, 89 lines checked
+total: 0 errors, 7 warnings, 89 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1050,14 +978,6 @@ security/provenance/include/provenance_query.h has style problems, please review
 -----------------------------------------------
 security/provenance/include/provenance_record.h
 -----------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_record.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_record.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_record.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_record.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -1357,7 +1277,7 @@ WARNING:LONG_LINE: line over 80 characters
 #492: FILE: security/provenance/include/provenance_record.h:492:
 +	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
 
-total: 0 errors, 76 warnings, 505 lines checked
+total: 0 errors, 74 warnings, 505 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1366,14 +1286,6 @@ security/provenance/include/provenance_record.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_relay.h
 ----------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_relay.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_relay.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_relay.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_relay.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -1438,7 +1350,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #143: FILE: security/provenance/include/provenance_relay.h:143:
 +	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 
-total: 0 errors, 18 warnings, 146 lines checked
+total: 0 errors, 16 warnings, 146 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1447,14 +1359,6 @@ security/provenance/include/provenance_relay.h has style problems, please review
 ---------------------------------------------
 security/provenance/include/provenance_task.h
 ---------------------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/include/provenance_task.h', please use '/*' instead
-#1: FILE: security/provenance/include/provenance_task.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/include/provenance_task.h:1:
-+// SPDX-License-Identifier: GPL-2.0
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_task.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -1601,7 +1505,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #569: FILE: security/provenance/include/provenance_task.h:569:
 + * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
 
-total: 0 errors, 38 warnings, 608 lines checked
+total: 0 errors, 36 warnings, 608 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
