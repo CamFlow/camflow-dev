@@ -796,7 +796,6 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out_hashdesc;
 	}
 	hashdesc->tfm = policy_shash_tfm;
-	hashdesc->flags = 0x0;
 	rc = crypto_shash_init(hashdesc);
 	if (rc) {
 		pos = -EAGAIN;
