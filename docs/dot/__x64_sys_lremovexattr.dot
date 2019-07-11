@@ -38,10 +38,6 @@ process_memory -> task[fontsize = 8,label = memory_read]
 
 xattr[fontsize = 8,label = xattr,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-task -> xattr[fontsize = 8,label = setxattr]
-
-xattr -> inode[fontsize = 8,label = setxattr_inode]
-
 task -> xattr[fontsize = 8,label = removexattr]
 
 xattr -> inode[fontsize = 8,label = removexattr_inode]
