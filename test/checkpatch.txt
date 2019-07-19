@@ -1,14 +1,6 @@
 ------------------------
 security/provenance/fs.c
 ------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/fs.c', please use '//' instead
-#1: FILE: security/provenance/fs.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/fs.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/fs.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -713,7 +705,7 @@ WARNING:LONG_LINE: line over 80 characters
 #970: FILE: security/provenance/fs.c:970:
 +	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
 
-total: 0 errors, 162 warnings, 992 lines checked
+total: 0 errors, 160 warnings, 992 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -722,14 +714,6 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/hooks.c', please use '//' instead
-#1: FILE: security/provenance/hooks.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/hooks.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/hooks.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -1998,7 +1982,7 @@ WARNING:LONG_LINE_STRING: line over 80 characters
 #2626: FILE: security/provenance/hooks.c:2626:
 +	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 
-total: 0 errors, 319 warnings, 2636 lines checked
+total: 0 errors, 317 warnings, 2636 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2007,14 +1991,6 @@ security/provenance/hooks.c has style problems, please review.
 -----------------------------
 security/provenance/machine.c
 -----------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/machine.c', please use '//' instead
-#1: FILE: security/provenance/machine.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/machine.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/machine.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -2055,7 +2031,7 @@ WARNING:LONG_LINE: line over 80 characters
 #52: FILE: security/provenance/machine.c:52:
 +	pr_info("Provenance: domainname %s", prov_machine->machine_info.utsname.domainname);
 
-total: 0 errors, 12 warnings, 53 lines checked
+total: 0 errors, 10 warnings, 53 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2064,14 +2040,6 @@ security/provenance/machine.c has style problems, please review.
 -------------------------------
 security/provenance/memcpy_ss.c
 -------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/memcpy_ss.c', please use '//' instead
-#1: FILE: security/provenance/memcpy_ss.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/memcpy_ss.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/memcpy_ss.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -2112,7 +2080,7 @@ WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__mem
 #56: FILE: security/provenance/memcpy_ss.c:56:
 +		pr_err("__memcpy_ss: dest and src overlap.");
 
-total: 0 errors, 12 warnings, 62 lines checked
+total: 0 errors, 10 warnings, 62 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2121,14 +2089,6 @@ security/provenance/memcpy_ss.c has style problems, please review.
 -------------------------------
 security/provenance/netfilter.c
 -------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/netfilter.c', please use '//' instead
-#1: FILE: security/provenance/netfilter.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/netfilter.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/netfilter.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -2153,7 +2113,7 @@ WARNING:LONG_LINE: line over 80 characters
 #80: FILE: security/provenance/netfilter.c:80:
 +	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
 
-total: 0 errors, 8 warnings, 109 lines checked
+total: 0 errors, 6 warnings, 109 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2162,19 +2122,11 @@ security/provenance/netfilter.c has style problems, please review.
 -------------------------------
 security/provenance/propagate.c
 -------------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/propagate.c', please use '//' instead
-#1: FILE: security/provenance/propagate.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/propagate.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/propagate.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
-total: 0 errors, 3 warnings, 40 lines checked
+total: 0 errors, 1 warnings, 40 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2183,19 +2135,11 @@ security/provenance/propagate.c has style problems, please review.
 ---------------------------
 security/provenance/query.c
 ---------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/query.c', please use '//' instead
-#1: FILE: security/provenance/query.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/query.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/query.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
-total: 0 errors, 3 warnings, 46 lines checked
+total: 0 errors, 1 warnings, 46 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2204,14 +2148,6 @@ security/provenance/query.c has style problems, please review.
 ---------------------------
 security/provenance/relay.c
 ---------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/relay.c', please use '//' instead
-#1: FILE: security/provenance/relay.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/relay.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/relay.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -2388,7 +2324,7 @@ WARNING:LONG_LINE: line over 80 characters
 #357: FILE: security/provenance/relay.c:357:
 +	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
-total: 0 errors, 46 warnings, 367 lines checked
+total: 0 errors, 44 warnings, 367 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2397,14 +2333,6 @@ security/provenance/relay.c has style problems, please review.
 --------------------------
 security/provenance/type.c
 --------------------------
-WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/type.c', please use '//' instead
-#1: FILE: security/provenance/type.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
-WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
-#1: FILE: security/provenance/type.c:1:
-+/* SPDX-License-Identifier: GPL-2.0 */
-
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/type.c:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
@@ -2921,7 +2849,7 @@ WARNING:LONG_LINE: line over 80 characters
 #436: FILE: security/provenance/type.c:436:
 +	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
 
-total: 0 errors, 131 warnings, 537 lines checked
+total: 0 errors, 129 warnings, 537 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
