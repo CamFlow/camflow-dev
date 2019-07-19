@@ -58,12 +58,6 @@ inode -> task[fontsize = 8,label = perm_append]
 
 inode -> task[fontsize = 8,label = perm_write]
 
-xattr[fontsize = 8,label = xattr,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-task -> xattr[fontsize = 8,label = setxattr]
-
-xattr -> inode[fontsize = 8,label = setxattr_inode]
-
 iattr[fontsize = 8,label = iattr,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 task -> iattr[fontsize = 8,label = setattr]
