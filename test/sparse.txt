@@ -88,7 +88,7 @@ security/provenance/relay.c:84:42:    got struct rchan_buf *
 security/provenance/relay.c:87:38: warning: incorrect type in argument 1 (different address spaces)
 security/provenance/relay.c:87:38:    expected struct rchan_buf *buf
 security/provenance/relay.c:87:38:    got struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:186:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
+security/provenance/relay.c:183:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
 security/provenance/hooks.c:108:22: warning: incorrect type in assignment (different address spaces)
@@ -134,8 +134,6 @@ security/provenance/hooks.c:149:30: warning: cast removes address space '<asn:4>
 ./security/provenance/include/provenance_net.h:154:22: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:154:22:    expected unsigned short [usertype] rcv_port
 ./security/provenance/include/provenance_net.h:154:22:    got restricted __be16 [usertype] dest
-security/provenance/hooks.c:2535:16: warning: symbol 'buffer_head' was not declared. Should it be static?
-security/provenance/hooks.c:2536:21: warning: symbol 'long_buffer_head' was not declared. Should it be static?
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o

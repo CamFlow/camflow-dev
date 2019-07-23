@@ -1295,62 +1295,62 @@ WARNING:LONG_LINE: line over 80 characters
 +#define PROV_RELAY_BUFF_SIZE            ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#51: FILE: security/provenance/include/provenance_relay.h:51:
+#53: FILE: security/provenance/include/provenance_relay.h:53:
 + * There are some checks before the provenance node is written to the relay buffer which can be consumed by userspace client.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#52: FILE: security/provenance/include/provenance_relay.h:52:
+#54: FILE: security/provenance/include/provenance_relay.h:54:
 + * If those checks are passed and the provenance node should be written to the relay buffer,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#53: FILE: security/provenance/include/provenance_relay.h:53:
+#55: FILE: security/provenance/include/provenance_relay.h:55:
 + * Call either "prov_write" or "long_prov_write" depending on whether the node is a regular or a long provenance node.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#56: FILE: security/provenance/include/provenance_relay.h:56:
+#58: FILE: security/provenance/include/provenance_relay.h:58:
 + * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#57: FILE: security/provenance/include/provenance_relay.h:57:
+#59: FILE: security/provenance/include/provenance_relay.h:59:
 + * 2. If the provenance is not a packet node (which means it should have machine ID) and the provenacne is not recorded,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#58: FILE: security/provenance/include/provenance_relay.h:58:
+#60: FILE: security/provenance/include/provenance_relay.h:60:
 + *              record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#93: FILE: security/provenance/include/provenance_relay.h:93:
+#95: FILE: security/provenance/include/provenance_relay.h:95:
 +	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 
 WARNING:LONG_LINE: line over 80 characters
-#98: FILE: security/provenance/include/provenance_relay.h:98:
+#100: FILE: security/provenance/include/provenance_relay.h:100:
 +	__memcpy_ss(&(relation->relation_info.snd), sizeof(union prov_identifier), &get_prov_identifier(f), sizeof(union prov_identifier));
 
 WARNING:LONG_LINE: line over 80 characters
-#99: FILE: security/provenance/include/provenance_relay.h:99:
+#101: FILE: security/provenance/include/provenance_relay.h:101:
 +	__memcpy_ss(&(relation->relation_info.rcv), sizeof(union prov_identifier), &get_prov_identifier(t), sizeof(union prov_identifier));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#112: FILE: security/provenance/include/provenance_relay.h:112:
+#114: FILE: security/provenance/include/provenance_relay.h:114:
 + * The relation will only be recorded if no user-supplied filter is applicable to the type of the relation or the end nodes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#114: FILE: security/provenance/include/provenance_relay.h:114:
+#116: FILE: security/provenance/include/provenance_relay.h:116:
 + * Two end nodes are recorded by calling "__write_node" function before the relation itself is recorded.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#115: FILE: security/provenance/include/provenance_relay.h:115:
+#117: FILE: security/provenance/include/provenance_relay.h:117:
 + * CamQuery is called for provenance runtime analysis of this provenance relation (i.e., edge) before the relation is recorded to relay.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#142: FILE: security/provenance/include/provenance_relay.h:142:
+#144: FILE: security/provenance/include/provenance_relay.h:144:
 +	rc = call_query_hooks(f, t, (prov_entry_t *)&relation); // Call query hooks for propagate tracking.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#143: FILE: security/provenance/include/provenance_relay.h:143:
+#145: FILE: security/provenance/include/provenance_relay.h:145:
 +	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 
-total: 0 errors, 16 warnings, 146 lines checked
+total: 0 errors, 16 warnings, 148 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
