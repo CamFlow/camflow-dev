@@ -123,9 +123,6 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file = remove_buf_file_handler,
 };
 
-extern union prov_elt *buffer_head;
-extern union long_prov_elt *long_buffer_head;
-
 static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 {
 	int cpu;
@@ -193,7 +190,6 @@ bool relay_initialized;
  * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
  *
  */
-extern union long_prov_elt *prov_machine;
 void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {

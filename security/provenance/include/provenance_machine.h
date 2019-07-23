@@ -14,7 +14,7 @@
 
 #include <uapi/linux/provenance.h>
 
-#include <uapi/linux/provenance.h>
+extern union long_prov_elt *prov_machine;
 
 void init_prov_machine(void);
 void refresh_prov_machine(void);
