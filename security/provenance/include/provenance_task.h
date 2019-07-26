@@ -267,8 +267,11 @@ static inline void update_proc_perf(struct task_struct *task,
 	uint64_t utime;
 	uint64_t stime;
 
+	if (!task)
+		return;
+
 	// time
-	task_cputime_adjusted(task, &utime, &stime);
+	task_cputime(task, &utime, &stime);
 	prov_elt(prov)->proc_info.utime = div_u64(utime, NSEC_PER_USEC);
 	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
 
