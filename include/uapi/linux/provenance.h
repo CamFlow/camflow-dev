@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "084a92d046ca0d5f13a3c2b6bece41dd0a474733"
+#define CAMFLOW_COMMIT "371cf4a544d1eef0b8c27817fe7e9f37c12558c7"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -165,6 +165,13 @@ struct proc_prov_struct {
 	uint32_t pidns;
 	uint32_t netns;
 	uint32_t cgroupns;
+};
+
+struct task_prov_struct {
+	basic_elements;
+	shared_node_elements;
+	uint32_t pid;
+	uint32_t vpid;
 	/* usec */
 	uint64_t utime;
 	uint64_t stime;
@@ -176,13 +183,6 @@ struct proc_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
-};
-
-struct task_prov_struct {
-	basic_elements;
-	shared_node_elements;
-	uint32_t pid;
-	uint32_t vpid;
 };
 
 #define PROV_SBUUID_LEN 16
