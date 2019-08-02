@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.6.3           | 5.2.1	       	 | N/A				|
+| 0.6.3           | 5.2.5       	 | N/A				|
 | 0.6.2           | 5.1.9	       	 | 17/06/2019	|
 | 0.6.1           | 5.1.9	       	 | 14/06/2019	|
 | 0.6.0           | 5.0.10	       | 29/04/2019 |
@@ -51,7 +51,7 @@
 - Pref associated with task instead of process.
 - Fix potential memory leak when reading policy hash.
 - Fix potential memory leak when creating new relay channel.
-- Update to kernel version 5.2.1.
+- Update to kernel version 5.2.5.
 ```
 
 ### v0.6.2
