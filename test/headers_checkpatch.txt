@@ -1434,78 +1434,78 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 + * @brief Update @prov with process performance information associated with @task.
 
 WARNING:LONG_LINE: line over 80 characters
-#281: FILE: security/provenance/include/provenance_task.h:281:
-+		prov_elt(prov)->proc_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+#284: FILE: security/provenance/include/provenance_task.h:284:
++		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
 
 WARNING:LONG_LINE: line over 80 characters
-#282: FILE: security/provenance/include/provenance_task.h:282:
-+		prov_elt(prov)->proc_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
+#285: FILE: security/provenance/include/provenance_task.h:285:
++		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#303: FILE: security/provenance/include/provenance_task.h:303:
+#306: FILE: security/provenance/include/provenance_task.h:306:
 + * This function records the name of the current process and associates it with the cred provenance entry,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#304: FILE: security/provenance/include/provenance_task.h:304:
+#307: FILE: security/provenance/include/provenance_task.h:307:
 + * unless the provenance is set to be opqaue, in which case no update is performed.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#305: FILE: security/provenance/include/provenance_task.h:305:
+#308: FILE: security/provenance/include/provenance_task.h:308:
 + * The cred provenance entry is also updated with UID, GID, namespaces, secid, and perform information.
 
 WARNING:LONG_LINE: line over 80 characters
-#318: FILE: security/provenance/include/provenance_task.h:318:
+#321: FILE: security/provenance/include/provenance_task.h:321:
 +	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#338: FILE: security/provenance/include/provenance_task.h:338:
+#340: FILE: security/provenance/include/provenance_task.h:340:
 + * We need to update pid and vpid here because when the task is first initialized,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#342: FILE: security/provenance/include/provenance_task.h:342:
+#344: FILE: security/provenance/include/provenance_task.h:344:
 + * @todo We do not want to waste resource to attempt to update pid and vpid every time, since only the first update is needed. Find a better way to do update only once.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#365: FILE: security/provenance/include/provenance_task.h:365:
+#368: FILE: security/provenance/include/provenance_task.h:368:
 +	struct task_struct *dest = find_task_by_vpid(pid);      // Function is in /kernel/pid.c
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#522: FILE: security/provenance/include/provenance_task.h:522:
+#525: FILE: security/provenance/include/provenance_task.h:525:
 + * @brief Record ARG/ENV and create a relation betwene bprm->cred (in hooks.c) and the args.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#526: FILE: security/provenance/include/provenance_task.h:526:
+#529: FILE: security/provenance/include/provenance_task.h:529:
 + * 1. Creating a long provenance entry of type @vtype (either ENT_ARG or ENT_ENV), and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#527: FILE: security/provenance/include/provenance_task.h:527:
+#530: FILE: security/provenance/include/provenance_task.h:530:
 + * 2. Recording a provenance relation @etype (either RL_ARG or RL_ENV depending on @vtype) between the @arg and @prov
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#528: FILE: security/provenance/include/provenance_task.h:528:
+#531: FILE: security/provenance/include/provenance_task.h:531:
 + * The length of the argument should not be longer than PATH_MAX, otherwise we have to truncate the argument.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#536: FILE: security/provenance/include/provenance_task.h:536:
+#539: FILE: security/provenance/include/provenance_task.h:539:
 + * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from long provenance cache; Other error codes inherited from record_relation function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#564: FILE: security/provenance/include/provenance_task.h:564:
+#567: FILE: security/provenance/include/provenance_task.h:567:
 + * We will only record all the arguments if @prov is tracked or capture all is set.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#565: FILE: security/provenance/include/provenance_task.h:565:
+#568: FILE: security/provenance/include/provenance_task.h:568:
 + * We record both ENT_ARG and ENT_ENV types of arguments and relations RL_ARG and RL_ENV between those arguments and @prov,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#567: FILE: security/provenance/include/provenance_task.h:567:
+#570: FILE: security/provenance/include/provenance_task.h:570:
 + * @param prov The provenance entry pointer where arguments should be associated with.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#569: FILE: security/provenance/include/provenance_task.h:569:
+#572: FILE: security/provenance/include/provenance_task.h:572:
 + * @return 0 if no error occurred; -ENOMEM if no memory available to copy arguments. Other error codes unknown.
 
-total: 0 errors, 36 warnings, 608 lines checked
+total: 0 errors, 36 warnings, 611 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
