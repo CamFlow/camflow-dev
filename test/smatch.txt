@@ -408,7 +408,7 @@ security/selinux/ss/ebitmap.c:188 ebitmap_netlbl_import() info: ignoring unreach
   CHECK   security/selinux/ss/symtab.c
   CC      security/selinux/ss/symtab.o
   CHECK   security/selinux/ss/sidtab.c
-security/selinux/ss/sidtab.c:468 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
+security/selinux/ss/sidtab.c:473 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
   CC      security/selinux/ss/sidtab.o
   CHECK   security/selinux/ss/avtab.c
   CC      security/selinux/ss/avtab.o
