@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -123,9 +123,6 @@ static struct rchan_callbacks relay_callbacks = {
 	.remove_buf_file = remove_buf_file_handler,
 };
 
-extern union prov_elt *buffer_head;
-extern union long_prov_elt *long_buffer_head;
-
 static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 {
 	int cpu;
@@ -193,7 +190,6 @@ bool relay_initialized;
  * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
  *
  */
-extern union long_prov_elt *prov_machine;
 void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
@@ -241,9 +237,10 @@ int prov_create_channel(char *buffer, size_t len)
 			goto out;
 		}
 	}
-
-	if (len > PATH_MAX - 5)
-		return -ENOMEM;
+	if (len > PATH_MAX - 5) {
+		rc = -ENOMEM;
+		goto out;
+	}
 	snprintf(long_name, PATH_MAX, "long_%s", buffer);
 	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!chan) {

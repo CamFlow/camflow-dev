@@ -27,11 +27,13 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
   WRAP    arch/x86/include/generated/uapi/asm/poll.h
   WRAP    arch/x86/include/generated/uapi/asm/socket.h
+  WRAP    arch/x86/include/generated/uapi/asm/sockios.h
   WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
+  WRAP    arch/x86/include/generated/asm/mmiowb.h
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
   HOSTCC  scripts/selinux/genheaders/genheaders
@@ -142,7 +144,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CHECK   security/keys/process_keys.c
   CC      security/keys/process_keys.o
   CHECK   security/keys/request_key.c
-security/keys/request_key.c:284 construct_get_dest_keyring() warn: missing break? reassigning 'dest_keyring->usage'
+security/keys/request_key.c:278 construct_get_dest_keyring() warn: missing break? reassigning 'dest_keyring->usage'
   CC      security/keys/request_key.o
   CHECK   security/keys/request_key_auth.c
   CC      security/keys/request_key_auth.o
@@ -166,7 +168,6 @@ security/keys/request_key.c:284 construct_get_dest_keyring() warn: missing break
   CC      security/keys/big_key.o
   AR      security/keys/built-in.a
   CHECK   security/provenance/relay.c
-security/provenance/relay.c:246 prov_create_channel() warn: possible memory leak of 'long_name'
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
 security/provenance/hooks.c:429 provenance_inode_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
@@ -365,7 +366,6 @@ security/provenance/hooks.c:2142 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
-security/provenance/fs.c:849 prov_read_policy_hash() warn: possible memory leak of 'buff'
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
   CC      security/provenance/netfilter.o
@@ -382,9 +382,9 @@ security/provenance/fs.c:849 prov_read_policy_hash() warn: possible memory leak 
   CHECK   security/selinux/avc.c
   CC      security/selinux/avc.o
   CHECK   security/selinux/hooks.c
-security/selinux/hooks.c:2571 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
-  Locked on:   line 2571
-  Unlocked on: line 2539
+security/selinux/hooks.c:2590 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
+  Locked on:   line 2590
+  Unlocked on: line 2558
   CC      security/selinux/hooks.o
   CHECK   security/selinux/selinuxfs.c
   CC      security/selinux/selinuxfs.o
@@ -408,7 +408,7 @@ security/selinux/ss/ebitmap.c:188 ebitmap_netlbl_import() info: ignoring unreach
   CHECK   security/selinux/ss/symtab.c
   CC      security/selinux/ss/symtab.o
   CHECK   security/selinux/ss/sidtab.c
-security/selinux/ss/sidtab.c:468 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
+security/selinux/ss/sidtab.c:473 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
   CC      security/selinux/ss/sidtab.o
   CHECK   security/selinux/ss/avtab.c
   CC      security/selinux/ss/avtab.o

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -260,40 +260,43 @@ out:
  * @param prov The provenance entry to be updated.
  *
  */
-static inline void update_proc_perf(struct task_struct *task,
+static inline void update_task_perf(struct task_struct *task,
 				    struct provenance *prov)
 {
 	struct mm_struct *mm;
 	uint64_t utime;
 	uint64_t stime;
 
+	if (!task)
+		return;
+
 	// time
 	task_cputime_adjusted(task, &utime, &stime);
-	prov_elt(prov)->proc_info.utime = div_u64(utime, NSEC_PER_USEC);
-	prov_elt(prov)->proc_info.stime = div_u64(stime, NSEC_PER_USEC);
+	prov_elt(prov)->task_info.utime = div_u64(utime, NSEC_PER_USEC);
+	prov_elt(prov)->task_info.stime = div_u64(stime, NSEC_PER_USEC);
 
 	// memory
 	mm = get_task_mm(task);
 	if (mm) {
 		// KB
-		prov_elt(prov)->proc_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
-		prov_elt(prov)->proc_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->proc_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->proc_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
 		mmput_async(mm);
 	}
 	// IO
 #ifdef CONFIG_TASK_IO_ACCOUNTING
 	// KB
-	prov_elt(prov)->proc_info.rbytes = task->ioac.read_bytes & KB_MASK;
-	prov_elt(prov)->proc_info.wbytes = task->ioac.write_bytes & KB_MASK;
-	prov_elt(prov)->proc_info.cancel_wbytes =
+	prov_elt(prov)->task_info.rbytes = task->ioac.read_bytes & KB_MASK;
+	prov_elt(prov)->task_info.wbytes = task->ioac.write_bytes & KB_MASK;
+	prov_elt(prov)->task_info.cancel_wbytes =
 		task->ioac.cancelled_write_bytes & KB_MASK;
 #else
 	// KB
-	prov_elt(prov)->proc_info.rbytes = task->ioac.rchar & KB_MASK;
-	prov_elt(prov)->proc_info.wbytes = task->ioac.wchar & KB_MASK;
-	prov_elt(prov)->proc_info.cancel_wbytes = 0;
+	prov_elt(prov)->task_info.rbytes = task->ioac.rchar & KB_MASK;
+	prov_elt(prov)->task_info.wbytes = task->ioac.wchar & KB_MASK;
+	prov_elt(prov)->task_info.cancel_wbytes = 0;
 #endif
 }
 
@@ -326,7 +329,6 @@ static inline struct provenance *get_cred_provenance(void)
 	prov_elt(prov)->proc_info.uid = __kuid_val(current_uid());
 	prov_elt(prov)->proc_info.gid = __kgid_val(current_gid());
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
-	update_proc_perf(current, prov);
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 	return prov;
 }
@@ -347,6 +349,7 @@ static inline struct provenance *get_task_provenance(bool link)
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+	update_task_perf(current, tprov);
 	if (!provenance_is_opaque(prov_elt(tprov)) && link)
 		record_kernel_link(prov_entry(tprov));
 	return tprov;

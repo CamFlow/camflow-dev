@@ -1,10 +1,12 @@
-digraph RGL__DirectedAdjacencyGraph {inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
+digraph RGL__DirectedAdjacencyGraph {process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+
+process_memory -> process_memory[fontsize = 8,label = terminate_proc]
+
+inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
 inode -> task[fontsize = 8,label = file_sigio]
-
-process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 task -> process_memory[fontsize = 8,label = memory_write]
 

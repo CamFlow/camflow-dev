@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -32,6 +32,8 @@ bool is_relay_full(struct rchan *chan, int cpu);
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
+extern union prov_elt *buffer_head;
+extern union long_prov_elt *long_buffer_head;
 extern bool relay_ready;
 void prov_write(union prov_elt *msg, size_t size);
 void long_prov_write(union long_prov_elt *msg, size_t size);

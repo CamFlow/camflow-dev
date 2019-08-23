@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.6.3           | 5.2.9       	 | 23/08/2019	|
 | 0.6.2           | 5.1.9	       	 | 17/06/2019	|
 | 0.6.1           | 5.1.9	       	 | 14/06/2019	|
 | 0.6.0           | 5.0.10	       | 29/04/2019 |
@@ -44,6 +45,14 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.6.3
+```
+- Resource accounting metrics associated with task instead of process.
+- Fix potential memory leak when reading policy hash.
+- Fix potential memory leak when creating new relay channel.
+- Update to kernel version 5.2.9.
+```
 
 ### v0.6.2
 ```

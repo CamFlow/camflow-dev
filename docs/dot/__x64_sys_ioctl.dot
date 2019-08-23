@@ -1,6 +1,8 @@
-digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
+digraph RGL__DirectedAdjacencyGraph {process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
+process_memory -> process_memory[fontsize = 8,label = terminate_proc]
+
+path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 path -> process_memory[fontsize = 8,label = named]
 
