@@ -87,13 +87,12 @@ struct prov_ipv4_filter {
 	uint64_t taint;
 };
 
-struct prov_ipv6_filter {
+typedef struct prov_ipv6_filter {
 	struct in6_addr ip;
 	uint16_t port;
 	uint8_t op;
 	uint64_t taint;
-};
-typedef struct prov_ipv6_filter prov_ipv6_filter;
+} prov_ipv6_filter;
 
 struct secinfo {
 	uint32_t secid;

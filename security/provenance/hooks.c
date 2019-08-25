@@ -2167,7 +2167,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (family != PF_INET)
+	if (family != PF_INET && family != PF_INET6)
 		return 0;
 
 	iprov = get_sk_inode_provenance(sk);
