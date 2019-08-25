@@ -59,6 +59,37 @@ static unsigned int provenance_ipv4_out(void *priv,
 	return NF_ACCEPT;
 }
 
+static unsigned int provenance_ipv6_out(void *priv,
+					struct sk_buff *skb,
+					const struct nf_hook_state *state)
+{
+	struct provenance *cprov = provenance_cred_from_task(current);
+	struct provenance *iprov = NULL;
+	struct provenance *pckprov;
+	unsigned long irqflags;
+
+	if (!cprov)
+		return NF_ACCEPT;
+	if (provenance_is_tracked(prov_elt(cprov))) {
+		iprov = get_sk_inode_provenance(skb->sk);
+		if (!iprov)
+			return NF_ACCEPT;
+
+		pckprov = provenance_alloc_with_ipv6_skb(ENT_PACKET, skb);
+		if (!pckprov)
+			return -ENOMEM;
+
+		if (provenance_records_packet(prov_elt(iprov)))
+			record_packet_content(skb, pckprov);
+
+		spin_lock_irqsave(prov_lock(iprov), irqflags);
+		derives(RL_SND_PACKET, iprov, pckprov, NULL, 0);
+		spin_unlock_irqrestore(prov_lock(iprov), irqflags);
+		free_provenance(pckprov);
+	}
+	return NF_ACCEPT;
+}
+
 /* Netfilter hook operations */
 static struct nf_hook_ops provenance_nf_ops[] = {
 	{
@@ -66,6 +97,12 @@ static struct nf_hook_ops provenance_nf_ops[] = {
 		.pf = NFPROTO_IPV4,
 		.hooknum = NF_INET_LOCAL_OUT,
 		.priority = NF_IP_PRI_LAST,
+	},
+	{
+		.hook = provenance_ipv6_out,
+		.pf = NFPROTO_IPV6,
+		.hooknum = NF_INET_LOCAL_OUT,
+		.priority = NF_IP6_PRI_LAST,
 	},
 };
 

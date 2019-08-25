@@ -489,6 +489,30 @@ static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 	return sizeof(struct prov_ipv4_filter);
 }
 
+static ssize_t __write_ipv6_filter(struct file *file, const char __user *buf,
+				   size_t count, struct list_head *filters)
+{
+	ipv6_filters *f;
+
+	if (!capable(CAP_AUDIT_CONTROL))
+		return -EPERM;
+	if (count < sizeof(prov_ipv6_filter))
+		return -ENOMEM;
+	f = kzalloc(sizeof(ipv6_filters), GFP_KERNEL);
+	if (!f)
+		return -ENOMEM;
+	if (copy_from_user(&(f->filter), buf, sizeof(prov_ipv6_filter))) {
+		kfree(f);
+		return -EAGAIN;
+	}
+	// we are not trying to delete something
+	if ((f->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
+		prov_ipv6_add_or_update(filters, f);
+	else
+		prov_ipv6_delete(filters, f);
+	return sizeof(prov_ipv6_filter);
+}
+
 static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 				  size_t count, struct list_head *filters)
 {
@@ -512,6 +536,29 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 	return pos;
 }
 
+static ssize_t __read_ipv6_filter(struct file *filp, char __user *buf,
+				  size_t count, struct list_head *filters)
+{
+	struct list_head *listentry, *listtmp;
+	ipv6_filters *tmp;
+	size_t pos = 0;
+
+	if (count < sizeof(prov_ipv6_filter))
+		return -ENOMEM;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, ipv6_filters, list);
+		if (count < pos + sizeof(prov_ipv6_filter))
+			return -ENOMEM;
+
+		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(prov_ipv6_filter)))
+			return -EAGAIN;
+
+		pos += sizeof(prov_ipv6_filter);
+	}
+	return pos;
+}
+
 #define declare_write_ipv4_filter_fcn(fcn_name, filter)         static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
 	{																		       \
 		return __write_ipv4_filter(file, buf, count, &filter);											       \
@@ -528,6 +575,23 @@ declare_file_operations(prov_ipv4_ingress_filter_ops, prov_write_ipv4_ingress_fi
 declare_write_ipv4_filter_fcn(prov_write_ipv4_egress_filter, egress_ipv4filters);
 declare_reader_ipv4_filter_fcn(prov_read_ipv4_egress_filter, egress_ipv4filters);
 declare_file_operations(prov_ipv4_egress_filter_ops, prov_write_ipv4_egress_filter, prov_read_ipv4_egress_filter);
+
+#define declare_write_ipv6_filter_fcn(fcn_name, filter)         static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
+	{																		       \
+		return __write_ipv6_filter(file, buf, count, &filter);											       \
+	}
+#define declare_reader_ipv6_filter_fcn(fcn_name, filter)        static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
+	{																		 \
+		return __read_ipv6_filter(filp, buf, count, &filter);											 \
+	}
+
+declare_write_ipv6_filter_fcn(prov_write_ipv6_ingress_filter, ingress_ipv6filters);
+declare_reader_ipv6_filter_fcn(prov_read_ipv6_ingress_filter, ingress_ipv6filters);
+declare_file_operations(prov_ipv6_ingress_filter_ops, prov_write_ipv6_ingress_filter, prov_read_ipv6_ingress_filter);
+
+declare_write_ipv6_filter_fcn(prov_write_ipv6_egress_filter, egress_ipv6filters);
+declare_reader_ipv6_filter_fcn(prov_read_ipv6_egress_filter, egress_ipv6filters);
+declare_file_operations(prov_ipv6_egress_filter_ops, prov_write_ipv6_egress_filter, prov_read_ipv6_egress_filter);
 
 static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
@@ -771,6 +835,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	uint8_t *buff = NULL;
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *ipv4_tmp;
+	ipv6_filters *ipv6_tmp;
 	struct ns_filters *ns_tmp;
 	struct secctx_filters *secctx_tmp;
 	struct user_filters *user_tmp;
@@ -823,6 +888,10 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	hash_filters(ingress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 	/* egress network policy */
 	hash_filters(egress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
+	/* ingress network policy */
+	hash_filters(ingress_ipv6filters, ipv6_filters, ipv6_tmp, prov_ipv6_filter);
+	/* egress network policy */
+	hash_filters(egress_ipv6filters, ipv6_filters, ipv6_tmp, prov_ipv6_filter);
 	/* namespace policy */
 	hash_filters(ns_filters, ns_filters, ns_tmp, ns_filters);
 	/* secctx policy */
@@ -972,6 +1041,8 @@ static int __init init_prov_fs(void)
 	prov_create_file("process", 0644, &prov_process_ops);
 	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);
 	prov_create_file("ipv4_egress", 0644, &prov_ipv4_egress_filter_ops);
+	prov_create_file("ipv6_ingress", 0644, &prov_ipv6_ingress_filter_ops);
+	prov_create_file("ipv6_egress", 0644, &prov_ipv6_egress_filter_ops);
 	prov_create_file("secctx", 0644, &prov_secctx_ops);
 	prov_create_file("secctx_filter", 0644, &prov_secctx_filter_ops);
 	prov_create_file("ns", 0644, &prov_ns_filter_ops);

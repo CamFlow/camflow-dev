@@ -2175,7 +2175,10 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return -ENOMEM;
 
 	if (provenance_is_tracked(prov_elt(iprov))) {
-		pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
+		if (family == PF_INET)
+			pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
+		else
+			pckprov = provenance_alloc_with_ipv6_skb(ENT_PACKET, skb);
 
 		if (!pckprov)
 			return -ENOMEM;
@@ -2537,6 +2540,8 @@ union long_prov_elt *long_buffer_head;
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
+LIST_HEAD(ingress_ipv6filters);
+LIST_HEAD(egress_ipv6filters);
 LIST_HEAD(secctx_filters);
 LIST_HEAD(user_filters);
 LIST_HEAD(group_filters);
