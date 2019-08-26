@@ -327,10 +327,8 @@ static inline uint8_t prov_ipv6_whichOP(struct list_head *filters, struct in6_ad
 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, ipv6_filters, list);
-		if (ip.s6_addr32[0] == tmp->filter.ip.s6_addr32[0] &&
-		    ip.s6_addr32[1] == tmp->filter.ip.s6_addr32[1] &&
-		    ip.s6_addr32[2] == tmp->filter.ip.s6_addr32[2] &&
-		    ip.s6_addr32[3] == tmp->filter.ip.s6_addr32[3])                     // Match IP
+		if (ntohl(ip.s6_addr32[2]) == ntohl(tmp->filter.ip.s6_addr32[2]) &&
+		    ntohl(ip.s6_addr32[3]) == ntohl(tmp->filter.ip.s6_addr32[3]))       // Match IP
 			if (tmp->filter.port == 0 || tmp->filter.port == port)          // Any port or a specific match
 				return tmp->filter.op;
 	}
@@ -373,10 +371,8 @@ static inline uint8_t prov_ipv6_delete(struct list_head *filters, ipv6_filters *
 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, ipv6_filters, list);
-		if (tmp->filter.ip.s6_addr32[0] == f->filter.ip.s6_addr32[0] &&
-		    tmp->filter.ip.s6_addr32[1] == f->filter.ip.s6_addr32[1] &&
-		    tmp->filter.ip.s6_addr32[2] == f->filter.ip.s6_addr32[2] &&
-		    tmp->filter.ip.s6_addr32[3] == f->filter.ip.s6_addr32[3] &&
+		if (ntohl(tmp->filter.ip.s6_addr32[2]) == ntohl(f->filter.ip.s6_addr32[2]) &&
+		    ntohl(tmp->filter.ip.s6_addr32[3]) == ntohl(f->filter.ip.s6_addr32[3]) &&
 		    tmp->filter.port == f->filter.port) {
 			list_del(listentry);
 			kfree(tmp);
@@ -422,10 +418,8 @@ static inline uint8_t prov_ipv6_add_or_update(struct list_head *filters, ipv6_fi
 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, ipv6_filters, list);
-		if (tmp->filter.ip.s6_addr32[0] == f->filter.ip.s6_addr32[0] &&
-		    tmp->filter.ip.s6_addr32[1] == f->filter.ip.s6_addr32[1] &&
-		    tmp->filter.ip.s6_addr32[2] == f->filter.ip.s6_addr32[2] &&
-		    tmp->filter.ip.s6_addr32[3] == f->filter.ip.s6_addr32[3] &&
+		if (ntohl(tmp->filter.ip.s6_addr32[2]) == ntohl(f->filter.ip.s6_addr32[2]) &&
+		    ntohl(tmp->filter.ip.s6_addr32[3]) == ntohl(f->filter.ip.s6_addr32[3]) &&
 		    tmp->filter.port == f->filter.port) {
 			tmp->filter.op |= f->filter.op;
 			return 0; // you should only get one
