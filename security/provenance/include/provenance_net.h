@@ -221,6 +221,7 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_
 	packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
 	packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
 	packet_identifier(prov_elt(prov)).protocol = ih->protocol;
+	packet_identifier(prov_elt(prov)).iv = 4;
 	packet_info(prov_elt(prov)).length = ih->tot_len;
 
 	switch (ih->protocol) {
@@ -256,6 +257,7 @@ static __always_inline struct provenance *provenance_alloc_with_ipv6_skb(uint64_
 	ipv6_packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
 	ipv6_packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
 	ipv6_packet_identifier(prov_elt(prov)).nexthdr = ih->nexthdr;
+	ipv6_packet_identifier(prov_elt(prov)).iv = 6;
 	packet_info(prov_elt(prov)).length = IPV6_HDR;
 
 	switch (ih->nexthdr) {
