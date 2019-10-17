@@ -1,5 +1,5 @@
 kernel-version=5.2.9
-lsm-version=0.6.3
+lsm-version=0.6.4
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
