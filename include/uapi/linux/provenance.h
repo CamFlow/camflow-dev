@@ -165,6 +165,13 @@ struct proc_prov_struct {
 	uint32_t pidns;
 	uint32_t netns;
 	uint32_t cgroupns;
+};
+
+struct task_prov_struct {
+	basic_elements;
+	shared_node_elements;
+	uint32_t pid;
+	uint32_t vpid;
 	/* usec */
 	uint64_t utime;
 	uint64_t stime;
@@ -176,13 +183,6 @@ struct proc_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
-};
-
-struct task_prov_struct {
-	basic_elements;
-	shared_node_elements;
-	uint32_t pid;
-	uint32_t vpid;
 };
 
 #define PROV_SBUUID_LEN 16
