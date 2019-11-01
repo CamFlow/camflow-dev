@@ -213,10 +213,27 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 out:
-	kfree(node);
+	if (prov_elt(tprov)->task_info.disc)
+		kfree(prov_elt(tprov)->task_info.disc);
+	prov_elt(tprov)->task_info.disc = node;
 	return count;
 }
-declare_file_operations(prov_node_ops, prov_write_node, no_read);
+
+static ssize_t prov_read_node(struct file *filp, char __user *buf,
+			      size_t count, loff_t *ppos)
+{
+	struct provenance *tprov = provenance_task(current);
+	union long_prov_elt *node;
+
+	if (count < sizeof(struct disc_node_struct))
+		return -ENOMEM;
+	if (!prov_elt(tprov)->task_info.disc)
+		return -EINVAL;
+	if (copy_to_user(buf, prov_elt(tprov)->task_info.disc, sizeof(struct disc_node_struct)))
+		return -ENOMEM;
+	return sizeof(struct disc_node_struct);
+}
+declare_file_operations(prov_node_ops, prov_write_node, prov_read_node);
 
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)

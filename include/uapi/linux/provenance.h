@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "6ab68d8ebcaea494a79294a521fd977b38bfcf74"
+#define CAMFLOW_COMMIT "5a83a8072fded2036c933db2b09cd0c3dc1a7543"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -183,6 +183,7 @@ struct task_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
+	union long_prov_elt *disc;
 };
 
 #define PROV_SBUUID_LEN 16
