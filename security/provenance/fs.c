@@ -191,9 +191,6 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	struct provenance *tprov = provenance_task(current);
 	union long_prov_elt *node;
 
-	if (!capable(CAP_AUDIT_WRITE))
-		return -EPERM;
-
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
@@ -215,8 +212,6 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		count = -EINVAL;
 		goto out;
 	}
-	if (copy_to_user((void *)buf, &node, count))
-		count = -ENOMEM;
 out:
 	kfree(node);
 	return count;
@@ -227,9 +222,6 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)
 {
 	union prov_elt relation;
-
-	if (!capable(CAP_AUDIT_WRITE))
-		return -EPERM;
 
 	if (count < sizeof(struct relation_struct))
 		return -ENOMEM;
