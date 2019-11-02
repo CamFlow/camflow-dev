@@ -245,7 +245,9 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 
 	if (copy_from_user(&relation, buf, sizeof(struct relation_struct)))
 		return -ENOMEM;
-
+	relation_identifier(&relation).id = prov_next_relation_id();
+	relation_identifier(&relation).boot_id = prov_boot_id;
+	relation_identifier(&relation).machine_id = prov_machine_id;
 	prov_write(&relation, sizeof(union prov_elt));
 	return count;
 }
