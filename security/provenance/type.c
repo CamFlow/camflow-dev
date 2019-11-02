@@ -109,6 +109,13 @@ static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";       
 static const char RL_STR_LOAD_POLICY[] = "load_policy";                                                 // load file into kernel
 static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";                                       // load file into kernel
 static const char RL_STR_LOAD_UNDEFINED[] = "load_undefined";                                           // load file into kernel
+static const char RL_STR_DERIVED_DISC[] = "derived_disc";                                               // disclosed type
+static const char RL_STR_GENERATED_DISC[] = "generated_disc";                                           // disclosed type
+static const char RL_STR_USED_DISC[] = "used_disc";                                                     // disclosed type
+static const char RL_STR_INFORMED_DISC[] = "informed_disc";                                             // disclosed type
+static const char RL_STR_INFLUENCED_DISC[] = "influenced_disc";                                         // disclosed type
+static const char RL_STR_ASSOCIATED_DISC[] = "associated_disc";                                         // disclosed type
+
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                                 // unkown node type should normally not appear
@@ -334,6 +341,18 @@ const char *relation_str(uint64_t type)
 		return RL_STR_LOAD_UNDEFINED;
 	case RL_RAN_ON:
 		return RL_STR_RAN_ON;
+	case RL_DERIVED_DISC:
+		return RL_STR_DERIVED_DISC;
+	case RL_GENERATED_DISC:
+		return RL_STR_GENERATED_DISC;
+	case RL_USED_DISC:
+		return RL_STR_USED_DISC;
+	case RL_INFORMED_DISC:
+		return RL_STR_INFORMED_DISC;
+	case RL_INFLUENCED_DISC:
+		return RL_STR_INFLUENCED_DISC;
+	case RL_ASSOCIATED_DISC:
+		return RL_STR_ASSOCIATED_DISC;
 	default:
 		return RL_STR_UNKNOWN;
 	}
@@ -438,6 +457,13 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNDEFINED, RL_LOAD_UNDEFINED);
 	MATCH_AND_RETURN(str, RL_STR_RAN_ON, RL_RAN_ON);
+	MATCH_AND_RETURN(str, RL_STR_DERIVED_DISC, RL_DERIVED_DISC);
+	MATCH_AND_RETURN(str, RL_STR_GENERATED_DISC, RL_GENERATED_DISC);
+	MATCH_AND_RETURN(str, RL_STR_USED_DISC, RL_USED_DISC);
+	MATCH_AND_RETURN(str, RL_STR_INFORMED_DISC, RL_INFORMED_DISC);
+	MATCH_AND_RETURN(str, RL_STR_INFLUENCED_DISC, RL_INFLUENCED_DISC);
+	MATCH_AND_RETURN(str, RL_STR_ASSOCIATED_DISC, RL_ASSOCIATED_DISC);
+
 	return 0;
 }
 EXPORT_SYMBOL_GPL(relation_id);

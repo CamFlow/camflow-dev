@@ -64,6 +64,7 @@
 #define RL_SH_WRITE                             (RL_DERIVED   | (0x0000000000000001ULL << 17))
 #define RL_PCK_CNT                              (RL_DERIVED   | (0x0000000000000001ULL << 18))
 #define RL_ADDRESSED                            (RL_DERIVED   | (0x0000000000000001ULL << 19))
+#define RL_DERIVED_DISC                         (RL_DERIVED   | (0x0000000000000001ULL << 20))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */
@@ -99,6 +100,7 @@
 #define RL_MUNMAP                               (RL_GENERATED | (0x0000000000000001ULL << 29))
 #define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 30))
 #define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 31))
+#define RL_GENERATED_DISC                       (RL_GENERATED | (0x0000000000000001ULL << 32))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -132,12 +134,14 @@
 #define RL_MMAP_EXEC_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 27))
 #define RL_MMAP_WRITE_PRIVATE                   (RL_USED        | (0x0000000000000001ULL << 28))
 #define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 29))
+#define RL_USED_DISC                            (RL_USED        | (0x0000000000000001ULL << 30))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
 #define RL_CLONE                                (RL_INFORMED  | (0x0000000000000001ULL))
 #define RL_VERSION_TASK                         (RL_INFORMED  | (0x0000000000000001ULL << 1))
 #define RL_TERMINATE_TASK                       (RL_INFORMED  | (0x0000000000000001ULL << 2))
+#define RL_INFORMED_DISC                        (RL_INFORMED  | (0x0000000000000001ULL << 3))
 /* no more than 51!!!! */
 
 /* INFLUENCED  SUBTYPES */
@@ -149,10 +153,12 @@
 #define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 5))
 #define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 6))
 #define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 7))
-#define RL_LOAD_UNDEFINED                               (RL_INFLUENCED | (0x0000000000000001ULL << 8))
+#define RL_LOAD_UNDEFINED                       (RL_INFLUENCED | (0x0000000000000001ULL << 8))
+#define RL_INFLUENCED_DISC                      (RL_INFLUENCED | (0x0000000000000001ULL << 9))
 
 /* ASSOCIATED  SUBTYPES */
 #define RL_RAN_ON                               (RL_ASSOCIATED | (0x0000000000000001ULL))
+#define RL_ASSOCIATED_DISC                      (RL_ASSOCIATED | (0x0000000000000001ULL << 1))
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK                                (DM_ACTIVITY  | 0x0000000000000001ULL)
