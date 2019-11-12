@@ -70,7 +70,7 @@ __x64_sys_writev|6|
 __x64_sys_sync|6|
 __x64_sys_setreuid16|9|
 __x64_sys_sigsuspend|4|
-__x64_sys_execve|33|
+__x64_sys_execve|34|
 __x64_sys_bpf|27|
 __x64_sys_fallocate|6|
 __x64_sys_recvmmsg|4|
@@ -83,7 +83,7 @@ __x64_sys_stat|15|
 __x64_sys_llistxattr|16|
 __x64_sys_setfsuid16|9|
 __x64_sys_munlock|6|
-__x64_sys_open_by_handle_at|25|
+__x64_sys_open_by_handle_at|26|
 __x64_sys_times|4|
 __x64_sys_setresuid16|9|
 __x64_sys_tee|5|
@@ -99,7 +99,7 @@ __x64_sys_fsync|5|
 __x64_sys_rt_sigsuspend|4|
 __x64_sys_migrate_pages|9|
 __x64_sys_msgget|6|
-__x64_sys_swapoff|26|
+__x64_sys_swapoff|27|
 __x64_sys_read|6|
 __x64_sys_recv|6|
 __x64_sys_setgid|8|
@@ -109,7 +109,7 @@ __x64_sys_madvise|7|
 __x64_sys_sched_getscheduler|1|
 __x64_sys_lsetxattr|17|
 __x64_sys_vmsplice|7|
-__x64_sys_creat|24|
+__x64_sys_creat|25|
 __x64_sys_mincore|5|
 __x64_sys_futex|6|
 __x64_sys_newlstat|15|
@@ -124,15 +124,15 @@ __x64_sys_delete_module|4|
 __x64_sys_ioprio_set|5|
 __x64_sys_pwritev2|6|
 __x64_sys_rt_sigaction|4|
-__x64_sys_mq_unlink|9|
-__x64_sys_acct|24|
+__x64_sys_mq_unlink|8|
+__x64_sys_acct|25|
 __x64_sys_socket|13|
 __x64_sys_signalfd|9|
 __x64_sys_fremovexattr|8|
 __x64_sys_sysinfo|4|
 __x64_sys_clock_nanosleep|4|
 __x64_sys_flock|5|
-__x64_sys_execveat|33|
+__x64_sys_execveat|34|
 __x64_sys_getxattr|16|
 __x64_sys_fchown16|11|
 __x64_sys_sendfile64|6|
@@ -166,7 +166,7 @@ __x64_sys_sendto|6|
 __x64_sys_getsid|1|
 __x64_sys_fstatfs64|5|
 __x64_sys_utimensat|17|
-__x64_sys_wait4|8|
+__x64_sys_wait4|7|
 __x64_sys_eventfd2|9|
 __x64_sys_mq_notify|6|
 __x64_sys_membarrier|4|
@@ -178,7 +178,7 @@ __x64_sys_mknodat|12|
 __x64_sys_fchown|11|
 __x64_sys_write|6|
 __x64_sys_getpgid|1|
-__x64_sys_mmap_pgoff|22|
+__x64_sys_mmap_pgoff|23|
 __x64_sys_select|4|
 __x64_sys_sched_getparam|5|
 __x64_sys_kill|6|
@@ -187,7 +187,7 @@ __x64_sys_fchmod|11|
 __x64_sys_shmctl|7|
 __x64_sys_setresgid|8|
 __x64_sys_mq_timedsend|12|
-__x64_sys_finit_module|23|
+__x64_sys_finit_module|24|
 __x64_sys_setresgid16|8|
 __x64_sys_fanotify_init|9|
 __x64_sys_io_submit|6|
@@ -200,7 +200,7 @@ __x64_sys_unlinkat|13|
 __x64_sys_lstat|15|
 __x64_sys_oldumount|17|
 __x64_sys_sched_getaffinity|5|
-__x64_sys_swapon|28|
+__x64_sys_swapon|29|
 __x64_sys_eventfd|9|
 __x64_sys_newuname|4|
 __x64_sys_socketpair|14|
@@ -212,7 +212,7 @@ __x64_sys_connect|5|
 __x64_sys_semop|7|
 __x64_sys_fstatfs|5|
 __x64_sys_process_vm_writev|8|
-__x64_sys_kexec_file_load|19|
+__x64_sys_kexec_file_load|20|
 __x64_sys_preadv|6|
 __x64_sys_clock_getres|4|
 __x64_sys_remap_file_pages|13|
@@ -244,7 +244,7 @@ __x64_sys_io_setup|13|
 __x64_sys_inotify_add_watch|14|
 __x64_sys_chmod|18|
 __x64_sys_getpriority|4|
-__x64_sys_mmap|22|
+__x64_sys_mmap|23|
 __x64_sys_sysctl|4|
 __x64_sys_pwrite64|6|
 __x64_sys_pselect6|4|
@@ -289,7 +289,7 @@ __x64_sys_pkey_alloc|4|
 __x64_sys_clone|26|
 __x64_sys_fchownat|18|
 __x64_sys_chdir|14|
-__x64_sys_open|24|
+__x64_sys_open|25|
 __x64_sys_getitimer|4|
 __x64_sys_lookup_dcookie|4|
 __x64_sys_symlink|11|
@@ -311,7 +311,7 @@ __x64_sys_dup2|5|
 __x64_sys_dup3|5|
 __x64_sys_timerfd_settime|4|
 __x64_sys_chroot|15|
-__x64_sys_shmat|25|
+__x64_sys_shmat|26|
 __x64_sys_kexec_load|5|
 __x64_sys_rename|11|
 __x64_sys_unshare|15|
@@ -343,7 +343,7 @@ __x64_sys_sched_rr_get_interval|5|
 __x64_sys_mkdirat|11|
 __x64_sys_settimeofday|8|
 __x64_sys_nanosleep|4|
-__x64_sys_waitpid|8|
+__x64_sys_waitpid|7|
 __x64_sys_getrlimit|5|
 __x64_sys_mkdir|11|
 __x64_sys_msync|5|
@@ -384,7 +384,7 @@ __x64_sys_signalfd4|9|
 __x64_sys_mq_timedreceive|7|
 __x64_sys_tkill|6|
 __x64_sys_getcwd|4|
-__x64_sys_waitid|8|
+__x64_sys_waitid|7|
 __x64_sys_mlockall|6|
 __x64_sys_inotify_init1|9|
 __x64_sys_signal|4|
@@ -397,7 +397,7 @@ __x64_sys_ioprio_get|5|
 __x64_sys_pipe|10|
 __x64_sys_setresuid|9|
 __x64_sys_bind|5|
-__x64_sys_openat|24|
+__x64_sys_openat|25|
 __x64_sys_timer_gettime|4|
 
 
@@ -408,9 +408,9 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 4|75|
 5|42|
 6|44|
-7|18|
-8|25|
-9|26|
+7|21|
+8|23|
+9|25|
 10|8|
 11|17|
 12|4|
@@ -420,28 +420,30 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 16|7|
 17|8|
 18|8|
-19|4|
+19|3|
+20|1|
 21|1|
-22|3|
-23|1|
-24|4|
-25|2|
-26|4|
-27|1|
-28|2|
-33|2|
+22|1|
+23|2|
+24|1|
+25|4|
+26|5|
+27|2|
+28|1|
+29|1|
+34|2|
 
 
 ## Statistics of System Calls Arranged by Weighted API Importance
 WEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 --------------------------------------------|------------------------|
-mmap|22|
+mmap|23|
 vfork|26|
 exit|19|
 exit_group|19|
 write|6|
 read|6|
-open|24|
+open|25|
 gettid|N/A|
 madvise|7|
 munmap|7|
@@ -465,10 +467,10 @@ getcwd|4|
 clock_getres|4|
 getrlimit|5|
 newfstatat|15|
-openat|24|
+openat|25|
 dup2|5|
 clone|26|
-execve|33|
+execve|34|
 kill|6|
 setresuid|9|
 setresgid|8|
@@ -487,7 +489,7 @@ dup|4|
 unlink|11|
 uname|4|
 nanosleep|4|
-wait4|8|
+wait4|7|
 readv|6|
 geteuid|N/A|
 readlink|15|
@@ -542,7 +544,7 @@ pwrite64|6|
 inotify_init|9|
 lgetxattr|16|
 setxattr|17|
-shmat|25|
+shmat|26|
 prctl|14|
 inotify_rm_watch|5|
 listen|5|
@@ -570,7 +572,7 @@ sched_getscheduler|1|
 chroot|15|
 sync|6|
 fchdir|7|
-creat|24|
+creat|25|
 mlock|6|
 getpgrp|1|
 utimensat|17|
@@ -641,9 +643,9 @@ syslog|5|
 rt_sigreturn|N/A|
 msgctl|8|
 msgget|6|
-swapoff|26|
+swapoff|27|
 pivot_root|15|
-swapon|28|
+swapon|29|
 signalfd4|9|
 setns|14|
 ioprio_get|5|
@@ -658,9 +660,9 @@ epoll_create|9|
 munlockall|6|
 truncate|18|
 init_module|11|
-finit_module|23|
+finit_module|24|
 adjtimex|7|
-waitid|8|
+waitid|7|
 perf_event_open|10|
 process_vm_readv|8|
 sendfile|6|
@@ -697,7 +699,7 @@ sched_rr_get_interval|5|
 set_mempolicy|4|
 io_submit|6|
 io_setup|13|
-mq_unlink|9|
+mq_unlink|8|
 mq_open|12|
 io_destroy|7|
 io_cancel|4|
@@ -711,10 +713,10 @@ modify_ldt|N/A|
 getcpu|N/A|
 epoll_pwait|4|
 rt_sigqueueinfo|6|
-open_by_handle_at|25|
+open_by_handle_at|26|
 fanotify_mark|15|
 fanotify_init|9|
-acct|24|
+acct|25|
 mq_timedreceive|7|
 timer_getoverrun|N/A|
 semtimedop|7|
@@ -759,10 +761,10 @@ get_kernel_syms|N/A|
 UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 ----------------------------------------------|------------------------|
 exit|19|
-mmap|22|
+mmap|23|
 write|6|
 exit_group|19|
-open|24|
+open|25|
 read|6|
 madvise|7|
 gettid|N/A|
@@ -788,8 +790,8 @@ clock_getres|4|
 fstat|5|
 getrlimit|5|
 newfstatat|15|
-openat|24|
-execve|33|
+openat|25|
+execve|34|
 dup2|5|
 kill|6|
 setpgid|5|
@@ -816,7 +818,7 @@ set_tid_address|N/A|
 set_robust_list|N/A|
 readv|6|
 select|4|
-wait4|8|
+wait4|7|
 bind|5|
 setsockopt|5|
 sched_get_priority_max|N/A|
@@ -844,7 +846,7 @@ getpeername|5|
 shmdt|7|
 fchmod|11|
 shmctl|7|
-shmat|25|
+shmat|26|
 sigaltstack|4|
 fsync|5|
 listen|5|
@@ -917,7 +919,7 @@ rt_sigsuspend|4|
 chroot|15|
 rt_sigtimedwait|4|
 munlock|6|
-creat|24|
+creat|25|
 pause|4|
 flock|5|
 mlockall|6|
@@ -983,7 +985,7 @@ reboot|22|
 mknodat|12|
 msgrcv|9|
 time|N/A|
-waitid|8|
+waitid|7|
 fchownat|18|
 gettimeofday|4|
 fremovexattr|8|
@@ -1007,24 +1009,24 @@ setfsgid|8|
 timerfd_gettime|4|
 readahead|4|
 fchmodat|18|
-swapoff|26|
+swapoff|27|
 syslog|5|
 _sysctl|N/A|
 recvmmsg|4|
 timer_getoverrun|N/A|
 signalfd|9|
-swapon|28|
+swapon|29|
 mq_open|12|
 vhangup|N/A|
-mq_unlink|9|
+mq_unlink|8|
 setdomainname|4|
 getdents64|6|
 add_key|10|
 prlimit64|6|
-acct|24|
+acct|25|
 fork|26|
 semtimedop|7|
-open_by_handle_at|25|
+open_by_handle_at|26|
 epoll_pwait|4|
 delete_module|4|
 afs_syscall|N/A|
@@ -1034,7 +1036,7 @@ vmsplice|7|
 init_module|11|
 kcmp|N/A|
 fanotify_init|9|
-finit_module|23|
+finit_module|24|
 sched_rr_get_interval|5|
 process_vm_writev|8|
 fanotify_mark|15|

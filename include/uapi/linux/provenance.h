@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -30,7 +30,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "a273d6e9d2e384692b7df526e6755f04eb18f0e7"
+#define CAMFLOW_COMMIT "6c5665aaba32b3e8d71785452ba1f9d6da5160ed"
 
 #define PROVENANCE_HASH                 "sha256"
 
