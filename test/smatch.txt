@@ -23,6 +23,17 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  arch/x86/tools/relocs_64.o
   HOSTCC  arch/x86/tools/relocs_common.o
   HOSTLD  arch/x86/tools/relocs
+  HOSTCC  scripts/selinux/genheaders/genheaders
+  HOSTCC  scripts/selinux/mdp/mdp
+  HOSTCC  scripts/bin2c
+  HOSTCC  scripts/kallsyms
+  HOSTCC  scripts/pnmtologo
+  HOSTCC  scripts/conmakehash
+  HOSTCC  scripts/recordmcount
+  HOSTCC  scripts/sortextable
+  HOSTCC  scripts/asn1_compiler
+  HOSTCC  scripts/sign-file
+  HOSTCC  scripts/extract-cert
   UPD     include/config/kernel.release
   WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
   WRAP    arch/x86/include/generated/uapi/asm/poll.h
@@ -36,17 +47,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/asm/mmiowb.h
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
-  HOSTCC  scripts/selinux/genheaders/genheaders
-  HOSTCC  scripts/selinux/mdp/mdp
-  HOSTCC  scripts/bin2c
-  HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/pnmtologo
-  HOSTCC  scripts/conmakehash
-  HOSTCC  scripts/recordmcount
-  HOSTCC  scripts/sortextable
-  HOSTCC  scripts/asn1_compiler
-  HOSTCC  scripts/sign-file
-  HOSTCC  scripts/extract-cert
   CHECK   scripts/mod/empty.c
   CC      scripts/mod/empty.o
   HOSTCC  scripts/mod/mk_elfconfig
@@ -89,6 +89,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/special.o
   CC       /root/circulate/build/linux-stable/tools/objtool/objtool.o
   CC       /root/circulate/build/linux-stable/tools/objtool/libstring.o
+  CC       /root/circulate/build/linux-stable/tools/objtool/libctype.o
   CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
@@ -144,7 +145,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CHECK   security/keys/process_keys.c
   CC      security/keys/process_keys.o
   CHECK   security/keys/request_key.c
-security/keys/request_key.c:278 construct_get_dest_keyring() warn: missing break? reassigning 'dest_keyring->usage'
+security/keys/request_key.c:306 construct_get_dest_keyring() warn: missing break? reassigning 'dest_keyring->usage'
   CC      security/keys/request_key.o
   CHECK   security/keys/request_key_auth.c
   CC      security/keys/request_key_auth.o
