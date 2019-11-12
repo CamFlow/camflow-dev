@@ -18,7 +18,6 @@
 #include <linux/random.h>
 #include <linux/xattr.h>
 #include <linux/file.h>
-#include <linux/ptrace.h>
 #include <linux/workqueue.h>
 
 #include "provenance.h"
@@ -158,34 +157,6 @@ static void task_init_provenance(void)
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
-}
-
-static int provenance_ptrace_access_check(struct task_struct *child,
-					  unsigned int mode)
-{
-	struct provenance *cprov = get_cred_provenance();
-	struct provenance *tprov = get_task_provenance(false);
-	struct provenance *ccprov = provenance_cred_from_task(child);
-	struct provenance *ctprov = provenance_task(child);
-	int rc = 0;
-
-	if (mode & PTRACE_MODE_READ) {
-		rc = informs(RL_PTRACE_READ_TASK, ctprov, tprov, NULL, mode);
-		if (rc < 0)
-			goto out;
-		rc = uses(RL_PTRACE_READ, ccprov, tprov, cprov, NULL, 0);
-		if (rc < 0)
-			goto out;
-	}
-	if (mode & PTRACE_MODE_ATTACH) {
-		rc = generates(RL_PTRACE_ATTACH, cprov, tprov, ccprov, NULL, 0);
-		if (rc < 0)
-			goto out;
-		rc = informs(RL_PTRACE_ATTACH_TASK, tprov, ctprov, NULL, mode);
-	}
-
-out:
-	return rc;
 }
 
 /*!
@@ -2475,7 +2446,6 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_setpgid,             provenance_task_setpgid),
 	LSM_HOOK_INIT(task_getpgid,             provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,                provenance_task_kill),
-	LSM_HOOK_INIT(ptrace_access_check,      provenance_ptrace_access_check),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,     provenance_inode_alloc_security),

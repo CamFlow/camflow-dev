@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
  *
@@ -99,7 +99,6 @@
 #define RL_MUNMAP                               (RL_GENERATED | (0x0000000000000001ULL << 29))
 #define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 30))
 #define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 31))
-#define RL_PTRACE_ATTACH                                    (RL_GENERATED | (0x0000000000000001ULL << 32))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -133,15 +132,12 @@
 #define RL_MMAP_EXEC_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 27))
 #define RL_MMAP_WRITE_PRIVATE                   (RL_USED        | (0x0000000000000001ULL << 28))
 #define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 29))
-#define RL_PTRACE_READ                          (RL_USED        | (0x0000000000000001ULL << 30))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
 #define RL_CLONE                                (RL_INFORMED  | (0x0000000000000001ULL))
 #define RL_VERSION_TASK                         (RL_INFORMED  | (0x0000000000000001ULL << 1))
 #define RL_TERMINATE_TASK                       (RL_INFORMED  | (0x0000000000000001ULL << 2))
-#define RL_PTRACE_ATTACH_TASK                   (RL_INFORMED  | (0x0000000000000001ULL << 3))
-#define RL_PTRACE_READ_TASK                     (RL_INFORMED  | (0x0000000000000001ULL << 4))
 /* no more than 51!!!! */
 
 /* INFLUENCED  SUBTYPES */
@@ -153,7 +149,7 @@
 #define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 5))
 #define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 6))
 #define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 7))
-#define RL_LOAD_UNDEFINED                       (RL_INFLUENCED | (0x0000000000000001ULL << 8))
+#define RL_LOAD_UNDEFINED                               (RL_INFLUENCED | (0x0000000000000001ULL << 8))
 
 /* ASSOCIATED  SUBTYPES */
 #define RL_RAN_ON                               (RL_ASSOCIATED | (0x0000000000000001ULL))
