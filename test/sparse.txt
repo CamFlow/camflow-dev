@@ -92,10 +92,10 @@ security/provenance/relay.c:87:38:    got struct rchan_buf [noderef] <asn:3> *bu
 security/provenance/relay.c:183:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
-security/provenance/hooks.c:108:22: warning: incorrect type in assignment (different address spaces)
-security/provenance/hooks.c:108:22:    expected struct cred const *cred
-security/provenance/hooks.c:108:22:    got struct cred const [noderef] <asn:4> *real_cred
-security/provenance/hooks.c:149:30: warning: cast removes address space '<asn:4>' of expression
+security/provenance/hooks.c:109:22: warning: incorrect type in assignment (different address spaces)
+security/provenance/hooks.c:109:22:    expected struct cred const *cred
+security/provenance/hooks.c:109:22:    got struct cred const [noderef] <asn:4> *real_cred
+security/provenance/hooks.c:150:30: warning: cast removes address space '<asn:4>' of expression
 ./security/provenance/include/provenance_net.h:372:22: warning: incorrect type in argument 2 (different base types)
 ./security/provenance/include/provenance_net.h:372:22:    expected unsigned int [usertype] ip
 ./security/provenance/include/provenance_net.h:372:22:    got restricted __be32 [usertype] s_addr

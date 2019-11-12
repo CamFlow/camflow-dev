@@ -171,198 +171,198 @@ security/keys/request_key.c:306 construct_get_dest_keyring() warn: missing break
   CHECK   security/provenance/relay.c
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
-security/provenance/hooks.c:429 provenance_inode_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 423
-  Unlocked on: line 429
-security/provenance/hooks.c:429 provenance_inode_create() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 429
-  Unlocked on: line 423
-security/provenance/hooks.c:500 provenance_inode_permission() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 466
-               line 468
-               line 473
-  Unlocked on: line 500
-security/provenance/hooks.c:500 provenance_inode_permission() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 500
-  Unlocked on: line 466
-               line 468
-               line 473
-security/provenance/hooks.c:542 provenance_inode_link() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 534
-  Unlocked on: line 542
-security/provenance/hooks.c:542 provenance_inode_link() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 542
-  Unlocked on: line 534
-security/provenance/hooks.c:568 provenance_inode_unlink() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 561
-  Unlocked on: line 568
-security/provenance/hooks.c:568 provenance_inode_unlink() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 568
-  Unlocked on: line 561
-security/provenance/hooks.c:599 provenance_inode_symlink() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 599
-  Unlocked on: line 591
-security/provenance/hooks.c:636 provenance_inode_rename() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 627
-  Unlocked on: line 636
-security/provenance/hooks.c:636 provenance_inode_rename() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 636
-  Unlocked on: line 627
-security/provenance/hooks.c:694 provenance_inode_setattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 669
-               line 672
-  Unlocked on: line 694
-security/provenance/hooks.c:694 provenance_inode_setattr() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 694
-  Unlocked on: line 669
-               line 672
-security/provenance/hooks.c:723 provenance_inode_getattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 716
+security/provenance/hooks.c:458 provenance_inode_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 452
+  Unlocked on: line 458
+security/provenance/hooks.c:458 provenance_inode_create() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 458
+  Unlocked on: line 452
+security/provenance/hooks.c:529 provenance_inode_permission() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 495
+               line 497
+               line 502
+  Unlocked on: line 529
+security/provenance/hooks.c:529 provenance_inode_permission() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 529
+  Unlocked on: line 495
+               line 497
+               line 502
+security/provenance/hooks.c:571 provenance_inode_link() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 563
+  Unlocked on: line 571
+security/provenance/hooks.c:571 provenance_inode_link() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 571
+  Unlocked on: line 563
+security/provenance/hooks.c:597 provenance_inode_unlink() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 590
+  Unlocked on: line 597
+security/provenance/hooks.c:597 provenance_inode_unlink() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 597
+  Unlocked on: line 590
+security/provenance/hooks.c:628 provenance_inode_symlink() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 628
+  Unlocked on: line 620
+security/provenance/hooks.c:665 provenance_inode_rename() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 656
+  Unlocked on: line 665
+security/provenance/hooks.c:665 provenance_inode_rename() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 665
+  Unlocked on: line 656
+security/provenance/hooks.c:723 provenance_inode_setattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 698
+               line 701
   Unlocked on: line 723
-security/provenance/hooks.c:723 provenance_inode_getattr() warn: inconsistent returns 'spin_lock:'.
+security/provenance/hooks.c:723 provenance_inode_setattr() warn: inconsistent returns 'spin_lock:'.
   Locked on:   line 723
-  Unlocked on: line 716
-security/provenance/hooks.c:752 provenance_inode_readlink() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Unlocked on: line 698
+               line 701
+security/provenance/hooks.c:752 provenance_inode_getattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
   Locked on:   line 745
   Unlocked on: line 752
-security/provenance/hooks.c:752 provenance_inode_readlink() warn: inconsistent returns 'spin_lock:'.
+security/provenance/hooks.c:752 provenance_inode_getattr() warn: inconsistent returns 'spin_lock:'.
   Locked on:   line 752
   Unlocked on: line 745
-security/provenance/hooks.c:839 provenance_inode_post_setxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 830
-               line 833
-  Unlocked on: line 839
-security/provenance/hooks.c:839 provenance_inode_post_setxattr() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 839
-  Unlocked on: line 830
-               line 833
-security/provenance/hooks.c:873 provenance_inode_getxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 864
-               line 867
-  Unlocked on: line 873
-security/provenance/hooks.c:873 provenance_inode_getxattr() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 873
-  Unlocked on: line 864
-               line 867
-security/provenance/hooks.c:902 provenance_inode_listxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 896
+security/provenance/hooks.c:781 provenance_inode_readlink() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 774
+  Unlocked on: line 781
+security/provenance/hooks.c:781 provenance_inode_readlink() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 781
+  Unlocked on: line 774
+security/provenance/hooks.c:868 provenance_inode_post_setxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 859
+               line 862
+  Unlocked on: line 868
+security/provenance/hooks.c:868 provenance_inode_post_setxattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 868
+  Unlocked on: line 859
+               line 862
+security/provenance/hooks.c:902 provenance_inode_getxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 893
+               line 896
   Unlocked on: line 902
-security/provenance/hooks.c:902 provenance_inode_listxattr() warn: inconsistent returns 'spin_lock:'.
+security/provenance/hooks.c:902 provenance_inode_getxattr() warn: inconsistent returns 'spin_lock:'.
   Locked on:   line 902
-  Unlocked on: line 896
-security/provenance/hooks.c:938 provenance_inode_removexattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 927
-               line 930
-  Unlocked on: line 938
-security/provenance/hooks.c:938 provenance_inode_removexattr() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 938
-  Unlocked on: line 927
-               line 930
-security/provenance/hooks.c:1085 provenance_file_permission() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1032
-  Unlocked on: line 1085
-security/provenance/hooks.c:1085 provenance_file_permission() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1085
-  Unlocked on: line 1032
-security/provenance/hooks.c:1121 provenance_file_splice_pipe_to_pipe() warn: inconsistent returns 'spin_lock:&outprov->lock'.
-  Locked on:   line 1110
-  Unlocked on: line 1121
-security/provenance/hooks.c:1121 provenance_file_splice_pipe_to_pipe() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1121
-  Unlocked on: line 1110
-security/provenance/hooks.c:1197 provenance_file_open() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1191
-  Unlocked on: line 1197
-security/provenance/hooks.c:1197 provenance_file_open() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1197
-  Unlocked on: line 1191
-security/provenance/hooks.c:1225 provenance_file_receive() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1219
-  Unlocked on: line 1225
-security/provenance/hooks.c:1225 provenance_file_receive() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1225
-  Unlocked on: line 1219
-security/provenance/hooks.c:1251 provenance_file_lock() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1245
-  Unlocked on: line 1251
-security/provenance/hooks.c:1251 provenance_file_lock() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1251
-  Unlocked on: line 1245
-security/provenance/hooks.c:1284 provenance_file_send_sigiotask() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1276
-  Unlocked on: line 1284
-security/provenance/hooks.c:1284 provenance_file_send_sigiotask() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1284
-  Unlocked on: line 1276
-security/provenance/hooks.c:1364 provenance_mmap_file() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1327
-               line 1330
-  Unlocked on: line 1364
-security/provenance/hooks.c:1364 provenance_mmap_file() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1364
-  Unlocked on: line 1327
-               line 1330
-security/provenance/hooks.c:1446 provenance_file_ioctl() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1435
-  Unlocked on: line 1446
-security/provenance/hooks.c:1446 provenance_file_ioctl() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1446
-  Unlocked on: line 1435
-security/provenance/hooks.c:1731 provenance_shm_shmat() warn: inconsistent returns 'spin_lock:&sprov->lock'.
-  Locked on:   line 1717
-  Unlocked on: line 1731
-security/provenance/hooks.c:1731 provenance_shm_shmat() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1731
-  Unlocked on: line 1717
-security/provenance/hooks.c:1758 provenance_shm_shmdt() warn: inconsistent returns 'spin_lock:&sprov->lock'.
-  Locked on:   line 1753
-  Unlocked on: line 1758
-security/provenance/hooks.c:1758 provenance_shm_shmdt() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1758
-  Unlocked on: line 1753
-security/provenance/hooks.c:1837 provenance_socket_post_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1824
-               line 1826
-  Unlocked on: line 1837
-security/provenance/hooks.c:1837 provenance_socket_post_create() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1837
-  Unlocked on: line 1824
-               line 1826
-security/provenance/hooks.c:1860 provenance_socket_socketpair() error: double lock 'spin_lock:'
-security/provenance/hooks.c:1865 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:&iprova->lock'.
-  Locked on:   line 1850
-               line 1852
-  Unlocked on: line 1865
-security/provenance/hooks.c:1865 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:&iprovb->lock'.
-  Locked on:   line 1850
-               line 1852
-               line 1865
-  Unlocked on: line 1865
-security/provenance/hooks.c:1865 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1865
-  Unlocked on: line 1850
-               line 1852
-security/provenance/hooks.c:1951 provenance_socket_connect() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1935
-  Unlocked on: line 1951
-security/provenance/hooks.c:1951 provenance_socket_connect() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1951
-  Unlocked on: line 1935
-security/provenance/hooks.c:1979 provenance_socket_listen() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 1973
-  Unlocked on: line 1979
-security/provenance/hooks.c:1979 provenance_socket_listen() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 1979
-  Unlocked on: line 1973
-security/provenance/hooks.c:2078 provenance_socket_sendmsg_always() warn: inconsistent returns 'spin_lock:&iprova->lock'.
-  Locked on:   line 2056
-  Unlocked on: line 2078
-security/provenance/hooks.c:2142 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 2119
-  Unlocked on: line 2142
-security/provenance/hooks.c:2142 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 2142
-  Unlocked on: line 2119
+  Unlocked on: line 893
+               line 896
+security/provenance/hooks.c:931 provenance_inode_listxattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 925
+  Unlocked on: line 931
+security/provenance/hooks.c:931 provenance_inode_listxattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 931
+  Unlocked on: line 925
+security/provenance/hooks.c:967 provenance_inode_removexattr() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 956
+               line 959
+  Unlocked on: line 967
+security/provenance/hooks.c:967 provenance_inode_removexattr() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 967
+  Unlocked on: line 956
+               line 959
+security/provenance/hooks.c:1114 provenance_file_permission() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1061
+  Unlocked on: line 1114
+security/provenance/hooks.c:1114 provenance_file_permission() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1114
+  Unlocked on: line 1061
+security/provenance/hooks.c:1150 provenance_file_splice_pipe_to_pipe() warn: inconsistent returns 'spin_lock:&outprov->lock'.
+  Locked on:   line 1139
+  Unlocked on: line 1150
+security/provenance/hooks.c:1150 provenance_file_splice_pipe_to_pipe() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1150
+  Unlocked on: line 1139
+security/provenance/hooks.c:1226 provenance_file_open() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1220
+  Unlocked on: line 1226
+security/provenance/hooks.c:1226 provenance_file_open() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1226
+  Unlocked on: line 1220
+security/provenance/hooks.c:1254 provenance_file_receive() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1248
+  Unlocked on: line 1254
+security/provenance/hooks.c:1254 provenance_file_receive() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1254
+  Unlocked on: line 1248
+security/provenance/hooks.c:1280 provenance_file_lock() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1274
+  Unlocked on: line 1280
+security/provenance/hooks.c:1280 provenance_file_lock() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1280
+  Unlocked on: line 1274
+security/provenance/hooks.c:1313 provenance_file_send_sigiotask() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1305
+  Unlocked on: line 1313
+security/provenance/hooks.c:1313 provenance_file_send_sigiotask() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1313
+  Unlocked on: line 1305
+security/provenance/hooks.c:1393 provenance_mmap_file() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1356
+               line 1359
+  Unlocked on: line 1393
+security/provenance/hooks.c:1393 provenance_mmap_file() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1393
+  Unlocked on: line 1356
+               line 1359
+security/provenance/hooks.c:1475 provenance_file_ioctl() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1464
+  Unlocked on: line 1475
+security/provenance/hooks.c:1475 provenance_file_ioctl() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1475
+  Unlocked on: line 1464
+security/provenance/hooks.c:1760 provenance_shm_shmat() warn: inconsistent returns 'spin_lock:&sprov->lock'.
+  Locked on:   line 1746
+  Unlocked on: line 1760
+security/provenance/hooks.c:1760 provenance_shm_shmat() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1760
+  Unlocked on: line 1746
+security/provenance/hooks.c:1787 provenance_shm_shmdt() warn: inconsistent returns 'spin_lock:&sprov->lock'.
+  Locked on:   line 1782
+  Unlocked on: line 1787
+security/provenance/hooks.c:1787 provenance_shm_shmdt() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1787
+  Unlocked on: line 1782
+security/provenance/hooks.c:1866 provenance_socket_post_create() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1853
+               line 1855
+  Unlocked on: line 1866
+security/provenance/hooks.c:1866 provenance_socket_post_create() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1866
+  Unlocked on: line 1853
+               line 1855
+security/provenance/hooks.c:1889 provenance_socket_socketpair() error: double lock 'spin_lock:'
+security/provenance/hooks.c:1894 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:&iprova->lock'.
+  Locked on:   line 1879
+               line 1881
+  Unlocked on: line 1894
+security/provenance/hooks.c:1894 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:&iprovb->lock'.
+  Locked on:   line 1879
+               line 1881
+               line 1894
+  Unlocked on: line 1894
+security/provenance/hooks.c:1894 provenance_socket_socketpair() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1894
+  Unlocked on: line 1879
+               line 1881
+security/provenance/hooks.c:1980 provenance_socket_connect() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 1964
+  Unlocked on: line 1980
+security/provenance/hooks.c:1980 provenance_socket_connect() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 1980
+  Unlocked on: line 1964
+security/provenance/hooks.c:2008 provenance_socket_listen() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 2002
+  Unlocked on: line 2008
+security/provenance/hooks.c:2008 provenance_socket_listen() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 2008
+  Unlocked on: line 2002
+security/provenance/hooks.c:2107 provenance_socket_sendmsg_always() warn: inconsistent returns 'spin_lock:&iprova->lock'.
+  Locked on:   line 2085
+  Unlocked on: line 2107
+security/provenance/hooks.c:2171 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 2148
+  Unlocked on: line 2171
+security/provenance/hooks.c:2171 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 2171
+  Unlocked on: line 2148
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
