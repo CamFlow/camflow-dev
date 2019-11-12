@@ -49,6 +49,7 @@
 
 ### v0.6.4
 ```
+- Add ptrace support
 - Update to kernel version 5.3.6.
 ```
 
