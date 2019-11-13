@@ -142,6 +142,7 @@
 #define RL_TERMINATE_TASK                       (RL_INFORMED  | (0x0000000000000001ULL << 2))
 #define RL_PTRACE_ATTACH_TASK                   (RL_INFORMED  | (0x0000000000000001ULL << 3))
 #define RL_PTRACE_READ_TASK                     (RL_INFORMED  | (0x0000000000000001ULL << 4))
+#define RL_PTRACE_TRACEME                       (RL_INFORMED  | (0x0000000000000001ULL << 5))
 /* no more than 51!!!! */
 
 /* INFLUENCED  SUBTYPES */

@@ -173,19 +173,31 @@ static int provenance_ptrace_access_check(struct task_struct *child,
 		rc = informs(RL_PTRACE_READ_TASK, ctprov, tprov, NULL, mode);
 		if (rc < 0)
 			goto out;
-		rc = uses(RL_PTRACE_READ, ccprov, tprov, cprov, NULL, 0);
-		if (rc < 0)
-			goto out;
+		if (ccprov != cprov) { // if it is too sepearate processes
+			rc = uses(RL_PTRACE_READ, ccprov, tprov, cprov, NULL, 0);
+			if (rc < 0)
+				goto out;
+		}
 	}
 	if (mode & PTRACE_MODE_ATTACH) {
-		rc = generates(RL_PTRACE_ATTACH, cprov, tprov, ccprov, NULL, 0);
-		if (rc < 0)
-			goto out;
+		if (ccprov != cprov) { // if it is too sepearate processes
+			rc = generates(RL_PTRACE_ATTACH, cprov, tprov, ccprov, NULL, 0);
+			if (rc < 0)
+				goto out;
+		}
 		rc = informs(RL_PTRACE_ATTACH_TASK, tprov, ctprov, NULL, mode);
 	}
 
 out:
 	return rc;
+}
+
+static int provenance_ptrace_traceme(struct task_struct *parent)
+{
+	struct provenance *tprov = get_task_provenance(false);
+	struct provenance *ptprov = provenance_task(parent);
+
+	return informs(RL_PTRACE_TRACEME, tprov, ptprov, NULL, 0);
 }
 
 /*!
@@ -2476,6 +2488,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_getpgid,             provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,                provenance_task_kill),
 	LSM_HOOK_INIT(ptrace_access_check,      provenance_ptrace_access_check),
+	LSM_HOOK_INIT(ptrace_traceme,                           provenance_ptrace_traceme),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,     provenance_inode_alloc_security),

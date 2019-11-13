@@ -113,6 +113,7 @@ static const char RL_STR_PTRACE_ATTACH[] = "ptrace_attach";                     
 static const char RL_STR_PTRACE_READ[] = "ptrace_read";                                                 // ptrace read from mem
 static const char RL_STR_PTRACE_ATTACH_TASK[] = "ptrace_attach_task";                                   // write info via ptrace effect on task
 static const char RL_STR_PTRACE_READ_TASK[] = "ptrace_read_task";                                       // read info via ptrace effect on task
+static const char RL_STR_PTRACE_TRACEME[] = "ptrace_traceme";                                           // track ptrace_traceme
 
 /* node string name */
 static const char ND_STR_UNKNOWN[] = "unknown";                                 // unkown node type should normally not appear
@@ -344,6 +345,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_PTRACE_ATTACH_TASK;
 	case RL_PTRACE_READ_TASK:
 		return RL_STR_PTRACE_READ_TASK;
+	case RL_PTRACE_TRACEME:
+		return RL_STR_PTRACE_TRACEME;
 	case RL_RAN_ON:
 		return RL_STR_RAN_ON;
 	default:
@@ -453,6 +456,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_PTRACE_READ, RL_PTRACE_READ);
 	MATCH_AND_RETURN(str, RL_STR_PTRACE_ATTACH_TASK, RL_PTRACE_ATTACH_TASK);
 	MATCH_AND_RETURN(str, RL_STR_PTRACE_READ_TASK, RL_PTRACE_READ_TASK);
+	MATCH_AND_RETURN(str, RL_STR_PTRACE_TRACEME, RL_PTRACE_TRACEME);
 	MATCH_AND_RETURN(str, RL_STR_RAN_ON, RL_RAN_ON);
 	return 0;
 }

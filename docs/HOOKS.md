@@ -15,6 +15,7 @@ task_setpgid| ![task_setpgid graph](./img/task_setpgid.png)|
 task_getpgid| ![task_getpgid graph](./img/task_getpgid.png)|
 task_kill| ![task_kill graph](./img/task_kill.png)|
 ptrace_access_check| ![ptrace_access_check graph](./img/ptrace_access_check.png)|
+ptrace_traceme| ![ptrace_traceme graph](./img/ptrace_traceme.png)|
 inode_alloc_security| ![inode_alloc_security graph](./img/inode_alloc_security.png)|
 inode_create| ![inode_create graph](./img/inode_create.png)|
 inode_free_security| ![inode_free_security graph](./img/inode_free_security.png)|
