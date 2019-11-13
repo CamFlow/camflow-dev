@@ -266,10 +266,13 @@ out:
 static void insert_boot_buffer(union prov_elt *msg)
 {
 	union prov_elt *tmp = kmem_cache_alloc(provenance_cache, GFP_ATOMIC);
+	unsigned long irqflags;
 
 	__memcpy_ss(tmp, sizeof(struct provenance), msg, sizeof(union prov_elt));
+	spin_lock_irqsave(&lock_buffer, irqflags);
 	tmp->msg_info.next = buffer_head;
 	buffer_head = tmp;
+	spin_unlock_irqrestore(&lock_buffer, irqflags);
 }
 
 /*!
@@ -306,10 +309,13 @@ void prov_write(union prov_elt *msg, size_t size)
 static void insert_long_boot_buffer(union long_prov_elt *msg)
 {
 	union long_prov_elt *tmp = kmem_cache_alloc(long_provenance_cache, GFP_ATOMIC);
+	unsigned long irqflags;
 
 	__memcpy_ss(tmp, sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
+	spin_lock_irqsave(&lock_long_buffer, irqflags);
 	tmp->msg_info.next = long_buffer_head;
 	long_buffer_head = tmp;
+	spin_unlock_irqrestore(&lock_long_buffer, irqflags);
 }
 
 /*!

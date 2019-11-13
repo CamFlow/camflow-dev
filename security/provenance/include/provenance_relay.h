@@ -32,7 +32,9 @@ bool is_relay_full(struct rchan *chan, int cpu);
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
+extern spinlock_t lock_buffer;
 extern union prov_elt *buffer_head;
+extern spinlock_t lock_long_buffer;
 extern union long_prov_elt *long_buffer_head;
 extern bool relay_ready;
 void prov_write(union prov_elt *msg, size_t size);

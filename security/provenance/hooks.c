@@ -2575,7 +2575,10 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 struct kmem_cache *provenance_cache __ro_after_init;
 struct kmem_cache *long_provenance_cache __ro_after_init;
 
+
+spinlock_t lock_buffer;
 union prov_elt *buffer_head;
+spinlock_t lock_long_buffer;
 union long_prov_elt *long_buffer_head;
 
 LIST_HEAD(ingress_ipv4filters);
@@ -2652,7 +2655,9 @@ static int __init provenance_init(void)
 	prov_boot_id = 0;
 	epoch = 1;
 	init_prov_cache();
+	spin_lock_init(&lock_buffer);
 	buffer_head = NULL;
+	spin_lock_init(&lock_long_buffer);
 	long_buffer_head = NULL;
 	relay_ready = false;
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
