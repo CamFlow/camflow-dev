@@ -204,12 +204,16 @@ void write_boot_buffer(void)
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
 	// asynchronously empty the buffer
-	cookie = async_schedule(__async_handle_boot_buffer, NULL);
-	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+	if (buffer_head != NULL) {
+		cookie = async_schedule(__async_handle_boot_buffer, NULL);
+		pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+	}
 
 	// asynchronously empty the buffer
-	cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
-	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+	if (long_buffer_head != NULL) {
+		cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
+		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+	}
 }
 
 /*!
