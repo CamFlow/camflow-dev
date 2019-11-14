@@ -146,6 +146,15 @@ compile_us:
 	cd ./build/libprovenance && $(MAKE) clean
 	cd ./build/libprovenance && $(MAKE) all
 
+config_cross_pi: copy_change
+	cd build/linux-stable && KERNEL=kernel7l
+	cd build/linux-stable && make ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu- menuconfig
+
+compile_cross_pi:
+	make -j 16 ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu-
+	make -j 16 ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu- modules
+
+
 install_header:
 	cd ./build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 
