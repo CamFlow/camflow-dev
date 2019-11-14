@@ -746,1243 +746,1255 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #145: FILE: security/provenance/hooks.c:145:
 + * Current process's cred struct's provenance pointer now points to the provenance node.
 
+WARNING:LONG_LINE: line over 80 characters
+#177: FILE: security/provenance/hooks.c:177:
++			rc = uses(RL_PTRACE_READ, ccprov, tprov, cprov, NULL, 0);
+
+WARNING:LONG_LINE: line over 80 characters
+#184: FILE: security/provenance/hooks.c:184:
++			rc = generates(RL_PTRACE_ATTACH, cprov, tprov, ccprov, NULL, 0);
+
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#194: FILE: security/provenance/hooks.c:194:
+#206: FILE: security/provenance/hooks.c:206:
 + * This hook is triggered when allocating sufficient memory and attaching to @cred such that cred_transfer() will not get ENOMEM.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#196: FILE: security/provenance/hooks.c:196:
+#208: FILE: security/provenance/hooks.c:208:
 + * We simply create a ENT_PROC provenance node and associate the provenance entry to the newly allocated @cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#200: FILE: security/provenance/hooks.c:200:
+#212: FILE: security/provenance/hooks.c:212:
 + * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new provenance entry. Other error codes unknown.\
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#218: FILE: security/provenance/hooks.c:218:
+#230: FILE: security/provenance/hooks.c:230:
 + * This hook is triggered when deallocating and clearing the cred->security field in a set of credentials.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#219: FILE: security/provenance/hooks.c:219:
+#231: FILE: security/provenance/hooks.c:231:
 + * Record provenance relation RL_TERMINATE_PROC by calling "record_terminate" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#236: FILE: security/provenance/hooks.c:236:
+#248: FILE: security/provenance/hooks.c:248:
 + * This hook is triggered when preparing a new set of credentials by copying the data from the old set.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#239: FILE: security/provenance/hooks.c:239:
+#251: FILE: security/provenance/hooks.c:251:
 + * Information flows from old cred to the process that is preparing the new cred.
 
 WARNING:LONG_LINE: line over 80 characters
-#261: FILE: security/provenance/hooks.c:261:
+#273: FILE: security/provenance/hooks.c:273:
 +	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#263: FILE: security/provenance/hooks.c:263:
+#275: FILE: security/provenance/hooks.c:275:
 +		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
 
 WARNING:LONG_LINE: line over 80 characters
-#267: FILE: security/provenance/hooks.c:267:
+#279: FILE: security/provenance/hooks.c:279:
 +			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#277: FILE: security/provenance/hooks.c:277:
+#289: FILE: security/provenance/hooks.c:289:
 + * This hook is triggered when transfering data from original creds to new creds.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#279: FILE: security/provenance/hooks.c:279:
+#291: FILE: security/provenance/hooks.c:291:
 + * Information flow between cred's is captured when provenance_cred_prepare function is called.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#297: FILE: security/provenance/hooks.c:297:
+#309: FILE: security/provenance/hooks.c:309:
 + * This hook is triggered when updating the module's state after setting one or more of the user
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#299: FILE: security/provenance/hooks.c:299:
+#311: FILE: security/provenance/hooks.c:311:
 + * The @flags parameter indicates which of the set*uid system calls invoked this hook.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#302: FILE: security/provenance/hooks.c:302:
+#314: FILE: security/provenance/hooks.c:314:
 + * Information flows from @old to current process and then eventually flows to @new (since modification should be made to @new instead of @current->cred).
 
 WARNING:LONG_LINE: line over 80 characters
-#319: FILE: security/provenance/hooks.c:319:
+#331: FILE: security/provenance/hooks.c:331:
 +	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#328: FILE: security/provenance/hooks.c:328:
+#340: FILE: security/provenance/hooks.c:340:
 + * This hooks is triggered when checking permission before setting the process group identifier of the process @p to @pgid.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#329: FILE: security/provenance/hooks.c:329:
+#341: FILE: security/provenance/hooks.c:341:
 + * @cprov is the cred provenance of the @current process, and @tprov is the task provenance of the @current process.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#330: FILE: security/provenance/hooks.c:330:
+#342: FILE: security/provenance/hooks.c:342:
 + * During "get_cred_provenance" and "get_task_provenance" functions, their provenances are updated too.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#331: FILE: security/provenance/hooks.c:331:
+#343: FILE: security/provenance/hooks.c:343:
 + * We update process @p's cred provenance's pgid info as required by the trigger of the hook.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#333: FILE: security/provenance/hooks.c:333:
+#345: FILE: security/provenance/hooks.c:345:
 + * Information flows from cred of the @current process, which sets the @pgid, to the current process, and eventually to the process @p whose @pgid is updated.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#365: FILE: security/provenance/hooks.c:365:
+#377: FILE: security/provenance/hooks.c:377:
 + * This hook is triggered when checking permission before sending signal @sig to @p.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#367: FILE: security/provenance/hooks.c:367:
+#379: FILE: security/provenance/hooks.c:379:
 + * If @info is 1 or SI_FROMKERNEL(info) is true, then the signal should be viewed as coming from the kernel and should typically be permitted.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#368: FILE: security/provenance/hooks.c:368:
+#380: FILE: security/provenance/hooks.c:380:
 + * SIGIO signals are handled separately by the send_sigiotask hook in file_security_ops.
 
 WARNING:LONG_LINE: line over 80 characters
-#377: FILE: security/provenance/hooks.c:377:
+#389: FILE: security/provenance/hooks.c:389:
 +static int provenance_task_kill(struct task_struct *p, struct kernel_siginfo *info,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#386: FILE: security/provenance/hooks.c:386:
+#398: FILE: security/provenance/hooks.c:398:
 + * This hook is triggered when allocating and attaching a security structure to @inode->i_security.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#387: FILE: security/provenance/hooks.c:387:
+#399: FILE: security/provenance/hooks.c:399:
 + * The i_security field is initialized to NULL when the inode structure is allocated.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#388: FILE: security/provenance/hooks.c:388:
+#400: FILE: security/provenance/hooks.c:400:
 + * When i_security field is initialized, we also initialize i_provenance field of the inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#390: FILE: security/provenance/hooks.c:390:
+#402: FILE: security/provenance/hooks.c:402:
 + * UUID information from @i_sb (superblock) is copied to the new inode's provenance entry.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#391: FILE: security/provenance/hooks.c:391:
+#403: FILE: security/provenance/hooks.c:403:
 + * We then call function "refresh_inode_provenance" to obtain more information about the inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#394: FILE: security/provenance/hooks.c:394:
+#406: FILE: security/provenance/hooks.c:406:
 + * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for the new inode provenance entry. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#406: FILE: security/provenance/hooks.c:406:
+#418: FILE: security/provenance/hooks.c:418:
 +	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#414: FILE: security/provenance/hooks.c:414:
+#426: FILE: security/provenance/hooks.c:426:
 + * This hook is triggered when deallocating the inode security structure and set @inode->i_security to NULL.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#434: FILE: security/provenance/hooks.c:434:
+#446: FILE: security/provenance/hooks.c:446:
 + * Information flows from current process's cred's to the process, and eventually to the parent's inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#438: FILE: security/provenance/hooks.c:438:
+#450: FILE: security/provenance/hooks.c:450:
 + * @return 0 if permission is granted; -ENOMEM if parent's inode's provenance entry is NULL. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#453: FILE: security/provenance/hooks.c:453:
+#465: FILE: security/provenance/hooks.c:465:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#466: FILE: security/provenance/hooks.c:466:
-+ * so a security module can use it to provide additional checking for existing Linux permission checks.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#467: FILE: security/provenance/hooks.c:467:
-+ * Notice that this hook is called when a file is opened (as well as many other operations),
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#468: FILE: security/provenance/hooks.c:468:
-+ * whereas the file_security_ops permission hook is called when the actual read/write operations are performed.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#472: FILE: security/provenance/hooks.c:472:
-+ * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses" function, and
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#473: FILE: security/provenance/hooks.c:473:
-+ * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" function, and
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#474: FILE: security/provenance/hooks.c:474:
-+ * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses" function, and
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#475: FILE: security/provenance/hooks.c:475:
-+ * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses" function.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#477: FILE: security/provenance/hooks.c:477:
-+ * Information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #478: FILE: security/provenance/hooks.c:478:
++ * so a security module can use it to provide additional checking for existing Linux permission checks.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#479: FILE: security/provenance/hooks.c:479:
++ * Notice that this hook is called when a file is opened (as well as many other operations),
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#480: FILE: security/provenance/hooks.c:480:
++ * whereas the file_security_ops permission hook is called when the actual read/write operations are performed.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#484: FILE: security/provenance/hooks.c:484:
++ * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses" function, and
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#485: FILE: security/provenance/hooks.c:485:
++ * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" function, and
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#486: FILE: security/provenance/hooks.c:486:
++ * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses" function, and
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#487: FILE: security/provenance/hooks.c:487:
++ * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses" function.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#489: FILE: security/provenance/hooks.c:489:
++ * Information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#490: FILE: security/provenance/hooks.c:490:
 + * Provenance relation is not recorded if the inode to be access is private or if the inode's provenance entry does not exist.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#481: FILE: security/provenance/hooks.c:481:
+#493: FILE: security/provenance/hooks.c:493:
 + * @return 0 if permission is granted; -ENOMEM if @inode's provenance does not exist. Other error codes unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#483: FILE: security/provenance/hooks.c:483:
+#495: FILE: security/provenance/hooks.c:495:
 + * @todo We ignore inode that are PRIVATE (i.e., IS_PRIVATE is true). Private inodes are FS internals and we ignore for now.
 
 WARNING:LONG_LINE: line over 80 characters
-#504: FILE: security/provenance/hooks.c:504:
+#516: FILE: security/provenance/hooks.c:516:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#535: FILE: security/provenance/hooks.c:535:
+#547: FILE: security/provenance/hooks.c:547:
 + * This hook is triggered when checking permission before creating a new hard link to a file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#536: FILE: security/provenance/hooks.c:536:
+#548: FILE: security/provenance/hooks.c:548:
 + * We obtain the provenance of current process and its cred, as well as provenance of inode or parent directory of new link.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#540: FILE: security/provenance/hooks.c:540:
+#552: FILE: security/provenance/hooks.c:552:
 + * 1. From cred of the current process to the process, and eventually to the inode of parent directory of new link, and,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#541: FILE: security/provenance/hooks.c:541:
+#553: FILE: security/provenance/hooks.c:553:
 + * 2. From cred of the current process to the process, and eventually to the dentry of the existing link to the file, and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#542: FILE: security/provenance/hooks.c:542:
+#554: FILE: security/provenance/hooks.c:554:
 + * 3. From the inode of parent directory of new link to the dentry of the existing link to the file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#546: FILE: security/provenance/hooks.c:546:
+#558: FILE: security/provenance/hooks.c:558:
 + * @return 0 if permission is granted; -ENOMEM if either the dentry provenance of the existing link to the file or the inode provenance of the new parent directory of new link does not exist.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#548: FILE: security/provenance/hooks.c:548:
+#560: FILE: security/provenance/hooks.c:560:
 + * @todo The information flow relations captured here is a bit weird. We need to double check the correctness.
 
 WARNING:LONG_LINE: line over 80 characters
-#565: FILE: security/provenance/hooks.c:565:
+#577: FILE: security/provenance/hooks.c:577:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#592: FILE: security/provenance/hooks.c:592:
+#604: FILE: security/provenance/hooks.c:604:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#603: FILE: security/provenance/hooks.c:603:
+#615: FILE: security/provenance/hooks.c:615:
 + *	@dir contains the inode structure of parent directory of the symbolic link.
 
 WARNING:LONG_LINE: line over 80 characters
-#622: FILE: security/provenance/hooks.c:622:
+#634: FILE: security/provenance/hooks.c:634:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#634: FILE: security/provenance/hooks.c:634:
+#646: FILE: security/provenance/hooks.c:646:
 + * This hook is triggered when checking for permission to rename a file or directory.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#635: FILE: security/provenance/hooks.c:635:
+#647: FILE: security/provenance/hooks.c:647:
 + * Information flow is the same as in the "provenance_inode_link" function so we call this function.
 
 WARNING:LONG_LINE: line over 80 characters
-#658: FILE: security/provenance/hooks.c:658:
+#670: FILE: security/provenance/hooks.c:670:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#671: FILE: security/provenance/hooks.c:671:
+#683: FILE: security/provenance/hooks.c:683:
 + * This hooks is triggered when checking permission before setting file attributes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#672: FILE: security/provenance/hooks.c:672:
+#684: FILE: security/provenance/hooks.c:684:
 + * Note that the kernel call to notify_change is performed from several locations,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#673: FILE: security/provenance/hooks.c:673:
+#685: FILE: security/provenance/hooks.c:685:
 + * whenever file attributes change (such as when a file is truncated, chown/chmod operations
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#675: FILE: security/provenance/hooks.c:675:
+#687: FILE: security/provenance/hooks.c:687:
 + * We create a new provenance node ENT_IATTR, and update its information based on @iattr.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#678: FILE: security/provenance/hooks.c:678:
+#690: FILE: security/provenance/hooks.c:690:
 + * Information flows from cred of the current process to the process, and eventually to the inode attribute to set the attributes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#679: FILE: security/provenance/hooks.c:679:
+#691: FILE: security/provenance/hooks.c:691:
 + * Information also flows from inode attribute to the inode whose attributes are to be set.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#680: FILE: security/provenance/hooks.c:680:
+#692: FILE: security/provenance/hooks.c:692:
 + * After relation is recorded, iattr provenance entry is freed (i.e., memory deallocated).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#684: FILE: security/provenance/hooks.c:684:
+#696: FILE: security/provenance/hooks.c:696:
 + * @return 0 if permission is granted; -ENOMEM if inode provenance of the file is NULL; -ENOMEM if no memory can be allocated for a new ENT_IATTR provenance entry. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#712: FILE: security/provenance/hooks.c:712:
+#724: FILE: security/provenance/hooks.c:724:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#729: FILE: security/provenance/hooks.c:729:
+#741: FILE: security/provenance/hooks.c:741:
 + * This hook is triggered when checking permission before obtaining file attributes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#731: FILE: security/provenance/hooks.c:731:
+#743: FILE: security/provenance/hooks.c:743:
 + * Information flows from the inode of the file to the calling process, and eventually to the process's cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#733: FILE: security/provenance/hooks.c:733:
+#745: FILE: security/provenance/hooks.c:745:
 + * @return 0 if permission is granted; -ENOMEM if the provenance entry of the file is NULL. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#747: FILE: security/provenance/hooks.c:747:
+#759: FILE: security/provenance/hooks.c:759:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#758: FILE: security/provenance/hooks.c:758:
+#770: FILE: security/provenance/hooks.c:770:
 + * This hook is triggered when checking the permission to read the symbolic link.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#760: FILE: security/provenance/hooks.c:760:
+#772: FILE: security/provenance/hooks.c:772:
 + * Information flows from the link file to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#762: FILE: security/provenance/hooks.c:762:
+#774: FILE: security/provenance/hooks.c:774:
 + * @return 0 if permission is granted; -ENOMEM if the link file's provenance entry is NULL. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#776: FILE: security/provenance/hooks.c:776:
+#788: FILE: security/provenance/hooks.c:788:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#787: FILE: security/provenance/hooks.c:787:
+#799: FILE: security/provenance/hooks.c:799:
 + * The provenance extended attributes are set for an inode only if the @name of xattr is matched to be XATTR_NAME_PROVENANCE.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#793: FILE: security/provenance/hooks.c:793:
+#805: FILE: security/provenance/hooks.c:805:
 + * @return 0 if no error occurred; -ENOMEM if size does not match. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#826: FILE: security/provenance/hooks.c:826:
+#838: FILE: security/provenance/hooks.c:838:
 +		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#834: FILE: security/provenance/hooks.c:834:
+#846: FILE: security/provenance/hooks.c:846:
 + * This hook is triggered when updating inode security field after successful setxattr operation.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#835: FILE: security/provenance/hooks.c:835:
+#847: FILE: security/provenance/hooks.c:847:
 + * The relations are recorded through "record_write_xattr" function defined in provenance_inode.h file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#838: FILE: security/provenance/hooks.c:838:
+#850: FILE: security/provenance/hooks.c:850:
 + * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
 
 WARNING:LONG_LINE: line over 80 characters
-#863: FILE: security/provenance/hooks.c:863:
+#875: FILE: security/provenance/hooks.c:875:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#865: FILE: security/provenance/hooks.c:865:
+#877: FILE: security/provenance/hooks.c:877:
 +	record_write_xattr(RL_SETXATTR, iprov, tprov, cprov, name, value, size, flags);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#874: FILE: security/provenance/hooks.c:874:
+#886: FILE: security/provenance/hooks.c:886:
 + * This hook is triggered when checking permission before obtaining the extended attributes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#875: FILE: security/provenance/hooks.c:875:
+#887: FILE: security/provenance/hooks.c:887:
 + * The relations are recorded through "record_read_xattr" function defined in provenance_inode.h file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#877: FILE: security/provenance/hooks.c:877:
+#889: FILE: security/provenance/hooks.c:889:
 + * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#881: FILE: security/provenance/hooks.c:881:
+#893: FILE: security/provenance/hooks.c:893:
 + * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; Other error codes inherited from "record_read_xattr" function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#897: FILE: security/provenance/hooks.c:897:
+#909: FILE: security/provenance/hooks.c:909:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#908: FILE: security/provenance/hooks.c:908:
+#920: FILE: security/provenance/hooks.c:920:
 + * This hook is triggered when checking permission before obtaining the list of extended attribute names for @dentry.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#910: FILE: security/provenance/hooks.c:910:
+#922: FILE: security/provenance/hooks.c:922:
 + * Information flows from inode (whose xattrs are of interests) to calling task process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#913: FILE: security/provenance/hooks.c:913:
+#925: FILE: security/provenance/hooks.c:925:
 + * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; Other error codes inherited from "uses" function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#926: FILE: security/provenance/hooks.c:926:
+#938: FILE: security/provenance/hooks.c:938:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#937: FILE: security/provenance/hooks.c:937:
+#949: FILE: security/provenance/hooks.c:949:
 + * This hook is triggered when checking permission before removing the extended attribute identified by @name for @dentry.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#938: FILE: security/provenance/hooks.c:938:
+#950: FILE: security/provenance/hooks.c:950:
 + * The relations are recorded through "record_write_xattr" function defined in provenance_inode.h file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#941: FILE: security/provenance/hooks.c:941:
+#953: FILE: security/provenance/hooks.c:953:
 + * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
 
 WARNING:LONG_LINE: line over 80 characters
-#961: FILE: security/provenance/hooks.c:961:
+#973: FILE: security/provenance/hooks.c:973:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#963: FILE: security/provenance/hooks.c:963:
+#975: FILE: security/provenance/hooks.c:975:
 +	rc = record_write_xattr(RL_RMVXATTR, iprov, tprov, cprov, name, NULL, 0, 0);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#973: FILE: security/provenance/hooks.c:973:
+#985: FILE: security/provenance/hooks.c:985:
 + * This hook allows us to retrieve a copy of the extended attribute representation of the security label
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#975: FILE: security/provenance/hooks.c:975:
+#987: FILE: security/provenance/hooks.c:987:
 + * Note that @name is the remainder of the attribute name after the security prefix has been removed.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#978: FILE: security/provenance/hooks.c:978:
+#990: FILE: security/provenance/hooks.c:990:
 + * @param name The name of extended attribute, which must be provenance (or an error will be thrown).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#980: FILE: security/provenance/hooks.c:980:
+#992: FILE: security/provenance/hooks.c:992:
 + * @param alloc Specify if the call should return a value via the buffer or just the value length.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#981: FILE: security/provenance/hooks.c:981:
+#993: FILE: security/provenance/hooks.c:993:
 + * @return Size of the buffer on success, which in this case is the size of the provenance entry; -ENOMEM if inode provenance is NULL; -EOPNOTSUPP if name of the attribute is not provenance.
 
 WARNING:LONG_LINE: line over 80 characters
-#998: FILE: security/provenance/hooks.c:998:
+#1010: FILE: security/provenance/hooks.c:1010:
 +	__memcpy_ss(*buffer, sizeof(union prov_elt), prov_elt(iprov), sizeof(union prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1006: FILE: security/provenance/hooks.c:1006:
+#1018: FILE: security/provenance/hooks.c:1018:
 + * This function copies the extended attribute of provenance associated with @inode into @buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1009: FILE: security/provenance/hooks.c:1009:
+#1021: FILE: security/provenance/hooks.c:1021:
 + * If @buffer is not NULL and the length of the provenance attribute name is smaller than @buffer_size,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1011: FILE: security/provenance/hooks.c:1011:
+#1023: FILE: security/provenance/hooks.c:1023:
 + * @param inode The inode whose provenance extended attribute is to be retrieved.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1031: FILE: security/provenance/hooks.c:1031:
+#1043: FILE: security/provenance/hooks.c:1043:
 + * This hook is triggered when checking file permissions before accessing an open file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1033: FILE: security/provenance/hooks.c:1033:
+#1045: FILE: security/provenance/hooks.c:1045:
 + * A security module can use this hook to perform additional checking on these operations,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1034: FILE: security/provenance/hooks.c:1034:
+#1046: FILE: security/provenance/hooks.c:1046:
 + * e.g., to revalidate permissions on use to support privilege bracketing or policy changes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1035: FILE: security/provenance/hooks.c:1035:
+#1047: FILE: security/provenance/hooks.c:1047:
 + * Notice that this hook is used when the actual read/write operations are performed,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1036: FILE: security/provenance/hooks.c:1036:
+#1048: FILE: security/provenance/hooks.c:1048:
 + * whereas the inode_security_ops hook is called when a file is opened (as well as many other operations).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1038: FILE: security/provenance/hooks.c:1038:
+#1050: FILE: security/provenance/hooks.c:1050:
 + * Although this hook can be used to revalidate permissions for various system call operations that read or write files,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1047: FILE: security/provenance/hooks.c:1047:
+#1059: FILE: security/provenance/hooks.c:1059:
 + * @return 0 if permission is granted; -ENOMEM if inode provenance is NULL. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1063: FILE: security/provenance/hooks.c:1063:
+#1075: FILE: security/provenance/hooks.c:1075:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1067: FILE: security/provenance/hooks.c:1067:
+#1079: FILE: security/provenance/hooks.c:1079:
 +			rc = generates(RL_WRITE, cprov, tprov, iprov, file, mask);
 
 WARNING:LONG_LINE: line over 80 characters
-#1094: FILE: security/provenance/hooks.c:1094:
+#1106: FILE: security/provenance/hooks.c:1106:
 +			rc = generates(RL_WRITE, cprov, tprov, iprov, file, mask);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1119: FILE: security/provenance/hooks.c:1119:
+#1131: FILE: security/provenance/hooks.c:1131:
 + * @brief Record provenance when file_splice_pipe_to_pipe hook is triggered (splice system call).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1126: FILE: security/provenance/hooks.c:1126:
+#1138: FILE: security/provenance/hooks.c:1138:
 + * @return 0 if no error occurred; -ENOMEM if either end of the file provenance entry is NULL; Other error code inherited from derives function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1129: FILE: security/provenance/hooks.c:1129:
+#1141: FILE: security/provenance/hooks.c:1141:
 +static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
 
 WARNING:LONG_LINE: line over 80 characters
-#1141: FILE: security/provenance/hooks.c:1141:
+#1153: FILE: security/provenance/hooks.c:1153:
 +	spin_lock_irqsave_nested(prov_lock(inprov), irqflags, PROVENANCE_LOCK_INODE);
 
 WARNING:LONG_LINE: line over 80 characters
-#1165: FILE: security/provenance/hooks.c:1165:
+#1177: FILE: security/provenance/hooks.c:1177:
 +	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
 
 WARNING:LONG_LINE: line over 80 characters
-#1168: FILE: security/provenance/hooks.c:1168:
+#1180: FILE: security/provenance/hooks.c:1180:
 +		rc = record_influences_kernel(RL_LOAD_UNKNOWN, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1171: FILE: security/provenance/hooks.c:1171:
+#1183: FILE: security/provenance/hooks.c:1183:
 +		rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1174: FILE: security/provenance/hooks.c:1174:
+#1186: FILE: security/provenance/hooks.c:1186:
 +		rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1177: FILE: security/provenance/hooks.c:1177:
+#1189: FILE: security/provenance/hooks.c:1189:
 +		rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1180: FILE: security/provenance/hooks.c:1180:
+#1192: FILE: security/provenance/hooks.c:1192:
 +		rc = record_influences_kernel(RL_LOAD_KEXEC_IMAGE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1183: FILE: security/provenance/hooks.c:1183:
+#1195: FILE: security/provenance/hooks.c:1195:
 +		rc = record_influences_kernel(RL_LOAD_KEXEC_INITRAMFS, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1186: FILE: security/provenance/hooks.c:1186:
+#1198: FILE: security/provenance/hooks.c:1198:
 +		rc = record_influences_kernel(RL_LOAD_POLICY, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1189: FILE: security/provenance/hooks.c:1189:
+#1201: FILE: security/provenance/hooks.c:1201:
 +		rc = record_influences_kernel(RL_LOAD_CERTIFICATE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1192: FILE: security/provenance/hooks.c:1192:
+#1204: FILE: security/provenance/hooks.c:1204:
 +		rc = record_influences_kernel(RL_LOAD_UNDEFINED, iprov, tprov, file);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1202: FILE: security/provenance/hooks.c:1202:
+#1214: FILE: security/provenance/hooks.c:1214:
 + * This hook is triggered when saving open-time permission checking state for later use upon file_permission,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1205: FILE: security/provenance/hooks.c:1205:
+#1217: FILE: security/provenance/hooks.c:1217:
 + * Information flows from inode of the file to be opened to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1208: FILE: security/provenance/hooks.c:1208:
+#1220: FILE: security/provenance/hooks.c:1220:
 + * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1221: FILE: security/provenance/hooks.c:1221:
+#1233: FILE: security/provenance/hooks.c:1233:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1232: FILE: security/provenance/hooks.c:1232:
+#1244: FILE: security/provenance/hooks.c:1244:
 + * This hook allows security modules to control the ability of a process to receive an open file descriptor via socket IPC.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1234: FILE: security/provenance/hooks.c:1234:
+#1246: FILE: security/provenance/hooks.c:1246:
 + * Information flows from inode of the file being received to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1236: FILE: security/provenance/hooks.c:1236:
+#1248: FILE: security/provenance/hooks.c:1248:
 + * @return 0 if permission is granted, no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1249: FILE: security/provenance/hooks.c:1249:
+#1261: FILE: security/provenance/hooks.c:1261:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1275: FILE: security/provenance/hooks.c:1275:
+#1287: FILE: security/provenance/hooks.c:1287:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1308: FILE: security/provenance/hooks.c:1308:
+#1320: FILE: security/provenance/hooks.c:1320:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1326: FILE: security/provenance/hooks.c:1326:
+#1338: FILE: security/provenance/hooks.c:1338:
 + * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or RL_MMAP_EXEC by calling "derives" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1330: FILE: security/provenance/hooks.c:1330:
+#1342: FILE: security/provenance/hooks.c:1342:
 + * we create an additional provenance node to represent the private mapped inode by calling function "branch_mmap",
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1331: FILE: security/provenance/hooks.c:1331:
+#1343: FILE: security/provenance/hooks.c:1343:
 + * record provenance relation RL_MMAP by calling "derives" function because information flows from the original mapped file to the private file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1333: FILE: security/provenance/hooks.c:1333:
+#1345: FILE: security/provenance/hooks.c:1345:
 + * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or RL_MMAP_EXEC by calling "derives" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1334: FILE: security/provenance/hooks.c:1334:
+#1346: FILE: security/provenance/hooks.c:1346:
 + * Information flows between the new private mmap node and calling process and its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1341: FILE: security/provenance/hooks.c:1341:
+#1353: FILE: security/provenance/hooks.c:1353:
 + * @return 0 if permission is granted and no error occurred; -ENOMEM if the original file inode provenance entry is NULL; Other error codes inherited from derives function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1360: FILE: security/provenance/hooks.c:1360:
+#1372: FILE: security/provenance/hooks.c:1372:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1367: FILE: security/provenance/hooks.c:1367:
+#1379: FILE: security/provenance/hooks.c:1379:
 +			rc = uses(RL_MMAP_WRITE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1371: FILE: security/provenance/hooks.c:1371:
+#1383: FILE: security/provenance/hooks.c:1383:
 +			rc = uses(RL_MMAP_READ, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1375: FILE: security/provenance/hooks.c:1375:
+#1387: FILE: security/provenance/hooks.c:1387:
 +			rc = uses(RL_MMAP_EXEC, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1380: FILE: security/provenance/hooks.c:1380:
+#1392: FILE: security/provenance/hooks.c:1392:
 +			rc = uses(RL_MMAP_WRITE_PRIVATE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1384: FILE: security/provenance/hooks.c:1384:
+#1396: FILE: security/provenance/hooks.c:1396:
 +			rc = uses(RL_MMAP_READ_PRIVATE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1388: FILE: security/provenance/hooks.c:1388:
+#1400: FILE: security/provenance/hooks.c:1400:
 +			rc = uses(RL_MMAP_EXEC_PRIVATE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1401: FILE: security/provenance/hooks.c:1401:
+#1413: FILE: security/provenance/hooks.c:1413:
 + * We obtain the provenance entry of the mmap'ed file, and if it shows that the mmap'ed file is shared based on the flags,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1403: FILE: security/provenance/hooks.c:1403:
+#1415: FILE: security/provenance/hooks.c:1415:
 + * Information flows from cred of the process that unmmaps the file to the mmap'ed file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1404: FILE: security/provenance/hooks.c:1404:
+#1416: FILE: security/provenance/hooks.c:1416:
 + * Note that if the file to be unmmap'ed is private, the provenance of the mmap'ed file is short-lived and thus no longer exists.
 
 WARNING:LONG_LINE: line over 80 characters
-#1427: FILE: security/provenance/hooks.c:1427:
+#1439: FILE: security/provenance/hooks.c:1439:
 +			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1428: FILE: security/provenance/hooks.c:1428:
+#1440: FILE: security/provenance/hooks.c:1440:
 +			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1440: FILE: security/provenance/hooks.c:1440:
+#1452: FILE: security/provenance/hooks.c:1452:
 + * This hook is triggered when checking permission for an ioctl operation on @file.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1443: FILE: security/provenance/hooks.c:1443:
+#1455: FILE: security/provenance/hooks.c:1455:
 + * When @arg represents a user space pointer, it should never be used by the security module.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1444: FILE: security/provenance/hooks.c:1444:
+#1456: FILE: security/provenance/hooks.c:1456:
 + * Record provenance relation RL_WRITE_IOCTL by calling "generates" function and RL_READ_IOCTL by calling "uses" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1450: FILE: security/provenance/hooks.c:1450:
+#1462: FILE: security/provenance/hooks.c:1462:
 + * @return 0 if permission is granted or no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from generates/uses function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1465: FILE: security/provenance/hooks.c:1465:
+#1477: FILE: security/provenance/hooks.c:1477:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1483: FILE: security/provenance/hooks.c:1483:
+#1495: FILE: security/provenance/hooks.c:1495:
 + * This hooks allocates and attaches a security structure to the msg->security field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1484: FILE: security/provenance/hooks.c:1484:
+#1496: FILE: security/provenance/hooks.c:1496:
 + * The security field is initialized to NULL when the structure is first created.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1485: FILE: security/provenance/hooks.c:1485:
+#1497: FILE: security/provenance/hooks.c:1497:
 + * This function initializes and attaches a new provenance entry to the msg->provenance field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1486: FILE: security/provenance/hooks.c:1486:
+#1498: FILE: security/provenance/hooks.c:1498:
 + * We create a new provenance node ENT_MSG and update the information in the provenance entry from @msg.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1488: FILE: security/provenance/hooks.c:1488:
+#1500: FILE: security/provenance/hooks.c:1500:
 + * Information flows from cred of the calling process to the task, and eventually to the newly created msg node.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1490: FILE: security/provenance/hooks.c:1490:
+#1502: FILE: security/provenance/hooks.c:1502:
 + * @return 0 if operation was successful and permission is granted; -ENOMEM if no memory can be allocated for the new provenance entry; Other error codes inherited from generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1505: FILE: security/provenance/hooks.c:1505:
+#1517: FILE: security/provenance/hooks.c:1517:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1514: FILE: security/provenance/hooks.c:1514:
+#1526: FILE: security/provenance/hooks.c:1526:
 + * This hook is triggered when deallocating the security structure for this message.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1515: FILE: security/provenance/hooks.c:1515:
+#1527: FILE: security/provenance/hooks.c:1527:
 + * Free msg provenance entry when security structure for this message is deallocated.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1516: FILE: security/provenance/hooks.c:1516:
+#1528: FILE: security/provenance/hooks.c:1528:
 + * If the msg has a valid provenance entry pointer (i.e., non-NULL), free the memory and set the pointer to NULL.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1529: FILE: security/provenance/hooks.c:1529:
+#1541: FILE: security/provenance/hooks.c:1541:
 + * @brief Helper function for two security hooks: msg_queue_msgsnd and mq_timedsend.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1532: FILE: security/provenance/hooks.c:1532:
+#1544: FILE: security/provenance/hooks.c:1544:
 + * Information flows from calling process's cred to the process, and eventually to msg.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1534: FILE: security/provenance/hooks.c:1534:
+#1546: FILE: security/provenance/hooks.c:1546:
 + * @return 0 if no error occurred; Other error codes inherited from generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1545: FILE: security/provenance/hooks.c:1545:
+#1557: FILE: security/provenance/hooks.c:1557:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1556: FILE: security/provenance/hooks.c:1556:
+#1568: FILE: security/provenance/hooks.c:1568:
 + * This hook is trigger when checking permission before a message, @msg, is enqueued on the message queue, @msq.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1561: FILE: security/provenance/hooks.c:1561:
+#1573: FILE: security/provenance/hooks.c:1573:
 + * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1580: FILE: security/provenance/hooks.c:1580:
+#1592: FILE: security/provenance/hooks.c:1592:
 + * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1591: FILE: security/provenance/hooks.c:1591:
+#1603: FILE: security/provenance/hooks.c:1603:
 + * @brief Helper function for two security hooks: msg_queue_msgrcv and mq_timedreceive.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1594: FILE: security/provenance/hooks.c:1594:
+#1606: FILE: security/provenance/hooks.c:1606:
 + * Information flows from msg to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1597: FILE: security/provenance/hooks.c:1597:
+#1609: FILE: security/provenance/hooks.c:1609:
 + * @return 0 if no error occurred; Other error codes inherited from uses function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1607: FILE: security/provenance/hooks.c:1607:
+#1619: FILE: security/provenance/hooks.c:1619:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1618: FILE: security/provenance/hooks.c:1618:
+#1630: FILE: security/provenance/hooks.c:1630:
 + * This hook is triggered when checking permission before a message, @msg, is removed from the message queue, @msq.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1619: FILE: security/provenance/hooks.c:1619:
+#1631: FILE: security/provenance/hooks.c:1631:
 + * The @target task structure contains a pointer to the process that will be receiving the message
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1623: FILE: security/provenance/hooks.c:1623:
+#1635: FILE: security/provenance/hooks.c:1635:
 + * and then simply calls the helper function __mq_msgrcv to record the information flow.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1629: FILE: security/provenance/hooks.c:1629:
+#1641: FILE: security/provenance/hooks.c:1641:
 + * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1649: FILE: security/provenance/hooks.c:1649:
+#1661: FILE: security/provenance/hooks.c:1661:
 + * We simply calls the helper function __mq_msgrcv to record the information flow.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1653: FILE: security/provenance/hooks.c:1653:
+#1665: FILE: security/provenance/hooks.c:1665:
 + * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1668: FILE: security/provenance/hooks.c:1668:
+#1680: FILE: security/provenance/hooks.c:1680:
 + * This hunk is triggered when allocating and attaching a security structure to the shp->shm_perm.security field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1669: FILE: security/provenance/hooks.c:1669:
+#1681: FILE: security/provenance/hooks.c:1681:
 + * The security field is initialized to NULL when the structure is first created.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1670: FILE: security/provenance/hooks.c:1670:
+#1682: FILE: security/provenance/hooks.c:1682:
 + * This function allocates and attaches a provenance entry to the shp->shm_perm.provenance field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1672: FILE: security/provenance/hooks.c:1672:
+#1684: FILE: security/provenance/hooks.c:1684:
 + * It also fills in some provenance information based on the information contained in @shp.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1674: FILE: security/provenance/hooks.c:1674:
+#1686: FILE: security/provenance/hooks.c:1686:
 + * For read, information flows from shared memory to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1676: FILE: security/provenance/hooks.c:1676:
+#1688: FILE: security/provenance/hooks.c:1688:
 + * For write, information flows from the calling process's cree to the process, and eventually to shared memory.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1678: FILE: security/provenance/hooks.c:1678:
+#1690: FILE: security/provenance/hooks.c:1690:
 + * @return 0 if operation was successful and permission is granted, no error occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM provenance entry. Other error code inherited from uses and generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1693: FILE: security/provenance/hooks.c:1693:
+#1705: FILE: security/provenance/hooks.c:1705:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1706: FILE: security/provenance/hooks.c:1706:
+#1718: FILE: security/provenance/hooks.c:1718:
 + * This hook is triggered when deallocating the security struct for this memory segment.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1707: FILE: security/provenance/hooks.c:1707:
+#1719: FILE: security/provenance/hooks.c:1719:
 + * We simply free the memory of the allocated provenance entry if it exists, and set the pointer to NULL.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1722: FILE: security/provenance/hooks.c:1722:
+#1734: FILE: security/provenance/hooks.c:1734:
 + * This hook is triggered when checking permissions prior to allowing the shmat system call to attach the
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1727: FILE: security/provenance/hooks.c:1727:
+#1739: FILE: security/provenance/hooks.c:1739:
 + * Information flows from shared memory to the calling process, and then eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1729: FILE: security/provenance/hooks.c:1729:
+#1741: FILE: security/provenance/hooks.c:1741:
 + * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function and RL_SH_ATTACH_WRITE by calling "uses" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1734: FILE: security/provenance/hooks.c:1734:
+#1746: FILE: security/provenance/hooks.c:1746:
 + * @return 0 if permission is granted and no error occurred; -ENOMEM if shared memory provenance entry does not exist. Other error codes inherited from uses and generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1737: FILE: security/provenance/hooks.c:1737:
+#1749: FILE: security/provenance/hooks.c:1749:
 +static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr, int shmflg)
 
 WARNING:LONG_LINE: line over 80 characters
-#1747: FILE: security/provenance/hooks.c:1747:
+#1759: FILE: security/provenance/hooks.c:1759:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1755: FILE: security/provenance/hooks.c:1755:
+#1767: FILE: security/provenance/hooks.c:1767:
 +		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1767: FILE: security/provenance/hooks.c:1767:
+#1779: FILE: security/provenance/hooks.c:1779:
 + * This hook is triggered when detaching the shared memory segment from the address space of the calling process.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1768: FILE: security/provenance/hooks.c:1768:
+#1780: FILE: security/provenance/hooks.c:1780:
 + * The to-be-detached segment must be currently attached with shmaddr equal to the value returned by the attaching shmat() call.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1770: FILE: security/provenance/hooks.c:1770:
+#1782: FILE: security/provenance/hooks.c:1782:
 + * Information flows from the calling process's cred to the process, and eventually to the shared memory.
 
 WARNING:LONG_LINE: line over 80 characters
-#1783: FILE: security/provenance/hooks.c:1783:
+#1795: FILE: security/provenance/hooks.c:1795:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1794: FILE: security/provenance/hooks.c:1794:
+#1806: FILE: security/provenance/hooks.c:1806:
 + * This hook is triggered when allocating and attaching a security structure to the sk->sk_security field,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1796: FILE: security/provenance/hooks.c:1796:
+#1808: FILE: security/provenance/hooks.c:1808:
 + * This function therefore allocates and attaches @sk_provenance structure to @sk.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1797: FILE: security/provenance/hooks.c:1797:
+#1809: FILE: security/provenance/hooks.c:1809:
 + * The provenance of the local stream socket is the same as the cred provenance of the calling process.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1801: FILE: security/provenance/hooks.c:1801:
+#1813: FILE: security/provenance/hooks.c:1813:
 + * @return 0 if success and no error occurred; -ENOMEM if calling process's cred structure does not exist. Other error codes unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1819: FILE: security/provenance/hooks.c:1819:
+#1831: FILE: security/provenance/hooks.c:1831:
 + * This hook allows a module to update or allocate a per-socket security structure.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1821: FILE: security/provenance/hooks.c:1821:
+#1833: FILE: security/provenance/hooks.c:1833:
 + * but rather, the socket security information is stored in the associated inode.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1822: FILE: security/provenance/hooks.c:1822:
+#1834: FILE: security/provenance/hooks.c:1834:
 + * Typically, the inode alloc_security hook will allocate and and attach security information to
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1825: FILE: security/provenance/hooks.c:1825:
+#1837: FILE: security/provenance/hooks.c:1837:
 + * with additional information that wasn't available when the inode was allocated.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1827: FILE: security/provenance/hooks.c:1827:
+#1839: FILE: security/provenance/hooks.c:1839:
 + * Information flows from the calling process's cred to the process, and eventually to the socket that is being created.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1829: FILE: security/provenance/hooks.c:1829:
+#1841: FILE: security/provenance/hooks.c:1841:
 + * This is becasuse kernel socket is a form of communication between kernel and userspace.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1836: FILE: security/provenance/hooks.c:1836:
+#1848: FILE: security/provenance/hooks.c:1848:
 + * @return 0 if no error occurred; -ENOMEM if inode provenance entry does not exist. Other error codes inherited from generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1861: FILE: security/provenance/hooks.c:1861:
+#1873: FILE: security/provenance/hooks.c:1873:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1869: FILE: security/provenance/hooks.c:1869:
+#1881: FILE: security/provenance/hooks.c:1881:
 +static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb)
 
 WARNING:LONG_LINE: line over 80 characters
-#1883: FILE: security/provenance/hooks.c:1883:
+#1895: FILE: security/provenance/hooks.c:1895:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1900: FILE: security/provenance/hooks.c:1900:
-+ * This hook is triggered when checking permission before socket protocol layer bind operation is performed,
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1901: FILE: security/provenance/hooks.c:1901:
-+ * and the socket @sock is bound to the address specified in the @address parameter.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1902: FILE: security/provenance/hooks.c:1902:
-+ * The function records the provenance relations if the calling process is not set to be opaque (i.e., should be recorded).
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1905: FILE: security/provenance/hooks.c:1905:
-+ * Information flows from the cred of the calling process to the process itself, and eventually to the socket.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1906: FILE: security/provenance/hooks.c:1906:
-+ * If the address family is PF_INET (we only support IPv4 for now), we check if we should record the packet from the socket,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #1912: FILE: security/provenance/hooks.c:1912:
++ * This hook is triggered when checking permission before socket protocol layer bind operation is performed,
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#1913: FILE: security/provenance/hooks.c:1913:
++ * and the socket @sock is bound to the address specified in the @address parameter.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#1914: FILE: security/provenance/hooks.c:1914:
++ * The function records the provenance relations if the calling process is not set to be opaque (i.e., should be recorded).
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#1917: FILE: security/provenance/hooks.c:1917:
++ * Information flows from the cred of the calling process to the process itself, and eventually to the socket.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#1918: FILE: security/provenance/hooks.c:1918:
++ * If the address family is PF_INET (we only support IPv4 for now), we check if we should record the packet from the socket,
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#1924: FILE: security/provenance/hooks.c:1924:
 + * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1943: FILE: security/provenance/hooks.c:1943:
+#1955: FILE: security/provenance/hooks.c:1955:
 + * This hook is triggered when checking permission before socket protocol layer connect operation
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1945: FILE: security/provenance/hooks.c:1945:
+#1957: FILE: security/provenance/hooks.c:1957:
 + * This function is similar to the above provenance_socket_bind function, except that we
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1950: FILE: security/provenance/hooks.c:1950:
+#1962: FILE: security/provenance/hooks.c:1962:
 + * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#1966: FILE: security/provenance/hooks.c:1966:
+#1978: FILE: security/provenance/hooks.c:1978:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1986: FILE: security/provenance/hooks.c:1986:
+#1998: FILE: security/provenance/hooks.c:1998:
 + * This hook is triggered when checking permission before socket protocol layer listen operation.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1990: FILE: security/provenance/hooks.c:1990:
+#2002: FILE: security/provenance/hooks.c:2002:
 + * @return 0 if no error occurred; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited from generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#2003: FILE: security/provenance/hooks.c:2003:
+#2015: FILE: security/provenance/hooks.c:2015:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2014: FILE: security/provenance/hooks.c:2014:
+#2026: FILE: security/provenance/hooks.c:2026:
 + * This hook is triggered when checking permission before accepting a new connection.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2015: FILE: security/provenance/hooks.c:2015:
+#2027: FILE: security/provenance/hooks.c:2027:
 + * Note that the new socket, @newsock, has been created and some information copied to it,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2022: FILE: security/provenance/hooks.c:2022:
+#2034: FILE: security/provenance/hooks.c:2034:
 + * Information flows from the new socket to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2025: FILE: security/provenance/hooks.c:2025:
+#2037: FILE: security/provenance/hooks.c:2037:
 + * @return 0 if permission is granted and no error occurred; Other error codes inherited from derives and uses function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#2037: FILE: security/provenance/hooks.c:2037:
+#2049: FILE: security/provenance/hooks.c:2049:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2050: FILE: security/provenance/hooks.c:2050:
+#2062: FILE: security/provenance/hooks.c:2062:
 + * @brief Record provenance when socket_sendmsg_always/socket_sendmsg hook is triggered.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2052: FILE: security/provenance/hooks.c:2052:
+#2064: FILE: security/provenance/hooks.c:2064:
 + * This hook is triggered when checking permission before transmitting a message to another socket.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2054: FILE: security/provenance/hooks.c:2054:
+#2066: FILE: security/provenance/hooks.c:2066:
 + * Information flows from the calling process's cred to the calling process, and eventually to the sending socket.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2055: FILE: security/provenance/hooks.c:2055:
+#2067: FILE: security/provenance/hooks.c:2067:
 + * If sk_family is PF_UNIX (or any local communication) and sk_type is not SOCK_DGRAM,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2063: FILE: security/provenance/hooks.c:2063:
+#2075: FILE: security/provenance/hooks.c:2075:
 + * @return 0 if permission is granted and no error occurred; -ENOMEM if the sending socket's provenance entry does not exist; Other error codes inherited from generates and derives function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2087: FILE: security/provenance/hooks.c:2087:
+#2099: FILE: security/provenance/hooks.c:2099:
 +	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
 
 WARNING:LONG_LINE: line over 80 characters
-#2095: FILE: security/provenance/hooks.c:2095:
+#2107: FILE: security/provenance/hooks.c:2107:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2111: FILE: security/provenance/hooks.c:2111:
+#2123: FILE: security/provenance/hooks.c:2123:
 + * @brief Record provenance when socket_recvmsg_always/socket_recvmsg hook is triggered.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2113: FILE: security/provenance/hooks.c:2113:
+#2125: FILE: security/provenance/hooks.c:2125:
 + * This hook is triggered when checking permission before receiving a message from a socket.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2114: FILE: security/provenance/hooks.c:2114:
+#2126: FILE: security/provenance/hooks.c:2126:
 + * This function is similar to the above provenance_socket_sendmsg_always function except the direction is reversed.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2117: FILE: security/provenance/hooks.c:2117:
+#2129: FILE: security/provenance/hooks.c:2129:
 + * Information flows from the sending socket (@peer) to the receiving socket (@sock).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2119: FILE: security/provenance/hooks.c:2119:
+#2131: FILE: security/provenance/hooks.c:2131:
 + * Information flows from the receiving socket to the calling process, and eventually to its cred.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2124: FILE: security/provenance/hooks.c:2124:
+#2136: FILE: security/provenance/hooks.c:2136:
 + * @return 0 if permission is granted, and no error occurred; -ENOMEM if the receiving socket's provenance entry does not exist; Other error codes inherited from uses and derives function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2150: FILE: security/provenance/hooks.c:2150:
+#2162: FILE: security/provenance/hooks.c:2162:
 +	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
 
 WARNING:LONG_LINE: line over 80 characters
-#2158: FILE: security/provenance/hooks.c:2158:
+#2170: FILE: security/provenance/hooks.c:2170:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2177: FILE: security/provenance/hooks.c:2177:
+#2189: FILE: security/provenance/hooks.c:2189:
 + * This hooks is triggered when checking permissions on incoming network packets.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2178: FILE: security/provenance/hooks.c:2178:
+#2190: FILE: security/provenance/hooks.c:2190:
 + * This hook is distinct from Netfilter's IP input hooks since it is the first time that
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2182: FILE: security/provenance/hooks.c:2182:
+#2194: FILE: security/provenance/hooks.c:2194:
 + * create a packet provenance node and fill the provenance information of the node from @skb,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2188: FILE: security/provenance/hooks.c:2188:
+#2200: FILE: security/provenance/hooks.c:2200:
 + * @return 0 if no error occurred; -ENOMEM if sk provenance does not exist. Other error codes inherited from derives function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2226: FILE: security/provenance/hooks.c:2226:
+#2238: FILE: security/provenance/hooks.c:2238:
 + * This hook is triggered when checking permissions before establishing a Unix domain stream connection b]etween @sock and @other.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2228: FILE: security/provenance/hooks.c:2228:
+#2240: FILE: security/provenance/hooks.c:2240:
 + * Since this is simply to connect (no information should flow between the two local sockets yet),
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2231: FILE: security/provenance/hooks.c:2231:
+#2243: FILE: security/provenance/hooks.c:2243:
 + * Information flows from the calling process's cred to the task , and eventually to the sending socket.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2235: FILE: security/provenance/hooks.c:2235:
+#2247: FILE: security/provenance/hooks.c:2247:
 + * @return 0 if permission is granted; Other error code inherited from generates function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#2248: FILE: security/provenance/hooks.c:2248:
+#2260: FILE: security/provenance/hooks.c:2260:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2259: FILE: security/provenance/hooks.c:2259:
+#2271: FILE: security/provenance/hooks.c:2271:
 + * This hook is triggered when checking permissions before connecting or sending datagrams from @sock to @other.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2261: FILE: security/provenance/hooks.c:2261:
+#2273: FILE: security/provenance/hooks.c:2273:
 + * Information flows from the sending socket (@sock) to the receiving socket (@other).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2264: FILE: security/provenance/hooks.c:2264:
+#2276: FILE: security/provenance/hooks.c:2276:
 + * @return 0 if permission is granted and no error occurred; Other error codes inherited from derives function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#2275: FILE: security/provenance/hooks.c:2275:
+#2287: FILE: security/provenance/hooks.c:2287:
 +	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_SOCKET);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2286: FILE: security/provenance/hooks.c:2286:
+#2298: FILE: security/provenance/hooks.c:2298:
 + * This hook is triggered when saving security information in the bprm->security field,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2287: FILE: security/provenance/hooks.c:2287:
+#2299: FILE: security/provenance/hooks.c:2299:
 + * typically based on information about the bprm->file, for later use by the apply_creds hook.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2288: FILE: security/provenance/hooks.c:2288:
+#2300: FILE: security/provenance/hooks.c:2300:
 + * This hook may also optionally check permissions (e.g. for transitions between security domains).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2289: FILE: security/provenance/hooks.c:2289:
+#2301: FILE: security/provenance/hooks.c:2301:
 + * This hook may be called multiple times during a single execve, e.g. for interpreters.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2290: FILE: security/provenance/hooks.c:2290:
+#2302: FILE: security/provenance/hooks.c:2302:
 + * The hook can tell whether it has already been called by checking to see if @bprm->security is non-NULL.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2291: FILE: security/provenance/hooks.c:2291:
+#2303: FILE: security/provenance/hooks.c:2303:
 + * If so, then the hook may decide either to retain the security information saved earlier or to replace it.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2297: FILE: security/provenance/hooks.c:2297:
+#2309: FILE: security/provenance/hooks.c:2309:
 + * @return 0 if the hook is successful and permission is granted; -ENOMEM if bprm->cred's provenance does not exist. Other error codes inherited from derives function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2324: FILE: security/provenance/hooks.c:2324:
+#2336: FILE: security/provenance/hooks.c:2336:
 + * It allows a check the @bprm->security value which is set in the preceding set_creds call.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2325: FILE: security/provenance/hooks.c:2325:
+#2337: FILE: security/provenance/hooks.c:2337:
 + * The primary difference from set_creds is that the argv list and envp list are reliably available in @bprm.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2328: FILE: security/provenance/hooks.c:2328:
+#2340: FILE: security/provenance/hooks.c:2340:
 + * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque (i.e., do not track).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2329: FILE: security/provenance/hooks.c:2329:
+#2341: FILE: security/provenance/hooks.c:2341:
 + * The relations between the bprm arguments and bprm->cred are recorded by calling record_args function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2331: FILE: security/provenance/hooks.c:2331:
+#2343: FILE: security/provenance/hooks.c:2343:
 + * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from record_args function or unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2356: FILE: security/provenance/hooks.c:2356:
+#2368: FILE: security/provenance/hooks.c:2368:
 + * This hook is triggered when preparing to install the new security attributes of a process being transformed by an execve operation,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2369: FILE: security/provenance/hooks.c:2369:
+#2381: FILE: security/provenance/hooks.c:2381:
 + * The old process gets the name of the new process by calling record_node_name function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2371: FILE: security/provenance/hooks.c:2371:
+#2383: FILE: security/provenance/hooks.c:2383:
 + * the new process bprm->cred's provenance will therefore be opaque and we do not track any of the relations.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2391: FILE: security/provenance/hooks.c:2391:
+#2403: FILE: security/provenance/hooks.c:2403:
 + * This hook is triggered when allocating and attaching a security structure to the sb->s_security field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2393: FILE: security/provenance/hooks.c:2393:
+#2405: FILE: security/provenance/hooks.c:2405:
 + * This function allocates and initializes a provenance structure to sb->s_provenance field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2397: FILE: security/provenance/hooks.c:2397:
+#2409: FILE: security/provenance/hooks.c:2409:
 + * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for a new provenance entry. Other error codes unknown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2413: FILE: security/provenance/hooks.c:2413:
+#2425: FILE: security/provenance/hooks.c:2425:
 + * This hooks is triggered when deallocating and clearing the sb->s_security field.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2414: FILE: security/provenance/hooks.c:2414:
+#2426: FILE: security/provenance/hooks.c:2426:
 + * This function frees the memory of the allocated provenance field and set the pointer to NULL.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2429: FILE: security/provenance/hooks.c:2429:
+#2441: FILE: security/provenance/hooks.c:2441:
 + * This function will update the Universal Unique ID of the provenance entry of the device @sb->s_provenance once it is mounted.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2430: FILE: security/provenance/hooks.c:2430:
+#2442: FILE: security/provenance/hooks.c:2442:
 + * We obtain this information from @sb if it exists, or we give it a random value.
 
 WARNING:LONG_LINE: line over 80 characters
-#2448: FILE: security/provenance/hooks.c:2448:
+#2460: FILE: security/provenance/hooks.c:2460:
 +		get_random_bytes(prov_elt(sbprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 
 WARNING:LONG_LINE: line over 80 characters
-#2481: FILE: security/provenance/hooks.c:2481:
+#2491: FILE: security/provenance/hooks.c:2491:
++	LSM_HOOK_INIT(ptrace_traceme,                           provenance_ptrace_traceme),
+
+WARNING:LONG_LINE: line over 80 characters
+#2494: FILE: security/provenance/hooks.c:2494:
 +	LSM_HOOK_INIT(inode_alloc_security,     provenance_inode_alloc_security),
 
 WARNING:LONG_LINE: line over 80 characters
-#2512: FILE: security/provenance/hooks.c:2512:
+#2525: FILE: security/provenance/hooks.c:2525:
 +	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
 
 WARNING:LONG_LINE: line over 80 characters
-#2517: FILE: security/provenance/hooks.c:2517:
+#2530: FILE: security/provenance/hooks.c:2530:
 +	LSM_HOOK_INIT(msg_msg_alloc_security,   provenance_msg_msg_alloc_security),
 
 WARNING:LONG_LINE: line over 80 characters
-#2518: FILE: security/provenance/hooks.c:2518:
+#2531: FILE: security/provenance/hooks.c:2531:
 +	LSM_HOOK_INIT(msg_msg_free_security,    provenance_msg_msg_free_security),
 
 WARNING:LONG_LINE: line over 80 characters
-#2539: FILE: security/provenance/hooks.c:2539:
+#2552: FILE: security/provenance/hooks.c:2552:
 +	LSM_HOOK_INIT(socket_sendmsg_always,    provenance_socket_sendmsg_always),
 
 WARNING:LONG_LINE: line over 80 characters
-#2540: FILE: security/provenance/hooks.c:2540:
+#2553: FILE: security/provenance/hooks.c:2553:
 +	LSM_HOOK_INIT(socket_recvmsg_always,    provenance_socket_recvmsg_always),
 
 WARNING:LONG_LINE: line over 80 characters
-#2554: FILE: security/provenance/hooks.c:2554:
+#2567: FILE: security/provenance/hooks.c:2567:
 +	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2622: FILE: security/provenance/hooks.c:2622:
+#2638: FILE: security/provenance/hooks.c:2638:
 + * 4. Set up kernel memory cache for regular provenance entries (NULL on failure).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2630: FILE: security/provenance/hooks.c:2630:
+#2646: FILE: security/provenance/hooks.c:2646:
 + * Work_queue helps persiste provenance of inodes (if needed) during the operations that cannot sleep,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2631: FILE: security/provenance/hooks.c:2631:
+#2647: FILE: security/provenance/hooks.c:2647:
 + * since persists provenance requires writing to disk (which means sleep is needed).
 
 WARNING:LONG_LINE_STRING: line over 80 characters
-#2656: FILE: security/provenance/hooks.c:2656:
+#2674: FILE: security/provenance/hooks.c:2674:
 +	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 
-total: 0 errors, 317 warnings, 2666 lines checked
+total: 0 errors, 320 warnings, 2684 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2217,102 +2229,106 @@ WARNING:AVOID_EXTERNS: externs should be avoided in .c files
 +void refresh_prov_machine(void);
 
 WARNING:LONG_LINE: line over 80 characters
-#212: FILE: security/provenance/relay.c:212:
-+	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+#209: FILE: security/provenance/relay.c:209:
++		pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#216: FILE: security/provenance/relay.c:216:
-+ * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#219: FILE: security/provenance/relay.c:219:
-+ * Each relay channel contains a relay buffer for regular provenance entries and a relay buffer for long provenance entries.
+WARNING:LONG_LINE: line over 80 characters
+#215: FILE: security/provenance/relay.c:215:
++		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #220: FILE: security/provenance/relay.c:220:
++ * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#223: FILE: security/provenance/relay.c:223:
++ * Each relay channel contains a relay buffer for regular provenance entries and a relay buffer for long provenance entries.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#224: FILE: security/provenance/relay.c:224:
 + * @param buffer Contains the name of the relay buffer for regular provenance entries (prepend "long_" for the relay buffer name for long provenance entries)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#222: FILE: security/provenance/relay.c:222:
+#226: FILE: security/provenance/relay.c:226:
 + * @return 0 if no error occurred; -EFAULT if name already exists for relay buffer or opening new relay buffer failed; -ENOMEM if length of the name of the relay buffer is too long. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#245: FILE: security/provenance/relay.c:245:
+#249: FILE: security/provenance/relay.c:249:
 +	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#250: FILE: security/provenance/relay.c:250:
+#254: FILE: security/provenance/relay.c:254:
 +	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#266: FILE: security/provenance/relay.c:266:
+#271: FILE: security/provenance/relay.c:271:
 +	__memcpy_ss(tmp, sizeof(struct provenance), msg, sizeof(union prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#272: FILE: security/provenance/relay.c:272:
+#279: FILE: security/provenance/relay.c:279:
 + * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#274: FILE: security/provenance/relay.c:274:
+#281: FILE: security/provenance/relay.c:281:
 + * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#275: FILE: security/provenance/relay.c:275:
+#282: FILE: security/provenance/relay.c:282:
 + * However, in an unlikely event that the boot buffer is full, an error is thrown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#276: FILE: security/provenance/relay.c:276:
+#283: FILE: security/provenance/relay.c:283:
 + * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#278: FILE: security/provenance/relay.c:278:
+#285: FILE: security/provenance/relay.c:285:
 + * It will write to every relay buffer in the relay_list for every CamQuery query use.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#279: FILE: security/provenance/relay.c:279:
+#286: FILE: security/provenance/relay.c:286:
 + * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#280: FILE: security/provenance/relay.c:280:
+#287: FILE: security/provenance/relay.c:287:
 + * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#281: FILE: security/provenance/relay.c:281:
+#288: FILE: security/provenance/relay.c:288:
 + * @param msg Provenance information to be written to either boot buffer or relay buffer.
 
 WARNING:LONG_LINE: line over 80 characters
-#304: FILE: security/provenance/relay.c:304:
+#311: FILE: security/provenance/relay.c:311:
 +	union long_prov_elt *tmp = kmem_cache_alloc(long_provenance_cache, GFP_ATOMIC);
 
 WARNING:LONG_LINE: line over 80 characters
-#306: FILE: security/provenance/relay.c:306:
+#314: FILE: security/provenance/relay.c:314:
 +	__memcpy_ss(tmp, sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#312: FILE: security/provenance/relay.c:312:
+#322: FILE: security/provenance/relay.c:322:
 + * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#314: FILE: security/provenance/relay.c:314:
+#324: FILE: security/provenance/relay.c:324:
 + * This function performs the same function as "prov_write" function except that it writes a long provenance information,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#316: FILE: security/provenance/relay.c:316:
+#326: FILE: security/provenance/relay.c:326:
 + * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#339: FILE: security/provenance/relay.c:339:
+#349: FILE: security/provenance/relay.c:349:
 + * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,
 
 WARNING:LONG_LINE: line over 80 characters
-#349: FILE: security/provenance/relay.c:349:
+#359: FILE: security/provenance/relay.c:359:
 +	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#353: FILE: security/provenance/relay.c:353:
+#363: FILE: security/provenance/relay.c:363:
 +	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
-total: 0 errors, 41 warnings, 363 lines checked
+total: 0 errors, 42 warnings, 373 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2725,135 +2741,139 @@ WARNING:LONG_LINE: line over 80 characters
 #115: FILE: security/provenance/type.c:115:
 +static const char RL_STR_PTRACE_READ_TASK[] = "ptrace_read_task";                                       // read info via ptrace effect on task
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#118: FILE: security/provenance/type.c:118:
-+static const char ND_STR_UNKNOWN[] = "unknown";                                 // unkown node type should normally not appear
+WARNING:LONG_LINE: line over 80 characters
+#116: FILE: security/provenance/type.c:116:
++static const char RL_STR_PTRACE_TRACEME[] = "ptrace_traceme";                                           // track ptrace_traceme
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #119: FILE: security/provenance/type.c:119:
-+static const char ND_STR_STR[] = "string";                                      // simple string used for disclosed log
++static const char ND_STR_UNKNOWN[] = "unknown";                                 // unkown node type should normally not appear
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #120: FILE: security/provenance/type.c:120:
-+static const char ND_STR_TASK[] = "task";                                       // represent a thread from user space POV
++static const char ND_STR_STR[] = "string";                                      // simple string used for disclosed log
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #121: FILE: security/provenance/type.c:121:
-+static const char ND_STR_INODE_UNKNOWN[] = "inode_unknown";                     // unknown inode type should normally not appear
++static const char ND_STR_TASK[] = "task";                                       // represent a thread from user space POV
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #122: FILE: security/provenance/type.c:122:
-+static const char ND_STR_INODE_LINK[] = "link";                                 // link
++static const char ND_STR_INODE_UNKNOWN[] = "inode_unknown";                     // unknown inode type should normally not appear
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #123: FILE: security/provenance/type.c:123:
-+static const char ND_STR_INODE_FILE[] = "file";                                 // standard file
++static const char ND_STR_INODE_LINK[] = "link";                                 // link
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #124: FILE: security/provenance/type.c:124:
-+static const char ND_STR_INODE_DIRECTORY[] = "directory";                       // directory
++static const char ND_STR_INODE_FILE[] = "file";                                 // standard file
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #125: FILE: security/provenance/type.c:125:
-+static const char ND_STR_INODE_CHAR[] = "char";                                 // character device
++static const char ND_STR_INODE_DIRECTORY[] = "directory";                       // directory
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #126: FILE: security/provenance/type.c:126:
-+static const char ND_STR_INODE_BLOCK[] = "block";                               // block device
++static const char ND_STR_INODE_CHAR[] = "char";                                 // character device
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #127: FILE: security/provenance/type.c:127:
-+static const char ND_STR_INODE_PIPE[] = "pipe";                                 // pipe
++static const char ND_STR_INODE_BLOCK[] = "block";                               // block device
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #128: FILE: security/provenance/type.c:128:
-+static const char ND_STR_INODE_SOCKET[] = "socket";                             // network socket
++static const char ND_STR_INODE_PIPE[] = "pipe";                                 // pipe
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #129: FILE: security/provenance/type.c:129:
-+static const char ND_STR_MSG[] = "msg";                                         // msg as in IPC message passing
++static const char ND_STR_INODE_SOCKET[] = "socket";                             // network socket
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #130: FILE: security/provenance/type.c:130:
-+static const char ND_STR_SHM[] = "shm";                                         // shared memory
++static const char ND_STR_MSG[] = "msg";                                         // msg as in IPC message passing
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #131: FILE: security/provenance/type.c:131:
-+static const char ND_STR_ADDR[] = "address";                                    // network address
++static const char ND_STR_SHM[] = "shm";                                         // shared memory
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #132: FILE: security/provenance/type.c:132:
-+static const char ND_STR_SB[] = "sb";                                           // superblock
++static const char ND_STR_ADDR[] = "address";                                    // network address
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #133: FILE: security/provenance/type.c:133:
-+static const char ND_STR_PATH[] = "path";                                       // path associated with a file
++static const char ND_STR_SB[] = "sb";                                           // superblock
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #134: FILE: security/provenance/type.c:134:
-+static const char ND_STR_DISC_ENTITY[] = "disc_entity";                         // descilosed node representing an entity
++static const char ND_STR_PATH[] = "path";                                       // path associated with a file
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #135: FILE: security/provenance/type.c:135:
-+static const char ND_STR_DISC_ACTIVITY[] = "disc_activity";                     // descilosed node representing an activity
++static const char ND_STR_DISC_ENTITY[] = "disc_entity";                         // descilosed node representing an entity
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #136: FILE: security/provenance/type.c:136:
-+static const char ND_STR_DISC_AGENT[] = "disc_agent";                           // disclosed node representing an agent
++static const char ND_STR_DISC_ACTIVITY[] = "disc_activity";                     // descilosed node representing an activity
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #137: FILE: security/provenance/type.c:137:
-+static const char ND_STR_MACHINE[] = "machine";                                 // machine representing an agent
++static const char ND_STR_DISC_AGENT[] = "disc_agent";                           // disclosed node representing an agent
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #138: FILE: security/provenance/type.c:138:
-+static const char ND_STR_PACKET[] = "packet";                                   // network packet
++static const char ND_STR_MACHINE[] = "machine";                                 // machine representing an agent
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #139: FILE: security/provenance/type.c:139:
-+static const char ND_STR_IATTR[] = "iattr";                                     // inode attributes value
++static const char ND_STR_PACKET[] = "packet";                                   // network packet
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #140: FILE: security/provenance/type.c:140:
-+static const char ND_STR_XATTR[] = "xattr";                                     // extended attributes value
++static const char ND_STR_IATTR[] = "iattr";                                     // inode attributes value
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #141: FILE: security/provenance/type.c:141:
-+static const char ND_STR_PCKCNT[] = "packet_content";                           // the content of network packet
++static const char ND_STR_XATTR[] = "xattr";                                     // extended attributes value
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #142: FILE: security/provenance/type.c:142:
-+static const char ND_STR_ARG[] = "argv";                                        // argument passed to a process
++static const char ND_STR_PCKCNT[] = "packet_content";                           // the content of network packet
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #143: FILE: security/provenance/type.c:143:
-+static const char ND_STR_ENV[] = "envp";                                        // environment parameter
++static const char ND_STR_ARG[] = "argv";                                        // argument passed to a process
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #144: FILE: security/provenance/type.c:144:
++static const char ND_STR_ENV[] = "envp";                                        // environment parameter
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#145: FILE: security/provenance/type.c:145:
 +static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
 WARNING:LONG_LINE: line over 80 characters
-#146: FILE: security/provenance/type.c:146:
+#147: FILE: security/provenance/type.c:147:
 +#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#146: FILE: security/provenance/type.c:146:
+#147: FILE: security/provenance/type.c:147:
 +#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
 
 WARNING:LONG_LINE: line over 80 characters
-#372: FILE: security/provenance/type.c:372:
+#375: FILE: security/provenance/type.c:375:
 +	MATCH_AND_RETURN(str, RL_STR_CONNECT_UNIX_STREAM, RL_CONNECT_UNIX_STREAM);
 
 WARNING:LONG_LINE: line over 80 characters
-#445: FILE: security/provenance/type.c:445:
+#448: FILE: security/provenance/type.c:448:
 +	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER, RL_LOAD_FIRMWARE_PREALLOC_BUFFER);
 
 WARNING:LONG_LINE: line over 80 characters
-#448: FILE: security/provenance/type.c:448:
+#451: FILE: security/provenance/type.c:451:
 +	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
 
-total: 0 errors, 133 warnings, 553 lines checked
+total: 0 errors, 134 warnings, 557 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
