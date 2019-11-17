@@ -167,8 +167,10 @@ static int provenance_ptrace_access_check(struct task_struct *child,
 	struct provenance *tprov = get_task_provenance(false);
 	struct provenance *ccprov = provenance_cred_from_task(child);
 	struct provenance *ctprov = provenance_task(child);
+	unsigned long irqflags;
 	int rc = 0;
 
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	if (mode & PTRACE_MODE_READ) {
 		rc = informs(RL_PTRACE_READ_TASK, ctprov, tprov, NULL, mode);
 		if (rc < 0)
@@ -189,6 +191,7 @@ static int provenance_ptrace_access_check(struct task_struct *child,
 	}
 
 out:
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
 
