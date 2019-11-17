@@ -89,7 +89,7 @@ security/provenance/relay.c:84:42:    got struct rchan_buf *
 security/provenance/relay.c:87:38: warning: incorrect type in argument 1 (different address spaces)
 security/provenance/relay.c:87:38:    expected struct rchan_buf *buf
 security/provenance/relay.c:87:38:    got struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:183:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
+security/provenance/relay.c:201:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
 security/provenance/hooks.c:109:22: warning: incorrect type in assignment (different address spaces)
