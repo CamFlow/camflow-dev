@@ -46,13 +46,13 @@ LIST_HEAD(relay_list);
  */
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
 {
-	struct relay_list *list;
+	struct relay_list *elt;
 
-	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
-	list->name = name;
-	list->prov = prov;
-	list->long_prov = long_prov;
-	list_add_tail(&(list->list), &relay_list);
+	elt = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
+	elt->name = name;
+	elt->prov = prov;
+	elt->long_prov = long_prov;
+	list_add_tail(&(elt->list), &relay_list);
 }
 
 /*!
@@ -127,11 +127,13 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 {
 	int cpu;
 	union prov_elt *tmp = buffer_head;
+	unsigned long irqflags;
 
 	msleep(1000);
 	pr_info("Provenance: async boot buffer task %llu running...", cookie);
 
 	while (tmp != NULL) {
+		// check if relay is full
 		cpu = get_cpu();
 		if (is_relay_full(prov_chan, cpu)) {
 			cookie = async_schedule(__async_handle_boot_buffer, NULL);
@@ -140,13 +142,20 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 			return;
 		}
 		put_cpu();
+
+		// tighten provenance entry
 		tighten_identifier(&get_prov_identifier(tmp));
 		if (prov_is_relation(tmp)) {
 			tighten_identifier(&(tmp->relation_info.snd));
 			tighten_identifier(&(tmp->relation_info.rcv));
 		}
+
 		relay_write(prov_chan, tmp, sizeof(union prov_elt));
+
+		// delete from list
+		spin_lock_irqsave(&lock_buffer, irqflags);
 		buffer_head = tmp->msg_info.next;
+		spin_unlock_irqrestore(&lock_buffer, irqflags);
 		kmem_cache_free(provenance_cache, tmp);
 		tmp = buffer_head;
 	}
@@ -157,11 +166,13 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 {
 	int cpu;
 	union long_prov_elt *tmp = long_buffer_head;
+	unsigned long irqflags;
 
 	msleep(1000);
 	pr_info("Provenance: async boot buffer task %llu running...", cookie);
 
 	while (tmp != NULL) {
+		// check if relay is full
 		cpu = get_cpu();
 		if (is_relay_full(prov_chan, cpu)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
@@ -170,9 +181,16 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 			return;
 		}
 		put_cpu();
+
+		// tighten provenance entry
 		tighten_identifier(&get_prov_identifier(tmp));
+
 		relay_write(long_prov_chan, tmp, sizeof(union long_prov_elt));
+
+		// delete from list
+		spin_lock_irqsave(&lock_long_buffer, irqflags);
 		long_buffer_head = tmp->msg_info.next;
+		spin_unlock_irqrestore(&lock_long_buffer, irqflags);
 		kmem_cache_free(long_provenance_cache, tmp);
 		tmp = long_buffer_head;
 	}
@@ -265,7 +283,7 @@ out:
 
 static void insert_boot_buffer(union prov_elt *msg)
 {
-	union prov_elt *tmp = kmem_cache_alloc(provenance_cache, GFP_ATOMIC);
+	union prov_elt *tmp = kmem_cache_zalloc(provenance_cache, GFP_ATOMIC);
 	unsigned long irqflags;
 
 	__memcpy_ss(tmp, sizeof(struct provenance), msg, sizeof(union prov_elt));
@@ -308,7 +326,7 @@ void prov_write(union prov_elt *msg, size_t size)
 
 static void insert_long_boot_buffer(union long_prov_elt *msg)
 {
-	union long_prov_elt *tmp = kmem_cache_alloc(long_provenance_cache, GFP_ATOMIC);
+	union long_prov_elt *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
 	unsigned long irqflags;
 
 	__memcpy_ss(tmp, sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
