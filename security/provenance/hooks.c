@@ -2282,7 +2282,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	struct provenance *iprov = get_socket_provenance(sock);
+	struct provenance *iprov = get_socket_inode_provenance(sock);
 	struct provenance *oprov = get_socket_inode_provenance(other);
 	unsigned long irqflags;
 	int rc = 0;
