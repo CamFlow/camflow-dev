@@ -191,9 +191,6 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	struct provenance *tprov = provenance_task(current);
 	union long_prov_elt *node;
 
-	if (!capable(CAP_AUDIT_WRITE))
-		return -EPERM;
-
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
 
@@ -215,28 +212,42 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		count = -EINVAL;
 		goto out;
 	}
-	if (copy_to_user((void *)buf, &node, count))
-		count = -ENOMEM;
 out:
-	kfree(node);
+	if (prov_elt(tprov)->task_info.disc)
+		kfree(prov_elt(tprov)->task_info.disc);
+	prov_elt(tprov)->task_info.disc = node;
 	return count;
 }
-declare_file_operations(prov_node_ops, prov_write_node, no_read);
+
+static ssize_t prov_read_node(struct file *filp, char __user *buf,
+			      size_t count, loff_t *ppos)
+{
+	struct provenance *tprov = provenance_task(current);
+	union long_prov_elt *node;
+
+	if (count < sizeof(struct disc_node_struct))
+		return -ENOMEM;
+	if (!prov_elt(tprov)->task_info.disc)
+		return -EINVAL;
+	if (copy_to_user(buf, prov_elt(tprov)->task_info.disc, sizeof(struct disc_node_struct)))
+		return -ENOMEM;
+	return sizeof(struct disc_node_struct);
+}
+declare_file_operations(prov_node_ops, prov_write_node, prov_read_node);
 
 static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 				   size_t count, loff_t *ppos)
 {
 	union prov_elt relation;
 
-	if (!capable(CAP_AUDIT_WRITE))
-		return -EPERM;
-
 	if (count < sizeof(struct relation_struct))
 		return -ENOMEM;
 
 	if (copy_from_user(&relation, buf, sizeof(struct relation_struct)))
 		return -ENOMEM;
-
+	relation_identifier(&relation).id = prov_next_relation_id();
+	relation_identifier(&relation).boot_id = prov_boot_id;
+	relation_identifier(&relation).machine_id = prov_machine_id;
 	prov_write(&relation, sizeof(union prov_elt));
 	return count;
 }
