@@ -198,7 +198,7 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 	}
 	pr_info("Provenance: finished task %llu.", cookie);
 out:
-	spin_unlock_irqrestore(&lock_buffer, irqflags);
+	spin_unlock_irqrestore(&lock_long_buffer, irqflags);
 }
 
 bool relay_ready;
