@@ -1986,23 +1986,27 @@ WARNING:LONG_LINE: line over 80 characters
 #2570: FILE: security/provenance/hooks.c:2570:
 +	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
 
+WARNING:LONG_LINE: line over 80 characters
+#2629: FILE: security/provenance/hooks.c:2629:
++						   sizeof(struct long_boot_buffer),
+
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2641: FILE: security/provenance/hooks.c:2641:
+#2659: FILE: security/provenance/hooks.c:2659:
 + * 4. Set up kernel memory cache for regular provenance entries (NULL on failure).
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2649: FILE: security/provenance/hooks.c:2649:
+#2667: FILE: security/provenance/hooks.c:2667:
 + * Work_queue helps persiste provenance of inodes (if needed) during the operations that cannot sleep,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2650: FILE: security/provenance/hooks.c:2650:
+#2668: FILE: security/provenance/hooks.c:2668:
 + * since persists provenance requires writing to disk (which means sleep is needed).
 
 WARNING:LONG_LINE_STRING: line over 80 characters
-#2677: FILE: security/provenance/hooks.c:2677:
+#2694: FILE: security/provenance/hooks.c:2694:
 +	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 
-total: 0 errors, 321 warnings, 2687 lines checked
+total: 0 errors, 322 warnings, 2704 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2205,138 +2209,150 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 + * @brief Callback function of function "remove_buf_file". This callback function removes the relay file from "debugfs".
 
 WARNING:LONG_LINE: line over 80 characters
-#139: FILE: security/provenance/relay.c:139:
+#143: FILE: security/provenance/relay.c:143:
 +			cookie = async_schedule(__async_handle_boot_buffer, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#140: FILE: security/provenance/relay.c:140:
+#144: FILE: security/provenance/relay.c:144:
 +			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE: line over 80 characters
-#178: FILE: security/provenance/relay.c:178:
+#175: FILE: security/provenance/relay.c:175:
++	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
+
+WARNING:LONG_LINE: line over 80 characters
+#184: FILE: security/provenance/relay.c:184:
 +			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#179: FILE: security/provenance/relay.c:179:
-+			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+#185: FILE: security/provenance/relay.c:185:
++			pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+
+WARNING:LONG_LINE: line over 80 characters
+#194: FILE: security/provenance/relay.c:194:
++		relay_write(long_prov_chan, &(entry->msg), sizeof(union long_prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#203: FILE: security/provenance/relay.c:203:
+#207: FILE: security/provenance/relay.c:207:
 + * @brief Write whatever in boot buffer to relay buffer when relay buffer is ready.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#205: FILE: security/provenance/relay.c:205:
+#209: FILE: security/provenance/relay.c:209:
 + * This function writes what's in boot_buffer to relay buffer for regular provenance entries,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#208: FILE: security/provenance/relay.c:208:
+#212: FILE: security/provenance/relay.c:212:
 + * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
 
 WARNING:AVOID_EXTERNS: externs should be avoided in .c files
-#211: FILE: security/provenance/relay.c:211:
+#215: FILE: security/provenance/relay.c:215:
 +void refresh_prov_machine(void);
 
 WARNING:LONG_LINE: line over 80 characters
-#227: FILE: security/provenance/relay.c:227:
+#231: FILE: security/provenance/relay.c:231:
 +		pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE: line over 80 characters
-#233: FILE: security/provenance/relay.c:233:
+#237: FILE: security/provenance/relay.c:237:
 +		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#238: FILE: security/provenance/relay.c:238:
+#242: FILE: security/provenance/relay.c:242:
 + * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#241: FILE: security/provenance/relay.c:241:
+#245: FILE: security/provenance/relay.c:245:
 + * Each relay channel contains a relay buffer for regular provenance entries and a relay buffer for long provenance entries.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#242: FILE: security/provenance/relay.c:242:
+#246: FILE: security/provenance/relay.c:246:
 + * @param buffer Contains the name of the relay buffer for regular provenance entries (prepend "long_" for the relay buffer name for long provenance entries)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#244: FILE: security/provenance/relay.c:244:
+#248: FILE: security/provenance/relay.c:248:
 + * @return 0 if no error occurred; -EFAULT if name already exists for relay buffer or opening new relay buffer failed; -ENOMEM if length of the name of the relay buffer is too long. Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#267: FILE: security/provenance/relay.c:267:
+#271: FILE: security/provenance/relay.c:271:
 +	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#272: FILE: security/provenance/relay.c:272:
+#276: FILE: security/provenance/relay.c:276:
 +	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#289: FILE: security/provenance/relay.c:289:
-+	__memcpy_ss(tmp, sizeof(struct provenance), msg, sizeof(union prov_elt));
+#290: FILE: security/provenance/relay.c:290:
++	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#297: FILE: security/provenance/relay.c:297:
-+ * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#299: FILE: security/provenance/relay.c:299:
-+ * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#300: FILE: security/provenance/relay.c:300:
-+ * However, in an unlikely event that the boot buffer is full, an error is thrown.
+WARNING:LONG_LINE: line over 80 characters
+#293: FILE: security/provenance/relay.c:293:
++	__memcpy_ss(&(tmp->msg), sizeof(union prov_elt), msg, sizeof(union prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #301: FILE: security/provenance/relay.c:301:
-+ * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
++ * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #303: FILE: security/provenance/relay.c:303:
-+ * It will write to every relay buffer in the relay_list for every CamQuery query use.
++ * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #304: FILE: security/provenance/relay.c:304:
-+ * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
++ * However, in an unlikely event that the boot buffer is full, an error is thrown.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #305: FILE: security/provenance/relay.c:305:
++ * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#307: FILE: security/provenance/relay.c:307:
++ * It will write to every relay buffer in the relay_list for every CamQuery query use.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#308: FILE: security/provenance/relay.c:308:
++ * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#309: FILE: security/provenance/relay.c:309:
 + * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#306: FILE: security/provenance/relay.c:306:
+#310: FILE: security/provenance/relay.c:310:
 + * @param msg Provenance information to be written to either boot buffer or relay buffer.
 
 WARNING:LONG_LINE: line over 80 characters
-#329: FILE: security/provenance/relay.c:329:
-+	union long_prov_elt *tmp = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+#333: FILE: security/provenance/relay.c:333:
++	struct long_boot_buffer *tmp = kmem_cache_zalloc(long_boot_buffer_cache, GFP_ATOMIC);
 
 WARNING:LONG_LINE: line over 80 characters
-#332: FILE: security/provenance/relay.c:332:
-+	__memcpy_ss(tmp, sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#340: FILE: security/provenance/relay.c:340:
-+ * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#342: FILE: security/provenance/relay.c:342:
-+ * This function performs the same function as "prov_write" function except that it writes a long provenance information,
+#336: FILE: security/provenance/relay.c:336:
++	__memcpy_ss(&(tmp->msg), sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #344: FILE: security/provenance/relay.c:344:
++ * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#346: FILE: security/provenance/relay.c:346:
++ * This function performs the same function as "prov_write" function except that it writes a long provenance information,
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#348: FILE: security/provenance/relay.c:348:
 + * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#367: FILE: security/provenance/relay.c:367:
+#371: FILE: security/provenance/relay.c:371:
 + * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,
 
 WARNING:LONG_LINE: line over 80 characters
-#377: FILE: security/provenance/relay.c:377:
+#381: FILE: security/provenance/relay.c:381:
 +	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#381: FILE: security/provenance/relay.c:381:
+#385: FILE: security/provenance/relay.c:385:
 +	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
-total: 0 errors, 42 warnings, 391 lines checked
+total: 0 errors, 45 warnings, 395 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
