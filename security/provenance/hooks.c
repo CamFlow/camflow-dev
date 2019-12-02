@@ -2578,11 +2578,13 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 struct kmem_cache *provenance_cache __ro_after_init;
 struct kmem_cache *long_provenance_cache __ro_after_init;
 
-
+struct kmem_cache *boot_buffer_cache __ro_after_init;
 spinlock_t lock_buffer;
-union prov_elt *buffer_head;
+LIST_HEAD(buffer_list);
+
+struct kmem_cache *long_boot_buffer_cache __ro_after_init;
 spinlock_t lock_long_buffer;
-union long_prov_elt *long_buffer_head;
+LIST_HEAD(long_buffer_list);
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
@@ -2613,6 +2615,22 @@ static void __init init_prov_policy(void)
 	prov_policy.prov_all = false;
 #endif
 	pr_info("Provenance: policy initialization finished.");
+}
+
+static void __init init_boot_cache(void)
+{
+	pr_info("Provenance: boot cache initialization started...");
+	boot_buffer_cache = kmem_cache_create("boot_buffer_cache",
+					      sizeof(struct boot_buffer),
+					      0, SLAB_PANIC, NULL);
+	if (unlikely(!boot_buffer_cache))
+		panic("Provenance: could not allocate boot_buffer_cache.");
+	long_boot_buffer_cache = kmem_cache_create("long_boot_buffer_cache",
+						   sizeof(struct long_boot_buffer),
+						   0, SLAB_PANIC, NULL);
+	if (unlikely(!long_boot_buffer_cache))
+		panic("Provenance: could not allocate long_boot_buffer_cache.");
+	pr_info("Provenance: boot cache initialization finished.");
 }
 
 static void __init init_prov_cache(void)
@@ -2658,10 +2676,9 @@ static int __init provenance_init(void)
 	prov_boot_id = 0;
 	epoch = 1;
 	init_prov_cache();
+	init_boot_cache();
 	spin_lock_init(&lock_buffer);
-	buffer_head = NULL;
 	spin_lock_init(&lock_long_buffer);
-	long_buffer_head = NULL;
 	relay_ready = false;
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 	provq = alloc_workqueue("provq", 0, 0);

@@ -49,6 +49,7 @@
 
 ### v0.6.4
 ```
+- Use kernel linked list to build boot buffer.
 - Refactoring of layering interface (accommodate changes to libprovenance).
 - Add ptrace support.
 - Update to kernel version 5.3.11.

@@ -15,6 +15,8 @@
 #include <linux/relay.h>
 #include <linux/spinlock.h>
 #include <linux/jiffies.h>
+#include <linux/list.h>
+#include <uapi/linux/provenance.h>
 
 #include "provenance_filter.h"
 #include "provenance_query.h"
@@ -26,17 +28,32 @@
 #define PROV_INITIAL_BUFF_SIZE          (1024 * 16)
 #define PROV_INITIAL_LONG_BUFF_SIZE     512
 
+struct boot_buffer {
+	struct list_head list;
+	union prov_elt msg;
+};
+
+struct long_boot_buffer {
+	struct list_head list;
+	union long_prov_elt msg;
+};
+
 int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan, int cpu);
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
+extern struct kmem_cache *boot_buffer_cache;
 extern spinlock_t lock_buffer;
-extern union prov_elt *buffer_head;
+extern struct list_head buffer_list;
+
+extern struct kmem_cache *long_boot_buffer_cache;
 extern spinlock_t lock_long_buffer;
-extern union long_prov_elt *long_buffer_head;
+extern struct list_head long_buffer_list;
+
 extern bool relay_ready;
+
 void prov_write(union prov_elt *msg, size_t size);
 void long_prov_write(union long_prov_elt *msg, size_t size);
 
