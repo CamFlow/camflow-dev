@@ -148,7 +148,6 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 
 static __always_inline int record_hook(uint64_t type)
 {
-	union prov_elt hook;
 	int rc;
 
 	rc = __write_hook(type);
