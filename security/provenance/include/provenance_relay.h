@@ -244,7 +244,7 @@ static __always_inline int __write_hook(const uint64_t type)
 	relation_identifier(&hook).machine_id = prov_machine_id;
 	hook.msg_info.epoch = epoch;
 
-	prov_write(&hook, sizeof(union prov_elt));
+	prov_write(&hook);
 	return rc;
 }
 
