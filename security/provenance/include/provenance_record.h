@@ -146,6 +146,15 @@ static __always_inline int record_terminate(uint64_t type, struct provenance *pr
 	return rc;
 }
 
+static __always_inline int record_hook(uint64_t type)
+{
+	union prov_elt hook;
+	int rc;
+
+	rc = __write_hook(type);
+	return rc;
+}
+
 /*!
  * @brief This function records the name of a provenance node. The name itself is a provenance node so there exists a new relation between the name and the node.
  *

@@ -137,6 +137,76 @@ static const char ND_STR_ARG[] = "argv";                                // argum
 static const char ND_STR_ENV[] = "envp";                                // environment parameter
 static const char ND_STR_PROC[] = "process_memory";                     // process memory
 
+/* hook string name */
+static const char HK_STR_TASK_ALLOC[] = "security_task_alloc";
+static const char HK_STR_TASK_FREE[] = "security_task_free";
+static const char HK_STR_CRED_ALLOC_BLANK[] = "security_cred_alloc_blank";
+static const char HK_STR_CRED_FREE[] = "security_cred_free";
+static const char HK_STR_CRED_PREPARE[] = "security_cred_prepare";
+static const char HK_STR_CRED_TRANSFER[] = "security_cred_transfer";
+static const char HK_STR_TASK_FIX_SETUID[] = "security_task_fix_setuid";
+static const char HK_STR_TASK_SETPGID[] = "security_task_setpgid";
+static const char HK_STR_TASK_GETPGID[] = "security_task_getpgid";
+static const char HK_STR_TASK_KILL[] = "security_task_kill";
+static const char HK_STR_INODE_ALLOC_SECURITY[] = "security_inode_alloc_security";
+static const char HK_STR_INODE_FREE_SECURITY[] = "security_inode_free_security";
+static const char HK_STR_INODE_CREATE[] = "security_inode_create";
+static const char HK_STR_INODE_PERMISSION[] = "security_inode_permission";
+static const char HK_STR_INODE_LINK[] = "security_inode_link";
+static const char HK_STR_INODE_UNLINK[] = "security_inode_unlink";
+static const char HK_STR_INODE_SYMLINK[] = "security_inode_symlink";
+static const char HK_STR_INODE_RENAME[] = "security_inode_rename";
+static const char HK_STR_INODE_SETATTR[] = "security_inode_setattr";
+static const char HK_STR_INODE_GETATTR[] = "security_inode_getattr";
+static const char HK_STR_INODE_READLINK[] = "security_inode_readlink";
+static const char HK_STR_INODE_SETXATTR[] = "security_inode_setxattr";
+static const char HK_STR_INODE_POST_SETXATTR[] = "security_inode_post_setxattr";
+static const char HK_STR_INODE_GETXATTR[] = "security_inode_getxattr";
+static const char HK_STR_INODE_LISTXATTR[] = "security_inode_listxattr";
+static const char HK_STR_INODE_REMOVEXATTR[] = "security_inode_removexattr";
+static const char HK_STR_INODE_GETSECURITY[] = "security_inode_getsecurity";
+static const char HK_STR_INODE_LISTSECURITY[] = "security_inode_listsecurity";
+static const char HK_STR_FILE_PERMISSION[] = "security_file_permission";
+static const char HK_STR_FILE_SPLICE_PIPE_TO_PIPE[] = "security_file_splice_pipe_to_pipe";
+static const char HK_STR_KERNEL_READ_FILE[] = "security_kernel_read_file";
+static const char HK_STR_FILE_OPEN[] = "security_file_open";
+static const char HK_STR_FILE_RECEIVE[] = "security_file_receive";
+static const char HK_STR_FILE_LOCK[] = "security_file_lock";
+static const char HK_STR_FILE_SEND_SIGIOTASK[] = "security_file_send_sigiotask";
+static const char HK_STR_MMAP_FILE[] = "security_mmap_file";
+static const char HK_STR_MMAP_MUNMAP[] = "security_mmap_munmap";
+static const char HK_STR_FILE_IOCTL[] = "security_file_ioctl";
+static const char HK_STR_MSG_MSG_ALLOC_SECURITY[] = "security_msg_msg_alloc_security";
+static const char HK_STR_MSG_MSG_FREE_SECURITY[] = "security_msg_msg_free_security";
+static const char HK_STR_MSG_QUEUE_MSGSND[] = "security_msg_queue_msgsnd";
+static const char HK_STR_MQ_TIMEDSEND[] = "security_mq_timedsend";
+static const char HK_STR_MSG_QUEUE_MSGRCV[] = "security_msg_queue_msgrcv";
+static const char HK_STR_MQ_TIMEDRECEIVE[] = "security_mq_timedreceive";
+static const char HK_STR_SHM_ALLOC_SECURITY[] = "security_shm_alloc_security";
+static const char HK_STR_SHM_FREE_SECURITY[] = "security_shm_free_security";
+static const char HK_STR_SHM_SHMAT[] = "security_shm_shmat";
+static const char HK_STR_SHM_SHMDT[] = "security_shm_shmdt";
+static const char HK_STR_SK_ALLOC_SECURITY[] = "security_sk_alloc_security";
+static const char HK_STR_SOCKET_POST_CREATE[] = "security_socket_post_create";
+static const char HK_STR_SOCKET_SOCKETPAIR[] = "security_socket_socketpair";
+static const char HK_STR_SOCKET_BIND[] = "security_socket_bind";
+static const char HK_STR_SOCKET_CONNECT[] = "security_socket_connect";
+static const char HK_STR_SOCKET_LISTEN[] = "security_socket_listen";
+static const char HK_STR_SOCKET_ACCEPT[] = "security_socket_accept";
+static const char HK_STR_SOCKET_SENDMSG_ALWAYS[] = "security_socket_sendmsg_always";
+static const char HK_STR_SOCKET_SENDMSG[] = "security_socket_sendmsg";
+static const char HK_STR_SOCKET_RECVMSG_ALWAYS[] = "security_socket_recvmsg_always";
+static const char HK_STR_SOCKET_RECVMSG[] = "security_socket_recvmsg";
+static const char HK_STR_SOCKET_SOCK_RCV_SKB[] = "security_socket_sock_rcv_skb";
+static const char HK_STR_UNIX_STREAM_CONNECT[] = "security_unix_stream_connect";
+static const char HK_STR_UNIX_MAY_SEND[] = "security_unix_may_send";
+static const char HK_STR_BPRM_SET_CREDS[] = "security_bprm_set_creds";
+static const char HK_STR_BPRM_CHECK_SECURITY[] = "security_bprm_check_security";
+static const char HK_STR_BPRM_COMMITTING_CREDS[] = "security_bprm_committing_creds";
+static const char HK_STR_SB_ALLOC_SECURITY[] = "security_sb_alloc_security";
+static const char HK_STR_SB_FREE_SECURITY[] = "security_sb_free_security";
+static const char HK_STR_SB_KERN_MOUNT[] = "security_sb_kern_mount";
+
 #define MATCH_AND_RETURN(str1, str2, v) if (strcmp(str1, str2) == 0) return v
 /* transform from relation ID to string representation */
 const char* relation_str(uint64_t type)
@@ -326,6 +396,142 @@ const char* relation_str(uint64_t type)
 		return RL_STR_LOAD_CERTIFICATE;
 	case RL_RAN_ON:
 		return RL_STR_RAN_ON;
+	case HK_TASK_ALLOC:
+		return HK_STR_TASK_ALLOC;
+	case HK_TASK_FREE:
+		return HK_STR_TASK_FREE;
+	case HK_CRED_ALLOC_BLANK:
+		return HK_STR_CRED_ALLOC_BLANK;
+	case HK_CRED_FREE:
+		return HK_STR_CRED_FREE;
+	case HK_CRED_PREPARE:
+		return HK_STR_CRED_PREPARE;
+	case HK_CRED_TRANSFER:
+		return HK_STR_CRED_TRANSFER;
+	case HK_TASK_FIX_SETUID:
+		return HK_STR_TASK_FIX_SETUID;
+	case HK_TASK_SETPGID:
+		return HK_STR_TASK_SETPGID;
+	case HK_TASK_GETPGID:
+		return HK_STR_TASK_GETPGID;
+	case HK_TASK_KILL:
+		return HK_STR_TASK_KILL;
+	case HK_INODE_ALLOC_SECURITY:
+		return HK_STR_INODE_ALLOC_SECURITY;
+	case HK_INODE_FREE_SECURITY:
+		return HK_STR_INODE_FREE_SECURITY;
+	case HK_INODE_CREATE:
+		return HK_STR_INODE_CREATE;
+	case HK_INODE_PERMISSION:
+		return HK_STR_INODE_PERMISSION;
+	case HK_INODE_LINK:
+		return HK_STR_INODE_LINK;
+	case HK_INODE_UNLINK:
+		return HK_STR_INODE_UNLINK;
+	case HK_INODE_SYMLINK:
+		return HK_STR_INODE_SYMLINK;
+	case HK_INODE_RENAME:
+		return HK_STR_INODE_RENAME;
+	case HK_INODE_SETATTR:
+		return HK_STR_INODE_SETATTR;
+	case HK_INODE_GETATTR:
+		return HK_STR_INODE_GETATTR;
+	case HK_INODE_READLINK:
+		return HK_STR_INODE_READLINK;
+	case HK_INODE_SETXATTR:
+		return HK_STR_INODE_SETXATTR;
+	case HK_INODE_POST_SETXATTR:
+		return HK_STR_INODE_POST_SETXATTR;
+	case HK_INODE_GETXATTR:
+		return HK_STR_INODE_GETXATTR;
+	case HK_INODE_LISTXATTR:
+		return HK_STR_INODE_LISTXATTR;
+	case HK_INODE_REMOVEXATTR:
+		return HK_STR_INODE_REMOVEXATTR;
+	case HK_INODE_GETSECURITY:
+		return HK_STR_INODE_GETSECURITY;
+	case HK_INODE_LISTSECURITY:
+		return HK_STR_INODE_LISTSECURITY;
+	case HK_FILE_PERMISSION:
+		return HK_STR_FILE_PERMISSION;
+	case HK_FILE_SPLICE_PIPE_TO_PIPE:
+		return HK_STR_FILE_SPLICE_PIPE_TO_PIPE;
+	case HK_KERNEL_READ_FILE:
+		return HK_STR_KERNEL_READ_FILE;
+	case HK_FILE_OPEN:
+		return HK_STR_FILE_OPEN;
+	case HK_FILE_RECEIVE:
+		return HK_STR_FILE_RECEIVE;
+	case HK_FILE_LOCK:
+		return HK_STR_FILE_LOCK;
+	case HK_FILE_SEND_SIGIOTASK:
+		return HK_STR_FILE_SEND_SIGIOTASK;
+	case HK_MMAP_FILE:
+		return HK_STR_MMAP_FILE;
+	case HK_MMAP_MUNMAP:
+		return HK_STR_MMAP_MUNMAP;
+	case HK_FILE_IOCTL:
+		return HK_STR_FILE_IOCTL;
+	case HK_MSG_MSG_ALLOC_SECURITY:
+		return HK_STR_MSG_MSG_ALLOC_SECURITY;
+	case HK_MSG_MSG_FREE_SECURITY:
+		return HK_STR_MSG_MSG_FREE_SECURITY;
+	case HK_MSG_QUEUE_MSGSND:
+		return HK_STR_MSG_QUEUE_MSGSND;
+	case HK_MQ_TIMEDSEND:
+		return HK_STR_MQ_TIMEDSEND;
+	case HK_MSG_QUEUE_MSGRCV:
+		return HK_STR_MSG_QUEUE_MSGRCV;
+	case HK_MQ_TIMEDRECEIVE:
+		return HK_STR_MQ_TIMEDRECEIVE;
+	case HK_SHM_ALLOC_SECURITY:
+		return HK_STR_SHM_ALLOC_SECURITY;
+	case HK_SHM_FREE_SECURITY:
+		return HK_STR_SHM_FREE_SECURITY;
+	case HK_SHM_SHMAT:
+		return HK_STR_SHM_SHMAT;
+	case HK_SHM_SHMDT:
+		return HK_STR_SHM_SHMDT;
+	case HK_SK_ALLOC_SECURITY:
+		return HK_STR_SK_ALLOC_SECURITY;
+	case HK_SOCKET_POST_CREATE:
+		return HK_STR_SOCKET_POST_CREATE;
+	case HK_SOCKET_SOCKETPAIR:
+		return HK_STR_SOCKET_SOCKETPAIR;
+	case HK_SOCKET_BIND:
+		return HK_STR_SOCKET_BIND;
+	case HK_SOCKET_CONNECT:
+		return HK_STR_SOCKET_CONNECT;
+	case HK_SOCKET_LISTEN:
+		return HK_STR_SOCKET_LISTEN;
+	case HK_SOCKET_ACCEPT:
+		return HK_STR_SOCKET_ACCEPT;
+	case HK_SOCKET_SENDMSG_ALWAYS:
+		return HK_STR_SOCKET_SENDMSG_ALWAYS;
+	case HK_SOCKET_SENDMSG:
+		return HK_STR_SOCKET_SENDMSG;
+	case HK_SOCKET_RECVMSG_ALWAYS:
+		return HK_STR_SOCKET_RECVMSG_ALWAYS;
+	case HK_SOCKET_RECVMSG:
+		return HK_STR_SOCKET_RECVMSG;
+	case HK_SOCKET_SOCK_RCV_SKB:
+		return HK_STR_SOCKET_SOCK_RCV_SKB;
+	case HK_UNIX_STREAM_CONNECT:
+		return HK_STR_UNIX_STREAM_CONNECT;
+	case HK_UNIX_MAY_SEND:
+		return HK_STR_UNIX_MAY_SEND;
+	case HK_BPRM_SET_CREDS:
+		return HK_STR_BPRM_SET_CREDS;
+	case HK_BPRM_CHECK_SECURITY:
+		return HK_STR_BPRM_CHECK_SECURITY;
+	case HK_BPRM_COMMITTING_CREDS:
+		return HK_STR_BPRM_COMMITTING_CREDS;
+	case HK_SB_ALLOC_SECURITY:
+		return HK_STR_SB_ALLOC_SECURITY;
+	case HK_SB_FREE_SECURITY:
+		return HK_STR_SB_FREE_SECURITY;
+	case HK_SB_KERN_MOUNT:
+		return HK_STR_SB_KERN_MOUNT;
 	default:
 		return RL_STR_UNKNOWN;
 	}

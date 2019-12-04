@@ -233,6 +233,21 @@ static __always_inline void prepare_relation(const uint64_t type,
 	relation->msg_info.epoch = epoch;
 }
 
+static __always_inline int __write_hook(const uint64_t type)
+{
+	union prov_elt hook;
+	int rc = 0;
+
+	memset(&hook, 0, sizeof(union prov_elt));
+	prov_type(&hook) = type;
+	relation_identifier(&hook).bootid = prov_boot_id;
+	relation_identifier(&hook).machine_id = prov_machine_id;
+	hook.msg_info.epoch = epoch;
+
+	prov_write(&hook, sizeof(union prov_elt));
+	return rc;
+}
+
 /*!
  * @brief Write provenance relation to relay buffer.
  *
