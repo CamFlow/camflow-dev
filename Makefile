@@ -1,5 +1,9 @@
 kernel-version=4.20.11
 lsm-version=0.5.2
+lib-version=0.4.6
+config-version=0.4.4
+cli-version=0.1.13
+service-version=0.2.3
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -27,22 +31,22 @@ prepare_kernel:
 
 prepare_provenance:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/libprovenance.git
+	cd ./build && git clone -b v$(lib-version) --single-branch https://github.com/CamFlow/libprovenance.git
 	cd ./build/libprovenance && $(MAKE) prepare
 
 prepare_config:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camconfd.git
+	cd ./build && git clone -b v$(config-version) --single-branch https://github.com/CamFlow/camconfd.git
 	cd ./build/camconfd && $(MAKE) prepare
 
 prepare_cli:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflow-cli.git
+	cd ./build && git clone -b v$(cli-version) --single-branch https://github.com/CamFlow/camflow-cli.git
 	cd ./build/camflow-cli && $(MAKE) prepare
 
 prepare_service:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflowd.git
+	cd ./build && git clone -b v$(service-version) --single-branch https://github.com/CamFlow/camflowd.git
 	cd ./build/camflowd && $(MAKE) prepare
 
 prepare_smatch:
