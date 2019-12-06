@@ -240,7 +240,7 @@ static __always_inline int __write_hook(const uint64_t type)
 
 	memset(&hook, 0, sizeof(union prov_elt));
 	prov_type(&hook) = type;
-	relation_identifier(relation).id = prov_next_relation_id();
+	relation_identifier(&hook).id = prov_next_relation_id();
 	relation_identifier(&hook).boot_id = prov_boot_id;
 	relation_identifier(&hook).machine_id = prov_machine_id;
 	hook.msg_info.epoch = epoch;
