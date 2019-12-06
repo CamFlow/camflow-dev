@@ -273,6 +273,8 @@
 #define prov_is_associated(val) prov_is_type(val, RL_ASSOCIATED)
 #define prov_is_generated(val) prov_is_type(val, RL_GENERATED)
 #define prov_is_derived(val) prov_is_type(val, RL_DERIVED)
+#define prov_is_hook(val) prov_is_type(val, RL_HOOK)
+#define prov_is_hook_cont(val) prov_is_type(val, RL_HOOK_CONT)
 
 #define prov_is_close(val) (val == RL_TERMINATE_TASK \
 												 || val == RL_TERMINATE_PROC \
