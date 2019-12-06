@@ -1,9 +1,9 @@
 kernel-version=4.20.11
 lsm-version=0.5.2
-lib-version=0.4.6
+lib-version=0.4.6-patched
 config-version=0.4.4
 cli-version=0.1.13
-service-version=0.2.3
+service-version=0.2.3-patched
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
