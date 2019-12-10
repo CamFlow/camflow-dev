@@ -223,7 +223,6 @@ static ssize_t prov_read_node(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
 	struct provenance *tprov = provenance_task(current);
-	union long_prov_elt *node;
 
 	if (count < sizeof(struct disc_node_struct))
 		return -ENOMEM;
