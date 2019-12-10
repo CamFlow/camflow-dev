@@ -140,10 +140,6 @@ security/provenance/hooks.c:150:30: warning: cast removes address space '<asn:4>
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
   CC      security/provenance/fs.o
-security/provenance/fs.c: In function 'prov_read_node':
-security/provenance/fs.c:226:23: warning: unused variable 'node' [-Wunused-variable]
-  union long_prov_elt *node;
-                       ^
   CHECK   security/provenance/netfilter.c
 ./security/provenance/include/provenance_net.h:171:46: warning: incorrect type in assignment (different base types)
 ./security/provenance/include/provenance_net.h:171:46:    expected unsigned short [usertype] id
