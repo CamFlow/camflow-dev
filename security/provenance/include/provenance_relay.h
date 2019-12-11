@@ -164,4 +164,21 @@ static __always_inline int __write_relation(const uint64_t type,
 	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 	return rc;
 }
+
+static __always_inline int __write_hook(const uint64_t type)
+{
+	union prov_elt hook;
+	int rc = 0;
+
+	memset(&hook, 0, sizeof(union prov_elt));
+	prov_type(&hook) = type;
+	relation_identifier(&hook).id = prov_next_relation_id();
+	relation_identifier(&hook).boot_id = prov_boot_id;
+	relation_identifier(&hook).machine_id = prov_machine_id;
+	hook.msg_info.epoch = epoch;
+	hook.relation_info.task_id = current_provid();
+
+	prov_write(&hook, sizeof(union prov_elt));
+	return rc;
+}
 #endif

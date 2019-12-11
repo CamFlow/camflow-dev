@@ -208,6 +208,14 @@ static __always_inline int record_kernel_link(prov_entry_t *node)
 	}
 }
 
+static __always_inline int record_hook(const uint64_t type)
+{
+	int rc;
+
+	rc = __write_hook(type);
+	return rc;
+}
+
 static __always_inline int current_update_shst(struct provenance *cprov, bool read);
 
 /*!
