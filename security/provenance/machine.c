@@ -39,15 +39,3 @@ void init_prov_machine(void)
 	refresh_prov_machine();
 	call_provenance_alloc(prov_machine);
 }
-
-void print_prov_machine(void)
-{
-	pr_info("Provenance: version %d.%d.%d", prov_machine->machine_info.cam_major, prov_machine->machine_info.cam_minor, prov_machine->machine_info.cam_patch);
-	pr_info("Provenance: commit %s", prov_machine->machine_info.commit);
-	pr_info("Provenance: sysname %s", prov_machine->machine_info.utsname.sysname);
-	pr_info("Provenance: nodename %s", prov_machine->machine_info.utsname.nodename);
-	pr_info("Provenance: release %s", prov_machine->machine_info.utsname.release);
-	pr_info("Provenance: version %s", prov_machine->machine_info.utsname.version);
-	pr_info("Provenance: machine %s", prov_machine->machine_info.utsname.machine);
-	pr_info("Provenance: domainname %s", prov_machine->machine_info.utsname.domainname);
-}

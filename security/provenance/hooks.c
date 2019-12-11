@@ -2687,7 +2687,6 @@ static int __init provenance_init(void)
 #endif
 	task_init_provenance();
 	init_prov_machine();
-	print_prov_machine();
 	pr_info("Provenance: init propagate query.");
 	init_prov_propagate();
 	pr_info("Provenance: starting in epoch %d.", epoch);
