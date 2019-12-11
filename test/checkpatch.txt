@@ -2003,10 +2003,10 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 + * since persists provenance requires writing to disk (which means sleep is needed).
 
 WARNING:LONG_LINE_STRING: line over 80 characters
-#2694: FILE: security/provenance/hooks.c:2694:
+#2693: FILE: security/provenance/hooks.c:2693:
 +	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 
-total: 0 errors, 322 warnings, 2704 lines checked
+total: 0 errors, 322 warnings, 2703 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2027,35 +2027,7 @@ WARNING:LONG_LINE: line over 80 characters
 #36: FILE: security/provenance/machine.c:36:
 +	__memcpy_ss(prov_machine->machine_info.commit, PROV_COMMIT_MAX_LENGTH, CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
 
-WARNING:LONG_LINE: line over 80 characters
-#45: FILE: security/provenance/machine.c:45:
-+	pr_info("Provenance: version %d.%d.%d", prov_machine->machine_info.cam_major, prov_machine->machine_info.cam_minor, prov_machine->machine_info.cam_patch);
-
-WARNING:LONG_LINE: line over 80 characters
-#47: FILE: security/provenance/machine.c:47:
-+	pr_info("Provenance: sysname %s", prov_machine->machine_info.utsname.sysname);
-
-WARNING:LONG_LINE: line over 80 characters
-#48: FILE: security/provenance/machine.c:48:
-+	pr_info("Provenance: nodename %s", prov_machine->machine_info.utsname.nodename);
-
-WARNING:LONG_LINE: line over 80 characters
-#49: FILE: security/provenance/machine.c:49:
-+	pr_info("Provenance: release %s", prov_machine->machine_info.utsname.release);
-
-WARNING:LONG_LINE: line over 80 characters
-#50: FILE: security/provenance/machine.c:50:
-+	pr_info("Provenance: version %s", prov_machine->machine_info.utsname.version);
-
-WARNING:LONG_LINE: line over 80 characters
-#51: FILE: security/provenance/machine.c:51:
-+	pr_info("Provenance: machine %s", prov_machine->machine_info.utsname.machine);
-
-WARNING:LONG_LINE: line over 80 characters
-#52: FILE: security/provenance/machine.c:52:
-+	pr_info("Provenance: domainname %s", prov_machine->machine_info.utsname.domainname);
-
-total: 0 errors, 10 warnings, 53 lines checked
+total: 0 errors, 3 warnings, 41 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
