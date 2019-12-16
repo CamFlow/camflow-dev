@@ -40,9 +40,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cd ./scripts && make prepare'
@@ -66,9 +67,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -84,9 +86,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -102,9 +105,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -121,9 +125,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -140,9 +145,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -159,9 +165,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cd build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git'
@@ -188,9 +195,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install -y flawfinder'
       - run: 'apt-get install --reinstall make'
@@ -213,9 +221,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -240,9 +249,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'make prepare_smatch'
@@ -266,9 +276,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
+      - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
       - run: 'apt-get install -y ocaml-native-compilers ocaml-findlib menhir libmenhir-ocaml-dev libpcre-ocaml-dev libparmap-ocaml-dev texlive-fonts-extra'
       - run: 'apt-get install --reinstall make'
