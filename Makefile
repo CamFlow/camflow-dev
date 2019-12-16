@@ -1,6 +1,7 @@
 kernel-version=5.3.15
 lsm-version=0.6.4
 arch=x86_64
+michael-version=dev-michael
 
 cont-email != $(git log --format="%ae" HEAD^!)
 cont-name != $(git log --format="%ae" HEAD^!)
@@ -27,7 +28,7 @@ prepare_kernel:
 
 prepare_provenance:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/libprovenance.git
+	cd ./build && git clone -b $(michael-version) https://github.com/CamFlow/libprovenance.git
 	cd ./build/libprovenance && $(MAKE) prepare
 
 prepare_config:
@@ -42,7 +43,7 @@ prepare_cli:
 
 prepare_service:
 	mkdir -p build
-	cd ./build && git clone https://github.com/CamFlow/camflowd.git
+	cd ./build && git clone -b $(michael-version) https://github.com/CamFlow/camflowd.git
 	cd ./build/camflowd && $(MAKE) prepare
 
 prepare_smatch:

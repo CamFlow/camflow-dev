@@ -1,4 +1,4 @@
-prepare: prepare_gcc prepare_gpp prepare_m4 prepare_callgraph
+prepare: prepare_gcc prepare_gpp prepare_m4 prepare_callgraph prepare_profiler
 
 prepare_gcc:
 	wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-4.8/gcc-4.8-base_4.8.5-4ubuntu2_amd64.deb
@@ -39,7 +39,11 @@ prepare_callgraph:
 	mkdir -p ../build
 	cd ../build && git clone https://github.com/CamFlow/callgraphs.git
 
-config: config_callgraph config_kernel config_sqlite
+prepare_profiler:
+	mkdir -p ../build
+	cd ../build && git clone https://${GH_XH_TOKEN}@github.com/michael-hahn/kernel_profiler.git
+
+config: config_callgraph config_profiler config_kernel config_sqlite
 
 config_callgraph:
 	cd ../build/callgraphs && ls
@@ -47,6 +51,13 @@ config_callgraph:
 	cd ../build/callgraphs && ./configure
 	cd ../build/callgraphs && $(MAKE)
 	cd ../build/callgraphs && sudo $(MAKE) install
+
+config_profiler:
+	cd ../build/kernel_profiler && ls
+	cd ../build/kernel_profiler && autoreconf --install -vv
+	cd ../build/kernel_profiler && ./configure
+	cd ../build/kernel_profiler && $(MAKE)
+	cd ../build/kernel_profiler && sudo $(MAKE) install
 
 config_kernel:
 	cp -f ./.config ../build/linux-stable/
@@ -65,7 +76,7 @@ config_sqlite:
 	cd ../build/linux-stable && ./create_db.sh
 
 compile:
-	cd ../build/linux-stable && $(MAKE) CC=gcc HOSTCC=gcc EXTRA_CFLAGS="-fplugin=kayrebt_callgraphs -fplugin-arg-kayrebt_callgraphs-dbfile=db.sqlite"
+	cd ../build/linux-stable && $(MAKE) CC=gcc HOSTCC=gcc EXTRA_CFLAGS="-fplugin=kayrebt_pathexaminer2 -fplugin=kayrebt_callgraphs -fplugin-arg-kayrebt_callgraphs-dbfile=db.sqlite"
 
 run: run_analysis
 

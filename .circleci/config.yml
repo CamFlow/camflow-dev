@@ -304,7 +304,7 @@ jobs:
             echo "Cloning..."
             git clone https://github.com/camflow/camflow-dev
             cd camflow-dev
-            git checkout dev
+            git checkout dev-michael
             echo "Copying..."
             mkdir -p docs
             mkdir -p scripts
@@ -322,7 +322,7 @@ jobs:
             if ! git diff-index --exit-code --quiet HEAD; then
               echo 'Committing...'
               git commit -a -m "[ci skip] CircleCI automated documentation generation and testing, based on commit ${CIRCLE_SHA1}"
-              git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git dev
+              git push -q https://${GH_TOKEN}@github.com/camflow/camflow-dev.git dev-michael
             else
               echo 'Nothing to commit.'
             fi
@@ -386,7 +386,7 @@ workflows:
           filters:
             branches:
               only:
-                - dev
+                - dev-michael
           requires:
             - doc
             - sparse
