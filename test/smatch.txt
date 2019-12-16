@@ -356,15 +356,15 @@ security/provenance/hooks.c:2135 provenance_socket_listen() warn: inconsistent r
 security/provenance/hooks.c:2135 provenance_socket_listen() warn: inconsistent returns 'spin_lock:'.
   Locked on:   line 2135
   Unlocked on: line 2129
-security/provenance/hooks.c:2241 provenance_socket_sendmsg_always() warn: inconsistent returns 'spin_lock:&iprova->lock'.
-  Locked on:   line 2219
-  Unlocked on: line 2241
-security/provenance/hooks.c:2310 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:&iprov->lock'.
-  Locked on:   line 2287
-  Unlocked on: line 2310
-security/provenance/hooks.c:2310 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:'.
-  Locked on:   line 2310
-  Unlocked on: line 2287
+security/provenance/hooks.c:2242 provenance_socket_sendmsg_always() warn: inconsistent returns 'spin_lock:&iprova->lock'.
+  Locked on:   line 2220
+  Unlocked on: line 2242
+security/provenance/hooks.c:2312 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:&iprov->lock'.
+  Locked on:   line 2289
+  Unlocked on: line 2312
+security/provenance/hooks.c:2312 provenance_socket_recvmsg_always() warn: inconsistent returns 'spin_lock:'.
+  Locked on:   line 2312
+  Unlocked on: line 2289
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
