@@ -16,9 +16,10 @@ jobs:
               echo 'Build environment was cached.'
             else
               echo 'Build environment was not cached.'
-              add-apt-repository ppa:sri-csl/formal-methods -y
               apt-get update -qq
               apt-get install -y sudo
+              apt-get install software-properties-common -y
+              add-apt-repository ppa:sri-csl/formal-methods -y
               apt-get update -qq
               apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev
               make prepare_kernel
@@ -42,6 +43,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -69,6 +71,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -88,6 +91,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -107,6 +111,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -127,6 +132,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -147,6 +153,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -167,6 +174,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -197,6 +205,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -223,6 +232,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -251,6 +261,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
@@ -278,6 +289,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
+      - run: 'apt-get install software-properties-common -y'
       - run: 'add-apt-repository ppa:sri-csl/formal-methods -y'
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev yices2 yices2-dev'
