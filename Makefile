@@ -27,7 +27,7 @@ prepare_kernel:
 
 prepare_provenance:
 	mkdir -p build
-	cd ./build && git clone https://github.com/bstelea/libprovenance.git
+	cd ./build && git clone https://github.com/CamFlow/libprovenance.git
 	cd ./build/libprovenance && $(MAKE) prepare
 
 prepare_config:
