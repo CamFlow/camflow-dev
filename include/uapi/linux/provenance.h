@@ -31,7 +31,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "510713cc22230a0c3c373a36afdb9d48f57a316e"
+#define CAMFLOW_COMMIT "5c56169c25fe869aa46f8f84b690e4822b0ce91d"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -83,7 +83,7 @@ struct packet_identifier {
 	int iv;
 };
 
-typedef struct ipv6_packet_identifier {
+struct ipv6_packet_identifier {
 	uint64_t type;
 	struct in6_addr snd_ip;
 	struct in6_addr rcv_ip;
@@ -92,15 +92,20 @@ typedef struct ipv6_packet_identifier {
 	uint8_t nexthdr;
 	uint32_t seq;
 	int iv;
-} ipv6_packet_identifier;
+};
 
-#define PROV_IDENTIFIER_BUFFER_LENGTH    sizeof(struct node_identifier)
+#define MAX2(a, b) ((a > b) ? (a) : (b))
+#define MAX4(a, b, c, d) MAX2(MAX2(a, b), MAX2(c, d))
+#define PROV_IDENTIFIER_BUFFER_LENGTH MAX4(sizeof(struct node_identifier),     \
+					   sizeof(struct relation_identifier), \
+					   sizeof(struct packet_identifier),   \
+					   sizeof(struct ipv6_packet_identifier))
 
 union prov_identifier {
 	struct node_identifier node_id;
 	struct relation_identifier relation_id;
 	struct packet_identifier packet_id;
-	ipv6_packet_identifier ipv6_packet_id;
+	struct ipv6_packet_identifier ipv6_packet_id;
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 };
 

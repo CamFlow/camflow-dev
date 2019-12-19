@@ -114,7 +114,7 @@ static __always_inline void __extract_tcp_info(struct sk_buff *skb,
 
 static __always_inline void __extract_ipv6_tcp_info(struct sk_buff *skb,
 						    int offset,
-						    ipv6_packet_identifier *id)
+						    struct ipv6_packet_identifier *id)
 {
 	struct tcphdr _tcph;
 	struct tcphdr *th;
@@ -159,7 +159,7 @@ static __always_inline void __extract_udp_info(struct sk_buff *skb,
 
 static __always_inline void __extract_ipv6_udp_info(struct sk_buff *skb,
 						    int offset,
-						    ipv6_packet_identifier *id)
+						    struct ipv6_packet_identifier *id)
 {
 	struct udphdr _udph;
 	struct udphdr *uh;
