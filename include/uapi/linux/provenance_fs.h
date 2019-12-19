@@ -39,6 +39,8 @@
  #define PROV_PROCESS_FILE                       "/sys/kernel/security/provenance/process"
  #define PROV_IPV4_INGRESS_FILE                  "/sys/kernel/security/provenance/ipv4_ingress"
  #define PROV_IPV4_EGRESS_FILE                   "/sys/kernel/security/provenance/ipv4_egress"
+ #define PROV_IPV6_INGRESS_FILE                  "/sys/kernel/security/provenance/ipv6_ingress"
+ #define PROV_IPV6_EGRESS_FILE                   "/sys/kernel/security/provenance/ipv6_egress"
  #define PROV_SECCTX                             "/sys/kernel/security/provenance/secctx"
  #define PROV_SECCTX_FILTER                      "/sys/kernel/security/provenance/secctx_filter"
  #define PROV_NS_FILTER                          "/sys/kernel/security/provenance/ns"
@@ -84,6 +86,13 @@ struct prov_ipv4_filter {
 	uint8_t op;
 	uint64_t taint;
 };
+
+typedef struct prov_ipv6_filter {
+	struct in6_addr ip;
+	uint16_t port;
+	uint8_t op;
+	uint64_t taint;
+} prov_ipv6_filter;
 
 struct secinfo {
 	uint32_t secid;

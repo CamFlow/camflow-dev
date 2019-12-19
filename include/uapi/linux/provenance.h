@@ -19,6 +19,7 @@
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
+#include <linux/in6.h>
 
 #define xstr(s)         str(s)
 #define str(s)          # s
@@ -42,7 +43,8 @@
 #define relation_identifier(relation)           ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)               ((node)->node_info.identifier)
 #define packet_identifier(packet)               ((packet)->pck_info.identifier.packet_id)
-#define packet_info(packet)                                                                                     ((packet)->pck_info)
+#define ipv6_packet_identifier(packet)          ((packet)->pck_info.identifier.ipv6_packet_id)
+#define packet_info(packet)                     ((packet)->pck_info)
 #define node_secid(node)                        ((node)->node_info.secid)
 #define node_uid(node)                          ((node)->node_info.uid)
 #define node_gid(node)                          ((node)->node_info.gid)
@@ -78,7 +80,19 @@ struct packet_identifier {
 	uint16_t rcv_port;
 	uint8_t protocol;
 	uint32_t seq;
+	int iv;
 };
+
+typedef struct ipv6_packet_identifier {
+	uint64_t type;
+	struct in6_addr snd_ip;
+	struct in6_addr rcv_ip;
+	uint16_t snd_port;
+	uint16_t rcv_port;
+	uint8_t nexthdr;
+	uint32_t seq;
+	int iv;
+} ipv6_packet_identifier;
 
 #define PROV_IDENTIFIER_BUFFER_LENGTH    sizeof(struct node_identifier)
 
@@ -86,6 +100,7 @@ union prov_identifier {
 	struct node_identifier node_id;
 	struct relation_identifier relation_id;
 	struct packet_identifier packet_id;
+	ipv6_packet_identifier ipv6_packet_id;
 	uint8_t buffer[PROV_IDENTIFIER_BUFFER_LENGTH];
 };
 

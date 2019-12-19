@@ -81,6 +81,7 @@ static inline struct provenance *get_sk_provenance(struct sock *sk)
 }
 
 #define ihlen(ih)    (ih->ihl * 4)
+#define IPV6_HDR 40
 
 /*!
  * @brief Extract TCP header information and store it in packet_identifier struct of provenance entry.
@@ -111,6 +112,23 @@ static __always_inline void __extract_tcp_info(struct sk_buff *skb,
 	id->seq = th->seq;
 }
 
+static __always_inline void __extract_ipv6_tcp_info(struct sk_buff *skb,
+						    int offset,
+						    ipv6_packet_identifier *id)
+{
+	struct tcphdr _tcph;
+	struct tcphdr *th;
+	int tcpoff;
+
+	tcpoff = offset + IPV6_HDR;    // Point to tcp packet.
+	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
+	if (!th)
+		return;
+	id->snd_port = th->source;
+	id->rcv_port = th->dest;
+	id->seq = th->seq;
+}
+
 /*!
  * @brief Extract UPD header information and store it in packet_identifier struct of provenance entry.
  *
@@ -132,6 +150,22 @@ static __always_inline void __extract_udp_info(struct sk_buff *skb,
 	if (ntohs(ih->frag_off) & IP_OFFSET)
 		return;
 	udpoff = offset + ihlen(ih);  // point to udp packet
+	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
+	if (!uh)
+		return;
+	id->snd_port = uh->source;
+	id->rcv_port = uh->dest;
+}
+
+static __always_inline void __extract_ipv6_udp_info(struct sk_buff *skb,
+						    int offset,
+						    ipv6_packet_identifier *id)
+{
+	struct udphdr _udph;
+	struct udphdr *uh;
+	int udpoff;
+
+	udpoff = offset + IPV6_HDR;  // point to udp packet
 	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
 	if (!uh)
 		return;
@@ -172,6 +206,7 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_
 	packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
 	packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
 	packet_identifier(prov_elt(prov)).protocol = ih->protocol;
+	packet_identifier(prov_elt(prov)).iv = 4;
 	packet_info(prov_elt(prov)).length = ih->tot_len;
 
 	switch (ih->protocol) {
@@ -188,16 +223,63 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_
 	return prov;
 }
 
+static __always_inline struct provenance *provenance_alloc_with_ipv6_skb(uint64_t type, struct sk_buff *skb)
+{
+	struct provenance *prov;
+	int offset;
+	struct ipv6hdr _iph;
+	struct ipv6hdr *ih;
+
+	offset = skb_network_offset(skb);
+	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);      // We obtain the IP header.
+	if (!ih)
+		return NULL;
+
+	prov =  kmem_cache_zalloc(provenance_cache, GFP_ATOMIC);
+
+	ipv6_packet_identifier(prov_elt(prov)).type = type;
+	// Collect IP element of prov identifier.
+	ipv6_packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
+	ipv6_packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
+	ipv6_packet_identifier(prov_elt(prov)).nexthdr = ih->nexthdr;
+	ipv6_packet_identifier(prov_elt(prov)).iv = 6;
+	packet_info(prov_elt(prov)).length = IPV6_HDR;
+
+	switch (ih->nexthdr) {
+	case IPPROTO_TCP:
+		__extract_ipv6_tcp_info(skb, offset, &ipv6_packet_identifier(prov_elt(prov)));
+		break;
+	case IPPROTO_UDP:
+		__extract_ipv6_udp_info(skb, offset, &ipv6_packet_identifier(prov_elt(prov)));
+		break;
+	default:
+		break;
+	}
+	call_provenance_alloc(prov_entry(prov));
+	return prov;
+}
+
 struct ipv4_filters {
 	struct list_head list;
 	struct prov_ipv4_filter filter;
 };
 
+typedef struct ipv6_filters {
+	struct list_head list;
+	prov_ipv6_filter filter;
+} ipv6_filters;
+
 extern struct list_head ingress_ipv4filters;
 extern struct list_head egress_ipv4filters;
 
+extern struct list_head ingress_ipv6filters;
+extern struct list_head egress_ipv6filters;
+
 #define prov_ipv4_ingressOP(ip, port)           prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 #define prov_ipv4_egressOP(ip, port)            prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
+
+#define prov_ipv6_ingressOP(ip, port)           prov_ipv6_whichOP(&ingress_ipv6filters, ip, port)
+#define prov_ipv6_egressOP(ip, port)            prov_ipv6_whichOP(&egress_ipv6filters, ip, port)
 
 /*!
  * @brief Returns op value of the filter of a specific IP and/or port.
@@ -219,6 +301,21 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))     // Match IP
+			if (tmp->filter.port == 0 || tmp->filter.port == port)          // Any port or a specific match
+				return tmp->filter.op;
+	}
+	return 0;
+}
+
+static inline uint8_t prov_ipv6_whichOP(struct list_head *filters, struct in6_addr ip, uint32_t port)
+{
+	struct list_head *listentry, *listtmp;
+	ipv6_filters *tmp;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, ipv6_filters, list);
+		if (ntohl(ip.s6_addr32[2]) == ntohl(tmp->filter.ip.s6_addr32[2]) &&
+		    ntohl(ip.s6_addr32[3]) == ntohl(tmp->filter.ip.s6_addr32[3]))       // Match IP
 			if (tmp->filter.port == 0 || tmp->filter.port == port)          // Any port or a specific match
 				return tmp->filter.op;
 	}
@@ -254,6 +351,24 @@ static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_fi
 	return 0;
 }
 
+static inline uint8_t prov_ipv6_delete(struct list_head *filters, ipv6_filters *f)
+{
+	struct list_head *listentry, *listtmp;
+	ipv6_filters *tmp;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, ipv6_filters, list);
+		if (ntohl(tmp->filter.ip.s6_addr32[2]) == ntohl(f->filter.ip.s6_addr32[2]) &&
+		    ntohl(tmp->filter.ip.s6_addr32[3]) == ntohl(f->filter.ip.s6_addr32[3]) &&
+		    tmp->filter.port == f->filter.port) {
+			list_del(listentry);
+			kfree(tmp);
+			return 0;       // Should only get one.
+		}
+	}
+	return 0;
+}
+
 /*!
  * @brief Add or update an element in the filter list that matches a specific filter.
  *
@@ -274,6 +389,24 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 		tmp = list_entry(listentry, struct ipv4_filters, list);
 		if (tmp->filter.mask == f->filter.mask &&
 		    tmp->filter.ip == f->filter.ip &&
+		    tmp->filter.port == f->filter.port) {
+			tmp->filter.op |= f->filter.op;
+			return 0; // you should only get one
+		}
+	}
+	list_add_tail(&(f->list), filters); // If not already in the list, we add it.
+	return 0;
+}
+
+static inline uint8_t prov_ipv6_add_or_update(struct list_head *filters, ipv6_filters *f)
+{
+	struct list_head *listentry, *listtmp;
+	ipv6_filters *tmp;
+
+	list_for_each_safe(listentry, listtmp, filters) {
+		tmp = list_entry(listentry, ipv6_filters, list);
+		if (ntohl(tmp->filter.ip.s6_addr32[2]) == ntohl(f->filter.ip.s6_addr32[2]) &&
+		    ntohl(tmp->filter.ip.s6_addr32[3]) == ntohl(f->filter.ip.s6_addr32[3]) &&
 		    tmp->filter.port == f->filter.port) {
 			tmp->filter.op |= f->filter.op;
 			return 0; // you should only get one
@@ -350,11 +483,17 @@ static __always_inline int check_track_socket(const struct sockaddr *address,
 					      struct provenance *iprov)
 {
 	struct sockaddr_in *ipv4_addr;
+	struct sockaddr_in6 *ipv6_addr;
 	uint8_t op;
 
-	if (address->sa_family == PF_INET) {
-		ipv4_addr = (struct sockaddr_in *)address;
-		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+	if (address->sa_family == PF_INET || address->sa_family == PF_INET6) {
+		if (address->sa_family == PF_INET) {
+			ipv4_addr = (struct sockaddr_in *)address;
+			op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		} else {
+			ipv6_addr = (struct sockaddr_in6 *)address;
+			op = prov_ipv6_egressOP(ipv6_addr->sin6_addr, ipv6_addr->sin6_port);
+		}
 		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));

@@ -2211,7 +2211,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	unsigned long irqflags;
 	int rc = 0;
 
-	if (family != PF_INET)
+	if (family != PF_INET && family != PF_INET6)
 		return 0;
 
 	iprov = get_sk_inode_provenance(sk);
@@ -2219,7 +2219,10 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 		return -ENOMEM;
 
 	if (provenance_is_tracked(prov_elt(iprov))) {
-		pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
+		if (family == PF_INET)
+			pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
+		else
+			pckprov = provenance_alloc_with_ipv6_skb(ENT_PACKET, skb);
 
 		if (!pckprov)
 			return -ENOMEM;
@@ -2588,6 +2591,8 @@ LIST_HEAD(long_buffer_list);
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
+LIST_HEAD(ingress_ipv6filters);
+LIST_HEAD(egress_ipv6filters);
 LIST_HEAD(secctx_filters);
 LIST_HEAD(user_filters);
 LIST_HEAD(group_filters);
