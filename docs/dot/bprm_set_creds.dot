@@ -6,6 +6,8 @@ path -> inode[fontsize = 8,label = named]
 
 process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
+path -> process_memory[fontsize = 8,label = named]
+
 inode -> process_memory[fontsize = 8,label = exec]
 
 process_memory -> process_memory[fontsize = 8,label = version_entity]

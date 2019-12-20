@@ -1134,150 +1134,150 @@ WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
 +	else {
 
 WARNING:LONG_LINE: line over 80 characters
-#219: FILE: security/provenance/include/provenance_record.h:219:
+#235: FILE: security/provenance/include/provenance_record.h:235:
 +static __always_inline int current_update_shst(struct provenance *cprov, bool read);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#222: FILE: security/provenance/include/provenance_record.h:222:
+#238: FILE: security/provenance/include/provenance_record.h:238:
 + * @brief Record "used" relation from entity provenance node to activity provenance node, including its memory state.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#225: FILE: security/provenance/include/provenance_record.h:225:
+#241: FILE: security/provenance/include/provenance_record.h:241:
 + * Unless all nodes involved (entity, activity, activity_mem) are set not to be tracked and prov_all is also turned off,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#229: FILE: security/provenance/include/provenance_record.h:229:
+#245: FILE: security/provenance/include/provenance_record.h:245:
 + * 1. Whatever relation between entity and activity given by the argument "type", and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#231: FILE: security/provenance/include/provenance_record.h:231:
+#247: FILE: security/provenance/include/provenance_record.h:247:
 + * If activity_mem has memory mapped files, a SH_WRITE relation may be captured (see function definition of "current_update_shst").
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#232: FILE: security/provenance/include/provenance_record.h:232:
+#248: FILE: security/provenance/include/provenance_record.h:248:
 + * @param type The type of relation (in the category of "used") between entity and activity.
 
 WARNING:LONG_LINE: line over 80 characters
-#267: FILE: security/provenance/include/provenance_record.h:267:
+#283: FILE: security/provenance/include/provenance_record.h:283:
 +	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 
 WARNING:LONG_LINE: line over 80 characters
-#270: FILE: security/provenance/include/provenance_record.h:270:
+#286: FILE: security/provenance/include/provenance_record.h:286:
 +	rc = record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#276: FILE: security/provenance/include/provenance_record.h:276:
+#292: FILE: security/provenance/include/provenance_record.h:292:
 +	rc = record_relation(RL_PROC_WRITE, prov_entry(activity), prov_entry(activity_mem), NULL, 0);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#283: FILE: security/provenance/include/provenance_record.h:283:
+#299: FILE: security/provenance/include/provenance_record.h:299:
 + * @brief Record "used" relation from entity provenance node to activity provenance node. This function is a stripped-down version of "uses" function above.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#285: FILE: security/provenance/include/provenance_record.h:285:
+#301: FILE: security/provenance/include/provenance_record.h:301:
 + * This function applies to only "used" relation between two provenance nodes and does almost the same as the above "uses" function.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#287: FILE: security/provenance/include/provenance_record.h:287:
+#303: FILE: security/provenance/include/provenance_record.h:303:
 + * @param type The type of relation (in the category of "used") between entity and activity.
 
 WARNING:LONG_LINE: line over 80 characters
-#316: FILE: security/provenance/include/provenance_record.h:316:
+#332: FILE: security/provenance/include/provenance_record.h:332:
 +	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 
 WARNING:LONG_LINE: line over 80 characters
-#318: FILE: security/provenance/include/provenance_record.h:318:
+#334: FILE: security/provenance/include/provenance_record.h:334:
 +	rc = record_relation(type, prov_entry(entity), prov_entry(activity), file, flags);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#325: FILE: security/provenance/include/provenance_record.h:325:
+#341: FILE: security/provenance/include/provenance_record.h:341:
 + * @brief Record "generated" relation from activity provenance node (including its memory state) to entity provenance node.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#327: FILE: security/provenance/include/provenance_record.h:327:
+#343: FILE: security/provenance/include/provenance_record.h:343:
 + * This function applies to only "generated" relation between two provenance nodes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#328: FILE: security/provenance/include/provenance_record.h:328:
+#344: FILE: security/provenance/include/provenance_record.h:344:
 + * Unless all nodes involved (entity, activity, activity_mem) are set not to be tracked and prov_all is also turned off,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#333: FILE: security/provenance/include/provenance_record.h:333:
+#349: FILE: security/provenance/include/provenance_record.h:349:
 + * 1. Whatever relation between activity and entity given by the argument "type", and
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#334: FILE: security/provenance/include/provenance_record.h:334:
+#350: FILE: security/provenance/include/provenance_record.h:350:
 + * If activity_mem has memory mapped files, a SH_READ relation may be captured (see function definition of "current_update_shst").
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#335: FILE: security/provenance/include/provenance_record.h:335:
+#351: FILE: security/provenance/include/provenance_record.h:351:
 + * @param type The type of relation (in the category of "generated") between activity and entity.
 
 WARNING:LONG_LINE: line over 80 characters
-#376: FILE: security/provenance/include/provenance_record.h:376:
+#392: FILE: security/provenance/include/provenance_record.h:392:
 +	if (!should_record_relation(type, prov_entry(activity), prov_entry(entity)))
 
 WARNING:LONG_LINE: line over 80 characters
-#382: FILE: security/provenance/include/provenance_record.h:382:
+#398: FILE: security/provenance/include/provenance_record.h:398:
 +	rc = record_relation(RL_PROC_READ, prov_entry(activity_mem), prov_entry(activity), NULL, 0);
 
 WARNING:LONG_LINE: line over 80 characters
-#388: FILE: security/provenance/include/provenance_record.h:388:
+#404: FILE: security/provenance/include/provenance_record.h:404:
 +	rc = record_relation(type, prov_entry(activity), prov_entry(entity), file, flags);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#393: FILE: security/provenance/include/provenance_record.h:393:
+#409: FILE: security/provenance/include/provenance_record.h:409:
 + * @brief Record "derived" relation from one entity provenance node to another entity provenance node.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#395: FILE: security/provenance/include/provenance_record.h:395:
+#411: FILE: security/provenance/include/provenance_record.h:411:
 + * This function applies to only "derived" relation between two entity provenance nodes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#396: FILE: security/provenance/include/provenance_record.h:396:
+#412: FILE: security/provenance/include/provenance_record.h:412:
 + * Unless both nodes involved (from, to) are set not to be tracked and prov_all is also turned off,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#399: FILE: security/provenance/include/provenance_record.h:399:
+#415: FILE: security/provenance/include/provenance_record.h:415:
 + * The relation is whatever relation between one entity to another given by the argument "type".
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#400: FILE: security/provenance/include/provenance_record.h:400:
+#416: FILE: security/provenance/include/provenance_record.h:416:
 + * @param type The type of relation (in the category of "derived") between two entities.
 
 WARNING:LONG_LINE: line over 80 characters
-#430: FILE: security/provenance/include/provenance_record.h:430:
+#446: FILE: security/provenance/include/provenance_record.h:446:
 +	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#434: FILE: security/provenance/include/provenance_record.h:434:
+#450: FILE: security/provenance/include/provenance_record.h:450:
 + * @brief Record "informed" relation from one activity provenance node to another activity provenance node.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#436: FILE: security/provenance/include/provenance_record.h:436:
+#452: FILE: security/provenance/include/provenance_record.h:452:
 + * This function applies to only "informed" relation between two activity provenance nodes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#437: FILE: security/provenance/include/provenance_record.h:437:
+#453: FILE: security/provenance/include/provenance_record.h:453:
 + * Unless both nodes involved (from, to) are set not to be tracked and prov_all is also turned off,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#440: FILE: security/provenance/include/provenance_record.h:440:
+#456: FILE: security/provenance/include/provenance_record.h:456:
 + * The relation is whatever relation between one activity node to another given by the argument "type".
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#441: FILE: security/provenance/include/provenance_record.h:441:
+#457: FILE: security/provenance/include/provenance_record.h:457:
 + * @param type The type of relation (in the category of "informed") between two activities.
 
 WARNING:LONG_LINE: line over 80 characters
-#478: FILE: security/provenance/include/provenance_record.h:478:
+#494: FILE: security/provenance/include/provenance_record.h:494:
 +	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#500: FILE: security/provenance/include/provenance_record.h:500:
+#516: FILE: security/provenance/include/provenance_record.h:516:
 +	rc = record_relation(RL_LOAD_FILE, prov_entry(entity), prov_entry(activity), file, 0);
 
-total: 0 errors, 74 warnings, 513 lines checked
+total: 0 errors, 74 warnings, 529 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.

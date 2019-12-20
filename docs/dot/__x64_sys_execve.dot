@@ -6,6 +6,8 @@ path -> inode[fontsize = 8,label = named]
 
 process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
+path -> process_memory[fontsize = 8,label = named]
+
 inode -> process_memory[fontsize = 8,label = exec]
 
 process_memory -> process_memory[fontsize = 8,label = version_entity]
@@ -21,8 +23,6 @@ task -> process_memory[fontsize = 8,label = clone_mem]
 task -> task[fontsize = 8,label = version_activity]
 
 inode -> process_memory[fontsize = 8,label = sh_read]
-
-path -> process_memory[fontsize = 8,label = named]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
