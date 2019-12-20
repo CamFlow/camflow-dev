@@ -208,9 +208,25 @@ static __always_inline int record_kernel_link(prov_entry_t *node)
 	}
 }
 
-static __always_inline int record_hook(const uint64_t type)
+static __always_inline int record_hook(const uint64_t type,
+				       struct provenance *activity)
 {
 	int rc;
+
+	BUILD_BUG_ON(!prov_is_hook(type));
+
+	if (!activity)
+		return 0;
+	
+	// Check if the nodes match some capture options.
+	apply_target(prov_elt(activity));
+
+	if (provenance_is_opaque(prov_elt(activity)))
+		return 0;
+
+	if (!provenance_is_tracked(prov_elt(activity))
+	    && !prov_policy.prov_all)
+		return 0;
 
 	rc = __write_hook(type);
 	return rc;
