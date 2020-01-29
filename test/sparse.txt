@@ -22,17 +22,27 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
-  UPD     include/config/kernel.release
   WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
+  WRAP    arch/x86/include/generated/uapi/asm/errno.h
+  WRAP    arch/x86/include/generated/uapi/asm/fcntl.h
+  WRAP    arch/x86/include/generated/uapi/asm/ioctl.h
+  WRAP    arch/x86/include/generated/uapi/asm/ioctls.h
+  WRAP    arch/x86/include/generated/uapi/asm/ipcbuf.h
+  WRAP    arch/x86/include/generated/uapi/asm/param.h
   WRAP    arch/x86/include/generated/uapi/asm/poll.h
+  WRAP    arch/x86/include/generated/uapi/asm/resource.h
   WRAP    arch/x86/include/generated/uapi/asm/socket.h
   WRAP    arch/x86/include/generated/uapi/asm/sockios.h
+  WRAP    arch/x86/include/generated/uapi/asm/termbits.h
+  WRAP    arch/x86/include/generated/uapi/asm/termios.h
+  WRAP    arch/x86/include/generated/uapi/asm/types.h
   WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
   CHECK   scripts/mod/empty.c
@@ -65,6 +75,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/subcmd-config.o
   LD       /root/circulate/build/linux-stable/tools/objtool/libsubcmd-in.o
   AR       /root/circulate/build/linux-stable/tools/objtool/libsubcmd.a
+  MKDIR    /root/circulate/build/linux-stable/tools/objtool/arch/x86/lib/
   GEN      /root/circulate/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
   CC       /root/circulate/build/linux-stable/tools/objtool/arch/x86/decode.o
   LD       /root/circulate/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
@@ -80,6 +91,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/libctype.o
   CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
+/root/circulate/build/linux-stable/tools/objtool
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
   CHECK   security/provenance/relay.c
 security/provenance/relay.c:37:1: warning: symbol 'relay_list' was not declared. Should it be static?
