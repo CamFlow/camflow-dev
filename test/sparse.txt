@@ -94,20 +94,20 @@ scripts/kconfig/conf  --syncconfig Kconfig
 /root/circulate/build/linux-stable/tools/objtool
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
   CHECK   security/provenance/relay.c
-security/provenance/relay.c:37:1: warning: symbol 'relay_list' was not declared. Should it be static?
-security/provenance/relay.c:84:42: warning: incorrect type in initializer (different address spaces)
-security/provenance/relay.c:84:42:    expected struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:84:42:    got struct rchan_buf *
-security/provenance/relay.c:87:38: warning: incorrect type in argument 1 (different address spaces)
-security/provenance/relay.c:87:38:    expected struct rchan_buf *buf
-security/provenance/relay.c:87:38:    got struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:205:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
+security/provenance/relay.c:40:1: warning: symbol 'relay_list' was not declared. Should it be static?
+security/provenance/relay.c:87:42: warning: incorrect type in initializer (different address spaces)
+security/provenance/relay.c:87:42:    expected struct rchan_buf [noderef] <asn:3> *buf
+security/provenance/relay.c:87:42:    got struct rchan_buf *
+security/provenance/relay.c:90:38: warning: incorrect type in argument 1 (different address spaces)
+security/provenance/relay.c:90:38:    expected struct rchan_buf *buf
+security/provenance/relay.c:90:38:    got struct rchan_buf [noderef] <asn:3> *buf
+security/provenance/relay.c:208:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
-security/provenance/hooks.c:109:22: warning: incorrect type in assignment (different address spaces)
-security/provenance/hooks.c:109:22:    expected struct cred const *cred
-security/provenance/hooks.c:109:22:    got struct cred const [noderef] <asn:4> *real_cred
-security/provenance/hooks.c:150:30: warning: cast removes address space '<asn:4>' of expression
+security/provenance/hooks.c:112:22: warning: incorrect type in assignment (different address spaces)
+security/provenance/hooks.c:112:22:    expected struct cred const *cred
+security/provenance/hooks.c:112:22:    got struct cred const [noderef] <asn:4> *real_cred
+security/provenance/hooks.c:153:30: warning: cast removes address space '<asn:4>' of expression
 ./security/provenance/include/provenance_net.h:357:22: warning: incorrect type in argument 2 (different base types)
 ./security/provenance/include/provenance_net.h:357:22:    expected unsigned int [usertype] ip
 ./security/provenance/include/provenance_net.h:357:22:    got restricted __be32 [usertype] s_addr
@@ -182,7 +182,7 @@ security/provenance/hooks.c:150:30: warning: cast removes address space '<asn:4>
 ./security/provenance/include/provenance_net.h:139:22:    got restricted __be16 [usertype] dest
   CC      security/provenance/netfilter.o
   CHECK   security/provenance/propagate.c
-security/provenance/propagate.c:28:31: warning: symbol 'hooks' was not declared. Should it be static?
+security/provenance/propagate.c:31:31: warning: symbol 'hooks' was not declared. Should it be static?
   CC      security/provenance/propagate.o
   CHECK   security/provenance/type.c
   CC      security/provenance/type.o
