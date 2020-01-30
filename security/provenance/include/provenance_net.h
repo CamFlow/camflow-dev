@@ -74,25 +74,10 @@ static inline struct provenance *get_sk_provenance(struct sock *sk)
 {
 	struct provenance *pprov = sk->sk_provenance;
 
-	return pprov;
-}
-
-/*!
- * @brief Return the provenance entry pointer of sock.
- *
- * The provenance information is stored in the @sock->sk struct.
- * Therefore, we simply call the function sk_provenance.
- * @param sock The socket structure.
- * @return The provenance entry pointer.
- *
- */
-static inline struct provenance *get_socket_provenance(struct socket *sock)
-{
-	struct sock *sk = sock->sk;
-
-	if (!sk)
+	if (node_type(prov_elt(pprov)) != ACT_TASK)
 		return NULL;
-	return get_sk_provenance(sk);
+
+	return pprov;
 }
 
 #define ihlen(ih)    (ih->ihl * 4)

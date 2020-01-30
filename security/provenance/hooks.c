@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -18,6 +21,7 @@
 #include <linux/random.h>
 #include <linux/xattr.h>
 #include <linux/file.h>
+#include <linux/ptrace.h>
 #include <linux/workqueue.h>
 
 #include "provenance.h"
@@ -157,6 +161,49 @@ static void task_init_provenance(void)
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+}
+
+static int provenance_ptrace_access_check(struct task_struct *child,
+					  unsigned int mode)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance(false);
+	struct provenance *ccprov = provenance_cred_from_task(child);
+	struct provenance *ctprov = provenance_task(child);
+	unsigned long irqflags;
+	int rc = 0;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	if (mode & PTRACE_MODE_READ) {
+		rc = informs(RL_PTRACE_READ_TASK, ctprov, tprov, NULL, mode);
+		if (rc < 0)
+			goto out;
+		if (ccprov != cprov) { // if it is too sepearate processes
+			rc = uses(RL_PTRACE_READ, ccprov, tprov, cprov, NULL, 0);
+			if (rc < 0)
+				goto out;
+		}
+	}
+	if (mode & PTRACE_MODE_ATTACH) {
+		if (ccprov != cprov) { // if it is too sepearate processes
+			rc = generates(RL_PTRACE_ATTACH, cprov, tprov, ccprov, NULL, 0);
+			if (rc < 0)
+				goto out;
+		}
+		rc = informs(RL_PTRACE_ATTACH_TASK, tprov, ctprov, NULL, mode);
+	}
+
+out:
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
+static int provenance_ptrace_traceme(struct task_struct *parent)
+{
+	struct provenance *tprov = get_task_provenance(false);
+	struct provenance *ptprov = provenance_task(parent);
+
+	return informs(RL_PTRACE_TRACEME, tprov, ptprov, NULL, 0);
 }
 
 /*!
@@ -2238,7 +2285,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
 static int provenance_unix_may_send(struct socket *sock,
 				    struct socket *other)
 {
-	struct provenance *iprov = get_socket_provenance(sock);
+	struct provenance *iprov = get_socket_inode_provenance(sock);
 	struct provenance *oprov = get_socket_inode_provenance(other);
 	unsigned long irqflags;
 	int rc = 0;
@@ -2446,6 +2493,8 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_setpgid,             provenance_task_setpgid),
 	LSM_HOOK_INIT(task_getpgid,             provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,                provenance_task_kill),
+	LSM_HOOK_INIT(ptrace_access_check,      provenance_ptrace_access_check),
+	LSM_HOOK_INIT(ptrace_traceme,                           provenance_ptrace_traceme),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,     provenance_inode_alloc_security),
@@ -2532,8 +2581,13 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 struct kmem_cache *provenance_cache __ro_after_init;
 struct kmem_cache *long_provenance_cache __ro_after_init;
 
-union prov_elt *buffer_head;
-union long_prov_elt *long_buffer_head;
+struct kmem_cache *boot_buffer_cache __ro_after_init;
+spinlock_t lock_buffer;
+LIST_HEAD(buffer_list);
+
+struct kmem_cache *long_boot_buffer_cache __ro_after_init;
+spinlock_t lock_long_buffer;
+LIST_HEAD(long_buffer_list);
 
 LIST_HEAD(ingress_ipv4filters);
 LIST_HEAD(egress_ipv4filters);
@@ -2564,6 +2618,22 @@ static void __init init_prov_policy(void)
 	prov_policy.prov_all = false;
 #endif
 	pr_info("Provenance: policy initialization finished.");
+}
+
+static void __init init_boot_cache(void)
+{
+	pr_info("Provenance: boot cache initialization started...");
+	boot_buffer_cache = kmem_cache_create("boot_buffer_cache",
+					      sizeof(struct boot_buffer),
+					      0, SLAB_PANIC, NULL);
+	if (unlikely(!boot_buffer_cache))
+		panic("Provenance: could not allocate boot_buffer_cache.");
+	long_boot_buffer_cache = kmem_cache_create("long_boot_buffer_cache",
+						   sizeof(struct long_boot_buffer),
+						   0, SLAB_PANIC, NULL);
+	if (unlikely(!long_boot_buffer_cache))
+		panic("Provenance: could not allocate long_boot_buffer_cache.");
+	pr_info("Provenance: boot cache initialization finished.");
 }
 
 static void __init init_prov_cache(void)
@@ -2609,8 +2679,9 @@ static int __init provenance_init(void)
 	prov_boot_id = 0;
 	epoch = 1;
 	init_prov_cache();
-	buffer_head = NULL;
-	long_buffer_head = NULL;
+	init_boot_cache();
+	spin_lock_init(&lock_buffer);
+	spin_lock_init(&lock_long_buffer);
 	relay_ready = false;
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 	provq = alloc_workqueue("provq", 0, 0);
@@ -2619,7 +2690,6 @@ static int __init provenance_init(void)
 #endif
 	task_init_provenance();
 	init_prov_machine();
-	print_prov_machine();
 	pr_info("Provenance: init propagate query.");
 	init_prov_propagate();
 	pr_info("Provenance: starting in epoch %d.", epoch);

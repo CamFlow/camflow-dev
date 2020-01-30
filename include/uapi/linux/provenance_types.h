@@ -1,6 +1,9 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+// SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -9,6 +12,7 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
+
 #ifndef _UAPI_LINUX_PROVENANCE_TYPES_H
 #define _UAPI_LINUX_PROVENANCE_TYPES_H
 
@@ -64,6 +68,7 @@
 #define RL_SH_WRITE                             (RL_DERIVED   | (0x0000000000000001ULL << 17))
 #define RL_PCK_CNT                              (RL_DERIVED   | (0x0000000000000001ULL << 18))
 #define RL_ADDRESSED                            (RL_DERIVED   | (0x0000000000000001ULL << 19))
+#define RL_DERIVED_DISC                         (RL_DERIVED   | (0x0000000000000001ULL << 20))
 /* no more than 51!!!! */
 
 /* GENERATED SUBTYPES */
@@ -99,6 +104,8 @@
 #define RL_MUNMAP                               (RL_GENERATED | (0x0000000000000001ULL << 29))
 #define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 30))
 #define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 31))
+#define RL_PTRACE_ATTACH                        (RL_GENERATED | (0x0000000000000001ULL << 32))
+#define RL_GENERATED_DISC                       (RL_GENERATED | (0x0000000000000001ULL << 33))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -132,12 +139,18 @@
 #define RL_MMAP_EXEC_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 27))
 #define RL_MMAP_WRITE_PRIVATE                   (RL_USED        | (0x0000000000000001ULL << 28))
 #define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 29))
+#define RL_PTRACE_READ                          (RL_USED        | (0x0000000000000001ULL << 30))
+#define RL_USED_DISC                            (RL_USED        | (0x0000000000000001ULL << 31))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
 #define RL_CLONE                                (RL_INFORMED  | (0x0000000000000001ULL))
 #define RL_VERSION_TASK                         (RL_INFORMED  | (0x0000000000000001ULL << 1))
 #define RL_TERMINATE_TASK                       (RL_INFORMED  | (0x0000000000000001ULL << 2))
+#define RL_PTRACE_ATTACH_TASK                   (RL_INFORMED  | (0x0000000000000001ULL << 3))
+#define RL_PTRACE_READ_TASK                     (RL_INFORMED  | (0x0000000000000001ULL << 4))
+#define RL_PTRACE_TRACEME                       (RL_INFORMED  | (0x0000000000000001ULL << 5))
+#define RL_INFORMED_DISC                        (RL_INFORMED  | (0x0000000000000001ULL << 6))
 /* no more than 51!!!! */
 
 /* INFLUENCED  SUBTYPES */
@@ -149,22 +162,28 @@
 #define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 5))
 #define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 6))
 #define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 7))
-#define RL_LOAD_UNDEFINED                               (RL_INFLUENCED | (0x0000000000000001ULL << 8))
+#define RL_LOAD_UNDEFINED                       (RL_INFLUENCED | (0x0000000000000001ULL << 8))
+#define RL_INFLUENCED_DISC                      (RL_INFLUENCED | (0x0000000000000001ULL << 9))
 
 /* ASSOCIATED  SUBTYPES */
 #define RL_RAN_ON                               (RL_ASSOCIATED | (0x0000000000000001ULL))
+#define RL_ASSOCIATED_DISC                      (RL_ASSOCIATED | (0x0000000000000001ULL << 1))
 
 /* ACTIVITY SUBTYPES */
 #define ACT_TASK                                (DM_ACTIVITY  | 0x0000000000000001ULL)
-#define ACT_DISC                                (DM_ACTIVITY  | (0x0000000000000001ULL << 1))
+
+/* LONG NODE */
+/* DISCLOSED TYPE */
+#define ACT_DISC                                (DM_ACTIVITY | ND_LONG | (0x0000000000000001ULL << 1))
 
 /* AGENT SUBTYPES */
 #define AGT_USR                                 (DM_AGENT       | (0x0000000000000001ULL << 2))
 #define AGT_GRP                                 (DM_AGENT       | (0x0000000000000001ULL << 3))
-#define AGT_DISC                                (DM_AGENT       | (0x0000000000000001ULL << 4))
 
 /* LONG NODE */
-#define AGT_MACHINE                             (DM_AGENT | ND_LONG     | (0x0000000000000001ULL << 5))
+#define AGT_MACHINE                             (DM_AGENT | ND_LONG | (0x0000000000000001ULL << 4))
+/* DISCLOSED TYPE */
+#define AGT_DISC                                (DM_AGENT | ND_LONG | (0x0000000000000001ULL << 5))
 
 /* ENTITY SUBTYPES */
 #define ENT_INODE_UNKNOWN                       (DM_ENTITY    | (0x0000000000000001ULL << 6))
@@ -179,18 +198,19 @@
 #define ENT_SHM                                 (DM_ENTITY    | (0x0000000000000001ULL << 15))
 #define ENT_SBLCK                               (DM_ENTITY    | (0x0000000000000001ULL << 16))
 #define ENT_PACKET                              (DM_ENTITY    | (0x0000000000000001ULL << 17))
-#define ENT_DISC                                (DM_ENTITY    | (0x0000000000000001ULL << 18))
-#define ENT_IATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 19))
-#define ENT_PROC                                (DM_ENTITY    | (0x0000000000000001ULL << 20))
+#define ENT_IATTR                               (DM_ENTITY    | (0x0000000000000001ULL << 18))
+#define ENT_PROC                                (DM_ENTITY    | (0x0000000000000001ULL << 19))
 
 /* LONG NODE */
-#define ENT_STR                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 21))
-#define ENT_ADDR                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 22))
-#define ENT_PATH                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 23))
-#define ENT_XATTR                               (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 24))
-#define ENT_PCKCNT                              (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 25))
-#define ENT_ARG                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 26))
-#define ENT_ENV                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 27))
+#define ENT_STR                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 20))
+#define ENT_ADDR                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 21))
+#define ENT_PATH                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 22))
+#define ENT_XATTR                               (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 23))
+#define ENT_PCKCNT                              (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 24))
+#define ENT_ARG                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 25))
+#define ENT_ENV                                 (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 26))
+/* DISCLOSED TYPE */
+#define ENT_DISC                                (DM_ENTITY | ND_LONG | (0x0000000000000001ULL << 27))
 
 #define prov_type(prov)                 ((prov)->node_info.identifier.node_id.type)
 #define node_type(node)                 prov_type(node)

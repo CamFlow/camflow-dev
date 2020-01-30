@@ -21,9 +21,9 @@ class Instruction
   end
 
   def self.prov_to_type str
-    if str == 'cprov' || str=='nprov' || str == 'old_prov' || str == 'pprov'
+    if str == 'cprov' || str=='nprov' || str == 'old_prov' || str == 'pprov' || str == 'ccprov'
       return 'process_memory'
-    elsif str == 'tprov' || str == 'ntprov'
+    elsif str == 'tprov' || str == 'ntprov' || str == 'ctprov' || str == 'ptprov'
       return 'task'
     elsif str == 'iprov' || str == 'iprova' || str == 'iprovb' || str == 'niprov' || str == 'inprov' || str == 'outprov' || str == 'oprov'
       return 'inode'

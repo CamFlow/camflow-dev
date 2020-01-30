@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -46,13 +49,13 @@ LIST_HEAD(relay_list);
  */
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
 {
-	struct relay_list *list;
+	struct relay_list *elt;
 
-	list = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
-	list->name = name;
-	list->prov = prov;
-	list->long_prov = long_prov;
-	list_add_tail(&(list->list), &relay_list);
+	elt = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
+	elt->name = name;
+	elt->prov = prov;
+	elt->long_prov = long_prov;
+	list_add_tail(&(elt->list), &relay_list);
 }
 
 /*!
@@ -126,57 +129,79 @@ static struct rchan_callbacks relay_callbacks = {
 static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 {
 	int cpu;
-	union prov_elt *tmp = buffer_head;
+	struct list_head *ele, *next;
+	struct boot_buffer *entry;
+	unsigned long irqflags;
 
 	msleep(1000);
 	pr_info("Provenance: async boot buffer task %llu running...", cookie);
 
-	while (tmp != NULL) {
+	spin_lock_irqsave(&lock_buffer, irqflags);
+	list_for_each_safe(ele, next, &buffer_list) {
+		entry = list_entry(ele, struct boot_buffer, list);
+
+		// check if relay is full
 		cpu = get_cpu();
 		if (is_relay_full(prov_chan, cpu)) {
 			cookie = async_schedule(__async_handle_boot_buffer, NULL);
 			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 			put_cpu();
-			return;
+			goto out;
 		}
 		put_cpu();
-		tighten_identifier(&get_prov_identifier(tmp));
-		if (prov_is_relation(tmp)) {
-			tighten_identifier(&(tmp->relation_info.snd));
-			tighten_identifier(&(tmp->relation_info.rcv));
+
+		// tighten provenance entry
+		tighten_identifier(&get_prov_identifier(&(entry->msg)));
+		if (prov_is_relation(&(entry->msg))) {
+			tighten_identifier(&(entry->msg.relation_info.snd));
+			tighten_identifier(&(entry->msg.relation_info.rcv));
 		}
-		relay_write(prov_chan, tmp, sizeof(union prov_elt));
-		buffer_head = tmp->msg_info.next;
-		kmem_cache_free(provenance_cache, tmp);
-		tmp = buffer_head;
+
+		relay_write(prov_chan, &(entry->msg), sizeof(union prov_elt));
+
+		list_del(&(entry->list));
+		kmem_cache_free(boot_buffer_cache, entry);
 	}
 	pr_info("Provenance: finished task %llu.", cookie);
+out:
+	spin_unlock_irqrestore(&lock_buffer, irqflags);
 }
 
 static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 {
 	int cpu;
-	union long_prov_elt *tmp = long_buffer_head;
+	struct list_head *ele, *next;
+	struct long_boot_buffer *entry;
+	unsigned long irqflags;
 
 	msleep(1000);
-	pr_info("Provenance: async boot buffer task %llu running...", cookie);
+	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
 
-	while (tmp != NULL) {
+	spin_lock_irqsave(&lock_long_buffer, irqflags);
+	list_for_each_safe(ele, next, &long_buffer_list) {
+		entry = list_entry(ele, struct long_boot_buffer, list);
+
+		// check if relay is full
 		cpu = get_cpu();
 		if (is_relay_full(prov_chan, cpu)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
-			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+			pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 			put_cpu();
-			return;
+			goto out;
 		}
 		put_cpu();
-		tighten_identifier(&get_prov_identifier(tmp));
-		relay_write(long_prov_chan, tmp, sizeof(union long_prov_elt));
-		long_buffer_head = tmp->msg_info.next;
-		kmem_cache_free(long_provenance_cache, tmp);
-		tmp = long_buffer_head;
+
+		// tighten provenance entry
+		tighten_identifier(&get_prov_identifier(&(entry->msg)));
+
+		relay_write(long_prov_chan, &(entry->msg), sizeof(union long_prov_elt));
+
+		list_del(&(entry->list));
+		kmem_cache_free(long_boot_buffer_cache, entry);
 	}
 	pr_info("Provenance: finished task %llu.", cookie);
+out:
+	spin_unlock_irqrestore(&lock_long_buffer, irqflags);
 }
 
 bool relay_ready;
@@ -204,12 +229,16 @@ void write_boot_buffer(void)
 	relay_write(long_prov_chan, prov_machine, sizeof(union long_prov_elt));
 
 	// asynchronously empty the buffer
-	cookie = async_schedule(__async_handle_boot_buffer, NULL);
-	pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+	if (!list_empty(&buffer_list)) {
+		cookie = async_schedule(__async_handle_boot_buffer, NULL);
+		pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
+	}
 
 	// asynchronously empty the buffer
-	cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
-	pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+	if (!list_empty(&long_buffer_list)) {
+		cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
+		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+	}
 }
 
 /*!
@@ -261,11 +290,14 @@ out:
 
 static void insert_boot_buffer(union prov_elt *msg)
 {
-	union prov_elt *tmp = kmem_cache_alloc(provenance_cache, GFP_ATOMIC);
+	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
+	unsigned long irqflags;
 
-	__memcpy_ss(tmp, sizeof(struct provenance), msg, sizeof(union prov_elt));
-	tmp->msg_info.next = buffer_head;
-	buffer_head = tmp;
+	__memcpy_ss(&(tmp->msg), sizeof(union prov_elt), msg, sizeof(union prov_elt));
+	INIT_LIST_HEAD(&(tmp->list));
+	spin_lock_irqsave(&lock_buffer, irqflags);
+	list_add(&(tmp->list), &buffer_list);
+	spin_unlock_irqrestore(&lock_buffer, irqflags);
 }
 
 /*!
@@ -301,11 +333,14 @@ void prov_write(union prov_elt *msg, size_t size)
 
 static void insert_long_boot_buffer(union long_prov_elt *msg)
 {
-	union long_prov_elt *tmp = kmem_cache_alloc(long_provenance_cache, GFP_ATOMIC);
+	struct long_boot_buffer *tmp = kmem_cache_zalloc(long_boot_buffer_cache, GFP_ATOMIC);
+	unsigned long irqflags;
 
-	__memcpy_ss(tmp, sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
-	tmp->msg_info.next = long_buffer_head;
-	long_buffer_head = tmp;
+	__memcpy_ss(&(tmp->msg), sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
+	INIT_LIST_HEAD(&(tmp->list));
+	spin_lock_irqsave(&lock_long_buffer, irqflags);
+	list_add(&(tmp->list), &long_buffer_list);
+	spin_unlock_irqrestore(&lock_long_buffer, irqflags);
 }
 
 /*!

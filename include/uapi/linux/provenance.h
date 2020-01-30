@@ -1,6 +1,9 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+// SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -9,6 +12,7 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
+
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
@@ -25,12 +29,12 @@
 
 #define CAMFLOW_VERSION_MAJOR           0
 #define CAMFLOW_VERSION_MINOR           6
-#define CAMFLOW_VERSION_PATCH           3
+#define CAMFLOW_VERSION_PATCH           4
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "d056ca47a66fa365f261344ebab9606bcab42627"
+#define CAMFLOW_COMMIT "6433e35f611788c09ca4df40159f711cae061b06"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -130,7 +134,7 @@ union prov_identifier {
 
 
 
-#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]; void *next
+#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
 #define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
@@ -183,6 +187,7 @@ struct task_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
+	union long_prov_elt *disc;
 };
 
 #define PROV_SBUUID_LEN 16

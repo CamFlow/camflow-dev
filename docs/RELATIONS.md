@@ -100,3 +100,14 @@ RL_LOAD_KEXEC_INITRAMFS|load_kexec_initramfs|load file into kernel|
 RL_LOAD_POLICY|load_policy|load file into kernel|
 RL_LOAD_CERTIFICATE|load_certificate|load file into kernel|
 RL_LOAD_UNDEFINED|load_undefined|load file into kernel|
+RL_PTRACE_ATTACH|ptrace_attach|ptrace attach effect on memory|
+RL_PTRACE_READ|ptrace_read|ptrace read from mem|
+RL_PTRACE_ATTACH_TASK|ptrace_attach_task|write info via ptrace effect on task|
+RL_PTRACE_READ_TASK|ptrace_read_task|read info via ptrace effect on task|
+RL_PTRACE_TRACEME|ptrace_traceme|track ptrace_traceme|
+RL_DERIVED_DISC|derived_disc|disclosed type|
+RL_GENERATED_DISC|generated_disc|disclosed type|
+RL_USED_DISC|used_disc|disclosed type|
+RL_INFORMED_DISC|informed_disc|disclosed type|
+RL_INFLUENCED_DISC|influenced_disc|disclosed type|
+RL_ASSOCIATED_DISC|associated_disc|disclosed type|

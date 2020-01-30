@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.6.4           | 5.4.15       	 | 30/01/2020	|
 | 0.6.3           | 5.2.9       	 | 23/08/2019	|
 | 0.6.2           | 5.1.9	       	 | 17/06/2019	|
 | 0.6.1           | 5.1.9	       	 | 14/06/2019	|
@@ -45,6 +46,14 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+### v0.6.4
+```
+- Use kernel linked list to build boot buffer.
+- Refactoring of layering interface (accommodate changes to libprovenance).
+- Add ptrace support.
+- Update to kernel version 5.4.15.
+```
 
 ### v0.6.3
 ```

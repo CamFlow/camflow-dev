@@ -32,6 +32,14 @@ task -> inode[fontsize = 8,label = munmap]
 
 inode -> process_memory[fontsize = 8,label = sh_read]
 
+task -> task[fontsize = 8,label = ptrace_read_task]
+
+process_memory -> task[fontsize = 8,label = ptrace_read]
+
+task -> process_memory[fontsize = 8,label = ptrace_attach]
+
+task -> task[fontsize = 8,label = ptrace_attach_task]
+
 task -> task[fontsize = 8,label = terminate_task]
 
 }

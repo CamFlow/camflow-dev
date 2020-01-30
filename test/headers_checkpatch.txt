@@ -632,7 +632,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #3: FILE: security/provenance/include/provenance_machine.h:3:
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
-total: 0 errors, 1 warnings, 22 lines checked
+total: 0 errors, 1 warnings, 21 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -658,135 +658,135 @@ WARNING:LONG_LINE: line over 80 characters
 +static inline struct provenance *get_socket_inode_provenance(struct socket *sock)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#101: FILE: security/provenance/include/provenance_net.h:101:
+#86: FILE: security/provenance/include/provenance_net.h:86:
 + * @brief Extract TCP header information and store it in packet_identifier struct of provenance entry.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#130: FILE: security/provenance/include/provenance_net.h:130:
+#115: FILE: security/provenance/include/provenance_net.h:115:
 + * @brief Extract UPD header information and store it in packet_identifier struct of provenance entry.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#158: FILE: security/provenance/include/provenance_net.h:158:
+#143: FILE: security/provenance/include/provenance_net.h:143:
 + * @brief Parse network packet information @skb into a packet provenance entry @prov.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#160: FILE: security/provenance/include/provenance_net.h:160:
+#145: FILE: security/provenance/include/provenance_net.h:145:
 + * We parse a series of IP information from @skb and create a provenance entry node ENT_PACKET.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#161: FILE: security/provenance/include/provenance_net.h:161:
+#146: FILE: security/provenance/include/provenance_net.h:146:
 + * Depending on the type of the packet (i.e., TCP or UDP), we call either __extract_tcp_info or __extract_udp_info subfunction to parse.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#164: FILE: security/provenance/include/provenance_net.h:164:
+#149: FILE: security/provenance/include/provenance_net.h:149:
 + * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#167: FILE: security/provenance/include/provenance_net.h:167:
+#152: FILE: security/provenance/include/provenance_net.h:152:
 +static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#175: FILE: security/provenance/include/provenance_net.h:175:
+#160: FILE: security/provenance/include/provenance_net.h:160:
 +	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);      // We obtain the IP header.
 
 WARNING:LONG_LINE: line over 80 characters
-#194: FILE: security/provenance/include/provenance_net.h:194:
+#179: FILE: security/provenance/include/provenance_net.h:179:
 +		__extract_tcp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
 
 WARNING:LONG_LINE: line over 80 characters
-#197: FILE: security/provenance/include/provenance_net.h:197:
+#182: FILE: security/provenance/include/provenance_net.h:182:
 +		__extract_udp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
 
 WARNING:LONG_LINE: line over 80 characters
-#214: FILE: security/provenance/include/provenance_net.h:214:
+#199: FILE: security/provenance/include/provenance_net.h:199:
 +#define prov_ipv4_ingressOP(ip, port)           prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
 
 WARNING:LONG_LINE: line over 80 characters
-#215: FILE: security/provenance/include/provenance_net.h:215:
+#200: FILE: security/provenance/include/provenance_net.h:200:
 +#define prov_ipv4_egressOP(ip, port)            prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
 WARNING:LONG_LINE: line over 80 characters
-#229: FILE: security/provenance/include/provenance_net.h:229:
+#214: FILE: security/provenance/include/provenance_net.h:214:
 +static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, uint32_t port)
 
 WARNING:LONG_LINE: line over 80 characters
-#236: FILE: security/provenance/include/provenance_net.h:236:
+#221: FILE: security/provenance/include/provenance_net.h:221:
 +		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))     // Match IP
 
 WARNING:LONG_LINE: line over 80 characters
-#237: FILE: security/provenance/include/provenance_net.h:237:
+#222: FILE: security/provenance/include/provenance_net.h:222:
 +			if (tmp->filter.port == 0 || tmp->filter.port == port)          // Any port or a specific match
 
 WARNING:LONG_LINE: line over 80 characters
-#254: FILE: security/provenance/include/provenance_net.h:254:
+#239: FILE: security/provenance/include/provenance_net.h:239:
 +static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_filters *f)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#273: FILE: security/provenance/include/provenance_net.h:273:
+#258: FILE: security/provenance/include/provenance_net.h:258:
 + * @brief Add or update an element in the filter list that matches a specific filter.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#277: FILE: security/provenance/include/provenance_net.h:277:
+#262: FILE: security/provenance/include/provenance_net.h:262:
 + * If matched, the matched element's op value will be updated based on the given filter @f or the element will be added if no matches.
 
 WARNING:LONG_LINE: line over 80 characters
-#283: FILE: security/provenance/include/provenance_net.h:283:
+#268: FILE: security/provenance/include/provenance_net.h:268:
 +static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct ipv4_filters *f)
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#297: FILE: security/provenance/include/provenance_net.h:297:
+#282: FILE: security/provenance/include/provenance_net.h:282:
 +	list_add_tail(&(f->list), filters); // If not already in the list, we add it.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#304: FILE: security/provenance/include/provenance_net.h:304:
+#289: FILE: security/provenance/include/provenance_net.h:289:
 + * This function creates a long provenance entry node ENT_ADDR that binds to the socket provenance entry @prov.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#307: FILE: security/provenance/include/provenance_net.h:307:
+#292: FILE: security/provenance/include/provenance_net.h:292:
 + * 1. The socket inode is not recorded or the name (addr) of the socket has been recorded already, or
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#310: FILE: security/provenance/include/provenance_net.h:310:
+#295: FILE: security/provenance/include/provenance_net.h:295:
 + * This provenance node is short-lived and thus we free the memory once we have recorded the relation.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#314: FILE: security/provenance/include/provenance_net.h:314:
+#299: FILE: security/provenance/include/provenance_net.h:299:
 + * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation function or unknown.
 
 WARNING:LONG_LINE: line over 80 characters
-#317: FILE: security/provenance/include/provenance_net.h:317:
+#302: FILE: security/provenance/include/provenance_net.h:302:
 +static __always_inline int record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
 
 WARNING:LONG_LINE: line over 80 characters
-#322: FILE: security/provenance/include/provenance_net.h:322:
+#307: FILE: security/provenance/include/provenance_net.h:307:
 +	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
 
 WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#324: FILE: security/provenance/include/provenance_net.h:324:
+#309: FILE: security/provenance/include/provenance_net.h:309:
 +		return 0;
 +	else {
 
 WARNING:LONG_LINE: line over 80 characters
-#331: FILE: security/provenance/include/provenance_net.h:331:
+#316: FILE: security/provenance/include/provenance_net.h:316:
 +		__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr_storage), address, addrlen);
 
 WARNING:LONG_LINE: line over 80 characters
-#333: FILE: security/provenance/include/provenance_net.h:333:
+#318: FILE: security/provenance/include/provenance_net.h:318:
 +		rc = record_relation(RL_ADDRESSED, addr_info, prov_entry(prov), NULL, 0);
 
 WARNING:LONG_LINE: line over 80 characters
-#353: FILE: security/provenance/include/provenance_net.h:353:
+#338: FILE: security/provenance/include/provenance_net.h:338:
 +		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, PATH_MAX);
 
 WARNING:LONG_LINE: line over 80 characters
-#355: FILE: security/provenance/include/provenance_net.h:355:
+#340: FILE: security/provenance/include/provenance_net.h:340:
 +		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, cnt->pckcnt_info.length);
 
 WARNING:LONG_LINE: line over 80 characters
-#372: FILE: security/provenance/include/provenance_net.h:372:
+#357: FILE: security/provenance/include/provenance_net.h:357:
 +		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
 
-total: 0 errors, 36 warnings, 386 lines checked
+total: 0 errors, 36 warnings, 371 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1291,66 +1291,66 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 + * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
 
 WARNING:LONG_LINE: line over 80 characters
-#24: FILE: security/provenance/include/provenance_relay.h:24:
+#26: FILE: security/provenance/include/provenance_relay.h:26:
 +#define PROV_RELAY_BUFF_SIZE            ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#53: FILE: security/provenance/include/provenance_relay.h:53:
+#72: FILE: security/provenance/include/provenance_relay.h:72:
 + * There are some checks before the provenance node is written to the relay buffer which can be consumed by userspace client.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#54: FILE: security/provenance/include/provenance_relay.h:54:
+#73: FILE: security/provenance/include/provenance_relay.h:73:
 + * If those checks are passed and the provenance node should be written to the relay buffer,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#55: FILE: security/provenance/include/provenance_relay.h:55:
+#74: FILE: security/provenance/include/provenance_relay.h:74:
 + * Call either "prov_write" or "long_prov_write" depending on whether the node is a regular or a long provenance node.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#58: FILE: security/provenance/include/provenance_relay.h:58:
+#77: FILE: security/provenance/include/provenance_relay.h:77:
 + * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#59: FILE: security/provenance/include/provenance_relay.h:59:
+#78: FILE: security/provenance/include/provenance_relay.h:78:
 + * 2. If the provenance is not a packet node (which means it should have machine ID) and the provenacne is not recorded,
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#60: FILE: security/provenance/include/provenance_relay.h:60:
+#79: FILE: security/provenance/include/provenance_relay.h:79:
 + *              record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#95: FILE: security/provenance/include/provenance_relay.h:95:
+#114: FILE: security/provenance/include/provenance_relay.h:114:
 +	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
 
 WARNING:LONG_LINE: line over 80 characters
-#100: FILE: security/provenance/include/provenance_relay.h:100:
+#119: FILE: security/provenance/include/provenance_relay.h:119:
 +	__memcpy_ss(&(relation->relation_info.snd), sizeof(union prov_identifier), &get_prov_identifier(f), sizeof(union prov_identifier));
 
 WARNING:LONG_LINE: line over 80 characters
-#101: FILE: security/provenance/include/provenance_relay.h:101:
+#120: FILE: security/provenance/include/provenance_relay.h:120:
 +	__memcpy_ss(&(relation->relation_info.rcv), sizeof(union prov_identifier), &get_prov_identifier(t), sizeof(union prov_identifier));
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#114: FILE: security/provenance/include/provenance_relay.h:114:
+#133: FILE: security/provenance/include/provenance_relay.h:133:
 + * The relation will only be recorded if no user-supplied filter is applicable to the type of the relation or the end nodes.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#116: FILE: security/provenance/include/provenance_relay.h:116:
+#135: FILE: security/provenance/include/provenance_relay.h:135:
 + * Two end nodes are recorded by calling "__write_node" function before the relation itself is recorded.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#117: FILE: security/provenance/include/provenance_relay.h:117:
+#136: FILE: security/provenance/include/provenance_relay.h:136:
 + * CamQuery is called for provenance runtime analysis of this provenance relation (i.e., edge) before the relation is recorded to relay.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#144: FILE: security/provenance/include/provenance_relay.h:144:
+#163: FILE: security/provenance/include/provenance_relay.h:163:
 +	rc = call_query_hooks(f, t, (prov_entry_t *)&relation); // Call query hooks for propagate tracking.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#145: FILE: security/provenance/include/provenance_relay.h:145:
+#164: FILE: security/provenance/include/provenance_relay.h:164:
 +	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
 
-total: 0 errors, 16 warnings, 148 lines checked
+total: 0 errors, 16 warnings, 167 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
