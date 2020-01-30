@@ -3,9 +3,8 @@
   HOSTCC  scripts/kconfig/confdata.o
   HOSTCC  scripts/kconfig/expr.o
   LEX     scripts/kconfig/lexer.lex.c
-  YACC    scripts/kconfig/parser.tab.h
+  YACC    scripts/kconfig/parser.tab.[ch]
   HOSTCC  scripts/kconfig/lexer.lex.o
-  YACC    scripts/kconfig/parser.tab.c
   HOSTCC  scripts/kconfig/parser.tab.o
   HOSTCC  scripts/kconfig/preprocess.o
   HOSTCC  scripts/kconfig/symbol.o
@@ -34,17 +33,27 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
-  UPD     include/config/kernel.release
   WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
+  WRAP    arch/x86/include/generated/uapi/asm/errno.h
+  WRAP    arch/x86/include/generated/uapi/asm/fcntl.h
+  WRAP    arch/x86/include/generated/uapi/asm/ioctl.h
+  WRAP    arch/x86/include/generated/uapi/asm/ioctls.h
+  WRAP    arch/x86/include/generated/uapi/asm/ipcbuf.h
+  WRAP    arch/x86/include/generated/uapi/asm/param.h
   WRAP    arch/x86/include/generated/uapi/asm/poll.h
+  WRAP    arch/x86/include/generated/uapi/asm/resource.h
   WRAP    arch/x86/include/generated/uapi/asm/socket.h
   WRAP    arch/x86/include/generated/uapi/asm/sockios.h
+  WRAP    arch/x86/include/generated/uapi/asm/termbits.h
+  WRAP    arch/x86/include/generated/uapi/asm/termios.h
+  WRAP    arch/x86/include/generated/uapi/asm/types.h
   WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
   CHECK   scripts/mod/empty.c
@@ -77,6 +86,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/subcmd-config.o
   LD       /root/circulate/build/linux-stable/tools/objtool/libsubcmd-in.o
   AR       /root/circulate/build/linux-stable/tools/objtool/libsubcmd.a
+  MKDIR    /root/circulate/build/linux-stable/tools/objtool/arch/x86/lib/
   GEN      /root/circulate/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
   CC       /root/circulate/build/linux-stable/tools/objtool/arch/x86/decode.o
   LD       /root/circulate/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
@@ -92,6 +102,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/libctype.o
   CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
+/root/circulate/build/linux-stable/tools/objtool
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
   CHECK   security/integrity/ima/ima_fs.c
   CC      security/integrity/ima/ima_fs.o
@@ -385,9 +396,9 @@ security/provenance/hooks.c:2186 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/selinux/avc.c
   CC      security/selinux/avc.o
   CHECK   security/selinux/hooks.c
-security/selinux/hooks.c:2590 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
-  Locked on:   line 2590
-  Unlocked on: line 2558
+security/selinux/hooks.c:2592 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
+  Locked on:   line 2592
+  Unlocked on: line 2560
   CC      security/selinux/hooks.o
   CHECK   security/selinux/selinuxfs.c
   CC      security/selinux/selinuxfs.o
@@ -411,7 +422,7 @@ security/selinux/ss/ebitmap.c:188 ebitmap_netlbl_import() info: ignoring unreach
   CHECK   security/selinux/ss/symtab.c
   CC      security/selinux/ss/symtab.o
   CHECK   security/selinux/ss/sidtab.c
-security/selinux/ss/sidtab.c:473 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
+security/selinux/ss/sidtab.c:467 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
   CC      security/selinux/ss/sidtab.o
   CHECK   security/selinux/ss/avtab.c
   CC      security/selinux/ss/avtab.o
