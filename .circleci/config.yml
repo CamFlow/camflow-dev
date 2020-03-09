@@ -261,6 +261,8 @@ jobs:
       - run: 'apt-get install --reinstall make'
       - run: 'apt-get build-dep -y coccinelle'
       - run: 'cd build && git clone https://github.com/coccinelle/coccinelle.git'
+      - run: 'cd build && git checkout 1.0.8'
+      - run: 'cd build/coccinelle && make clean'
       - run: 'cd build/coccinelle && ./autogen'
       - run: 'cd build/coccinelle && ./configure'
       - run: 'cd build/coccinelle && make'
@@ -289,7 +291,7 @@ jobs:
       - run: 'apt-get install -y sudo'
       - run: 'apt-get install -y git rsync'
       - run: 'apt-get install -y ruby'
-      - run: 'ruby ./scripts/clean_test.rb' 
+      - run: 'ruby ./scripts/clean_test.rb'
       - run: 'cd test && ls'
       - deploy:
           name: Deploy
