@@ -15,7 +15,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/pnmtologo
   HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
   HOSTCC  scripts/sortextable
@@ -91,7 +90,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/libctype.o
   CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
-/root/circulate/build/linux-stable/tools/objtool
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
   CHECK   security/provenance/relay.c
 security/provenance/relay.c:40:1: warning: symbol 'relay_list' was not declared. Should it be static?

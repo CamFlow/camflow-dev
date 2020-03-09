@@ -8,6 +8,7 @@
   HOSTCC  scripts/kconfig/parser.tab.o
   HOSTCC  scripts/kconfig/preprocess.o
   HOSTCC  scripts/kconfig/symbol.o
+  HOSTCC  scripts/kconfig/util.o
   HOSTLD  scripts/kconfig/conf
 scripts/kconfig/conf  --syncconfig Kconfig
   SYSTBL  arch/x86/include/generated/asm/syscalls_32.h
@@ -26,7 +27,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/pnmtologo
   HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
   HOSTCC  scripts/sortextable
@@ -102,7 +102,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC       /root/circulate/build/linux-stable/tools/objtool/libctype.o
   CC       /root/circulate/build/linux-stable/tools/objtool/str_error_r.o
   LD       /root/circulate/build/linux-stable/tools/objtool/objtool-in.o
-/root/circulate/build/linux-stable/tools/objtool
   LINK     /root/circulate/build/linux-stable/tools/objtool/objtool
   CHECK   security/integrity/ima/ima_fs.c
   CC      security/integrity/ima/ima_fs.o
@@ -122,8 +121,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      security/integrity/ima/ima_template.o
   CHECK   security/integrity/ima/ima_template_lib.c
   CC      security/integrity/ima/ima_template_lib.o
-  CHECK   security/integrity/ima/ima_appraise.c
-  CC      security/integrity/ima/ima_appraise.o
   AR      security/integrity/ima/built-in.a
   CHECK   security/integrity/iint.c
   CC      security/integrity/iint.o
@@ -133,12 +130,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CC      security/integrity/digsig.o
   CHECK   security/integrity/digsig_asymmetric.c
   CC      security/integrity/digsig_asymmetric.o
-  CHECK   security/integrity/platform_certs/platform_keyring.c
-  CC      security/integrity/platform_certs/platform_keyring.o
-  CHECK   security/integrity/platform_certs/efi_parser.c
-  CC      security/integrity/platform_certs/efi_parser.o
-  CHECK   security/integrity/platform_certs/load_uefi.c
-  CC      security/integrity/platform_certs/load_uefi.o
   AR      security/integrity/built-in.a
   CHECK   security/keys/encrypted-keys/encrypted.c
   CC      security/keys/encrypted-keys/encrypted.o
@@ -396,9 +387,9 @@ security/provenance/hooks.c:2189 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/selinux/avc.c
   CC      security/selinux/avc.o
   CHECK   security/selinux/hooks.c
-security/selinux/hooks.c:2592 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
-  Locked on:   line 2592
-  Unlocked on: line 2560
+security/selinux/hooks.c:2588 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
+  Locked on:   line 2588
+  Unlocked on: line 2559
   CC      security/selinux/hooks.o
   CHECK   security/selinux/selinuxfs.c
   CC      security/selinux/selinuxfs.o
@@ -415,7 +406,7 @@ security/selinux/hooks.c:2592 selinux_bprm_committed_creds() warn: inconsistent 
   CHECK   security/selinux/ibpkey.c
   CC      security/selinux/ibpkey.o
   CHECK   security/selinux/ss/ebitmap.c
-security/selinux/ss/ebitmap.c:188 ebitmap_netlbl_import() info: ignoring unreachable code.
+security/selinux/ss/ebitmap.c:206 ebitmap_netlbl_import() info: ignoring unreachable code.
   CC      security/selinux/ss/ebitmap.o
   CHECK   security/selinux/ss/hashtab.c
   CC      security/selinux/ss/hashtab.o
