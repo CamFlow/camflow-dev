@@ -261,7 +261,7 @@ jobs:
       - run: 'apt-get install --reinstall make'
       - run: 'apt-get build-dep -y coccinelle'
       - run: 'cd build && git clone https://github.com/coccinelle/coccinelle.git'
-      - run: 'cd build && git checkout 1.0.8'
+      - run: 'cd build/coccinelle && git checkout 1.0.8'
       - run: 'cd build/coccinelle && make clean'
       - run: 'cd build/coccinelle && ./autogen'
       - run: 'cd build/coccinelle && ./configure'
