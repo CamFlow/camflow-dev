@@ -50,7 +50,7 @@
 
 ### v0.6.5
 ```
-- Update to kernel version 5.4.15.
+- Update to kernel version 5.5.8.
 ```
 
 ### v0.6.4
