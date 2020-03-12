@@ -23,6 +23,8 @@
 #ifndef __KERNEL__
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
@@ -38,7 +40,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "16c08ad74b0d630ddafdb299bfff4ccd4e3b65a9"
+#define CAMFLOW_COMMIT "a6eac1d1c6ea4450940d779fbb178937c5be5f6c"
 
 #define PROVENANCE_HASH                 "sha256"
 
