@@ -19,6 +19,7 @@
  #ifndef __KERNEL__
  #include <stdint.h>
  #include <stdbool.h>
+ #include <string.h>
  #endif
 
  #define PROV_GOLDEN_RATIO_64            0x61C8864680B583EBUL
@@ -44,7 +45,7 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val)
 	}
 }
 
-// djb2 hash implementation by Dan Bernstein
+/* djb2 hash implementation by Dan Bernstein */
 static inline uint64_t djb2_hash(const char *str)
 {
 	uint64_t hash = 5381;

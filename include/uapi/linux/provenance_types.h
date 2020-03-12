@@ -291,4 +291,4 @@ struct prov_type {
 	uint8_t is_relation;
 };
 
-#endif // _UAPI_LINUX_PROVENANCE_TYPES_H
+#endif /* _UAPI_LINUX_PROVENANCE_TYPES_H */
