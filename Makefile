@@ -276,3 +276,13 @@ save_space:
 	cd build && rm -rf information-flow-patch
 	cd build/linux-stable && rm -rf .git
 	cd build/pristine/linux-stable && rm -rf .git
+
+prepare_dwarves:
+	mkdir -p build
+	cd ./build && git clone https://github.com/acmel/dwarves
+	cd ./build/dwarves && git checkout v1.16
+	cd ./build/dwarves && mkdir build
+	cd ./build/dwarves/build && cmake -D__LIB=lib ..
+
+install_dwarves:
+	cd ./build/dwarves/build && make install
