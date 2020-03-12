@@ -50,6 +50,7 @@
 
 ### v0.6.5
 ```
+- Fix issue to build on Fedora 31 (new gcc version etc.).
 - Update to kernel version 5.5.8.
 ```
 
