@@ -20,6 +20,10 @@
 #include <linux/socket.h>
 #include <linux/mutex.h>
 #endif
+#ifndef __KERNEL__
+#include <stdint.h>
+#include <stdbool.h>
+#endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
@@ -34,7 +38,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "d520ff817e13d130ead34eee02ef382598e5e7f0"
+#define CAMFLOW_COMMIT "16c08ad74b0d630ddafdb299bfff4ccd4e3b65a9"
 
 #define PROVENANCE_HASH                 "sha256"
 
