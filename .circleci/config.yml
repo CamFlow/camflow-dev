@@ -65,11 +65,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -83,11 +83,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -101,11 +101,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -120,11 +120,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -139,11 +139,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -158,15 +158,15 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cd build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git'
       - run: 'cd build/sparse && git checkout v0.6.1'
       - run: 'cd build/sparse && make'
-      - run: 'cd build/sparse && make install'
+      - run: 'cd build/sparse && sudo make install'
       - run: 'cp -f /root/bin/sparse /bin/sparse'
       - run: 'cp -f /root/bin/cgcc /bin/cgcc'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -188,12 +188,12 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install -y flawfinder'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install -y flawfinder'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -213,11 +213,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -240,11 +240,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_smatch'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -300,11 +300,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y apt-utils'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y git rsync'
-      - run: 'apt-get install -y ruby'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y git rsync'
+      - run: 'sudo apt-get install -y ruby'
       - run: 'ruby ./scripts/clean_test.rb'
       - run: 'cd test && ls'
       - deploy:
