@@ -167,7 +167,7 @@ jobs:
       - run: 'cd build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git'
       - run: 'cd build/sparse && git checkout v0.6.1'
       - run: 'cd build/sparse && make'
-      - run: 'cd build/sparse && make install'
+      - run: 'cd build/sparse && sudo make install'
       - run: 'cp -f /root/bin/sparse /bin/sparse'
       - run: 'cp -f /root/bin/cgcc /bin/cgcc'
       - run: 'cp -f scripts/.config build/linux-stable/'
