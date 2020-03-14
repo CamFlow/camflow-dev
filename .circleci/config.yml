@@ -32,8 +32,8 @@ jobs:
           paths: build
 
   doc:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -43,7 +43,6 @@ jobs:
       - run: 'apt-get install -y apt-utils'
       - run: 'apt-get install -y sudo'
       - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install -y libisl15 libmpfr4'
       - run: 'apt-get install --reinstall make'
       - run: 'cd ./scripts && make prepare'
       - run: 'cd ./scripts && make config'
@@ -280,7 +279,7 @@ jobs:
       - run: 'cd build/coccinelle && ./autogen'
       - run: 'cd build/coccinelle && ./configure'
       - run: 'cd build/coccinelle && make'
-      - run: 'cd build/coccinelle && make install'
+      - run: 'cd build/coccinelle && sudo make install'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
