@@ -34,7 +34,7 @@ jobs:
   doc:
     machine:
       image: ubuntu-1604:201903-01
-      size: large
+      resource_class: large
     working_directory: ~/circulate
     steps:
       - checkout
