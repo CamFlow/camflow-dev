@@ -260,8 +260,8 @@ jobs:
           paths:
             - test/smatch.txt
   coccinelle:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
