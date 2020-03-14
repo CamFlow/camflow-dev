@@ -70,8 +70,8 @@ compile:
 run: run_analysis
 
 run_analysis:
-	python syscall.py /home/circleci/circulatebuild/linux-stable/db.sqlite syscalls.txt syslist.txt
-	python analyze.py /home/circleci/circulatebuild/linux-stable/db.sqlite syslist.txt syshooks.txt
+	python syscall.py /home/circleci/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	python analyze.py /home/circleci/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
 	python stats.py syshooks.txt ../docs/STATS.md
 	cd .. && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md
 
