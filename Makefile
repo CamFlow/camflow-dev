@@ -107,7 +107,6 @@ config_circle: copy_change
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
-	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
 
 hooklist:
 	echo 'Generating HOOKS.md...'
