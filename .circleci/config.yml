@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   checkout:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -32,7 +32,7 @@ jobs:
 
   doc:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -57,7 +57,7 @@ jobs:
             - scripts
   security:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -74,7 +74,7 @@ jobs:
       - run: 'make compile_security_only'
   compile_default:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -91,7 +91,7 @@ jobs:
       - run: 'make compile_kernel'
   compile_no_flow_friendly:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -109,7 +109,7 @@ jobs:
       - run: 'make compile_kernel'
   compile_whole:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -127,7 +127,7 @@ jobs:
       - run: 'make compile_kernel'
   compile_persist:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -145,7 +145,7 @@ jobs:
       - run: 'make compile_kernel'
   sparse:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -174,7 +174,7 @@ jobs:
             - test/sparse.txt
   flawfinder:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -198,7 +198,7 @@ jobs:
             - test/flawfinder.txt
   checkpatch:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -224,7 +224,7 @@ jobs:
             - test/headers_checkpatch.txt
   smatch:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -249,7 +249,7 @@ jobs:
             - test/smatch.txt
   coccinelle:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
@@ -282,7 +282,7 @@ jobs:
             - test/cocci.txt
   deploy_dev:
     docker:
-      - image: moul/kernel-builder:latest
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
