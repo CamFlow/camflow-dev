@@ -18,7 +18,7 @@ jobs:
               echo 'Build environment was not cached.'
               apt-get update -qq
               apt-get install -y sudo
-              apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev
+              apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev
               make prepare_kernel
               make save_space
             fi
@@ -40,9 +40,14 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cd ./scripts && make prepare'
+      - run: 'cd ./build && git clone https://github.com/acmel/dwarves'
+      - run: 'cd ./build/dwarves && git checkout v1.16'
+      - run: 'cd ./build/dwarves && mkdir build'
+      - run: 'cd ./build/dwarves/build && cmake -D__LIB=lib ..'
+      - run: 'cd ./build/dwarves/build && make install'
       - run: 'cd ./scripts && make config'
       - run:
           command: 'cd ./scripts && make compile'
@@ -65,7 +70,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -82,7 +87,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -99,7 +104,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -117,7 +122,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -135,7 +140,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -153,7 +158,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cd build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git'
       - run: 'cd build/sparse && git checkout v0.6.1'
@@ -182,7 +187,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install -y flawfinder'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -206,7 +211,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -232,7 +237,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install --reinstall make'
       - run: 'make prepare_smatch'
       - run: 'cp -f scripts/.config build/linux-stable/'
@@ -257,7 +262,7 @@ jobs:
           at: ~/circulate
       - run: 'apt-get update -qq'
       - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf dwarves automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'apt-get install -y ocaml-native-compilers ocaml-findlib menhir libmenhir-ocaml-dev libpcre-ocaml-dev libparmap-ocaml-dev texlive-fonts-extra'
       - run: 'apt-get install --reinstall make'
       - run: 'apt-get build-dep -y coccinelle'
