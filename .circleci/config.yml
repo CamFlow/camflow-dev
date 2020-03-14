@@ -16,10 +16,10 @@ jobs:
               echo 'Build environment was cached.'
             else
               echo 'Build environment was not cached.'
-              apt-get update -qq
-              apt-get install -y apt-utils
-              apt-get install -y sudo
-              apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev
+              sudo apt-get update -qq
+              sudo apt-get install -y apt-utils
+              sudo apt-get install -y sudo
+              sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev
               make prepare_kernel
               make save_space
             fi
