@@ -1,8 +1,8 @@
 version: 2.1
 jobs:
   checkout:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -58,8 +58,8 @@ jobs:
             - docs
             - scripts
   security:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -76,8 +76,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_security_only'
   compile_default:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -94,8 +94,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_kernel'
   compile_no_flow_friendly:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -113,8 +113,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_SECURITY_FLOW_FRIENDLY=y/CONFIG_SECURITY_FLOW_FRIENDLY=n/" .config'
       - run: 'make compile_kernel'
   compile_whole:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -132,8 +132,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/# CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM is not set/CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM=y/" .config'
       - run: 'make compile_kernel'
   compile_persist:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -151,8 +151,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/# CONFIG_SECURITY_PROVENANCE_PERSISTENCE is not set/CONFIG_SECURITY_PROVENANCE_PERSISTENCE=y/" .config'
       - run: 'make compile_kernel'
   sparse:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -181,8 +181,8 @@ jobs:
           paths:
             - test/sparse.txt
   flawfinder:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -206,8 +206,8 @@ jobs:
           paths:
             - test/flawfinder.txt
   checkpatch:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -233,8 +233,8 @@ jobs:
             - test/checkpatch.txt
             - test/headers_checkpatch.txt
   smatch:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
@@ -293,8 +293,8 @@ jobs:
           paths:
             - test/cocci.txt
   deploy_dev:
-    docker:
-      - image: luxas/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
