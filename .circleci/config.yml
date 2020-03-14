@@ -1,8 +1,8 @@
 version: 2.1
 jobs:
   checkout:
-    machine:
-      image: ubuntu-1604:201903-01
+    docker:
+      - image: luxas/kernel-builder:latest
     working_directory: ~/circulate
     steps:
       - checkout
