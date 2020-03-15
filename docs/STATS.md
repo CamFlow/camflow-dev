@@ -327,7 +327,7 @@ SYSTEM CALL NAME | NUMBER OF HOOKS CALLED |
 __x64_sys_writev|7|
 __x64_sys_sync|7|
 __x64_sys_sigsuspend|5|
-__x64_sys_execve|34|
+__x64_sys_execve|38|
 __x64_sys_fallocate|7|
 __x64_sys_fchdir|8|
 __x64_sys_clone|29|
@@ -350,7 +350,7 @@ __x64_sys_setgid|9|
 __x64_sys_sched_getscheduler|1|
 __x64_sys_lsetxattr|18|
 __x64_sys_bpf|27|
-__x64_sys_creat|25|
+__x64_sys_creat|29|
 __x64_sys_newlstat|16|
 __x64_sys_capget|6|
 __x64_sys_flistxattr|8|
@@ -381,15 +381,15 @@ __x64_sys_wait4|9|
 __x64_sys_membarrier|5|
 __x64_sys_readahead|5|
 __x64_sys_getrandom|5|
-__x64_sys_mknodat|13|
-__x64_sys_fchown|12|
+__x64_sys_mknodat|15|
+__x64_sys_fchown|14|
 __x64_sys_write|7|
 __x64_sys_getpgid|1|
-__x64_sys_mmap_pgoff|23|
+__x64_sys_mmap_pgoff|28|
 __x64_sys_select|5|
 __x64_sys_sched_getparam|6|
 __x64_sys_fdatasync|6|
-__x64_sys_fchmod|12|
+__x64_sys_fchmod|14|
 __x64_sys_setresgid|9|
 __x64_sys_old_readdir|7|
 __x64_sys_setitimer|5|
@@ -414,7 +414,7 @@ __x64_sys_lchown|19|
 __x64_sys_newfstatat|16|
 __x64_sys_lgetxattr|17|
 __x64_sys_getrusage|8|
-__x64_sys_ftruncate|11|
+__x64_sys_ftruncate|14|
 __x64_sys_prlimit64|7|
 __x64_sys_iopl|6|
 __x64_sys_uname|5|
@@ -426,7 +426,7 @@ __x64_sys_chown|19|
 __x64_sys_timer_delete|5|
 __x64_sys_chmod|19|
 __x64_sys_getpriority|5|
-__x64_sys_mmap|23|
+__x64_sys_mmap|28|
 __x64_sys_sysctl|5|
 __x64_sys_pwrite64|7|
 __x64_sys_pselect6|5|
@@ -452,7 +452,7 @@ __x64_sys_setxattr|18|
 __x64_sys_getpgrp|1|
 __x64_sys_fchownat|19|
 __x64_sys_chdir|15|
-__x64_sys_open|25|
+__x64_sys_open|29|
 __x64_sys_getitimer|5|
 __x64_sys_symlink|12|
 __x64_sys_access|16|
@@ -468,7 +468,7 @@ __x64_sys_tgkill|7|
 __x64_sys_rt_tgsigqueueinfo|7|
 __x64_sys_sched_setscheduler|6|
 __x64_sys_setsid|8|
-__x64_sys_mknod|13|
+__x64_sys_mknod|15|
 __x64_sys_dup2|6|
 __x64_sys_dup3|6|
 __x64_sys_chroot|16|
@@ -530,7 +530,7 @@ __x64_sys_sched_setattr|6|
 __x64_sys_truncate|19|
 __x64_sys_pipe|11|
 __x64_sys_setresuid|10|
-__x64_sys_openat|25|
+__x64_sys_openat|29|
 __x64_sys_getdents64|7|
 
 
@@ -544,34 +544,33 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 8|8|
 9|13|
 10|7|
-11|4|
-12|11|
-13|2|
-14|1|
-15|4|
+11|3|
+12|9|
+14|4|
+15|6|
 16|18|
 17|6|
 18|8|
 19|7|
 21|2|
 22|1|
-23|2|
-25|4|
+25|1|
 27|1|
-29|3|
-34|1|
+28|2|
+29|6|
+38|1|
 
 
 ## Statistics of System Calls Arranged by Weighted API Importance
 WEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 --------------------------------------------|------------------------|
-mmap|23|
+mmap|28|
 vfork|29|
 exit|21|
 exit_group|21|
 write|7|
 read|7|
-open|25|
+open|29|
 gettid|N/A|
 madvise|N/A|
 munmap|8|
@@ -595,10 +594,10 @@ getcwd|5|
 clock_getres|5|
 getrlimit|6|
 newfstatat|16|
-openat|25|
+openat|29|
 dup2|6|
 clone|29|
-execve|34|
+execve|38|
 kill|7|
 setresuid|10|
 setresgid|9|
@@ -631,21 +630,21 @@ chdir|15|
 getegid|N/A|
 chmod|19|
 setsockopt|N/A|
-fchmod|12|
+fchmod|14|
 statfs|16|
 recvfrom|N/A|
 sendmsg|N/A|
 fsync|6|
 sched_get_priority_max|N/A|
 sched_get_priority_min|N/A|
-ftruncate|11|
+ftruncate|14|
 umask|N/A|
 rmdir|12|
 pipe2|11|
 getsockopt|N/A|
 chown|19|
 link|17|
-fchown|12|
+fchown|14|
 sigaltstack|5|
 shutdown|N/A|
 getppid|N/A|
@@ -695,12 +694,12 @@ epoll_create1|N/A|
 setpriority|6|
 dup3|6|
 sched_getparam|6|
-mknod|13|
+mknod|15|
 sched_getscheduler|1|
 chroot|16|
 sync|7|
 fchdir|8|
-creat|25|
+creat|29|
 mlock|N/A|
 getpgrp|1|
 utimensat|18|
@@ -780,7 +779,7 @@ ioprio_get|N/A|
 timer_delete|5|
 timer_create|5|
 timer_settime|5|
-mknodat|13|
+mknodat|15|
 setdomainname|5|
 prlimit64|7|
 vhangup|N/A|
@@ -889,10 +888,10 @@ get_kernel_syms|N/A|
 UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 ----------------------------------------------|------------------------|
 exit|21|
-mmap|23|
+mmap|28|
 write|7|
 exit_group|21|
-open|25|
+open|29|
 read|7|
 madvise|N/A|
 gettid|N/A|
@@ -918,8 +917,8 @@ clock_getres|5|
 fstat|6|
 getrlimit|6|
 newfstatat|16|
-openat|25|
-execve|34|
+openat|29|
+execve|38|
 dup2|6|
 kill|7|
 setpgid|6|
@@ -964,7 +963,7 @@ rename|12|
 sendmsg|N/A|
 pipe2|11|
 chmod|19|
-ftruncate|11|
+ftruncate|14|
 statfs|16|
 getsockopt|N/A|
 rmdir|12|
@@ -972,7 +971,7 @@ getresuid|N/A|
 getresgid|N/A|
 getpeername|N/A|
 shmdt|N/A|
-fchmod|12|
+fchmod|14|
 shmctl|N/A|
 shmat|N/A|
 sigaltstack|5|
@@ -983,7 +982,7 @@ accept|N/A|
 link|17|
 fstatfs|6|
 pread64|7|
-fchown|12|
+fchown|14|
 getppid|N/A|
 pwrite64|7|
 umask|N/A|
@@ -1031,7 +1030,7 @@ getpgrp|1|
 setgroups|N/A|
 setpriority|6|
 sync|7|
-mknod|13|
+mknod|15|
 setitimer|5|
 msync|N/A|
 epoll_create1|N/A|
@@ -1047,7 +1046,7 @@ rt_sigsuspend|5|
 chroot|16|
 rt_sigtimedwait|5|
 munlock|N/A|
-creat|25|
+creat|29|
 pause|5|
 flock|N/A|
 mlockall|N/A|
@@ -1110,7 +1109,7 @@ io_setup|N/A|
 linkat|17|
 unshare|16|
 reboot|25|
-mknodat|13|
+mknodat|15|
 msgrcv|N/A|
 time|N/A|
 waitid|9|
