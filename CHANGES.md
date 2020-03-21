@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.6.5           | 5.4.15       	 | N/A				|
+| 0.6.5           | 5.5.11       	 | N/A				|
 | 0.6.4           | 5.4.15       	 | 30/01/2020	|
 | 0.6.3           | 5.2.9       	 | 23/08/2019	|
 | 0.6.2           | 5.1.9	       	 | 17/06/2019	|
@@ -51,7 +51,7 @@
 ### v0.6.5
 ```
 - Fix issue to build on Fedora 31 (new gcc version etc.).
-- Update to kernel version 5.5.8.
+- Update to kernel version 5.5.11.
 ```
 
 ### v0.6.4
