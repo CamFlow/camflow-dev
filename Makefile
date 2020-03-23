@@ -1,5 +1,5 @@
-kernel-version=5.4.15
-lsm-version=0.6.4
+kernel-version=5.5.11
+lsm-version=0.6.5
 arch=x86_64
 
 cont-email != $(git log --format="%ae" HEAD^!)
@@ -105,6 +105,8 @@ config_old: copy_change copy_config
 config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
 
 hooklist:
 	echo 'Generating HOOKS.md...'
@@ -276,3 +278,13 @@ save_space:
 	cd build && rm -rf information-flow-patch
 	cd build/linux-stable && rm -rf .git
 	cd build/pristine/linux-stable && rm -rf .git
+
+prepare_dwarves:
+	mkdir -p build
+	cd ./build && git clone https://github.com/acmel/dwarves
+	cd ./build/dwarves && git checkout v1.16
+	cd ./build/dwarves && mkdir build
+	cd ./build/dwarves/build && cmake -D__LIB=lib ..
+
+install_dwarves:
+	cd ./build/dwarves/build && make install

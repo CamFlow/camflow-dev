@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only WITH Linux-syscall-note
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -20,6 +20,13 @@
 #include <linux/socket.h>
 #include <linux/mutex.h>
 #endif
+#ifndef __KERNEL__
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
@@ -29,12 +36,12 @@
 
 #define CAMFLOW_VERSION_MAJOR           0
 #define CAMFLOW_VERSION_MINOR           6
-#define CAMFLOW_VERSION_PATCH           4
+#define CAMFLOW_VERSION_PATCH           5
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "d4590a58333fb26175fab9a0c23a7057296fc672"
+#define CAMFLOW_COMMIT "3377c78151e9b8cd6a2a17d96ff05580085d2f07"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -299,7 +306,7 @@ struct disc_node_struct {
 struct xattr_prov_struct {
 	basic_elements;
 	shared_node_elements;
-	char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
+	char name[PROV_XATTR_NAME_SIZE];
 	uint8_t value[PROV_XATTR_VALUE_SIZE];
 	size_t size;
 };

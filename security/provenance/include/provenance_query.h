@@ -78,7 +78,7 @@ static inline int call_query_hooks(prov_entry_t *from,
 
 	rc = call_provenance_flow(from, edge, to);
 	if ((rc & PROVENANCE_RAISE_WARNING) == PROVENANCE_RAISE_WARNING)
-		pr_warning("Provenance: warning raised.\n");
+		pr_warn("Provenance: warning raised.\n");
 	if ((rc & PROVENANCE_PREVENT_FLOW) == PROVENANCE_PREVENT_FLOW) {
 		pr_err("Provenance: error raised.\n");
 		edge->relation_info.allowed = FLOW_DISALLOWED;

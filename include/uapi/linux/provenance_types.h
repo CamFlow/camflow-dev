@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only WITH Linux-syscall-note
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -291,4 +291,4 @@ struct prov_type {
 	uint8_t is_relation;
 };
 
-#endif // _UAPI_LINUX_PROVENANCE_TYPES_H
+#endif /* _UAPI_LINUX_PROVENANCE_TYPES_H */

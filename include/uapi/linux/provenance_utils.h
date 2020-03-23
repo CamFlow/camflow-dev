@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only WITH Linux-syscall-note
+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -15,6 +15,12 @@
 
  #ifndef _UAPI_LINUX_PROVENANCE_UTILS_H
  #define _UAPI_LINUX_PROVENANCE_UTILS_H
+
+ #ifndef __KERNEL__
+ #include <stdint.h>
+ #include <stdbool.h>
+ #include <string.h>
+ #endif
 
  #define PROV_GOLDEN_RATIO_64            0x61C8864680B583EBUL
 static inline uint32_t prov_hash(uint64_t val)
@@ -39,7 +45,7 @@ static inline void prov_bloom_add(uint8_t bloom[PROV_N_BYTES], uint64_t val)
 	}
 }
 
-// djb2 hash implementation by Dan Bernstein
+/* djb2 hash implementation by Dan Bernstein */
 static inline uint64_t djb2_hash(const char *str)
 {
 	uint64_t hash = 5381;

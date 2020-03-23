@@ -1,14 +1,14 @@
 version: 2.1
 jobs:
   checkout:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - restore_cache:
          keys:
-           - build-{{ checksum "Makefile" }}
+           - build-machine-{{ checksum "Makefile" }}
       - run:
           name: 'Prepare build environment...'
           command: |
@@ -16,14 +16,15 @@ jobs:
               echo 'Build environment was cached.'
             else
               echo 'Build environment was not cached.'
-              apt-get update -qq
-              apt-get install -y sudo
-              apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev
+              sudo apt-get update -qq
+              sudo apt-get install -y apt-utils
+              sudo apt-get install -y sudo
+              sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev
               make prepare_kernel
               make save_space
             fi
       - save_cache:
-          key: build-{{ checksum "Makefile" }}
+          key: build-machine-{{ checksum "Makefile" }}
           paths:
             - build
       - persist_to_workspace:
@@ -31,22 +32,24 @@ jobs:
           paths: build
 
   doc:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cd ./scripts && make prepare'
       - run: 'cd ./scripts && make config'
       - run:
           command: 'cd ./scripts && make compile'
           no_output_timeout: '30m'
+      - run: 'pwd'
       - run: 'cd ./scripts && make run'
       - run: 'cd ./scripts && cat syslist.txt'
       - run: 'make doc'
@@ -56,51 +59,54 @@ jobs:
             - docs
             - scripts
   security:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_security_only'
   compile_default:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_kernel'
   compile_no_flow_friendly:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -108,17 +114,18 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_SECURITY_FLOW_FRIENDLY=y/CONFIG_SECURITY_FLOW_FRIENDLY=n/" .config'
       - run: 'make compile_kernel'
   compile_whole:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -126,17 +133,18 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/# CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM is not set/CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM=y/" .config'
       - run: 'make compile_kernel'
   compile_persist:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -144,22 +152,22 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/# CONFIG_SECURITY_PROVENANCE_PERSISTENCE is not set/CONFIG_SECURITY_PROVENANCE_PERSISTENCE=y/" .config'
       - run: 'make compile_kernel'
   sparse:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cd build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git'
+      - run: 'cd build/sparse && git checkout v0.6.1'
       - run: 'cd build/sparse && make'
-      - run: 'cd build/sparse && make install'
-      - run: 'cp -f /root/bin/sparse /bin/sparse'
-      - run: 'cp -f /root/bin/cgcc /bin/cgcc'
+      - run: 'cd build/sparse && sudo make install'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -172,18 +180,19 @@ jobs:
           paths:
             - test/sparse.txt
   flawfinder:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install -y flawfinder'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install -y flawfinder'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -196,17 +205,18 @@ jobs:
           paths:
             - test/flawfinder.txt
   checkpatch:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -222,17 +232,18 @@ jobs:
             - test/checkpatch.txt
             - test/headers_checkpatch.txt
   smatch:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install --reinstall make'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_smatch'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
@@ -247,24 +258,27 @@ jobs:
           paths:
             - test/smatch.txt
   coccinelle:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
-      - run: 'apt-get install -y ocaml-native-compilers ocaml-findlib menhir libmenhir-ocaml-dev libpcre-ocaml-dev libparmap-ocaml-dev texlive-fonts-extra'
-      - run: 'apt-get install --reinstall make'
-      - run: 'apt-get build-dep -y coccinelle'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install -y ocaml-native-compilers ocaml-findlib menhir libmenhir-ocaml-dev libpcre-ocaml-dev libparmap-ocaml-dev texlive-fonts-extra'
+      - run: 'sudo apt-get install --reinstall make'
+      - run: 'sudo apt-get build-dep -y coccinelle'
       - run: 'cd build && git clone https://github.com/coccinelle/coccinelle.git'
+      - run: 'cd build/coccinelle && git checkout 1.0.8'
+      - run: 'cd build/coccinelle && make clean'
       - run: 'cd build/coccinelle && ./autogen'
       - run: 'cd build/coccinelle && ./configure'
       - run: 'cd build/coccinelle && make'
-      - run: 'cd build/coccinelle && make install'
+      - run: 'cd build/coccinelle && sudo make install'
       - run: 'cp -f scripts/.config build/linux-stable/'
       - run: 'make config_circle'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
@@ -278,18 +292,19 @@ jobs:
           paths:
             - test/cocci.txt
   deploy_dev:
-    docker:
-      - image: moul/kernel-builder:latest
+    machine:
+      image: ubuntu-1604:201903-01
     working_directory: ~/circulate
     steps:
       - checkout
       - attach_workspace:
           at: ~/circulate
-      - run: 'apt-get update -qq'
-      - run: 'apt-get install -y sudo'
-      - run: 'apt-get install -y git rsync'
-      - run: 'apt-get install -y ruby'
-      - run: 'ruby ./scripts/clean_test.rb' 
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y git rsync'
+      - run: 'sudo apt-get install -y ruby'
+      - run: 'ruby ./scripts/clean_test.rb'
       - run: 'cd test && ls'
       - deploy:
           name: Deploy

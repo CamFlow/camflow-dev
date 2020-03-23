@@ -330,7 +330,7 @@ __x64_sys_sigsuspend|5|
 __x64_sys_execve|38|
 __x64_sys_fallocate|7|
 __x64_sys_fchdir|8|
-__x64_sys_clone|27|
+__x64_sys_clone|29|
 __x64_sys_preadv2|7|
 __x64_sys_stat|16|
 __x64_sys_llistxattr|17|
@@ -431,7 +431,7 @@ __x64_sys_sysctl|5|
 __x64_sys_pwrite64|7|
 __x64_sys_pselect6|5|
 __x64_sys_setfsgid|9|
-__x64_sys_ptrace|16|
+__x64_sys_ptrace|19|
 __x64_sys_clock_adjtime|5|
 __x64_sys_pipe2|11|
 __x64_sys_linkat|17|
@@ -441,11 +441,11 @@ __x64_sys_timer_create|5|
 __x64_sys_renameat|12|
 __x64_sys_setfsuid|10|
 __x64_sys_lseek|5|
-__x64_sys_fork|27|
+__x64_sys_fork|29|
 __x64_sys_sync_file_range|5|
 __x64_sys_pread64|7|
 __x64_sys_getdents|7|
-__x64_sys_perf_event_open|12|
+__x64_sys_perf_event_open|15|
 __x64_sys_statfs|16|
 __x64_sys_getcwd|5|
 __x64_sys_setxattr|18|
@@ -459,7 +459,7 @@ __x64_sys_access|16|
 __x64_sys_llseek|5|
 __x64_sys_mount|22|
 __x64_sys_fchmodat|19|
-__x64_sys_vfork|27|
+__x64_sys_vfork|29|
 __x64_sys_kill|7|
 __x64_sys_umount|18|
 __x64_sys_pause|5|
@@ -479,8 +479,8 @@ __x64_sys_symlinkat|12|
 __x64_sys_splice|8|
 __x64_sys_fcntl|10|
 __x64_sys_readv|7|
-__x64_sys_exit|20|
-__x64_sys_reboot|24|
+__x64_sys_exit|21|
+__x64_sys_reboot|25|
 __x64_sys_sendfile|7|
 __x64_sys_rt_sigpending|5|
 __x64_sys_sched_yield|5|
@@ -515,7 +515,7 @@ __x64_sys_close|6|
 __x64_sys_dup|5|
 __x64_sys_mkdir|12|
 __x64_sys_poll|5|
-__x64_sys_exit_group|20|
+__x64_sys_exit_group|21|
 __x64_sys_setrlimit|6|
 __x64_sys_statx|16|
 __x64_sys_newfstat|6|
@@ -545,19 +545,19 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 9|13|
 10|7|
 11|3|
-12|10|
+12|9|
 14|4|
-15|5|
-16|19|
+15|6|
+16|18|
 17|6|
 18|8|
-19|6|
-20|2|
+19|7|
+21|2|
 22|1|
-24|1|
-27|4|
+25|1|
+27|1|
 28|2|
-29|3|
+29|6|
 38|1|
 
 
@@ -565,9 +565,9 @@ NUMBER OF HOOKS CALLED | NUMBER OF SYSTEM CALLS |
 WEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 --------------------------------------------|------------------------|
 mmap|28|
-vfork|27|
-exit|20|
-exit_group|20|
+vfork|29|
+exit|21|
+exit_group|21|
 write|7|
 read|7|
 open|29|
@@ -596,7 +596,7 @@ getrlimit|6|
 newfstatat|16|
 openat|29|
 dup2|6|
-clone|27|
+clone|29|
 execve|38|
 kill|7|
 setresuid|10|
@@ -741,7 +741,7 @@ umount2|N/A|
 rt_sigtimedwait|5|
 timerfd_create|N/A|
 timerfd_settime|N/A|
-ptrace|16|
+ptrace|19|
 ioprio_set|N/A|
 fchmodat|19|
 fchownat|19|
@@ -756,7 +756,7 @@ capset|10|
 personality|N/A|
 iopl|6|
 sched_setaffinity|6|
-reboot|24|
+reboot|25|
 clock_settime|5|
 unshare|16|
 symlinkat|12|
@@ -790,7 +790,7 @@ init_module|N/A|
 finit_module|N/A|
 adjtimex|8|
 waitid|9|
-perf_event_open|12|
+perf_event_open|15|
 process_vm_readv|N/A|
 sendfile|7|
 readahead|5|
@@ -814,7 +814,7 @@ keyctl|N/A|
 set_tid_address|N/A|
 set_robust_list|N/A|
 getdents64|7|
-fork|27|
+fork|29|
 delete_module|N/A|
 request_key|N/A|
 pwritev|7|
@@ -887,10 +887,10 @@ get_kernel_syms|N/A|
 ## Statistics of System Calls Arranged by Unweighted API Importance
 UNWEIGHTED API CALL (MOST TO LEAST IMPORTANT) | NUMBER OF HOOKS CALLED |
 ----------------------------------------------|------------------------|
-exit|20|
+exit|21|
 mmap|28|
 write|7|
-exit_group|20|
+exit_group|21|
 open|29|
 read|7|
 madvise|N/A|
@@ -898,7 +898,7 @@ gettid|N/A|
 futex|N/A|
 munmap|8|
 rt_sigprocmask|5|
-clone|27|
+clone|29|
 close|6|
 sched_yield|5|
 mprotect|N/A|
@@ -923,7 +923,7 @@ dup2|6|
 kill|7|
 setpgid|6|
 sched_setscheduler|6|
-vfork|27|
+vfork|29|
 setresgid|9|
 setresuid|10|
 sched_setparam|6|
@@ -1083,7 +1083,7 @@ signalfd4|N/A|
 ioprio_set|N/A|
 faccessat|16|
 fsetxattr|11|
-ptrace|16|
+ptrace|19|
 tkill|7|
 unlinkat|14|
 readlinkat|16|
@@ -1101,14 +1101,14 @@ msgctl|N/A|
 msgsnd|N/A|
 lremovexattr|16|
 clock_nanosleep|5|
-perf_event_open|12|
+perf_event_open|15|
 io_submit|N/A|
 capset|10|
 renameat|12|
 io_setup|N/A|
 linkat|17|
 unshare|16|
-reboot|24|
+reboot|25|
 mknodat|15|
 msgrcv|N/A|
 time|N/A|
@@ -1151,7 +1151,7 @@ getdents64|7|
 add_key|N/A|
 prlimit64|7|
 acct|N/A|
-fork|27|
+fork|29|
 semtimedop|N/A|
 open_by_handle_at|N/A|
 epoll_pwait|N/A|

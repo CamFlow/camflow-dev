@@ -1,6 +1,14 @@
 ------------------------
 security/provenance/fs.c
 ------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/fs.c', please use '//' instead
+#1: FILE: security/provenance/fs.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/fs.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:LONG_LINE: line over 80 characters
 #35: FILE: security/provenance/fs.c:35:
 +#define declare_file_operations(ops_name, write_op, read_op)    static const struct file_operations ops_name = { \
@@ -705,7 +713,7 @@ WARNING:LONG_LINE: line over 80 characters
 #983: FILE: security/provenance/fs.c:983:
 +	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
 
-total: 0 errors, 160 warnings, 1005 lines checked
+total: 0 errors, 162 warnings, 1005 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -714,6 +722,14 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/hooks.c', please use '//' instead
+#1: FILE: security/provenance/hooks.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/hooks.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #92: FILE: security/provenance/hooks.c:92:
 + * Record provenance relation RL_PROC_READ (by calling "uses_two" function) and RL_CLONE (by calling "informs" function).
@@ -1998,7 +2014,7 @@ WARNING:LONG_LINE_STRING: line over 80 characters
 #2696: FILE: security/provenance/hooks.c:2696:
 +	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
 
-total: 0 errors, 321 warnings, 2706 lines checked
+total: 0 errors, 323 warnings, 2706 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2007,6 +2023,14 @@ security/provenance/hooks.c has style problems, please review.
 -----------------------------
 security/provenance/machine.c
 -----------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/machine.c', please use '//' instead
+#1: FILE: security/provenance/machine.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/machine.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:LONG_LINE: line over 80 characters
 #26: FILE: security/provenance/machine.c:26:
 +	__memcpy_ss(&(prov_machine->machine_info.utsname), sizeof(struct new_utsname), uname, sizeof(struct new_utsname));
@@ -2015,7 +2039,7 @@ WARNING:LONG_LINE: line over 80 characters
 #39: FILE: security/provenance/machine.c:39:
 +	__memcpy_ss(prov_machine->machine_info.commit, PROV_COMMIT_MAX_LENGTH, CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
 
-total: 0 errors, 2 warnings, 44 lines checked
+total: 0 errors, 4 warnings, 44 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2024,6 +2048,14 @@ security/provenance/machine.c has style problems, please review.
 -------------------------------
 security/provenance/memcpy_ss.c
 -------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/memcpy_ss.c', please use '//' instead
+#1: FILE: security/provenance/memcpy_ss.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/memcpy_ss.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:INCLUDE_LINUX: Use #include <linux/bug.h> instead of <asm/bug.h>
 #18: FILE: security/provenance/memcpy_ss.c:18:
 +#include <asm/bug.h>
@@ -2060,7 +2092,7 @@ WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__mem
 #59: FILE: security/provenance/memcpy_ss.c:59:
 +		pr_err("__memcpy_ss: dest and src overlap.");
 
-total: 0 errors, 9 warnings, 65 lines checked
+total: 0 errors, 11 warnings, 65 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2069,6 +2101,14 @@ security/provenance/memcpy_ss.c has style problems, please review.
 -------------------------------
 security/provenance/netfilter.c
 -------------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/netfilter.c', please use '//' instead
+#1: FILE: security/provenance/netfilter.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/netfilter.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #22: FILE: security/provenance/netfilter.c:22:
 + * @brief Record provenance of an outgoing packets, which is done through NetFilter (instead of LSM) hooks.
@@ -2089,7 +2129,7 @@ WARNING:LONG_LINE: line over 80 characters
 #83: FILE: security/provenance/netfilter.c:83:
 +	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
 
-total: 0 errors, 5 warnings, 112 lines checked
+total: 0 errors, 7 warnings, 112 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2098,18 +2138,48 @@ security/provenance/netfilter.c has style problems, please review.
 -------------------------------
 security/provenance/propagate.c
 -------------------------------
-total: 0 errors, 0 warnings, 43 lines checked
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/propagate.c', please use '//' instead
+#1: FILE: security/provenance/propagate.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
 
-security/provenance/propagate.c has no obvious style problems and is ready for submission.
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/propagate.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+total: 0 errors, 2 warnings, 43 lines checked
+
+NOTE: For some of the reported defects, checkpatch may be able to
+      mechanically convert to the typical style using --fix or --fix-inplace.
+
+security/provenance/propagate.c has style problems, please review.
 ---------------------------
 security/provenance/query.c
 ---------------------------
-total: 0 errors, 0 warnings, 49 lines checked
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/query.c', please use '//' instead
+#1: FILE: security/provenance/query.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
 
-security/provenance/query.c has no obvious style problems and is ready for submission.
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/query.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+total: 0 errors, 2 warnings, 49 lines checked
+
+NOTE: For some of the reported defects, checkpatch may be able to
+      mechanically convert to the typical style using --fix or --fix-inplace.
+
+security/provenance/query.c has style problems, please review.
 ---------------------------
 security/provenance/relay.c
 ---------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/relay.c', please use '//' instead
+#1: FILE: security/provenance/relay.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/relay.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #37: FILE: security/provenance/relay.c:37:
 +	struct rchan *prov;             // Relay buffer for regular provenance entries.
@@ -2286,7 +2356,7 @@ WARNING:LONG_LINE: line over 80 characters
 #388: FILE: security/provenance/relay.c:388:
 +	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
 
-total: 0 errors, 44 warnings, 398 lines checked
+total: 0 errors, 46 warnings, 398 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -2295,6 +2365,14 @@ security/provenance/relay.c has style problems, please review.
 --------------------------
 security/provenance/type.c
 --------------------------
+WARNING:SPDX_LICENSE_TAG: Improper SPDX comment style for 'security/provenance/type.c', please use '//' instead
+#1: FILE: security/provenance/type.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
+WARNING:SPDX_LICENSE_TAG: Missing or malformed SPDX-License-Identifier tag in line 1
+#1: FILE: security/provenance/type.c:1:
++/* SPDX-License-Identifier: GPL-2.0 */
+
 WARNING:LONG_LINE: line over 80 characters
 #19: FILE: security/provenance/type.c:19:
 +static const char RL_STR_UNKNOWN[] = "unknown";                                                         // unknown relation should not happen
@@ -2833,11 +2911,15 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 
 WARNING:LONG_LINE: line over 80 characters
 #156: FILE: security/provenance/type.c:156:
-+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
++#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
 #156: FILE: security/provenance/type.c:156:
-+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
++#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
+
+WARNING:BRACES: braces {} are not necessary for single statement blocks
+#156: FILE: security/provenance/type.c:156:
++#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
 WARNING:LONG_LINE: line over 80 characters
 #396: FILE: security/provenance/type.c:396:
@@ -2851,7 +2933,7 @@ WARNING:LONG_LINE: line over 80 characters
 #472: FILE: security/provenance/type.c:472:
 +	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
 
-total: 0 errors, 139 warnings, 585 lines checked
+total: 0 errors, 142 warnings, 585 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
