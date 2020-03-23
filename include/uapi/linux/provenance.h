@@ -19,7 +19,7 @@
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
-#include <linux/in6.h>
+#include <netinet/in.h>
 
 #define xstr(s)         str(s)
 #define str(s)          # s
