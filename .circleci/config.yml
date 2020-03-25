@@ -291,6 +291,27 @@ jobs:
           root: .
           paths:
             - test/cocci.txt
+  tinkerbell:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
+      - run: 'cd build && git clone https://github.com/TinkerBellSystem/lsm'
+      - run: 'cd build/lsm && git checkout thomas'
+      - run: 'cd build/lsm && make prepare'
+      - run: 'cd build/lsm && make config'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/cocci.txt
   deploy_dev:
     machine:
       image: ubuntu-1604:201903-01
@@ -392,6 +413,12 @@ workflows:
             - compile_whole
             - compile_persist
       - coccinelle:
+          requires:
+            - compile_default
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
+      - tinkerbell:
           requires:
             - compile_default
             - compile_no_flow_friendly
