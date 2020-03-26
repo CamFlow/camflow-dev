@@ -310,6 +310,11 @@ jobs:
       - run: 'cd build/compiler && make prepare'
       - run: 'cd build/compiler && make config'
       - run: 'cd build/compiler && make compile'
+      - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
+      - run: 'cd build/graph-matching && git checkout thomas'
+      - run: 'cd build/graph-matching && source venv/bin/activate'
+      - run: 'cd build/graph-matching/scripts && make all'
+      - run: 'cd build/graph-matching/scripts && make analyse'
       - persist_to_workspace:
           root: .
           paths:
