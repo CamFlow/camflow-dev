@@ -308,7 +308,7 @@ jobs:
       - run: 'cd build/compiler && git checkout thomas'
       - run: 'cd build/compiler && make prepare'
       - run: 'cd build/compiler && make config'
-      - run: 'cd scripts && make config_circle'
+      - run: 'cd scripts && make config_kernel'
       - run: 'cd build/compiler && make compile'
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
       - run: 'cd build/graph-matching && git checkout thomas'
