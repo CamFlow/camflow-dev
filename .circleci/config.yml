@@ -313,7 +313,6 @@ jobs:
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
       - run: 'cd build/graph-matching && git checkout thomas'
       - run: 'cd build/graph-matching/scripts && make all'
-      - run: 'cd build/graph-matching/scripts && make analyze'
       - persist_to_workspace:
           root: .
           paths:
