@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -9,6 +12,7 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
+
 #ifndef _UAPI_LINUX_PROVENANCE_TYPES_H
 #define _UAPI_LINUX_PROVENANCE_TYPES_H
 
@@ -287,4 +291,4 @@ struct prov_type {
 	uint8_t is_relation;
 };
 
-#endif // _UAPI_LINUX_PROVENANCE_TYPES_H
+#endif /* _UAPI_LINUX_PROVENANCE_TYPES_H */

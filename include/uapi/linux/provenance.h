@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -9,12 +12,20 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
+
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
 #ifdef __KERNEL__
 #include <linux/socket.h>
 #include <linux/mutex.h>
+#endif
+#ifndef __KERNEL__
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
 #endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
@@ -26,7 +37,7 @@
 
 #define CAMFLOW_VERSION_MAJOR           0
 #define CAMFLOW_VERSION_MINOR           6
-#define CAMFLOW_VERSION_PATCH           4
+#define CAMFLOW_VERSION_PATCH           5
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
@@ -315,7 +326,7 @@ struct disc_node_struct {
 struct xattr_prov_struct {
 	basic_elements;
 	shared_node_elements;
-	char name[PROV_XATTR_NAME_SIZE]; // max Linux characters
+	char name[PROV_XATTR_NAME_SIZE];
 	uint8_t value[PROV_XATTR_VALUE_SIZE];
 	size_t size;
 };

@@ -24,7 +24,7 @@ File name removed
 
 FINAL RESULTS:
 
-./security/provenance/memcpy_ss.c:60:  [2] (buffer) memcpy:
+./security/provenance/memcpy_ss.c:63:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
 ./security/provenance/include/provenance_record.h:211:  [1] (buffer) read:
@@ -39,7 +39,7 @@ FINAL RESULTS:
 ./security/provenance/include/provenance_task.h:188:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/relay.c:270:  [1] (port) snprintf:
+./security/provenance/relay.c:273:  [1] (port) snprintf:
   On some very old systems, snprintf is incorrectly implemented and permits
   buffer overflows; there are also incompatible standard definitions of it.
   Check it during installation, or use something else.

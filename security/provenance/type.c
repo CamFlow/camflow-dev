@@ -1,6 +1,9 @@
-// SPDX-License-Identifier: GPL-2.0-only
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -150,7 +153,7 @@ static const char ND_STR_ARG[] = "argv";                                        
 static const char ND_STR_ENV[] = "envp";                                        // environment parameter
 static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
-#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) return v; } while (0)
+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 /* transform from relation ID to string representation */
 const char *relation_str(uint64_t type)
 {

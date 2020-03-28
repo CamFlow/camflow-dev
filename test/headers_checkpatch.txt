@@ -27,111 +27,6 @@ NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
 
 security/provenance/include/memcpy_ss.h has style problems, please review.
-----------------------------------------
-security/provenance/include/provenance.h
-----------------------------------------
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#3: FILE: security/provenance/include/provenance.h:3:
-+ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
-
-WARNING:LONG_LINE: line over 80 characters
-#40: FILE: security/provenance/include/provenance.h:40:
-+#define prov_next_relation_id()         ((uint64_t)atomic64_inc_return(&prov_relation_id))
-
-WARNING:LONG_LINE: line over 80 characters
-#41: FILE: security/provenance/include/provenance.h:41:
-+#define prov_next_node_id()             ((uint64_t)atomic64_inc_return(&prov_node_id))
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#78: FILE: security/provenance/include/provenance.h:78:
-+ * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#81: FILE: security/provenance/include/provenance.h:81:
-+ * The type of the provenance node provided in the argument list must align with the allowed provenance node type (i.e., not a relation type).
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#82: FILE: security/provenance/include/provenance.h:82:
-+ * Allowed provenance node types are defined in "include/uapi/linux/provenance_types.h"
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#84: FILE: security/provenance/include/provenance.h:84:
-+ * Implicitly, the "version" member of "node_identifier" structure is set to 0 through "zalloc".
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#88: FILE: security/provenance/include/provenance.h:88:
-+ * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
-
-WARNING:LONG_LINE: line over 80 characters
-#91: FILE: security/provenance/include/provenance.h:91:
-+static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#113: FILE: security/provenance/include/provenance.h:113:
-+ * @brief Allocate memory for a new long provenance node and set the provenance "LONG" flag (in basic_elements).
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#115: FILE: security/provenance/include/provenance.h:115:
-+ * Similar to "alloc_provenance" function above, this function allocate memory for long_prove_elt union structure.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#117: FILE: security/provenance/include/provenance.h:117:
-+ * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#118: FILE: security/provenance/include/provenance.h:118:
-+ * Spin lock is not needed because at most one thread will access the structure at a time, since it is a transient element.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#120: FILE: security/provenance/include/provenance.h:120:
-+ * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
-
-WARNING:LONG_LINE: line over 80 characters
-#124: FILE: security/provenance/include/provenance.h:124:
-+static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
-
-WARNING:LONG_LINE: line over 80 characters
-#126: FILE: security/provenance/include/provenance.h:126:
-+	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
-
-WARNING:LONG_LINE: line over 80 characters
-#153: FILE: security/provenance/include/provenance.h:153:
-+#define set_recorded(node)                      __set_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#159: FILE: security/provenance/include/provenance.h:159:
-+#define clear_recorded(node)                    __clear_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#165: FILE: security/provenance/include/provenance.h:165:
-+#define provenance_is_recorded(node)            __provenance_is_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#173: FILE: security/provenance/include/provenance.h:173:
-+#define set_name_recorded(node)                 __set_name_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#179: FILE: security/provenance/include/provenance.h:179:
-+#define clear_name_recorded(node)               __clear_name_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#185: FILE: security/provenance/include/provenance.h:185:
-+#define provenance_is_name_recorded(node)       __provenance_is_name_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#196: FILE: security/provenance/include/provenance.h:196:
-+#define set_kernel_recorded(node)               __set_kernel_recorded((union long_prov_elt *)node)
-
-WARNING:LONG_LINE: line over 80 characters
-#202: FILE: security/provenance/include/provenance.h:202:
-+#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
-
-total: 0 errors, 24 warnings, 256 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/include/provenance.h has style problems, please review.
 -----------------------------------------------
 security/provenance/include/provenance_filter.h
 -----------------------------------------------
@@ -317,6 +212,111 @@ NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
 
 security/provenance/include/provenance_filter.h has style problems, please review.
+----------------------------------------
+security/provenance/include/provenance.h
+----------------------------------------
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#3: FILE: security/provenance/include/provenance.h:3:
++ * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+
+WARNING:LONG_LINE: line over 80 characters
+#40: FILE: security/provenance/include/provenance.h:40:
++#define prov_next_relation_id()         ((uint64_t)atomic64_inc_return(&prov_relation_id))
+
+WARNING:LONG_LINE: line over 80 characters
+#41: FILE: security/provenance/include/provenance.h:41:
++#define prov_next_node_id()             ((uint64_t)atomic64_inc_return(&prov_node_id))
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#78: FILE: security/provenance/include/provenance.h:78:
++ * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#81: FILE: security/provenance/include/provenance.h:81:
++ * The type of the provenance node provided in the argument list must align with the allowed provenance node type (i.e., not a relation type).
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#82: FILE: security/provenance/include/provenance.h:82:
++ * Allowed provenance node types are defined in "include/uapi/linux/provenance_types.h"
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#84: FILE: security/provenance/include/provenance.h:84:
++ * Implicitly, the "version" member of "node_identifier" structure is set to 0 through "zalloc".
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#88: FILE: security/provenance/include/provenance.h:88:
++ * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
+
+WARNING:LONG_LINE: line over 80 characters
+#91: FILE: security/provenance/include/provenance.h:91:
++static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#113: FILE: security/provenance/include/provenance.h:113:
++ * @brief Allocate memory for a new long provenance node and set the provenance "LONG" flag (in basic_elements).
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#115: FILE: security/provenance/include/provenance.h:115:
++ * Similar to "alloc_provenance" function above, this function allocate memory for long_prove_elt union structure.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#117: FILE: security/provenance/include/provenance.h:117:
++ * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#118: FILE: security/provenance/include/provenance.h:118:
++ * Spin lock is not needed because at most one thread will access the structure at a time, since it is a transient element.
+
+WARNING:LONG_LINE_COMMENT: line over 80 characters
+#120: FILE: security/provenance/include/provenance.h:120:
++ * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
+
+WARNING:LONG_LINE: line over 80 characters
+#124: FILE: security/provenance/include/provenance.h:124:
++static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
+
+WARNING:LONG_LINE: line over 80 characters
+#126: FILE: security/provenance/include/provenance.h:126:
++	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+
+WARNING:LONG_LINE: line over 80 characters
+#153: FILE: security/provenance/include/provenance.h:153:
++#define set_recorded(node)                      __set_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#159: FILE: security/provenance/include/provenance.h:159:
++#define clear_recorded(node)                    __clear_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#165: FILE: security/provenance/include/provenance.h:165:
++#define provenance_is_recorded(node)            __provenance_is_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#173: FILE: security/provenance/include/provenance.h:173:
++#define set_name_recorded(node)                 __set_name_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#179: FILE: security/provenance/include/provenance.h:179:
++#define clear_name_recorded(node)               __clear_name_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#185: FILE: security/provenance/include/provenance.h:185:
++#define provenance_is_name_recorded(node)       __provenance_is_name_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#196: FILE: security/provenance/include/provenance.h:196:
++#define set_kernel_recorded(node)               __set_kernel_recorded((union long_prov_elt *)node)
+
+WARNING:LONG_LINE: line over 80 characters
+#202: FILE: security/provenance/include/provenance.h:202:
++#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
+
+total: 0 errors, 24 warnings, 256 lines checked
+
+NOTE: For some of the reported defects, checkpatch may be able to
+      mechanically convert to the typical style using --fix or --fix-inplace.
+
+security/provenance/include/provenance.h has style problems, please review.
 ----------------------------------------------
 security/provenance/include/provenance_inode.h
 ----------------------------------------------
@@ -965,11 +965,7 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #70: FILE: security/provenance/include/provenance_query.h:70:
 + * @return 0 if no error occurred; -EPERM if flow is disallowed. Other error codes inherited or unknown.
 
-WARNING:PREFER_PR_LEVEL: Prefer pr_warn(... to pr_warning(...
-#81: FILE: security/provenance/include/provenance_query.h:81:
-+		pr_warning("Provenance: warning raised.\n");
-
-total: 0 errors, 7 warnings, 89 lines checked
+total: 0 errors, 6 warnings, 89 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
