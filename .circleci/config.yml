@@ -315,6 +315,7 @@ jobs:
       - run: 'sudo apt-get install -yq python3.7'
       - run: 'sudo dpkg -L python3.7'
       - run: 'sudo dpkg -L python3.7-minimal'
+      - run: 'echo $PATH'
       - run: '/usr/bin/python3 -V'
       - run: 'python3 -V'
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
