@@ -316,7 +316,7 @@ jobs:
       - run: 'sudo dpkg -L python3.7'
       - run: 'sudo dpkg -L python3.7-minimal'
       - run: '/usr/bin/python3 -V'
-      - run: 'ln -sf /usr/bin/python3.7 /usr/bin/python3'
+      - run: 'sudo ln -sf /usr/bin/python3.7 /usr/bin/python3'
       - run: '/usr/bin/python3 -V'
       - run: 'echo $PATH'
       - run: 'export PATH="/usr/bin:$PATH"'
