@@ -389,12 +389,6 @@ workflows:
       - compile_persist:
           requires:
             - security
-      - doc:
-          requires:
-            - compile_default
-            - compile_no_flow_friendly
-            - compile_whole
-            - compile_persist
       - sparse:
           requires:
             - compile_default
@@ -427,10 +421,18 @@ workflows:
             - compile_persist
       - tinkerbell:
           requires:
-            - compile_default
-            - compile_no_flow_friendly
-            - compile_whole
-            - compile_persist
+            - sparse
+            - flawfinder
+            - checkpatch
+            - smatch
+            - coccinelle
+      - doc:
+          requires:
+            - sparse
+            - flawfinder
+            - checkpatch
+            - smatch
+            - coccinelle
       - deploy_dev:
           filters:
             branches:
@@ -438,8 +440,4 @@ workflows:
                 - dev
           requires:
             - doc
-            - sparse
-            - flawfinder
-            - checkpatch
-            - smatch
-            - coccinelle
+            - tinkerbell
