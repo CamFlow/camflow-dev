@@ -321,6 +321,8 @@ jobs:
       - run: 'echo $PATH'
       - run: 'export PATH="/usr/bin:$PATH"'
       - run: 'echo $PATH'
+      - run: 'python3.7 -V'
+      - run: 'sudo python3 -V'
       - run: 'python3 -V'
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
       - run: 'cd build/graph-matching && git checkout thomas'
