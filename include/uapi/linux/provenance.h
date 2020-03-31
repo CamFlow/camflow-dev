@@ -19,6 +19,7 @@
 #ifdef __KERNEL__
 #include <linux/socket.h>
 #include <linux/mutex.h>
+#include <linux/in6.h>
 #endif
 #ifndef __KERNEL__
 #include <stdint.h>
@@ -30,7 +31,6 @@
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
-#include <linux/in6.h>
 
 #define xstr(s)         str(s)
 #define str(s)          # s
