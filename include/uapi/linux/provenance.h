@@ -26,11 +26,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <linux/in6.h>
 #endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
-#include <linux/in6.h>
 
 #define xstr(s)         str(s)
 #define str(s)          # s
