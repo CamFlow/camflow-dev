@@ -314,6 +314,7 @@ jobs:
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -yq python3.7'
       - run: 'sudo ln -sf /usr/bin/python3.7 /usr/bin/python3'
+      - run: 'sudo pip install --no-input virtualenv'
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
       - run: 'cd build/graph-matching && git checkout thomas'
       - run: 'cd build/graph-matching/scripts && sudo make all'
