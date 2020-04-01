@@ -316,6 +316,8 @@ jobs:
       - run: 'pyenv global 3.7.2'
       - run: 'pyenv local 3.7.2'
       - run: 'pyenv version'
+      - run: 'pip install --noinput --upgrade pip'
+      - run: 'pip install --noinput virtualenv'
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
       - run: 'cd build/graph-matching && git checkout thomas'
       - run: 'cd build/graph-matching/scripts && make all'
