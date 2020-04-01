@@ -317,6 +317,7 @@ jobs:
       - run: 'pyenv version'
       - run: 'pip install --upgrade pip'
       - run: 'pip install virtualenv'
+      - run: 'pip install automaton'
       - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
       - run: 'cd build/graph-matching && git checkout thomas'
       - run: 'cd build/graph-matching/scripts && make all'
