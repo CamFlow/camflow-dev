@@ -28,7 +28,7 @@ static int flow(prov_entry_t *from, prov_entry_t *edge, prov_entry_t *to)
 	return 0;
 }
 
-struct provenance_query_hooks hooks = {
+static struct provenance_query_hooks hooks = {
 	QUERY_HOOK_INIT(flow, flow),
 };
 
