@@ -37,7 +37,7 @@ struct relay_list {
 	struct rchan *prov;             // Relay buffer for regular provenance entries.
 	struct rchan *long_prov;        // Relay buffer for long provenance entries.
 };
-LIST_HEAD(relay_list);
+static LIST_HEAD(relay_list);
 
 /*!
  * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
