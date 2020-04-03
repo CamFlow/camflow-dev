@@ -89,7 +89,7 @@ bool is_relay_full(struct rchan *chan)
 	if (buf) {
 		ret = relay_buf_full(buf);
 		if (ret)
-			pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, cpu);
+			pr_warn("Provenance: relay (%s) is full.", chan->base_filename);
 		rc += ret;
 	}
 	if (rc)

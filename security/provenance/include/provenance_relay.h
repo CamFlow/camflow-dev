@@ -40,7 +40,7 @@ struct long_boot_buffer {
 
 int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
-bool is_relay_full(struct rchan *chan, int cpu);
+bool is_relay_full(struct rchan *chan);
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
