@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -37,7 +37,7 @@ struct relay_list {
 	struct rchan *prov;             // Relay buffer for regular provenance entries.
 	struct rchan *long_prov;        // Relay buffer for long provenance entries.
 };
-LIST_HEAD(relay_list);
+static LIST_HEAD(relay_list);
 
 /*!
  * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
@@ -80,16 +80,16 @@ static struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
-bool is_relay_full(struct rchan *chan, int cpu)
+bool is_relay_full(struct rchan *chan)
 {
 	int ret;
 	int rc = 0;
-	struct rchan_buf __percpu *buf = *per_cpu_ptr(chan->buf, cpu);
+	struct rchan_buf *buf = *this_cpu_ptr(chan->buf);
 
 	if (buf) {
 		ret = relay_buf_full(buf);
 		if (ret)
-			pr_warn("Provenance: relay (%s) on core %d is full.", chan->base_filename, cpu);
+			pr_warn("Provenance: relay (%s) is full.", chan->base_filename);
 		rc += ret;
 	}
 	if (rc)
@@ -128,7 +128,6 @@ static struct rchan_callbacks relay_callbacks = {
 
 static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 {
-	int cpu;
 	struct list_head *ele, *next;
 	struct boot_buffer *entry;
 	unsigned long irqflags;
@@ -141,14 +140,11 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 		entry = list_entry(ele, struct boot_buffer, list);
 
 		// check if relay is full
-		cpu = get_cpu();
-		if (is_relay_full(prov_chan, cpu)) {
+		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_boot_buffer, NULL);
 			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
-			put_cpu();
 			goto out;
 		}
-		put_cpu();
 
 		// tighten provenance entry
 		tighten_identifier(&get_prov_identifier(&(entry->msg)));
@@ -169,7 +165,6 @@ out:
 
 static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 {
-	int cpu;
 	struct list_head *ele, *next;
 	struct long_boot_buffer *entry;
 	unsigned long irqflags;
@@ -182,14 +177,11 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 		entry = list_entry(ele, struct long_boot_buffer, list);
 
 		// check if relay is full
-		cpu = get_cpu();
-		if (is_relay_full(prov_chan, cpu)) {
+		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
 			pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
-			put_cpu();
 			goto out;
 		}
-		put_cpu();
 
 		// tighten provenance entry
 		tighten_identifier(&get_prov_identifier(&(entry->msg)));
