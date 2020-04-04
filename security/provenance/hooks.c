@@ -89,10 +89,11 @@ static inline void queue_save_provenance(struct provenance *provenance,
 /*!
  * @brief Record provenance when task_alloc is triggered.
  *
- * Record provenance relation RL_PROC_READ (by calling "uses_two" function) and RL_CLONE (by calling "informs" function).
+ * Record provenance relation RL_PROC_READ (by calling "uses_two" function)
+ * and RL_CLONE (by calling "informs" function).
  * We create a ACT_TASK node for the newly allocated task.
- * Since @cred is shared by all threads, we use @cred to save process's provenance,
- * and @task to save provenance of each thread.
+ * Since @cred is shared by all threads, we use @cred to save process's
+ * provenance, and @task to save provenance of each thread.
  * @param task Task being allocated.
  * @param clone_flags The flags indicating what should be shared.
  * @return 0 if no error occurred. Other error codes unknown.
@@ -126,9 +127,8 @@ static int provenance_task_alloc(struct task_struct *task,
 /*!
  * @brief Record provenance when task_free hook is triggered.
  *
- * Record provenance relation RL_TERMINATE_TASK by calling function "record_terminate".
- * Free kernel memory allocated for provenance entry of the task in question.
- * Set the provenance pointer in task_struct to NULL.
+ * Record provenance relation RL_TERMINATE_TASK by calling function
+ * "record_terminate".
  * @param task The task in question (i.e., to be free).
  *
  */
@@ -144,8 +144,10 @@ static void provenance_task_free(struct task_struct *task)
  * @brief Initialize the security for the initial task.
  *
  * This is the initial task when provenance capture is initialized.
- * We create a ENT_PROC provenance node, and set the UID and GID of the provenance node information from the current process's credential.
- * Current process's cred struct's provenance pointer now points to the provenance node.
+ * We create a ENT_PROC provenance node, and set the UID and GID of the
+ * provenance node information from the current process's credential.
+ * Current process's cred struct's provenance pointer now points to
+ * the provenance node.
  *
  */
 static void task_init_provenance(void)
@@ -209,13 +211,16 @@ static int provenance_ptrace_traceme(struct task_struct *parent)
 /*!
  * @brief Record provenance when cred_alloc_blank hook is triggered.
  *
- * This hook is triggered when allocating sufficient memory and attaching to @cred such that cred_transfer() will not get ENOMEM.
+ * This hook is triggered when allocating sufficient memory and attaching to
+ * @cred such that cred_transfer() will not get ENOMEM.
  * Therefore, no information flow occurred.
- * We simply create a ENT_PROC provenance node and associate the provenance entry to the newly allocated @cred.
+ * We simply create a ENT_PROC provenance node and associate the provenance
+ * entry to the newly allocated @cred.
  * Set the proper UID and GID of the node based on the information from @cred.
  * @param cred Points to the new credentials.
  * @param gfp Indicates the atomicity of any memory allocations.
- * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new provenance entry. Other error codes unknown.\
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for
+ * the new provenance entry. Other error codes unknown.\
  *
  */
 static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
@@ -233,10 +238,9 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 /*!
  * @brief Record provenance when cred_free hook is triggered.
  *
- * This hook is triggered when deallocating and clearing the cred->security field in a set of credentials.
- * Record provenance relation RL_TERMINATE_PROC by calling "record_terminate" function.
- * Free kernel memory allocated for provenance entry of the cred in question.
- * Set the provenance pointer in @cred to NULL.
+ * This hook is triggered when deallocating and clearing the cred->security
+ * field in a set of credentials. Record provenance relation RL_TERMINATE_PROC
+ * by calling "record_terminate" function.
  * @param cred Points to the credentials to be freed.
  *
  */
@@ -251,10 +255,12 @@ static void provenance_cred_free(struct cred *cred)
 /*!
  * @brief Record provenance when cred_prepare hook is triggered.
  *
- * This hook is triggered when preparing a new set of credentials by copying the data from the old set.
+ * This hook is triggered when preparing a new set of credentials by copying
+ * the data from the old set.
  * Record provenance relation RL_CLONE_MEM by calling "generates" function.
  * We create a new ENT_PROC provenance entry for the new cred.
- * Information flows from old cred to the process that is preparing the new cred.
+ * Information flows from old cred to the process that is preparing the new
+ * cred.
  * @param new Points to the new credentials.
  * @param old Points to the original credentials.
  * @param gfp Indicates the atomicity of any memory allocations.
@@ -294,7 +300,8 @@ static int provenance_cred_prepare(struct cred *new,
  *
  * This hook is triggered when transfering data from original creds to new creds.
  * We simply update the new creds provenance entry to that of the old creds.
- * Information flow between cred's is captured when provenance_cred_prepare function is called.
+ * Information flow between cred's is captured when provenance_cred_prepare
+ * function is called.
  * @param new Points to the new credentials.
  * @param old Points to the original credentials.
  *
@@ -312,12 +319,15 @@ static void provenance_cred_transfer(struct cred *new, const struct cred *old)
 /*!
  * @brief Record provenance when task_fix_setuid hook is triggered.
  *
- * This hook is triggered when updating the module's state after setting one or more of the user
+ * This hook is triggered when updating the module's state after setting one or
+ * more of the user
  * identity attributes of the current process.
- * The @flags parameter indicates which of the set*uid system calls invoked this hook.
+ * The @flags parameter indicates which of the set*uid system calls invoked this
+ * hook.
  * If @new is the set of credentials that will be installed,
  * modifications should be made to this rather than to @current->cred.
- * Information flows from @old to current process and then eventually flows to @new (since modification should be made to @new instead of @current->cred).
+ * Information flows from @old to current process and then eventually flows to
+ * @new (since modification should be made to @new instead of @current->cred).
  * Record provenance relation RL_SETUID by calling "generates" function.
  * @param old The set of credentials that are being replaced.
  * @param flags One of the LSM_SETID_* values.
@@ -343,12 +353,18 @@ static int provenance_task_fix_setuid(struct cred *new,
 /*!
  * @brief Record provenance when task_setpgid hook is triggered.
  *
- * This hooks is triggered when checking permission before setting the process group identifier of the process @p to @pgid.
- * @cprov is the cred provenance of the @current process, and @tprov is the task provenance of the @current process.
- * During "get_cred_provenance" and "get_task_provenance" functions, their provenances are updated too.
- * We update process @p's cred provenance's pgid info as required by the trigger of the hook.
+ * This hooks is triggered when checking permission before setting the process
+ * group identifier of the process @p to @pgid.
+ * @cprov is the cred provenance of the @current process, and @tprov is the
+ * task provenance of the @current process.
+ * During "get_cred_provenance" and "get_task_provenance" functions, their
+ * provenances are updated too.
+ * We update process @p's cred provenance's pgid info as required by the trigger
+ * of the hook.
  * Record provenance relation RL_SETGID by calling "generates" function.
- * Information flows from cred of the @current process, which sets the @pgid, to the current process, and eventually to the process @p whose @pgid is updated.
+ * Information flows from cred of the @current process, which sets the @pgid,
+ * to the current process, and eventually to the process @p whose @pgid is
+ * updated.
  * @param p The task_struct for process being modified.
  * @param pgid The new pgid.
  * @return 0 if permission is granted. Other error codes unknown.
@@ -380,10 +396,13 @@ static int provenance_task_getpgid(struct task_struct *p)
 /*!
  * @brief Record provenance when task_kill hook is triggered.
  *
- * This hook is triggered when checking permission before sending signal @sig to @p.
+ * This hook is triggered when checking permission before sending signal @sig
+ * to @p.
  * @info can be NULL, the constant 1, or a pointer to a siginfo structure.
- * If @info is 1 or SI_FROMKERNEL(info) is true, then the signal should be viewed as coming from the kernel and should typically be permitted.
- * SIGIO signals are handled separately by the send_sigiotask hook in file_security_ops.
+ * If @info is 1 or SI_FROMKERNEL(info) is true, then the signal should be
+ * viewed as coming from the kernel and should typically be permitted.
+ * SIGIO signals are handled separately by the send_sigiotask hook in
+ * file_security_ops.
  * No information flow happens in this case. Simply return 0.
  * @param p The task_struct for process.
  * @param info The signal information.
@@ -395,21 +414,28 @@ static int provenance_task_getpgid(struct task_struct *p)
 static int provenance_task_kill(struct task_struct *p, struct kernel_siginfo *info,
 				int sig, const struct cred *cred)
 {
+	// TODO
 	return 0;
 }
 
 /*!
  * @brief Record provenance when inode_alloc_security hook is triggered.
  *
- * This hook is triggered when allocating and attaching a security structure to @inode->i_security.
- * The i_security field is initialized to NULL when the inode structure is allocated.
- * When i_security field is initialized, we also initialize i_provenance field of the inode.
+ * This hook is triggered when allocating and attaching a security structure to
+ * @inode->i_security.
+ * The i_security field is initialized to NULL when the inode structure is
+ * allocated.
+ * When i_security field is initialized, we also initialize i_provenance field
+ * of the inode.
  * Therefore, we create a new ENT_INODE_UNKNOWN provenance entry.
- * UUID information from @i_sb (superblock) is copied to the new inode's provenance entry.
- * We then call function "refresh_inode_provenance" to obtain more information about the inode.
+ * UUID information from @i_sb (superblock) is copied to the new inode's
+ * provenance entry.
+ * We then call function "refresh_inode_provenance" to obtain more information
+ * about the inode.
  * No information flow occurs.
  * @param inode The inode structure.
- * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for the new inode provenance entry. Other error codes unknown.
+ * @return 0 if operation was successful; -ENOMEM if no memory can be allocated
+ * for the new inode provenance entry. Other error codes unknown.
  *
  */
 static int provenance_inode_alloc_security(struct inode *inode)
@@ -429,7 +455,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
 /*!
  * @brief Record provenance when inode_free_security hook is triggered.
  *
- * This hook is triggered when deallocating the inode security structure and set @inode->i_security to NULL.
+ * This hook is triggered when deallocating the inode security structure and
+ * set @inode->i_security to NULL.
  * Record provenance relation RL_FREED by calling "record_terminate" function.
  * Free kernel memory allocated for provenance entry of the inode in question.
  * Set the provenance pointer in @inode to NULL.
@@ -449,11 +476,13 @@ static void provenance_inode_free_security(struct inode *inode)
  *
  * This hook is trigger when checking permission to create a regular file.
  * Record provenance relation RL_INODE_CREATE by calling "generates" function.
- * Information flows from current process's cred's to the process, and eventually to the parent's inode.
+ * Information flows from current process's cred's to the process, and
+ * eventually to the parent's inode.
  * @param dir Inode structure of the parent of the new file.
  * @param dentry The dentry structure for the file to be created.
  * @param mode The file mode of the file to be created.
- * @return 0 if permission is granted; -ENOMEM if parent's inode's provenance entry is NULL. Other error codes unknown.
+ * @return 0 if permission is granted; -ENOMEM if parent's inode's provenance
+ * entry is NULL. Other error codes unknown.
  *
  */
 static int provenance_inode_create(struct inode *dir,
@@ -481,24 +510,35 @@ static int provenance_inode_create(struct inode *dir,
  *
  * This hook is triggered when checking permission before accessing an inode.
  * This hook is called by the existing Linux permission function,
- * so a security module can use it to provide additional checking for existing Linux permission checks.
- * Notice that this hook is called when a file is opened (as well as many other operations),
- * whereas the file_security_ops permission hook is called when the actual read/write operations are performed.
+ * so a security module can use it to provide additional checking for existing
+ * Linux permission checks.
+ * Notice that this hook is called when a file is opened (as well as many other
+ * operations),
+ * whereas the file_security_ops permission hook is called when the actual
+ * read/write operations are performed.
  * Depending on the permission specified in @mask,
  * Zero or more relation may be recorded during this permission check.
  * If permission is:
- * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses" function, and
- * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" function, and
- * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses" function, and
- * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses" function.
+ * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses"
+ * function, and
+ * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" function,
+ * and
+ * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses"
+ * function, and
+ * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses"
+ * function.
  * Note that "uses" function also generates provenance relation RL_PROC_WRITE.
- * Information flows from @inode's provenance to the current process that attempts to access the inode, and eventually to the cred of the task.
- * Provenance relation is not recorded if the inode to be access is private or if the inode's provenance entry does not exist.
+ * Information flows from @inode's provenance to the current process that
+ * attempts to access the inode, and eventually to the cred of the task.
+ * Provenance relation is not recorded if the inode to be access is private
+ * or if the inode's provenance entry does not exist.
  * @param inode The inode structure to check.
  * @param mask The permission mask.
- * @return 0 if permission is granted; -ENOMEM if @inode's provenance does not exist. Other error codes unknown.
+ * @return 0 if permission is granted; -ENOMEM if @inode's provenance does not
+ * exist. Other error codes unknown.
  *
- * @todo We ignore inode that are PRIVATE (i.e., IS_PRIVATE is true). Private inodes are FS internals and we ignore for now.
+ * @todo We ignore inode that are PRIVATE (i.e., IS_PRIVATE is true). Private
+ * inodes are FS internals and we ignore for now.
  *
  */
 static int provenance_inode_permission(struct inode *inode, int mask)
@@ -550,20 +590,28 @@ out:
 /*!
  * @brief Record provenance when inode_link hook is triggered.
  *
- * This hook is triggered when checking permission before creating a new hard link to a file.
- * We obtain the provenance of current process and its cred, as well as provenance of inode or parent directory of new link.
+ * This hook is triggered when checking permission before creating a new hard
+ * link to a file.
+ * We obtain the provenance of current process and its cred, as well as
+ * provenance of inode or parent directory of new link.
  * We also get the provenance of existing link to the file.
  * Record two provenance relations RL_LINK by calling "generates" function.
  * Information flows:
- * 1. From cred of the current process to the process, and eventually to the inode of parent directory of new link, and,
- * 2. From cred of the current process to the process, and eventually to the dentry of the existing link to the file, and
- * 3. From the inode of parent directory of new link to the dentry of the existing link to the file.
+ * 1. From cred of the current process to the process, and eventually to the
+ * inode of parent directory of new link, and,
+ * 2. From cred of the current process to the process, and eventually to the
+ * dentry of the existing link to the file, and
+ * 3. From the inode of parent directory of new link to the dentry of the
+ * existing link to the file.
  * @param old_dentry The dentry structure for an existing link to the file.
  * @parm dir The inode structure of the parent directory of the new link.
  * @param new_dentry The dentry structure for the new link.
- * @return 0 if permission is granted; -ENOMEM if either the dentry provenance of the existing link to the file or the inode provenance of the new parent directory of new link does not exist.
+ * @return 0 if permission is granted; -ENOMEM if either the dentry provenance
+ * of the existing link to the file or the inode provenance of the new parent
+ * directory of new link does not exist.
  *
- * @todo The information flow relations captured here is a bit weird. We need to double check the correctness.
+ * @todo The information flow relations captured here is a bit weird. We need
+ * to double check the correctness.
  */
 
 static int provenance_inode_link(struct dentry *old_dentry,
