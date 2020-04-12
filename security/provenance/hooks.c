@@ -2480,9 +2480,11 @@ static int provenance_unix_stream_connect(struct sock *sock,
 /*!
  * @brief Record provenance when unix_may_send hook is triggered.
  *
- * This hook is triggered when checking permissions before connecting or sending datagrams from @sock to @other.
+ * This hook is triggered when checking permissions before connecting or sending
+ * datagrams from @sock to @other.
  * Record provenance relation RL_SND_UNIX by calling "derives" function.
- * Information flows from the sending socket (@sock) to the receiving socket (@other).
+ * Information flows from the sending socket (@sock) to the receiving socket
+ * (@other).
  * @param sock The socket structure.
  * @param other The peer socket structure.
  * @return 0 if permission is granted and no error occurred; Other error codes
