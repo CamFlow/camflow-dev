@@ -232,6 +232,7 @@ static inline int record_task_name(struct task_struct *task,
 		if (exe_file) {
 			fprov = get_file_provenance(exe_file, false);
 			if (provenance_is_opaque(prov_elt(fprov))) {
+				fput(exe_file); // Release the file.
 				set_opaque(prov_elt(prov));
 				goto out;
 			}
