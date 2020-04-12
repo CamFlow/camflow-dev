@@ -968,7 +968,7 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
  * @param dentry The dentry structure for the file.
  * @param name The name of the extended attribute.
  * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; other
- * error codes inherited from "record_read_xattr" function or unknown.
+ * error codes inherited from "record_read_xattr" function.
  *
  */
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
@@ -1003,7 +1003,7 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
  * The relation may not be recorded if inode provenance entry is NULL.
  * @param dentry The dentry structure for the file.
  * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; other
- * error codes inherited from "uses" function or unknown.
+ * error codes inherited from "uses" function.
  *
  */
 static int provenance_inode_listxattr(struct dentry *dentry)
@@ -1236,7 +1236,7 @@ out:
  * @param in Information source file.
  * @param out Information drain file.
  * @return 0 if no error occurred; -ENOMEM if either end of the file provenance
- * entry is NULL; Other error code inherited from derives function or unknown.
+ * entry is NULL; Other error code inherited from derives function.
  *
  */
 static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
@@ -1321,7 +1321,7 @@ static int provenance_kernel_read_file(struct file *file
  * @param file The file to be opened.
  * @param cred Unused parameter.
  * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is
- * NULL; other error code inherited from uses function or unknown.
+ * NULL; other error code inherited from uses function.
  *
  */
 static int provenance_file_open(struct file *file)
@@ -1353,7 +1353,7 @@ static int provenance_file_open(struct file *file)
  * @param file The file structure being received.
  * @return 0 if permission is granted, no error occurred; -ENOMEM if the
  * file inode provenance entry is NULL; Other error code inherited from uses
- * function or unknown.
+ * function.
  *
  */
 static int provenance_file_receive(struct file *file)
@@ -1465,7 +1465,7 @@ static int provenance_file_send_sigiotask(struct task_struct *task,
  * @param flags The operational flags.
  * @return 0 if permission is granted and no error occurred; -ENOMEM if the
  * original file inode provenance entry is NULL; Other error codes inherited
- * from derives function or unknown.
+ * from derives function.
  *
  */
 static int provenance_mmap_file(struct file *file,
@@ -1582,7 +1582,7 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
  * @param arg The operational arguments.
  * @return 0 if permission is granted or no error occurred; -ENOMEM if the file
  * inode provenance entry is NULL; Other error code inherited from
- * generates/uses function or unknown.
+ * generates/uses function.
  *
  */
 static int provenance_file_ioctl(struct file *file,
@@ -1629,7 +1629,7 @@ out:
  * @param msg The message structure to be modified.
  * @return 0 if operation was successful and permission is granted; -ENOMEM if
  * no memory can be allocated for the new provenance entry; other error codes
- * inherited from generates function or unknown.
+ * inherited from generates function.
  *
  */
 static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
@@ -1679,7 +1679,7 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
  * to msg.
  * @param msg The message structure.
  * @return 0 if no error occurred; Other error codes inherited from generates
- * function or unknown.
+ * function.
  *
  */
 static inline int __mq_msgsnd(struct msg_msg *msg)
@@ -1708,7 +1708,7 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
  * @param msg The message to be enqueued.
  * @param msqflg The operational flags.
  * @return 0 if permission is granted. Other error codes inherited from
- * __mq_msgsnd function or unknown.
+ * __mq_msgsnd function.
  *
  */
 static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
@@ -1728,7 +1728,7 @@ static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
  * @param msg The message to be enqueued.
  * @param ts Unused parameter.
  * @return 0 if permission is granted. Other error codes inherited from
- * __mq_msgsnd function or unknown.
+ * __mq_msgsnd function.
  *
  */
 static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
@@ -1747,7 +1747,7 @@ static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
  * @param cprov The calling process's cred provenance entry pointer.
  * @param msg The message structure.
  * @return 0 if no error occurred; Other error codes inherited from uses
- * function or unknown.
+ * function.
  *
  */
 static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
@@ -1783,7 +1783,7 @@ static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
  * @param type The type of message requested.
  * @param mode The operational flags.
  * @return 0 if permission is granted. Other error codes inherited from
- * __mq_msgrcv function or unknown.
+ * __mq_msgrcv function.
  *
  */
 static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
@@ -1809,7 +1809,7 @@ static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
  * @param msg The message destination.
  * @param ts Unused parameter.
  * @return 0 if permission is granted. Other error codes inherited from
- * __mq_msgrcv function or unknown.
+ * __mq_msgrcv function.
  *
  */
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
@@ -1843,7 +1843,7 @@ static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
  * @return 0 if operation was successful and permission is granted, no error
  * occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM
  * provenance entry. Other error code inherited from uses and generates function
- * or unknown.
+ *.
  *
  */
 static int provenance_shm_alloc_security(struct kern_ipc_perm *shp)
@@ -1906,7 +1906,7 @@ static void provenance_shm_free_security(struct kern_ipc_perm *shp)
  * @param shmflg The operational flags.
  * @return 0 if permission is granted and no error occurred; -ENOMEM if shared
  * memory provenance entry does not exist. Other error codes inherited from uses
- * and generates function or unknown.
+ * and generates function.
  *
  */
 static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr, int shmflg)
@@ -2021,7 +2021,7 @@ static int provenance_sk_alloc_security(struct sock *sk,
  * @param protocol The requested protocol.
  * @param kern Set to 1 if it is a kernel socket.
  * @return 0 if no error occurred; -ENOMEM if inode provenance entry does not
- * exist. Other error codes inherited from generates function or unknown.
+ * exist. Other error codes inherited from generates function.
  *
  * @todo Maybe support kernel socket in a future release.
  */
@@ -2103,7 +2103,7 @@ out:
  * @param addrlen The length of address.
  * @return 0 if permission is granted and no error occurred; -EINVAL if socket
  * address is longer than @addrlen; -ENOMEM if socket inode provenance entry
- * does not exist. Other error codes inherited or unknown.
+ * does not exist. Other error codes inherited.
  *
  */
 static int provenance_socket_bind(struct socket *sock,
@@ -2145,7 +2145,7 @@ static int provenance_socket_bind(struct socket *sock,
  * @param addrlen The length of address.
  * @return 0 if permission is granted and no error occurred; -EINVAL if socket
  * address is longer than @addrlen; -ENOMEM if socket inode provenance entry
- * does not exist. Other error codes inherited or unknown.
+ * does not exist. Other error codes inherited.
  *
  */
 static int provenance_socket_connect(struct socket *sock,
@@ -2187,7 +2187,7 @@ out:
  * @param sock The socket structure.
  * @param backlog The maximum length for the pending connection queue.
  * @return 0 if no error occurred; -ENOMEM if socket inode provenance entry does
- * not exist. Other error codes inherited from generates function or unknown.
+ * not exist. Other error codes inherited from generates function.
  *
  */
 static int provenance_socket_listen(struct socket *sock, int backlog)
@@ -2226,7 +2226,7 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
  * @param sock The listening socket structure.
  * @param newsock The newly created server socket for connection.
  * @return 0 if permission is granted and no error occurred; Other error codes
- * inherited from derives and uses function or unknown.
+ * inherited from derives and uses function.
  *
  */
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
@@ -2269,7 +2269,7 @@ out:
  * @param size The size of message.
  * @return 0 if permission is granted and no error occurred; -ENOMEM if the
  * sending socket's provenance entry does not exist; Other error codes inherited
- * from generates and derives function or unknown.
+ * from generates and derives function.
  *
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
@@ -2337,7 +2337,7 @@ out:
  * @param flags The operational flags.
  * @return 0 if permission is granted, and no error occurred; -ENOMEM if the
  * receiving socket's provenance entry does not exist; Other error codes
- * inherited from uses and derives function or unknown.
+ * inherited from uses and derives function.
  *
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
@@ -2405,7 +2405,7 @@ out:
  * @param sk The sock (not socket) associated with the incoming sk_buff.
  * @param skb The incoming network data.
  * @return 0 if no error occurred; -ENOMEM if sk provenance does not exist.
- * Other error codes inherited from derives function or unknown.
+ * Other error codes inherited from derives function.
  *
  */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
@@ -2459,7 +2459,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
  * @param other The peer (i.e., receiving) sock structure. Unused parameter.
  * @param newsk The new sock structure. Unused parameter.
  * @return 0 if permission is granted; Other error code inherited from generates
- * function or unknown.
+ * function.
  *
  */
 static int provenance_unix_stream_connect(struct sock *sock,
@@ -2491,7 +2491,7 @@ static int provenance_unix_stream_connect(struct sock *sock,
  * @param sock The socket structure.
  * @param other The peer socket structure.
  * @return 0 if permission is granted and no error occurred; Other error codes
- * inherited from derives function or unknown.
+ * inherited from derives function.
  *
  */
 static int provenance_unix_may_send(struct socket *sock,
@@ -2531,7 +2531,7 @@ static int provenance_unix_may_send(struct socket *sock,
  * @param bprm The linux_binprm structure.
  * @return 0 if the hook is successful and permission is granted; -ENOMEM if
  * bprm->cred's provenance does not exist. Other error codes inherited from
- * derives function or unknown.
+ * derives function.
  *
  */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm)
@@ -2570,7 +2570,7 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * calling record_args function.
  * @param bprm The linux_binprm structure.
  * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not
- * exist. Other error codes inherited from record_args function or unknown.
+ * exist. Other error codes inherited from record_args function.
  *
  */
 static int provenance_bprm_check_security(struct linux_binprm *bprm)
