@@ -697,8 +697,10 @@ static int provenance_inode_symlink(struct inode *dir,
 /*!
  * @brief Record provenance when inode_rename hook is triggered.
  *
- * This hook is triggered when checking for permission to rename a file or directory.
- * Information flow is the same as in the "provenance_inode_link" function so we call this function.
+ * This hook is triggered when checking for permission to rename a file or
+ * directory.
+ * Information flow is the same as in the "provenance_inode_link" function so
+ * we call this function.
  * @param old_dir The inode structure for parent of the old link.
  * @param old_dentry The dentry structure of the old link.
  * @param new_dir The inode structure for parent of the new link.
@@ -734,20 +736,27 @@ static int provenance_inode_rename(struct inode *old_dir,
 /*!
  * @brief Record provenance when inode_setattr hook is triggered.
  *
- * This hooks is triggered when checking permission before setting file attributes.
- * Note that the kernel call to notify_change is performed from several locations,
- * whenever file attributes change (such as when a file is truncated, chown/chmod operations
- * transferring disk quotas, etc).
- * We create a new provenance node ENT_IATTR, and update its information based on @iattr.
+ * This hooks is triggered when checking permission before setting file
+ * attributes.
+ * Note that the kernel call to notify_change is performed from several
+ * locations, whenever file attributes change (such as when a file is truncated,
+ * chown/chmod operations transferring disk quotas, etc).
+ * We create a new provenance node ENT_IATTR, and update its information based
+ * on @iattr.
  * Record provenance relation RL_SETATTR by calling "generates" function.
  * Record provenance relation RL_SETATTR_INODE by calling "derives" function.
- * Information flows from cred of the current process to the process, and eventually to the inode attribute to set the attributes.
- * Information also flows from inode attribute to the inode whose attributes are to be set.
- * After relation is recorded, iattr provenance entry is freed (i.e., memory deallocated).
+ * Information flows from cred of the current process to the process, and
+ * eventually to the inode attribute to set the attributes.
+ * Information also flows from inode attribute to the inode whose attributes
+ * are to be set.
+ * After relation is recorded, iattr provenance entry is freed (i.e., memory
+ * deallocated).
  * We also persistant the inode's provenance.
  * @param dentry The dentry structure for the file.
  * @param attr The iattr structure containing the new file attributes.
- * @return 0 if permission is granted; -ENOMEM if inode provenance of the file is NULL; -ENOMEM if no memory can be allocated for a new ENT_IATTR provenance entry. Other error codes unknown.
+ * @return 0 if permission is granted; -ENOMEM if inode provenance of the file
+ * is NULL; -ENOMEM if no memory can be allocated for a new ENT_IATTR provenance
+ * entry. Other error codes unknown.
  *
  */
 static int provenance_inode_setattr(struct dentry *dentry, struct iattr *iattr)
@@ -792,11 +801,14 @@ out:
 /*!
  * @brief Record provenance when inode_getattr hook is triggered.
  *
- * This hook is triggered when checking permission before obtaining file attributes.
+ * This hook is triggered when checking permission before obtaining file
+ * attributes.
  * Record provenance relation RL_GETATTR by calling "uses" function.
- * Information flows from the inode of the file to the calling process, and eventually to the process's cred.
+ * Information flows from the inode of the file to the calling process, and
+ * eventually to the process's cred.
  * @param path The path structure for the file.
- * @return 0 if permission is granted; -ENOMEM if the provenance entry of the file is NULL. Other error codes unknown.
+ * @return 0 if permission is granted; -ENOMEM if the provenance entry of the
+ * file is NULL. Other error codes unknown.
  *
  */
 static int provenance_inode_getattr(const struct path *path)
@@ -821,11 +833,14 @@ static int provenance_inode_getattr(const struct path *path)
 /*!
  * @brief Record provenance when inode_readlink hook is triggered.
  *
- * This hook is triggered when checking the permission to read the symbolic link.
+ * This hook is triggered when checking the permission to read the symbolic
+ * link.
  * Record provenance relation RL_READ_LINK by calling "uses" function.
- * Information flows from the link file to the calling process, and eventually to its cred.
+ * Information flows from the link file to the calling process, and eventually
+ * to its cred.
  * @param dentry The dentry structure for the file link.
- * @return 0 if permission is granted; -ENOMEM if the link file's provenance entry is NULL. Other error codes unknown.
+ * @return 0 if permission is granted; -ENOMEM if the link file's provenance
+ * entry is NULL. Other error codes unknown.
  *
  */
 static int provenance_inode_readlink(struct dentry *dentry)
@@ -850,13 +865,15 @@ static int provenance_inode_readlink(struct dentry *dentry)
 /*!
  * @brief Setting provenance extended attribute for an inode.
 
- * The provenance extended attributes are set for an inode only if the @name of xattr is matched to be XATTR_NAME_PROVENANCE.
+ * The provenance extended attributes are set for an inode only if the @name of
+ * xattr is matched to be XATTR_NAME_PROVENANCE.
  * @param dentry The dentry struct whose inode's provenance xattr is to be set.
  * @param name Must be XATTR_NAME_PROVENANCE to set the xattr.
  * @param value Setting of the provenance xattr.
  * @param size Must be the size of provenance entry.
  * @param flags The operational flags.
- * @return 0 if no error occurred; -ENOMEM if size does not match. Other error codes unknown.
+ * @return 0 if no error occurred; -ENOMEM if size does not match. Other error
+ * codes unknown.
  *
  */
 static int provenance_inode_setxattr(struct dentry *dentry,
@@ -897,11 +914,14 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 /*!
  * @brief Record provenance when inode_post_setxattr hook is triggered.
  *
- * This hook is triggered when updating inode security field after successful setxattr operation.
- * The relations are recorded through "record_write_xattr" function defined in provenance_inode.h file.
+ * This hook is triggered when updating inode security field after successful
+ * setxattr operation.
+ * The relations are recorded through "record_write_xattr" function defined in
+ * provenance_inode.h file.
  * RL_SETXATTR is one of the relations to be recorded.
  * The relations may not be recorded for the following reasons:
- * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
+ * 1. The name of the extended attribute is provenance (do not capture
+ * provenance of CamFlow provenance ops), or
  * 2. inode provenance entry is NULL.
  * @param dentry The dentry structure for the file.
  * @param name The name of the extended attribute.
@@ -937,14 +957,18 @@ static void provenance_inode_post_setxattr(struct dentry *dentry,
 /*!
  * @brief Record provenance when inode_getxattr hook is triggered.
  *
- * This hook is triggered when checking permission before obtaining the extended attributes.
- * The relations are recorded through "record_read_xattr" function defined in provenance_inode.h file.
+ * This hook is triggered when checking permission before obtaining the extended
+ * attributes.
+ * The relations are recorded through "record_read_xattr" function defined in
+ * provenance_inode.h file.
  * The relations may not be recorded for the following reasons:
- * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
+ * 1. The name of the extended attribute is provenance (do not capture
+ * provenance of CamFlow provenance ops), or
  * 2. inode provenance entry is NULL.
  * @param dentry The dentry structure for the file.
  * @param name The name of the extended attribute.
- * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; Other error codes inherited from "record_read_xattr" function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; other
+ * error codes inherited from "record_read_xattr" function or unknown.
  *
  */
 static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
@@ -971,12 +995,15 @@ static int provenance_inode_getxattr(struct dentry *dentry, const char *name)
 /*!
  * @brief Record provenance when inode_listxattr hook is triggered.
  *
- * This hook is triggered when checking permission before obtaining the list of extended attribute names for @dentry.
+ * This hook is triggered when checking permission before obtaining the list of
+ * extended attribute names for @dentry.
  * Record provenance relation RL_LSTXATTR by calling "uses" function.
- * Information flows from inode (whose xattrs are of interests) to calling task process, and eventually to its cred.
+ * Information flows from inode (whose xattrs are of interests) to calling task
+ * process, and eventually to its cred.
  * The relation may not be recorded if inode provenance entry is NULL.
  * @param dentry The dentry structure for the file.
- * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; Other error codes inherited from "uses" function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if inode provenance is NULL; other
+ * error codes inherited from "uses" function or unknown.
  *
  */
 static int provenance_inode_listxattr(struct dentry *dentry)
@@ -1000,11 +1027,14 @@ static int provenance_inode_listxattr(struct dentry *dentry)
 /*!
  * @brief Record provenance when inode_removexattr hook is triggered.
  *
- * This hook is triggered when checking permission before removing the extended attribute identified by @name for @dentry.
- * The relations are recorded through "record_write_xattr" function defined in provenance_inode.h file.
+ * This hook is triggered when checking permission before removing the extended
+ * attribute identified by @name for @dentry.
+ * The relations are recorded through "record_write_xattr" function defined in
+ * provenance_inode.h file.
  * RL_RMVXATTR is one of the relations to be recorded.
  * The relations may not be recorded for the following reasons:
- * 1. The name of the extended attribute is provenance (do not capture provenance of CamFlow provenance ops), or
+ * 1. The name of the extended attribute is provenance (do not capture
+ * provenance of CamFlow provenance ops), or
  * 2. inode provenance entry is NULL.
  * @param dentry The dentry structure for the file.
  * @param name The name of the extended attribute.
@@ -1036,15 +1066,21 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
 /*!
  * @brief Enabling checking provenance of an inode from user space.
  *
- * This hook allows us to retrieve a copy of the extended attribute representation of the security label
+ * This hook allows us to retrieve a copy of the extended attribute
+ * representation of the security label
  * associated with @name for @inode via @buffer.
- * Note that @name is the remainder of the attribute name after the security prefix has been removed.
+ * Note that @name is the remainder of the attribute name after the security
+ * prefix has been removed.
  * The provenance of the inode, if exists, is stored in @buffer.
  * @param inode The inode whose provenance is to be retrieved.
- * @param name The name of extended attribute, which must be provenance (or an error will be thrown).
+ * @param name The name of extended attribute, which must be provenance
+ * (or an error will be thrown).
  * @param buffer The buffer to hold the provenance of the inode.
- * @param alloc Specify if the call should return a value via the buffer or just the value length.
- * @return Size of the buffer on success, which in this case is the size of the provenance entry; -ENOMEM if inode provenance is NULL; -EOPNOTSUPP if name of the attribute is not provenance.
+ * @param alloc Specify if the call should return a value via the buffer or just
+ * the value length.
+ * @return Size of the buffer on success, which in this case is the size of the
+ * provenance entry; -ENOMEM if inode provenance is NULL; -EOPNOTSUPP if name of
+ * the attribute is not provenance.
  *
  */
 static int provenance_inode_getsecurity(struct inode *inode,
@@ -1069,12 +1105,15 @@ out:
 /*!
  * @brief Copy the name of the provenance extended attribute to buffer.
  *
- * This function copies the extended attribute of provenance associated with @inode into @buffer.
+ * This function copies the extended attribute of provenance associated with
+ * @inode into @buffer.
  * The maximum size of @buffer is specified by @buffer_size.
  * @buffer may be NULL to request the size of the buffer required.
- * If @buffer is not NULL and the length of the provenance attribute name is smaller than @buffer_size,
+ * If @buffer is not NULL and the length of the provenance attribute name is
+ * smaller than @buffer_size,
  * then the buffer will contain the name of the provenance attribute.
- * @param inode The inode whose provenance extended attribute is to be retrieved.
+ * @param inode The inode whose provenance extended attribute is to be
+ * retrieved.
  * @param buffer The buffer that holds that attribute name.
  * @param buffer_size The maximum size of the buffer.
  * @returns Number of bytes used/required on success.
@@ -1094,14 +1133,19 @@ static int provenance_inode_listsecurity(struct inode *inode,
 /*!
  * @brief Record provenance when file_permission hook is triggered.
  *
- * This hook is triggered when checking file permissions before accessing an open file.
+ * This hook is triggered when checking file permissions before accessing an
+ * open file.
  * This hook is called by various operations that read or write files.
- * A security module can use this hook to perform additional checking on these operations,
- * e.g., to revalidate permissions on use to support privilege bracketing or policy changes.
- * Notice that this hook is used when the actual read/write operations are performed,
- * whereas the inode_security_ops hook is called when a file is opened (as well as many other operations).
+ * A security module can use this hook to perform additional checking on these
+ * operations,
+ * e.g., to revalidate permissions on use to support privilege bracketing or
+ * policy changes.
+ * Notice that this hook is used when the actual read/write operations are
+ * performed, whereas the inode_security_ops hook is called when a file is
+ * opened (as well as many other operations).
  * Caveat:
- * Although this hook can be used to revalidate permissions for various system call operations that read or write files,
+ * Although this hook can be used to revalidate permissions for various system
+ * call operations that read or write files,
  * it does not address the revalidation of permissions for memory-mapped files.
  * Security modules must handle this separately if they need such revalidation.
  * Depending on the type of the @file (e.g., a regular file or a directory),
@@ -1110,7 +1154,8 @@ static int provenance_inode_listsecurity(struct inode *inode,
  * RL_WRITE, RL_READ, RL_SEARCH, RL_SND, RL_RCV, RL_EXEC.
  * @param file The file structure being accessed.
  * @param mask The requested permissions.
- * @return 0 if permission is granted; -ENOMEM if inode provenance is NULL. Other error codes unknown.
+ * @return 0 if permission is granted; -ENOMEM if inode provenance is NULL.
+ * Other error codes unknown.
  *
  */
 static int provenance_file_permission(struct file *file, int mask)
@@ -1182,14 +1227,16 @@ out:
 
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
 /*!
- * @brief Record provenance when file_splice_pipe_to_pipe hook is triggered (splice system call).
+ * @brief Record provenance when file_splice_pipe_to_pipe hook is triggered
+ * (splice system call).
  *
  * Record provenance relation RL_SPLICE by calling "derives" function.
  * Information flows from one pipe @in to another pipe @out.
  * Fail if either file inode provenance does not exist.
  * @param in Information source file.
  * @param out Information drain file.
- * @return 0 if no error occurred; -ENOMEM if either end of the file provenance entry is NULL; Other error code inherited from derives function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if either end of the file provenance
+ * entry is NULL; Other error code inherited from derives function or unknown.
  *
  */
 static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
@@ -1265,13 +1312,16 @@ static int provenance_kernel_read_file(struct file *file
 /*!
  * @brief Record provenance when file_open hook is triggered.
  *
- * This hook is triggered when saving open-time permission checking state for later use upon file_permission,
+ * This hook is triggered when saving open-time permission checking state for
+ * later use upon file_permission,
  * and rechecking access if anything has changed since inode_permission.
  * Record provenance relation RL_OPEN by calling "uses" function.
- * Information flows from inode of the file to be opened to the calling process, and eventually to its cred.
+ * Information flows from inode of the file to be opened to the calling process,
+ * and eventually to its cred.
  * @param file The file to be opened.
  * @param cred Unused parameter.
- * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if the file inode provenance entry is
+ * NULL; other error code inherited from uses function or unknown.
  *
  */
 static int provenance_file_open(struct file *file)
@@ -1295,11 +1345,15 @@ static int provenance_file_open(struct file *file)
 /*!
  * @brief Record provenance when file_receive hook is triggered.
  *
- * This hook allows security modules to control the ability of a process to receive an open file descriptor via socket IPC.
+ * This hook allows security modules to control the ability of a process to
+ * receive an open file descriptor via socket IPC.
  * Record provenance relation RL_FILE_RCV by calling "uses" function.
- * Information flows from inode of the file being received to the calling process, and eventually to its cred.
+ * Information flows from inode of the file being received to the calling
+ * process, and eventually to its cred.
  * @param file The file structure being received.
- * @return 0 if permission is granted, no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from uses function or unknown.
+ * @return 0 if permission is granted, no error occurred; -ENOMEM if the
+ * file inode provenance entry is NULL; Other error code inherited from uses
+ * function or unknown.
  *
  */
 static int provenance_file_receive(struct file *file)
@@ -1389,22 +1443,29 @@ static int provenance_file_send_sigiotask(struct task_struct *task,
  * 2. Failure occurred.
  * If the mmap is shared (flag: MAP_SHARED or MAP_SHARED_VALIDATE),
  * depending on the action allowed by the kernel,
- * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or RL_MMAP_EXEC by calling "derives" function.
+ * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or
+ * RL_MMAP_EXEC by calling "derives" function.
  * Information flows between the mmap file and calling process and its cred.
  * The direction of the information flow depends on the action allowed.
  * If the mmap is private (flag: MAP_PRIVATE),
- * we create an additional provenance node to represent the private mapped inode by calling function "branch_mmap",
- * record provenance relation RL_MMAP by calling "derives" function because information flows from the original mapped file to the private file.
+ * we create an additional provenance node to represent the private mapped inode
+ * by calling function "branch_mmap", record provenance relation RL_MMAP by
+ * calling "derives" function because information flows from the original mapped
+ * file to the private file.
  * Then depending on the action allowed by the kernel,
- * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or RL_MMAP_EXEC by calling "derives" function.
- * Information flows between the new private mmap node and calling process and its cred.
+ * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or
+ * RL_MMAP_EXEC by calling "derives" function.
+ * Information flows between the new private mmap node and calling process and
+ * its cred.
  * The direction of the information flow depends on the action allowed.
  * Note that this new node is short-lived.
  * @param file The file structure for file to map (may be NULL).
  * @param reqprot The protection requested by the application.
  * @param prot The protection that will be applied by the kernel.
  * @param flags The operational flags.
- * @return 0 if permission is granted and no error occurred; -ENOMEM if the original file inode provenance entry is NULL; Other error codes inherited from derives function or unknown.
+ * @return 0 if permission is granted and no error occurred; -ENOMEM if the
+ * original file inode provenance entry is NULL; Other error codes inherited
+ * from derives function or unknown.
  *
  */
 static int provenance_mmap_file(struct file *file,
@@ -1464,10 +1525,13 @@ out:
  * @brief Record provenance when mmap_munmap hook is triggered.
  *
  * This hook is triggered when a file is unmmap'ed.
- * We obtain the provenance entry of the mmap'ed file, and if it shows that the mmap'ed file is shared based on the flags,
+ * We obtain the provenance entry of the mmap'ed file, and if it shows that the
+ * mmap'ed file is shared based on the flags,
  * record provenance relation RL_MUNMAP by calling "derives" function.
- * Information flows from cred of the process that unmmaps the file to the mmap'ed file.
- * Note that if the file to be unmmap'ed is private, the provenance of the mmap'ed file is short-lived and thus no longer exists.
+ * Information flows from cred of the process that unmmaps the file to the
+ * mmap'ed file.
+ * Note that if the file to be unmmap'ed is private, the provenance of the
+ * mmap'ed file is short-lived and thus no longer exists.
  * @param mm Unused parameter.
  * @param vma Virtual memory of the calling process.
  * @param start Unused parameter.
@@ -1503,17 +1567,22 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 /*!
  * @brief Record provenance when file_ioctl hook is triggered.
  *
- * This hook is triggered when checking permission for an ioctl operation on @file.
- * Note that @arg sometimes represents a user space pointer;
- * in other cases, it may be a simple integer value.
- * When @arg represents a user space pointer, it should never be used by the security module.
- * Record provenance relation RL_WRITE_IOCTL by calling "generates" function and RL_READ_IOCTL by calling "uses" function.
+ * This hook is triggered when checking permission for an ioctl operation on
+ * @file.
+ * Note that @arg sometimes represents a user space pointer; in other cases, it
+ * may be a simple integer value.
+ * When @arg represents a user space pointer, it should never be used by the
+ * security module.
+ * Record provenance relation RL_WRITE_IOCTL by calling "generates" function
+ * and RL_READ_IOCTL by calling "uses" function.
  * Information flows between the file and the calling process and its cred.
  * At the end, we save @iprov provenance.
  * @param file The file structure.
  * @param cmd The operation to perform.
  * @param arg The operational arguments.
- * @return 0 if permission is granted or no error occurred; -ENOMEM if the file inode provenance entry is NULL; Other error code inherited from generates/uses function or unknown.
+ * @return 0 if permission is granted or no error occurred; -ENOMEM if the file
+ * inode provenance entry is NULL; Other error code inherited from
+ * generates/uses function or unknown.
  *
  */
 static int provenance_file_ioctl(struct file *file,
@@ -1546,14 +1615,21 @@ out:
 /*!
  * @brief Record provenance when msg_msg_alloc_security hook is triggered.
  *
- * This hooks allocates and attaches a security structure to the msg->security field.
- * The security field is initialized to NULL when the structure is first created.
- * This function initializes and attaches a new provenance entry to the msg->provenance field.
- * We create a new provenance node ENT_MSG and update the information in the provenance entry from @msg.
+ * This hooks allocates and attaches a security structure to the msg->security
+ * field.
+ * The security field is initialized to NULL when the structure is first
+ * created.
+ * This function initializes and attaches a new provenance entry to the
+ * msg->provenance field.
+ * We create a new provenance node ENT_MSG and update the information in the
+ * provenance entry from @msg.
  * Record provenance relation RL_MSG_CREATE by calling "generates" function.
- * Information flows from cred of the calling process to the task, and eventually to the newly created msg node.
+ * Information flows from cred of the calling process to the task, and
+ * eventually to the newly created msg node.
  * @param msg The message structure to be modified.
- * @return 0 if operation was successful and permission is granted; -ENOMEM if no memory can be allocated for the new provenance entry; Other error codes inherited from generates function or unknown.
+ * @return 0 if operation was successful and permission is granted; -ENOMEM if
+ * no memory can be allocated for the new provenance entry; other error codes
+ * inherited from generates function or unknown.
  *
  */
 static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
@@ -1577,9 +1653,12 @@ static int provenance_msg_msg_alloc_security(struct msg_msg *msg)
 /*!
  * @brief Record provenance when msg_msg_free_security hook is triggered.
  *
- * This hook is triggered when deallocating the security structure for this message.
- * Free msg provenance entry when security structure for this message is deallocated.
- * If the msg has a valid provenance entry pointer (i.e., non-NULL), free the memory and set the pointer to NULL.
+ * This hook is triggered when deallocating the security structure for this
+ * message.
+ * Free msg provenance entry when security structure for this message is
+ * deallocated.
+ * If the msg has a valid provenance entry pointer (i.e., non-NULL), free the
+ * memory and set the pointer to NULL.
  * @param msg The message structure whose security structure to be freed.
  *
  */
@@ -1592,12 +1671,15 @@ static void provenance_msg_msg_free_security(struct msg_msg *msg)
 }
 
 /*!
- * @brief Helper function for two security hooks: msg_queue_msgsnd and mq_timedsend.
+ * @brief Helper function for two security hooks: msg_queue_msgsnd and
+ * mq_timedsend.
  *
  * Record provenance relation RL_SND_MSG_Q by calling "generates" function.
- * Information flows from calling process's cred to the process, and eventually to msg.
+ * Information flows from calling process's cred to the process, and eventually
+ * to msg.
  * @param msg The message structure.
- * @return 0 if no error occurred; Other error codes inherited from generates function or unknown.
+ * @return 0 if no error occurred; Other error codes inherited from generates
+ * function or unknown.
  *
  */
 static inline int __mq_msgsnd(struct msg_msg *msg)
@@ -1619,12 +1701,14 @@ static inline int __mq_msgsnd(struct msg_msg *msg)
 /*!
  * @brief Record provenance when msg_queue_msgsnd hook is triggered.
  *
- * This hook is trigger when checking permission before a message, @msg, is enqueued on the message queue, @msq.
+ * This hook is trigger when checking permission before a message, @msg,
+ * is enqueued on the message queue, @msq.
  * This function simply calls the helper function __mq_msgsnd.
  * @param msq The message queue to send message to.
  * @param msg The message to be enqueued.
  * @param msqflg The operational flags.
- * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd function or unknown.
+ * @return 0 if permission is granted. Other error codes inherited from
+ * __mq_msgsnd function or unknown.
  *
  */
 static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
@@ -1643,7 +1727,8 @@ static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
  * @param inode Unused parameter.
  * @param msg The message to be enqueued.
  * @param ts Unused parameter.
- * @return 0 if permission is granted. Other error codes inherited from __mq_msgsnd function or unknown.
+ * @return 0 if permission is granted. Other error codes inherited from
+ * __mq_msgsnd function or unknown.
  *
  */
 static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
@@ -1654,13 +1739,15 @@ static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
 #endif
 
 /*!
- * @brief Helper function for two security hooks: msg_queue_msgrcv and mq_timedreceive.
+ * @brief Helper function for two security hooks: msg_queue_msgrcv and
+ * mq_timedreceive.
  *
  * Record provenance relation RL_RCV_MSG_Q by calling "uses" function.
  * Information flows from msg to the calling process, and eventually to its cred.
  * @param cprov The calling process's cred provenance entry pointer.
  * @param msg The message structure.
- * @return 0 if no error occurred; Other error codes inherited from uses function or unknown.
+ * @return 0 if no error occurred; Other error codes inherited from uses
+ * function or unknown.
  *
  */
 static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
@@ -1681,18 +1768,22 @@ static inline int __mq_msgrcv(struct provenance *cprov, struct msg_msg *msg)
 /*!
  * @brief Record provenance when msg_queue_msgrcv hook is triggered.
  *
- * This hook is triggered when checking permission before a message, @msg, is removed from the message queue, @msq.
- * The @target task structure contains a pointer to the process that will be receiving the message
- * (not equal to the current process when inline receives are being performed).
+ * This hook is triggered when checking permission before a message, @msg, is
+ * removed from the message queue, @msq.
+ * The @target task structure contains a pointer to the process that will be
+ * receiving the message (not equal to the current process when inline receives
+ * are being performed).
  * Since it is the receiving task that receives the msg,
  * we first obtain the receiving task's cred provenance entry pointer,
- * and then simply calls the helper function __mq_msgrcv to record the information flow.
+ * and then simply calls the helper function __mq_msgrcv to record the
+ * information flow.
  * @param msq The message queue to retrieve message from.
  * @param msg The message destination.
  * @param target The task structure for recipient process.
  * @param type The type of message requested.
  * @param mode The operational flags.
- * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv function or unknown.
+ * @return 0 if permission is granted. Other error codes inherited from
+ * __mq_msgrcv function or unknown.
  *
  */
 static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
@@ -1712,11 +1803,13 @@ static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
  * @brief Record provenance when mq_timedreceive hook is triggered.
  *
  * Current process will be receiving the message.
- * We simply calls the helper function __mq_msgrcv to record the information flow.
+ * We simply calls the helper function __mq_msgrcv to record the information
+ * flow.
  * @param inode Unused parameter.
  * @param msg The message destination.
  * @param ts Unused parameter.
- * @return 0 if permission is granted. Other error codes inherited from __mq_msgrcv function or unknown.
+ * @return 0 if permission is granted. Other error codes inherited from
+ * __mq_msgrcv function or unknown.
  *
  */
 static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
@@ -1731,17 +1824,26 @@ static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
 /*!
  * @brief Record provenance when shm_alloc_security hook is triggered.
  *
- * This hunk is triggered when allocating and attaching a security structure to the shp->shm_perm.security field.
- * The security field is initialized to NULL when the structure is first created.
- * This function allocates and attaches a provenance entry to the shp->shm_perm.provenance field.
+ * This hunk is triggered when allocating and attaching a security structure to
+ * the shp->shm_perm.security field.
+ * The security field is initialized to NULL when the structure is first
+ * created.
+ * This function allocates and attaches a provenance entry to the
+ * shp->shm_perm.provenance field.
  * That is, it creates a new provenance node ENT_SHM.
- * It also fills in some provenance information based on the information contained in @shp.
+ * It also fills in some provenance information based on the information
+ * contained in @shp.
  * Record provenance relation RL_SH_CREATE_READ by calling "uses" function.
- * For read, information flows from shared memory to the calling process, and eventually to its cred.
+ * For read, information flows from shared memory to the calling process, and
+ * eventually to its cred.
  * Record provenance relation RL_SH_CREATE_WRITE by calling "uses" function.
- * For write, information flows from the calling process's cree to the process, and eventually to shared memory.
+ * For write, information flows from the calling process's cree to the process,
+ * and eventually to shared memory.
  * @param shp The shared memory structure to be modified.
- * @return 0 if operation was successful and permission is granted, no error occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM provenance entry. Other error code inherited from uses and generates function or unknown.
+ * @return 0 if operation was successful and permission is granted, no error
+ * occurred. -ENOMEM if no memory can be allocated to create a new ENT_SHM
+ * provenance entry. Other error code inherited from uses and generates function
+ * or unknown.
  *
  */
 static int provenance_shm_alloc_security(struct kern_ipc_perm *shp)
@@ -1769,8 +1871,10 @@ out:
 /*!
  * @brief Record provenance when shm_free_security hook is triggered.
  *
- * This hook is triggered when deallocating the security struct for this memory segment.
- * We simply free the memory of the allocated provenance entry if it exists, and set the pointer to NULL.
+ * This hook is triggered when deallocating the security struct for this memory
+ * segment.
+ * We simply free the memory of the allocated provenance entry if it exists, and
+ * set the pointer to NULL.
  * @param shp The shared memory structure to be modified.
  *
  */
@@ -1785,19 +1889,24 @@ static void provenance_shm_free_security(struct kern_ipc_perm *shp)
 /*!
  * @brief Record provenance when shm_shmat hook is triggered.
  *
- * This hook is triggered when checking permissions prior to allowing the shmat system call to attach the
+ * This hook is triggered when checking permissions prior to allowing the shmat
+ * system call to attach the
  * shared memory segment @shp to the data segment of the calling process.
  * The attaching address is specified by @shmaddr.
  * If @shmflg is SHM_RDONLY (readable only), then:
  * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function.
- * Information flows from shared memory to the calling process, and then eventually to its cred.
+ * Information flows from shared memory to the calling process, and then
+ * eventually to its cred.
  * Otherwise, shared memory is both readable and writable, then:
- * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function and RL_SH_ATTACH_WRITE by calling "uses" function.
+ * Record provenance relation RL_SH_ATTACH_READ by calling "uses" function and
+ * RL_SH_ATTACH_WRITE by calling "uses" function.
  * Information can flow both ways.
  * @param shp The shared memory structure to be modified.
  * @param shmaddr The address to attach memory region to.
  * @param shmflg The operational flags.
- * @return 0 if permission is granted and no error occurred; -ENOMEM if shared memory provenance entry does not exist. Other error codes inherited from uses and generates function or unknown.
+ * @return 0 if permission is granted and no error occurred; -ENOMEM if shared
+ * memory provenance entry does not exist. Other error codes inherited from uses
+ * and generates function or unknown.
  *
  */
 static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr, int shmflg)
@@ -1830,10 +1939,13 @@ out:
 /*!
  * @brief Record provenance when shm_shmdt hook is triggered.
  *
- * This hook is triggered when detaching the shared memory segment from the address space of the calling process.
- * The to-be-detached segment must be currently attached with shmaddr equal to the value returned by the attaching shmat() call.
+ * This hook is triggered when detaching the shared memory segment from the
+ * address space of the calling process.
+ * The to-be-detached segment must be currently attached with shmaddr equal to
+ * the value returned by the attaching shmat() call.
  * Record provenance relation RL_SHMDT by calling "generates" function.
- * Information flows from the calling process's cred to the process, and eventually to the shared memory.
+ * Information flows from the calling process's cred to the process, and
+ * eventually to the shared memory.
  * @param shp The shared memory structure to be modified.
  *
  */
@@ -1857,14 +1969,18 @@ static void provenance_shm_shmdt(struct kern_ipc_perm *shp)
 /*!
  * @brief Record provenance when sk_alloc_security hook is triggered.
  *
- * This hook is triggered when allocating and attaching a security structure to the sk->sk_security field,
+ * This hook is triggered when allocating and attaching a security structure to
+ * the sk->sk_security field,
  * which is used to copy security attributes between local stream sockets.
- * This function therefore allocates and attaches @sk_provenance structure to @sk.
- * The provenance of the local stream socket is the same as the cred provenance of the calling process.
+ * This function therefore allocates and attaches @sk_provenance structure to
+ * @sk.
+ * The provenance of the local stream socket is the same as the cred provenance
+ * of the calling process.
  * @param sk The sock structure to be modified.
  * @param family The protocol family. Unused parameter.
  * @param priority Memory allocation operation flag.
- * @return 0 if success and no error occurred; -ENOMEM if calling process's cred structure does not exist. Other error codes unknown.
+ * @return 0 if success and no error occurred; -ENOMEM if calling process's
+ * cred structure does not exist. Other error codes unknown.
  *
  */
 static int provenance_sk_alloc_security(struct sock *sk,
@@ -1882,24 +1998,30 @@ static int provenance_sk_alloc_security(struct sock *sk,
 /*!
  * @brief Record provenance when socket_post_create hook is triggered.
  *
- * This hook allows a module to update or allocate a per-socket security structure.
+ * This hook allows a module to update or allocate a per-socket security
+ * structure.
  * Note that the security field was not added directly to the socket structure,
- * but rather, the socket security information is stored in the associated inode.
- * Typically, the inode alloc_security hook will allocate and and attach security information to
- * sock->inode->i_security.
+ * but rather, the socket security information is stored in the associated
+ * inode.
+ * Typically, the inode alloc_security hook will allocate and and attach
+ * security information to sock->inode->i_security.
  * This hook may be used to update the sock->inode->i_security field
- * with additional information that wasn't available when the inode was allocated.
+ * with additional information that wasn't available when the inode was
+ * allocated.
  * Record provenance relation RL_SOCKET_CREATE by calling "generates" function.
- * Information flows from the calling process's cred to the process, and eventually to the socket that is being created.
+ * Information flows from the calling process's cred to the process, and
+ * eventually to the socket that is being created.
  * If @kern is 1 (kernal socket), no provenance relation is recorded.
- * This is becasuse kernel socket is a form of communication between kernel and userspace.
+ * This is becasuse kernel socket is a form of communication between kernel and
+ * userspace.
  * We do not capture kernel's provenance for now.
  * @param sock The newly created socket structure.
  * @param family The requested protocol family.
  * @param type The requested communications type.
  * @param protocol The requested protocol.
  * @param kern Set to 1 if it is a kernel socket.
- * @return 0 if no error occurred; -ENOMEM if inode provenance entry does not exist. Other error codes inherited from generates function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if inode provenance entry does not
+ * exist. Other error codes inherited from generates function or unknown.
  *
  * @todo Maybe support kernel socket in a future release.
  */
@@ -1963,19 +2085,25 @@ out:
 /*!
  * @brief Record provenance when socket_bind hook is triggered.
  *
- * This hook is triggered when checking permission before socket protocol layer bind operation is performed,
- * and the socket @sock is bound to the address specified in the @address parameter.
- * The function records the provenance relations if the calling process is not set to be opaque (i.e., should be recorded).
+ * This hook is triggered when checking permission before socket protocol layer
+ * bind operation is performed, and the socket @sock is bound to the address
+ * specified in the @address parameter.
+ * The function records the provenance relations if the calling process is not
+ * set to be opaque (i.e., should be recorded).
  * The relation between the socket and its address is recorded first,
  * then record provenance relation RL_BIND by calling "generates" function.
- * Information flows from the cred of the calling process to the process itself, and eventually to the socket.
- * If the address family is PF_INET (we only support IPv4 for now), we check if we should record the packet from the socket,
+ * Information flows from the cred of the calling process to the process itself,
+ * and eventually to the socket.
+ * If the address family is PF_INET (we only support IPv4 for now), we check if
+ * we should record the packet from the socket,
  * and track and propagate recording from the socket and the calling process.
  * Note that usually server binds the socket to its local address.
  * @param sock The socket structure.
  * @param address The address to bind to.
  * @param addrlen The length of address.
- * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
+ * @return 0 if permission is granted and no error occurred; -EINVAL if socket
+ * address is longer than @addrlen; -ENOMEM if socket inode provenance entry
+ * does not exist. Other error codes inherited or unknown.
  *
  */
 static int provenance_socket_bind(struct socket *sock,
@@ -2006,14 +2134,18 @@ static int provenance_socket_bind(struct socket *sock,
 /*!
  * @brief Record provenance when socket_connect hook is triggered.
  *
- * This hook is triggered when checking permission before socket protocol layer connect operation
- * attempts to connect socket @sock to a remote address, @address.
- * This function is similar to the above provenance_socket_bind function, except that we
- * record provenance relation RL_CONNECT by calling "generates" function.
+ * This hook is triggered when checking permission before socket protocol layer
+ * connect operation attempts to connect socket @sock to a remote address,
+ * @address.
+ * This function is similar to the above provenance_socket_bind function, except
+ * that we record provenance relation RL_CONNECT by calling "generates"
+ * function.
  * @param sock The socket structure.
  * @param address The address of remote endpoint.
  * @param addrlen The length of address.
- * @return 0 if permission is granted and no error occurred; -EINVAL if socket address is longer than @addrlen; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited or unknown.
+ * @return 0 if permission is granted and no error occurred; -EINVAL if socket
+ * address is longer than @addrlen; -ENOMEM if socket inode provenance entry
+ * does not exist. Other error codes inherited or unknown.
  *
  */
 static int provenance_socket_connect(struct socket *sock,
@@ -2049,11 +2181,13 @@ out:
 /*!
  * @brief Record provenance when socket_listen hook is triggered.
  *
- * This hook is triggered when checking permission before socket protocol layer listen operation.
+ * This hook is triggered when checking permission before socket protocol layer
+ * listen operation.
  * Record provenance relation RL_LISTEN by calling "generates" function.
  * @param sock The socket structure.
  * @param backlog The maximum length for the pending connection queue.
- * @return 0 if no error occurred; -ENOMEM if socket inode provenance entry does not exist. Other error codes inherited from generates function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if socket inode provenance entry does
+ * not exist. Other error codes inherited from generates function or unknown.
  *
  */
 static int provenance_socket_listen(struct socket *sock, int backlog)
@@ -2077,18 +2211,22 @@ static int provenance_socket_listen(struct socket *sock, int backlog)
 /*!
  * @brief Record provenance when socket_accept hook is triggered.
  *
- * This hook is triggered when checking permission before accepting a new connection.
- * Note that the new socket, @newsock, has been created and some information copied to it,
+ * This hook is triggered when checking permission before accepting a new
+ * connection.
+ * Note that the new socket, @newsock, has been created and some information
+ * copied to it,
  * but the accept operation has not actually been performed.
  * Since a new socket has been created after aceepting a new connection,
  * record provenance relation RL_ACCEPT_SOCKET by calling "derives" function.
  * Information flows from the old socket to the new socket.
  * Then record provenance relation RL_ACCEPT by calling "uses" function,
  * since the calling process accepts the connection.
- * Information flows from the new socket to the calling process, and eventually to its cred.
+ * Information flows from the new socket to the calling process, and eventually
+ * to its cred.
  * @param sock The listening socket structure.
  * @param newsock The newly created server socket for connection.
- * @return 0 if permission is granted and no error occurred; Other error codes inherited from derives and uses function or unknown.
+ * @return 0 if permission is granted and no error occurred; Other error codes
+ * inherited from derives and uses function or unknown.
  *
  */
 static int provenance_socket_accept(struct socket *sock, struct socket *newsock)
@@ -2113,20 +2251,25 @@ out:
 }
 
 /*!
- * @brief Record provenance when socket_sendmsg_always/socket_sendmsg hook is triggered.
+ * @brief Record provenance when socket_sendmsg_always/socket_sendmsg hook is
+ * triggered.
  *
- * This hook is triggered when checking permission before transmitting a message to another socket.
+ * This hook is triggered when checking permission before transmitting a message
+ * to another socket.
  * Record provenance relation RL_SND_MSG by calling "generates" function.
- * Information flows from the calling process's cred to the calling process, and eventually to the sending socket.
- * If sk_family is PF_UNIX (or any local communication) and sk_type is not SOCK_DGRAM,
- * we obtain the @peer receiving socket and its provenance,
+ * Information flows from the calling process's cred to the calling process, and
+ * eventually to the sending socket.
+ * If sk_family is PF_UNIX (or any local communication) and sk_type is not
+ * SOCK_DGRAM, we obtain the @peer receiving socket and its provenance,
  * and if the provenance is not NULL,
  * record provenance relation RL_RCV_UNIX by calling "derives" function.
  * Information flows from the sending socket to the receiving peer socket.
  * @param sock The socket structure.
  * @param msg The message to be transmitted.
  * @param size The size of message.
- * @return 0 if permission is granted and no error occurred; -ENOMEM if the sending socket's provenance entry does not exist; Other error codes inherited from generates and derives function or unknown.
+ * @return 0 if permission is granted and no error occurred; -ENOMEM if the
+ * sending socket's provenance entry does not exist; Other error codes inherited
+ * from generates and derives function or unknown.
  *
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
@@ -2174,20 +2317,27 @@ out:
 }
 
 /*!
- * @brief Record provenance when socket_recvmsg_always/socket_recvmsg hook is triggered.
+ * @brief Record provenance when socket_recvmsg_always/socket_recvmsg hook is
+ * triggered.
  *
- * This hook is triggered when checking permission before receiving a message from a socket.
- * This function is similar to the above provenance_socket_sendmsg_always function except the direction is reversed.
+ * This hook is triggered when checking permission before receiving a message
+ * from a socket.
+ * This function is similar to the above provenance_socket_sendmsg_always
+ * function except the direction is reversed.
  * Specifically, if we know the sending socket, we have
  * record provenance relation RL_SND_UNIX by calling "derives" function.
- * Information flows from the sending socket (@peer) to the receiving socket (@sock).
+ * Information flows from the sending socket (@peer) to the receiving socket
+ * (@sock).
  * Then record provenance relation RL_RCV_MSG by calling "uses" function.
- * Information flows from the receiving socket to the calling process, and eventually to its cred.
+ * Information flows from the receiving socket to the calling process, and
+ * eventually to its cred.
  * @param sock The receiving socket structure.
  * @param msg The message structure.
  * @param size The size of message structure.
  * @param flags The operational flags.
- * @return 0 if permission is granted, and no error occurred; -ENOMEM if the receiving socket's provenance entry does not exist; Other error codes inherited from uses and derives function or unknown.
+ * @return 0 if permission is granted, and no error occurred; -ENOMEM if the
+ * receiving socket's provenance entry does not exist; Other error codes
+ * inherited from uses and derives function or unknown.
  *
  */
 #ifdef CONFIG_SECURITY_FLOW_FRIENDLY
@@ -2213,7 +2363,7 @@ static int provenance_socket_recvmsg(struct socket *sock,
 	if (!iprov)
 		return -ENOMEM;
 	if (sock->sk->sk_family == PF_UNIX &&
-	    sock->sk->sk_type != SOCK_DGRAM) {             // datagran handled by unix_may_send
+	    sock->sk->sk_type != SOCK_DGRAM) { // datagran handled by unix_may_send
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			pprov = get_sk_provenance(peer);
@@ -2240,18 +2390,22 @@ out:
 /*!
  * @brief Record provenance when socket_sock_rcv_skb hook is triggered.
  *
- * This hooks is triggered when checking permissions on incoming network packets.
- * This hook is distinct from Netfilter's IP input hooks since it is the first time that
- * the incoming sk_buff @skb has been associated with a particular socket, @sk.
+ * This hooks is triggered when checking permissions on incoming network
+ * packets.
+ * This hook is distinct from Netfilter's IP input hooks since it is the first
+ * time that the incoming sk_buff @skb has been associated with a particular
+ * socket, @sk.
  * Must not sleep inside this hook because some callers hold spinlocks.
  * If the socket inode is tracked,
- * create a packet provenance node and fill the provenance information of the node from @skb,
+ * create a packet provenance node and fill the provenance information of the
+ * node from @skb,
  * and record provenance relation RL_RCV_PACKET by calling "derives" function.
  * Information flows from the packet to the socket.
  * We only handle IPv4 in this function for now (i.e. PF_INET family only).
  * @param sk The sock (not socket) associated with the incoming sk_buff.
  * @param skb The incoming network data.
- * @return 0 if no error occurred; -ENOMEM if sk provenance does not exist. Other error codes inherited from derives function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if sk provenance does not exist.
+ * Other error codes inherited from derives function or unknown.
  *
  */
 static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
@@ -2289,16 +2443,20 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 /*!
  * @brief Record provenance when unix_stream_connect hook is triggered.
  *
- * This hook is triggered when checking permissions before establishing a Unix domain stream connection b]etween @sock and @other.
+ * This hook is triggered when checking permissions before establishing a Unix
+ * domain stream connection b]etween @sock and @other.
  * Unix domain connection is local communication.
- * Since this is simply to connect (no information should flow between the two local sockets yet),
- * we do not use receiving socket information @other or new socket @newsk.
+ * Since this is simply to connect (no information should flow between the two
+ * local sockets yet), we do not use receiving socket information @other or new
+ * socket @newsk.
  * Record provenance relation RL_CONNECT by calling "generates" function.
- * Information flows from the calling process's cred to the task , and eventually to the sending socket.
+ * Information flows from the calling process's cred to the task , and
+ * eventually to the sending socket.
  * @param sock The (sending) sock structure.
  * @param other The peer (i.e., receiving) sock structure. Unused parameter.
  * @param newsk The new sock structure. Unused parameter.
- * @return 0 if permission is granted; Other error code inherited from generates function or unknown.
+ * @return 0 if permission is granted; Other error code inherited from generates
+ * function or unknown.
  *
  */
 static int provenance_unix_stream_connect(struct sock *sock,
@@ -2327,7 +2485,8 @@ static int provenance_unix_stream_connect(struct sock *sock,
  * Information flows from the sending socket (@sock) to the receiving socket (@other).
  * @param sock The socket structure.
  * @param other The peer socket structure.
- * @return 0 if permission is granted and no error occurred; Other error codes inherited from derives function or unknown.
+ * @return 0 if permission is granted and no error occurred; Other error codes
+ * inherited from derives function or unknown.
  *
  */
 static int provenance_unix_may_send(struct socket *sock,
@@ -2349,18 +2508,25 @@ static int provenance_unix_may_send(struct socket *sock,
 /*!
  * @brief Record provenance when bprm_set_creds hook is triggered.
  *
- * This hook is triggered when saving security information in the bprm->security field,
- * typically based on information about the bprm->file, for later use by the apply_creds hook.
- * This hook may also optionally check permissions (e.g. for transitions between security domains).
- * This hook may be called multiple times during a single execve, e.g. for interpreters.
- * The hook can tell whether it has already been called by checking to see if @bprm->security is non-NULL.
- * If so, then the hook may decide either to retain the security information saved earlier or to replace it.
+ * This hook is triggered when saving security information in the bprm->security
+ * field, typically based on information about the bprm->file, for later use by
+ * the apply_creds hook.
+ * This hook may also optionally check permissions (e.g. for transitions between
+ * security domains).
+ * This hook may be called multiple times during a single execve, e.g. for
+ * interpreters.
+ * The hook can tell whether it has already been called by checking to see if
+ * @bprm->security is non-NULL.
+ * If so, then the hook may decide either to retain the security information
+ * saved earlier or to replace it.
  * Since cred is based on information about the @bprm->file,
  * information flows from the inode of bprm->file to bprm->cred.
  * Therefore, record provenance relation RL_EXEC by calling "derives" function.
  * Relation is not recorded if the inode of bprm->file is set to be opaque.
  * @param bprm The linux_binprm structure.
- * @return 0 if the hook is successful and permission is granted; -ENOMEM if bprm->cred's provenance does not exist. Other error codes inherited from derives function or unknown.
+ * @return 0 if the hook is successful and permission is granted; -ENOMEM if
+ * bprm->cred's provenance does not exist. Other error codes inherited from
+ * derives function or unknown.
  *
  */
 static int provenance_bprm_set_creds(struct linux_binprm *bprm)
@@ -2387,14 +2553,19 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * @brief Record provenance when bprm_check hook is triggered.
  *
  * This hook mediates the point when a search for a binary handler will begin.
- * It allows a check the @bprm->security value which is set in the preceding set_creds call.
- * The primary difference from set_creds is that the argv list and envp list are reliably available in @bprm.
+ * It allows a check the @bprm->security value which is set in the preceding
+ * set_creds call.
+ * The primary difference from set_creds is that the argv list and envp list are
+ * reliably available in @bprm.
  * This hook may be called multiple times during a single execve;
  * and in each pass set_creds is called first.
- * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque (i.e., do not track).
- * The relations between the bprm arguments and bprm->cred are recorded by calling record_args function.
+ * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque
+ * (i.e., do not track).
+ * The relations between the bprm arguments and bprm->cred are recorded by
+ * calling record_args function.
  * @param bprm The linux_binprm structure.
- * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not exist. Other error codes inherited from record_args function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if bprm->cred provenance does not
+ * exist. Other error codes inherited from record_args function or unknown.
  *
  */
 static int provenance_bprm_check_security(struct linux_binprm *bprm)
@@ -2419,7 +2590,8 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 /*!
  * @brief Record provenance when bprm_committing_creds hook is triggered.
  *
- * This hook is triggered when preparing to install the new security attributes of a process being transformed by an execve operation,
+ * This hook is triggered when preparing to install the new security attributes
+ * of a process being transformed by an execve operation,
  * based on the old credentials pointed to by @current->cred,
  * and the information set in @bprm->cred by the bprm_set_creds hook.
  * This hook is a good place to perform state changes on the process such as
@@ -2432,9 +2604,11 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
  * Cred can also be set by bprm_set_creds, so
  * record provenance relation RL_EXEC by calling "derives" function.
  * Information flows from the bprm->file's cred to the new process's cred.
- * The old process gets the name of the new process by calling record_node_name function.
+ * The old process gets the name of the new process by calling record_node_name
+ * function.
  * Note that if bprm->file's provenance is set to be opaque,
- * the new process bprm->cred's provenance will therefore be opaque and we do not track any of the relations.
+ * the new process bprm->cred's provenance will therefore be opaque and we do
+ * not track any of the relations.
  * @param bprm points to the linux_binprm structure.
  *
  */
@@ -2454,13 +2628,16 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
 /*!
  * @brief Record provenance when sb_alloc_security hook is triggered.
  *
- * This hook is triggered when allocating and attaching a security structure to the sb->s_security field.
+ * This hook is triggered when allocating and attaching a security structure to
+ * the sb->s_security field.
  * The s_security field is initialized to NULL when the structure is allocated.
- * This function allocates and initializes a provenance structure to sb->s_provenance field.
+ * This function allocates and initializes a provenance structure to
+ * sb->s_provenance field.
  * It also creates a new provenance node ENT_SBLCK.
  * SB represents the existence of a device/pipe.
  * @param sb The super_block structure to be modified.
- * @return 0 if operation was successful; -ENOMEM if no memory can be allocated for a new provenance entry. Other error codes unknown.
+ * @return 0 if operation was successful; -ENOMEM if no memory can be allocated
+ * for a new provenance entry. Other error codes unknown.
  *
  */
 static int provenance_sb_alloc_security(struct super_block *sb)
@@ -2476,8 +2653,10 @@ static int provenance_sb_alloc_security(struct super_block *sb)
 /*!
  * @brief Record provenance when sb_free_security hook is triggered.
  *
- * This hooks is triggered when deallocating and clearing the sb->s_security field.
- * This function frees the memory of the allocated provenance field and set the pointer to NULL.
+ * This hooks is triggered when deallocating and clearing the sb->s_security
+ * field.
+ * This function frees the memory of the allocated provenance field and set the
+ * pointer to NULL.
  * @param sb The super_block structure to be modified.
  *
  */
@@ -2492,8 +2671,10 @@ static void provenance_sb_free_security(struct super_block *sb)
  * @brief Record provenance when sb_kern_mount hook is triggered.
  *
  * This hook is triggered when mounting a kernel device, including pipe.
- * This function will update the Universal Unique ID of the provenance entry of the device @sb->s_provenance once it is mounted.
- * We obtain this information from @sb if it exists, or we give it a random value.
+ * This function will update the Universal Unique ID of the provenance entry
+ * of the device @sb->s_provenance once it is mounted.
+ * We obtain this information from @sb if it exists, or we give it a random
+ * value.
  * @param sb The super block structure.
  * @param flags The operations flags.
  * @param data
@@ -2542,7 +2723,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_getpgid,             provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,                provenance_task_kill),
 	LSM_HOOK_INIT(ptrace_access_check,      provenance_ptrace_access_check),
-	LSM_HOOK_INIT(ptrace_traceme,                           provenance_ptrace_traceme),
+	LSM_HOOK_INIT(ptrace_traceme,           provenance_ptrace_traceme),
 
 	/* inode related hooks */
 	LSM_HOOK_INIT(inode_alloc_security,     provenance_inode_alloc_security),
@@ -2707,7 +2888,8 @@ static void __init init_prov_cache(void)
  * 1. Set up default capture policies.
  * 2. Machine ID is default to 1.
  * 3. Boot ID is default to 0.
- * 4. Set up kernel memory cache for regular provenance entries (NULL on failure).
+ * 4. Set up kernel memory cache for regular provenance entries (NULL on
+ * failure).
  * 5. Set up kernel memory cache for long provenance entries (NULL on failure).
  * 6. Set up boot buffer for regualr provenance entries (NULL on failure).
  * 7. Set up boot buffer for long provenance entries (NULL on failure).
@@ -2715,8 +2897,10 @@ static void __init init_prov_cache(void)
  * 8. Initialize a workqueue (NULL on failure).
  * 9. Initialize security for provenance task ("task_init_provenance" function).
  * 10. Register provenance security hooks.
- * Work_queue helps persiste provenance of inodes (if needed) during the operations that cannot sleep,
- * since persists provenance requires writing to disk (which means sleep is needed).
+ * Work_queue helps persiste provenance of inodes (if needed) during the
+ * operations that cannot sleep,
+ * since persists provenance requires writing to disk (which means sleep is
+ * needed).
  *
  */
 static int __init provenance_init(void)
