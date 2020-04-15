@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -216,8 +216,7 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		goto out;
 	}
 out:
-	if (prov_elt(tprov)->task_info.disc)
-		kfree(prov_elt(tprov)->task_info.disc);
+	kfree(prov_elt(tprov)->task_info.disc);
 	prov_elt(tprov)->task_info.disc = node;
 	return count;
 }

@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -232,6 +235,7 @@ static inline int record_task_name(struct task_struct *task,
 		if (exe_file) {
 			fprov = get_file_provenance(exe_file, false);
 			if (provenance_is_opaque(prov_elt(fprov))) {
+				fput(exe_file); // Release the file.
 				set_opaque(prov_elt(prov));
 				goto out;
 			}

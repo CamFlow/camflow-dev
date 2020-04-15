@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -106,9 +109,9 @@ static __always_inline void __extract_tcp_info(struct sk_buff *skb,
 	th = skb_header_pointer(skb, tcpoff, sizeof(_tcph), &_tcph);
 	if (!th)
 		return;
-	id->snd_port = th->source;
-	id->rcv_port = th->dest;
-	id->seq = th->seq;
+	id->snd_port = (__force uint16_t)th->source;
+	id->rcv_port = (__force uint16_t)th->dest;
+	id->seq = (__force uint32_t)th->seq;
 }
 
 /*!
@@ -135,8 +138,8 @@ static __always_inline void __extract_udp_info(struct sk_buff *skb,
 	uh = skb_header_pointer(skb, udpoff, sizeof(_udph), &_udph);
 	if (!uh)
 		return;
-	id->snd_port = uh->source;
-	id->rcv_port = uh->dest;
+	id->snd_port = (__force uint16_t)uh->source;
+	id->rcv_port = (__force uint16_t)uh->dest;
 }
 
 /*!
@@ -168,11 +171,12 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_
 
 	packet_identifier(prov_elt(prov)).type = type;
 	// Collect IP element of prov identifier.
-	packet_identifier(prov_elt(prov)).id = ih->id;
-	packet_identifier(prov_elt(prov)).snd_ip = ih->saddr;
-	packet_identifier(prov_elt(prov)).rcv_ip = ih->daddr;
+	// force parse endian casting
+	packet_identifier(prov_elt(prov)).id = (__force uint16_t)ih->id;
+	packet_identifier(prov_elt(prov)).snd_ip = (__force uint32_t)ih->saddr;
+	packet_identifier(prov_elt(prov)).rcv_ip = (__force uint32_t)ih->daddr;
 	packet_identifier(prov_elt(prov)).protocol = ih->protocol;
-	packet_info(prov_elt(prov)).length = ih->tot_len;
+	packet_info(prov_elt(prov)).length = (__force size_t)ih->tot_len;
 
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
@@ -354,7 +358,9 @@ static __always_inline int check_track_socket(const struct sockaddr *address,
 
 	if (address->sa_family == PF_INET) {
 		ipv4_addr = (struct sockaddr_in *)address;
-		op = prov_ipv4_egressOP(ipv4_addr->sin_addr.s_addr, ipv4_addr->sin_port);
+		// force parse endian casting
+		op = prov_ipv4_egressOP((__force uint32_t)ipv4_addr->sin_addr.s_addr,
+					(__force uint32_t)ipv4_addr->sin_port);
 		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));
