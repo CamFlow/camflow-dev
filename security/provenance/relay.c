@@ -197,7 +197,7 @@ out:
 }
 
 bool relay_ready;
-bool relay_initialized;
+static bool relay_initialized;
 /*!
  * @brief Write whatever in boot buffer to relay buffer when relay buffer is ready.
  *
