@@ -1016,13 +1016,8 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/asm/sockios.h
   HDRINST usr/include/asm/errno.h
   CHECK   security/provenance/relay.c
-security/provenance/relay.c:200:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
-security/provenance/hooks.c:113:22: warning: incorrect type in assignment (different address spaces)
-security/provenance/hooks.c:113:22:    expected struct cred const *cred
-security/provenance/hooks.c:113:22:    got struct cred const [noderef] <asn:4> *real_cred
-security/provenance/hooks.c:155:30: warning: cast removes address space '<asn:4>' of expression
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
