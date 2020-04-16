@@ -424,13 +424,6 @@ workflows:
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
-      - tinkerbell:
-          requires:
-            - sparse
-            - flawfinder
-            - checkpatch
-            - smatch
-            - coccinelle
       - doc:
           requires:
             - sparse
@@ -445,4 +438,3 @@ workflows:
                 - dev
           requires:
             - doc
-            - tinkerbell
