@@ -103,14 +103,14 @@ static int provenance_task_alloc(struct task_struct *task,
 				 unsigned long clone_flags)
 {
 	struct provenance *ntprov = provenance_task(task);
-	const struct cred *cred;
+	struct cred *cred;
 	struct task_struct *t = current;
 	struct provenance *tprov;
 	struct provenance *cprov;
 
 	init_provenance_struct(ACT_TASK, ntprov);
 	if (t != NULL) {
-		cred = t->real_cred;
+		cred = (__force struct cred *)t->real_cred;
 		tprov = provenance_task(t);
 		if (cred != NULL) {
 			cprov = provenance_cred(cred);
@@ -152,7 +152,7 @@ static void provenance_task_free(struct task_struct *task)
  */
 static void task_init_provenance(void)
 {
-	struct cred *cred = (struct cred *)current->real_cred;
+	struct cred *cred = (__force struct cred *)current->real_cred;
 	struct provenance *cprov = provenance_cred(cred);
 	struct provenance *tprov = provenance_task(current);
 
