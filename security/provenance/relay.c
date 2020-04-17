@@ -40,10 +40,13 @@ struct relay_list {
 static LIST_HEAD(relay_list);
 
 /*!
- * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
+ * @brief Add an element to the tail end of the relay list, which is identified
+ * by the "extern struct list_head relay_list" above.
  * @param name Member of the element in the relay list
- * @param prov Member of the element in the relay list. This is a relay channel pointer.
- * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
+ * @param prov Member of the element in the relay list. This is a relay channel
+ * pointer.
+ * @param long_prov Member of the element in the relay list. This is a relay
+ * channel pointer.
  *
  * @todo Failure case checking is missing.
  */
@@ -98,7 +101,8 @@ bool is_relay_full(struct rchan *chan)
 }
 
 /*!
- * @brief Callback function of function "create_buf_file". This callback function creates relay file in "debugfs".
+ * @brief Callback function of function "create_buf_file". This callback
+ * function creates relay file in "debugfs".
  */
 static struct dentry *create_buf_file_handler(const char *filename,
 					      struct dentry *parent,
@@ -111,7 +115,8 @@ static struct dentry *create_buf_file_handler(const char *filename,
 }
 
 /*!
- * @brief Callback function of function "remove_buf_file". This callback function removes the relay file from "debugfs".
+ * @brief Callback function of function "remove_buf_file". This callback
+ * function removes the relay file from "debugfs".
  */
 static int remove_buf_file_handler(struct dentry *dentry)
 {
@@ -179,7 +184,8 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 		// check if relay is full
 		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
-			pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+			pr_info("Provenance: schedlued long boot buffer async task %llu.",
+				cookie);
 			goto out;
 		}
 
@@ -199,12 +205,15 @@ out:
 bool relay_ready;
 static bool relay_initialized;
 /*!
- * @brief Write whatever in boot buffer to relay buffer when relay buffer is ready.
+ * @brief Write whatever in boot buffer to relay buffer when relay buffer is
+ * ready.
  *
- * This function writes what's in boot_buffer to relay buffer for regular provenance entries,
+ * This function writes what's in boot_buffer to relay buffer for regular
+ * provenance entries,
  * and what's in long_boot_buffer to relay buffer for long provenance entries.
  * It also frees memory after it is done writing.
- * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
+ * Once done, set boolean value relay_ready to true to signal that relay buffer
+ * is ready to be used.
  *
  */
 void refresh_prov_machine(void);
@@ -234,13 +243,19 @@ void write_boot_buffer(void)
 }
 
 /*!
- * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
+ * @brief Create a provenance relay buffer channel for both regular and long
+ * provenance entries.
  *
  * Each relay channel in the list must have a unique name.
- * Each relay channel contains a relay buffer for regular provenance entries and a relay buffer for long provenance entries.
- * @param buffer Contains the name of the relay buffer for regular provenance entries (prepend "long_" for the relay buffer name for long provenance entries)
+ * Each relay channel contains a relay buffer for regular provenance entries and
+ * a relay buffer for long provenance entries.
+ * @param buffer Contains the name of the relay buffer for regular provenance
+ * entries (prepend "long_" for the relay buffer name for long provenance
+ * entries)
  * @param len The length of the name of the regular relay buffer.
- * @return 0 if no error occurred; -EFAULT if name already exists for relay buffer or opening new relay buffer failed; -ENOMEM if length of the name of the relay buffer is too long. Other error codes unknown.
+ * @return 0 if no error occurred; -EFAULT if name already exists for relay
+ * buffer or opening new relay buffer failed; -ENOMEM if length of the name of
+ * the relay buffer is too long. Other error codes unknown.
  *
  */
 int prov_create_channel(char *buffer, size_t len)
@@ -263,12 +278,14 @@ int prov_create_channel(char *buffer, size_t len)
 		goto out;
 	}
 	snprintf(long_name, PATH_MAX, "long_%s", buffer);
-	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF,
+			  &relay_callbacks, NULL);
 	if (!chan) {
 		rc = -EFAULT;
 		goto out;
 	}
-	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF,
+			       &relay_callbacks, NULL);
 	if (!long_chan) {
 		rc = -EFAULT;
 		goto out;
@@ -293,16 +310,24 @@ static void insert_boot_buffer(union prov_elt *msg)
 }
 
 /*!
- * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
+ * @brief Write provenance information to relay buffer or to boot buffer if
+ * relay buffer is not ready yet during boot.
  *
- * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
- * However, in an unlikely event that the boot buffer is full, an error is thrown.
- * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
+ * If in an unlikely event that relay is not ready, provenance information
+ * should be written to the boot buffer.
+ * However, in an unlikely event that the boot buffer is full, an error is
+ * thrown.
+ * Otherwise (i.e., boot buffer is not full) provenance information is written
+ * to the next empty slot in the boot buffer.
  * If relay buffer is ready, write to relay buffer.
- * It will write to every relay buffer in the relay_list for every CamQuery query use.
- * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
- * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
- * @param msg Provenance information to be written to either boot buffer or relay buffer.
+ * It will write to every relay buffer in the relay_list for every CamQuery
+ * query use.
+ * This is because once provenance is read from a relay buffer, it will be
+ * consumed from the buffer.
+ * We therefore need to write to multiple relay buffers if we want to
+ * consume/use same provenance data multiple times.
+ * @param msg Provenance information to be written to either boot buffer or
+ * relay buffer.
  * @return NULL
  *
  */
@@ -325,10 +350,12 @@ void prov_write(union prov_elt *msg, size_t size)
 
 static void insert_long_boot_buffer(union long_prov_elt *msg)
 {
-	struct long_boot_buffer *tmp = kmem_cache_zalloc(long_boot_buffer_cache, GFP_ATOMIC);
+	struct long_boot_buffer *tmp = kmem_cache_zalloc(long_boot_buffer_cache,
+							 GFP_ATOMIC);
 	unsigned long irqflags;
 
-	__memcpy_ss(&(tmp->msg), sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
+	__memcpy_ss(&(tmp->msg), sizeof(union long_prov_elt),
+		    msg, sizeof(union long_prov_elt));
 	INIT_LIST_HEAD(&(tmp->list));
 	spin_lock_irqsave(&lock_long_buffer, irqflags);
 	list_add(&(tmp->list), &long_buffer_list);
@@ -336,11 +363,14 @@ static void insert_long_boot_buffer(union long_prov_elt *msg)
 }
 
 /*!
- * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
+ * @brief Write long provenance information to relay buffer or to boot buffer if
+ * relay buffer is not ready yet during boot.
  *
- * This function performs the same function as "prov_write" function except that it writes a long provenance information,
+ * This function performs the same function as "prov_write" function except that
+ * it writes a long provenance information,
  * instead of regular provenance information to the buffer.
- * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
+ * @param msg Long provenance information to be written to either long boot
+ * buffer or long relay buffer.
  *
  */
 void long_prov_write(union long_prov_elt *msg, size_t size)
@@ -363,7 +393,8 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
 /*!
  * @brief Initialize relay buffer for provenance.
  *
- * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,
+ * Initialize provenance relay buffer with a base relay buffer for regular
+ * provenance entries,
  * and a base relay buffer for long provenance entries.
  * This will become the first relay channel in the relay_list.
  * Then we can write down whatever is in the boot buffer to relay buffer.
@@ -373,11 +404,13 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  */
 static int __init relay_prov_init(void)
 {
-	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
+			       PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!prov_chan)
 		panic("Provenance: relay_open failure\n");
 
-	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
+				    PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
 	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
