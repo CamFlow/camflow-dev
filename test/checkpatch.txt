@@ -740,341 +740,313 @@ WARNING:LONG_LINE: line over 80 characters
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
 #287: FILE: security/provenance/hooks.c:287:
-+		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
++		// Here we use current->provenance instead of calling get_task_provenance
 
 WARNING:LONG_LINE: line over 80 characters
-#291: FILE: security/provenance/hooks.c:291:
+#292: FILE: security/provenance/hooks.c:292:
 +			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#301: FILE: security/provenance/hooks.c:301:
+#302: FILE: security/provenance/hooks.c:302:
 + * This hook is triggered when transfering data from original creds to new creds.
 
 WARNING:LONG_LINE: line over 80 characters
-#347: FILE: security/provenance/hooks.c:347:
+#348: FILE: security/provenance/hooks.c:348:
 +	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#414: FILE: security/provenance/hooks.c:414:
+#415: FILE: security/provenance/hooks.c:415:
 +static int provenance_task_kill(struct task_struct *p, struct kernel_siginfo *info,
 
 WARNING:LONG_LINE: line over 80 characters
-#450: FILE: security/provenance/hooks.c:450:
-+	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
-
-WARNING:LONG_LINE: line over 80 characters
-#500: FILE: security/provenance/hooks.c:500:
+#502: FILE: security/provenance/hooks.c:502:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#562: FILE: security/provenance/hooks.c:562:
+#564: FILE: security/provenance/hooks.c:564:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#631: FILE: security/provenance/hooks.c:631:
+#633: FILE: security/provenance/hooks.c:633:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#658: FILE: security/provenance/hooks.c:658:
+#660: FILE: security/provenance/hooks.c:660:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#669: FILE: security/provenance/hooks.c:669:
+#671: FILE: security/provenance/hooks.c:671:
 + *	@dir contains the inode structure of parent directory of the symbolic link.
 
 WARNING:LONG_LINE: line over 80 characters
-#688: FILE: security/provenance/hooks.c:688:
+#690: FILE: security/provenance/hooks.c:690:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#726: FILE: security/provenance/hooks.c:726:
+#728: FILE: security/provenance/hooks.c:728:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#787: FILE: security/provenance/hooks.c:787:
+#789: FILE: security/provenance/hooks.c:789:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#825: FILE: security/provenance/hooks.c:825:
+#827: FILE: security/provenance/hooks.c:827:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#857: FILE: security/provenance/hooks.c:857:
+#859: FILE: security/provenance/hooks.c:859:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#909: FILE: security/provenance/hooks.c:909:
+#911: FILE: security/provenance/hooks.c:911:
 +		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
 
 WARNING:LONG_LINE: line over 80 characters
-#949: FILE: security/provenance/hooks.c:949:
+#951: FILE: security/provenance/hooks.c:951:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#951: FILE: security/provenance/hooks.c:951:
+#953: FILE: security/provenance/hooks.c:953:
 +	record_write_xattr(RL_SETXATTR, iprov, tprov, cprov, name, value, size, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#987: FILE: security/provenance/hooks.c:987:
+#989: FILE: security/provenance/hooks.c:989:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1019: FILE: security/provenance/hooks.c:1019:
-+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-
-WARNING:LONG_LINE: line over 80 characters
-#1057: FILE: security/provenance/hooks.c:1057:
+#1021: FILE: security/provenance/hooks.c:1021:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
 #1059: FILE: security/provenance/hooks.c:1059:
++	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+
+WARNING:LONG_LINE: line over 80 characters
+#1061: FILE: security/provenance/hooks.c:1061:
 +	rc = record_write_xattr(RL_RMVXATTR, iprov, tprov, cprov, name, NULL, 0, 0);
 
 WARNING:LONG_LINE: line over 80 characters
-#1100: FILE: security/provenance/hooks.c:1100:
-+	__memcpy_ss(*buffer, sizeof(union prov_elt), prov_elt(iprov), sizeof(union prov_elt));
-
-WARNING:LONG_LINE: line over 80 characters
-#1174: FILE: security/provenance/hooks.c:1174:
+#1177: FILE: security/provenance/hooks.c:1177:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1178: FILE: security/provenance/hooks.c:1178:
+#1181: FILE: security/provenance/hooks.c:1181:
 +			rc = generates(RL_WRITE, cprov, tprov, iprov, file, mask);
 
 WARNING:LONG_LINE: line over 80 characters
-#1205: FILE: security/provenance/hooks.c:1205:
+#1208: FILE: security/provenance/hooks.c:1208:
 +			rc = generates(RL_WRITE, cprov, tprov, iprov, file, mask);
 
 WARNING:LONG_LINE: line over 80 characters
-#1242: FILE: security/provenance/hooks.c:1242:
-+static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
-
-WARNING:LONG_LINE: line over 80 characters
-#1254: FILE: security/provenance/hooks.c:1254:
+#1258: FILE: security/provenance/hooks.c:1258:
 +	spin_lock_irqsave_nested(prov_lock(inprov), irqflags, PROVENANCE_LOCK_INODE);
 
 WARNING:LONG_LINE: line over 80 characters
-#1278: FILE: security/provenance/hooks.c:1278:
+#1282: FILE: security/provenance/hooks.c:1282:
 +	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_INODE);
 
 WARNING:LONG_LINE: line over 80 characters
-#1281: FILE: security/provenance/hooks.c:1281:
+#1285: FILE: security/provenance/hooks.c:1285:
 +		rc = record_influences_kernel(RL_LOAD_UNKNOWN, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1284: FILE: security/provenance/hooks.c:1284:
+#1288: FILE: security/provenance/hooks.c:1288:
 +		rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1287: FILE: security/provenance/hooks.c:1287:
+#1291: FILE: security/provenance/hooks.c:1291:
 +		rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1290: FILE: security/provenance/hooks.c:1290:
+#1294: FILE: security/provenance/hooks.c:1294:
 +		rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1293: FILE: security/provenance/hooks.c:1293:
+#1297: FILE: security/provenance/hooks.c:1297:
 +		rc = record_influences_kernel(RL_LOAD_KEXEC_IMAGE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1296: FILE: security/provenance/hooks.c:1296:
+#1300: FILE: security/provenance/hooks.c:1300:
 +		rc = record_influences_kernel(RL_LOAD_KEXEC_INITRAMFS, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1299: FILE: security/provenance/hooks.c:1299:
+#1303: FILE: security/provenance/hooks.c:1303:
 +		rc = record_influences_kernel(RL_LOAD_POLICY, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1302: FILE: security/provenance/hooks.c:1302:
+#1306: FILE: security/provenance/hooks.c:1306:
 +		rc = record_influences_kernel(RL_LOAD_CERTIFICATE, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1305: FILE: security/provenance/hooks.c:1305:
+#1309: FILE: security/provenance/hooks.c:1309:
 +		rc = record_influences_kernel(RL_LOAD_UNDEFINED, iprov, tprov, file);
 
 WARNING:LONG_LINE: line over 80 characters
-#1337: FILE: security/provenance/hooks.c:1337:
+#1341: FILE: security/provenance/hooks.c:1341:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1369: FILE: security/provenance/hooks.c:1369:
+#1373: FILE: security/provenance/hooks.c:1373:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1395: FILE: security/provenance/hooks.c:1395:
+#1399: FILE: security/provenance/hooks.c:1399:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1428: FILE: security/provenance/hooks.c:1428:
+#1432: FILE: security/provenance/hooks.c:1432:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1487: FILE: security/provenance/hooks.c:1487:
+#1491: FILE: security/provenance/hooks.c:1491:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-
-WARNING:LONG_LINE: line over 80 characters
-#1494: FILE: security/provenance/hooks.c:1494:
-+			rc = uses(RL_MMAP_WRITE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
 #1498: FILE: security/provenance/hooks.c:1498:
-+			rc = uses(RL_MMAP_READ, iprov, tprov, cprov, file, flags);
++			rc = uses(RL_MMAP_WRITE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
 #1502: FILE: security/provenance/hooks.c:1502:
++			rc = uses(RL_MMAP_READ, iprov, tprov, cprov, file, flags);
+
+WARNING:LONG_LINE: line over 80 characters
+#1506: FILE: security/provenance/hooks.c:1506:
 +			rc = uses(RL_MMAP_EXEC, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1507: FILE: security/provenance/hooks.c:1507:
+#1511: FILE: security/provenance/hooks.c:1511:
 +			rc = uses(RL_MMAP_WRITE_PRIVATE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1511: FILE: security/provenance/hooks.c:1511:
+#1515: FILE: security/provenance/hooks.c:1515:
 +			rc = uses(RL_MMAP_READ_PRIVATE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1515: FILE: security/provenance/hooks.c:1515:
+#1519: FILE: security/provenance/hooks.c:1519:
 +			rc = uses(RL_MMAP_EXEC_PRIVATE, iprov, tprov, cprov, file, flags);
 
 WARNING:LONG_LINE: line over 80 characters
-#1557: FILE: security/provenance/hooks.c:1557:
-+			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+#1562: FILE: security/provenance/hooks.c:1562:
++						 irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1558: FILE: security/provenance/hooks.c:1558:
+#1563: FILE: security/provenance/hooks.c:1563:
 +			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 
 WARNING:LONG_LINE: line over 80 characters
-#1600: FILE: security/provenance/hooks.c:1600:
+#1605: FILE: security/provenance/hooks.c:1605:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1647: FILE: security/provenance/hooks.c:1647:
+#1652: FILE: security/provenance/hooks.c:1652:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1693: FILE: security/provenance/hooks.c:1693:
-+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#1746: FILE: security/provenance/hooks.c:1746:
-+ * Information flows from msg to the calling process, and eventually to its cred.
-
-WARNING:LONG_LINE: line over 80 characters
-#1760: FILE: security/provenance/hooks.c:1760:
+#1698: FILE: security/provenance/hooks.c:1698:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1861: FILE: security/provenance/hooks.c:1861:
+#1766: FILE: security/provenance/hooks.c:1766:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1912: FILE: security/provenance/hooks.c:1912:
+#1867: FILE: security/provenance/hooks.c:1867:
++	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+
+WARNING:LONG_LINE: line over 80 characters
+#1918: FILE: security/provenance/hooks.c:1918:
 +static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr, int shmflg)
 
 WARNING:LONG_LINE: line over 80 characters
-#1922: FILE: security/provenance/hooks.c:1922:
+#1928: FILE: security/provenance/hooks.c:1928:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#1930: FILE: security/provenance/hooks.c:1930:
+#1936: FILE: security/provenance/hooks.c:1936:
 +		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
 
 WARNING:LONG_LINE: line over 80 characters
-#1961: FILE: security/provenance/hooks.c:1961:
+#1967: FILE: security/provenance/hooks.c:1967:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2049: FILE: security/provenance/hooks.c:2049:
+#2055: FILE: security/provenance/hooks.c:2055:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2057: FILE: security/provenance/hooks.c:2057:
-+static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb)
-
-WARNING:LONG_LINE: line over 80 characters
-#2071: FILE: security/provenance/hooks.c:2071:
+#2078: FILE: security/provenance/hooks.c:2078:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2164: FILE: security/provenance/hooks.c:2164:
+#2171: FILE: security/provenance/hooks.c:2171:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2203: FILE: security/provenance/hooks.c:2203:
+#2210: FILE: security/provenance/hooks.c:2210:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2241: FILE: security/provenance/hooks.c:2241:
+#2248: FILE: security/provenance/hooks.c:2248:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2296: FILE: security/provenance/hooks.c:2296:
-+	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
-
 WARNING:LONG_LINE: line over 80 characters
-#2304: FILE: security/provenance/hooks.c:2304:
+#2312: FILE: security/provenance/hooks.c:2312:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#2366: FILE: security/provenance/hooks.c:2366:
+#2374: FILE: security/provenance/hooks.c:2374:
 +	    sock->sk->sk_type != SOCK_DGRAM) { // datagran handled by unix_may_send
 
 WARNING:LONG_LINE: line over 80 characters
-#2374: FILE: security/provenance/hooks.c:2374:
+#2382: FILE: security/provenance/hooks.c:2382:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2472: FILE: security/provenance/hooks.c:2472:
+#2480: FILE: security/provenance/hooks.c:2480:
 +	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 
 WARNING:LONG_LINE: line over 80 characters
-#2502: FILE: security/provenance/hooks.c:2502:
+#2510: FILE: security/provenance/hooks.c:2510:
 +	spin_lock_irqsave_nested(prov_lock(iprov), irqflags, PROVENANCE_LOCK_SOCKET);
 
 WARNING:LONG_LINE: line over 80 characters
-#2697: FILE: security/provenance/hooks.c:2697:
+#2705: FILE: security/provenance/hooks.c:2705:
 +		get_random_bytes(prov_elt(sbprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 
 WARNING:LONG_LINE: line over 80 characters
-#2731: FILE: security/provenance/hooks.c:2731:
+#2739: FILE: security/provenance/hooks.c:2739:
 +	LSM_HOOK_INIT(inode_alloc_security,     provenance_inode_alloc_security),
 
 WARNING:LONG_LINE: line over 80 characters
-#2762: FILE: security/provenance/hooks.c:2762:
+#2770: FILE: security/provenance/hooks.c:2770:
 +	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
 
 WARNING:LONG_LINE: line over 80 characters
-#2767: FILE: security/provenance/hooks.c:2767:
+#2775: FILE: security/provenance/hooks.c:2775:
 +	LSM_HOOK_INIT(msg_msg_alloc_security,   provenance_msg_msg_alloc_security),
 
 WARNING:LONG_LINE: line over 80 characters
-#2768: FILE: security/provenance/hooks.c:2768:
+#2776: FILE: security/provenance/hooks.c:2776:
 +	LSM_HOOK_INIT(msg_msg_free_security,    provenance_msg_msg_free_security),
 
 WARNING:LONG_LINE: line over 80 characters
-#2789: FILE: security/provenance/hooks.c:2789:
+#2797: FILE: security/provenance/hooks.c:2797:
 +	LSM_HOOK_INIT(socket_sendmsg_always,    provenance_socket_sendmsg_always),
 
 WARNING:LONG_LINE: line over 80 characters
-#2790: FILE: security/provenance/hooks.c:2790:
+#2798: FILE: security/provenance/hooks.c:2798:
 +	LSM_HOOK_INIT(socket_recvmsg_always,    provenance_socket_recvmsg_always),
 
 WARNING:LONG_LINE: line over 80 characters
-#2804: FILE: security/provenance/hooks.c:2804:
+#2812: FILE: security/provenance/hooks.c:2812:
 +	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
 
 WARNING:LONG_LINE: line over 80 characters
-#2863: FILE: security/provenance/hooks.c:2863:
+#2871: FILE: security/provenance/hooks.c:2871:
 +						   sizeof(struct long_boot_buffer),
 
-WARNING:LONG_LINE_STRING: line over 80 characters
-#2930: FILE: security/provenance/hooks.c:2930:
-+	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
-
-total: 0 errors, 90 warnings, 2940 lines checked
+total: 0 errors, 83 warnings, 2950 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1085,13 +1057,13 @@ security/provenance/machine.c
 -----------------------------
 WARNING:LONG_LINE: line over 80 characters
 #26: FILE: security/provenance/machine.c:26:
-+	__memcpy_ss(&(prov_machine->machine_info.utsname), sizeof(struct new_utsname), uname, sizeof(struct new_utsname));
++	__memcpy_ss(&(prov_machine->machine_info.utsname), sizeof(struct new_utsname),
 
 WARNING:LONG_LINE: line over 80 characters
-#39: FILE: security/provenance/machine.c:39:
-+	__memcpy_ss(prov_machine->machine_info.commit, PROV_COMMIT_MAX_LENGTH, CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
+#41: FILE: security/provenance/machine.c:41:
++		    CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
 
-total: 0 errors, 2 warnings, 44 lines checked
+total: 0 errors, 2 warnings, 46 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1104,39 +1076,35 @@ WARNING:INCLUDE_LINUX: Use #include <linux/bug.h> instead of <asm/bug.h>
 #18: FILE: security/provenance/memcpy_ss.c:18:
 +#include <asm/bug.h>
 
-WARNING:LONG_LINE: line over 80 characters
-#24: FILE: security/provenance/memcpy_ss.c:24:
-+int __memcpy_ss(void *dest, __kernel_size_t dmax, const void *src, __kernel_size_t smax)
-
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#30: FILE: security/provenance/memcpy_ss.c:30:
+#31: FILE: security/provenance/memcpy_ss.c:31:
 +		pr_err("__memcpy_ss: dest is null.");
 
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#34: FILE: security/provenance/memcpy_ss.c:34:
+#35: FILE: security/provenance/memcpy_ss.c:35:
 +		pr_err("__memcpy_ss: dmax is 0.");
 
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#38: FILE: security/provenance/memcpy_ss.c:38:
+#39: FILE: security/provenance/memcpy_ss.c:39:
 +		pr_err("__memcpy_ss: dmax is too large.");
 
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#42: FILE: security/provenance/memcpy_ss.c:42:
+#43: FILE: security/provenance/memcpy_ss.c:43:
 +		pr_err("__memcpy_ss: sp is null.");
 
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#47: FILE: security/provenance/memcpy_ss.c:47:
+#48: FILE: security/provenance/memcpy_ss.c:48:
 +		pr_err("__memcpy_ss: smax is 0.");
 
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#52: FILE: security/provenance/memcpy_ss.c:52:
+#53: FILE: security/provenance/memcpy_ss.c:53:
 +		pr_err("__memcpy_ss: smax greater than dmax.");
 
 WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#59: FILE: security/provenance/memcpy_ss.c:59:
+#60: FILE: security/provenance/memcpy_ss.c:60:
 +		pr_err("__memcpy_ss: dest and src overlap.");
 
-total: 0 errors, 9 warnings, 65 lines checked
+total: 0 errors, 8 warnings, 66 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1145,32 +1113,9 @@ security/provenance/memcpy_ss.c has style problems, please review.
 -------------------------------
 security/provenance/netfilter.c
 -------------------------------
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#22: FILE: security/provenance/netfilter.c:22:
-+ * @brief Record provenance of an outgoing packets, which is done through NetFilter (instead of LSM) hooks.
+total: 0 errors, 0 warnings, 117 lines checked
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#24: FILE: security/provenance/netfilter.c:24:
-+ * We record the provenance relation RL_SND_PACKET by calling "derives" function.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#27: FILE: security/provenance/netfilter.c:27:
-+ * 1. The calling process cred's provenance (obtained from current_provenance) is not recorded or does not exist, or
-
-WARNING:LONG_LINE: line over 80 characters
-#78: FILE: security/provenance/netfilter.c:78:
-+	return nf_register_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
-
-WARNING:LONG_LINE: line over 80 characters
-#83: FILE: security/provenance/netfilter.c:83:
-+	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
-
-total: 0 errors, 5 warnings, 112 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/netfilter.c has style problems, please review.
+security/provenance/netfilter.c has no obvious style problems and is ready for submission.
 -------------------------------
 security/provenance/propagate.c
 -------------------------------
@@ -1194,175 +1139,59 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #38: FILE: security/provenance/relay.c:38:
 +	struct rchan *long_prov;        // Relay buffer for long provenance entries.
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#43: FILE: security/provenance/relay.c:43:
-+ * @brief Add an element to the tail end of the relay list, which is identified by the "extern struct list_head relay_list" above.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#45: FILE: security/provenance/relay.c:45:
-+ * @param prov Member of the element in the relay list. This is a relay channel pointer.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#46: FILE: security/provenance/relay.c:46:
-+ * @param long_prov Member of the element in the relay list. This is a relay channel pointer.
-
 WARNING:LONG_LINE: line over 80 characters
-#92: FILE: security/provenance/relay.c:92:
+#95: FILE: security/provenance/relay.c:95:
 +			pr_warn("Provenance: relay (%s) is full.", chan->base_filename);
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#101: FILE: security/provenance/relay.c:101:
-+ * @brief Callback function of function "create_buf_file". This callback function creates relay file in "debugfs".
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#114: FILE: security/provenance/relay.c:114:
-+ * @brief Callback function of function "remove_buf_file". This callback function removes the relay file from "debugfs".
-
 WARNING:LONG_LINE: line over 80 characters
-#144: FILE: security/provenance/relay.c:144:
+#149: FILE: security/provenance/relay.c:149:
 +			cookie = async_schedule(__async_handle_boot_buffer, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#145: FILE: security/provenance/relay.c:145:
+#150: FILE: security/provenance/relay.c:150:
 +			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE: line over 80 characters
-#173: FILE: security/provenance/relay.c:173:
+#178: FILE: security/provenance/relay.c:178:
 +	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
 
 WARNING:LONG_LINE: line over 80 characters
-#181: FILE: security/provenance/relay.c:181:
+#186: FILE: security/provenance/relay.c:186:
 +			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
 
 WARNING:LONG_LINE: line over 80 characters
-#182: FILE: security/provenance/relay.c:182:
-+			pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
-
-WARNING:LONG_LINE: line over 80 characters
-#189: FILE: security/provenance/relay.c:189:
+#195: FILE: security/provenance/relay.c:195:
 +		relay_write(long_prov_chan, &(entry->msg), sizeof(union long_prov_elt));
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#202: FILE: security/provenance/relay.c:202:
-+ * @brief Write whatever in boot buffer to relay buffer when relay buffer is ready.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#204: FILE: security/provenance/relay.c:204:
-+ * This function writes what's in boot_buffer to relay buffer for regular provenance entries,
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#207: FILE: security/provenance/relay.c:207:
-+ * Once done, set boolean value relay_ready to true to signal that relay buffer is ready to be used.
-
 WARNING:AVOID_EXTERNS: externs should be avoided in .c files
-#210: FILE: security/provenance/relay.c:210:
+#219: FILE: security/provenance/relay.c:219:
 +void refresh_prov_machine(void);
 
 WARNING:LONG_LINE: line over 80 characters
-#226: FILE: security/provenance/relay.c:226:
+#235: FILE: security/provenance/relay.c:235:
 +		pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE: line over 80 characters
-#232: FILE: security/provenance/relay.c:232:
+#241: FILE: security/provenance/relay.c:241:
 +		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#237: FILE: security/provenance/relay.c:237:
-+ * @brief Create a provenance relay buffer channel for both regular and long provenance entries.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#240: FILE: security/provenance/relay.c:240:
-+ * Each relay channel contains a relay buffer for regular provenance entries and a relay buffer for long provenance entries.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#241: FILE: security/provenance/relay.c:241:
-+ * @param buffer Contains the name of the relay buffer for regular provenance entries (prepend "long_" for the relay buffer name for long provenance entries)
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#243: FILE: security/provenance/relay.c:243:
-+ * @return 0 if no error occurred; -EFAULT if name already exists for relay buffer or opening new relay buffer failed; -ENOMEM if length of the name of the relay buffer is too long. Other error codes unknown.
+WARNING:LONG_LINE: line over 80 characters
+#287: FILE: security/provenance/relay.c:287:
++	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF,
 
 WARNING:LONG_LINE: line over 80 characters
-#266: FILE: security/provenance/relay.c:266:
-+	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-
-WARNING:LONG_LINE: line over 80 characters
-#271: FILE: security/provenance/relay.c:271:
-+	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-
-WARNING:LONG_LINE: line over 80 characters
-#285: FILE: security/provenance/relay.c:285:
+#302: FILE: security/provenance/relay.c:302:
 +	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
 
 WARNING:LONG_LINE: line over 80 characters
-#288: FILE: security/provenance/relay.c:288:
+#305: FILE: security/provenance/relay.c:305:
 +	__memcpy_ss(&(tmp->msg), sizeof(union prov_elt), msg, sizeof(union prov_elt));
 
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#296: FILE: security/provenance/relay.c:296:
-+ * @brief Write provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#298: FILE: security/provenance/relay.c:298:
-+ * If in an unlikely event that relay is not ready, provenance information should be written to the boot buffer.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#299: FILE: security/provenance/relay.c:299:
-+ * However, in an unlikely event that the boot buffer is full, an error is thrown.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#300: FILE: security/provenance/relay.c:300:
-+ * Otherwise (i.e., boot buffer is not full) provenance information is written to the next empty slot in the boot buffer.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#302: FILE: security/provenance/relay.c:302:
-+ * It will write to every relay buffer in the relay_list for every CamQuery query use.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#303: FILE: security/provenance/relay.c:303:
-+ * This is because once provenance is read from a relay buffer, it will be consumed from the buffer.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#304: FILE: security/provenance/relay.c:304:
-+ * We therefore need to write to multiple relay buffers if we want to consume/use same provenance data multiple times.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#305: FILE: security/provenance/relay.c:305:
-+ * @param msg Provenance information to be written to either boot buffer or relay buffer.
-
 WARNING:LONG_LINE: line over 80 characters
-#328: FILE: security/provenance/relay.c:328:
-+	struct long_boot_buffer *tmp = kmem_cache_zalloc(long_boot_buffer_cache, GFP_ATOMIC);
+#412: FILE: security/provenance/relay.c:412:
++	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
 
-WARNING:LONG_LINE: line over 80 characters
-#331: FILE: security/provenance/relay.c:331:
-+	__memcpy_ss(&(tmp->msg), sizeof(union long_prov_elt), msg, sizeof(union long_prov_elt));
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#339: FILE: security/provenance/relay.c:339:
-+ * @brief Write long provenance information to relay buffer or to boot buffer if relay buffer is not ready yet during boot.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#341: FILE: security/provenance/relay.c:341:
-+ * This function performs the same function as "prov_write" function except that it writes a long provenance information,
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#343: FILE: security/provenance/relay.c:343:
-+ * @param msg Long provenance information to be written to either long boot buffer or long relay buffer.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#366: FILE: security/provenance/relay.c:366:
-+ * Initialize provenance relay buffer with a base relay buffer for regular provenance entries,
-
-WARNING:LONG_LINE: line over 80 characters
-#376: FILE: security/provenance/relay.c:376:
-+	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-
-WARNING:LONG_LINE: line over 80 characters
-#380: FILE: security/provenance/relay.c:380:
-+	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF, &relay_callbacks, NULL);
-
-total: 0 errors, 44 warnings, 390 lines checked
+total: 0 errors, 15 warnings, 423 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
