@@ -30,13 +30,16 @@
 #include "memcpy_ss.h"
 
 /*!
- * @brief Returns the provenance entry pointer of the inode associated with sock.
+ * @brief Returns the provenance entry pointer of the inode associated with
+ * sock.
  *
  * @param sock The socket structure whose provenance to be obtained.
- * @return The provenance entry pointer of the socket or NULL if it does not exist.
+ * @return The provenance entry pointer of the socket or NULL if it does not
+ * exist.
  *
  */
-static inline struct provenance *get_socket_inode_provenance(struct socket *sock)
+static inline struct provenance *get_socket_inode_provenance(
+	struct socket *sock)
 {
 	struct inode *inode = SOCK_INODE(sock);
 	struct provenance *iprov = NULL;
@@ -86,7 +89,8 @@ static inline struct provenance *get_sk_provenance(struct sock *sk)
 #define ihlen(ih)    (ih->ihl * 4)
 
 /*!
- * @brief Extract TCP header information and store it in packet_identifier struct of provenance entry.
+ * @brief Extract TCP header information and store it in packet_identifier
+ * struct of provenance entry.
  *
  * @param skb The socket buffer.
  * @param ih The IP header.
@@ -115,7 +119,8 @@ static __always_inline void __extract_tcp_info(struct sk_buff *skb,
 }
 
 /*!
- * @brief Extract UPD header information and store it in packet_identifier struct of provenance entry.
+ * @brief Extract UPD header information and store it in packet_identifier
+ * struct of provenance entry.
  *
  * @param skb The socket buffer.
  * @param ih The IP header.
@@ -143,16 +148,21 @@ static __always_inline void __extract_udp_info(struct sk_buff *skb,
 }
 
 /*!
- * @brief Parse network packet information @skb into a packet provenance entry @prov.
+ * @brief Parse network packet information @skb into a packet provenance entry
+ * @prov.
  *
- * We parse a series of IP information from @skb and create a provenance entry node ENT_PACKET.
- * Depending on the type of the packet (i.e., TCP or UDP), we call either __extract_tcp_info or __extract_udp_info subfunction to parse.
+ * We parse a series of IP information from @skb and create a provenance entry
+ * node ENT_PACKET.
+ * Depending on the type of the packet (i.e., TCP or UDP), we call either
+ * __extract_tcp_info or __extract_udp_info subfunction to parse.
  * @param skb Socket buffer where packet information lies.
  * @param prov The provenance entry pointer.
- * @return 0 if no error occurred; -EINVAL if error during obtaining packet meta-data; Other error codes unknown.
+ * @return 0 if no error occurred; -EINVAL if error during obtaining packet
+ * meta-data; Other error codes unknown.
  *
  */
-static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_t type, struct sk_buff *skb)
+static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(
+	uint64_t type, struct sk_buff *skb)
 {
 	struct provenance *prov;
 	int offset;
@@ -160,7 +170,8 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(uint64_
 	struct iphdr *ih;
 
 	offset = skb_network_offset(skb);
-	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);      // We obtain the IP header.
+	// We obtain the IP header.
+	ih = skb_header_pointer(skb, offset, sizeof(_iph), &_iph);
 	if (!ih)
 		return NULL;
 
@@ -200,8 +211,10 @@ struct ipv4_filters {
 extern struct list_head ingress_ipv4filters;
 extern struct list_head egress_ipv4filters;
 
-#define prov_ipv4_ingressOP(ip, port)           prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
-#define prov_ipv4_egressOP(ip, port)            prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
+#define prov_ipv4_ingressOP(ip, port) \
+	prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
+#define prov_ipv4_egressOP(ip, port) \
+	prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
 
 /*!
  * @brief Returns op value of the filter of a specific IP and/or port.
@@ -215,15 +228,19 @@ extern struct list_head egress_ipv4filters;
  * @return 0 if not found or the op value of the matched element in the list.
  *
  */
-static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, uint32_t port)
+static inline uint8_t prov_ipv4_whichOP(struct list_head *filters,
+					uint32_t ip,
+					uint32_t port)
 {
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
 
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, struct ipv4_filters, list);
-		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))     // Match IP
-			if (tmp->filter.port == 0 || tmp->filter.port == port)          // Any port or a specific match
+		// Match IP
+		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))
+			// Any port or a specific match
+			if (tmp->filter.port == 0 || tmp->filter.port == port)
 				return tmp->filter.op;
 	}
 	return 0;
@@ -240,7 +257,8 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters, uint32_t ip, 
  * @return Always return 0.
  *
  */
-static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_filters *f)
+static inline uint8_t prov_ipv4_delete(struct list_head *filters,
+				       struct ipv4_filters *f)
 {
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
@@ -259,17 +277,20 @@ static inline uint8_t prov_ipv4_delete(struct list_head *filters, struct ipv4_fi
 }
 
 /*!
- * @brief Add or update an element in the filter list that matches a specific filter.
+ * @brief Add or update an element in the filter list that matches a specific
+ * filter.
  *
  * This function goes through a filter list,
  * and attempts to match the given filter.
- * If matched, the matched element's op value will be updated based on the given filter @f or the element will be added if no matches.
+ * If matched, the matched element's op value will be updated based on the given
+ * filter @f or the element will be added if no matches.
  * @param filters The list to go through.
  * @param f The filter to match its mask, ip and port.
  * @return Always return 0.
  *
  */
-static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct ipv4_filters *f)
+static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters,
+					      struct ipv4_filters *f)
 {
 	struct list_head *listentry, *listtmp;
 	struct ipv4_filters *tmp;
@@ -290,17 +311,22 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters, struct 
 /*!
  * @brief Record the address provenance node that binds to the socket node.
  *
- * This function creates a long provenance entry node ENT_ADDR that binds to the socket provenance entry @prov.
+ * This function creates a long provenance entry node ENT_ADDR that binds to the
+ * socket provenance entry @prov.
  * Record provenance relation RL_NAMED by calling "record_relation" function.
  * Relation will not be recorded, if:
- * 1. The socket inode is not recorded or the name (addr) of the socket has been recorded already, or
+ * 1. The socket inode is not recorded or the name (addr) of the socket has been
+ * recorded already, or
  * 2. Failure occurs.
  * The information in the ENT_ADDR node is filled in from @address and @addrlen.
- * This provenance node is short-lived and thus we free the memory once we have recorded the relation.
+ * This provenance node is short-lived and thus we free the memory once we have
+ * recorded the relation.
  * @param address The address of the socket.
  * @param addrlen The length of the addres.
  * @param prov The provenance entry pointer of the socket.
- * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the new long provenance node ENT_ADDR; Other error codes inherited from record_relation function or unknown.
+ * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for the
+ * new long provenance node ENT_ADDR; Other error codes inherited from
+ * record_relation function.
  *
  */
 static __always_inline int record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
@@ -341,7 +367,8 @@ static inline void record_packet_content(struct sk_buff *skb,
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
 		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, PATH_MAX);
 	} else
-		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, cnt->pckcnt_info.length);
+		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX,
+			    skb->head, cnt->pckcnt_info.length);
 	record_relation(RL_PCK_CNT, cnt, prov_entry(pckprov), NULL, 0);
 	free_long_provenance(cnt);
 }
