@@ -150,7 +150,7 @@ static __always_inline int record_relation(const uint64_t type,
  *
  */
 static __always_inline int record_terminate(uint64_t type,
-																						struct provenance *prov)
+					    struct provenance *prov)
 {
 	union prov_elt old_prov;
 	int rc;
@@ -162,7 +162,7 @@ static __always_inline int record_terminate(uint64_t type,
 	if (filter_node(prov_entry(prov)))
 		return 0;
 	__memcpy_ss(&old_prov, sizeof(union prov_elt),
-							prov_elt(prov), sizeof(union prov_elt));
+		    prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
 	clear_recorded(prov_elt(prov));
 
@@ -244,7 +244,7 @@ static __always_inline int record_kernel_link(prov_entry_t *node)
 }
 
 static __always_inline int current_update_shst(struct provenance *cprov,
-																							 bool read);
+					       bool read);
 
 /*!
  * @brief Record "used" relation from entity provenance node to activity
@@ -301,14 +301,14 @@ static __always_inline int uses(const uint64_t type,
 		return 0;
 
 	rc = record_relation(type, prov_entry(entity),
-											 prov_entry(activity), file, flags);
+			     prov_entry(activity), file, flags);
 	if (rc < 0)
 		return rc;
 	rc = record_kernel_link(prov_entry(activity));
 	if (rc < 0)
 		return rc;
 	rc = record_relation(RL_PROC_WRITE, prov_entry(activity),
-												prov_entry(activity_mem), NULL, 0);
+			     prov_entry(activity_mem), NULL, 0);
 	if (rc < 0)
 		return rc;
 	return current_update_shst(activity_mem, false);
@@ -355,7 +355,7 @@ static __always_inline int uses_two(const uint64_t type,
 	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
 		return 0;
 	rc = record_relation(type, prov_entry(entity),
-	 											prov_entry(activity), file, flags);
+			     prov_entry(activity), file, flags);
 	if (rc < 0)
 		return rc;
 	return record_kernel_link(prov_entry(activity));
@@ -426,14 +426,14 @@ static __always_inline int generates(const uint64_t type,
 	if (rc < 0)
 		return rc;
 	rc = record_relation(RL_PROC_READ, prov_entry(activity_mem),
-	 											prov_entry(activity), NULL, 0);
+			     prov_entry(activity), NULL, 0);
 	if (rc < 0)
 		return rc;
 	rc = record_kernel_link(prov_entry(activity));
 	if (rc < 0)
 		return rc;
 	rc = record_relation(type, prov_entry(activity),
-												prov_entry(entity), file, flags);
+			     prov_entry(entity), file, flags);
 	return rc;
 }
 
@@ -556,7 +556,7 @@ static __always_inline int record_influences_kernel(const uint64_t type,
 	    && !prov_policy.prov_all)
 		return 0;
 	rc = record_relation(RL_LOAD_FILE, prov_entry(entity),
-	 											prov_entry(activity), file, 0);
+			     prov_entry(activity), file, 0);
 	if (rc < 0)
 		goto out;
 	rc = record_relation(type, prov_entry(activity), prov_machine, NULL, 0);
