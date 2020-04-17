@@ -19,12 +19,15 @@
 #include "provenance_task.h"
 
 /*!
- * @brief Record provenance of an outgoing packets, which is done through NetFilter (instead of LSM) hooks.
+ * @brief Record provenance of an outgoing packets, which is done through
+ * NetFilter (instead of LSM) hooks.
  *
- * We record the provenance relation RL_SND_PACKET by calling "derives" function.
+ * We record the provenance relation RL_SND_PACKET by calling "derives"
+ * function.
  * Information flows from the sending socket to the outgoing packet.
  * We will not record the provenance if:
- * 1. The calling process cred's provenance (obtained from current_provenance) is not recorded or does not exist, or
+ * 1. The calling process cred's provenance (obtained from current_provenance)
+ * is not recorded or does not exist, or
  * 2. The socket inode's provenance does not exist.
  * We will create a new packet provenance node for this relation.
  * @param skb The socket buffer that contain packet information.
@@ -75,12 +78,14 @@ static struct nf_hook_ops provenance_nf_ops[] = {
 /* Register the hooks */
 static int __net_init provenance_nf_register(struct net *net)
 {
-	return nf_register_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
+	return nf_register_net_hooks(net, provenance_nf_ops,
+				     ARRAY_SIZE(provenance_nf_ops));
 }
 /* Unregister the hooks */
 static void __net_exit provenance_nf_unregister(struct net *net)
 {
-	nf_unregister_net_hooks(net, provenance_nf_ops, ARRAY_SIZE(provenance_nf_ops));
+	nf_unregister_net_hooks(net, provenance_nf_ops,
+				ARRAY_SIZE(provenance_nf_ops));
 }
 
 static struct pernet_operations provenance_net_ops = {
