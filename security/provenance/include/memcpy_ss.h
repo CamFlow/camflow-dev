@@ -15,6 +15,9 @@
 #ifndef _MEMCPY_SS
 #define _MEMCPY_SS
 
-extern int __memcpy_ss(void *, __kernel_size_t, const void *, __kernel_size_t);
+extern int __memcpy_ss(void *dest,
+		       __kernel_size_t dmax,
+		       const void *src,
+		       __kernel_size_t smax);
 
 #endif // _MEMCPY_SS
