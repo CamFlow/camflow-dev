@@ -231,27 +231,27 @@ static __always_inline bool should_record_relation(const uint64_t type,
 		return 0;						  \
 	}
 /*
-* A list of secinfo structs (defined in /include/uapi/linux/provenance.h, same
-* as the following)
-*/
+ * A list of secinfo structs (defined in /include/uapi/linux/provenance.h, same
+ * as the following)
+ */
 declare_filter_list(secctx_filters, secinfo);
 
 /*
-* Return op value of an item of a specific secid in the secctx_filters list if
-* exists; return 0 otherwise
-*/
+ * Return op value of an item of a specific secid in the secctx_filters list if
+ * exists; return 0 otherwise
+ */
 declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);
 
 /*
-* Delete the element in secctx_filters list with the same secid as the item
-* given in the function argument
-*/
+ * Delete the element in secctx_filters list with the same secid as the item
+ * given in the function argument
+ */
 declare_filter_delete(prov_secctx_delete, secctx_filters, secid);
 
 /*
-* Add or update op value of an item of a specific secid, which is the same as
-* the item given in the function argument.
-*/
+ * Add or update op value of an item of a specific secid, which is the same as
+ * the item given in the function argument.
+ */
 declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid);
 
 /*!
