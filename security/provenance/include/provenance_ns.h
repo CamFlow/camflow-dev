@@ -23,9 +23,11 @@ struct ns_filters {
 extern struct list_head ns_filters;
 
 /*!
- * @brief Return the op value for a specific namespace filter in the ns_filters list.
+ * @brief Return the op value for a specific namespace filter in the ns_filters
+ * list.
  *
- * The specific namespace filter must have the same values of the namespaces as in the argument list or is IGNORE_NS.
+ * The specific namespace filter must have the same values of the namespaces as
+ * in the argument list or is IGNORE_NS.
  * @param utsns UTS namespace.
  * @param ipcns Interprocess communication namespace.
  * @param mntns Mount namespace.
@@ -61,9 +63,11 @@ static inline uint8_t prov_ns_whichOP(uint32_t utsns,
 /*!
  * @brief Remove a specific namespace filter in the ns_filters list.
  *
- * The specific namespace filter must have the same values as the ns_filter in the argument list.
+ * The specific namespace filter must have the same values as the ns_filter
+ * in the argument list.
  * @postcondition At most one element should be removed in the list.
- * @param f The ns_filter that is checked against to remove the filter in the list.
+ * @param f The ns_filter that is checked against to remove the filter in the
+ * list.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
@@ -91,13 +95,17 @@ static inline uint8_t prov_ns_delete(struct ns_filters *f)
 
 
 /*!
- * @brief Update the op value of a specific namespace filter in the ns_filters list.
+ * @brief Update the op value of a specific namespace filter in the ns_filters
+ * list.
  *
- * The specific namespace filter must have the same values as the ns_filter in the argument list.
+ * The specific namespace filter must have the same values as the ns_filter in
+ * the argument list.
  * The op value is updated to the same as the ns_filters in the argument list.
- * If we cannot find the matching filter in the list, we add the filter at the tail end of the list.
+ * If we cannot find the matching filter in the list, we add the filter at the
+ * tail end of the list.
  * @postcondition At most one element should be updated in the list.
- * @param f The ns_filter that is checked against to update the filter in the list.
+ * @param f The ns_filter that is checked against to update the filter in the
+ * list.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
