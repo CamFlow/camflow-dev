@@ -284,7 +284,8 @@ static int provenance_cred_prepare(struct cred *new,
 	node_gid(prov_elt(nprov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	if (current != NULL) {
-		// Here we use current->provenance instead of calling get_task_provenance because at this point pid and vpid are not ready yet.
+		// Here we use current->provenance instead of calling get_task_provenance
+		// because at this point pid and vpid are not ready yet.
 		// System will crash if attempt to update those values.
 		tprov = provenance_task(current);
 		if (tprov != NULL)
@@ -447,7 +448,8 @@ static int provenance_inode_alloc_security(struct inode *inode)
 		return -ENOMEM;
 	init_provenance_struct(ENT_INODE_UNKNOWN, iprov);
 	sprov = inode->i_sb->s_provenance;
-	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN, prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
+	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN,
+		    prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	refresh_inode_provenance(inode, iprov);
 	return 0;
 }
@@ -1097,7 +1099,8 @@ static int provenance_inode_getsecurity(struct inode *inode,
 	if (!alloc)
 		goto out;
 	*buffer = kmalloc(sizeof(union prov_elt), GFP_KERNEL);
-	__memcpy_ss(*buffer, sizeof(union prov_elt), prov_elt(iprov), sizeof(union prov_elt));
+	__memcpy_ss(*buffer, sizeof(union prov_elt),
+		    prov_elt(iprov), sizeof(union prov_elt));
 out:
 	return sizeof(union prov_elt);
 }
@@ -1239,7 +1242,8 @@ out:
  * entry is NULL; Other error code inherited from derives function.
  *
  */
-static int provenance_file_splice_pipe_to_pipe(struct file *in, struct file *out)
+static int provenance_file_splice_pipe_to_pipe(struct file *in,
+					       struct file *out)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
@@ -1554,7 +1558,8 @@ static void provenance_mmap_munmap(struct mm_struct *mm,
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			iprov = get_file_provenance(mmapf, false);
-			spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+			spin_lock_irqsave_nested(prov_lock(cprov),
+						 irqflags, PROVENANCE_LOCK_PROC);
 			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 			generates(RL_MUNMAP, cprov, tprov, iprov, mmapf, flags);
 			spin_unlock(prov_lock(iprov));
@@ -1743,7 +1748,8 @@ static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
  * mq_timedreceive.
  *
  * Record provenance relation RL_RCV_MSG_Q by calling "uses" function.
- * Information flows from msg to the calling process, and eventually to its cred.
+ * Information flows from msg to the calling process, and eventually to its
+ * cred.
  * @param cprov The calling process's cred provenance entry pointer.
  * @param msg The message structure.
  * @return 0 if no error occurred; Other error codes inherited from uses
@@ -2054,7 +2060,8 @@ static int provenance_socket_post_create(struct socket *sock,
 	return rc;
 }
 
-static int provenance_socket_socketpair(struct socket *socka, struct socket *sockb)
+static int provenance_socket_socketpair(struct socket *socka,
+					struct socket *sockb)
 {
 	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(true);
@@ -2292,8 +2299,9 @@ static int provenance_socket_sendmsg(struct socket *sock,
 
 	if (!iprova)
 		return -ENOMEM;
+	// Datagram handled by unix_may_send hook.
 	if (sock->sk->sk_family == PF_UNIX &&
-	    sock->sk->sk_type != SOCK_DGRAM) {  // Datagram handled by unix_may_send hook.
+	    sock->sk->sk_type != SOCK_DGRAM) {
 		peer = unix_peer_get(sock->sk);
 		if (peer) {
 			iprovb = get_sk_inode_provenance(peer);
@@ -2927,7 +2935,9 @@ static int __init provenance_init(void)
 	pr_info("Provenance: init propagate query.");
 	init_prov_propagate();
 	pr_info("Provenance: starting in epoch %d.", epoch);
-	security_add_hooks(provenance_hooks, ARRAY_SIZE(provenance_hooks), "provenance");       // Register provenance security hooks.
+	// Register provenance security hooks.
+	security_add_hooks(provenance_hooks,
+			   ARRAY_SIZE(provenance_hooks), "provenance");
 	pr_info("Provenance: hooks ready.\n");
 	return 0;
 }

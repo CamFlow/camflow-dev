@@ -22,7 +22,7 @@
 #define RSIZE_MAX_MEM (256UL << 20)   // 256MB
 
 int __memcpy_ss(void *dest, __kernel_size_t dmax,
-	 							const void *src, __kernel_size_t smax)
+		const void *src, __kernel_size_t smax)
 {
 	uint8_t *dp = dest;
 	const uint8_t *sp = src;
