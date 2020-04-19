@@ -403,7 +403,7 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 		return __write_filter(file, buf, count, &filter); \
 	}
 
-#define declare_reader_filter_fcn(fcn_name, filter)		\
+#define declare_read_filter_fcn(fcn_name, filter)		\
 	static ssize_t fcn_name(struct file *filp,		\
 				char __user *buf,		\
 				size_t count,			\
@@ -413,77 +413,77 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	}
 
 declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
-declare_reader_filter_fcn(prov_read_node_filter, prov_policy.prov_node_filter);
+declare_read_filter_fcn(prov_read_node_filter, prov_policy.prov_node_filter);
 declare_file_operations(prov_node_filter_ops,
 			prov_write_node_filter,
 			prov_read_node_filter);
 
 declare_write_filter_fcn(prov_write_derived_filter,
 			 prov_policy.prov_derived_filter);
-declare_reader_filter_fcn(prov_read_derived_filter,
-			  prov_policy.prov_derived_filter);
+declare_read_filter_fcn(prov_read_derived_filter,
+			prov_policy.prov_derived_filter);
 declare_file_operations(prov_derived_filter_ops,
 			prov_write_derived_filter,
 			prov_read_derived_filter);
 
 declare_write_filter_fcn(prov_write_generated_filter,
 			 prov_policy.prov_generated_filter);
-declare_reader_filter_fcn(prov_read_generated_filter,
-			  prov_policy.prov_generated_filter);
+declare_read_filter_fcn(prov_read_generated_filter,
+			prov_policy.prov_generated_filter);
 declare_file_operations(prov_generated_filter_ops,
 			prov_write_generated_filter,
 			prov_read_generated_filter);
 
 declare_write_filter_fcn(prov_write_used_filter, prov_policy.prov_used_filter);
-declare_reader_filter_fcn(prov_read_used_filter, prov_policy.prov_used_filter);
+declare_read_filter_fcn(prov_read_used_filter, prov_policy.prov_used_filter);
 declare_file_operations(prov_used_filter_ops,
 			prov_write_used_filter,
 			prov_read_used_filter);
 
 declare_write_filter_fcn(prov_write_informed_filter,
 			 prov_policy.prov_informed_filter);
-declare_reader_filter_fcn(prov_read_informed_filter,
-			  prov_policy.prov_informed_filter);
+declare_read_filter_fcn(prov_read_informed_filter,
+			prov_policy.prov_informed_filter);
 declare_file_operations(prov_informed_filter_ops,
 			prov_write_informed_filter,
 			prov_read_informed_filter);
 
 declare_write_filter_fcn(prov_write_propagate_node_filter,
 			 prov_policy.prov_propagate_node_filter);
-declare_reader_filter_fcn(prov_read_propagate_node_filter,
-			  prov_policy.prov_propagate_node_filter);
+declare_read_filter_fcn(prov_read_propagate_node_filter,
+			prov_policy.prov_propagate_node_filter);
 declare_file_operations(prov_propagate_node_filter_ops,
 			prov_write_propagate_node_filter,
 			prov_read_propagate_node_filter);
 
 declare_write_filter_fcn(prov_write_propagate_derived_filter,
 			 prov_policy.prov_propagate_derived_filter);
-declare_reader_filter_fcn(prov_read_propagate_derived_filter,
-			  prov_policy.prov_propagate_derived_filter);
+declare_read_filter_fcn(prov_read_propagate_derived_filter,
+			prov_policy.prov_propagate_derived_filter);
 declare_file_operations(prov_propagate_derived_filter_ops,
 			prov_write_propagate_derived_filter,
 			prov_read_propagate_derived_filter);
 
 declare_write_filter_fcn(prov_write_propagate_generated_filter,
 			 prov_policy.prov_propagate_generated_filter);
-declare_reader_filter_fcn(prov_read_propagate_generated_filter,
-			  prov_policy.prov_propagate_generated_filter);
+declare_read_filter_fcn(prov_read_propagate_generated_filter,
+			prov_policy.prov_propagate_generated_filter);
 declare_file_operations(prov_propagate_generated_filter_ops,
 			prov_write_propagate_generated_filter,
 			prov_read_propagate_generated_filter);
 
 declare_write_filter_fcn(prov_write_propagate_used_filter,
 			 prov_policy.prov_propagate_used_filter);
-declare_reader_filter_fcn(prov_read_propagate_used_filter,
-			  prov_policy.prov_propagate_used_filter);
+declare_read_filter_fcn(prov_read_propagate_used_filter,
+			prov_policy.prov_propagate_used_filter);
 declare_file_operations(prov_propagate_used_filter_ops,
 			prov_write_propagate_used_filter,
 			prov_read_propagate_used_filter);
 
 declare_write_filter_fcn(prov_write_propagate_informed_filter,
 			 prov_policy.prov_propagate_informed_filter);
-declare_reader_filter_fcn(prov_read_propagate_informed_filter,
-			  prov_policy.prov_propagate_informed_filter);
+declare_read_filter_fcn(prov_read_propagate_informed_filter,
+			prov_policy.prov_propagate_informed_filter);
 declare_file_operations(prov_propagate_informed_filter_ops,
 			prov_write_propagate_informed_filter,
 			prov_read_propagate_informed_filter);
