@@ -84,7 +84,7 @@ security/provenance/include/provenance_filter.h has style problems, please revie
 ----------------------------------------
 security/provenance/include/provenance.h
 ----------------------------------------
-total: 0 errors, 0 warnings, 283 lines checked
+total: 0 errors, 0 warnings, 284 lines checked
 
 security/provenance/include/provenance.h has no obvious style problems and is ready for submission.
 ----------------------------------------------
@@ -252,26 +252,26 @@ security/provenance/include/provenance_ns.h has style problems, please review.
 security/provenance/include/provenance_policy.h
 -----------------------------------------------
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#33: FILE: security/provenance/include/provenance_policy.h:33:
+#31: FILE: security/provenance/include/provenance_policy.h:31:
 +	// every time a relation is recorded the two end nodes will be recorded again
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#48: FILE: security/provenance/include/provenance_policy.h:48:
+#46: FILE: security/provenance/include/provenance_policy.h:46:
 +	// Edge of category "derived" to be filtered out if it is part of propagate.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#50: FILE: security/provenance/include/provenance_policy.h:50:
+#48: FILE: security/provenance/include/provenance_policy.h:48:
 +	// Edge of category "generated" to be filtered out if it is part of propagate.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#52: FILE: security/provenance/include/provenance_policy.h:52:
+#50: FILE: security/provenance/include/provenance_policy.h:50:
 +	// Edge of category "used" to be filtered out if it is part of propagate.
 
 WARNING:LONG_LINE_COMMENT: line over 80 characters
-#54: FILE: security/provenance/include/provenance_policy.h:54:
+#52: FILE: security/provenance/include/provenance_policy.h:52:
 +	// Edge of category "informed" to be filtered out if it is part of propagate.
 
-total: 0 errors, 5 warnings, 60 lines checked
+total: 0 errors, 5 warnings, 58 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
