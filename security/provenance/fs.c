@@ -115,17 +115,27 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 declare_read_flag_fcn(prov_read_written, prov_policy.prov_written);
 declare_file_operations(prov_written_ops, no_write, prov_read_written);
 
-declare_write_flag_fcn(prov_write_compress_node, prov_policy.should_compress_node);
-declare_read_flag_fcn(prov_read_compress_node, prov_policy.should_compress_node);
-declare_file_operations(prov_compress_node_ops, prov_write_compress_node, prov_read_compress_node);
+declare_write_flag_fcn(prov_write_compress_node,
+		       prov_policy.should_compress_node);
+declare_read_flag_fcn(prov_read_compress_node,
+		      prov_policy.should_compress_node);
+declare_file_operations(prov_compress_node_ops,
+			prov_write_compress_node,
+			prov_read_compress_node);
 
-declare_write_flag_fcn(prov_write_compress_edge, prov_policy.should_compress_edge);
-declare_read_flag_fcn(prov_read_compress_edge, prov_policy.should_compress_edge);
-declare_file_operations(prov_compress_edge_ops, prov_write_compress_edge, prov_read_compress_edge);
+declare_write_flag_fcn(prov_write_compress_edge,
+		       prov_policy.should_compress_edge);
+declare_read_flag_fcn(prov_read_compress_edge,
+		      prov_policy.should_compress_edge);
+declare_file_operations(prov_compress_edge_ops,
+			prov_write_compress_edge,
+			prov_read_compress_edge);
 
 declare_write_flag_fcn(prov_write_duplicate, prov_policy.should_duplicate);
 declare_read_flag_fcn(prov_read_duplicate, prov_policy.should_duplicate);
-declare_file_operations(prov_duplicate_ops, prov_write_duplicate, prov_read_duplicate);
+declare_file_operations(prov_duplicate_ops,
+			prov_write_duplicate,
+			prov_read_duplicate);
 
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
@@ -161,7 +171,9 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 
 	return count;
 }
-declare_file_operations(prov_machine_id_ops, prov_write_machine_id, prov_read_machine_id);
+declare_file_operations(prov_machine_id_ops,
+			prov_write_machine_id,
+			prov_read_machine_id);
 
 static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
 				  size_t count, loff_t *ppos)
@@ -197,7 +209,9 @@ static ssize_t prov_read_boot_id(struct file *filp, char __user *buf,
 
 	return count;
 }
-declare_file_operations(prov_boot_id_ops, prov_write_boot_id, prov_read_boot_id);
+declare_file_operations(prov_boot_id_ops,
+			prov_write_boot_id,
+			prov_read_boot_id);
 
 
 static ssize_t prov_write_node(struct file *file, const char __user *buf,
@@ -267,7 +281,9 @@ static ssize_t prov_write_relation(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_relation_ops, prov_write_relation, no_read);
 
-static inline void update_prov_config(union prov_elt *setting, uint8_t op, struct provenance *prov)
+static inline void update_prov_config(union prov_elt *setting,
+				      uint8_t op,
+				      struct provenance *prov)
 {
 	if ((op & PROV_SET_TRACKED) != 0) {
 		if (provenance_is_tracked(setting))
@@ -393,43 +409,79 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 
 declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
 declare_reader_filter_fcn(prov_read_node_filter, prov_policy.prov_node_filter);
-declare_file_operations(prov_node_filter_ops, prov_write_node_filter, prov_read_node_filter);
+declare_file_operations(prov_node_filter_ops,
+			prov_write_node_filter,
+			prov_read_node_filter);
 
-declare_write_filter_fcn(prov_write_derived_filter, prov_policy.prov_derived_filter);
-declare_reader_filter_fcn(prov_read_derived_filter, prov_policy.prov_derived_filter);
-declare_file_operations(prov_derived_filter_ops, prov_write_derived_filter, prov_read_derived_filter);
+declare_write_filter_fcn(prov_write_derived_filter,
+			 prov_policy.prov_derived_filter);
+declare_reader_filter_fcn(prov_read_derived_filter,
+			  prov_policy.prov_derived_filter);
+declare_file_operations(prov_derived_filter_ops,
+			prov_write_derived_filter,
+			prov_read_derived_filter);
 
-declare_write_filter_fcn(prov_write_generated_filter, prov_policy.prov_generated_filter);
-declare_reader_filter_fcn(prov_read_generated_filter, prov_policy.prov_generated_filter);
-declare_file_operations(prov_generated_filter_ops, prov_write_generated_filter, prov_read_generated_filter);
+declare_write_filter_fcn(prov_write_generated_filter,
+			 prov_policy.prov_generated_filter);
+declare_reader_filter_fcn(prov_read_generated_filter,
+			  prov_policy.prov_generated_filter);
+declare_file_operations(prov_generated_filter_ops,
+			prov_write_generated_filter,
+			prov_read_generated_filter);
 
 declare_write_filter_fcn(prov_write_used_filter, prov_policy.prov_used_filter);
 declare_reader_filter_fcn(prov_read_used_filter, prov_policy.prov_used_filter);
-declare_file_operations(prov_used_filter_ops, prov_write_used_filter, prov_read_used_filter);
+declare_file_operations(prov_used_filter_ops,
+			prov_write_used_filter,
+			prov_read_used_filter);
 
-declare_write_filter_fcn(prov_write_informed_filter, prov_policy.prov_informed_filter);
-declare_reader_filter_fcn(prov_read_informed_filter, prov_policy.prov_informed_filter);
-declare_file_operations(prov_informed_filter_ops, prov_write_informed_filter, prov_read_informed_filter);
+declare_write_filter_fcn(prov_write_informed_filter,
+			 prov_policy.prov_informed_filter);
+declare_reader_filter_fcn(prov_read_informed_filter,
+			  prov_policy.prov_informed_filter);
+declare_file_operations(prov_informed_filter_ops,
+			prov_write_informed_filter,
+			prov_read_informed_filter);
 
-declare_write_filter_fcn(prov_write_propagate_node_filter, prov_policy.prov_propagate_node_filter);
-declare_reader_filter_fcn(prov_read_propagate_node_filter, prov_policy.prov_propagate_node_filter);
-declare_file_operations(prov_propagate_node_filter_ops, prov_write_propagate_node_filter, prov_read_propagate_node_filter);
+declare_write_filter_fcn(prov_write_propagate_node_filter,
+			 prov_policy.prov_propagate_node_filter);
+declare_reader_filter_fcn(prov_read_propagate_node_filter,
+			  prov_policy.prov_propagate_node_filter);
+declare_file_operations(prov_propagate_node_filter_ops,
+			prov_write_propagate_node_filter,
+			prov_read_propagate_node_filter);
 
-declare_write_filter_fcn(prov_write_propagate_derived_filter, prov_policy.prov_propagate_derived_filter);
-declare_reader_filter_fcn(prov_read_propagate_derived_filter, prov_policy.prov_propagate_derived_filter);
-declare_file_operations(prov_propagate_derived_filter_ops, prov_write_propagate_derived_filter, prov_read_propagate_derived_filter);
+declare_write_filter_fcn(prov_write_propagate_derived_filter,
+			 prov_policy.prov_propagate_derived_filter);
+declare_reader_filter_fcn(prov_read_propagate_derived_filter,
+			  prov_policy.prov_propagate_derived_filter);
+declare_file_operations(prov_propagate_derived_filter_ops,
+			prov_write_propagate_derived_filter,
+			prov_read_propagate_derived_filter);
 
-declare_write_filter_fcn(prov_write_propagate_generated_filter, prov_policy.prov_propagate_generated_filter);
-declare_reader_filter_fcn(prov_read_propagate_generated_filter, prov_policy.prov_propagate_generated_filter);
-declare_file_operations(prov_propagate_generated_filter_ops, prov_write_propagate_generated_filter, prov_read_propagate_generated_filter);
+declare_write_filter_fcn(prov_write_propagate_generated_filter,
+			 prov_policy.prov_propagate_generated_filter);
+declare_reader_filter_fcn(prov_read_propagate_generated_filter,
+			  prov_policy.prov_propagate_generated_filter);
+declare_file_operations(prov_propagate_generated_filter_ops,
+			prov_write_propagate_generated_filter,
+			prov_read_propagate_generated_filter);
 
-declare_write_filter_fcn(prov_write_propagate_used_filter, prov_policy.prov_propagate_used_filter);
-declare_reader_filter_fcn(prov_read_propagate_used_filter, prov_policy.prov_propagate_used_filter);
-declare_file_operations(prov_propagate_used_filter_ops, prov_write_propagate_used_filter, prov_read_propagate_used_filter);
+declare_write_filter_fcn(prov_write_propagate_used_filter,
+			 prov_policy.prov_propagate_used_filter);
+declare_reader_filter_fcn(prov_read_propagate_used_filter,
+			  prov_policy.prov_propagate_used_filter);
+declare_file_operations(prov_propagate_used_filter_ops,
+			prov_write_propagate_used_filter,
+			prov_read_propagate_used_filter);
 
-declare_write_filter_fcn(prov_write_propagate_informed_filter, prov_policy.prov_propagate_informed_filter);
-declare_reader_filter_fcn(prov_read_propagate_informed_filter, prov_policy.prov_propagate_informed_filter);
-declare_file_operations(prov_propagate_informed_filter_ops, prov_write_propagate_informed_filter, prov_read_propagate_informed_filter);
+declare_write_filter_fcn(prov_write_propagate_informed_filter,
+			 prov_policy.prov_propagate_informed_filter);
+declare_reader_filter_fcn(prov_read_propagate_informed_filter,
+			  prov_policy.prov_propagate_informed_filter);
+declare_file_operations(prov_propagate_informed_filter_ops,
+			prov_write_propagate_informed_filter,
+			prov_read_propagate_informed_filter);
 
 static ssize_t prov_write_flush(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
@@ -496,7 +548,9 @@ out:
 	kfree(msg);
 	return rtn;
 }
-declare_file_operations(prov_process_ops, prov_write_process, prov_read_process);
+declare_file_operations(prov_process_ops,
+			prov_write_process,
+			prov_read_process);
 
 static ssize_t __write_ipv4_filter(struct file *file, const char __user *buf,
 				   size_t count, struct list_head *filters)
@@ -564,13 +618,21 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 		return __read_ipv4_filter(filp, buf, count, &filter); \
 	}
 
-declare_write_ipv4_filter_fcn(prov_write_ipv4_ingress_filter, ingress_ipv4filters);
-declare_reader_ipv4_filter_fcn(prov_read_ipv4_ingress_filter, ingress_ipv4filters);
-declare_file_operations(prov_ipv4_ingress_filter_ops, prov_write_ipv4_ingress_filter, prov_read_ipv4_ingress_filter);
+declare_write_ipv4_filter_fcn(prov_write_ipv4_ingress_filter,
+			      ingress_ipv4filters);
+declare_reader_ipv4_filter_fcn(prov_read_ipv4_ingress_filter,
+			       ingress_ipv4filters);
+declare_file_operations(prov_ipv4_ingress_filter_ops,
+			prov_write_ipv4_ingress_filter,
+			prov_read_ipv4_ingress_filter);
 
-declare_write_ipv4_filter_fcn(prov_write_ipv4_egress_filter, egress_ipv4filters);
-declare_reader_ipv4_filter_fcn(prov_read_ipv4_egress_filter, egress_ipv4filters);
-declare_file_operations(prov_ipv4_egress_filter_ops, prov_write_ipv4_egress_filter, prov_read_ipv4_egress_filter);
+declare_write_ipv4_filter_fcn(prov_write_ipv4_egress_filter,
+			      egress_ipv4filters);
+declare_reader_ipv4_filter_fcn(prov_read_ipv4_egress_filter,
+			       egress_ipv4filters);
+declare_file_operations(prov_ipv4_egress_filter_ops,
+			prov_write_ipv4_egress_filter,
+			prov_read_ipv4_egress_filter);
 
 static ssize_t prov_read_secctx(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
@@ -679,15 +741,28 @@ static ssize_t prov_write_secctx_filter(struct file *file,
 }
 
 declare_generic_filter_read(prov_read_secctx_filter, secctx_filters, secinfo);
-declare_file_operations(prov_secctx_filter_ops, prov_write_secctx_filter, prov_read_secctx_filter);
+declare_file_operations(prov_secctx_filter_ops,
+			prov_write_secctx_filter,
+			prov_read_secctx_filter);
 
-declare_generic_filter_write(prov_write_uid_filter, user_filters, userinfo, prov_uid_add_or_update, prov_uid_delete);
+declare_generic_filter_write(prov_write_uid_filter,
+			     user_filters, userinfo,
+			     prov_uid_add_or_update,
+			     prov_uid_delete);
 declare_generic_filter_read(prov_read_uid_filter, user_filters, userinfo);
-declare_file_operations(prov_uid_filter_ops, prov_write_uid_filter, prov_read_uid_filter);
+declare_file_operations(prov_uid_filter_ops,
+			prov_write_uid_filter,
+			prov_read_uid_filter);
 
-declare_generic_filter_write(prov_write_gid_filter, group_filters, groupinfo, prov_gid_add_or_update, prov_gid_delete);
+declare_generic_filter_write(prov_write_gid_filter,
+			     group_filters,
+			     groupinfo,
+			     prov_gid_add_or_update,
+			     prov_gid_delete);
 declare_generic_filter_read(prov_read_gid_filter, group_filters, groupinfo);
-declare_file_operations(prov_gid_filter_ops, prov_write_gid_filter, prov_read_gid_filter);
+declare_file_operations(prov_gid_filter_ops,
+			prov_write_gid_filter,
+			prov_read_gid_filter);
 
 static ssize_t prov_write_ns_filter(struct file *file, const char __user *buf,
 				    size_t count, loff_t *ppos)
@@ -733,7 +808,9 @@ static ssize_t prov_read_ns_filter(struct file *filp, char __user *buf,
 	}
 	return pos;
 }
-declare_file_operations(prov_ns_filter_ops, prov_write_ns_filter, prov_read_ns_filter);
+declare_file_operations(prov_ns_filter_ops,
+			prov_write_ns_filter,
+			prov_read_ns_filter);
 
 /*!
  * @brief This function records a relation between a provenance node and a user supplied data, which is a transient node.
