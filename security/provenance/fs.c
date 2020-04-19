@@ -228,11 +228,15 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 	if (IS_ERR(node))
 		return PTR_ERR(node);
 
-	if (prov_type(node) == ENT_DISC || prov_type(node) == ACT_DISC || prov_type(node) == AGT_DISC) {
+	if (prov_type(node) == ENT_DISC ||
+	    prov_type(node) == ACT_DISC ||
+	    prov_type(node) == AGT_DISC) {
 		spin_lock(prov_lock(tprov));
 		// TODO redo
 		__write_node(prov_entry(tprov));
-		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier), &prov_elt(tprov)->node_info.identifier, sizeof(union prov_identifier));
+		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier),
+			    &prov_elt(tprov)->node_info.identifier,
+			    sizeof(union prov_identifier));
 		spin_unlock(prov_lock(tprov));
 		node_identifier(node).id = prov_next_node_id();
 		node_identifier(node).boot_id = prov_boot_id;
@@ -257,7 +261,8 @@ static ssize_t prov_read_node(struct file *filp, char __user *buf,
 		return -ENOMEM;
 	if (!prov_elt(tprov)->task_info.disc)
 		return -EINVAL;
-	if (copy_to_user(buf, prov_elt(tprov)->task_info.disc, sizeof(struct disc_node_struct)))
+	if (copy_to_user(buf, prov_elt(tprov)->task_info.disc,
+			 sizeof(struct disc_node_struct)))
 		return -ENOMEM;
 	return sizeof(struct disc_node_struct);
 }
@@ -539,7 +544,8 @@ static ssize_t prov_read_process(struct file *filp, char __user *buf,
 	}
 
 	spin_lock(prov_lock(prov));
-	__memcpy_ss(&msg->prov, sizeof(union prov_elt), prov_elt(prov), sizeof(union prov_elt));
+	__memcpy_ss(&msg->prov, sizeof(union prov_elt),
+		    prov_elt(prov), sizeof(union prov_elt));
 	spin_unlock(prov_lock(prov));
 
 	if (copy_to_user(buf, msg, sizeof(struct prov_process_config)))
@@ -592,7 +598,8 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 		if (count < pos + sizeof(struct prov_ipv4_filter))
 			return -ENOMEM;
 
-		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct prov_ipv4_filter)))
+		if (copy_to_user(buf + pos, &(tmp->filter),
+				 sizeof(struct prov_ipv4_filter)))
 			return -EAGAIN;
 
 		pos += sizeof(struct prov_ipv4_filter);
@@ -813,19 +820,27 @@ declare_file_operations(prov_ns_filter_ops,
 			prov_read_ns_filter);
 
 /*!
- * @brief This function records a relation between a provenance node and a user supplied data, which is a transient node.
+ * @brief This function records a relation between a provenance node and a user
+ * supplied data, which is a transient node.
  *
- * This function allows the user to attach an annotation node to a provenance node.
- * The relation between the two nodes is RL_LOG and the node of the user-supplied log is of type ENT_STR.
+ * This function allows the user to attach an annotation node to a provenance
+ * node.
+ * The relation between the two nodes is RL_LOG and the node of the
+ * user-supplied log is of type ENT_STR.
  * ENT_STR node is transient and should not have further use.
- * Therefore, once we have recorded the node, we will free the memory allocated for it.
+ * Therefore, once we have recorded the node, we will free the memory allocated
+ * for it.
  * @param cprov Provenance node to be annotated by the user.
  * @param buf Userspace buffer where user annotation locates.
  * @param count Number of bytes copied from the user buffer.
- * @return Number of bytes copied. -ENOMEM if no memory can be allocated for the transient long provenance node. -EAGAIN if copying from userspace failed. Other error codes unknown.
+ * @return Number of bytes copied. -ENOMEM if no memory can be allocated for
+ * the transient long provenance node. -EAGAIN if copying from userspace
+ * failed. Other error codes unknown.
  *
  */
-static inline int record_log(union prov_elt *tprov, const char __user *buf, size_t count)
+static inline int record_log(union prov_elt *tprov,
+			     const char __user *buf,
+			     size_t count)
 {
 	union long_prov_elt *str;
 	int rc = 0;
@@ -928,19 +943,22 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* LSM version */
-	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR, strnlen(CAMFLOW_VERSION_STR, 32));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR,
+				 strnlen(CAMFLOW_VERSION_STR, 32));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* commit */
-	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
+	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT,
+				 strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
 	}
 	/* general policy */
-	rc = crypto_shash_update(hashdesc, (u8 *)&prov_policy, sizeof(struct capture_policy));
+	rc = crypto_shash_update(hashdesc, (u8 *)&prov_policy,
+				 sizeof(struct capture_policy));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -991,7 +1009,8 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 
 	if (type_info->is_relation) {
 		if (type_info->id)
-			strlcpy(type_info->str, relation_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
+			strlcpy(type_info->str, relation_str(type_info->id),
+				PROV_TYPE_STR_MAX_LEN);
 		else
 			type_info->id = relation_id(type_info->str);
 	} else {
@@ -1090,10 +1109,14 @@ static int __init init_prov_fs(void)
 	prov_create_file("informed_filter", 0644, &prov_informed_filter_ops);
 	prov_create_file("propagate_node_filter", 0644,
 			 &prov_propagate_node_filter_ops);
-	prov_create_file("propagate_derived_filter", 0644, &prov_propagate_derived_filter_ops);
-	prov_create_file("propagate_generated_filter", 0644, &prov_propagate_generated_filter_ops);
-	prov_create_file("propagate_used_filter", 0644, &prov_propagate_used_filter_ops);
-	prov_create_file("propagate_informed_filter", 0644, &prov_propagate_informed_filter_ops);
+	prov_create_file("propagate_derived_filter", 0644,
+			 &prov_propagate_derived_filter_ops);
+	prov_create_file("propagate_generated_filter", 0644,
+			 &prov_propagate_generated_filter_ops);
+	prov_create_file("propagate_used_filter", 0644,
+			 &prov_propagate_used_filter_ops);
+	prov_create_file("propagate_informed_filter", 0644,
+			 &prov_propagate_informed_filter_ops);
 	prov_create_file("flush", 0600, &prov_flush_ops);
 	prov_create_file("process", 0644, &prov_process_ops);
 	prov_create_file("ipv4_ingress", 0644, &prov_ipv4_ingress_filter_ops);
