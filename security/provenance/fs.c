@@ -112,7 +112,7 @@ declare_write_flag_fcn(prov_write_all, prov_policy.prov_all);
 declare_read_flag_fcn(prov_read_all, prov_policy.prov_all);
 declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 
-declare_read_flag_fcn(prov_read_written, prov_policy.prov_written);
+declare_read_flag_fcn(prov_read_written, prov_written);
 declare_file_operations(prov_written_ops, no_write, prov_read_written);
 
 declare_write_flag_fcn(prov_write_compress_node,

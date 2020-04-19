@@ -2841,13 +2841,12 @@ struct capture_policy prov_policy;
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
 uint32_t epoch;
-
+bool prov_written;
 
 static void __init init_prov_policy(void)
 {
 	pr_info("Provenance: policy initialization started...");
 	prov_policy.prov_enabled = true;
-	prov_policy.prov_written = false;
 	prov_policy.should_duplicate = false;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
@@ -2920,6 +2919,7 @@ static int __init provenance_init(void)
 	prov_machine_id = 0;
 	prov_boot_id = 0;
 	epoch = 1;
+	prov_written = false;
 	init_prov_cache();
 	init_boot_cache();
 	spin_lock_init(&lock_buffer);

@@ -39,6 +39,7 @@ extern atomic64_t prov_node_id;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 extern uint32_t epoch;
+extern bool prov_written;
 
 #define prov_next_relation_id()	\
 	((uint64_t)atomic64_inc_return(&prov_relation_id))

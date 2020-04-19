@@ -341,7 +341,7 @@ void prov_write(union prov_elt *msg, size_t size)
 	if (unlikely(!relay_ready))
 		insert_boot_buffer(msg);
 	else {
-		prov_policy.prov_written = true;
+		prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->prov, msg, size);
 		}
@@ -383,7 +383,7 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
 	if (unlikely(!relay_ready))
 		insert_long_boot_buffer(msg);
 	else {
-		prov_policy.prov_written = true;
+		prov_written = true;
 		list_for_each_entry(tmp, &relay_list, list) {
 			relay_write(tmp->long_prov, msg, size);
 		}
