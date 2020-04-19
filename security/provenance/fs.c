@@ -32,13 +32,17 @@
 
 #define TMPBUFLEN    12
 
-#define declare_file_operations(ops_name, write_op, read_op)    static const struct file_operations ops_name = { \
-		.write = write_op,										 \
-		.read = read_op,										 \
-		.llseek = generic_file_llseek,									 \
-}
+#define declare_file_operations(ops_name, write_op, read_op) \
+	static const struct file_operations ops_name = {     \
+		.write = write_op,			     \
+		.read = read_op,			     \
+		.llseek = generic_file_llseek,		     \
+	}
 
-static ssize_t no_read(struct file *filp, char __user *buf, size_t count, loff_t *ppos)
+static ssize_t no_read(struct file *filp,
+		       char __user *buf,
+		       size_t count,
+		       loff_t *ppos)
 {
 	return -EPERM; // write only
 }
@@ -82,13 +86,22 @@ static ssize_t __read_flag(struct file *filp, char __user *buf,
 		return simple_read_from_buffer(buf, count, ppos, "0", 2);
 }
 
-#define declare_write_flag_fcn(fcn_name, flag)          static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{																	       \
-		return __write_flag(file, buf, count, ppos, &flag);										       \
+#define declare_write_flag_fcn(fcn_name, flag)			    \
+	static ssize_t fcn_name(struct file *file,		    \
+				const char __user *buf,		    \
+				size_t count,			    \
+				loff_t *ppos)			    \
+	{							    \
+		return __write_flag(file, buf, count, ppos, &flag); \
 	}
-#define declare_read_flag_fcn(fcn_name, flag)           static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{																	 \
-		return __read_flag(filp, buf, count, ppos, flag);										 \
+
+#define declare_read_flag_fcn(fcn_name, flag)			  \
+	static ssize_t fcn_name(struct file *filp,		  \
+				char __user *buf,		  \
+				size_t count,			  \
+				loff_t *ppos)			  \
+	{							  \
+		return __read_flag(filp, buf, count, ppos, flag); \
 	}
 
 declare_write_flag_fcn(prov_write_enable, prov_policy.prov_enabled);
@@ -360,13 +373,22 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 	return count;
 }
 
-#define declare_write_filter_fcn(fcn_name, filter)      static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{																	       \
-		return __write_filter(file, buf, count, &filter);										       \
+#define declare_write_filter_fcn(fcn_name, filter)		  \
+	static ssize_t fcn_name(struct file *file,		  \
+				const char __user *buf,		  \
+				size_t count,			  \
+				loff_t *ppos)			  \
+	{							  \
+		return __write_filter(file, buf, count, &filter); \
 	}
-#define declare_reader_filter_fcn(fcn_name, filter)     static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{																	 \
-		return __read_filter(filp, buf, count, filter);											 \
+
+#define declare_reader_filter_fcn(fcn_name, filter)		\
+	static ssize_t fcn_name(struct file *filp,		\
+				char __user *buf,		\
+				size_t count,			\
+				loff_t *ppos)			\
+	{							\
+		return __read_filter(filp, buf, count, filter);	\
 	}
 
 declare_write_filter_fcn(prov_write_node_filter, prov_policy.prov_node_filter);
@@ -524,13 +546,22 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 	return pos;
 }
 
-#define declare_write_ipv4_filter_fcn(fcn_name, filter)         static ssize_t fcn_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{																		       \
-		return __write_ipv4_filter(file, buf, count, &filter);											       \
+#define declare_write_ipv4_filter_fcn(fcn_name, filter)		       \
+	static ssize_t fcn_name(struct file *file,		       \
+				const char __user *buf,		       \
+				size_t count,			       \
+				loff_t *ppos)			       \
+	{							       \
+		return __write_ipv4_filter(file, buf, count, &filter); \
 	}
-#define declare_reader_ipv4_filter_fcn(fcn_name, filter)        static ssize_t fcn_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{																		 \
-		return __read_ipv4_filter(filp, buf, count, &filter);											 \
+
+#define declare_reader_ipv4_filter_fcn(fcn_name, filter)	      \
+	static ssize_t fcn_name(struct file *filp,		      \
+				char __user *buf,		      \
+				size_t count,			      \
+				loff_t *ppos)			      \
+	{							      \
+		return __read_ipv4_filter(filp, buf, count, &filter); \
 	}
 
 declare_write_ipv4_filter_fcn(prov_write_ipv4_ingress_filter, ingress_ipv4filters);
@@ -577,47 +608,53 @@ out:
 }
 declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
-#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function)	    \
-	static ssize_t function_name(struct file *file, const char __user *buf, size_t count, loff_t *ppos) \
-	{												    \
-		struct filters *s;									    \
-		if (count < sizeof(struct info)) {							    \
-			return -ENOMEM; }								    \
-		s = kzalloc(sizeof(struct filters), GFP_KERNEL);					    \
-		if (!s) {										    \
-			return -ENOMEM; }								    \
-		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {				    \
-			kfree(s);									    \
-			return -EAGAIN;									    \
-		}											    \
-		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) {				    \
-			add_function(s); }								    \
-		else {											    \
-			delete_function(s); }								    \
-		return sizeof(struct filters);								    \
+#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
+	static ssize_t function_name(struct file *file,						  \
+				     const char __user *buf,					  \
+				     size_t count,						  \
+				     loff_t *ppos)						  \
+	{											  \
+		struct filters *s;								  \
+		if (count < sizeof(struct info))						  \
+		return -ENOMEM;									  \
+		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
+		if (!s)										  \
+		return -ENOMEM;									  \
+		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {			  \
+			kfree(s);								  \
+			return -EAGAIN;								  \
+		}										  \
+		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
+		add_function (s); else								  \
+		delete_function (s); return sizeof(struct filters);				  \
 	}
 
-#define declare_generic_filter_read(function_name, filters, info)				      \
-	static ssize_t function_name(struct file *filp, char __user *buf, size_t count, loff_t *ppos) \
-	{											      \
-		struct list_head *listentry, *listtmp;						      \
-		struct filters *tmp;								      \
-		size_t pos = 0;									      \
-		if (count < sizeof(struct info)) {						      \
-			return -ENOMEM; }							      \
-		list_for_each_safe(listentry, listtmp, &filters) {				      \
-			tmp = list_entry(listentry, struct filters, list);			      \
-			if (count < pos + sizeof(struct info)) {				      \
-				return -ENOMEM; }						      \
-			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) {	      \
-				return -EAGAIN; }						      \
-			pos += sizeof(struct info);						      \
-		}										      \
-		return pos;									      \
+#define declare_generic_filter_read(function_name, filters, info)			    \
+	static ssize_t function_name(struct file *filp,					    \
+				     char __user *buf,					    \
+				     size_t count,					    \
+				     loff_t *ppos)					    \
+	{										    \
+		struct list_head *listentry, *listtmp;					    \
+		struct filters *tmp;							    \
+		size_t pos = 0;								    \
+		if (count < sizeof(struct info)) {					    \
+			return -ENOMEM; }						    \
+		list_for_each_safe(listentry, listtmp, &filters) {			    \
+			tmp = list_entry(listentry, struct filters, list);		    \
+			if (count < pos + sizeof(struct info)) {			    \
+				return -ENOMEM; }					    \
+			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) { \
+				return -EAGAIN; }					    \
+			pos += sizeof(struct info);					    \
+		}									    \
+		return pos;								    \
 	}
 
-static ssize_t prov_write_secctx_filter(struct file *file, const char __user *buf,
-					size_t count, loff_t *ppos)
+static ssize_t prov_write_secctx_filter(struct file *file,
+					const char __user *buf,
+					size_t count,
+					loff_t *ppos)
 {
 	struct secctx_filters *s;
 
