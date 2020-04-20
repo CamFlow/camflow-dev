@@ -71,7 +71,8 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		type = ENT_INODE_FILE;
 	else if (S_ISSOCK(mode))
 		type = ENT_INODE_SOCKET;
-	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_INODE);
+	spin_lock_irqsave_nested(prov_lock(prov), irqflags,
+				 PROVENANCE_LOCK_INODE);
 	if (prov_elt(prov)->inode_info.mode != 0
 	    && prov_elt(prov)->inode_info.mode != mode
 	    && provenance_is_recorded(prov_elt(prov))) {
@@ -84,7 +85,8 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 		clear_recorded(prov_elt(prov));
 
 		// We record a version edge.
-		__write_relation(RL_VERSION, &old_prov, prov_elt(prov), NULL, 0);
+		__write_relation(RL_VERSION, &old_prov, prov_elt(prov),
+				 NULL, 0);
 		clear_has_outgoing(prov_elt(prov));
 		clear_saved(prov_elt(prov));
 	}
@@ -188,7 +190,8 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	struct dentry *dentry;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
+	if (provenance_is_name_recorded(prov_elt(prov))
+	    || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
 		dentry = d_find_alias(inode);
@@ -462,11 +465,16 @@ static __always_inline int record_write_xattr(uint64_t type,
 	if (value) {
 		if (size < PROV_XATTR_VALUE_SIZE) {
 			xattr->xattr_info.size = size;
-			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE, value, size);
+			__memcpy_ss(xattr->xattr_info.value,
+				    PROV_XATTR_VALUE_SIZE,
+				    value,
+				    size);
 		} else {
 			xattr->xattr_info.size = PROV_XATTR_VALUE_SIZE;
-			__memcpy_ss(xattr->xattr_info.value, PROV_XATTR_VALUE_SIZE,
-				    value, PROV_XATTR_VALUE_SIZE);
+			__memcpy_ss(xattr->xattr_info.value,
+				    PROV_XATTR_VALUE_SIZE,
+				    value,
+				    PROV_XATTR_VALUE_SIZE);
 		}
 	}
 	rc = record_relation(RL_PROC_READ, prov_entry(cprov),
@@ -539,10 +547,12 @@ static __always_inline int record_read_xattr(struct provenance *cprov,
 		    name, PROV_XATTR_NAME_SIZE - 1);
 	xattr->xattr_info.name[PROV_XATTR_NAME_SIZE - 1] = '\0';
 
-	rc = record_relation(RL_GETXATTR_INODE, prov_entry(iprov), xattr, NULL, 0);
+	rc = record_relation(RL_GETXATTR_INODE, prov_entry(iprov),
+			     xattr, NULL, 0);
 	if (rc < 0)
 		goto out;
-	rc = record_relation(RL_GETXATTR, xattr, prov_entry(tprov), NULL, 0);
+	rc = record_relation(RL_GETXATTR, xattr,
+			     prov_entry(tprov), NULL, 0);
 	if (rc < 0)
 		goto out;
 	rc = record_relation(RL_PROC_WRITE, prov_entry(tprov),

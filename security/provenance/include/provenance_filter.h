@@ -127,15 +127,15 @@ static __always_inline bool filter_propagate_relation(uint64_t type)
 			return true;
 	} else if (prov_is_generated(type)) {
 		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter,
-				type))
+			       type))
 			return true;
 	} else if (prov_is_used(type)) {
 		if (HIT_FILTER(prov_policy.prov_propagate_used_filter,
-				type))
+			       type))
 			return true;
 	} else if (prov_is_informed(type))
 		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter,
-				type))
+			       type))
 			return true;
 	return false;
 }
