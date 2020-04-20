@@ -82,35 +82,9 @@ security/provenance/include/provenance.h has no obvious style problems and is re
 ----------------------------------------------
 security/provenance/include/provenance_inode.h
 ----------------------------------------------
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#159: FILE: security/provenance/include/provenance_inode.h:159:
-+		return 0;
-+	else {
+total: 0 errors, 0 warnings, 604 lines checked
 
-WARNING:LONG_LINE: line over 80 characters
-#188: FILE: security/provenance/include/provenance_inode.h:188:
-+static inline int record_inode_name(struct inode *inode, struct provenance *prov)
-
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#196: FILE: security/provenance/include/provenance_inode.h:196:
-+		return 0;
-+	else {
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#198: FILE: security/provenance/include/provenance_inode.h:198:
-+		if (!dentry) // We did not find a dentry, not sure if it should ever happen.
-
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#260: FILE: security/provenance/include/provenance_inode.h:260:
-+		return 0;
-+	} else
-
-total: 0 errors, 5 warnings, 605 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/include/provenance_inode.h has style problems, please review.
+security/provenance/include/provenance_inode.h has no obvious style problems and is ready for submission.
 ------------------------------------------------
 security/provenance/include/provenance_machine.h
 ------------------------------------------------
@@ -120,25 +94,9 @@ security/provenance/include/provenance_machine.h has no obvious style problems a
 --------------------------------------------
 security/provenance/include/provenance_net.h
 --------------------------------------------
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#310: FILE: security/provenance/include/provenance_net.h:310:
-+	list_add_tail(&(f->list), filters); // If not already in the list, we add it.
+total: 0 errors, 0 warnings, 414 lines checked
 
-WARNING:LONG_LINE: line over 80 characters
-#335: FILE: security/provenance/include/provenance_net.h:335:
-+static __always_inline int record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
-
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#343: FILE: security/provenance/include/provenance_net.h:343:
-+		return 0;
-+	else {
-
-total: 0 errors, 3 warnings, 412 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/include/provenance_net.h has style problems, please review.
+security/provenance/include/provenance_net.h has no obvious style problems and is ready for submission.
 -------------------------------------------
 security/provenance/include/provenance_ns.h
 -------------------------------------------
