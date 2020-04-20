@@ -739,20 +739,9 @@ security/provenance/hooks.c has style problems, please review.
 -----------------------------
 security/provenance/machine.c
 -----------------------------
-WARNING:LONG_LINE: line over 80 characters
-#26: FILE: security/provenance/machine.c:26:
-+	__memcpy_ss(&(prov_machine->machine_info.utsname), sizeof(struct new_utsname),
+total: 0 errors, 0 warnings, 51 lines checked
 
-WARNING:LONG_LINE: line over 80 characters
-#41: FILE: security/provenance/machine.c:41:
-+		    CAMFLOW_COMMIT, strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
-
-total: 0 errors, 2 warnings, 46 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/machine.c has style problems, please review.
+security/provenance/machine.c has no obvious style problems and is ready for submission.
 -------------------------------
 security/provenance/memcpy_ss.c
 -------------------------------
@@ -815,67 +804,19 @@ security/provenance/query.c has no obvious style problems and is ready for submi
 ---------------------------
 security/provenance/relay.c
 ---------------------------
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#37: FILE: security/provenance/relay.c:37:
-+	struct rchan *prov;             // Relay buffer for regular provenance entries.
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#38: FILE: security/provenance/relay.c:38:
-+	struct rchan *long_prov;        // Relay buffer for long provenance entries.
-
-WARNING:LONG_LINE: line over 80 characters
-#95: FILE: security/provenance/relay.c:95:
-+			pr_warn("Provenance: relay (%s) is full.", chan->base_filename);
-
-WARNING:LONG_LINE: line over 80 characters
-#149: FILE: security/provenance/relay.c:149:
-+			cookie = async_schedule(__async_handle_boot_buffer, NULL);
-
-WARNING:LONG_LINE: line over 80 characters
-#150: FILE: security/provenance/relay.c:150:
-+			pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
-
-WARNING:LONG_LINE: line over 80 characters
-#178: FILE: security/provenance/relay.c:178:
-+	pr_info("Provenance: async long boot buffer task %llu running...", cookie);
-
-WARNING:LONG_LINE: line over 80 characters
-#186: FILE: security/provenance/relay.c:186:
-+			cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
-
-WARNING:LONG_LINE: line over 80 characters
-#195: FILE: security/provenance/relay.c:195:
-+		relay_write(long_prov_chan, &(entry->msg), sizeof(union long_prov_elt));
-
 WARNING:AVOID_EXTERNS: externs should be avoided in .c files
-#219: FILE: security/provenance/relay.c:219:
+#230: FILE: security/provenance/relay.c:230:
 +void refresh_prov_machine(void);
 
 WARNING:LONG_LINE: line over 80 characters
-#235: FILE: security/provenance/relay.c:235:
-+		pr_info("Provenance: schedlued boot buffer async task %llu.", cookie);
-
-WARNING:LONG_LINE: line over 80 characters
-#241: FILE: security/provenance/relay.c:241:
+#253: FILE: security/provenance/relay.c:253:
 +		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
 
 WARNING:LONG_LINE: line over 80 characters
-#287: FILE: security/provenance/relay.c:287:
-+	long_chan = relay_open(long_name, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF,
-
-WARNING:LONG_LINE: line over 80 characters
-#302: FILE: security/provenance/relay.c:302:
+#317: FILE: security/provenance/relay.c:317:
 +	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
 
-WARNING:LONG_LINE: line over 80 characters
-#305: FILE: security/provenance/relay.c:305:
-+	__memcpy_ss(&(tmp->msg), sizeof(union prov_elt), msg, sizeof(union prov_elt));
-
-WARNING:LONG_LINE: line over 80 characters
-#412: FILE: security/provenance/relay.c:412:
-+	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
-
-total: 0 errors, 15 warnings, 423 lines checked
+total: 0 errors, 3 warnings, 442 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -1420,31 +1361,20 @@ WARNING:LONG_LINE_COMMENT: line over 80 characters
 #154: FILE: security/provenance/type.c:154:
 +static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
-WARNING:LONG_LINE: line over 80 characters
-#156: FILE: security/provenance/type.c:156:
-+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
-
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
 #156: FILE: security/provenance/type.c:156:
-+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
++#define MATCH_AND_RETURN(str1, str2, v)	\
++	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
 WARNING:BRACES: braces {} are not necessary for single statement blocks
-#156: FILE: security/provenance/type.c:156:
-+#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
+#157: FILE: security/provenance/type.c:157:
++	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
 WARNING:LONG_LINE: line over 80 characters
-#396: FILE: security/provenance/type.c:396:
+#397: FILE: security/provenance/type.c:397:
 +	MATCH_AND_RETURN(str, RL_STR_CONNECT_UNIX_STREAM, RL_CONNECT_UNIX_STREAM);
 
-WARNING:LONG_LINE: line over 80 characters
-#469: FILE: security/provenance/type.c:469:
-+	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER, RL_LOAD_FIRMWARE_PREALLOC_BUFFER);
-
-WARNING:LONG_LINE: line over 80 characters
-#472: FILE: security/provenance/type.c:472:
-+	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
-
-total: 0 errors, 140 warnings, 585 lines checked
+total: 0 errors, 137 warnings, 588 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
