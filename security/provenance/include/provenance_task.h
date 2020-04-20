@@ -193,11 +193,17 @@ static __always_inline int current_update_shst(struct provenance *cprov,
 			mmprov = get_file_provenance(mmapf, false);
 			if (mmprov) {
 				if (vm_read_exec_mayshare(flags) && read)
-					rc = record_relation(RL_SH_READ, prov_entry(mmprov),
-							     prov_entry(cprov), mmapf, flags);
+					rc = record_relation(RL_SH_READ,
+						prov_entry(mmprov),
+						prov_entry(cprov),
+						mmapf,
+						flags);
 				if (vm_write_mayshare(flags) && !read)
-					rc = record_relation(RL_SH_WRITE, prov_entry(cprov),
-							     prov_entry(mmprov), mmapf, flags);
+					rc = record_relation(RL_SH_WRITE,
+						prov_entry(cprov),
+						prov_entry(mmprov),
+						mmapf,
+						flags);
 			}
 		}
 		vma = vma->vm_next;
@@ -256,7 +262,8 @@ static inline int record_task_name(struct task_struct *task,
 			// Memory allocation not allowed to sleep.
 			buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
 			if (!buffer) {
-				pr_err("Provenance: could not allocate memory\n");
+				pr_err(
+				"Provenance: could not allocate memory\n");
 				fput(exe_file); // Release the file.
 				rc = -ENOMEM;
 				goto out;
@@ -298,10 +305,14 @@ static inline void update_task_perf(struct task_struct *task,
 	mm = get_task_mm(task);
 	if (mm) {
 		// KB
-		prov_elt(prov)->task_info.vm =  mm->total_vm  * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.rss = get_mm_rss(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.hw_vm = get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
-		prov_elt(prov)->task_info.hw_rss = get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.vm =
+			mm->total_vm  * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.rss =
+			get_mm_rss(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_vm =
+			get_mm_hiwater_vm(mm) * PAGE_SIZE / KB;
+		prov_elt(prov)->task_info.hw_rss =
+			get_mm_hiwater_rss(mm) * PAGE_SIZE / KB;
 		mmput_async(mm);
 	}
 	// IO
@@ -340,7 +351,8 @@ static inline struct provenance *get_cred_provenance(void)
 	if (provenance_is_opaque(prov_elt(prov)))
 		return prov;
 	record_task_name(current, prov);
-	spin_lock_irqsave_nested(prov_lock(prov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_irqsave_nested(prov_lock(prov),
+					irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
 	prov_elt(prov)->proc_info.utsns = current_utsns();
 	prov_elt(prov)->proc_info.ipcns = current_ipcns();
