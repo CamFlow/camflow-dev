@@ -183,7 +183,8 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
  * @return 0 if no error occurred or if "dentry" returns NULL.
  *
  */
-static inline int record_inode_name(struct inode *inode, struct provenance *prov)
+static inline int record_inode_name(struct inode *inode,
+				    struct provenance *prov)
 {
 	struct dentry *dentry;
 	int rc;
@@ -191,14 +192,13 @@ static inline int record_inode_name(struct inode *inode, struct provenance *prov
 	if (provenance_is_name_recorded(prov_elt(prov))
 	    || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	else {
-		dentry = d_find_alias(inode);
-		if (!dentry) // We did not find a dentry, not sure if it should ever happen.
-			return 0;
-		rc = record_inode_name_from_dentry(dentry, prov, false);
-		dput(dentry);
-		return rc;
-	}
+	dentry = d_find_alias(inode);
+	// We did not find a dentry, not sure if it should ever happen.
+	if (!dentry)
+		return 0;
+	rc = record_inode_name_from_dentry(dentry, prov, false);
+	dput(dentry);
+	return rc;
 }
 
 /*!
@@ -255,8 +255,9 @@ static inline int inode_init_provenance(struct inode *inode,
 	if (provenance_is_initialized(prov_elt(prov))) {
 		spin_unlock(prov_lock(prov));
 		return 0;
-	} else
-		set_initialized(prov_elt(prov));
+	}
+
+	set_initialized(prov_elt(prov));
 	spin_unlock(prov_lock(prov));
 	update_inode_type(inode->i_mode, prov);
 	// xattr not supported on this inode
