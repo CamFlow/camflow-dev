@@ -258,7 +258,8 @@ static inline int inode_init_provenance(struct inode *inode,
 		set_initialized(prov_elt(prov));
 	spin_unlock(prov_lock(prov));
 	update_inode_type(inode->i_mode, prov);
-	if (!(inode->i_opflags & IOP_XATTR))   // xattr not supported on this inode
+	// xattr not supported on this inode
+	if (!(inode->i_opflags & IOP_XATTR))
 		return 0;
 	if (opt_dentry)
 		dentry = dget(opt_dentry);
@@ -307,7 +308,8 @@ free_buf:
  * "inode_init_provenance" can fail (i.e., non-zero return value).
  * @todo We may not want to update (call refresh_inode_provenance) all the time.
  */
-static inline struct provenance *get_inode_provenance(struct inode *inode, bool may_sleep)
+static inline struct provenance *get_inode_provenance(struct inode *inode,
+						      bool may_sleep)
 {
 	struct provenance *iprov = provenance_inode(inode);
 
@@ -356,7 +358,8 @@ static inline struct provenance *get_dentry_provenance(struct dentry *dentry,
  * @return provenance struct pointer or NULL if inode does not exist.
  *
  */
-static inline struct provenance *get_file_provenance(struct file *file, bool may_sleep)
+static inline struct provenance *get_file_provenance(struct file *file,
+						     bool may_sleep)
 {
 	struct inode *inode = file_inode(file);
 
