@@ -49,12 +49,18 @@ static inline uint8_t prov_ns_whichOP(uint32_t utsns,
 
 	list_for_each_safe(listentry, listtmp, &ns_filters) {
 		tmp = list_entry(listentry, struct ns_filters, list);
-		if ((tmp->filter.cgroupns == cgroupns || tmp->filter.cgroupns == IGNORE_NS)
-		    && (tmp->filter.utsns == utsns || tmp->filter.utsns == IGNORE_NS)
-		    && (tmp->filter.ipcns == ipcns || tmp->filter.ipcns == IGNORE_NS)
-		    && (tmp->filter.mntns == mntns || tmp->filter.mntns == IGNORE_NS)
-		    && (tmp->filter.pidns == pidns || tmp->filter.pidns == IGNORE_NS)
-		    && (tmp->filter.netns == netns || tmp->filter.netns == IGNORE_NS))
+		if ((tmp->filter.cgroupns == cgroupns
+			|| tmp->filter.cgroupns == IGNORE_NS)
+		    && (tmp->filter.utsns == utsns
+			    || tmp->filter.utsns == IGNORE_NS)
+		    && (tmp->filter.ipcns == ipcns
+			    || tmp->filter.ipcns == IGNORE_NS)
+		    && (tmp->filter.mntns == mntns
+			    || tmp->filter.mntns == IGNORE_NS)
+		    && (tmp->filter.pidns == pidns
+			    || tmp->filter.pidns == IGNORE_NS)
+		    && (tmp->filter.netns == netns
+			    || tmp->filter.netns == IGNORE_NS))
 			return tmp->filter.op;
 	}
 	return 0;
