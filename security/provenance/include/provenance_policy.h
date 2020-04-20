@@ -28,8 +28,8 @@ struct capture_policy {
 	bool should_compress_node;
 	// Whether edges should be compressed into one if possible.
 	bool should_compress_edge;
-	// every time a relation is recorded the two end nodes will be recorded again
-	// if set to true.
+	// every time a relation is recorded the two end nodes will be recorded
+	// again if set to true.
 	bool should_duplicate;
 	// Node to be filtered out (i.e., not recorded).
 	uint64_t prov_node_filter;
@@ -43,13 +43,17 @@ struct capture_policy {
 	uint64_t prov_used_filter;
 	// Edge of category "informed" to be filtered out.
 	uint64_t prov_informed_filter;
-	// Edge of category "derived" to be filtered out if it is part of propagate.
+	// Edge of category "derived" to be filtered out if it is part of
+	// propagate.
 	uint64_t prov_propagate_derived_filter;
-	// Edge of category "generated" to be filtered out if it is part of propagate.
+	// Edge of category "generated" to be filtered out if it is part of
+	// propagate.
 	uint64_t prov_propagate_generated_filter;
-	// Edge of category "used" to be filtered out if it is part of propagate.
+	// Edge of category "used" to be filtered out if it is part of
+	// propagate.
 	uint64_t prov_propagate_used_filter;
-	// Edge of category "informed" to be filtered out if it is part of propagate.
+	// Edge of category "informed" to be filtered out if it is part of
+	// propagate.
 	uint64_t prov_propagate_informed_filter;
 };
 
