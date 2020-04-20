@@ -191,10 +191,12 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(
 
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
-		__extract_tcp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
+		__extract_tcp_info(skb, ih,
+				   offset, &packet_identifier(prov_elt(prov)));
 		break;
 	case IPPROTO_UDP:
-		__extract_udp_info(skb, ih, offset, &packet_identifier(prov_elt(prov)));
+		__extract_udp_info(skb, ih,
+				   offset, &packet_identifier(prov_elt(prov)));
 		break;
 	default:
 		break;
@@ -238,7 +240,8 @@ static inline uint8_t prov_ipv4_whichOP(struct list_head *filters,
 	list_for_each_safe(listentry, listtmp, filters) {
 		tmp = list_entry(listentry, struct ipv4_filters, list);
 		// Match IP
-		if ((tmp->filter.mask & ip) == (tmp->filter.mask & tmp->filter.ip))
+		if ((tmp->filter.mask & ip)
+		    == (tmp->filter.mask & tmp->filter.ip))
 			// Any port or a specific match
 			if (tmp->filter.port == 0 || tmp->filter.port == port)
 				return tmp->filter.op;
@@ -334,7 +337,8 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 	union long_prov_elt *addr_info;
 	int rc = 0;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) || !provenance_is_recorded(prov_elt(prov)))
+	if (provenance_is_name_recorded(prov_elt(prov))
+	    || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 	else {
 		addr_info = alloc_long_provenance(ENT_ADDR, 0);
@@ -343,9 +347,11 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 			goto out;
 		}
 		addr_info->address_info.length = addrlen;
-		__memcpy_ss(&(addr_info->address_info.addr), sizeof(struct sockaddr_storage), address, addrlen);
+		__memcpy_ss(&(addr_info->address_info.addr),
+			    sizeof(struct sockaddr_storage), address, addrlen);
 
-		rc = record_relation(RL_ADDRESSED, addr_info, prov_entry(prov), NULL, 0);
+		rc = record_relation(RL_ADDRESSED, addr_info,
+				     prov_entry(prov), NULL, 0);
 		set_name_recorded(prov_elt(prov));
 	}
 out:
@@ -365,7 +371,8 @@ static inline void record_packet_content(struct sk_buff *skb,
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length >= PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;
-		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX, skb->head, PATH_MAX);
+		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX,
+			    skb->head, PATH_MAX);
 	} else
 		__memcpy_ss(cnt->pckcnt_info.content, PATH_MAX,
 			    skb->head, cnt->pckcnt_info.length);
@@ -386,8 +393,9 @@ static __always_inline int check_track_socket(const struct sockaddr *address,
 	if (address->sa_family == PF_INET) {
 		ipv4_addr = (struct sockaddr_in *)address;
 		// force parse endian casting
-		op = prov_ipv4_egressOP((__force uint32_t)ipv4_addr->sin_addr.s_addr,
-					(__force uint32_t)ipv4_addr->sin_port);
+		op = prov_ipv4_egressOP(
+			(__force uint32_t)ipv4_addr->sin_addr.s_addr,
+			(__force uint32_t)ipv4_addr->sin_port);
 		if ((op & PROV_SET_TRACKED) != 0) {
 			set_tracked(prov_elt(iprov));
 			set_tracked(prov_elt(cprov));
