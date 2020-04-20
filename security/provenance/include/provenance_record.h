@@ -62,7 +62,8 @@ static __always_inline int __update_version(const uint64_t type,
 		return 0;
 
 	// Copy the current provenance prov to old_prov.
-	__memcpy_ss(&old_prov, sizeof(union prov_elt), prov, sizeof(union prov_elt));
+	__memcpy_ss(&old_prov, sizeof(union prov_elt),
+		    prov, sizeof(union prov_elt));
 
 	// Update the version of prov to the newer version.
 	node_identifier(prov).version++;
@@ -70,11 +71,14 @@ static __always_inline int __update_version(const uint64_t type,
 
 	// Record the version relation between two versions of the same identity.
 	if (node_identifier(prov).type == ACT_TASK)
-		rc = __write_relation(RL_VERSION_TASK, &old_prov, prov, NULL, 0);
+		rc = __write_relation(RL_VERSION_TASK, &old_prov,
+				      prov, NULL, 0);
 	else
 		rc = __write_relation(RL_VERSION, &old_prov, prov, NULL, 0);
-	clear_has_outgoing(prov);       // Newer version now has no outgoing edge.
-	clear_saved(prov);              // For inode provenance persistance
+	// Newer version now has no outgoing edge.
+	clear_has_outgoing(prov);
+	// For inode provenance persistance
+	clear_saved(prov);
 	return rc;
 }
 
@@ -221,7 +225,8 @@ static __always_inline int record_node_name(struct provenance *node,
 
 		// Here we record the relation.
 		spin_lock(prov_lock(node));
-		rc = record_relation(RL_NAMED, fname_prov, prov_entry(node), NULL, 0);
+		rc = record_relation(RL_NAMED, fname_prov,
+				     prov_entry(node), NULL, 0);
 		set_name_recorded(prov_elt(node));
 		spin_unlock(prov_lock(node));
 		free_long_provenance(fname_prov);
@@ -297,7 +302,8 @@ static __always_inline int uses(const uint64_t type,
 	    && !provenance_is_tracked(prov_elt(activity_mem))
 	    && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
+	if (!should_record_relation(
+		    type, prov_entry(entity), prov_entry(activity)))
 		return 0;
 
 	rc = record_relation(type, prov_entry(entity),
@@ -352,7 +358,8 @@ static __always_inline int uses_two(const uint64_t type,
 	    && !provenance_is_tracked(prov_elt(activity))
 	    && !prov_policy.prov_all)
 		return 0;
-	if (!should_record_relation(type, prov_entry(entity), prov_entry(activity)))
+	if (!should_record_relation(
+		    type, prov_entry(entity), prov_entry(activity)))
 		return 0;
 	rc = record_relation(type, prov_entry(entity),
 			     prov_entry(activity), file, flags);
@@ -419,7 +426,8 @@ static __always_inline int generates(const uint64_t type,
 	    && !prov_policy.prov_all)
 		return 0;
 
-	if (!should_record_relation(type, prov_entry(activity), prov_entry(entity)))
+	if (!should_record_relation(
+		    type, prov_entry(activity), prov_entry(entity)))
 		return 0;
 
 	rc = current_update_shst(activity_mem, true);
@@ -480,7 +488,8 @@ static __always_inline int derives(const uint64_t type,
 	if (!should_record_relation(type, prov_entry(from), prov_entry(to)))
 		return 0;
 
-	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
+	return record_relation(
+		type, prov_entry(from), prov_entry(to), file, flags);
 }
 
 /*!
@@ -533,7 +542,8 @@ static __always_inline int informs(const uint64_t type,
 	rc = record_kernel_link(prov_entry(to));
 	if (rc < 0)
 		return rc;
-	return record_relation(type, prov_entry(from), prov_entry(to), file, flags);
+	return record_relation(
+		type, prov_entry(from), prov_entry(to), file, flags);
 }
 
 static __always_inline int record_influences_kernel(const uint64_t type,
