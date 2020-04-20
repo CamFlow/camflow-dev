@@ -156,18 +156,16 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	else {
-		// Should not sleep.
-		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-		if (!buffer)
-			return -ENOMEM;
-		ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
-		if (IS_ERR(ptr))
-			return PTR_ERR(ptr);
-		rc = record_node_name(prov, ptr, force);
-		kfree(buffer);
-		return rc;
-	}
+
+	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+	if (!buffer)
+		return -ENOMEM;
+	ptr = dentry_path_raw(dentry, buffer, PATH_MAX);
+	if (IS_ERR(ptr))
+		return PTR_ERR(ptr);
+	rc = record_node_name(prov, ptr, force);
+	kfree(buffer);
+	return rc;
 }
 
 /*!
