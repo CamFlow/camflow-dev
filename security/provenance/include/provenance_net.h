@@ -307,7 +307,8 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters,
 			return 0; // you should only get one
 		}
 	}
-	list_add_tail(&(f->list), filters); // If not already in the list, we add it.
+	// If not already in the list, we add it.
+	list_add_tail(&(f->list), filters);
 	return 0;
 }
 
@@ -332,7 +333,9 @@ static inline uint8_t prov_ipv4_add_or_update(struct list_head *filters,
  * record_relation function.
  *
  */
-static __always_inline int record_address(struct sockaddr *address, int addrlen, struct provenance *prov)
+static __always_inline int record_address(struct sockaddr *address,
+					  int addrlen,
+					  struct provenance *prov)
 {
 	union long_prov_elt *addr_info;
 	int rc = 0;
@@ -340,20 +343,19 @@ static __always_inline int record_address(struct sockaddr *address, int addrlen,
 	if (provenance_is_name_recorded(prov_elt(prov))
 	    || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	else {
-		addr_info = alloc_long_provenance(ENT_ADDR, 0);
-		if (!addr_info) {
-			rc = -ENOMEM;
-			goto out;
-		}
-		addr_info->address_info.length = addrlen;
-		__memcpy_ss(&(addr_info->address_info.addr),
-			    sizeof(struct sockaddr_storage), address, addrlen);
 
-		rc = record_relation(RL_ADDRESSED, addr_info,
-				     prov_entry(prov), NULL, 0);
-		set_name_recorded(prov_elt(prov));
+	addr_info = alloc_long_provenance(ENT_ADDR, 0);
+	if (!addr_info) {
+		rc = -ENOMEM;
+		goto out;
 	}
+	addr_info->address_info.length = addrlen;
+	__memcpy_ss(&(addr_info->address_info.addr),
+		    sizeof(struct sockaddr_storage), address, addrlen);
+
+	rc = record_relation(RL_ADDRESSED, addr_info,
+			     prov_entry(prov), NULL, 0);
+	set_name_recorded(prov_elt(prov));
 out:
 	free_long_provenance(addr_info);
 	return rc;
