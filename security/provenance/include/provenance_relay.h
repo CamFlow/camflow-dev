@@ -126,10 +126,14 @@ static __always_inline void __prepare_relation(const uint64_t type,
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
 	relation_identifier(relation).machine_id = prov_machine_id;
-	__memcpy_ss(&(relation->relation_info.snd), sizeof(union prov_identifier),
-		    &get_prov_identifier(f), sizeof(union prov_identifier));
-	__memcpy_ss(&(relation->relation_info.rcv), sizeof(union prov_identifier),
-		    &get_prov_identifier(t), sizeof(union prov_identifier));
+	__memcpy_ss(&(relation->relation_info.snd),
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(f),
+		    sizeof(union prov_identifier));
+	__memcpy_ss(&(relation->relation_info.rcv),
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(t),
+		    sizeof(union prov_identifier));
 	if (file) {
 		relation->relation_info.set = FILE_INFO_SET;
 		relation->relation_info.offset = file->f_pos;
