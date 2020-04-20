@@ -28,7 +28,8 @@ static inline int call_provenance_flow(prov_entry_t *from,
 	struct provenance_query_hooks *fcn;
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		fcn = list_entry(listentry, struct provenance_query_hooks,
+				 list);
 		if (fcn->flow)
 			rc |= fcn->flow(from, edge, to);
 	}
@@ -42,7 +43,8 @@ static inline int call_provenance_alloc(prov_entry_t *elt)
 	struct provenance_query_hooks *fcn;
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		fcn = list_entry(listentry, struct provenance_query_hooks,
+				 list);
 		if (fcn->alloc)
 			rc |= fcn->alloc(elt);
 	}
@@ -56,7 +58,8 @@ static inline int call_provenance_free(prov_entry_t *elt)
 	struct provenance_query_hooks *fcn;
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		fcn = list_entry(listentry, struct provenance_query_hooks,
+				 list);
 		if (fcn->free)
 			rc |= fcn->free(elt);
 	}
