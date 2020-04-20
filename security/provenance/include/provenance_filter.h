@@ -126,13 +126,16 @@ static __always_inline bool filter_propagate_relation(uint64_t type)
 		if (HIT_FILTER(prov_policy.prov_propagate_derived_filter, type))
 			return true;
 	} else if (prov_is_generated(type)) {
-		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter, type))
+		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter,
+				type))
 			return true;
 	} else if (prov_is_used(type)) {
-		if (HIT_FILTER(prov_policy.prov_propagate_used_filter, type))
+		if (HIT_FILTER(prov_policy.prov_propagate_used_filter,
+				type))
 			return true;
 	} else if (prov_is_informed(type))
-		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter, type))
+		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter,
+				type))
 			return true;
 	return false;
 }
