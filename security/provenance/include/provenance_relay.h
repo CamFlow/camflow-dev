@@ -121,7 +121,7 @@ static __always_inline void __prepare_relation(const uint64_t type,
 					       const struct file *file,
 					       const uint64_t flags)
 {
-	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
+	memset(relation, 0, sizeof(union prov_elt));
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
