@@ -24,9 +24,9 @@ void refresh_prov_machine(void)
 	struct new_utsname *uname = utsname();
 
 	__memcpy_ss(&(prov_machine->machine_info.utsname),
-		sizeof(struct new_utsname),
-		uname,
-		sizeof(struct new_utsname));
+		    sizeof(struct new_utsname),
+		    uname,
+		    sizeof(struct new_utsname));
 	node_identifier(prov_machine).id = djb2_hash(CAMFLOW_COMMIT);
 	node_identifier(prov_machine).boot_id = prov_boot_id;
 	node_identifier(prov_machine).machine_id = prov_machine_id;
@@ -40,9 +40,10 @@ void init_prov_machine(void)
 	prov_machine->machine_info.cam_minor = CAMFLOW_VERSION_MINOR;
 	prov_machine->machine_info.cam_patch = CAMFLOW_VERSION_PATCH;
 	__memcpy_ss(prov_machine->machine_info.commit,
-			PROV_COMMIT_MAX_LENGTH,
-			CAMFLOW_COMMIT,
-			strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
+		    PROV_COMMIT_MAX_LENGTH,
+		    CAMFLOW_COMMIT,
+		    strnlen(CAMFLOW_COMMIT,
+			    PROV_COMMIT_MAX_LENGTH));
 	prov_type(prov_machine) = AGT_MACHINE;
 	node_identifier(prov_machine).version = 1;
 	refresh_prov_machine();

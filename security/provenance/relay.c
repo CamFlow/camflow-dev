@@ -33,7 +33,7 @@
  */
 struct relay_list {
 	struct list_head list;
-	 // The name of the relay channel.
+	// The name of the relay channel.
 	char *name;
 	// Relay buffer for regular provenance entries.
 	struct rchan *prov;
@@ -151,10 +151,10 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 		// check if relay is full
 		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_boot_buffer,
-				NULL);
+						NULL);
 			pr_info(
-			"Provenance: schedlued boot buffer async task %llu.",
-			cookie);
+				"Provenance: schedlued boot buffer async task %llu.",
+				cookie);
 			goto out;
 		}
 
@@ -183,7 +183,7 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 
 	msleep(1000);
 	pr_info("Provenance: async long boot buffer task %llu running...",
-	cookie);
+		cookie);
 
 	spin_lock_irqsave(&lock_long_buffer, irqflags);
 	list_for_each_safe(ele, next, &long_buffer_list) {
@@ -192,10 +192,10 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 		// check if relay is full
 		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer,
-				NULL);
+						NULL);
 			pr_info(
-			"Provenance: schedlued long boot buffer async task %llu.",
-			cookie);
+				"Provenance: schedlued long boot buffer async task %llu.",
+				cookie);
 			goto out;
 		}
 
@@ -203,7 +203,7 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 		tighten_identifier(&get_prov_identifier(&(entry->msg)));
 
 		relay_write(long_prov_chan, &(entry->msg),
-				sizeof(union long_prov_elt));
+			    sizeof(union long_prov_elt));
 
 		list_del(&(entry->list));
 		kmem_cache_free(long_boot_buffer_cache, entry);
@@ -244,7 +244,7 @@ void write_boot_buffer(void)
 	if (!list_empty(&buffer_list)) {
 		cookie = async_schedule(__async_handle_boot_buffer, NULL);
 		pr_info("Provenance: schedlued boot buffer async task %llu.",
-		cookie);
+			cookie);
 	}
 
 	// asynchronously empty the buffer
@@ -297,10 +297,10 @@ int prov_create_channel(char *buffer, size_t len)
 		goto out;
 	}
 	long_chan = relay_open(long_name, NULL,
-				PROV_RELAY_BUFF_SIZE,
-				PROV_NB_SUBBUF,
-				&relay_callbacks,
-				NULL);
+			       PROV_RELAY_BUFF_SIZE,
+			       PROV_NB_SUBBUF,
+			       &relay_callbacks,
+			       NULL);
 	if (!long_chan) {
 		rc = -EFAULT;
 		goto out;
@@ -318,7 +318,7 @@ static void insert_boot_buffer(union prov_elt *msg)
 	unsigned long irqflags;
 
 	__memcpy_ss(&(tmp->msg), sizeof(union prov_elt),
-			msg, sizeof(union prov_elt));
+		    msg, sizeof(union prov_elt));
 	INIT_LIST_HEAD(&(tmp->list));
 	spin_lock_irqsave(&lock_buffer, irqflags);
 	list_add(&(tmp->list), &buffer_list);
@@ -426,10 +426,10 @@ static int __init relay_prov_init(void)
 		panic("Provenance: relay_open failure\n");
 
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL,
-					PROV_RELAY_BUFF_SIZE,
-				    	PROV_NB_SUBBUF,
-					&relay_callbacks,
-					NULL);
+				    PROV_RELAY_BUFF_SIZE,
+				    PROV_NB_SUBBUF,
+				    &relay_callbacks,
+				    NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
 	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
