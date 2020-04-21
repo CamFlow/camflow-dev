@@ -69,7 +69,8 @@ static __always_inline int __update_version(const uint64_t type,
 	node_identifier(prov).version++;
 	clear_recorded(prov);
 
-	// Record the version relation between two versions of the same identity.
+	// Record the version relation between two versions of the same
+	// identity.
 	if (node_identifier(prov).type == ACT_TASK)
 		rc = __write_relation(RL_VERSION_TASK, &old_prov,
 				      prov, NULL, 0);
@@ -122,10 +123,9 @@ static __always_inline int record_relation(const uint64_t type,
 		if (node_previous_id(to) == node_identifier(from).id
 		    && node_previous_type(to) == type)
 			return 0;
-		else {
-			node_previous_id(to) = node_identifier(from).id;
-			node_previous_type(to) = type;
-		}
+
+		node_previous_id(to) = node_identifier(from).id;
+		node_previous_type(to) = type;
 	}
 
 	rc = __update_version(type, to);
@@ -165,6 +165,7 @@ static __always_inline int record_terminate(uint64_t type,
 		return 0;
 	if (filter_node(prov_entry(prov)))
 		return 0;
+
 	__memcpy_ss(&old_prov, sizeof(union prov_elt),
 		    prov_elt(prov), sizeof(union prov_elt));
 	node_identifier(prov_elt(prov)).version++;
@@ -214,24 +215,23 @@ static __always_inline int record_node_name(struct provenance *node,
 	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
 	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
-	else {
-		fname_prov = alloc_long_provenance(ENT_PATH, djb2_hash(name));
-		if (!fname_prov)
-			return -ENOMEM;
 
-		strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
-		fname_prov->file_name_info.length =
-			strnlen(fname_prov->file_name_info.name, PATH_MAX);
+	fname_prov = alloc_long_provenance(ENT_PATH, djb2_hash(name));
+	if (!fname_prov)
+		return -ENOMEM;
 
-		// Here we record the relation.
-		spin_lock(prov_lock(node));
-		rc = record_relation(RL_NAMED, fname_prov,
-				     prov_entry(node), NULL, 0);
-		set_name_recorded(prov_elt(node));
-		spin_unlock(prov_lock(node));
-		free_long_provenance(fname_prov);
-		return rc;
-	}
+	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	fname_prov->file_name_info.length =
+		strnlen(fname_prov->file_name_info.name, PATH_MAX);
+
+	// Here we record the relation.
+	spin_lock(prov_lock(node));
+	rc = record_relation(RL_NAMED, fname_prov,
+			     prov_entry(node), NULL, 0);
+	set_name_recorded(prov_elt(node));
+	spin_unlock(prov_lock(node));
+	free_long_provenance(fname_prov);
+	return rc;
 }
 
 static __always_inline int record_kernel_link(prov_entry_t *node)
@@ -241,11 +241,10 @@ static __always_inline int record_kernel_link(prov_entry_t *node)
 	if (provenance_is_kernel_recorded(node) ||
 	    !provenance_is_recorded(node))
 		return 0;
-	else {
-		rc = record_relation(RL_RAN_ON, prov_machine, node, NULL, 0);
-		set_kernel_recorded(node);
-		return rc;
-	}
+
+	rc = record_relation(RL_RAN_ON, prov_machine, node, NULL, 0);
+	set_kernel_recorded(node);
+	return rc;
 }
 
 static __always_inline int current_update_shst(struct provenance *cprov,
