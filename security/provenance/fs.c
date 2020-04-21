@@ -234,7 +234,8 @@ static ssize_t prov_write_node(struct file *file, const char __user *buf,
 		spin_lock(prov_lock(tprov));
 		// TODO redo
 		__write_node(prov_entry(tprov));
-		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier),
+		__memcpy_ss(&node->disc_node_info.parent,
+			    sizeof(union prov_identifier),
 			    &prov_elt(tprov)->node_info.identifier,
 			    sizeof(union prov_identifier));
 		spin_unlock(prov_lock(tprov));
@@ -312,7 +313,8 @@ static inline void update_prov_config(union prov_elt *setting,
 	}
 
 	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
+		prov_bloom_merge(prov_taint(prov_elt(prov)),
+				 prov_taint(setting));
 }
 
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
@@ -355,20 +357,14 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 {
 	struct prov_filter setting;
 
-	if (!capable(CAP_AUDIT_CONTROL)) {
-		pr_err("Provenance: failing setting filter, !CAP_AUDIT_CONTROL.");
+	if (!capable(CAP_AUDIT_CONTROL))
 		return -EPERM;
-	}
 
-	if (count < sizeof(struct prov_filter)) {
-		pr_err("Provenance: failing setting filter, wrong length.");
+	if (count < sizeof(struct prov_filter))
 		return -ENOMEM;
-	}
 
-	if (copy_from_user(&setting, buf, sizeof(struct prov_filter))) {
-		pr_err("Provenance: failed copying from user.");
+	if (copy_from_user(&setting, buf, sizeof(struct prov_filter)))
 		return -ENOMEM;
-	}
 
 	if (setting.add != 0)
 		(*filter) |= setting.filter & setting.mask;
@@ -381,15 +377,11 @@ static inline ssize_t __write_filter(struct file *file, const char __user *buf,
 static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 				    size_t count, uint64_t filter)
 {
-	if (count < sizeof(uint64_t)) {
-		pr_err("Provenance: failing setting filter, wrong length.");
+	if (count < sizeof(uint64_t))
 		return -ENOMEM;
-	}
 
-	if (copy_to_user(buf, &filter, sizeof(uint64_t))) {
-		pr_err("Provenance: failed copying to user.");
+	if (copy_to_user(buf, &filter, sizeof(uint64_t)))
 		return -EAGAIN;
-	}
 
 	return count;
 }
@@ -739,7 +731,9 @@ static ssize_t prov_write_secctx_filter(struct file *file,
 		return -EAGAIN;
 	}
 
-	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
+	security_secctx_to_secid(s->filter.secctx,
+				 s->filter.len,
+				 &s->filter.secid);
 	if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)
 		prov_secctx_add_or_update(s);
 	else
@@ -809,7 +803,8 @@ static ssize_t prov_read_ns_filter(struct file *filp, char __user *buf,
 		tmp = list_entry(listentry, struct ns_filters, list);
 		if (count < pos + sizeof(struct nsinfo))
 			return -ENOMEM;
-		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct nsinfo)))
+		if (copy_to_user(buf + pos, &(tmp->filter),
+				 sizeof(struct nsinfo)))
 			return -EAGAIN;
 		pos += sizeof(struct nsinfo);
 	}
@@ -852,7 +847,8 @@ static inline int record_log(union prov_elt *tprov,
 		rc = -EAGAIN;
 		goto out;
 	}
-	str->str_info.str[count] = '\0';        // Make sure the string is null terminated.
+	// Make sure the string is null terminated.
+	str->str_info.str[count] = '\0';
 	str->str_info.length = count;
 
 	rc = __write_relation(RL_LOG, str, tprov, NULL, 0);
@@ -925,7 +921,8 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		pos = -ENOMEM;
 		goto out_shash;
 	}
-	size = sizeof(struct shash_desc) + crypto_shash_descsize(policy_shash_tfm);
+	size = sizeof(struct shash_desc) +
+	       crypto_shash_descsize(policy_shash_tfm);
 	hashdesc = kzalloc(size, GFP_KERNEL);
 	if (!hashdesc) {
 		pos = -ENOMEM;
@@ -950,8 +947,10 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 		goto out;
 	}
 	/* commit */
-	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_COMMIT,
-				 strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
+	rc = crypto_shash_update(hashdesc,
+				 (u8 *)CAMFLOW_COMMIT,
+				 strnlen(CAMFLOW_COMMIT,
+					 PROV_COMMIT_MAX_LENGTH));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -999,10 +998,9 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 	struct prov_type *type_info;
 	ssize_t rc = sizeof(struct prov_type);
 
-	if (count < sizeof(struct prov_type)) {
-		pr_err("Provenance: failed retrieving object id, wrong string length.");
+	if (count < sizeof(struct prov_type))
 		return -ENOMEM;
-	}
+
 	type_info = memdup_user(buf, sizeof(struct prov_type));
 	if (IS_ERR(type_info))
 		return PTR_ERR(type_info);
@@ -1015,7 +1013,9 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 			type_info->id = relation_id(type_info->str);
 	} else {
 		if (type_info->id)
-			strlcpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
+			strlcpy(type_info->str,
+				node_str(type_info->id),
+				PROV_TYPE_STR_MAX_LEN);
 		else
 			type_info->id = node_id(type_info->str);
 	}
