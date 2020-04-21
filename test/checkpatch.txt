@@ -23,16 +23,8 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		return __read_flag(filp, buf, count, ppos, flag); \
 +	}
 
-WARNING:LONG_LINE: line over 80 characters
-#237: FILE: security/provenance/fs.c:237:
-+		__memcpy_ss(&node->disc_node_info.parent, sizeof(union prov_identifier),
-
-WARNING:LONG_LINE: line over 80 characters
-#315: FILE: security/provenance/fs.c:315:
-+		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
-
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#397: FILE: security/provenance/fs.c:397:
+#389: FILE: security/provenance/fs.c:389:
 +#define declare_write_filter_fcn(fcn_name, filter)		  \
 +	static ssize_t fcn_name(struct file *file,		  \
 +				const char __user *buf,		  \
@@ -43,7 +35,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#406: FILE: security/provenance/fs.c:406:
+#398: FILE: security/provenance/fs.c:398:
 +#define declare_read_filter_fcn(fcn_name, filter)		\
 +	static ssize_t fcn_name(struct file *filp,		\
 +				char __user *buf,		\
@@ -54,11 +46,11 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:LONG_LINE: line over 80 characters
-#573: FILE: security/provenance/fs.c:573:
+#565: FILE: security/provenance/fs.c:565:
 +	if (copy_from_user(&(f->filter), buf, sizeof(struct prov_ipv4_filter))) {
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#610: FILE: security/provenance/fs.c:610:
+#602: FILE: security/provenance/fs.c:602:
 +#define declare_write_ipv4_filter_fcn(fcn_name, filter)		       \
 +	static ssize_t fcn_name(struct file *file,		       \
 +				const char __user *buf,		       \
@@ -69,7 +61,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#619: FILE: security/provenance/fs.c:619:
+#611: FILE: security/provenance/fs.c:611:
 +#define declare_reader_ipv4_filter_fcn(fcn_name, filter)	      \
 +	static ssize_t fcn_name(struct file *filp,		      \
 +				char __user *buf,		      \
@@ -80,11 +72,11 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:LONG_LINE: line over 80 characters
-#680: FILE: security/provenance/fs.c:680:
+#672: FILE: security/provenance/fs.c:672:
 +#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#680: FILE: security/provenance/fs.c:680:
+#672: FILE: security/provenance/fs.c:672:
 +#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
 +	static ssize_t function_name(struct file *file,						  \
 +				     const char __user *buf,					  \
@@ -105,85 +97,85 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +			add_function(s); else							  \
 +			delete_function(s); return sizeof(struct filters);			  \
 +	}
+
+WARNING:LONG_LINE: line over 80 characters
+#673: FILE: security/provenance/fs.c:673:
++	static ssize_t function_name(struct file *file,						  \
+
+WARNING:LONG_LINE: line over 80 characters
+#674: FILE: security/provenance/fs.c:674:
++				     const char __user *buf,					  \
+
+WARNING:LONG_LINE: line over 80 characters
+#675: FILE: security/provenance/fs.c:675:
++				     size_t count,						  \
+
+WARNING:LONG_LINE: line over 80 characters
+#676: FILE: security/provenance/fs.c:676:
++				     loff_t *ppos)						  \
+
+WARNING:LONG_LINE: line over 80 characters
+#677: FILE: security/provenance/fs.c:677:
++	{											  \
+
+WARNING:LONG_LINE: line over 80 characters
+#678: FILE: security/provenance/fs.c:678:
++		struct filters *s;								  \
+
+WARNING:LONG_LINE: line over 80 characters
+#679: FILE: security/provenance/fs.c:679:
++		if (count < sizeof(struct info))						  \
+
+WARNING:LONG_LINE: line over 80 characters
+#680: FILE: security/provenance/fs.c:680:
++			return -ENOMEM;								  \
 
 WARNING:LONG_LINE: line over 80 characters
 #681: FILE: security/provenance/fs.c:681:
-+	static ssize_t function_name(struct file *file,						  \
-
-WARNING:LONG_LINE: line over 80 characters
-#682: FILE: security/provenance/fs.c:682:
-+				     const char __user *buf,					  \
-
-WARNING:LONG_LINE: line over 80 characters
-#683: FILE: security/provenance/fs.c:683:
-+				     size_t count,						  \
-
-WARNING:LONG_LINE: line over 80 characters
-#684: FILE: security/provenance/fs.c:684:
-+				     loff_t *ppos)						  \
-
-WARNING:LONG_LINE: line over 80 characters
-#685: FILE: security/provenance/fs.c:685:
-+	{											  \
-
-WARNING:LONG_LINE: line over 80 characters
-#686: FILE: security/provenance/fs.c:686:
-+		struct filters *s;								  \
-
-WARNING:LONG_LINE: line over 80 characters
-#687: FILE: security/provenance/fs.c:687:
-+		if (count < sizeof(struct info))						  \
-
-WARNING:LONG_LINE: line over 80 characters
-#688: FILE: security/provenance/fs.c:688:
-+			return -ENOMEM;								  \
-
-WARNING:LONG_LINE: line over 80 characters
-#689: FILE: security/provenance/fs.c:689:
 +		s = kzalloc(sizeof(struct filters), GFP_KERNEL);				  \
 
 WARNING:LONG_LINE: line over 80 characters
-#690: FILE: security/provenance/fs.c:690:
+#682: FILE: security/provenance/fs.c:682:
 +		if (!s)										  \
 
 WARNING:LONG_LINE: line over 80 characters
-#691: FILE: security/provenance/fs.c:691:
+#683: FILE: security/provenance/fs.c:683:
 +			return -ENOMEM;								  \
 
 WARNING:LONG_LINE: line over 80 characters
-#692: FILE: security/provenance/fs.c:692:
+#684: FILE: security/provenance/fs.c:684:
 +		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {			  \
 
 WARNING:LONG_LINE: line over 80 characters
-#693: FILE: security/provenance/fs.c:693:
+#685: FILE: security/provenance/fs.c:685:
 +			kfree(s);								  \
 
 WARNING:LONG_LINE: line over 80 characters
-#694: FILE: security/provenance/fs.c:694:
+#686: FILE: security/provenance/fs.c:686:
 +			return -EAGAIN;								  \
 
 WARNING:LONG_LINE: line over 80 characters
-#695: FILE: security/provenance/fs.c:695:
+#687: FILE: security/provenance/fs.c:687:
 +		}										  \
 
 WARNING:LONG_LINE: line over 80 characters
-#696: FILE: security/provenance/fs.c:696:
+#688: FILE: security/provenance/fs.c:688:
 +		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
 
 WARNING:LONG_LINE: line over 80 characters
-#697: FILE: security/provenance/fs.c:697:
+#689: FILE: security/provenance/fs.c:689:
 +			add_function(s); else							  \
 
 WARNING:LONG_LINE: line over 80 characters
-#698: FILE: security/provenance/fs.c:698:
+#690: FILE: security/provenance/fs.c:690:
 +			delete_function(s); return sizeof(struct filters);			  \
 
 WARNING:LONG_LINE: line over 80 characters
-#701: FILE: security/provenance/fs.c:701:
+#693: FILE: security/provenance/fs.c:693:
 +#define declare_generic_filter_read(function_name, filters, info)			    \
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#701: FILE: security/provenance/fs.c:701:
+#693: FILE: security/provenance/fs.c:693:
 +#define declare_generic_filter_read(function_name, filters, info)			    \
 +	static ssize_t function_name(struct file *filp,					    \
 +				     char __user *buf,					    \
@@ -207,99 +199,87 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:LONG_LINE: line over 80 characters
-#702: FILE: security/provenance/fs.c:702:
+#694: FILE: security/provenance/fs.c:694:
 +	static ssize_t function_name(struct file *filp,					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#703: FILE: security/provenance/fs.c:703:
+#695: FILE: security/provenance/fs.c:695:
 +				     char __user *buf,					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#704: FILE: security/provenance/fs.c:704:
+#696: FILE: security/provenance/fs.c:696:
 +				     size_t count,					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#705: FILE: security/provenance/fs.c:705:
+#697: FILE: security/provenance/fs.c:697:
 +				     loff_t *ppos)					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#706: FILE: security/provenance/fs.c:706:
+#698: FILE: security/provenance/fs.c:698:
 +	{										    \
 
 WARNING:LONG_LINE: line over 80 characters
-#707: FILE: security/provenance/fs.c:707:
+#699: FILE: security/provenance/fs.c:699:
 +		struct list_head *listentry, *listtmp;					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#708: FILE: security/provenance/fs.c:708:
+#700: FILE: security/provenance/fs.c:700:
 +		struct filters *tmp;							    \
 
 WARNING:LONG_LINE: line over 80 characters
-#709: FILE: security/provenance/fs.c:709:
+#701: FILE: security/provenance/fs.c:701:
 +		size_t pos = 0;								    \
 
 WARNING:LONG_LINE: line over 80 characters
-#710: FILE: security/provenance/fs.c:710:
+#702: FILE: security/provenance/fs.c:702:
 +		if (count < sizeof(struct info)) {					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#711: FILE: security/provenance/fs.c:711:
+#703: FILE: security/provenance/fs.c:703:
 +			return -ENOMEM; }						    \
 
 WARNING:LONG_LINE: line over 80 characters
-#712: FILE: security/provenance/fs.c:712:
+#704: FILE: security/provenance/fs.c:704:
 +		list_for_each_safe(listentry, listtmp, &filters) {			    \
 
 WARNING:LONG_LINE: line over 80 characters
-#713: FILE: security/provenance/fs.c:713:
+#705: FILE: security/provenance/fs.c:705:
 +			tmp = list_entry(listentry, struct filters, list);		    \
 
 WARNING:LONG_LINE: line over 80 characters
-#714: FILE: security/provenance/fs.c:714:
+#706: FILE: security/provenance/fs.c:706:
 +			if (count < pos + sizeof(struct info)) {			    \
 
 WARNING:LONG_LINE: line over 80 characters
-#715: FILE: security/provenance/fs.c:715:
+#707: FILE: security/provenance/fs.c:707:
 +				return -ENOMEM; }					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#716: FILE: security/provenance/fs.c:716:
+#708: FILE: security/provenance/fs.c:708:
 +			if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct info))) { \
 
 WARNING:LONG_LINE: line over 80 characters
-#717: FILE: security/provenance/fs.c:717:
+#709: FILE: security/provenance/fs.c:709:
 +				return -EAGAIN; }					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#718: FILE: security/provenance/fs.c:718:
+#710: FILE: security/provenance/fs.c:710:
 +			pos += sizeof(struct info);					    \
 
 WARNING:LONG_LINE: line over 80 characters
-#719: FILE: security/provenance/fs.c:719:
+#711: FILE: security/provenance/fs.c:711:
 +		}									    \
 
 WARNING:LONG_LINE: line over 80 characters
-#720: FILE: security/provenance/fs.c:720:
+#712: FILE: security/provenance/fs.c:712:
 +		return pos;								    \
 
 WARNING:LONG_LINE: line over 80 characters
-#742: FILE: security/provenance/fs.c:742:
-+	security_secctx_to_secid(s->filter.secctx, s->filter.len, &s->filter.secid);
-
-WARNING:LONG_LINE: line over 80 characters
-#812: FILE: security/provenance/fs.c:812:
-+		if (copy_to_user(buf + pos, &(tmp->filter), sizeof(struct nsinfo)))
-
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#855: FILE: security/provenance/fs.c:855:
-+	str->str_info.str[count] = '\0';        // Make sure the string is null terminated.
-
-WARNING:LONG_LINE: line over 80 characters
-#891: FILE: security/provenance/fs.c:891:
+#887: FILE: security/provenance/fs.c:887:
 +#define hash_filters(filters, filters_type, tmp, tmp_type)						 \
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#891: FILE: security/provenance/fs.c:891:
+#887: FILE: security/provenance/fs.c:887:
 +#define hash_filters(filters, filters_type, tmp, tmp_type)						 \
 +	do {												 \
 +		list_for_each_safe(listentry, listtmp, &filters) {					 \
@@ -314,64 +294,52 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	} while (0)
 
 WARNING:LONG_LINE: line over 80 characters
-#892: FILE: security/provenance/fs.c:892:
+#888: FILE: security/provenance/fs.c:888:
 +	do {												 \
 
 WARNING:LONG_LINE: line over 80 characters
-#893: FILE: security/provenance/fs.c:893:
+#889: FILE: security/provenance/fs.c:889:
 +		list_for_each_safe(listentry, listtmp, &filters) {					 \
 
 WARNING:LONG_LINE: line over 80 characters
-#894: FILE: security/provenance/fs.c:894:
+#890: FILE: security/provenance/fs.c:890:
 +			tmp = list_entry(listentry, struct filters_type, list);				 \
 
 WARNING:LONG_LINE: line over 80 characters
-#895: FILE: security/provenance/fs.c:895:
+#891: FILE: security/provenance/fs.c:891:
 +			rc = crypto_shash_update(hashdesc, (u8 *)&tmp->filter, sizeof(struct tmp_type)); \
 
 WARNING:LONG_LINE: line over 80 characters
-#896: FILE: security/provenance/fs.c:896:
+#892: FILE: security/provenance/fs.c:892:
 +			if (rc) {									 \
 
 WARNING:LONG_LINE: line over 80 characters
-#897: FILE: security/provenance/fs.c:897:
+#893: FILE: security/provenance/fs.c:893:
 +				pr_err("Provenance: error updating hash.");				 \
 
 WARNING:LONG_LINE: line over 80 characters
-#898: FILE: security/provenance/fs.c:898:
+#894: FILE: security/provenance/fs.c:894:
 +				pos = -EAGAIN;								 \
 
 WARNING:LONG_LINE: line over 80 characters
-#899: FILE: security/provenance/fs.c:899:
+#895: FILE: security/provenance/fs.c:895:
 +				goto out;								 \
 
 WARNING:LONG_LINE: line over 80 characters
-#900: FILE: security/provenance/fs.c:900:
+#896: FILE: security/provenance/fs.c:896:
 +			}										 \
 
 WARNING:LONG_LINE: line over 80 characters
-#901: FILE: security/provenance/fs.c:901:
+#897: FILE: security/provenance/fs.c:897:
 +		}											 \
 
 WARNING:LONG_LINE: line over 80 characters
-#928: FILE: security/provenance/fs.c:928:
-+	size = sizeof(struct shash_desc) + crypto_shash_descsize(policy_shash_tfm);
-
-WARNING:LONG_LINE: line over 80 characters
-#954: FILE: security/provenance/fs.c:954:
-+				 strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH));
-
-WARNING:LONG_LINE: line over 80 characters
-#967: FILE: security/provenance/fs.c:967:
+#966: FILE: security/provenance/fs.c:966:
 +	hash_filters(ingress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
 
 WARNING:LONG_LINE: line over 80 characters
-#969: FILE: security/provenance/fs.c:969:
+#968: FILE: security/provenance/fs.c:968:
 +	hash_filters(egress_ipv4filters, ipv4_filters, ipv4_tmp, prov_ipv4_filter);
-
-WARNING:LONG_LINE: line over 80 characters
-#1018: FILE: security/provenance/fs.c:1018:
-+			strlcpy(type_info->str, node_str(type_info->id), PROV_TYPE_STR_MAX_LEN);
 
 WARNING:LONG_LINE: line over 80 characters
 #1083: FILE: security/provenance/fs.c:1083:
@@ -389,7 +357,7 @@ WARNING:LONG_LINE: line over 80 characters
 #1086: FILE: security/provenance/fs.c:1086:
 +		provenance_mark_as_opaque_dentry(dentry);			      \
 
-total: 0 errors, 74 warnings, 1141 lines checked
+total: 0 errors, 66 warnings, 1141 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -749,35 +717,7 @@ WARNING:INCLUDE_LINUX: Use #include <linux/bug.h> instead of <asm/bug.h>
 #18: FILE: security/provenance/memcpy_ss.c:18:
 +#include <asm/bug.h>
 
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#31: FILE: security/provenance/memcpy_ss.c:31:
-+		pr_err("__memcpy_ss: dest is null.");
-
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#35: FILE: security/provenance/memcpy_ss.c:35:
-+		pr_err("__memcpy_ss: dmax is 0.");
-
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#39: FILE: security/provenance/memcpy_ss.c:39:
-+		pr_err("__memcpy_ss: dmax is too large.");
-
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#43: FILE: security/provenance/memcpy_ss.c:43:
-+		pr_err("__memcpy_ss: sp is null.");
-
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#48: FILE: security/provenance/memcpy_ss.c:48:
-+		pr_err("__memcpy_ss: smax is 0.");
-
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#53: FILE: security/provenance/memcpy_ss.c:53:
-+		pr_err("__memcpy_ss: smax greater than dmax.");
-
-WARNING:EMBEDDED_FUNCTION_NAME: Prefer using '"%s...", __func__' to using '__memcpy_ss', this function's name, in a string
-#60: FILE: security/provenance/memcpy_ss.c:60:
-+		pr_err("__memcpy_ss: dest and src overlap.");
-
-total: 0 errors, 8 warnings, 66 lines checked
+total: 0 errors, 1 warnings, 66 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -805,18 +745,14 @@ security/provenance/query.c has no obvious style problems and is ready for submi
 security/provenance/relay.c
 ---------------------------
 WARNING:AVOID_EXTERNS: externs should be avoided in .c files
-#230: FILE: security/provenance/relay.c:230:
+#228: FILE: security/provenance/relay.c:228:
 +void refresh_prov_machine(void);
 
 WARNING:LONG_LINE: line over 80 characters
-#253: FILE: security/provenance/relay.c:253:
-+		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
-
-WARNING:LONG_LINE: line over 80 characters
-#317: FILE: security/provenance/relay.c:317:
+#315: FILE: security/provenance/relay.c:315:
 +	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
 
-total: 0 errors, 3 warnings, 442 lines checked
+total: 0 errors, 2 warnings, 440 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.

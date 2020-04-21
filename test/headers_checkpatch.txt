@@ -118,31 +118,9 @@ security/provenance/include/provenance_query.h has no obvious style problems and
 -----------------------------------------------
 security/provenance/include/provenance_record.h
 -----------------------------------------------
-WARNING:LONG_LINE_COMMENT: line over 80 characters
-#72: FILE: security/provenance/include/provenance_record.h:72:
-+	// Record the version relation between two versions of the same identity.
+total: 0 errors, 0 warnings, 581 lines checked
 
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#125: FILE: security/provenance/include/provenance_record.h:125:
-+			return 0;
-+		else {
-
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#217: FILE: security/provenance/include/provenance_record.h:217:
-+		return 0;
-+	else {
-
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#244: FILE: security/provenance/include/provenance_record.h:244:
-+		return 0;
-+	else {
-
-total: 0 errors, 4 warnings, 582 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/include/provenance_record.h has style problems, please review.
+security/provenance/include/provenance_record.h has no obvious style problems and is ready for submission.
 ----------------------------------------------
 security/provenance/include/provenance_relay.h
 ----------------------------------------------
@@ -152,22 +130,9 @@ security/provenance/include/provenance_relay.h has no obvious style problems and
 ---------------------------------------------
 security/provenance/include/provenance_task.h
 ---------------------------------------------
-WARNING:UNNECESSARY_ELSE: else is not generally useful after a break or return
-#248: FILE: security/provenance/include/provenance_task.h:248:
-+		return 0;
-+	else {
+total: 0 errors, 0 warnings, 656 lines checked
 
-WARNING:OOM_MESSAGE: Possible unnecessary 'out of memory' message
-#265: FILE: security/provenance/include/provenance_task.h:265:
-+			if (!buffer) {
-+				pr_err(
-
-total: 0 errors, 2 warnings, 659 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/include/provenance_task.h has style problems, please review.
+security/provenance/include/provenance_task.h has no obvious style problems and is ready for submission.
 
 NOTE: If any of the errors are false positives, please report
       them to the maintainer, see CHECKPATCH in MAINTAINERS.
