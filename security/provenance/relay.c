@@ -152,8 +152,7 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_boot_buffer,
 						NULL);
-			pr_info(
-				"Provenance: schedlued boot buffer async task %llu.",
+			pr_info("Provenance: schedlued async task %llu.",
 				cookie);
 			goto out;
 		}
@@ -193,8 +192,7 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 		if (is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer,
 						NULL);
-			pr_info(
-				"Provenance: schedlued long boot buffer async task %llu.",
+			pr_info("Provenance: schedlued long async task %llu.",
 				cookie);
 			goto out;
 		}
@@ -243,14 +241,14 @@ void write_boot_buffer(void)
 	// asynchronously empty the buffer
 	if (!list_empty(&buffer_list)) {
 		cookie = async_schedule(__async_handle_boot_buffer, NULL);
-		pr_info("Provenance: schedlued boot buffer async task %llu.",
+		pr_info("Provenance: schedlued async task %llu.",
 			cookie);
 	}
 
 	// asynchronously empty the buffer
 	if (!list_empty(&long_buffer_list)) {
 		cookie = async_schedule(__async_handle_long_boot_buffer, NULL);
-		pr_info("Provenance: schedlued long boot buffer async task %llu.", cookie);
+		pr_info("Provenance: schedlued long async task %llu.", cookie);
 	}
 }
 
