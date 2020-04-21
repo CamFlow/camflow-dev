@@ -39,7 +39,7 @@ FINAL RESULTS:
 ./security/provenance/include/provenance_task.h:201:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/relay.c:290:  [1] (port) snprintf:
+./security/provenance/relay.c:289:  [1] (port) snprintf:
   On some very old systems, snprintf is incorrectly implemented and permits
   buffer overflows; there are also incompatible standard definitions of it.
   Check it during installation, or use something else.
