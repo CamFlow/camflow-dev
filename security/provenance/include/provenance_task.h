@@ -228,7 +228,7 @@ static __always_inline int current_update_shst(struct provenance *cprov,
  * @param task The task whose name is to be obtained.
  * @param prov The provenance entry that will be associated with the task name.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for
- * buffer to hold file path. Other error code unknown.
+ * buffer to hold file path.
  *
  */
 static inline int record_task_name(struct task_struct *task,
@@ -245,34 +245,31 @@ static inline int record_task_name(struct task_struct *task,
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;
-	else {
-		mm = get_task_mm(task);
-		if (!mm)
-			goto out;
-		exe_file = get_mm_exe_file(mm);
-		mmput_async(mm);
-		if (exe_file) {
-			fprov = get_file_provenance(exe_file, false);
-			if (provenance_is_opaque(prov_elt(fprov))) {
-				fput(exe_file); // Release the file.
-				set_opaque(prov_elt(prov));
-				goto out;
-			}
 
-			// Memory allocation not allowed to sleep.
-			buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
-			if (!buffer) {
-				pr_err(
-					"Provenance: could not allocate memory\n");
-				fput(exe_file); // Release the file.
-				rc = -ENOMEM;
-				goto out;
-			}
-			ptr = file_path(exe_file, buffer, PATH_MAX);
+	mm = get_task_mm(task);
+	if (!mm)
+		goto out;
+	exe_file = get_mm_exe_file(mm);
+	mmput_async(mm);
+	if (exe_file) {
+		fprov = get_file_provenance(exe_file, false);
+		if (provenance_is_opaque(prov_elt(fprov))) {
 			fput(exe_file); // Release the file.
-			rc = record_node_name(prov, ptr, false);
-			kfree(buffer);
+			set_opaque(prov_elt(prov));
+			goto out;
 		}
+
+		// Memory allocation not allowed to sleep.
+		buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
+		if (!buffer) {
+			fput(exe_file); // Release the file.
+			rc = -ENOMEM;
+			goto out;
+		}
+		ptr = file_path(exe_file, buffer, PATH_MAX);
+		fput(exe_file); // Release the file.
+		rc = record_node_name(prov, ptr, false);
+		kfree(buffer);
 	}
 out:
 	return rc;
