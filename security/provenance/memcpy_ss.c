@@ -15,7 +15,7 @@
 #include <linux/string.h>
 #include <linux/errno.h>
 #include <linux/printk.h>
-#include <asm/bug.h>
+#include <linux/bug.h>
 
 #include "include/memcpy_ss.h"
 
