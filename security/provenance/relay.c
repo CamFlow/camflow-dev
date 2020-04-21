@@ -225,7 +225,6 @@ static bool relay_initialized;
  * is ready to be used.
  *
  */
-void refresh_prov_machine(void);
 void write_boot_buffer(void)
 {
 	async_cookie_t cookie;
@@ -312,7 +311,8 @@ out:
 
 static void insert_boot_buffer(union prov_elt *msg)
 {
-	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
+	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache,
+						    GFP_ATOMIC);
 	unsigned long irqflags;
 
 	__memcpy_ss(&(tmp->msg), sizeof(union prov_elt),
