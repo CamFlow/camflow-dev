@@ -28,36 +28,36 @@ int __memcpy_ss(void *dest, __kernel_size_t dmax,
 	const uint8_t *sp = src;
 
 	if (WARN_ON(!dp)) {
-		pr_err("__memcpy_ss: dest is null.");
+		pr_err("%s: dest is null.", __func__);
 		return -EFAULT;
 	}
 	if (WARN_ON(dmax == 0)) {
-		pr_err("__memcpy_ss: dmax is 0.");
+		pr_err("%s: dmax is 0.", __func__);
 		return -EINVAL;
 	}
 	if (WARN_ON(dmax > RSIZE_MAX_MEM)) {
-		pr_err("__memcpy_ss: dmax is too large.");
+		pr_err("%s: dmax is too large.", __func__);
 		return -EINVAL;
 	}
 	if (WARN_ON(!sp)) {
-		pr_err("__memcpy_ss: sp is null.");
+		pr_err("%s: sp is null.", __func__);
 		memset(dp, 0, dmax);
 		return -EFAULT;
 	}
 	if (WARN_ON(smax == 0)) { // nothing to copy
-		pr_err("__memcpy_ss: smax is 0.");
+		pr_err("%s: smax is 0.", __func__);
 		memset(dp, 0, dmax);
 		return 0;
 	}
 	if (WARN_ON(smax > dmax)) {
-		pr_err("__memcpy_ss: smax greater than dmax.");
+		pr_err("%s: smax greater than dmax.", __func__);
 		memset(dp, 0, dmax);
 		return -EINVAL;
 	}
 	// check for overlap
 	if (WARN_ON(((dp > sp) && (dp < (sp + smax))) ||
 		    ((sp > dp) && (sp < (dp + smax))))) {
-		pr_err("__memcpy_ss: dest and src overlap.");
+		pr_err("%s: dest and src overlap.", __func__);
 		memset(dp, 0, dmax);
 		return -EINVAL;
 	}
