@@ -713,16 +713,9 @@ security/provenance/machine.c has no obvious style problems and is ready for sub
 -------------------------------
 security/provenance/memcpy_ss.c
 -------------------------------
-WARNING:INCLUDE_LINUX: Use #include <linux/bug.h> instead of <asm/bug.h>
-#18: FILE: security/provenance/memcpy_ss.c:18:
-+#include <asm/bug.h>
+total: 0 errors, 0 warnings, 66 lines checked
 
-total: 0 errors, 1 warnings, 66 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/memcpy_ss.c has style problems, please review.
+security/provenance/memcpy_ss.c has no obvious style problems and is ready for submission.
 -------------------------------
 security/provenance/netfilter.c
 -------------------------------
@@ -744,20 +737,9 @@ security/provenance/query.c has no obvious style problems and is ready for submi
 ---------------------------
 security/provenance/relay.c
 ---------------------------
-WARNING:AVOID_EXTERNS: externs should be avoided in .c files
-#228: FILE: security/provenance/relay.c:228:
-+void refresh_prov_machine(void);
+total: 0 errors, 0 warnings, 440 lines checked
 
-WARNING:LONG_LINE: line over 80 characters
-#315: FILE: security/provenance/relay.c:315:
-+	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache, GFP_ATOMIC);
-
-total: 0 errors, 2 warnings, 440 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/relay.c has style problems, please review.
+security/provenance/relay.c has no obvious style problems and is ready for submission.
 --------------------------
 security/provenance/type.c
 --------------------------
