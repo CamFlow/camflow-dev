@@ -15,9 +15,8 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
-  HOSTCC  scripts/sortextable
+  HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
@@ -36,12 +35,12 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/uapi/asm/termbits.h
   WRAP    arch/x86/include/generated/uapi/asm/termios.h
   WRAP    arch/x86/include/generated/uapi/asm/types.h
-  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
@@ -200,6 +199,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/misc/xilinx_sdfec.h
   HDRINST usr/include/misc/cxl.h
   HDRINST usr/include/misc/habanalabs.h
+  HDRINST usr/include/misc/pvpanic.h
   HDRINST usr/include/misc/ocxl.h
   HDRINST usr/include/linux/kd.h
   HDRINST usr/include/linux/serio.h
@@ -210,7 +210,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/mroute6.h
   HDRINST usr/include/linux/prctl.h
   HDRINST usr/include/linux/vfio.h
-  HDRINST usr/include/linux/hysdn_if.h
   HDRINST usr/include/linux/swab.h
   HDRINST usr/include/linux/if_arcnet.h
   HDRINST usr/include/linux/elf-em.h
@@ -367,6 +366,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/if_vlan.h
   HDRINST usr/include/linux/net_dropmon.h
   HDRINST usr/include/linux/qnxtypes.h
+  HDRINST usr/include/linux/wireguard.h
   HDRINST usr/include/linux/scc.h
   HDRINST usr/include/linux/posix_acl.h
   HDRINST usr/include/linux/binfmts.h
@@ -374,6 +374,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/rio_cm_cdev.h
   HDRINST usr/include/linux/vt.h
   HDRINST usr/include/linux/seg6_hmac.h
+  HDRINST usr/include/linux/openat2.h
   HDRINST usr/include/linux/keyboard.h
   HDRINST usr/include/linux/netfilter_arp.h
   HDRINST usr/include/linux/provenance_fs.h
@@ -530,6 +531,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/taskstats.h
   HDRINST usr/include/linux/btf.h
   HDRINST usr/include/linux/rtnetlink.h
+  HDRINST usr/include/linux/dma-heap.h
   HDRINST usr/include/linux/zorro.h
   HDRINST usr/include/linux/genwqe/genwqe_card.h
   HDRINST usr/include/linux/media-bus-format.h
@@ -628,6 +630,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/netfilter_bridge/ebt_ip.h
   HDRINST usr/include/linux/inotify.h
   HDRINST usr/include/linux/cdrom.h
+  HDRINST usr/include/linux/idxd.h
   HDRINST usr/include/linux/reboot.h
   HDRINST usr/include/linux/nfsd/export.h
   HDRINST usr/include/linux/nfsd/nfsfh.h
@@ -740,6 +743,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/ppdev.h
   HDRINST usr/include/linux/time.h
   HDRINST usr/include/linux/iommu.h
+  HDRINST usr/include/linux/ethtool_netlink.h
   HDRINST usr/include/linux/fiemap.h
   HDRINST usr/include/linux/smiapp.h
   HDRINST usr/include/linux/uleds.h
@@ -888,7 +892,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/iso_fs.h
   HDRINST usr/include/linux/wait.h
   HDRINST usr/include/linux/if_pppol2tp.h
-  HDRINST usr/include/linux/b1lli.h
   HDRINST usr/include/linux/nubus.h
   HDRINST usr/include/linux/netfilter_decnet.h
   HDRINST usr/include/linux/tcp.h
@@ -909,7 +912,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/netlink.h
   HDRINST usr/include/linux/virtio_ids.h
   HDRINST usr/include/linux/xfrm.h
-  HDRINST usr/include/linux/gigaset_dev.h
   HDRINST usr/include/linux/acct.h
   HDRINST usr/include/linux/virtio_input.h
   HDRINST usr/include/linux/i2c-dev.h

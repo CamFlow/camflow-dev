@@ -27,9 +27,8 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
-  HOSTCC  scripts/sortextable
+  HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
@@ -48,12 +47,12 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/uapi/asm/termbits.h
   WRAP    arch/x86/include/generated/uapi/asm/termios.h
   WRAP    arch/x86/include/generated/uapi/asm/types.h
-  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
@@ -212,6 +211,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/misc/xilinx_sdfec.h
   HDRINST usr/include/misc/cxl.h
   HDRINST usr/include/misc/habanalabs.h
+  HDRINST usr/include/misc/pvpanic.h
   HDRINST usr/include/misc/ocxl.h
   HDRINST usr/include/linux/kd.h
   HDRINST usr/include/linux/serio.h
@@ -222,7 +222,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/mroute6.h
   HDRINST usr/include/linux/prctl.h
   HDRINST usr/include/linux/vfio.h
-  HDRINST usr/include/linux/hysdn_if.h
   HDRINST usr/include/linux/swab.h
   HDRINST usr/include/linux/if_arcnet.h
   HDRINST usr/include/linux/elf-em.h
@@ -379,6 +378,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/if_vlan.h
   HDRINST usr/include/linux/net_dropmon.h
   HDRINST usr/include/linux/qnxtypes.h
+  HDRINST usr/include/linux/wireguard.h
   HDRINST usr/include/linux/scc.h
   HDRINST usr/include/linux/posix_acl.h
   HDRINST usr/include/linux/binfmts.h
@@ -386,6 +386,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/rio_cm_cdev.h
   HDRINST usr/include/linux/vt.h
   HDRINST usr/include/linux/seg6_hmac.h
+  HDRINST usr/include/linux/openat2.h
   HDRINST usr/include/linux/keyboard.h
   HDRINST usr/include/linux/netfilter_arp.h
   HDRINST usr/include/linux/provenance_fs.h
@@ -542,6 +543,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/taskstats.h
   HDRINST usr/include/linux/btf.h
   HDRINST usr/include/linux/rtnetlink.h
+  HDRINST usr/include/linux/dma-heap.h
   HDRINST usr/include/linux/zorro.h
   HDRINST usr/include/linux/genwqe/genwqe_card.h
   HDRINST usr/include/linux/media-bus-format.h
@@ -640,6 +642,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/netfilter_bridge/ebt_ip.h
   HDRINST usr/include/linux/inotify.h
   HDRINST usr/include/linux/cdrom.h
+  HDRINST usr/include/linux/idxd.h
   HDRINST usr/include/linux/reboot.h
   HDRINST usr/include/linux/nfsd/export.h
   HDRINST usr/include/linux/nfsd/nfsfh.h
@@ -752,6 +755,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/ppdev.h
   HDRINST usr/include/linux/time.h
   HDRINST usr/include/linux/iommu.h
+  HDRINST usr/include/linux/ethtool_netlink.h
   HDRINST usr/include/linux/fiemap.h
   HDRINST usr/include/linux/smiapp.h
   HDRINST usr/include/linux/uleds.h
@@ -900,7 +904,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/iso_fs.h
   HDRINST usr/include/linux/wait.h
   HDRINST usr/include/linux/if_pppol2tp.h
-  HDRINST usr/include/linux/b1lli.h
   HDRINST usr/include/linux/nubus.h
   HDRINST usr/include/linux/netfilter_decnet.h
   HDRINST usr/include/linux/tcp.h
@@ -921,7 +924,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/netlink.h
   HDRINST usr/include/linux/virtio_ids.h
   HDRINST usr/include/linux/xfrm.h
-  HDRINST usr/include/linux/gigaset_dev.h
   HDRINST usr/include/linux/acct.h
   HDRINST usr/include/linux/virtio_input.h
   HDRINST usr/include/linux/i2c-dev.h
@@ -1027,46 +1029,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/asm/resource.h
   HDRINST usr/include/asm/sockios.h
   HDRINST usr/include/asm/errno.h
-  CHECK   security/integrity/ima/ima_fs.c
-  CC      security/integrity/ima/ima_fs.o
-  CHECK   security/integrity/ima/ima_queue.c
-  CC      security/integrity/ima/ima_queue.o
-  CHECK   security/integrity/ima/ima_init.c
-  CC      security/integrity/ima/ima_init.o
-  CHECK   security/integrity/ima/ima_main.c
-  CC      security/integrity/ima/ima_main.o
-  CHECK   security/integrity/ima/ima_crypto.c
-  CC      security/integrity/ima/ima_crypto.o
-  CHECK   security/integrity/ima/ima_api.c
-  CC      security/integrity/ima/ima_api.o
-  CHECK   security/integrity/ima/ima_policy.c
-  CC      security/integrity/ima/ima_policy.o
-  CHECK   security/integrity/ima/ima_template.c
-  CC      security/integrity/ima/ima_template.o
-  CHECK   security/integrity/ima/ima_template_lib.c
-  CC      security/integrity/ima/ima_template_lib.o
-  CHECK   security/integrity/ima/ima_appraise.c
-  CC      security/integrity/ima/ima_appraise.o
-  CHECK   security/integrity/ima/ima_modsig.c
-  CC      security/integrity/ima/ima_modsig.o
-  AR      security/integrity/ima/built-in.a
-  CHECK   security/integrity/iint.c
-  CC      security/integrity/iint.o
-  CHECK   security/integrity/integrity_audit.c
-  CC      security/integrity/integrity_audit.o
-  CHECK   security/integrity/digsig.c
-  CC      security/integrity/digsig.o
-  CHECK   security/integrity/digsig_asymmetric.c
-  CC      security/integrity/digsig_asymmetric.o
-  CHECK   security/integrity/platform_certs/platform_keyring.c
-  CC      security/integrity/platform_certs/platform_keyring.o
-  CHECK   security/integrity/platform_certs/efi_parser.c
-  CC      security/integrity/platform_certs/efi_parser.o
-  CHECK   security/integrity/platform_certs/load_uefi.c
-  CC      security/integrity/platform_certs/load_uefi.o
-  CHECK   security/integrity/platform_certs/keyring_handler.c
-  CC      security/integrity/platform_certs/keyring_handler.o
-  AR      security/integrity/built-in.a
   CHECK   security/keys/encrypted-keys/encrypted.c
   CC      security/keys/encrypted-keys/encrypted.o
   CHECK   security/keys/encrypted-keys/ecryptfs_format.c
@@ -1108,9 +1070,56 @@ security/keys/request_key.c:306 construct_get_dest_keyring() warn: missing break
   CHECK   security/keys/big_key.c
   CC      security/keys/big_key.o
   AR      security/keys/built-in.a
-  CHECK   security/lockdown/lockdown.c
-  CC      security/lockdown/lockdown.o
-  AR      security/lockdown/built-in.a
+  GEN     security/selinux/flask.h security/selinux/av_permissions.h
+  CHECK   security/selinux/avc.c
+  CC      security/selinux/avc.o
+  CHECK   security/selinux/hooks.c
+security/selinux/hooks.c:2535 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
+  Locked on:   line 2535
+  Unlocked on: line 2506
+  CC      security/selinux/hooks.o
+  CHECK   security/selinux/selinuxfs.c
+  CC      security/selinux/selinuxfs.o
+  CHECK   security/selinux/netlink.c
+  CC      security/selinux/netlink.o
+  CHECK   security/selinux/nlmsgtab.c
+  CC      security/selinux/nlmsgtab.o
+  CHECK   security/selinux/netif.c
+  CC      security/selinux/netif.o
+  CHECK   security/selinux/netnode.c
+  CC      security/selinux/netnode.o
+  CHECK   security/selinux/netport.c
+  CC      security/selinux/netport.o
+  CHECK   security/selinux/ss/ebitmap.c
+security/selinux/ss/ebitmap.c:206 ebitmap_netlbl_import() info: ignoring unreachable code.
+  CC      security/selinux/ss/ebitmap.o
+  CHECK   security/selinux/ss/hashtab.c
+  CC      security/selinux/ss/hashtab.o
+  CHECK   security/selinux/ss/symtab.c
+  CC      security/selinux/ss/symtab.o
+  CHECK   security/selinux/ss/sidtab.c
+security/selinux/ss/sidtab.c:481 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
+  CC      security/selinux/ss/sidtab.o
+  CHECK   security/selinux/ss/avtab.c
+  CC      security/selinux/ss/avtab.o
+  CHECK   security/selinux/ss/policydb.c
+  CC      security/selinux/ss/policydb.o
+  CHECK   security/selinux/ss/services.c
+  CC      security/selinux/ss/services.o
+  CHECK   security/selinux/ss/conditional.c
+  CC      security/selinux/ss/conditional.o
+  CHECK   security/selinux/ss/mls.c
+  CC      security/selinux/ss/mls.o
+  CHECK   security/selinux/ss/status.c
+  CC      security/selinux/ss/status.o
+  CHECK   security/selinux/xfrm.c
+  CC      security/selinux/xfrm.o
+  CHECK   security/selinux/netlabel.c
+  CC      security/selinux/netlabel.o
+  AR      security/selinux/built-in.a
+  CHECK   security/yama/yama_lsm.c
+  CC      security/yama/yama_lsm.o
+  AR      security/yama/built-in.a
   CHECK   security/provenance/relay.c
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
@@ -1322,58 +1331,53 @@ security/provenance/hooks.c:2395 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/provenance/memcpy_ss.c
   CC      security/provenance/memcpy_ss.o
   AR      security/provenance/built-in.a
-  GEN     security/selinux/flask.h security/selinux/av_permissions.h
-  CHECK   security/selinux/avc.c
-  CC      security/selinux/avc.o
-  CHECK   security/selinux/hooks.c
-security/selinux/hooks.c:2588 selinux_bprm_committed_creds() warn: inconsistent returns 'read_lock:&tasklist_lock'.
-  Locked on:   line 2588
-  Unlocked on: line 2559
-  CC      security/selinux/hooks.o
-  CHECK   security/selinux/selinuxfs.c
-  CC      security/selinux/selinuxfs.o
-  CHECK   security/selinux/netlink.c
-  CC      security/selinux/netlink.o
-  CHECK   security/selinux/nlmsgtab.c
-  CC      security/selinux/nlmsgtab.o
-  CHECK   security/selinux/netif.c
-  CC      security/selinux/netif.o
-  CHECK   security/selinux/netnode.c
-  CC      security/selinux/netnode.o
-  CHECK   security/selinux/netport.c
-  CC      security/selinux/netport.o
-  CHECK   security/selinux/ibpkey.c
-  CC      security/selinux/ibpkey.o
-  CHECK   security/selinux/ss/ebitmap.c
-security/selinux/ss/ebitmap.c:206 ebitmap_netlbl_import() info: ignoring unreachable code.
-  CC      security/selinux/ss/ebitmap.o
-  CHECK   security/selinux/ss/hashtab.c
-  CC      security/selinux/ss/hashtab.o
-  CHECK   security/selinux/ss/symtab.c
-  CC      security/selinux/ss/symtab.o
-  CHECK   security/selinux/ss/sidtab.c
-security/selinux/ss/sidtab.c:467 sidtab_destroy_tree() error: buffer overflow 'node->entries' 512 <= 4095
-  CC      security/selinux/ss/sidtab.o
-  CHECK   security/selinux/ss/avtab.c
-  CC      security/selinux/ss/avtab.o
-  CHECK   security/selinux/ss/policydb.c
-  CC      security/selinux/ss/policydb.o
-  CHECK   security/selinux/ss/services.c
-  CC      security/selinux/ss/services.o
-  CHECK   security/selinux/ss/conditional.c
-  CC      security/selinux/ss/conditional.o
-  CHECK   security/selinux/ss/mls.c
-  CC      security/selinux/ss/mls.o
-  CHECK   security/selinux/ss/status.c
-  CC      security/selinux/ss/status.o
-  CHECK   security/selinux/xfrm.c
-  CC      security/selinux/xfrm.o
-  CHECK   security/selinux/netlabel.c
-  CC      security/selinux/netlabel.o
-  AR      security/selinux/built-in.a
-  CHECK   security/yama/yama_lsm.c
-  CC      security/yama/yama_lsm.o
-  AR      security/yama/built-in.a
+  CHECK   security/lockdown/lockdown.c
+  CC      security/lockdown/lockdown.o
+  AR      security/lockdown/built-in.a
+  CHECK   security/integrity/ima/ima_fs.c
+  CC      security/integrity/ima/ima_fs.o
+  CHECK   security/integrity/ima/ima_queue.c
+  CC      security/integrity/ima/ima_queue.o
+  CHECK   security/integrity/ima/ima_init.c
+  CC      security/integrity/ima/ima_init.o
+  CHECK   security/integrity/ima/ima_main.c
+  CC      security/integrity/ima/ima_main.o
+  CHECK   security/integrity/ima/ima_crypto.c
+  CC      security/integrity/ima/ima_crypto.o
+  CHECK   security/integrity/ima/ima_api.c
+  CC      security/integrity/ima/ima_api.o
+  CHECK   security/integrity/ima/ima_policy.c
+  CC      security/integrity/ima/ima_policy.o
+  CHECK   security/integrity/ima/ima_template.c
+  CC      security/integrity/ima/ima_template.o
+  CHECK   security/integrity/ima/ima_template_lib.c
+  CC      security/integrity/ima/ima_template_lib.o
+  CHECK   security/integrity/ima/ima_appraise.c
+  CC      security/integrity/ima/ima_appraise.o
+  CHECK   security/integrity/ima/ima_modsig.c
+  CC      security/integrity/ima/ima_modsig.o
+  CHECK   security/integrity/ima/ima_asymmetric_keys.c
+  CC      security/integrity/ima/ima_asymmetric_keys.o
+  CHECK   security/integrity/ima/ima_queue_keys.c
+  CC      security/integrity/ima/ima_queue_keys.o
+  AR      security/integrity/ima/built-in.a
+  CHECK   security/integrity/iint.c
+  CC      security/integrity/iint.o
+  CHECK   security/integrity/integrity_audit.c
+  CC      security/integrity/integrity_audit.o
+  CHECK   security/integrity/digsig.c
+  CC      security/integrity/digsig.o
+  CHECK   security/integrity/digsig_asymmetric.c
+  CC      security/integrity/digsig_asymmetric.o
+  CHECK   security/integrity/platform_certs/platform_keyring.c
+  CC      security/integrity/platform_certs/platform_keyring.o
+  CHECK   security/integrity/platform_certs/efi_parser.c
+  CC      security/integrity/platform_certs/efi_parser.o
+  CHECK   security/integrity/platform_certs/load_uefi.c
+  CC      security/integrity/platform_certs/load_uefi.o
+  CHECK   security/integrity/platform_certs/keyring_handler.c
+  CC      security/integrity/platform_certs/keyring_handler.o
+  AR      security/integrity/built-in.a
   CHECK   security/commoncap.c
   CC      security/commoncap.o
   CHECK   security/min_addr.c
