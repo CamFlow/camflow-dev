@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.6.6           | 5.5.11         | N/A	|
+| 0.6.6           | 5.6.6          | N/A	|
 | 0.6.5           | 5.5.11         | 23/03/2020	|
 | 0.6.4           | 5.4.15         | 30/01/2020	|
 | 0.6.3           | 5.2.9          | 23/08/2019	|
@@ -53,6 +53,7 @@
 ```
 - Fix issue where policy hash will change once provenance is written.
 - Fix issue where file reference counter was not properly released.
+- Update to kernel version 5.6.6.
 ```
 
 ### v0.6.5
