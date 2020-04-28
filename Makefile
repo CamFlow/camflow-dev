@@ -88,6 +88,15 @@ config: copy_change copy_config
 	cd ./build/linux-stable && cp .config ../../.config
 	cp -f .config ./scripts/.config
 
+config_clang: copy_change copy_config
+	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
+	cd ./build/linux-stable &&  mv .config config_sav
+	cd ./build/linux-stable &&  mv config_strip .config
+	cd ./build/linux-stable && $(MAKE) menuconfig CC=clang HOSTCC=clang
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ./build/linux-stable && cp .config ../../.config
+	cp -f .config ./scripts/.config
+
 config_travis: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-stable &&  mv .config config_sav
@@ -104,6 +113,12 @@ config_old: copy_change copy_config
 
 config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
+
+config_circle_clang: copy_change
+	cd ./build/linux-stable && $(MAKE) olddefconfig CC=clang HOSTCC=clang
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
@@ -138,7 +153,12 @@ compile: compile_security compile_kernel compile_us doc
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1
 
+compile_security_only_clang:
+	cd ./build/linux-stable && $(MAKE) security W=1 CC=clang HOSTCC=clang
+
 compile_security: copy_change compile_security_only doc
+
+compile_security_clang: copy_change compile_security_only_clang doc
 
 compile_kernel: copy_change
 	cd ./build/linux-stable && $(MAKE) -j16
@@ -155,7 +175,6 @@ config_cross_pi: copy_change
 compile_cross_pi:
 	make -j 16 ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu-
 	make -j 16 ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu- modules
-
 
 install_header:
 	cd ./build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
