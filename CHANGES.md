@@ -51,6 +51,7 @@
 
 ### v0.6.6
 ```
+- Modified CircleCI workflow to test build with clang.
 - Fix issue where policy hash will change once provenance is written.
 - Fix issue where file reference counter was not properly released.
 - Update to kernel version 5.6.7.
