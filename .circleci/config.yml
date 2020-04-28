@@ -90,6 +90,8 @@ jobs:
       - run: 'wget https://apt.llvm.org/llvm.sh'
       - run: 'chmod +x llvm.sh'
       - run: 'sudo ./llvm.sh 10'
+      - run: 'sudo ln -s /usr/bin/clang-10 /usr/bin/clang'
+      - run: 'sudo ln -s /usr/bin/clang++-10 /usr/bin/clang++'
       - run: 'clang -v'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
       - run: 'sudo apt-get install --reinstall make'
