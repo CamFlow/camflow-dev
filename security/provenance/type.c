@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -153,7 +153,8 @@ static const char ND_STR_ARG[] = "argv";                                        
 static const char ND_STR_ENV[] = "envp";                                        // environment parameter
 static const char ND_STR_PROC[] = "process_memory";                             // process memory
 
-#define MATCH_AND_RETURN(str1, str2, v)    do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
+#define MATCH_AND_RETURN(str1, str2, v)	\
+	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 /* transform from relation ID to string representation */
 const char *relation_str(uint64_t type)
 {
@@ -466,10 +467,12 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FILE, RL_LOAD_FILE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNKNOWN, RL_LOAD_UNKNOWN);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE, RL_LOAD_FIRMWARE);
-	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER, RL_LOAD_FIRMWARE_PREALLOC_BUFFER);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE_PREALLOC_BUFFER,
+			 RL_LOAD_FIRMWARE_PREALLOC_BUFFER);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_MODULE, RL_LOAD_MODULE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_IMAGE, RL_LOAD_KEXEC_IMAGE);
-	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS, RL_LOAD_KEXEC_INITRAMFS);
+	MATCH_AND_RETURN(str, RL_STR_LOAD_KEXEC_INITRAMFS,
+			 RL_LOAD_KEXEC_INITRAMFS);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_POLICY, RL_LOAD_POLICY);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNDEFINED, RL_LOAD_UNDEFINED);

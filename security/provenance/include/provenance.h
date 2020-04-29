@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -36,9 +39,12 @@ extern atomic64_t prov_node_id;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 extern uint32_t epoch;
+extern bool prov_written;
 
-#define prov_next_relation_id()         ((uint64_t)atomic64_inc_return(&prov_relation_id))
-#define prov_next_node_id()             ((uint64_t)atomic64_inc_return(&prov_node_id))
+#define prov_next_relation_id()	\
+	((uint64_t)atomic64_inc_return(&prov_relation_id))
+#define prov_next_node_id() \
+	((uint64_t)atomic64_inc_return(&prov_node_id))
 
 enum {
 	PROVENANCE_LOCK_PROC,
@@ -75,20 +81,26 @@ static __always_inline void init_provenance_struct(uint64_t ntype,
 	call_provenance_alloc(prov_entry(prov));
 }
 /*!
- * @brief Allocate memory for a new provenance node and populate "node_identifier" information.
+ * @brief Allocate memory for a new provenance node and populate
+ * "node_identifier" information.
  *
  * The memory is allocated from "provenance_cache".
- * The type of the provenance node provided in the argument list must align with the allowed provenance node type (i.e., not a relation type).
- * Allowed provenance node types are defined in "include/uapi/linux/provenance_types.h"
+ * The type of the provenance node provided in the argument list must align with
+ * the allowed provenance node type (i.e., not a relation type).
+ * Allowed provenance node types are defined in
+ * "include/uapi/linux/provenance_types.h"
  * The lock accompanied "provenance" structure is initialized as UNLOCK.
- * Implicitly, the "version" member of "node_identifier" structure is set to 0 through "zalloc".
+ * Implicitly, the "version" member of "node_identifier" structure is set to 0
+ * through "zalloc".
  * This is because the version of a new node starts from 0.
  * @param ntype The type of the provenance node.
  * @param gfp GFP flags used in memory allocation in the kernel
- * @return The pointer to the provenance node (prov_elt + lock structure) or NULL if allocating memory from cache failed.
+ * @return The pointer to the provenance node (prov_elt + lock structure) or
+ * NULL if allocating memory from cache failed.
  *
  */
-static __always_inline struct provenance *alloc_provenance(uint64_t ntype, gfp_t gfp)
+static __always_inline struct provenance *alloc_provenance(uint64_t ntype,
+							   gfp_t gfp)
 {
 	struct provenance *prov =  kmem_cache_zalloc(provenance_cache, gfp);
 
@@ -110,20 +122,28 @@ static inline void free_provenance(struct provenance *prov)
 }
 
 /*!
- * @brief Allocate memory for a new long provenance node and set the provenance "LONG" flag (in basic_elements).
+ * @brief Allocate memory for a new long provenance node and set the provenance
+ * "LONG" flag (in basic_elements).
  *
- * Similar to "alloc_provenance" function above, this function allocate memory for long_prove_elt union structure.
+ * Similar to "alloc_provenance" function above, this function allocate memory
+ * for long_prove_elt union structure.
  * long_prov_elt contains more types of node structures than prov_elt.
- * "version" member of the identifier is also implicitly set to 0 due to "zalloc".
- * Spin lock is not needed because at most one thread will access the structure at a time, since it is a transient element.
+ * "version" member of the identifier is also implicitly set to 0 due to
+ * "zalloc".
+ * Spin lock is not needed because at most one thread will access the structure
+ * at a time, since it is a transient element.
  * @param ntype The type of the long provenance node.
- * @return The pointer to the long provenance node (long_prov_elt union structure) or NULL if allocating memory from cache failed.
+ * @return The pointer to the long provenance node (long_prov_elt union
+ * structure) or NULL if allocating memory from cache failed.
  * @reference GFP_ATOMIC https://www.linuxjournal.com/article/6930
  *
  */
-static __always_inline union long_prov_elt *alloc_long_provenance(uint64_t ntype, uint64_t id)
+static __always_inline union long_prov_elt *alloc_long_provenance(
+	uint64_t ntype,
+	uint64_t id)
 {
-	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache, GFP_ATOMIC);
+	union long_prov_elt *prov = kmem_cache_zalloc(long_provenance_cache,
+						      GFP_ATOMIC);
 
 	BUILD_BUG_ON(!prov_type_is_node(ntype));
 	BUILD_BUG_ON(!prov_type_is_long(ntype));
@@ -150,19 +170,22 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 	kmem_cache_free(long_provenance_cache, prov);
 }
 
-#define set_recorded(node)                      __set_recorded((union long_prov_elt *)node)
+#define set_recorded(node) \
+	__set_recorded((union long_prov_elt *)node)
 static inline void __set_recorded(union long_prov_elt *node)
 {
 	node->msg_info.epoch = epoch;
 }
 
-#define clear_recorded(node)                    __clear_recorded((union long_prov_elt *)node)
+#define clear_recorded(node) \
+	__clear_recorded((union long_prov_elt *)node)
 static inline void __clear_recorded(union long_prov_elt *node)
 {
 	node->msg_info.epoch = 0;
 }
 
-#define provenance_is_recorded(node)            __provenance_is_recorded((union long_prov_elt *)node)
+#define provenance_is_recorded(node) \
+	__provenance_is_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_recorded(union long_prov_elt *node)
 {
 	if (epoch > node->msg_info.epoch)
@@ -170,19 +193,22 @@ static inline bool __provenance_is_recorded(union long_prov_elt *node)
 	return true;
 }
 
-#define set_name_recorded(node)                 __set_name_recorded((union long_prov_elt *)node)
+#define set_name_recorded(node)	\
+	__set_name_recorded((union long_prov_elt *)node)
 static inline void __set_name_recorded(union long_prov_elt *node)
 {
 	node->msg_info.nepoch = epoch;
 }
 
-#define clear_name_recorded(node)               __clear_name_recorded((union long_prov_elt *)node)
+#define clear_name_recorded(node) \
+	__clear_name_recorded((union long_prov_elt *)node)
 static inline void __clear_name_recorded(union long_prov_elt *node)
 {
 	node->msg_info.nepoch = 0;
 }
 
-#define provenance_is_name_recorded(node)       __provenance_is_name_recorded((union long_prov_elt *)node)
+#define provenance_is_name_recorded(node) \
+	__provenance_is_name_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 {
 	if (epoch > node->msg_info.nepoch)
@@ -193,13 +219,15 @@ static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 // reference to node representing the machine/kernel
 extern union long_prov_elt *prov_machine;
 
-#define set_kernel_recorded(node)               __set_kernel_recorded((union long_prov_elt *)node)
+#define set_kernel_recorded(node) \
+	__set_kernel_recorded((union long_prov_elt *)node)
 static inline void __set_kernel_recorded(union long_prov_elt *node)
 {
 	node_kernel_version(node) = node_identifier(prov_machine).version;
 }
 
-#define provenance_is_kernel_recorded(node)     __provenance_is_kernel_recorded((union long_prov_elt *)node)
+#define provenance_is_kernel_recorded(node) \
+	__provenance_is_kernel_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_kernel_recorded(union long_prov_elt *node)
 {
 	if (node_kernel_version(node) < node_identifier(prov_machine).version)

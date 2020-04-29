@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -20,9 +23,11 @@ struct ns_filters {
 extern struct list_head ns_filters;
 
 /*!
- * @brief Return the op value for a specific namespace filter in the ns_filters list.
+ * @brief Return the op value for a specific namespace filter in the ns_filters
+ * list.
  *
- * The specific namespace filter must have the same values of the namespaces as in the argument list or is IGNORE_NS.
+ * The specific namespace filter must have the same values of the namespaces as
+ * in the argument list or is IGNORE_NS.
  * @param utsns UTS namespace.
  * @param ipcns Interprocess communication namespace.
  * @param mntns Mount namespace.
@@ -44,12 +49,18 @@ static inline uint8_t prov_ns_whichOP(uint32_t utsns,
 
 	list_for_each_safe(listentry, listtmp, &ns_filters) {
 		tmp = list_entry(listentry, struct ns_filters, list);
-		if ((tmp->filter.cgroupns == cgroupns || tmp->filter.cgroupns == IGNORE_NS)
-		    && (tmp->filter.utsns == utsns || tmp->filter.utsns == IGNORE_NS)
-		    && (tmp->filter.ipcns == ipcns || tmp->filter.ipcns == IGNORE_NS)
-		    && (tmp->filter.mntns == mntns || tmp->filter.mntns == IGNORE_NS)
-		    && (tmp->filter.pidns == pidns || tmp->filter.pidns == IGNORE_NS)
-		    && (tmp->filter.netns == netns || tmp->filter.netns == IGNORE_NS))
+		if ((tmp->filter.cgroupns == cgroupns
+		     || tmp->filter.cgroupns == IGNORE_NS)
+		    && (tmp->filter.utsns == utsns
+			|| tmp->filter.utsns == IGNORE_NS)
+		    && (tmp->filter.ipcns == ipcns
+			|| tmp->filter.ipcns == IGNORE_NS)
+		    && (tmp->filter.mntns == mntns
+			|| tmp->filter.mntns == IGNORE_NS)
+		    && (tmp->filter.pidns == pidns
+			|| tmp->filter.pidns == IGNORE_NS)
+		    && (tmp->filter.netns == netns
+			|| tmp->filter.netns == IGNORE_NS))
 			return tmp->filter.op;
 	}
 	return 0;
@@ -58,9 +69,11 @@ static inline uint8_t prov_ns_whichOP(uint32_t utsns,
 /*!
  * @brief Remove a specific namespace filter in the ns_filters list.
  *
- * The specific namespace filter must have the same values as the ns_filter in the argument list.
+ * The specific namespace filter must have the same values as the ns_filter
+ * in the argument list.
  * @postcondition At most one element should be removed in the list.
- * @param f The ns_filter that is checked against to remove the filter in the list.
+ * @param f The ns_filter that is checked against to remove the filter in the
+ * list.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */
@@ -88,13 +101,17 @@ static inline uint8_t prov_ns_delete(struct ns_filters *f)
 
 
 /*!
- * @brief Update the op value of a specific namespace filter in the ns_filters list.
+ * @brief Update the op value of a specific namespace filter in the ns_filters
+ * list.
  *
- * The specific namespace filter must have the same values as the ns_filter in the argument list.
+ * The specific namespace filter must have the same values as the ns_filter in
+ * the argument list.
  * The op value is updated to the same as the ns_filters in the argument list.
- * If we cannot find the matching filter in the list, we add the filter at the tail end of the list.
+ * If we cannot find the matching filter in the list, we add the filter at the
+ * tail end of the list.
  * @postcondition At most one element should be updated in the list.
- * @param f The ns_filter that is checked against to update the filter in the list.
+ * @param f The ns_filter that is checked against to update the filter in the
+ * list.
  * @return 0 if no error occurred. Other error codes unknown.
  *
  */

@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -22,11 +25,11 @@
 #include "provenance_query.h"
 #include "memcpy_ss.h"
 
-#define PROV_RELAY_BUFF_EXP             20
-#define PROV_RELAY_BUFF_SIZE            ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
-#define PROV_NB_SUBBUF                  64
-#define PROV_INITIAL_BUFF_SIZE          (1024 * 16)
-#define PROV_INITIAL_LONG_BUFF_SIZE     512
+#define PROV_RELAY_BUFF_EXP 20
+#define PROV_RELAY_BUFF_SIZE ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
+#define PROV_NB_SUBBUF 64
+#define PROV_INITIAL_BUFF_SIZE (1024 * 16)
+#define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 struct boot_buffer {
 	struct list_head list;
@@ -40,7 +43,7 @@ struct long_boot_buffer {
 
 int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
-bool is_relay_full(struct rchan *chan, int cpu);
+bool is_relay_full(struct rchan *chan);
 void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
@@ -69,14 +72,21 @@ static __always_inline void tighten_identifier(union prov_identifier *id)
 /*!
  * @brief Write provenance node to relay buffer.
  *
- * There are some checks before the provenance node is written to the relay buffer which can be consumed by userspace client.
- * If those checks are passed and the provenance node should be written to the relay buffer,
- * Call either "prov_write" or "long_prov_write" depending on whether the node is a regular or a long provenance node.
+ * There are some checks before the provenance node is written to the relay
+ * buffer which can be consumed by userspace client.
+ * If those checks are passed and the provenance node should be written to the
+ * relay buffer,
+ * Call either "prov_write" or "long_prov_write" depending on whether the node
+ * is a regular or a long provenance node.
  * Then mark the provenance node as recorded.
  * The checks include:
- * 1. If the node has already been recorded and the user policy is set to not duplicate recorded node, then do not record again.
- * 2. If the provenance is not a packet node (which means it should have machine ID) and the provenacne is not recorded,
- *              record the machine and boot ID because during boot it is possible that these information is not ready yet (in camconfd) and need to be set again here.
+ * 1. If the node has already been recorded and the user policy is set to not
+ * duplicate recorded node, then do not record again.
+ * 2. If the provenance is not a packet node (which means it should have machine
+ * ID) and the provenacne is not recorded,
+ *              record the machine and boot ID because during boot it is
+ * possible that these information is not ready yet (in camconfd) and need to be
+ * set again here.
  * @param node Provenance node (could be either regular or long)
  *
  */
@@ -111,13 +121,19 @@ static __always_inline void __prepare_relation(const uint64_t type,
 					       const struct file *file,
 					       const uint64_t flags)
 {
-	memset(relation, 0, sizeof(union prov_elt)); // Allocate memory for the relation edge.
+	memset(relation, 0, sizeof(union prov_elt));
 	prov_type(relation) = type;
 	relation_identifier(relation).id = prov_next_relation_id();
 	relation_identifier(relation).boot_id = prov_boot_id;
 	relation_identifier(relation).machine_id = prov_machine_id;
-	__memcpy_ss(&(relation->relation_info.snd), sizeof(union prov_identifier), &get_prov_identifier(f), sizeof(union prov_identifier));
-	__memcpy_ss(&(relation->relation_info.rcv), sizeof(union prov_identifier), &get_prov_identifier(t), sizeof(union prov_identifier));
+	__memcpy_ss(&(relation->relation_info.snd),
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(f),
+		    sizeof(union prov_identifier));
+	__memcpy_ss(&(relation->relation_info.rcv),
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(t),
+		    sizeof(union prov_identifier));
 	if (file) {
 		relation->relation_info.set = FILE_INFO_SET;
 		relation->relation_info.offset = file->f_pos;
@@ -130,10 +146,13 @@ static __always_inline void __prepare_relation(const uint64_t type,
 /*!
  * @brief Write provenance relation to relay buffer.
  *
- * The relation will only be recorded if no user-supplied filter is applicable to the type of the relation or the end nodes.
+ * The relation will only be recorded if no user-supplied filter is applicable
+ * to the type of the relation or the end nodes.
  * This is checked by "should_record_relation" function.
- * Two end nodes are recorded by calling "__write_node" function before the relation itself is recorded.
- * CamQuery is called for provenance runtime analysis of this provenance relation (i.e., edge) before the relation is recorded to relay.
+ * Two end nodes are recorded by calling "__write_node" function before the
+ * relation itself is recorded.
+ * CamQuery is called for provenance runtime analysis of this provenance
+ * relation (i.e., edge) before the relation is recorded to relay.
  * @param type The type of the relation (i.e., edge)
  * @param from The source node of the provenance edge
  * @param to The destination node of the provenance edge
@@ -160,8 +179,10 @@ static __always_inline int __write_relation(const uint64_t type,
 	__write_node(f);
 	__write_node(t);
 	__prepare_relation(type, &relation, f, t, file, flags);
-	rc = call_query_hooks(f, t, (prov_entry_t *)&relation); // Call query hooks for propagate tracking.
-	prov_write(&relation, sizeof(union prov_elt));          // Finally record the relation (i.e., edge) to relay buffer.
+	// Call query hooks for propagate tracking.
+	rc = call_query_hooks(f, t, (prov_entry_t *)&relation);
+	// Finally record the relation (i.e., edge) to relay buffer.
+	prov_write(&relation, sizeof(union prov_elt));
 	return rc;
 }
 #endif

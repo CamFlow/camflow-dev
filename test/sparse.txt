@@ -15,9 +15,8 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/conmakehash
   HOSTCC  scripts/recordmcount
-  HOSTCC  scripts/sortextable
+  HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
   HOSTCC  scripts/extract-cert
@@ -36,12 +35,12 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/uapi/asm/termbits.h
   WRAP    arch/x86/include/generated/uapi/asm/termios.h
   WRAP    arch/x86/include/generated/uapi/asm/types.h
-  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
   UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
@@ -200,6 +199,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/misc/xilinx_sdfec.h
   HDRINST usr/include/misc/cxl.h
   HDRINST usr/include/misc/habanalabs.h
+  HDRINST usr/include/misc/pvpanic.h
   HDRINST usr/include/misc/ocxl.h
   HDRINST usr/include/linux/kd.h
   HDRINST usr/include/linux/serio.h
@@ -210,7 +210,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/mroute6.h
   HDRINST usr/include/linux/prctl.h
   HDRINST usr/include/linux/vfio.h
-  HDRINST usr/include/linux/hysdn_if.h
   HDRINST usr/include/linux/swab.h
   HDRINST usr/include/linux/if_arcnet.h
   HDRINST usr/include/linux/elf-em.h
@@ -367,6 +366,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/if_vlan.h
   HDRINST usr/include/linux/net_dropmon.h
   HDRINST usr/include/linux/qnxtypes.h
+  HDRINST usr/include/linux/wireguard.h
   HDRINST usr/include/linux/scc.h
   HDRINST usr/include/linux/posix_acl.h
   HDRINST usr/include/linux/binfmts.h
@@ -374,6 +374,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/rio_cm_cdev.h
   HDRINST usr/include/linux/vt.h
   HDRINST usr/include/linux/seg6_hmac.h
+  HDRINST usr/include/linux/openat2.h
   HDRINST usr/include/linux/keyboard.h
   HDRINST usr/include/linux/netfilter_arp.h
   HDRINST usr/include/linux/provenance_fs.h
@@ -530,6 +531,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/taskstats.h
   HDRINST usr/include/linux/btf.h
   HDRINST usr/include/linux/rtnetlink.h
+  HDRINST usr/include/linux/dma-heap.h
   HDRINST usr/include/linux/zorro.h
   HDRINST usr/include/linux/genwqe/genwqe_card.h
   HDRINST usr/include/linux/media-bus-format.h
@@ -628,6 +630,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/netfilter_bridge/ebt_ip.h
   HDRINST usr/include/linux/inotify.h
   HDRINST usr/include/linux/cdrom.h
+  HDRINST usr/include/linux/idxd.h
   HDRINST usr/include/linux/reboot.h
   HDRINST usr/include/linux/nfsd/export.h
   HDRINST usr/include/linux/nfsd/nfsfh.h
@@ -740,6 +743,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/ppdev.h
   HDRINST usr/include/linux/time.h
   HDRINST usr/include/linux/iommu.h
+  HDRINST usr/include/linux/ethtool_netlink.h
   HDRINST usr/include/linux/fiemap.h
   HDRINST usr/include/linux/smiapp.h
   HDRINST usr/include/linux/uleds.h
@@ -888,7 +892,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/iso_fs.h
   HDRINST usr/include/linux/wait.h
   HDRINST usr/include/linux/if_pppol2tp.h
-  HDRINST usr/include/linux/b1lli.h
   HDRINST usr/include/linux/nubus.h
   HDRINST usr/include/linux/netfilter_decnet.h
   HDRINST usr/include/linux/tcp.h
@@ -909,7 +912,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/netlink.h
   HDRINST usr/include/linux/virtio_ids.h
   HDRINST usr/include/linux/xfrm.h
-  HDRINST usr/include/linux/gigaset_dev.h
   HDRINST usr/include/linux/acct.h
   HDRINST usr/include/linux/virtio_input.h
   HDRINST usr/include/linux/i2c-dev.h
@@ -1016,95 +1018,16 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/asm/sockios.h
   HDRINST usr/include/asm/errno.h
   CHECK   security/provenance/relay.c
-security/provenance/relay.c:40:1: warning: symbol 'relay_list' was not declared. Should it be static?
-security/provenance/relay.c:87:42: warning: incorrect type in initializer (different address spaces)
-security/provenance/relay.c:87:42:    expected struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:87:42:    got struct rchan_buf *
-security/provenance/relay.c:90:38: warning: incorrect type in argument 1 (different address spaces)
-security/provenance/relay.c:90:38:    expected struct rchan_buf *buf
-security/provenance/relay.c:90:38:    got struct rchan_buf [noderef] <asn:3> *buf
-security/provenance/relay.c:208:6: warning: symbol 'relay_initialized' was not declared. Should it be static?
   CC      security/provenance/relay.o
   CHECK   security/provenance/hooks.c
-security/provenance/hooks.c:112:22: warning: incorrect type in assignment (different address spaces)
-security/provenance/hooks.c:112:22:    expected struct cred const *cred
-security/provenance/hooks.c:112:22:    got struct cred const [noderef] <asn:4> *real_cred
-security/provenance/hooks.c:153:30: warning: cast removes address space '<asn:4>' of expression
-./security/provenance/include/provenance_net.h:357:22: warning: incorrect type in argument 2 (different base types)
-./security/provenance/include/provenance_net.h:357:22:    expected unsigned int [usertype] ip
-./security/provenance/include/provenance_net.h:357:22:    got restricted __be32 [usertype] s_addr
-./security/provenance/include/provenance_net.h:357:22: warning: incorrect type in argument 3 (different base types)
-./security/provenance/include/provenance_net.h:357:22:    expected unsigned int [usertype] port
-./security/provenance/include/provenance_net.h:357:22:    got restricted __be16 [usertype] sin_port
-./security/provenance/include/provenance_net.h:357:22: warning: incorrect type in argument 2 (different base types)
-./security/provenance/include/provenance_net.h:357:22:    expected unsigned int [usertype] ip
-./security/provenance/include/provenance_net.h:357:22:    got restricted __be32 [usertype] s_addr
-./security/provenance/include/provenance_net.h:357:22: warning: incorrect type in argument 3 (different base types)
-./security/provenance/include/provenance_net.h:357:22:    expected unsigned int [usertype] port
-./security/provenance/include/provenance_net.h:357:22:    got restricted __be16 [usertype] sin_port
-./security/provenance/include/provenance_net.h:171:46: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:171:46:    expected unsigned short [usertype] id
-./security/provenance/include/provenance_net.h:171:46:    got restricted __be16 [usertype] id
-./security/provenance/include/provenance_net.h:172:50: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:172:50:    expected unsigned int [usertype] snd_ip
-./security/provenance/include/provenance_net.h:172:50:    got restricted __be32 [usertype] saddr
-./security/provenance/include/provenance_net.h:173:50: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:173:50:    expected unsigned int [usertype] rcv_ip
-./security/provenance/include/provenance_net.h:173:50:    got restricted __be32 [usertype] daddr
-./security/provenance/include/provenance_net.h:175:44: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:175:44:    expected unsigned short [usertype] length
-./security/provenance/include/provenance_net.h:175:44:    got restricted __be16 [usertype] tot_len
-./security/provenance/include/provenance_net.h:109:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:109:22:    expected unsigned short [usertype] snd_port
-./security/provenance/include/provenance_net.h:109:22:    got restricted __be16 [usertype] source
-./security/provenance/include/provenance_net.h:110:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:110:22:    expected unsigned short [usertype] rcv_port
-./security/provenance/include/provenance_net.h:110:22:    got restricted __be16 [usertype] dest
-./security/provenance/include/provenance_net.h:111:17: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:111:17:    expected unsigned int [usertype] seq
-./security/provenance/include/provenance_net.h:111:17:    got restricted __be32 [usertype] seq
-./security/provenance/include/provenance_net.h:138:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:138:22:    expected unsigned short [usertype] snd_port
-./security/provenance/include/provenance_net.h:138:22:    got restricted __be16 [usertype] source
-./security/provenance/include/provenance_net.h:139:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:139:22:    expected unsigned short [usertype] rcv_port
-./security/provenance/include/provenance_net.h:139:22:    got restricted __be16 [usertype] dest
   CC      security/provenance/hooks.o
   CHECK   security/provenance/query.c
   CC      security/provenance/query.o
   CHECK   security/provenance/fs.c
   CC      security/provenance/fs.o
   CHECK   security/provenance/netfilter.c
-./security/provenance/include/provenance_net.h:171:46: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:171:46:    expected unsigned short [usertype] id
-./security/provenance/include/provenance_net.h:171:46:    got restricted __be16 [usertype] id
-./security/provenance/include/provenance_net.h:172:50: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:172:50:    expected unsigned int [usertype] snd_ip
-./security/provenance/include/provenance_net.h:172:50:    got restricted __be32 [usertype] saddr
-./security/provenance/include/provenance_net.h:173:50: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:173:50:    expected unsigned int [usertype] rcv_ip
-./security/provenance/include/provenance_net.h:173:50:    got restricted __be32 [usertype] daddr
-./security/provenance/include/provenance_net.h:175:44: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:175:44:    expected unsigned short [usertype] length
-./security/provenance/include/provenance_net.h:175:44:    got restricted __be16 [usertype] tot_len
-./security/provenance/include/provenance_net.h:109:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:109:22:    expected unsigned short [usertype] snd_port
-./security/provenance/include/provenance_net.h:109:22:    got restricted __be16 [usertype] source
-./security/provenance/include/provenance_net.h:110:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:110:22:    expected unsigned short [usertype] rcv_port
-./security/provenance/include/provenance_net.h:110:22:    got restricted __be16 [usertype] dest
-./security/provenance/include/provenance_net.h:111:17: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:111:17:    expected unsigned int [usertype] seq
-./security/provenance/include/provenance_net.h:111:17:    got restricted __be32 [usertype] seq
-./security/provenance/include/provenance_net.h:138:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:138:22:    expected unsigned short [usertype] snd_port
-./security/provenance/include/provenance_net.h:138:22:    got restricted __be16 [usertype] source
-./security/provenance/include/provenance_net.h:139:22: warning: incorrect type in assignment (different base types)
-./security/provenance/include/provenance_net.h:139:22:    expected unsigned short [usertype] rcv_port
-./security/provenance/include/provenance_net.h:139:22:    got restricted __be16 [usertype] dest
   CC      security/provenance/netfilter.o
   CHECK   security/provenance/propagate.c
-security/provenance/propagate.c:31:31: warning: symbol 'hooks' was not declared. Should it be static?
   CC      security/provenance/propagate.o
   CHECK   security/provenance/type.c
   CC      security/provenance/type.o

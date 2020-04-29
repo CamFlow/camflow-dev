@@ -76,6 +76,30 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_security_only'
+  security_clang:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'wget https://apt.llvm.org/llvm.sh'
+      - run: 'chmod +x llvm.sh'
+      - run: 'sudo ./llvm.sh 10'
+      - run: 'sudo ln -s /usr/bin/clang-10 /usr/bin/clang'
+      - run: 'sudo ln -s /usr/bin/clang++-10 /usr/bin/clang++'
+      - run: 'clang -v'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle_clang'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'make compile_security_only_clang'
   compile_default:
     machine:
       image: ubuntu-1604:201903-01
@@ -94,6 +118,30 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_kernel'
+  compile_default_clang:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'wget https://apt.llvm.org/llvm.sh'
+      - run: 'chmod +x llvm.sh'
+      - run: 'sudo ./llvm.sh 10'
+      - run: 'sudo ln -s /usr/bin/clang-10 /usr/bin/clang'
+      - run: 'sudo ln -s /usr/bin/clang++-10 /usr/bin/clang++'
+      - run: 'clang -v'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
+      - run: 'cp -f scripts/.config build/linux-stable/'
+      - run: 'make config_circle_clang'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
+      - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
+      - run: 'make compile_kernel_clang'
   compile_no_flow_friendly:
     machine:
       image: ubuntu-1604:201903-01
@@ -291,6 +339,39 @@ jobs:
           root: .
           paths:
             - test/cocci.txt
+  tinkerbell:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/circulate
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/circulate
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev'
+      - run: 'sudo apt-get install --reinstall make'
+      - run: 'cd build && git clone https://github.com/TinkerBellSystem/compiler'
+      - run: 'cd build/compiler && git checkout thomas'
+      - run: 'cd build/compiler && make prepare'
+      - run: 'cd build/compiler && make config'
+      - run: 'cd scripts && make config_kernel'
+      - run: 'pyenv version'
+      - run: 'pyenv versions'
+      - run: 'pyenv install --list'
+      - run: 'pyenv install -v 2.7.16'
+      - run: 'pyenv local 2.7.16'
+      - run: 'pyenv version'
+      - run: 'pip install --upgrade pip'
+      - run: 'pip install virtualenv'
+      - run: 'cd build && git clone https://github.com/TinkerBellSystem/graph-matching'
+      - run: 'cd build/graph-matching && git checkout thomas'
+      - run: 'cd build/graph-matching/scripts && make all'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test/cocci.txt
   deploy_dev:
     machine:
       image: ubuntu-1604:201903-01
@@ -349,54 +430,71 @@ workflows:
       - security:
           requires:
             - checkout
+      - security_clang:
+          requires:
+            - checkout
       - compile_default:
           requires:
             - security
+            - security_clang
+      - compile_default_clang:
+          requires:
+            - security
+            - security_clang
       - compile_no_flow_friendly:
           requires:
             - security
+            - security_clang
       - compile_whole:
           requires:
             - security
+            - security_clang
       - compile_persist:
           requires:
             - security
-      - doc:
-          requires:
-            - compile_default
-            - compile_no_flow_friendly
-            - compile_whole
-            - compile_persist
+            - security_clang
       - sparse:
           requires:
             - compile_default
+            - compile_default_clang
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - flawfinder:
           requires:
             - compile_default
+            - compile_default_clang
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - checkpatch:
           requires:
             - compile_default
+            - compile_default_clang
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - smatch:
           requires:
             - compile_default
+            - compile_default_clang
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - coccinelle:
           requires:
             - compile_default
+            - compile_default_clang
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
+      - doc:
+          requires:
+            - sparse
+            - flawfinder
+            - checkpatch
+            - smatch
+            - coccinelle
       - deploy_dev:
           filters:
             branches:
@@ -404,8 +502,3 @@ workflows:
                 - dev
           requires:
             - doc
-            - sparse
-            - flawfinder
-            - checkpatch
-            - smatch
-            - coccinelle

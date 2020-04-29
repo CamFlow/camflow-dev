@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -25,7 +28,8 @@ static inline int call_provenance_flow(prov_entry_t *from,
 	struct provenance_query_hooks *fcn;
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		fcn = list_entry(listentry, struct provenance_query_hooks,
+				 list);
 		if (fcn->flow)
 			rc |= fcn->flow(from, edge, to);
 	}
@@ -39,7 +43,8 @@ static inline int call_provenance_alloc(prov_entry_t *elt)
 	struct provenance_query_hooks *fcn;
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		fcn = list_entry(listentry, struct provenance_query_hooks,
+				 list);
 		if (fcn->alloc)
 			rc |= fcn->alloc(elt);
 	}
@@ -53,7 +58,8 @@ static inline int call_provenance_free(prov_entry_t *elt)
 	struct provenance_query_hooks *fcn;
 
 	list_for_each_safe(listentry, listtmp, &provenance_query_hooks) {
-		fcn = list_entry(listentry, struct provenance_query_hooks, list);
+		fcn = list_entry(listentry, struct provenance_query_hooks,
+				 list);
 		if (fcn->free)
 			rc |= fcn->free(elt);
 	}
@@ -63,11 +69,13 @@ static inline int call_provenance_free(prov_entry_t *elt)
 /*!
  * @brief Call out_edge and in_edge function.
  *
- * Simply call both call_provenance_out_edge and call_provenance_in_edge function.
+ * Simply call both call_provenance_out_edge and call_provenance_in_edge
+ * function.
  * @param from The source node provenance entry pointer.
  * @param to The destination node provenance entry pointer.
  * @param edge The edge provenance entry pointer.
- * @return 0 if no error occurred; -EPERM if flow is disallowed. Other error codes inherited or unknown.
+ * @return 0 if no error occurred; -EPERM if flow is disallowed. Other error
+ * codes inherited.
  *
  */
 static inline int call_query_hooks(prov_entry_t *from,

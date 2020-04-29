@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -20,8 +23,10 @@
 
 #define HIT_FILTER(filter, data)        ((filter & data) != 0)
 
-#define filter_node(node)               __filter_node(prov_policy.prov_node_filter, node)
-#define filter_propagate_node(node)     __filter_node(prov_policy.prov_propagate_node_filter, node)
+#define filter_node(node) \
+	__filter_node(prov_policy.prov_node_filter, node)
+#define filter_propagate_node(node) \
+	__filter_node(prov_policy.prov_propagate_node_filter, node)
 
 /*!
  * @brief This function decides whether or not a node should be filtered.
@@ -34,7 +39,8 @@
  * Otherwise, it should be recorded.
  * @param filter The supplied filter to be checked against the node.
  * @param node The node in question (i.e., whether or not to be filtered).
- * @return true (i.e., should be filtered out) or false (i.e., should not be filtered out).
+ * @return true (i.e., should be filtered out) or false (i.e., should not be
+ * filtered out).
  *
  */
 static __always_inline bool __filter_node(uint64_t filter, prov_entry_t *node)
@@ -49,7 +55,8 @@ static __always_inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 }
 
 /*!
- * @brief If the relation type is VERSION_TASK or VERSION or NAMED or NAMED_PROCESS, updating a node's version is unnecessary.
+ * @brief If the relation type is VERSION_TASK or VERSION or NAMED or
+ * NAMED_PROCESS, updating a node's version is unnecessary.
  * @param relation_type The type of the relation (i.e., edge)
  *
  */
@@ -65,15 +72,20 @@ static __always_inline bool filter_update_node(const uint64_t relation_type)
 }
 
 /*!
- * @brief This function decides whether or not a relation (i.e., edge) should be filtered.
+ * @brief This function decides whether or not a relation (i.e., edge) should be
+ * filtered.
  *
- * Based on the user supplied filter, a relation (i.e., edge) may be filtered out so as not to be recorded.
+ * Based on the user supplied filter, a relation (i.e., edge) may be filtered
+ * out so as not to be recorded.
  * User supplies filter criterion based on the categories of the relations.
- * There are four categories of the relations: "derived", "generated", "used", and "informed".
+ * There are four categories of the relations: "derived", "generated", "used",
+ * and "informed".
  * Each category has its own filter supplied by the user.
- * Depending on the type of the current relation in question, test if the type of the relation hits the filter (i.e., should be filtered out).
+ * Depending on the type of the current relation in question, test if the type
+ * of the relation hits the filter (i.e., should be filtered out).
  * @param type The type of the relation (i.e., edge).
- * @return true if the relation should be filtered out (i.e., not recorded) or false if otherwise.
+ * @return true if the relation should be filtered out (i.e., not recorded) or
+ * false if otherwise.
  *
  */
 static __always_inline bool filter_relation(const uint64_t type)
@@ -96,11 +108,16 @@ static __always_inline bool filter_relation(const uint64_t type)
 /*!
  * @brief This function decides whether or not tracking should propagate.
  *
- * Based on the user supplied filter, a relation (i.e., edge) may be filtered if it is tracked in the propagation.
- * User supplies filter criterion based on the categories of the relations as in the "filter_relation" function.
- * Depending on the type of the current relation in question, test if the type of the relation hits the filter (i.e., should be filtered out if it is part of propagation).
+ * Based on the user supplied filter, a relation (i.e., edge) may be filtered
+ * if it is tracked in the propagation.
+ * User supplies filter criterion based on the categories of the relations as
+ * in the "filter_relation" function.
+ * Depending on the type of the current relation in question, test if the type
+ * of the relation hits the filter (i.e., should be filtered out if it is part
+ * of propagation).
  * @param type The type of the relation (i.e., edge).
- * @return true if the relation should be filtered out during propagation or false if otherwise.
+ * @return true if the relation should be filtered out during propagation or
+ * false if otherwise.
  *
  */
 static __always_inline bool filter_propagate_relation(uint64_t type)
@@ -109,27 +126,34 @@ static __always_inline bool filter_propagate_relation(uint64_t type)
 		if (HIT_FILTER(prov_policy.prov_propagate_derived_filter, type))
 			return true;
 	} else if (prov_is_generated(type)) {
-		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter, type))
+		if (HIT_FILTER(prov_policy.prov_propagate_generated_filter,
+			       type))
 			return true;
 	} else if (prov_is_used(type)) {
-		if (HIT_FILTER(prov_policy.prov_propagate_used_filter, type))
+		if (HIT_FILTER(prov_policy.prov_propagate_used_filter,
+			       type))
 			return true;
 	} else if (prov_is_informed(type))
-		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter, type))
+		if (HIT_FILTER(prov_policy.prov_propagate_informed_filter,
+			       type))
 			return true;
 	return false;
 }
 
 /*!
- * @brief Whether a provenance relation between two nodes should be recorded based on the user-defined filter.
+ * @brief Whether a provenance relation between two nodes should be recorded
+ * based on the user-defined filter.
  *
- * If either the relation type or at least one of the two end nodes are filtered out (i.e., not to be recorded as defined by the user),
+ * If either the relation type or at least one of the two end nodes are filtered
+ * out (i.e., not to be recorded as defined by the user),
  * Then this function will return false.
- * Otherwise, the relation should be recorded and thus the function will return true.
+ * Otherwise, the relation should be recorded and thus the function will return
+ * true.
  * @param type The type of the relation
  * @param from The provenance node entry of the source node.
  * @param to The provenance node entry of the destination node.
- * @return True if the relation of type 'type' should be recorded; False if otherwise.
+ * @return True if the relation of type 'type' should be recorded; False if
+ * otherwise.
  *
  */
 static __always_inline bool should_record_relation(const uint64_t type,
@@ -154,7 +178,8 @@ static __always_inline bool should_record_relation(const uint64_t type,
 	extern struct list_head filter_name;
 
 /*!
- * @brief Define an abstract operation that returns op value of an item in a list. See concrete example below.
+ * @brief Define an abstract operation that returns op value of an item in a
+ * list. See concrete example below.
  */
 #define declare_filter_whichOP(function_name, type, variable)		\
 	static __always_inline uint8_t function_name(uint32_t variable)	\
@@ -170,7 +195,8 @@ static __always_inline bool should_record_relation(const uint64_t type,
 	}
 
 /*!
- * @brief Define an abstract operation that deletes an item from a list. See concrete example below.
+ * @brief Define an abstract operation that deletes an item from a list.
+ * See concrete example below.
  */
 #define declare_filter_delete(function_name, type, variable)		  \
 	static __always_inline uint8_t function_name(struct type *f)	  \
@@ -189,7 +215,8 @@ static __always_inline bool should_record_relation(const uint64_t type,
 	}
 
 /*!
- * @brief Define an abstract operation that adds/updates the op value of an item from a list. See concrete example below.
+ * @brief Define an abstract operation that adds/updates the op value of an item
+ * from a list. See concrete example below.
  */
 #define declare_filter_add_or_update(function_name, type, variable)	  \
 	static __always_inline uint8_t function_name(struct type *f)	  \
@@ -206,11 +233,29 @@ static __always_inline bool should_record_relation(const uint64_t type,
 		list_add_tail(&(f->list), &type);			  \
 		return 0;						  \
 	}
+/*
+ * A list of secinfo structs (defined in /include/uapi/linux/provenance.h, same
+ * as the following)
+ */
+declare_filter_list(secctx_filters, secinfo);
 
-declare_filter_list(secctx_filters, secinfo);                                   // A list of secinfo structs (defined in /include/uapi/linux/provenance.h, same as the following)
-declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);             // Return op value of an item of a specific secid in the secctx_filters list if exists; return 0 otherwise
-declare_filter_delete(prov_secctx_delete, secctx_filters, secid);               // Delete the element in secctx_filters list with the same secid as the item given in the function argument
-declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid); // Add or update op value of an item of a specific secid, which is the same as the item given in the function argument.
+/*
+ * Return op value of an item of a specific secid in the secctx_filters list if
+ * exists; return 0 otherwise
+ */
+declare_filter_whichOP(prov_secctx_whichOP, secctx_filters, secid);
+
+/*
+ * Delete the element in secctx_filters list with the same secid as the item
+ * given in the function argument
+ */
+declare_filter_delete(prov_secctx_delete, secctx_filters, secid);
+
+/*
+ * Add or update op value of an item of a specific secid, which is the same as
+ * the item given in the function argument.
+ */
+declare_filter_add_or_update(prov_secctx_add_or_update, secctx_filters, secid);
 
 /*!
  * @brief Same set of operations as above but operate on "userinfo" list.
@@ -229,10 +274,12 @@ declare_filter_delete(prov_gid_delete, group_filters, gid);
 declare_filter_add_or_update(prov_gid_add_or_update, group_filters, gid);
 
 /*!
- * @brief Based on "op" value of a provenance node, decide whether it should be tracked/propagated/opaque.
+ * @brief Based on "op" value of a provenance node, decide whether it should be
+ * tracked/propagated/opaque.
  *
  * "op" value is contingent upon "op" values of:
- * 1. ns (i.e., namespace) elements: ipcns, mntns, pidns, netns, cgroupns, if the node is of type ENT_PROC, and
+ * 1. ns (i.e., namespace) elements: ipcns, mntns, pidns, netns, cgroupns,
+ * if the node is of type ENT_PROC, and
  * 2. secctx (i.e., security context) element if it has secctx, and
  * 3. uid element if it has uid, and
  * 4. gid element if it has gid.

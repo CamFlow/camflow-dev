@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (C) 2015-2019 University of Cambridge, Harvard University, University of Bristol
+ * Copyright (C) 2015-2016 University of Cambridge,
+ * Copyright (C) 2016-2017 Harvard University,
+ * Copyright (C) 2017-2018 University of Cambridge,
+ * Copyright (C) 2018-2020 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
@@ -12,6 +15,9 @@
 #ifndef _MEMCPY_SS
 #define _MEMCPY_SS
 
-extern int __memcpy_ss(void *, __kernel_size_t, const void *, __kernel_size_t);
+extern int __memcpy_ss(void *dest,
+		       __kernel_size_t dmax,
+		       const void *src,
+		       __kernel_size_t smax);
 
 #endif // _MEMCPY_SS

@@ -1,4 +1,4 @@
-kernel-version=5.5.11
+kernel-version=5.6.7
 lsm-version=0.6.5
 arch=x86_64
 
@@ -88,6 +88,15 @@ config: copy_change copy_config
 	cd ./build/linux-stable && cp .config ../../.config
 	cp -f .config ./scripts/.config
 
+config_clang: copy_change copy_config
+	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
+	cd ./build/linux-stable &&  mv .config config_sav
+	cd ./build/linux-stable &&  mv config_strip .config
+	cd ./build/linux-stable && $(MAKE) menuconfig CC=clang HOSTCC=clang
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ./build/linux-stable && cp .config ../../.config
+	cp -f .config ./scripts/.config
+
 config_travis: copy_change copy_config
 	cd ./build/linux-stable && ./scripts/kconfig/streamline_config.pl > config_strip
 	cd ./build/linux-stable &&  mv .config config_sav
@@ -104,6 +113,12 @@ config_old: copy_change copy_config
 
 config_circle: copy_change
 	cd ./build/linux-stable && $(MAKE) olddefconfig
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
+	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
+
+config_circle_clang: copy_change
+	cd ./build/linux-stable && $(MAKE) olddefconfig CC=clang HOSTCC=clang
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
 	cd ./build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
@@ -135,16 +150,31 @@ update_commit:
 
 compile: compile_security compile_kernel compile_us doc
 
+compile_clang: compile_security_clang compile_kernel_clang compile_us_clang doc
+
 compile_security_only:
 	cd ./build/linux-stable && $(MAKE) security W=1
 
+compile_security_only_clang:
+	cd ./build/linux-stable && $(MAKE) security W=1 CC=clang HOSTCC=clang
+
 compile_security: copy_change compile_security_only doc
+
+compile_security_clang: copy_change compile_security_only_clang doc
 
 compile_kernel: copy_change
 	cd ./build/linux-stable && $(MAKE) -j16
 
+compile_kernel_clang: copy_change
+	cd ./build/linux-stable && $(MAKE) -j16 CC=clang HOSTCC=clang
+
 compile_us:
 	cd ./build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
+	cd ./build/libprovenance && $(MAKE) clean
+	cd ./build/libprovenance && $(MAKE) all
+
+compile_us_clang:
+	cd ./build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr CC=clang HOSTCC=clang
 	cd ./build/libprovenance && $(MAKE) clean
 	cd ./build/libprovenance && $(MAKE) all
 
@@ -156,15 +186,24 @@ compile_cross_pi:
 	make -j 16 ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu-
 	make -j 16 ARCH=arm CROSS_COMPILE=/usr/bin/arm-linux-gnu- modules
 
+install: install_kernel install_header install_us
+
+install_clang: install_kernel_clang install_header_clang install_us
 
 install_header:
 	cd ./build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
 
-install: install_kernel install_header install_us
+install_header_clang:
+	cd ./build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr CC=clang HOSTCC=clang
 
 install_kernel:
 	cd ./build/linux-stable && sudo $(MAKE) modules_install
 	cd ./build/linux-stable && sudo $(MAKE) install
+	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)+
+
+install_kernel_clang:
+	cd ./build/linux-stable && sudo $(MAKE) modules_install CC=clang HOSTCC=clang
+	cd ./build/linux-stable && sudo $(MAKE) install CC=clang HOSTCC=clang
 	cd ./build/linux-stable && sudo cp -f .config /boot/config-$(kernel-version)camflow$(lsm-version)+
 
 install_us:

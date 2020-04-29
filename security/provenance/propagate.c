@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0 */
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
@@ -28,7 +28,7 @@ static int flow(prov_entry_t *from, prov_entry_t *edge, prov_entry_t *to)
 	return 0;
 }
 
-struct provenance_query_hooks hooks = {
+static struct provenance_query_hooks hooks = {
 	QUERY_HOOK_INIT(flow, flow),
 };
 
