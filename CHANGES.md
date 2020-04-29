@@ -1,4 +1,4 @@
-## Version
+# Releases
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
@@ -49,7 +49,7 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-### v0.6.6
+## v0.6.6
 ```
 - Modified CircleCI workflow to test build with clang.
 - Fix issue where policy hash will change once provenance is written.
@@ -57,13 +57,13 @@
 - Update to kernel version 5.6.7.
 ```
 
-### v0.6.5
+## v0.6.5
 ```
 - Fix issue to build on Fedora 31 (new gcc version etc.).
 - Update to kernel version 5.5.11.
 ```
 
-### v0.6.4
+## v0.6.4
 ```
 - Use kernel linked list to build boot buffer.
 - Refactoring of layering interface (accommodate changes to libprovenance).
@@ -71,7 +71,7 @@
 - Update to kernel version 5.4.15.
 ```
 
-### v0.6.3
+## v0.6.3
 ```
 - Resource accounting metrics associated with task instead of process.
 - Fix potential memory leak when reading policy hash.
@@ -79,20 +79,20 @@
 - Update to kernel version 5.2.9.
 ```
 
-### v0.6.2
+## v0.6.2
 ```
 - Ensure that the propagate query is on from the start
 - Fix interaction with process self-provenance.
 - Hotfix: fix issue when load order changes.
 ```
 
-### v0.6.1
+## v0.6.1
 ```
 - Remove extra pr_info in record address (left from debugging).
 - Update to kernel version 5.1.9.
 ```
 
-### v0.6.0
+## v0.6.0
 ```
 - Remove RL_NAMED_PROCESS as it was not used.
 - Add RL_ADDRESSED relation.
@@ -110,13 +110,13 @@
 - Update to kernel version 5.O.10.
 ```
 
-### v0.5.3
+## v0.5.3
 ```
 - Hot Fix: fix issue with latest gcc release.
 - Update to kernel version 4.20.13.
 ```
 
-### v0.5.2
+## v0.5.2
 ```
 - Dump boot buffer in async mode.
 - Reworked on the "link" family is represented.
@@ -125,14 +125,14 @@
 - Update to kernel version 4.20.11.
 ```
 
-### v0.5.1
+## v0.5.1
 ```
 - Properly associate epoch with relation.
 - Return error if machine or boot ID are set to 0.
 - Update to kernel version 4.20.7.
 ```
 
-### v0.5.0
+## v0.5.0
 ```
 - Reworking mmap handling logic (was last modified in 0.4.0).
 - Take into account propagate node policy.
@@ -143,13 +143,13 @@
 - Update to kernel version 4.20.5.
 ```
 
-### v0.4.6
+## v0.4.6
 ```
 - Hotfix: fix  tracking issue.
 - Update to kernel version 4.20.
 ```
 
-### v0.4.5
+## v0.4.5
 ```
 - Record graph in full once epoch changes.
 - Fix issue with receive_unix connecting to process memory instead of peer socket.
@@ -157,7 +157,7 @@
 - Update to kernel version 4.18.16.
 ```
 
-### v0.4.4
+## v0.4.4
 ```
 - Fix file splice_pipe_to_pipe so the thread initiating splice appears.
 - Fix file_unmmap so the thread initiating the unmmap appears.
@@ -167,7 +167,7 @@
 - Update to kernel version 4.17.17.
 ```
 
-### v0.4.3
+## v0.4.3
 ```
 - Added support for IO signal.
 - Added support for file_lock.
@@ -175,7 +175,7 @@
 - Update to kernel version 4.17.4.
 ```
 
-### v0.4.2
+## v0.4.2
 ```
 - Fix issue where thread were not made opaque.
 - Automated documentation.
@@ -191,14 +191,14 @@
 
 See _note_ in release v0.4.0.
 
-### v0.4.1
+## v0.4.1
 ```
 - Hotfix (revert some changes introduced in v0.4.0 as they were introducing a bug).
 ```
 
 See _note_ in release v0.4.0.
 
-### v0.4.0
+## v0.4.0
 ```
 - Support node duplication on/off.
 - Reworking mmap handling logic.
@@ -247,21 +247,21 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 	- vm_read_exec_mayshare(flags) in security/provenance/include/provenance_task.h: vm_write(flags) is changed to vm_read(flags).
 ```
 
-### v0.3.11
+## v0.3.11
 ```
 - RL_SND_UNIX and RL_RCV_UNIX replace by simply RL_SND and RL_RCV.
 - Fix issue with user buffer in fs interface (only affected certain configuration).
 - Update to kernel version 4.14.18.
 ```
 
-### v0.3.10
+## v0.3.10
 ```
 - Add support for shmdt.
 - Add support for pipe to pipe slice.
 - Update to kernel version 4.14.15.
 ```
 
-### v0.3.9
+## v0.3.9
 ```
 - Fix bug with machine ID not always being properly associated with nodes.
 - Log machine and boot ID when set.
@@ -270,7 +270,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.14.9.
 ```
 
-### v0.3.8
+## v0.3.8
 ```
 - Record munmap events.
 - Capture flags value on relations.
@@ -282,12 +282,12 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.14.5.
 ```
 
-### v0.3.7
+## v0.3.7
 ```
 - Change the syntax of the version number to make debian happy.
 ```
 
-### v0.3.6
+## v0.3.6
 ```
 - Fix bug related to file path recording.
 - Made node compression (introduced in v0.2.2) configurable from userspace.
@@ -295,7 +295,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.13.4.
 ```
 
-### v0.3.5
+## v0.3.5
 ```
 - Capture performance information (CPU, memory usage etc.) for processes.
 - Ensure that uname -r and packages name match.
@@ -310,7 +310,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.12.9.
 ```
 
-### v0.3.4
+## v0.3.4
 ```
 - Non-datagram unix socket generates connected graph.
 - Properly record arguments and environment variables.
@@ -320,20 +320,20 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.12.4.
 ```
 
-### v0.3.3
+## v0.3.3
 ```
 - Improve LSM support for Information Flow see https://github.com/CamFlow/camflow-dev/issues/41.
 - Use netfilter per net registration.
 - Update to kernel version 4.11.6.
 ```
 
-### v0.3.2
+## v0.3.2
 ```
 - Fix issue created by reading pidns.
 - Update to kernel version 4.11.3.
 ```
 
-### v0.3.1
+## v0.3.1
 ```
 - Expose hash of currently loaded capture polciy to user space.
 - Update filters to support namespaces based selection.
@@ -343,7 +343,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.11.2.
 ```
 
-### v0.3.0
+## v0.3.0
 ```
 - Make persistence of inode provenance information a build option.
 - Add a closed relationship when an inode is freed.
@@ -355,7 +355,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.10.10.
 ```
 
-### v0.2.3
+## v0.2.3
 ```
 - A variety of minor issues fixed through code analysis.
 - Add support for travis (see https://travis-ci.org/) testing.
@@ -366,7 +366,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.9.13.
 ```
 
-### v0.2.2
+## v0.2.2
 
 ```
 - Fixed some rare deadlock issue.
@@ -377,13 +377,13 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.9.9.
 ```
 
-### v0.2.1
+## v0.2.1
 
 ```
 - Performance improvement.
 ```
 
-### v0.2.0
+## v0.2.0
 
 ```
 - Improve stability.
@@ -405,7 +405,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.9.5.
 ```
 
-### v0.1.11
+## v0.1.11
 
 ```
 - Separate named relation for entities and activities.
@@ -421,7 +421,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.36.
 ```
 
-### v0.1.10
+## v0.1.10
 
 ```
 - Fix bug when recording version.
@@ -437,7 +437,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.31.
 ```
 
-### v0.1.9
+## v0.1.9
 
 ```
 - Record whole-provenance at boot if option set in kernel config (off by default).
@@ -446,7 +446,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.28.
 ```
 
-### v0.1.8
+## v0.1.8
 
 ```
 - Properly deal with MMAP_SHARED and MMAP_PRIVATE.
@@ -457,7 +457,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.25.
 ```
 
-### v0.1.7
+## v0.1.7
 
 ```
 - Config change: by default IFC is not set.
@@ -466,7 +466,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.23.
 ```
 
-### v0.1.6
+## v0.1.6
 
 ```
 - Add API to mark files as trusted (IFC).
@@ -476,7 +476,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.21.
 ```
 
-### v0.1.5
+## v0.1.5
 
 ```
 - Nodes updated only when relations are recorded.
@@ -488,7 +488,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 ```
 
 
-### v0.1.4
+## v0.1.4
 
 ```
 - Add pseudofile to manipulate file provenance settings.
@@ -497,7 +497,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update to kernel version 4.4.16.
 ```
 
-### v0.1.3
+## v0.1.3
 
 ```
 - Provide facility to filter nodes and edges in kernel.
@@ -508,7 +508,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - IFC and Provenance LSM are now part of the default configuration.
 ```
 
-### v0.1.2
+## v0.1.2
 
 ```
 - Machine ID provided by kernel module.
@@ -519,7 +519,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Build and install configuration service.
 ```
 
-### v0.1.1
+## v0.1.1
 
 ```
 - Reduce number of file name and address recorded, limit to tracked entities.
@@ -530,7 +530,7 @@ _NOTE_ changes reverted in `v0.4.1` and re-introduced in `v0.4.2`:
 - Update kernel from version 4.2.8 to version 4.4.6.
 ```
 
-### v0.1.0
+## v0.1.0
 
 ```
 - Initial release.
