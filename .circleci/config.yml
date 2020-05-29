@@ -27,9 +27,12 @@ jobs:
           key: build-machine-{{ checksum "Makefile" }}
           paths:
             - build
+            - patches
       - persist_to_workspace:
           root: .
-          paths: build
+          paths:
+            - build
+            - patches
 
   doc:
     machine:
