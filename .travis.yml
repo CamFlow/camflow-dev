@@ -24,6 +24,8 @@ before_install:
   - sudo apt-get -y install ruby
 
 before_script:
+  - git config --global user.email $GH_EMAIL
+  - git config --global user.name $GH_NAME
   - make prepare_kernel
   - make patch
 
@@ -36,9 +38,6 @@ script:
   - make compile_security
   - make compile_kernel
   - make test_patch
-
-after_success:
-  - make prepare_release_travis
 
 deploy:
   provider: releases

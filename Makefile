@@ -19,8 +19,6 @@ prepare_kernel_raw:
 prepare_information_flow:
 	mkdir -p build/linux-stable
 	mkdir -p patches
-	git config user.email $(cont-email)
-	git config user.name $(cont-name)
 	cd build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
 	cd build/linux-stable && git apply ../0001-information-flow.patch
 	cd build/linux-stable && git add .
@@ -287,8 +285,6 @@ uncrustify_clean:
 
 patch: copy_change
 	mkdir -p patches
-	git config --global user.email $(cont-email)
-	git config --global user.name $(cont-name)
 	cd build/linux-stable && rm -f .config
 	cd build/linux-stable && rm -f  config_sav
 	cd build/linux-stable && rm -f  certs/signing_key.pem
@@ -302,31 +298,11 @@ patch: copy_change
 	cd build/linux-stable && git format-patch HEAD~~ -s
 	cd build/linux-stable && cp -f *.patch ../../patches/
 
-prepare_release_travis:
-	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
-
 test_patch:
 	cd ./build/pristine/linux-stable && git apply ../../../patches/0001-information-flow.patch
 	cd ./build/pristine/linux-stable && git apply ../../../patches/0002-camflow.patch
 
-prepare_git:
-	mkdir -p build
-	cd build && git clone -b v$(kernel-version) git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-
-patch_git:
-	git config --global user.email $(cont-email)
-	git config --global user.name $(cont-name)
-	cd ./build/linux-stable && patch -p2 < ../information-flow-patch/output/patch-$(kernel-version)-flow-friendly
-	cd ./build/linux-stable && git add .
-	cd ./build/linux-stable && git commit -a -m 'information flow patch'
-	cd ./build/linux-stable && cp -r ../../security .
-	cd ./build/linux-stable && cp -r ../../include .
-	cd ./build/linux-stable && git add .
-	cd ./build/linux-stable && git commit -a -m 'camflow patch'
-	cd ./build/linux-stable && git format-patch HEAD~~ -s
-
 save_space:
-	cd build && rm -rf information-flow-patch
 	cd build/linux-stable && rm -rf .git
 	cd build/pristine/linux-stable && rm -rf .git
 
