@@ -301,10 +301,6 @@ patch: copy_change
 	cd build/pristine/linux-stable && git format-patch HEAD~~ -s
 	cd build/pristine/linux-stable && cp -f *.patch ../../../patches/
 
-test_patch:
-	cd ./build/pristine/linux-stable && git apply ../../../patches/0001-information-flow.patch
-	cd ./build/pristine/linux-stable && git apply ../../../patches/0002-camflow.patch
-
 save_space:
 	cd build/linux-stable && rm -rf .git
 	cd build/pristine/linux-stable && rm -rf .git
