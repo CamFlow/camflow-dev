@@ -2,8 +2,8 @@ kernel-version=5.6.13
 lsm-version=0.6.6
 arch=x86_64
 
-cont-email != $(git log --format="%ae" HEAD^!)
-cont-name != $(git log --format="%ae" HEAD^!)
+cont-email="change@me.com"
+cont-name="CHANGE ME"
 
 all: config compile
 
