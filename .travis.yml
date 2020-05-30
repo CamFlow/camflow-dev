@@ -38,6 +38,8 @@ script:
   - make compile_security
   - make compile_kernel
   - make test_patch
+  - head patches/0001-information-flow.patch
+  - head patches/0002-camflow.patch
 
 deploy:
   provider: releases

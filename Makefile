@@ -21,9 +21,6 @@ prepare_information_flow:
 	mkdir -p patches
 	cd build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
 	cd build/linux-stable && git apply ../0001-information-flow.patch
-	cd build/linux-stable && git add .
-	cd build/linux-stable && git commit -a -m 'information flow'
-	mv -f build/0001-information-flow.patch ./patches/
 
 finalize:
 	cd build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
@@ -285,18 +282,24 @@ uncrustify_clean:
 
 patch: copy_change
 	mkdir -p patches
-	cd build/linux-stable && rm -f .config
-	cd build/linux-stable && rm -f  config_sav
-	cd build/linux-stable && rm -f  certs/signing_key.pem
-	cd build/linux-stable && rm -f	certs/x509.genkey
-	cd build/linux-stable && rm -f certs/signing_key.x509
-	cd build/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
-	cd build/linux-stable && $(MAKE) clean
-	cd build/linux-stable && $(MAKE) mrproper
-	cd build/linux-stable && git add .
-	cd build/linux-stable && git commit -a -m 'camflow'
-	cd build/linux-stable && git format-patch HEAD~~ -s
-	cd build/linux-stable && cp -f *.patch ../../patches/
+	cd build/pristine/linux-stable && rm -f .config
+	cd build/pristine/linux-stable && rm -f  config_sav
+	cd build/pristine/linux-stable && rm -f  certs/signing_key.pem
+	cd build/pristine/linux-stable && rm -f	certs/x509.genkey
+	cd build/pristine/linux-stable && rm -f certs/signing_key.x509
+	cd build/pristine/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
+	cd build/pristine/linux-stable && $(MAKE) clean
+	cd build/pristine/linux-stable && $(MAKE) mrproper
+	cd build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
+	cd build/pristine/linux-stable && git apply ../../0001-information-flow.patch
+	cd build/pristine/linux-stable && git add .
+	cd build/pristine/linux-stable && git commit -a -m 'information flow'
+	cd build/pristine/linux-stable && cp -r ../../../security .
+	cd build/pristine/linux-stable && cp -r ../../../include .
+	cd build/pristine/linux-stable && git add .
+	cd build/pristine/linux-stable && git commit -a -m 'camflow'
+	cd build/pristine/linux-stable && git format-patch HEAD~~ -s
+	cd build/pristine/linux-stable && cp -f *.patch ../../../patches/
 
 test_patch:
 	cd ./build/pristine/linux-stable && git apply ../../../patches/0001-information-flow.patch
