@@ -17,24 +17,20 @@ prepare_kernel_raw:
 	cd ./build && cp -r ./linux-stable ./pristine
 
 prepare_information_flow:
-	mkdir -p build
-	cd build && git clone https://github.com/CamFlow/information-flow-patch.git
-	cd build/information-flow-patch && git checkout $(kernel-version)
-	cd build/information-flow-patch && make prepare_kernel
-	cd build/information-flow-patch && make patch
-
-apply_information_flow:
+	mkdir -p build/linux-stable
 	mkdir -p patches
-	cd build/linux-stable && git apply ../information-flow-patch/patches/0001-information-flow.patch
-	cp -f build/information-flow-patch/patches/0001-information-flow.patch patches/0001-information-flow.patch
-	cd build && rm -rf ./information-flow-patch
+	git config user.email $(cont-email)
+	git config user.name $(cont-name)
+	cd build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
+	cd build/linux-stable && git apply ../0001-information-flow.patch
 	cd build/linux-stable && git add .
 	cd build/linux-stable && git commit -a -m 'information flow'
+	mv -f build/0001-information-flow.patch ./patches/
 
 finalize:
 	cd build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
 
-prepare_kernel: prepare_kernel_raw prepare_information_flow apply_information_flow finalize
+prepare_kernel: prepare_kernel_raw prepare_information_flow finalize
 
 prepare_provenance:
 	mkdir -p build
@@ -241,7 +237,6 @@ clean_us:
 delete_kernel:
 	cd ./build && rm -rf ./pristine
 	cd ./build && rm -rf ./linux-stable
-	cd ./build && rm -rf ./information-flow-patch
 
 delete_us:
 	cd ./build && rm -rf ./camconfd
@@ -291,6 +286,7 @@ uncrustify_clean:
 	rm ./include/uapi/linux/*backup*~
 
 patch: copy_change
+	mkdir -p patches
 	git config --global user.email $(cont-email)
 	git config --global user.name $(cont-name)
 	cd build/linux-stable && rm -f .config
@@ -299,18 +295,19 @@ patch: copy_change
 	cd build/linux-stable && rm -f	certs/x509.genkey
 	cd build/linux-stable && rm -f certs/signing_key.x509
 	cd build/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
-	cd build && rm -f camflow.patch
 	cd build/linux-stable && $(MAKE) clean
 	cd build/linux-stable && $(MAKE) mrproper
 	cd build/linux-stable && git add .
 	cd build/linux-stable && git commit -a -m 'camflow'
 	cd build/linux-stable && git format-patch HEAD~~ -s
+	cd build/linux-stable && cp -f *.patch ../../patches/
 
 prepare_release_travis:
 	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
 
 test_patch:
-	cd ./build/pristine/linux-stable && git apply ../../camflow.patch
+	cd ./build/pristine/linux-stable && git apply ../../../patches/0001-information-flow.patch
+	cd ./build/pristine/linux-stable && git apply ../../../patches/0002-camflow.patch
 
 prepare_git:
 	mkdir -p build

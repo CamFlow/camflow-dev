@@ -44,7 +44,8 @@ deploy:
   provider: releases
   api_key: "$GITHUB_KEY"
   file:
-    - patch
+    - patches/0001-information-flow.patch
+    - patches/0002-camflow.patch
   skip_cleanup: true
   on:
     tags: true
