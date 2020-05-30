@@ -1,5 +1,5 @@
 kernel-version=5.6.13
-lsm-version=0.6.6
+lsm-version=0.6.7
 arch=x86_64
 
 cont-email="change@me.com"
