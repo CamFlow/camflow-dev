@@ -24,6 +24,8 @@ before_install:
   - sudo apt-get -y install ruby
 
 before_script:
+  - git config --global user.email $GH_EMAIL
+  - git config --global user.name $GH_NAME
   - make prepare_kernel
   - make patch
 
@@ -35,16 +37,15 @@ script:
   - make config_travis
   - make compile_security
   - make compile_kernel
-  - make test_patch
-
-after_success:
-  - make prepare_release_travis
+  - head patches/0001-information-flow.patch
+  - head patches/0002-camflow.patch
 
 deploy:
   provider: releases
   api_key: "$GITHUB_KEY"
   file:
-    - patch
+    - patches/0001-information-flow.patch
+    - patches/0002-camflow.patch
   skip_cleanup: true
   on:
     tags: true

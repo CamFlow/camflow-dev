@@ -1,29 +1,31 @@
-kernel-version=5.6.7
-lsm-version=0.6.6
+kernel-version=5.6.15
+lsm-version=0.6.7
 arch=x86_64
 
-cont-email != $(git log --format="%ae" HEAD^!)
-cont-name != $(git log --format="%ae" HEAD^!)
+cont-email="change@me.com"
+cont-name="CHANGE ME"
 
 all: config compile
 
 prepare: prepare_kernel prepare_us
 
-prepare_kernel:
+prepare_kernel_raw:
 	mkdir -p build
 	cd ./build && git clone -b v$(kernel-version) --single-branch git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
 	cd ./build/linux-stable && $(MAKE) mrproper
 	cd ./build && mkdir -p pristine
 	cd ./build && cp -r ./linux-stable ./pristine
-	cd ./build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
-	cd ./build && git clone https://github.com/CamFlow/information-flow-patch.git
-	cd ./build/information-flow-patch && git checkout $(kernel-version)
-	cd ./build/information-flow-patch && mkdir -p ./build/linux-stable
-	cd ./build && cp -fa ./linux-stable/* ./information-flow-patch/build/linux-stable/
-	cd ./build/information-flow-patch && mkdir -p ./build/pristine/linux-stable/
-	cd ./build && cp -fa ./linux-stable/* ./information-flow-patch/build/pristine/linux-stable/
-	cd ./build/information-flow-patch && $(MAKE) patch
-	cd ./build/linux-stable && patch -p2 < ../information-flow-patch/output/patch-$(kernel-version)-flow-friendly
+
+prepare_information_flow:
+	mkdir -p build/linux-stable
+	mkdir -p patches
+	cd build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
+	cd build/linux-stable && git apply ../0001-information-flow.patch
+
+finalize:
+	cd build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
+
+prepare_kernel: prepare_kernel_raw prepare_information_flow finalize
 
 prepare_provenance:
 	mkdir -p build
@@ -230,7 +232,6 @@ clean_us:
 delete_kernel:
 	cd ./build && rm -rf ./pristine
 	cd ./build && rm -rf ./linux-stable
-	cd ./build && rm -rf ./information-flow-patch
 
 delete_us:
 	cd ./build && rm -rf ./camconfd
@@ -280,41 +281,27 @@ uncrustify_clean:
 	rm ./include/uapi/linux/*backup*~
 
 patch: copy_change
-	cd build/linux-stable && rm -f .config
-	cd build/linux-stable && rm -f  config_sav
-	cd build/linux-stable && rm -f  certs/signing_key.pem
-	cd build/linux-stable && rm -f	certs/x509.genkey
-	cd build/linux-stable && rm -f certs/signing_key.x509
-	cd build/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
-	cd build && rm -f patch-$(kernel-version)-v$(lsm-version)
-	cd build/linux-stable && $(MAKE) clean
-	cd build/linux-stable && $(MAKE) mrproper
-	cd build && diff -uprN -b -B ./pristine/linux-stable ./linux-stable > ./patch-$(kernel-version)-v$(lsm-version); [ $$? -eq 1 ]
-
-prepare_release_travis:
-	cp -f build/patch-$(kernel-version)-v$(lsm-version) patch
-
-test_patch:
-	cd ./build/pristine/linux-stable && patch -p2 < ../../patch-$(kernel-version)-v$(lsm-version)
-
-prepare_git:
-	mkdir -p build
-	cd build && git clone -b v$(kernel-version) git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-
-patch_git:
-	git config --global user.email $(cont-email)
-	git config --global user.name $(cont-name)
-	cd ./build/linux-stable && patch -p2 < ../information-flow-patch/output/patch-$(kernel-version)-flow-friendly
-	cd ./build/linux-stable && git add .
-	cd ./build/linux-stable && git commit -a -m 'information flow patch'
-	cd ./build/linux-stable && cp -r ../../security .
-	cd ./build/linux-stable && cp -r ../../include .
-	cd ./build/linux-stable && git add .
-	cd ./build/linux-stable && git commit -a -m 'camflow patch'
-	cd ./build/linux-stable && git format-patch HEAD~~ -s
+	mkdir -p patches
+	cd build/pristine/linux-stable && rm -f .config
+	cd build/pristine/linux-stable && rm -f  config_sav
+	cd build/pristine/linux-stable && rm -f  certs/signing_key.pem
+	cd build/pristine/linux-stable && rm -f	certs/x509.genkey
+	cd build/pristine/linux-stable && rm -f certs/signing_key.x509
+	cd build/pristine/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
+	cd build/pristine/linux-stable && $(MAKE) clean
+	cd build/pristine/linux-stable && $(MAKE) mrproper
+	cd build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
+	cd build/pristine/linux-stable && git apply ../../0001-information-flow.patch
+	cd build/pristine/linux-stable && git add .
+	cd build/pristine/linux-stable && git commit -a -m 'information flow'
+	cd build/pristine/linux-stable && cp -r ../../../security .
+	cd build/pristine/linux-stable && cp -r ../../../include .
+	cd build/pristine/linux-stable && git add .
+	cd build/pristine/linux-stable && git commit -a -m 'camflow'
+	cd build/pristine/linux-stable && git format-patch HEAD~~ -s
+	cd build/pristine/linux-stable && cp -f *.patch ../../../patches/
 
 save_space:
-	cd build && rm -rf information-flow-patch
 	cd build/linux-stable && rm -rf .git
 	cd build/pristine/linux-stable && rm -rf .git
 
