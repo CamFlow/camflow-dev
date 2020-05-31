@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.6.7           | 5.6.13         | N/A				|
+| 0.6.7           | 5.6.15         | N/A				|
 | 0.6.6           | 5.6.7          | 30/04/2020 |
 | 0.6.5           | 5.5.11         | 23/03/2020	|
 | 0.6.4           | 5.4.15         | 30/01/2020	|
@@ -50,10 +50,10 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-## v0.6.13
+## v0.6.7
 ```
 - Changes the way patches are generated and handled.
-- Update to kernel version 5.6.13.
+- Update to kernel version 5.6.15.
 ```
 
 ## v0.6.6
