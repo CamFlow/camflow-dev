@@ -228,7 +228,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/test/sparse.txt || true'
+      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/build/test/sparse.txt || true'
       - run: 'cat ./test/sparse.txt'
       - persist_to_workspace:
           root: .
@@ -253,7 +253,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && flawfinder ./security/provenance > ~/test/flawfinder.txt'
+      - run: 'cd ./build/linux-stable && flawfinder ./security/provenance > ~/build/test/flawfinder.txt'
       - run: 'cat ./test/flawfinder.txt'
       - persist_to_workspace:
           root: .
@@ -277,8 +277,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/*.c > ~/test/checkpatch.txt || true'
-      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/include/*.h > ~/test/headers_checkpatch.txt || true'
+      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/*.c > ~/build/test/checkpatch.txt || true'
+      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/include/*.h > ~/build/test/headers_checkpatch.txt || true'
       - run: 'cat ./test/checkpatch.txt'
       - run: 'cat ./test/headers_checkpatch.txt'
       - persist_to_workspace:
@@ -306,7 +306,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && make clean'
-      - run: 'cd ./build/linux-stable && make security CHECK="../smatch/smatch -p=kernel" C=1 >  ~/test/smatch.txt'
+      - run: 'cd ./build/linux-stable && make security CHECK="../smatch/smatch -p=kernel" C=1 >  ~/build/test/smatch.txt'
       - run: 'cat ./test/smatch.txt'
       - persist_to_workspace:
           root: .
@@ -340,7 +340,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && sed -i "/options = --use-gitgrep/d" .cocciconfig'
-      - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance > ~/test/cocci.txt || true'
+      - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance > ~/build/test/cocci.txt || true'
       - run: 'cat ./test/cocci.txt'
       - persist_to_workspace:
           root: .
