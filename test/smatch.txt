@@ -74,35 +74,35 @@ scripts/kconfig/conf  --syncconfig Kconfig
   CALL    scripts/checksyscalls.sh
   CALL    scripts/atomic/check-atomics.sh
   DESCEND  objtool
-  HOSTCC   /home/circleci/circulate/build/linux-stable/tools/objtool/fixdep.o
-  HOSTLD   /home/circleci/circulate/build/linux-stable/tools/objtool/fixdep-in.o
-  LINK     /home/circleci/circulate/build/linux-stable/tools/objtool/fixdep
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/exec-cmd.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/help.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/pager.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/parse-options.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/run-command.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/sigchain.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/subcmd-config.o
-  LD       /home/circleci/circulate/build/linux-stable/tools/objtool/libsubcmd-in.o
-  AR       /home/circleci/circulate/build/linux-stable/tools/objtool/libsubcmd.a
-  MKDIR    /home/circleci/circulate/build/linux-stable/tools/objtool/arch/x86/lib/
-  GEN      /home/circleci/circulate/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/arch/x86/decode.o
-  LD       /home/circleci/circulate/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/builtin-check.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/builtin-orc.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/check.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/orc_gen.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/orc_dump.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/elf.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/special.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/objtool.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/libstring.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/libctype.o
-  CC       /home/circleci/circulate/build/linux-stable/tools/objtool/str_error_r.o
-  LD       /home/circleci/circulate/build/linux-stable/tools/objtool/objtool-in.o
-  LINK     /home/circleci/circulate/build/linux-stable/tools/objtool/objtool
+  HOSTCC   /home/circleci/build/linux-stable/tools/objtool/fixdep.o
+  HOSTLD   /home/circleci/build/linux-stable/tools/objtool/fixdep-in.o
+  LINK     /home/circleci/build/linux-stable/tools/objtool/fixdep
+  CC       /home/circleci/build/linux-stable/tools/objtool/exec-cmd.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/help.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/pager.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/parse-options.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/run-command.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/sigchain.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/subcmd-config.o
+  LD       /home/circleci/build/linux-stable/tools/objtool/libsubcmd-in.o
+  AR       /home/circleci/build/linux-stable/tools/objtool/libsubcmd.a
+  MKDIR    /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/
+  GEN      /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
+  CC       /home/circleci/build/linux-stable/tools/objtool/arch/x86/decode.o
+  LD       /home/circleci/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/builtin-check.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/builtin-orc.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/check.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/orc_gen.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/orc_dump.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/elf.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/special.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/objtool.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/libstring.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/libctype.o
+  CC       /home/circleci/build/linux-stable/tools/objtool/str_error_r.o
+  LD       /home/circleci/build/linux-stable/tools/objtool/objtool-in.o
+  LINK     /home/circleci/build/linux-stable/tools/objtool/objtool
   HOSTCC  scripts/unifdef
   HDRINST usr/include/video/sisfb.h
   HDRINST usr/include/video/edid.h
