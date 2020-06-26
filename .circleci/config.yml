@@ -8,7 +8,7 @@ jobs:
       - checkout
       - restore_cache:
          keys:
-           - build-machine-{{ checksum "Makefile" }}
+           - build-machine-1-{{ checksum "Makefile" }}
       - run:
           name: 'Prepare build environment...'
           command: |
@@ -27,7 +27,7 @@ jobs:
             fi
             ls
       - save_cache:
-          key: build-machine-{{ checksum "Makefile" }}
+          key: build-machine-1-{{ checksum "Makefile" }}
           paths:
             - linux-stable
             - pristine
