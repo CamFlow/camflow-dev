@@ -14,6 +14,7 @@ prepare_kernel_raw:
 	cd ~/build && cp -r ./linux-stable ./pristine
 
 prepare_information_flow:
+	mkdir -p patches
 	cd ~/build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
 	cd ~/build/linux-stable && git apply ../0001-information-flow.patch
 

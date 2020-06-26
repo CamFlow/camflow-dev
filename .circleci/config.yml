@@ -29,7 +29,8 @@ jobs:
       - save_cache:
           key: build-machine-{{ checksum "Makefile" }}
           paths:
-            - build
+            - linux-stable
+            - pristine
             - patches
       - persist_to_workspace:
           root: .
