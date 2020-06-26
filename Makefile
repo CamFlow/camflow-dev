@@ -44,18 +44,34 @@ prepare_service:
 	cd us-dependencies/camflowd && $(MAKE) prepare
 
 prepare_smatch:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone git://repo.or.cz/smatch.git
-	cd us-dependencies/smatch && git checkout 1.60
-	cd us-dependencies/smatch && $(MAKE)
+	mkdir -p ~/build
+	cd ~/build && git clone git://repo.or.cz/smatch.git
+	cd ~/build/smatch && git checkout 1.60
+	cd ~/build/smatch && $(MAKE)
+
+prepare_sparse:
+	mkdir -p ~/build
+	cd ~/build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git
+	cd ~/build/sparse && git checkout v0.6.1
+	cd ~/build/sparse && make
+	cd ~/build/sparse && sudo make install
+
+prepare_tinkerbell:
+	mkdir -p ~/build
+	cd ~/build && git clone https://github.com/TinkerBellSystem/compiler
+	cd ~/build/compiler && git checkout thomas
+	cd ~/build/compiler && make prepare
+	cd ~/build/compiler && make config
+	cd ~/build && git clone https://github.com/TinkerBellSystem/graph-matching
+	cd ~/build/graph-matching && git checkout thomas
 
 prepare_ltp:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/linux-test-project/ltp.git
-	cd us-dependencies/ltp && $(MAKE) autotools
-	cd us-dependencies/ltp && ./configure
-	cd us-dependencies/ltp && $(MAKE)
-	cd us-dependencies/ltp && sudo $(MAKE) install
+	mkdir -p ~/build
+	cd ~/build && git clone https://github.com/linux-test-project/ltp.git
+	cd ~/build/ltp && $(MAKE) autotools
+	cd ~/build/ltp && ./configure
+	cd ~/build/ltp && $(MAKE)
+	cd ~/build/ltp && sudo $(MAKE) install
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
