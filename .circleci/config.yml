@@ -35,7 +35,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - build
+            - linux-stable
+            - pristine
             - patches
 
   doc:
