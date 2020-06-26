@@ -2,9 +2,6 @@ kernel-version=5.6.15
 lsm-version=0.6.7
 arch=x86_64
 
-cont-email="change@me.com"
-cont-name="CHANGE ME"
-
 all: config compile
 
 prepare: prepare_kernel prepare_us
