@@ -12,7 +12,7 @@ jobs:
       - run:
           name: 'Prepare build environment...'
           command: |
-            if [ -d "build/linux-stable" ]; then
+            if [ -d "~/build/linux-stable" ]; then
               echo 'Build environment was cached.'
             else
               echo 'Build environment was not cached.'
