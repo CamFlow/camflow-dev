@@ -91,6 +91,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
+      - run: 'ls'
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
