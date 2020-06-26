@@ -289,8 +289,8 @@ patch: copy_change
 	cd ~/build/pristine/linux-stable && git apply ../../0001-information-flow.patch
 	cd ~/build/pristine/linux-stable && git add .
 	cd ~/build/pristine/linux-stable && git commit -a -m 'information flow'
-	cd ~/build/pristine/linux-stable && cp -r ../../../security .
-	cd ~/build/pristine/linux-stable && cp -r ../../../include .
+	cp -r security ~/build/pristine/linux-stable/.
+	cp -r include ~/build/pristine/linux-stable/.
 	cd ~/build/pristine/linux-stable && git add .
 	cd ~/build/pristine/linux-stable && git commit -a -m 'camflow'
 	cd ~/build/pristine/linux-stable && git format-patch HEAD~~ -s
