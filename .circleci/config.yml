@@ -3,7 +3,7 @@ jobs:
   checkout:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - restore_cache:
@@ -25,6 +25,7 @@ jobs:
               make prepare_kernel
               make save_space
             fi
+            ls
       - save_cache:
           key: build-machine-{{ checksum "Makefile" }}
           paths:
@@ -39,11 +40,11 @@ jobs:
   doc:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -66,11 +67,11 @@ jobs:
   security:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -84,11 +85,11 @@ jobs:
   security_clang:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -108,11 +109,11 @@ jobs:
   compile_default:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -126,11 +127,11 @@ jobs:
   compile_default_clang:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -150,11 +151,11 @@ jobs:
   compile_no_flow_friendly:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -169,11 +170,11 @@ jobs:
   compile_whole:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -188,11 +189,11 @@ jobs:
   compile_persist:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -207,11 +208,11 @@ jobs:
   sparse:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -235,11 +236,11 @@ jobs:
   flawfinder:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -260,11 +261,11 @@ jobs:
   checkpatch:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -287,11 +288,11 @@ jobs:
   smatch:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -313,11 +314,11 @@ jobs:
   coccinelle:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -347,11 +348,11 @@ jobs:
   tinkerbell:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -380,11 +381,11 @@ jobs:
   deploy_dev:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/
+    working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: ~/build
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
