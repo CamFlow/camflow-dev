@@ -3,7 +3,7 @@ jobs:
   checkout:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - restore_cache:
@@ -39,7 +39,7 @@ jobs:
   doc:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -66,7 +66,7 @@ jobs:
   security:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -84,7 +84,7 @@ jobs:
   security_clang:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -108,7 +108,7 @@ jobs:
   compile_default:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -126,7 +126,7 @@ jobs:
   compile_default_clang:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -150,7 +150,7 @@ jobs:
   compile_no_flow_friendly:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -169,7 +169,7 @@ jobs:
   compile_whole:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -188,7 +188,7 @@ jobs:
   compile_persist:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -207,7 +207,7 @@ jobs:
   sparse:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -235,7 +235,7 @@ jobs:
   flawfinder:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -260,7 +260,7 @@ jobs:
   checkpatch:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -287,7 +287,7 @@ jobs:
   smatch:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -313,7 +313,7 @@ jobs:
   coccinelle:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -347,7 +347,7 @@ jobs:
   tinkerbell:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
@@ -380,7 +380,7 @@ jobs:
   deploy_dev:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~
+    working_directory: ~/
     steps:
       - checkout
       - attach_workspace:
