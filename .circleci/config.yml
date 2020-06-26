@@ -3,7 +3,7 @@ jobs:
   checkout:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - restore_cache:
@@ -39,11 +39,11 @@ jobs:
   doc:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -66,11 +66,11 @@ jobs:
   security:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -84,11 +84,11 @@ jobs:
   security_clang:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -108,11 +108,11 @@ jobs:
   compile_default:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -126,11 +126,11 @@ jobs:
   compile_default_clang:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -150,11 +150,11 @@ jobs:
   compile_no_flow_friendly:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -169,11 +169,11 @@ jobs:
   compile_whole:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -188,11 +188,11 @@ jobs:
   compile_persist:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -207,11 +207,11 @@ jobs:
   sparse:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -226,7 +226,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/circulate/test/sparse.txt || true'
+      - run: 'cd ./build/linux-stable && make C=2 security/provenance/ &>  ~/test/sparse.txt || true'
       - run: 'cat ./test/sparse.txt'
       - persist_to_workspace:
           root: .
@@ -235,11 +235,11 @@ jobs:
   flawfinder:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -251,7 +251,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && flawfinder ./security/provenance > ~/circulate/test/flawfinder.txt'
+      - run: 'cd ./build/linux-stable && flawfinder ./security/provenance > ~/test/flawfinder.txt'
       - run: 'cat ./test/flawfinder.txt'
       - persist_to_workspace:
           root: .
@@ -260,11 +260,11 @@ jobs:
   checkpatch:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -275,8 +275,8 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
-      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/*.c > ~/circulate/test/checkpatch.txt || true'
-      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/include/*.h > ~/circulate/test/headers_checkpatch.txt || true'
+      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/*.c > ~/test/checkpatch.txt || true'
+      - run: 'cd ./build/linux-stable && ./scripts/checkpatch.pl --show-types --file security/provenance/include/*.h > ~/test/headers_checkpatch.txt || true'
       - run: 'cat ./test/checkpatch.txt'
       - run: 'cat ./test/headers_checkpatch.txt'
       - persist_to_workspace:
@@ -287,11 +287,11 @@ jobs:
   smatch:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -304,7 +304,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && make clean'
-      - run: 'cd ./build/linux-stable && make security CHECK="../smatch/smatch -p=kernel" C=1 >  ~/circulate/test/smatch.txt'
+      - run: 'cd ./build/linux-stable && make security CHECK="../smatch/smatch -p=kernel" C=1 >  ~/test/smatch.txt'
       - run: 'cat ./test/smatch.txt'
       - persist_to_workspace:
           root: .
@@ -313,11 +313,11 @@ jobs:
   coccinelle:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -338,7 +338,7 @@ jobs:
       - run: 'cd build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'mkdir -p test'
       - run: 'cd ./build/linux-stable && sed -i "/options = --use-gitgrep/d" .cocciconfig'
-      - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance > ~/circulate/test/cocci.txt || true'
+      - run: 'cd ./build/linux-stable && make coccicheck MODE=report M=security/provenance > ~/test/cocci.txt || true'
       - run: 'cat ./test/cocci.txt'
       - persist_to_workspace:
           root: .
@@ -347,11 +347,11 @@ jobs:
   tinkerbell:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -380,11 +380,11 @@ jobs:
   deploy_dev:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/circulate
+    working_directory: ~
     steps:
       - checkout
       - attach_workspace:
-          at: ~/circulate
+          at: ~
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
