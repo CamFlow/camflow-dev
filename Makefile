@@ -184,12 +184,10 @@ compile_kernel_clang: copy_change
 
 compile_us:
 	cd ~/build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr
-	cd us-dependencies/libprovenance && $(MAKE) clean
 	cd us-dependencies/libprovenance && $(MAKE) all
 
 compile_us_clang:
 	cd ~/build/linux-stable && sudo $(MAKE) headers_install ARCH=${arch} INSTALL_HDR_PATH=/usr CC=clang HOSTCC=clang
-	cd us-dependencies/libprovenance && $(MAKE) clean
 	cd us-dependencies/libprovenance && $(MAKE) all
 
 config_cross_pi: copy_change
