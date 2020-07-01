@@ -1,4 +1,4 @@
-kernel-version=5.6.15
+kernel-version=5.7.6
 lsm-version=0.7.0
 arch=x86_64
 
@@ -15,8 +15,9 @@ prepare_kernel_raw:
 
 prepare_information_flow:
 	mkdir -p patches
+	rm -f ~/build//0001-information-flow.patch
 	cd ~/build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
-	cd ~/build/linux-stable && git apply ../0001-information-flow.patch
+	cd ~/build/linux-stable && git apply --whitespace=fix --verbose ../0001-information-flow.patch
 
 finalize:
 	cd ~/build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
@@ -74,6 +75,18 @@ prepare_ltp:
 	cd ~/build/ltp && sudo $(MAKE) install
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
+
+prepare_update:
+	mv include/linux/fs.h include/linux/_fs.h
+	cp ~/build/pristine/linux-stable/include/linux/fs.h include/linux/fs.h
+	mv include/net/sock.h include/net/_sock.h
+	cp ~/build/pristine/linux-stable/include/net/sock.h include/net/sock.h
+	mv include/uapi/linux/xattr.h include/uapi/linux/_xattr.h
+	cp ~/build/pristine/linux-stable/include/uapi/linux/xattr.h include/uapi/linux/xattr.h
+	mv security/Kconfig security/_Kconfig
+	cp ~/build/pristine/linux-stable/security/Kconfig security/Kconfig
+	mv security/Makefile security/_Makefile
+	cp ~/build/pristine/linux-stable/security/Makefile security/Makefile
 
 copy_change: update_commit uncrustify uncrustify_clean
 	cp -r ./security ~/build/linux-stable
