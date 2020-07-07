@@ -6,6 +6,8 @@ We build uppon [INRIA tools](http://kayrebt.gforge.inria.fr/).
 
 The following hooks are ignored in this report: ["audit_rule_init", "audit_rule_match", "capable", "capable_noaudit", "capget", "capset", "cred_getsecid", "file_alloc", "file_free", "inode_getsecid", "ipc_getsecid", "path_chmod", "path_chown", "path_chroot", "path_link", "path_mkdir", "path_mknod", "path_rename", "path_rmdir", "path_symlink", "path_truncate", "path_unlink", "release_secctx", "secid_to_secctx", "sk_free", "task_getsecid"]
 
+**Code rote has broken our coverage/model analysis. Release [v0.6.7](https://github.com/CamFlow/camflow-dev/releases/tag/v0.6.7) is the latest release with working coverage analysis. We are working on better analysis tools, in the meantime, sorry :(.**
+
 System Call|Model|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)| 
 -----------|-----|------------|-----------------|---------------------|------------------------------| 
 __x64_sys_open| ![__x64_sys_open graph](./img/__x64_sys_open.png) |["bpf_prog_free", "cred_free", "file_open", "file_send_sigiotask", "inode_create", "inode_follow_link", "inode_free", "inode_killpriv", "inode_need_killpriv", "inode_permission", "inode_post_setxattr", "inode_setattr", "inode_setsecurity", "kernel_module_request", "key_alloc", "key_permission", "sb_free", "task_free"]|["cred_free", "file_open", "file_send_sigiotask", "inode_create", "inode_free", "inode_permission", "inode_post_setxattr", "inode_setattr", "sb_free", "task_free"]|["bpf_prog_free", "inode_follow_link", "inode_killpriv", "inode_need_killpriv", "inode_setsecurity", "kernel_module_request", "key_alloc", "key_permission"]|10/18|
