@@ -42,7 +42,11 @@ if __name__ == "__main__":
 		for line in f:
 			funcname = line.strip()
 			print "FuncName: " + funcname
-			id = str(getID(funcname, c)[0])
+			try:
+				id = str(getID(funcname, c)[0])
+			except TypeError:
+				print 'Failed identifying '+ funcname + ' id.'
+				continue
 			print "ID: " + id
 			outline = funcname + '\t' + id + '\n'
 			output.write(outline)
