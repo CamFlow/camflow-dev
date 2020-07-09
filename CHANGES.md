@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.7.0           | 5.6.15         | N/A				|
+| 0.7.0           | 5.7.7	         | 09/07/2020	|
 | 0.6.7           | 5.6.15         | 31/05/2020 |
 | 0.6.6           | 5.6.7          | 30/04/2020 |
 | 0.6.5           | 5.5.11         | 23/03/2020	|
@@ -54,7 +54,7 @@
 ## v0.7.0
 ```
 - Change build directory structure.
-- Update to kernel version 5.6.15.
+- Update to kernel version 5.7.7.
 ```
 
 ## v0.6.7
