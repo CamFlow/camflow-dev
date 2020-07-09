@@ -36,47 +36,41 @@ prepare_m4:
 	sudo cp -f -a ./m4/. /usr/share/aclocal
 
 prepare_callgraph:
-	mkdir -p ../build
-	cd ../build && git clone https://github.com/CamFlow/callgraphs.git
+	mkdir -p ~/build
+	cd ~/build && git clone https://github.com/CamFlow/callgraphs.git
 
 config: config_callgraph config_kernel config_sqlite
 
 config_callgraph:
-	cd ../build/callgraphs && ls
-	cd ../build/callgraphs && autoreconf --install -vv
-	cd ../build/callgraphs && ./configure
-	cd ../build/callgraphs && $(MAKE)
-	cd ../build/callgraphs && sudo $(MAKE) install
+	cd ~/build/callgraphs && ls
+	cd ~/build/callgraphs && autoreconf --install -vv
+	cd ~/build/callgraphs && ./configure
+	cd ~/build/callgraphs && $(MAKE)
+	cd ~/build/callgraphs && sudo $(MAKE) install
 
 config_kernel:
-	cp -f ./.config ../build/linux-stable/
+	cp -f ./.config ~/build/linux-stable/
 	cd .. && $(MAKE) config_circle
-	cd ../build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
-	cd ../build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config
+	cd ~/build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config
+	cd ~/build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config
 
 config_sqlite:
-	cd ../build/linux-stable && touch create_db.sh
-	cd ../build/linux-stable && echo '#!/bin/bash' >> create_db.sh
-	cd ../build/linux-stable && echo 'cat <<EOF | sqlite3 db.sqlite' >> create_db.sh
-	cd ../build/linux-stable && echo 'CREATE TABLE functions (Id INTEGER PRIMARY KEY, Name TEXT, File TEXT, Line INTEGER, Global INTEGER);' >> create_db.sh
-	cd ../build/linux-stable && echo 'CREATE TABLE calls (Caller INTEGER, Callee INTEGER, PRIMARY KEY (Caller,Callee));' >> create_db.sh
-	cd ../build/linux-stable && echo 'EOF' >> create_db.sh
-	cd ../build/linux-stable && chmod u+x create_db.sh
-	cd ../build/linux-stable && ./create_db.sh
+	cd ~/build/linux-stable && touch create_db.sh
+	cd ~/build/linux-stable && echo '#!/bin/bash' >> create_db.sh
+	cd ~/build/linux-stable && echo 'cat <<EOF | sqlite3 db.sqlite' >> create_db.sh
+	cd ~/build/linux-stable && echo 'CREATE TABLE functions (Id INTEGER PRIMARY KEY, Name TEXT, File TEXT, Line INTEGER, Global INTEGER);' >> create_db.sh
+	cd ~/build/linux-stable && echo 'CREATE TABLE calls (Caller INTEGER, Callee INTEGER, PRIMARY KEY (Caller,Callee));' >> create_db.sh
+	cd ~/build/linux-stable && echo 'EOF' >> create_db.sh
+	cd ~/build/linux-stable && chmod u+x create_db.sh
+	cd ~/build/linux-stable && ./create_db.sh
 
 compile:
-	cd ../build/linux-stable && $(MAKE) CC=gcc HOSTCC=gcc EXTRA_CFLAGS="-fplugin=kayrebt_callgraphs -fplugin-arg-kayrebt_callgraphs-dbfile=db.sqlite"
+	cd ~/build/linux-stable && $(MAKE) CC=gcc HOSTCC=gcc EXTRA_CFLAGS="-fplugin=kayrebt_callgraphs -fplugin-arg-kayrebt_callgraphs-dbfile=db.sqlite"
 
 run: run_analysis
 
 run_analysis:
-	python syscall.py /home/circleci/circulate/build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	python analyze.py /home/circleci/circulate/build/linux-stable/db.sqlite syslist.txt syshooks.txt
-	python stats.py syshooks.txt ../docs/STATS.md
-	cd .. && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md
-
-run_local:
-	python syscall.py ../build/linux-stable/db.sqlite syscalls.txt syslist.txt
-	python analyze.py ../build/linux-stable/db.sqlite syslist.txt syshooks.txt
+	python syscall.py ~/build/linux-stable/db.sqlite syscalls.txt syslist.txt
+	python analyze.py ~/build/linux-stable/db.sqlite syslist.txt syshooks.txt
 	python stats.py syshooks.txt ../docs/STATS.md
 	cd .. && ruby ./scripts/coverage.rb > ./docs/COVERAGE.md

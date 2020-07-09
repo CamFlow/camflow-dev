@@ -20,6 +20,7 @@ file_related = ['file_alloc', 'file_free'] # we use underlying inode structure f
 to_remove = audit_related + capable_related + secid_related + path_related + creds_related + sk_related + file_related
 to_remove.sort!
 puts 'The following hooks are ignored in this report: '+to_remove.to_s+"\n\n"
+puts "**Code rote has broken our coverage/model analysis. Release [v0.6.7](https://github.com/CamFlow/camflow-dev/releases/tag/v0.6.7) is the latest release with working coverage analysis. We are working on better analysis tools, in the meantime, sorry :(.**\n\n"
 
 puts "System Call|Model|Hooks Called|Hooks Implemented|Hooks Not Implemented|Coverage (implemented / total)| \n"
 puts "-----------|-----|------------|-----------------|---------------------|------------------------------| \n"
