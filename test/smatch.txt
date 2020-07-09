@@ -520,6 +520,9 @@ security/provenance/hooks.c:2395 provenance_socket_recvmsg_always() warn: incons
   CHECK   security/lockdown/lockdown.c
   CC      security/lockdown/lockdown.o
   AR      security/lockdown/built-in.a
+  CHECK   security/bpf/hooks.c
+  CC      security/bpf/hooks.o
+  AR      security/bpf/built-in.a
   CHECK   security/integrity/ima/ima_fs.c
   CC      security/integrity/ima/ima_fs.o
   CHECK   security/integrity/ima/ima_queue.c
