@@ -678,7 +678,7 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 		struct filters *s;								  \
 		if (count < sizeof(struct info))						  \
 		return -ENOMEM;									  \
-		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);				  \
 		if (!s)										  \
 		return -ENOMEM;									  \
 		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {			  \
@@ -686,8 +686,8 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 			return -EAGAIN;								  \
 		}										  \
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
-		add_function (s); else								  \
-		delete_function (s); return sizeof(struct filters);				  \
+		add_function(s); else								  \
+		delete_function(s); return sizeof(struct filters);				  \
 	}
 
 #define declare_generic_filter_read(function_name, filters, info)			    \

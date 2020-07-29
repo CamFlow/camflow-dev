@@ -16,10 +16,6 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
-#ifdef __KERNEL__
-#include <linux/socket.h>
-#include <linux/mutex.h>
-#endif
 #ifndef __KERNEL__
 #include <stdint.h>
 #include <stdbool.h>
@@ -27,6 +23,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #endif
+
 #include <linux/limits.h>
 #include <linux/utsname.h>
 #include <linux/provenance_utils.h>
@@ -41,7 +38,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "9532c0b5b4a61e9a27406e4caf4ca95f538212d8"
+#define CAMFLOW_COMMIT "9a4b48a9d764cee11e12706cfc5c683a6eb01764"
 
 #define PROVENANCE_HASH                 "sha256"
 
