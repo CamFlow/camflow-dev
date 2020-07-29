@@ -168,7 +168,7 @@ security/provenance/propagate.c has no obvious style problems and is ready for s
 ---------------------------
 security/provenance/query.c
 ---------------------------
-total: 0 errors, 0 warnings, 49 lines checked
+total: 0 errors, 0 warnings, 50 lines checked
 
 security/provenance/query.c has no obvious style problems and is ready for submission.
 ---------------------------
