@@ -22,9 +22,6 @@ static inline uint32_t prov_hash(uint64_t val)
 	return (val * PROV_GOLDEN_RATIO_64) >> (64 - 8);
 }
 
- #define PROV_K_HASH                     7
- #define PROV_M_BITS                     256
- #define PROV_N_BYTES                    (PROV_M_BITS / 8)
  #define PROV_BYTE_INDEX(a)      (a / 8)
  #define PROV_BIT_INDEX(a)       (a % 8)
 

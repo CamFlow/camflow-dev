@@ -16,7 +16,10 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
-#include <linux/provenance_utils.h>
+// taint buffer size
+#define PROV_K_HASH                     7
+#define PROV_M_BITS                     256
+#define PROV_N_BYTES                    (PROV_M_BITS / 8)
 
 #define xstr(s)         str(s)
 #define str(s)          # s
@@ -28,7 +31,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "e5dad36f86bfb4af0433dac88bc23aeb2f91202c"
+#define CAMFLOW_COMMIT "3a3dbb36dd34b02e117ef40f98ce6a8aee7588e9"
 
 #define PROVENANCE_HASH                 "sha256"
 

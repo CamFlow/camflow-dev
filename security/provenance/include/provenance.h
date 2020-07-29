@@ -25,6 +25,7 @@
 #include <linux/utsname.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
+#include <uapi/linux/provenance_utils.h>
 #include <uapi/linux/provenance_types.h>
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
