@@ -16,6 +16,9 @@
 #ifndef _UAPI_LINUX_PROVENANCE_FS_H
 #define _UAPI_LINUX_PROVENANCE_FS_H
 
+#include <linux/types.h>
+#include <linux/provenance.h>
+
  #define PROV_SEC_PATH                           "/sys/kernel/security/provenance/"
  #define PROV_ENABLE_FILE                        "/sys/kernel/security/provenance/enable"
  #define PROV_ALL_FILE                           "/sys/kernel/security/provenance/all"

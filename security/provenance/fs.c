@@ -19,7 +19,6 @@
  *
  */
 #include <linux/security.h>
-#include <linux/provenance_types.h>
 #include <crypto/hash.h>
 
 #include "provenance.h"

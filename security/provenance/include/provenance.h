@@ -31,6 +31,7 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/xattr.h>
+#include <linux/provenance_types.h>
 
 #include "provenance_policy.h"
 #include "provenance_filter.h"

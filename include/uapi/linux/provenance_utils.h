@@ -16,6 +16,8 @@
  #ifndef _UAPI_LINUX_PROVENANCE_UTILS_H
  #define _UAPI_LINUX_PROVENANCE_UTILS_H
 
+#include <linux/provenance.h>
+
  #define PROV_GOLDEN_RATIO_64            0x61C8864680B583EBUL
 static inline uint32_t prov_hash(uint64_t val)
 {
