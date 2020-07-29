@@ -15,6 +15,7 @@
 #include <linux/rculist.h>
 #include <uapi/asm-generic/errno-base.h>
 #include <linux/socket.h>
+#include <linux/utsname.h>
 
 #include "provenance_query.h"
 

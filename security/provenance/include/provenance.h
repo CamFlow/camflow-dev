@@ -22,6 +22,7 @@
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
 #include <linux/cred.h>
+#include <linux/utsname.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/provenance_types.h>

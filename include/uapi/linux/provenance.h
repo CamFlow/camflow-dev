@@ -16,16 +16,6 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
-#ifndef __KERNEL__
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
-#endif
-
-#include <linux/limits.h>
-#include <linux/utsname.h>
 #include <linux/provenance_utils.h>
 
 #define xstr(s)         str(s)
@@ -33,12 +23,12 @@
 
 #define CAMFLOW_VERSION_MAJOR           0
 #define CAMFLOW_VERSION_MINOR           7
-#define CAMFLOW_VERSION_PATCH           0
+#define CAMFLOW_VERSION_PATCH           1
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "9a4b48a9d764cee11e12706cfc5c683a6eb01764"
+#define CAMFLOW_COMMIT "e5dad36f86bfb4af0433dac88bc23aeb2f91202c"
 
 #define PROVENANCE_HASH                 "sha256"
 

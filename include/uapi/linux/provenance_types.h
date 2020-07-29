@@ -16,12 +16,6 @@
 #ifndef _UAPI_LINUX_PROVENANCE_TYPES_H
 #define _UAPI_LINUX_PROVENANCE_TYPES_H
 
-#ifndef __KERNEL__
-#include <stdint.h>
-#include <stdbool.h>
-#endif
-
-
 #define TYPE_MASK                               0xFFFF000000000000UL
 #define SUBTYPE_MASK                            0x0000FFFFFFFFFFFFUL
 
