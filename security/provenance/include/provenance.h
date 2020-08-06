@@ -25,7 +25,6 @@
 #include <linux/utsname.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
-#include <uapi/linux/provenance_utils.h>
 #include <uapi/linux/provenance_types.h>
 #include <uapi/linux/stat.h>
 #include <linux/fs.h>
@@ -34,6 +33,8 @@
 #include <linux/provenance_types.h>
 
 #include "provenance_policy.h"
+#include "provenance_taint.h"
+#include "provenance_utils.h"
 #include "provenance_filter.h"
 #include "provenance_query.h"
 

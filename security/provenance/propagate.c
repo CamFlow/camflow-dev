@@ -12,6 +12,7 @@
  * published by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
  */
+
 #include "provenance.h"
 #include "provenance_query.h"
 
@@ -23,7 +24,7 @@ static int flow(prov_entry_t *from, prov_entry_t *edge, prov_entry_t *to)
 		    !filter_propagate_node(to)) {
 			set_tracked(to);
 			set_propagate(to);
-			prov_bloom_merge(prov_taint(to), prov_taint(from));
+			provenance_taint_merge(prov_taint(to), prov_taint(from));
 		}
 	return 0;
 }

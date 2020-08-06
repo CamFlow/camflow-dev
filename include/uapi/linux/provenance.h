@@ -27,11 +27,6 @@
 #include <linux/utsname.h>
 #endif
 
-/* taint buffer size */
-#define PROV_K_HASH                     7
-#define PROV_M_BITS                     256
-#define PROV_N_BYTES                    (PROV_M_BITS / 8)
-
 #define xstr(s)         str(s)
 #define str(s)          # s
 
@@ -42,7 +37,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "96eb3b6403fd6110ae9f4b5846d7ee5919e70641"
+#define CAMFLOW_COMMIT "24f1dad42bc28a1d7d5e189595dc92b4bb26773c"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -142,7 +137,7 @@ union prov_identifier {
 
 
 
-#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
+#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
 #define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
