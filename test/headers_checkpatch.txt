@@ -76,7 +76,7 @@ security/provenance/include/provenance_filter.h has style problems, please revie
 ----------------------------------------
 security/provenance/include/provenance.h
 ----------------------------------------
-total: 0 errors, 0 warnings, 288 lines checked
+total: 0 errors, 0 warnings, 287 lines checked
 
 security/provenance/include/provenance.h has no obvious style problems and is ready for submission.
 ----------------------------------------------
@@ -127,19 +127,6 @@ security/provenance/include/provenance_relay.h
 total: 0 errors, 0 warnings, 188 lines checked
 
 security/provenance/include/provenance_relay.h has no obvious style problems and is ready for submission.
-----------------------------------------------
-security/provenance/include/provenance_taint.h
-----------------------------------------------
-ERROR:COMPLEX_MACRO: Macros with complex values should be enclosed in parentheses
-#18: FILE: security/provenance/include/provenance_taint.h:18:
-+#define provenance_taint_merge(dest, src) dest = dest | src
-
-total: 1 errors, 0 warnings, 20 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/include/provenance_taint.h has style problems, please review.
 ---------------------------------------------
 security/provenance/include/provenance_task.h
 ---------------------------------------------
