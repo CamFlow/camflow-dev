@@ -327,7 +327,7 @@ __x64_sys_name_to_handle_at	20531
 __x64_sys_open_by_handle_at	20533
 __x64_sys_setns	20696
 __x64_sys_seccomp	20549
-__x64_sys_getrandom	50749
+__x64_sys_getrandom	50748
 __x64_sys_bpf	16617
 __x64_sys_membarrier	10137
 __x64_sys_mlock2	20557

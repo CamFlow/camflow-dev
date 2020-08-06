@@ -874,7 +874,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/if_cablemodem.h
   HDRINST usr/include/linux/sem.h
   HDRINST usr/include/linux/blktrace_api.h
-  HDRINST usr/include/linux/provenance_utils.h
   HDRINST usr/include/linux/net_tstamp.h
   HDRINST usr/include/linux/dlm_device.h
   HDRINST usr/include/linux/fuse.h
