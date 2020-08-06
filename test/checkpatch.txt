@@ -24,7 +24,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#388: FILE: security/provenance/fs.c:388:
+#382: FILE: security/provenance/fs.c:382:
 +#define declare_write_filter_fcn(fcn_name, filter)		  \
 +	static ssize_t fcn_name(struct file *file,		  \
 +				const char __user *buf,		  \
@@ -35,7 +35,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#397: FILE: security/provenance/fs.c:397:
+#391: FILE: security/provenance/fs.c:391:
 +#define declare_read_filter_fcn(fcn_name, filter)		\
 +	static ssize_t fcn_name(struct file *filp,		\
 +				char __user *buf,		\
@@ -46,7 +46,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#601: FILE: security/provenance/fs.c:601:
+#595: FILE: security/provenance/fs.c:595:
 +#define declare_write_ipv4_filter_fcn(fcn_name, filter)		       \
 +	static ssize_t fcn_name(struct file *file,		       \
 +				const char __user *buf,		       \
@@ -57,7 +57,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#610: FILE: security/provenance/fs.c:610:
+#604: FILE: security/provenance/fs.c:604:
 +#define declare_reader_ipv4_filter_fcn(fcn_name, filter)	      \
 +	static ssize_t fcn_name(struct file *filp,		      \
 +				char __user *buf,		      \
@@ -68,7 +68,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#671: FILE: security/provenance/fs.c:671:
+#665: FILE: security/provenance/fs.c:665:
 +#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
 +	static ssize_t function_name(struct file *file,						  \
 +				     const char __user *buf,					  \
@@ -91,7 +91,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#692: FILE: security/provenance/fs.c:692:
+#686: FILE: security/provenance/fs.c:686:
 +#define declare_generic_filter_read(function_name, filters, info)			    \
 +	static ssize_t function_name(struct file *filp,					    \
 +				     char __user *buf,					    \
@@ -115,7 +115,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#886: FILE: security/provenance/fs.c:886:
+#880: FILE: security/provenance/fs.c:880:
 +#define hash_filters(filters, filters_type, tmp, tmp_type)						 \
 +	do {												 \
 +		list_for_each_safe(listentry, listtmp, &filters) {					 \
@@ -129,7 +129,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		}											 \
 +	} while (0)
 
-total: 0 errors, 9 warnings, 1140 lines checked
+total: 0 errors, 9 warnings, 1133 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -138,7 +138,7 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-total: 0 errors, 0 warnings, 2950 lines checked
+total: 0 errors, 0 warnings, 2949 lines checked
 
 security/provenance/hooks.c has no obvious style problems and is ready for submission.
 -----------------------------
