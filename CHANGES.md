@@ -54,6 +54,7 @@
 
 ## v0.7.1
 ```
+- Changes are taints are handled.
 - Remove duplicate option.
 - Clean up UAPI header files.
 ```

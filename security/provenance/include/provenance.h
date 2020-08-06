@@ -33,7 +33,6 @@
 #include <linux/provenance_types.h>
 
 #include "provenance_policy.h"
-#include "provenance_taint.h"
 #include "provenance_utils.h"
 #include "provenance_filter.h"
 #include "provenance_query.h"

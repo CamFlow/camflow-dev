@@ -37,7 +37,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "a25d8dd814ca90083e517121574f09fd06b9f1d5"
+#define CAMFLOW_COMMIT "cf48cc73ff254293fefca8264a40e2f953f88360"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -60,6 +60,8 @@
 #define prov_flag(prov)                         ((prov)->msg_info.internal_flag)
 #define prov_taint(prov)                        ((prov)->msg_info.taint)
 #define prov_jiffies(prov)                      ((prov)->msg_info.jiffies)
+
+#define provenance_taint_merge(dest, src) dest = (dest) | (src)
 
 struct node_identifier {
 	uint64_t type;

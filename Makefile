@@ -288,7 +288,6 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
-	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_taint.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_utils.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/memcpy_ss.h
