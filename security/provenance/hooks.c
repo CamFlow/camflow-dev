@@ -2847,7 +2847,6 @@ static void __init init_prov_policy(void)
 {
 	pr_info("Provenance: policy initialization started...");
 	prov_policy.prov_enabled = true;
-	prov_policy.should_duplicate = false;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM

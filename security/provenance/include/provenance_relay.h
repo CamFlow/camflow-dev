@@ -94,7 +94,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 {
 	BUG_ON(prov_type_is_relation(node_type(node)));
 
-	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
+	if (provenance_is_recorded(node))
 		return;
 	tighten_identifier(&get_prov_identifier(node));
 	set_recorded(node);

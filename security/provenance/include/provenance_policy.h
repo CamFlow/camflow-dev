@@ -28,9 +28,6 @@ struct capture_policy {
 	bool should_compress_node;
 	// Whether edges should be compressed into one if possible.
 	bool should_compress_edge;
-	// every time a relation is recorded the two end nodes will be recorded
-	// again if set to true.
-	bool should_duplicate;
 	// Node to be filtered out (i.e., not recorded).
 	uint64_t prov_node_filter;
 	// Node to be filtered out if it is part of propagate.
