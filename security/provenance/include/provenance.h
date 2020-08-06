@@ -31,6 +31,7 @@
 #include <linux/xattr.h>
 
 #include "provenance_policy.h"
+#include "provenance_utils.h"
 #include "provenance_filter.h"
 #include "provenance_query.h"
 

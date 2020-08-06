@@ -29,7 +29,6 @@
 #endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
-#include <linux/provenance_utils.h>
 
 #define xstr(s)         str(s)
 #define str(s)          # s
@@ -41,7 +40,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "da08fb3ceeb62d23b57c5a9c256eccc36437d5dd"
+#define CAMFLOW_COMMIT "e0c20ec5723e418575e8f32c94bb88c62d2734ab"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -64,6 +63,8 @@
 #define prov_flag(prov)                         ((prov)->msg_info.internal_flag)
 #define prov_taint(prov)                        ((prov)->msg_info.taint)
 #define prov_jiffies(prov)                      ((prov)->msg_info.jiffies)
+
+#define provenance_taint_merge(dest, src) dest = (dest) | (src)
 
 struct node_identifier {
 	uint64_t type;
@@ -141,7 +142,7 @@ union prov_identifier {
 
 
 
-#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
+#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
 #define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {

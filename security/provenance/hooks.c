@@ -908,7 +908,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 		else
 			clear_propagate(prov_elt(prov));
 
-		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
+		provenance_taint_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
 	}
 	return 0;
 }

@@ -313,8 +313,8 @@ static inline void update_prov_config(union prov_elt *setting,
 	}
 
 	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_elt(prov)),
-				 prov_taint(setting));
+		provenance_taint_merge(prov_taint(prov_elt(prov)),
+				       prov_taint(setting));
 }
 
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
