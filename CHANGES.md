@@ -54,6 +54,7 @@
 
 ## v0.7.1
 ```
+- Read/Write self applies to tasks (aka threads).
 - Changes are taints are handled.
 - Remove duplicate option.
 - Clean up UAPI header files.

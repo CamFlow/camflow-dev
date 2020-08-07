@@ -314,7 +314,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = provenance_cred_from_task(current);
+	struct provenance *prov = provenance_task(current);
 
 	if (!prov)
 		return -EINVAL;
@@ -332,7 +332,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = provenance_cred_from_task(current);
+	struct provenance *cprov = provenance_task(current);
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
