@@ -47,6 +47,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
@@ -74,9 +76,16 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-10 gcc-10'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 --slave /usr/bin/g++ g++ /usr/bin/g++-10'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
