@@ -47,11 +47,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get install -y software-properties-common'
-      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cd ./scripts && make prepare'
@@ -127,9 +133,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -169,9 +183,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -188,9 +210,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -207,9 +237,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -226,9 +264,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_sparse'
@@ -251,9 +297,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install -y flawfinder'
       - run: 'sudo apt-get install --reinstall make'
@@ -276,9 +330,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -303,9 +365,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_smatch'
@@ -329,9 +399,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install -y ocaml-native-compilers ocaml-findlib menhir libmenhir-ocaml-dev libpcre-ocaml-dev libparmap-ocaml-dev texlive-fonts-extra'
       - run: 'sudo apt-get install --reinstall make'
@@ -363,9 +441,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_tinkerbell'
@@ -391,9 +477,17 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y git rsync'
       - run: 'sudo apt-get install -y ruby'
       - run: 'ruby ./scripts/clean_test.rb'
