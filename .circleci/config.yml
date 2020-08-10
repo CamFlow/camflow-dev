@@ -83,7 +83,7 @@ jobs:
       - run: 'sudo apt-get update'
       - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y g++-9 gcc-9'
-      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 --slave /usr/bin/g++ g++ /usr/bin/g++-10'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
       - run: 'sudo update-alternatives --config gcc'
       - run: 'gcc --version'
       - run: 'g++ --version'
