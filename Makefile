@@ -47,7 +47,7 @@ prepare_service:
 prepare_smatch:
 	mkdir -p ~/build
 	cd ~/build && git clone git://repo.or.cz/smatch.git
-	cd ~/build/smatch && git checkout 1.60
+	cd ~/build/smatch && git checkout a196836a9addc799dc9bd057358656cec869d49b
 	cd ~/build/smatch && $(MAKE)
 
 prepare_sparse:
