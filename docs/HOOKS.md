@@ -68,8 +68,8 @@ socket_recvmsg| ![socket_recvmsg graph](./img/socket_recvmsg.png)|
 socket_sock_rcv_skb| ![socket_sock_rcv_skb graph](./img/socket_sock_rcv_skb.png)|
 unix_stream_connect| ![unix_stream_connect graph](./img/unix_stream_connect.png)|
 unix_may_send| ![unix_may_send graph](./img/unix_may_send.png)|
-bprm_check_security| ![bprm_check_security graph](./img/bprm_check_security.png)|
-bprm_set_creds| ![bprm_set_creds graph](./img/bprm_set_creds.png)|
+bprm_creds_from_file| ![bprm_creds_from_file graph](./img/bprm_creds_from_file.png)|
+bprm_creds_for_exec| ![bprm_creds_for_exec graph](./img/bprm_creds_for_exec.png)|
 bprm_committing_creds| ![bprm_committing_creds graph](./img/bprm_committing_creds.png)|
 sb_alloc_security| ![sb_alloc_security graph](./img/sb_alloc_security.png)|
 sb_free_security| ![sb_free_security graph](./img/sb_free_security.png)|

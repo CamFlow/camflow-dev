@@ -2516,15 +2516,13 @@ static int provenance_unix_may_send(struct socket *sock,
 }
 
 /*!
- * @brief Record provenance when bprm_set_creds hook is triggered.
+ * @brief Record provenance when bprm_creds_for_exec hook is triggered.
  *
  * This hook is triggered when saving security information in the bprm->security
  * field, typically based on information about the bprm->file, for later use by
  * the apply_creds hook.
  * This hook may also optionally check permissions (e.g. for transitions between
  * security domains).
- * This hook may be called multiple times during a single execve, e.g. for
- * interpreters.
  * The hook can tell whether it has already been called by checking to see if
  * @bprm->security is non-NULL.
  * If so, then the hook may decide either to retain the security information
@@ -2539,7 +2537,7 @@ static int provenance_unix_may_send(struct socket *sock,
  * derives function.
  *
  */
-static int provenance_bprm_set_creds(struct linux_binprm *bprm)
+static int provenance_bprm_creds_for_exec(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *iprov = get_file_provenance(bprm->file, true);
@@ -2560,17 +2558,14 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 }
 
 /*!
- * @brief Record provenance when bprm_check hook is triggered.
+ * @brief Record provenance when bprm_creds_from_file hook is triggered.
  *
- * This hook mediates the point when a search for a binary handler will begin.
- * It allows a check the @bprm->security value which is set in the preceding
- * set_creds call.
- * The primary difference from set_creds is that the argv list and envp list are
- * reliably available in @bprm.
- * This hook may be called multiple times during a single execve;
- * and in each pass set_creds is called first.
- * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque
- * (i.e., do not track).
+ * This is called after finding the binary that will be executed.
+ *	without an interpreter.  This ensures that the credentials will not
+ *	be derived from a script that the binary will need to reopen, which
+ *	when reopend may end up being a completely different file.  This
+ *	hook may also optionally check permissions (e.g. for transitions
+ *	between security domains).
  * The relations between the bprm arguments and bprm->cred are recorded by
  * calling record_args function.
  * @param bprm The linux_binprm structure.
@@ -2578,11 +2573,12 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * exist. Other error codes inherited from record_args function.
  *
  */
-static int provenance_bprm_check_security(struct linux_binprm *bprm)
+static int provenance_bprm_creds_from_file(struct linux_binprm *bprm,
+					   struct file *file)
 {
 	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *tprov = get_task_provenance(false);
-	struct provenance *iprov = get_file_provenance(bprm->file, false);
+	struct provenance *iprov = get_file_provenance(file, false);
 
 	if (!nprov)
 		return -ENOMEM;
@@ -2807,9 +2803,9 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(unix_may_send,            provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_check_security,      provenance_bprm_check_security),
-	LSM_HOOK_INIT(bprm_set_creds,           provenance_bprm_set_creds),
-	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
+	LSM_HOOK_INIT(bprm_creds_from_file,     provenance_bprm_creds_from_file),
+	LSM_HOOK_INIT(bprm_creds_for_exec,      provenance_bprm_creds_for_exec),
+	LSM_HOOK_INIT(bprm_committing_creds,            provenance_bprm_committing_creds),
 
 	/* file system related hooks */
 	LSM_HOOK_INIT(sb_alloc_security,        provenance_sb_alloc_security),

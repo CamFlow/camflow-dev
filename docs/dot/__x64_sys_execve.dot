@@ -1,14 +1,4 @@
-digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-path -> inode[fontsize = 8,label = named]
-
-process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-inode -> process_memory[fontsize = 8,label = exec]
-
-process_memory -> process_memory[fontsize = 8,label = version_entity]
+digraph RGL__DirectedAdjacencyGraph {process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 process_memory -> process_memory[fontsize = 8,label = terminate_proc]
 
@@ -20,13 +10,21 @@ task -> process_memory[fontsize = 8,label = clone_mem]
 
 task -> task[fontsize = 8,label = version_activity]
 
+process_memory -> process_memory[fontsize = 8,label = version_entity]
+
+inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
+
 inode -> process_memory[fontsize = 8,label = sh_read]
+
+path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 path -> process_memory[fontsize = 8,label = named]
 
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
 machine -> task[fontsize = 8,label = ran_on]
+
+path -> inode[fontsize = 8,label = named]
 
 inode -> task[fontsize = 8,label = open]
 
@@ -45,6 +43,8 @@ inode -> task[fontsize = 8,label = search]
 task -> inode[fontsize = 8,label = send]
 
 inode -> task[fontsize = 8,label = receive]
+
+inode -> process_memory[fontsize = 8,label = exec]
 
 inode -> task[fontsize = 8,label = file_sigio]
 

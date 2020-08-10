@@ -58,6 +58,7 @@
 - Change to how taints are handled.
 - Remove duplicate option.
 - Clean up UAPI header files.
+- Update to kernel version 5.8.
 ```
 
 ## v0.7.0
