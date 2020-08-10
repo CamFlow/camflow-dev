@@ -82,7 +82,7 @@ jobs:
       - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
       - run: 'sudo apt-get update'
       - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y g++-10 gcc-10'
+      - run: 'sudo apt-get install -y g++-9 gcc-9'
       - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 --slave /usr/bin/g++ g++ /usr/bin/g++-10'
       - run: 'sudo update-alternatives --config gcc'
       - run: 'gcc --version'
