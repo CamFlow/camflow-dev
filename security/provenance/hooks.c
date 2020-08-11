@@ -354,32 +354,29 @@ static int provenance_task_fix_setuid(struct cred *new,
 /*!
  * @brief Record provenance when task_setpgid hook is triggered.
  *
- * This hooks is triggered when checking permission before setting the process
- * group identifier of the process @p to @pgid.
- * @cprov is the cred provenance of the @current process, and @tprov is the
- * task provenance of the @current process.
- * During "get_cred_provenance" and "get_task_provenance" functions, their
- * provenances are updated too.
- * We update process @p's cred provenance's pgid info as required by the trigger
- * of the hook.
- * Record provenance relation RL_SETGID by calling "generates" function.
- * Information flows from cred of the @current process, which sets the @pgid,
- * to the current process, and eventually to the process @p whose @pgid is
- * updated.
- * @param p The task_struct for process being modified.
- * @param pgid The new pgid.
- * @return 0 if permission is granted. Other error codes unknown.
+ *      Update the module's state after setting one or more of the group
+ *      identity attributes of the current process.  The @flags parameter
+ *      indicates which of the set*gid system calls invoked this hook.
+ *      @new is the set of credentials that will be installed.  Modifications
+ *      should be made to this rather than to @current->cred.
+ *      @old is the set of credentials that are being replaced
+ *      @flags contains one of the LSM_SETID_* values.
+ *      Return 0 on success.
  *
  */
-static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
+static int provenance_task_fix_setgid(struct cred *new,
+				      const struct cred *old,
+				      int flags)
 {
-	struct provenance *cprov = get_cred_provenance();
+	struct provenance *old_prov = provenance_cred(old);
+	struct provenance *nprov = provenance_cred(new);
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *nprov = provenance_cred_from_task(p);
+	unsigned long irqflags;
 	int rc;
 
-	prov_elt(nprov)->proc_info.gid = pgid;
-	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
+	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
+	rc = generates(RL_SETGID, old_prov, tprov, nprov, NULL, flags);
+	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }
 
@@ -2725,7 +2722,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_alloc,               provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,                provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,          provenance_task_fix_setuid),
-	LSM_HOOK_INIT(task_setpgid,             provenance_task_setpgid),
+	LSM_HOOK_INIT(task_fix_setgid,          provenance_task_fix_setgid),
 	LSM_HOOK_INIT(task_getpgid,             provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,                provenance_task_kill),
 	LSM_HOOK_INIT(ptrace_access_check,      provenance_ptrace_access_check),

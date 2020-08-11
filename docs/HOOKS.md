@@ -11,7 +11,7 @@ cred_transfer| ![cred_transfer graph](./img/cred_transfer.png)|
 task_alloc| ![task_alloc graph](./img/task_alloc.png)|
 task_free| ![task_free graph](./img/task_free.png)|
 task_fix_setuid| ![task_fix_setuid graph](./img/task_fix_setuid.png)|
-task_setpgid| ![task_setpgid graph](./img/task_setpgid.png)|
+task_fix_setgid| ![task_fix_setgid graph](./img/task_fix_setgid.png)|
 task_getpgid| ![task_getpgid graph](./img/task_getpgid.png)|
 task_kill| ![task_kill graph](./img/task_kill.png)|
 ptrace_access_check| ![ptrace_access_check graph](./img/ptrace_access_check.png)|
