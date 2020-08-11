@@ -3,4 +3,4 @@ Please check for false positives in the output before submitting a patch.
 When using "patch" mode, carefully review the patch before submitting it.
 
 coccicheck failed
-Makefile:1791: recipe for target 'coccicheck' failed
+Makefile:1814: recipe for target 'coccicheck' failed
