@@ -2596,11 +2596,12 @@ static int provenance_bprm_creds_from_file(struct linux_binprm *bprm,
  * This hook is triggered when preparing to install the new security attributes
  * of a process being transformed by an execve operation,
  * based on the old credentials pointed to by @current->cred,
- * and the information set in @bprm->cred by the bprm_set_creds hook.
- * This hook is a good place to perform state changes on the process such as
- * closing open file descriptors to which access will no longer
- * be granted when the attributes are changed.
- * This is called immediately before commit_creds().
+ * and the information set in @bprm->cred by the bprm_creds_for_exec hook.
+ * @bprm points to the linux_binprm
+ *	structure.  This hook is a good place to perform state changes on the
+ *	process such as closing open file descriptors to which access will no
+ *	longer be granted when the attributes are changed.  This is called
+ *	immediately before commit_creds().
  * Since the process is being transformed to the new process,
  * record provenance relation RL_EXEC_TASK by calling "derives" function.
  * Information flows from the old process's cred to the new process's cred.
@@ -2802,7 +2803,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* exec related hooks */
 	LSM_HOOK_INIT(bprm_creds_from_file,     provenance_bprm_creds_from_file),
 	LSM_HOOK_INIT(bprm_creds_for_exec,      provenance_bprm_creds_for_exec),
-	LSM_HOOK_INIT(bprm_committing_creds,            provenance_bprm_committing_creds),
+	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
 
 	/* file system related hooks */
 	LSM_HOOK_INIT(sb_alloc_security,        provenance_sb_alloc_security),
