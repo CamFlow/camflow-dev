@@ -138,7 +138,7 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-total: 0 errors, 0 warnings, 2943 lines checked
+total: 0 errors, 0 warnings, 2965 lines checked
 
 security/provenance/hooks.c has no obvious style problems and is ready for submission.
 -----------------------------
@@ -181,15 +181,15 @@ security/provenance/relay.c has no obvious style problems and is ready for submi
 security/provenance/type.c
 --------------------------
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#155: FILE: security/provenance/type.c:155:
+#157: FILE: security/provenance/type.c:157:
 +#define MATCH_AND_RETURN(str1, str2, v)	\
 +	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
 WARNING:BRACES: braces {} are not necessary for single statement blocks
-#156: FILE: security/provenance/type.c:156:
+#158: FILE: security/provenance/type.c:158:
 +	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
-total: 0 errors, 2 warnings, 587 lines checked
+total: 0 errors, 2 warnings, 595 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
