@@ -54,6 +54,7 @@
 
 ## v0.7.1
 ```
+- Track copy up (overlayfs) operations.
 - Change the way setgid is handled.
 - Read/Write self applies to tasks (aka threads).
 - Change to how taints are handled.

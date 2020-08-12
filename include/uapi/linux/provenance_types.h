@@ -105,6 +105,8 @@
 #define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 31))
 #define RL_PTRACE_ATTACH                        (RL_GENERATED | (0x0000000000000001ULL << 32))
 #define RL_GENERATED_DISC                       (RL_GENERATED | (0x0000000000000001ULL << 33))
+#define RL_COPY_UP_NEW_CRED                     (RL_GENERATED | (0x0000000000000001ULL << 34))
+#define RL_COPY_UP_INODE                        (RL_GENERATED | (0x0000000000000001ULL << 35))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */

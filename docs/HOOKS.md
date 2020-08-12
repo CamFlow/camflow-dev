@@ -34,6 +34,7 @@ inode_listxattr| ![inode_listxattr graph](./img/inode_listxattr.png)|
 inode_removexattr| ![inode_removexattr graph](./img/inode_removexattr.png)|
 inode_getsecurity| ![inode_getsecurity graph](./img/inode_getsecurity.png)|
 inode_listsecurity| ![inode_listsecurity graph](./img/inode_listsecurity.png)|
+inode_copy_up| ![inode_copy_up graph](./img/inode_copy_up.png)|
 file_permission| ![file_permission graph](./img/file_permission.png)|
 mmap_file| ![mmap_file graph](./img/mmap_file.png)|
 mmap_munmap| ![mmap_munmap graph](./img/mmap_munmap.png)|

@@ -111,6 +111,8 @@ static const char RL_STR_LOAD_KEXEC_INITRAMFS[] = "load_kexec_initramfs";       
 static const char RL_STR_LOAD_POLICY[] = "load_policy";                                                 // load file into kernel
 static const char RL_STR_LOAD_CERTIFICATE[] = "load_certificate";                                       // load file into kernel
 static const char RL_STR_LOAD_UNDEFINED[] = "load_undefined";                                           // load file into kernel
+static const char RL_STR_COPY_UP_NEW_CRED[] = "copy_up_new_cred";                                       // overlayfs copy up create temporary cred
+static const char RL_STR_COPY_UP_INODE[] = "copy_up_inode";                                             // overlayfs action on inode
 static const char RL_STR_PTRACE_ATTACH[] = "ptrace_attach";                                             // ptrace attach effect on memory
 static const char RL_STR_PTRACE_READ[] = "ptrace_read";                                                 // ptrace read from mem
 static const char RL_STR_PTRACE_ATTACH_TASK[] = "ptrace_attach_task";                                   // write info via ptrace effect on task
@@ -346,6 +348,10 @@ const char *relation_str(uint64_t type)
 		return RL_STR_LOAD_CERTIFICATE;
 	case RL_LOAD_UNDEFINED:
 		return RL_STR_LOAD_UNDEFINED;
+	case RL_COPY_UP_NEW_CRED:
+		return RL_STR_COPY_UP_NEW_CRED;
+	case RL_COPY_UP_INODE:
+		return RL_STR_COPY_UP_INODE;
 	case RL_PTRACE_ATTACH:
 		return RL_STR_PTRACE_ATTACH;
 	case RL_PTRACE_READ:
@@ -475,6 +481,8 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_LOAD_POLICY, RL_LOAD_POLICY);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_CERTIFICATE, RL_LOAD_CERTIFICATE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNDEFINED, RL_LOAD_UNDEFINED);
+	MATCH_AND_RETURN(str, RL_STR_COPY_UP_NEW_CRED, RL_COPY_UP_NEW_CRED);
+	MATCH_AND_RETURN(str, RL_STR_COPY_UP_INODE, RL_COPY_UP_INODE);
 	MATCH_AND_RETURN(str, RL_STR_PTRACE_ATTACH, RL_PTRACE_ATTACH);
 	MATCH_AND_RETURN(str, RL_STR_PTRACE_READ, RL_PTRACE_READ);
 	MATCH_AND_RETURN(str, RL_STR_PTRACE_ATTACH_TASK, RL_PTRACE_ATTACH_TASK);
