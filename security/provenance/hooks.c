@@ -216,7 +216,6 @@ static int provenance_ptrace_traceme(struct task_struct *parent)
  * Therefore, no information flow occurred.
  * We simply create a ENT_PROC provenance node and associate the provenance
  * entry to the newly allocated @cred.
- * Set the proper UID and GID of the node based on the information from @cred.
  * @param cred Points to the new credentials.
  * @param gfp Indicates the atomicity of any memory allocations.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for
@@ -229,9 +228,6 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 
 	if (!prov)
 		return -ENOMEM;
-
-	node_uid(prov_elt(prov)) = __kuid_val(cred->euid);
-	node_gid(prov_elt(prov)) = __kgid_val(cred->egid);
 	return 0;
 }
 
