@@ -138,7 +138,7 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-total: 0 errors, 0 warnings, 2961 lines checked
+total: 0 errors, 0 warnings, 2965 lines checked
 
 security/provenance/hooks.c has no obvious style problems and is ready for submission.
 -----------------------------
