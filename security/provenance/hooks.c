@@ -2861,7 +2861,7 @@ static void __init init_prov_policy(void)
 	prov_policy.prov_enabled = true;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
-#ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
+#ifdef CONFIG_SECURITY_PROVENANCE_BOOT
 	prov_policy.prov_all = true;
 #else
 	prov_policy.prov_all = false;
@@ -2936,7 +2936,11 @@ static int __init provenance_init(void)
 	spin_lock_init(&lock_buffer);
 	spin_lock_init(&lock_long_buffer);
 	relay_ready = false;
+#ifdef CONFIG_SECURITY_PROVENANCE_BOOT
+	pr_info("Provenance: boot cature is on.");
+#endif
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
+	pr_info("Provenance: persistence is on.");
 	provq = alloc_workqueue("provq", 0, 0);
 	if (!provq)
 		pr_err("Provenance: could not initialize work queue.");

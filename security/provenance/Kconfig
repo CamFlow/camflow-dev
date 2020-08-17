@@ -13,8 +13,8 @@ config SECURITY_PROVENANCE
           This selects CamFlow provenance modules. It captures provenance through
           a Linux Security Module.
 
-config SECURITY_PROVENANCE_WHOLE_SYSTEM
-	bool "CamFlow - Whole system provenance"
+config SECURITY_PROVENANCE_BOOT
+	bool "CamFlow - boot provenance"
 	depends on SECURITY_PROVENANCE
 	default n
 	help
