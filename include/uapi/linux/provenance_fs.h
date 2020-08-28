@@ -16,6 +16,7 @@
 #ifndef _UAPI_LINUX_PROVENANCE_FS_H
 #define _UAPI_LINUX_PROVENANCE_FS_H
 
+#include <linux/types.h>
 #include <linux/provenance.h>
 
  #define PROV_SEC_PATH                           "/sys/kernel/security/provenance/"
@@ -55,6 +56,7 @@
  #define PROV_VERSION                            "/sys/kernel/security/provenance/version"
  #define PROV_COMMIT                             "/sys/kernel/security/provenance/commit"
  #define PROV_CHANNEL                            "/sys/kernel/security/provenance/channel"
+ #define PROV_DUPLICATE_FILE                     "/sys/kernel/security/provenance/duplicate"
  #define PROV_EPOCH_FILE                         "/sys/kernel/security/provenance/epoch"
 
  #define PROV_RELAY_NAME                         "/sys/kernel/debug/provenance"

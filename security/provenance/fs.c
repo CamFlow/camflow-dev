@@ -130,6 +130,12 @@ declare_file_operations(prov_compress_edge_ops,
 			prov_write_compress_edge,
 			prov_read_compress_edge);
 
+declare_write_flag_fcn(prov_write_duplicate, prov_policy.should_duplicate);
+declare_read_flag_fcn(prov_read_duplicate, prov_policy.should_duplicate);
+declare_file_operations(prov_duplicate_ops,
+			prov_write_duplicate,
+			prov_read_duplicate);
+
 static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
 				     size_t count, loff_t *ppos)
 {
@@ -1126,6 +1132,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("version", 0444, &prov_version);
 	prov_create_file("commit", 0444, &prov_commit);
 	prov_create_file("channel", 0644, &prov_channel_ops);
+	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
 	prov_create_file("epoch", 0644, &prov_epoch_ops);
 	pr_info("Provenance: fs ready.\n");
 	return 0;

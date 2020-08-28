@@ -59,7 +59,6 @@
 - Change the way setgid is handled.
 - Read/Write self applies to tasks (aka threads).
 - Change to how taints are handled.
-- Remove duplicate option.
 - Clean up UAPI header files.
 - Update to kernel version 5.8.
 ```
