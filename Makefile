@@ -1,4 +1,4 @@
-kernel-version=5.8.8
+kernel-version=5.8.14
 lsm-version=0.7.1
 arch=x86_64
 
@@ -15,7 +15,7 @@ prepare_kernel_raw:
 
 prepare_information_flow:
 	mkdir -p patches
-	rm -f ~/build//0001-information-flow.patch
+	rm -f ~/build/0001-information-flow.patch
 	cd ~/build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
 	cd ~/build/linux-stable && git apply --whitespace=fix --verbose ../0001-information-flow.patch
 
@@ -76,7 +76,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-prepare_update:
+prepare_update: prepare_kernel
 	mv include/linux/fs.h include/linux/_fs.h
 	cp ~/build/pristine/linux-stable/include/linux/fs.h include/linux/fs.h
 	mv include/net/sock.h include/net/_sock.h
