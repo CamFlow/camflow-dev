@@ -42,11 +42,12 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/asm/irq_regs.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  WRAP    arch/x86/include/generated/asm/rwonce.h
   UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
-  CHECK   scripts/mod/empty.c
   CC      scripts/mod/empty.o
+  CHECK   scripts/mod/empty.c
   HOSTCC  scripts/mod/mk_elfconfig
   MKELF   scripts/mod/elfconfig.h
   HOSTCC  scripts/mod/modpost.o
@@ -371,6 +372,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/meye.h
   HDRINST usr/include/linux/bpf_perf_event.h
   HDRINST usr/include/linux/net.h
+  HDRINST usr/include/linux/close_range.h
   HDRINST usr/include/linux/if_vlan.h
   HDRINST usr/include/linux/net_dropmon.h
   HDRINST usr/include/linux/qnxtypes.h
@@ -548,7 +550,6 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/ip6_tunnel.h
   HDRINST usr/include/linux/fdreg.h
   HDRINST usr/include/linux/if_phonet.h
-  HDRINST usr/include/linux/elfcore.h
   HDRINST usr/include/linux/patchkey.h
   HDRINST usr/include/linux/atm_zatm.h
   HDRINST usr/include/linux/ip_vs.h
@@ -767,6 +768,7 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/linux/cciss_defs.h
   HDRINST usr/include/linux/capi.h
   HDRINST usr/include/linux/userio.h
+  HDRINST usr/include/linux/remoteproc_cdev.h
   HDRINST usr/include/linux/dm-log-userspace.h
   HDRINST usr/include/linux/termios.h
   HDRINST usr/include/linux/vsockmon.h
@@ -1030,22 +1032,22 @@ scripts/kconfig/conf  --syncconfig Kconfig
   HDRINST usr/include/asm/resource.h
   HDRINST usr/include/asm/sockios.h
   HDRINST usr/include/asm/errno.h
-  CHECK   security/provenance/relay.c
   CC      security/provenance/relay.o
-  CHECK   security/provenance/hooks.c
+  CHECK   security/provenance/relay.c
   CC      security/provenance/hooks.o
-  CHECK   security/provenance/query.c
+  CHECK   security/provenance/hooks.c
   CC      security/provenance/query.o
-  CHECK   security/provenance/fs.c
+  CHECK   security/provenance/query.c
   CC      security/provenance/fs.o
-  CHECK   security/provenance/netfilter.c
+  CHECK   security/provenance/fs.c
   CC      security/provenance/netfilter.o
-  CHECK   security/provenance/propagate.c
+  CHECK   security/provenance/netfilter.c
   CC      security/provenance/propagate.o
-  CHECK   security/provenance/type.c
+  CHECK   security/provenance/propagate.c
   CC      security/provenance/type.o
-  CHECK   security/provenance/machine.c
+  CHECK   security/provenance/type.c
   CC      security/provenance/machine.o
-  CHECK   security/provenance/memcpy_ss.c
+  CHECK   security/provenance/machine.c
   CC      security/provenance/memcpy_ss.o
+  CHECK   security/provenance/memcpy_ss.c
   AR      security/provenance/built-in.a

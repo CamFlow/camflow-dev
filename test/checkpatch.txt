@@ -138,9 +138,16 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-total: 0 errors, 0 warnings, 2966 lines checked
+WARNING:REPEATED_WORD: Possible repeated word: 'and'
+#2026: FILE: security/provenance/hooks.c:2026:
++ * Typically, the inode alloc_security hook will allocate and and attach
 
-security/provenance/hooks.c has no obvious style problems and is ready for submission.
+total: 0 errors, 1 warnings, 2966 lines checked
+
+NOTE: For some of the reported defects, checkpatch may be able to
+      mechanically convert to the typical style using --fix or --fix-inplace.
+
+security/provenance/hooks.c has style problems, please review.
 -----------------------------
 security/provenance/machine.c
 -----------------------------
