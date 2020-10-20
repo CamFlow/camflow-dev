@@ -1085,7 +1085,7 @@ declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 		provenance_mark_as_opaque_dentry(dentry);			      \
 	} while (0)
 
-static int __init init_prov_fs(void)
+static __init int init_prov_fs(void)
 {
 	struct dentry *prov_dir;
 	struct dentry *dentry;

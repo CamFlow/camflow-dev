@@ -2855,7 +2855,7 @@ uint32_t prov_boot_id;
 uint32_t epoch;
 bool prov_written;
 
-static void __init init_prov_policy(void)
+static __init void init_prov_policy(void)
 {
 	pr_info("Provenance: policy initialization started...");
 	prov_policy.prov_enabled = true;
@@ -2870,7 +2870,7 @@ static void __init init_prov_policy(void)
 	pr_info("Provenance: policy initialization finished.");
 }
 
-static void __init init_boot_cache(void)
+static __init void init_boot_cache(void)
 {
 	pr_info("Provenance: boot cache initialization started...");
 	boot_buffer_cache = kmem_cache_create("boot_buffer_cache",
@@ -2886,7 +2886,7 @@ static void __init init_boot_cache(void)
 	pr_info("Provenance: boot cache initialization finished.");
 }
 
-static void __init init_prov_cache(void)
+static __init void init_prov_cache(void)
 {
 	pr_info("Provenance: cache initialization started...");
 	provenance_cache = kmem_cache_create("provenance_struct",
@@ -2924,7 +2924,7 @@ static void __init init_prov_cache(void)
  * needed).
  *
  */
-static int __init provenance_init(void)
+static __init int provenance_init(void)
 {
 	pr_info("Provenance: initialization started...");
 	init_prov_policy();

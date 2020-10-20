@@ -96,7 +96,7 @@ static struct pernet_operations provenance_net_ops = {
 /*!
  * Initialization of netfilter hooks.
  */
-static int __init provenance_nf_ip_init(void)
+static __init int provenance_nf_ip_init(void)
 {
 	int err;
 

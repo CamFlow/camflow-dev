@@ -416,7 +416,7 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  * @return 0 if no error occurred.
  *
  */
-static int __init relay_prov_init(void)
+static __init int relay_prov_init(void)
 {
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
 			       PROV_NB_SUBBUF, &relay_callbacks, NULL);
