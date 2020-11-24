@@ -54,6 +54,7 @@
 
 ## v0.7.1
 ```
+- Made git dependencies explicit.
 - Rename build (SECURITY_PROVENANCE_WHOLE_SYSTEM -> SECURITY_PROVENANCE_BOOT).
 - Track copy up (overlayfs) operations.
 - Change the way setgid is handled.
