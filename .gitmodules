@@ -1,0 +1,12 @@
+[submodule "us-dependencies/camconfd"]
+	path = us-dependencies/camconfd
+	url = https://github.com/CamFlow/camconfd.git
+[submodule "us-dependencies/camflow-cli"]
+	path = us-dependencies/camflow-cli
+	url = https://github.com/CamFlow/camflow-cli.git
+[submodule "us-dependencies/camflowd"]
+	path = us-dependencies/camflowd
+	url = https://github.com/CamFlow/camflowd.git
+[submodule "us-dependencies/libprovenance"]
+	path = us-dependencies/libprovenance
+	url = https://github.com/CamFlow/libprovenance.git
