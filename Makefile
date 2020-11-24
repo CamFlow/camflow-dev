@@ -25,7 +25,7 @@ finalize:
 prepare_kernel: prepare_kernel_raw prepare_information_flow finalize
 
 prepare_submodules:
-	git pull --recurse-submodules
+	git submodule update --init --recursive
 
 prepare_provenance:
 	cd us-dependencies/libprovenance && $(MAKE) prepare
