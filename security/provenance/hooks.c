@@ -1301,9 +1301,6 @@ static int provenance_kernel_read_file(struct file *file
 	case READING_FIRMWARE:
 		rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
 		break;
-	case READING_FIRMWARE_PREALLOC_BUFFER:
-		rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
-		break;
 	case READING_MODULE:
 		rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
 		break;
