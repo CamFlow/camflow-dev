@@ -102,7 +102,7 @@ jobs:
           at: ~/build
       - run: 'ls'
       - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y apt-utils zstd'
       - run: 'sudo apt-get install -y sudo'
       - run: 'wget https://apt.llvm.org/llvm.sh'
       - run: 'chmod +x llvm.sh'
@@ -152,7 +152,7 @@ jobs:
       - attach_workspace:
           at: ~/build
       - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y apt-utils zstd'
       - run: 'sudo apt-get install -y sudo'
       - run: 'wget https://apt.llvm.org/llvm.sh'
       - run: 'chmod +x llvm.sh'
