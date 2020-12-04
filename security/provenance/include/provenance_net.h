@@ -187,7 +187,7 @@ static __always_inline struct provenance *provenance_alloc_with_ipv4_skb(
 	packet_identifier(prov_elt(prov)).snd_ip = (__force uint32_t)ih->saddr;
 	packet_identifier(prov_elt(prov)).rcv_ip = (__force uint32_t)ih->daddr;
 	packet_identifier(prov_elt(prov)).protocol = ih->protocol;
-	packet_info(prov_elt(prov)).length = (__force size_t)ih->tot_len;
+	packet_info(prov_elt(prov)).len = (__force size_t)ih->tot_len;
 
 	switch (ih->protocol) {
 	case IPPROTO_TCP:
