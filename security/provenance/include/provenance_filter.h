@@ -145,11 +145,11 @@ static __always_inline bool filter_propagate_relation(uint64_t type)
  */
 static __always_inline bool should_record_packet(union prov_elt *prov)
 {
-    if(prov_policy.prov_all)
-        return true;
-    if(provenance_is_tracked(prov))
-        return true;
-    return false;
+	if (prov_policy.prov_all)
+		return true;
+	if (provenance_is_tracked(prov))
+		return true;
+	return false;
 }
 
 /*!
