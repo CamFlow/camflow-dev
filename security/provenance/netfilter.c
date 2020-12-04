@@ -45,7 +45,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 
 	if (!cprov)
 		return NF_ACCEPT;
-	if (provenance_is_tracked(prov_elt(cprov))) {
+	if (should_record_packet(prov_elt(cprov))) {
 		iprov = get_sk_inode_provenance(skb->sk);
 		if (!iprov)
 			return NF_ACCEPT;
