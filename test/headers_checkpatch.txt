@@ -8,7 +8,7 @@ security/provenance/include/memcpy_ss.h has no obvious style problems and is rea
 security/provenance/include/provenance_filter.h
 -----------------------------------------------
 WARNING:TRAILING_SEMICOLON: macros should not use a trailing semicolon
-#173: FILE: security/provenance/include/provenance_filter.h:173:
+#185: FILE: security/provenance/include/provenance_filter.h:185:
 +#define declare_filter_list(filter_name, type) \
 +	struct filter_name {		       \
 +		struct list_head list;	       \
@@ -17,7 +17,7 @@ WARNING:TRAILING_SEMICOLON: macros should not use a trailing semicolon
 +	extern struct list_head filter_name;
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#184: FILE: security/provenance/include/provenance_filter.h:184:
+#196: FILE: security/provenance/include/provenance_filter.h:196:
 +#define declare_filter_whichOP(function_name, type, variable)		\
 +	static __always_inline uint8_t function_name(uint32_t variable)	\
 +	{								\
@@ -32,7 +32,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#201: FILE: security/provenance/include/provenance_filter.h:201:
+#213: FILE: security/provenance/include/provenance_filter.h:213:
 +#define declare_filter_delete(function_name, type, variable)		  \
 +	static __always_inline uint8_t function_name(struct type *f)	  \
 +	{								  \
@@ -50,7 +50,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#221: FILE: security/provenance/include/provenance_filter.h:221:
+#233: FILE: security/provenance/include/provenance_filter.h:233:
 +#define declare_filter_add_or_update(function_name, type, variable)	  \
 +	static __always_inline uint8_t function_name(struct type *f)	  \
 +	{								  \
@@ -67,7 +67,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		return 0;						  \
 +	}
 
-total: 0 errors, 4 warnings, 319 lines checked
+total: 0 errors, 4 warnings, 331 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -124,7 +124,7 @@ security/provenance/include/provenance_record.h has no obvious style problems an
 ----------------------------------------------
 security/provenance/include/provenance_relay.h
 ----------------------------------------------
-total: 0 errors, 0 warnings, 188 lines checked
+total: 0 errors, 0 warnings, 186 lines checked
 
 security/provenance/include/provenance_relay.h has no obvious style problems and is ready for submission.
 ---------------------------------------------
