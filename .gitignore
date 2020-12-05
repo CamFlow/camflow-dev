@@ -36,9 +36,6 @@
 #build directory
 build/*
 
-# userspace depdencies directory
-us-dependencies/*
-
 # patches directory
 patches/*
 

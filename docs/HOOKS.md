@@ -11,7 +11,7 @@ cred_transfer| ![cred_transfer graph](./img/cred_transfer.png)|
 task_alloc| ![task_alloc graph](./img/task_alloc.png)|
 task_free| ![task_free graph](./img/task_free.png)|
 task_fix_setuid| ![task_fix_setuid graph](./img/task_fix_setuid.png)|
-task_setpgid| ![task_setpgid graph](./img/task_setpgid.png)|
+task_fix_setgid| ![task_fix_setgid graph](./img/task_fix_setgid.png)|
 task_getpgid| ![task_getpgid graph](./img/task_getpgid.png)|
 task_kill| ![task_kill graph](./img/task_kill.png)|
 ptrace_access_check| ![ptrace_access_check graph](./img/ptrace_access_check.png)|
@@ -34,6 +34,7 @@ inode_listxattr| ![inode_listxattr graph](./img/inode_listxattr.png)|
 inode_removexattr| ![inode_removexattr graph](./img/inode_removexattr.png)|
 inode_getsecurity| ![inode_getsecurity graph](./img/inode_getsecurity.png)|
 inode_listsecurity| ![inode_listsecurity graph](./img/inode_listsecurity.png)|
+inode_copy_up| ![inode_copy_up graph](./img/inode_copy_up.png)|
 file_permission| ![file_permission graph](./img/file_permission.png)|
 mmap_file| ![mmap_file graph](./img/mmap_file.png)|
 mmap_munmap| ![mmap_munmap graph](./img/mmap_munmap.png)|
@@ -68,8 +69,8 @@ socket_recvmsg| ![socket_recvmsg graph](./img/socket_recvmsg.png)|
 socket_sock_rcv_skb| ![socket_sock_rcv_skb graph](./img/socket_sock_rcv_skb.png)|
 unix_stream_connect| ![unix_stream_connect graph](./img/unix_stream_connect.png)|
 unix_may_send| ![unix_may_send graph](./img/unix_may_send.png)|
-bprm_check_security| ![bprm_check_security graph](./img/bprm_check_security.png)|
-bprm_set_creds| ![bprm_set_creds graph](./img/bprm_set_creds.png)|
+bprm_creds_from_file| ![bprm_creds_from_file graph](./img/bprm_creds_from_file.png)|
+bprm_creds_for_exec| ![bprm_creds_for_exec graph](./img/bprm_creds_for_exec.png)|
 bprm_committing_creds| ![bprm_committing_creds graph](./img/bprm_committing_creds.png)|
 sb_alloc_security| ![sb_alloc_security graph](./img/sb_alloc_security.png)|
 sb_free_security| ![sb_free_security graph](./img/sb_free_security.png)|

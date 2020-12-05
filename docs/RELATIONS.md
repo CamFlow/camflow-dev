@@ -93,13 +93,14 @@ RL_LOAD_FILE|load_file|load file into kernel|
 RL_RAN_ON|ran_on|task run on this machine|
 RL_LOAD_UNKNOWN|load_unknown|load file into kernel|
 RL_LOAD_FIRMWARE|load_firmware|load file into kernel|
-RL_LOAD_FIRMWARE_PREALLOC_BUFFER|load_firmware_prealloc_buffer|load file into kernel|
 RL_LOAD_MODULE|load_module|load file into kernel|
 RL_LOAD_KEXEC_IMAGE|load_kexec_image|load file into kernel|
 RL_LOAD_KEXEC_INITRAMFS|load_kexec_initramfs|load file into kernel|
 RL_LOAD_POLICY|load_policy|load file into kernel|
 RL_LOAD_CERTIFICATE|load_certificate|load file into kernel|
 RL_LOAD_UNDEFINED|load_undefined|load file into kernel|
+RL_COPY_UP_NEW_CRED|copy_up_new_cred|overlayfs copy up create temporary cred|
+RL_COPY_UP_INODE|copy_up_inode|overlayfs action on inode|
 RL_PTRACE_ATTACH|ptrace_attach|ptrace attach effect on memory|
 RL_PTRACE_READ|ptrace_read|ptrace read from mem|
 RL_PTRACE_ATTACH_TASK|ptrace_attach_task|write info via ptrace effect on task|

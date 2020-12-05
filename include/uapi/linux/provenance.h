@@ -16,32 +16,28 @@
 #ifndef _UAPI_LINUX_PROVENANCE_H
 #define _UAPI_LINUX_PROVENANCE_H
 
-#ifdef __KERNEL__
-#include <linux/socket.h>
-#include <linux/mutex.h>
-#endif
+
 #ifndef __KERNEL__
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
-#endif
 #include <linux/limits.h>
 #include <linux/utsname.h>
-#include <linux/provenance_utils.h>
+#endif
 
 #define xstr(s)         str(s)
 #define str(s)          # s
 
 #define CAMFLOW_VERSION_MAJOR           0
 #define CAMFLOW_VERSION_MINOR           7
-#define CAMFLOW_VERSION_PATCH           0
+#define CAMFLOW_VERSION_PATCH           1
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "9532c0b5b4a61e9a27406e4caf4ca95f538212d8"
+#define CAMFLOW_COMMIT "0c8f5c90e319b9837052997b93769f2e01003f46"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -64,6 +60,8 @@
 #define prov_flag(prov)                         ((prov)->msg_info.internal_flag)
 #define prov_taint(prov)                        ((prov)->msg_info.taint)
 #define prov_jiffies(prov)                      ((prov)->msg_info.jiffies)
+
+#define provenance_taint_merge(dest, src) dest = (dest) | (src)
 
 struct node_identifier {
 	uint64_t type;
@@ -141,7 +139,7 @@ union prov_identifier {
 
 
 
-#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint8_t taint[PROV_N_BYTES]
+#define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
 #define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
@@ -238,7 +236,7 @@ struct sb_struct {
 struct pck_struct {
 	basic_elements;
 	shared_node_elements;
-	uint16_t length;
+	uint32_t len;
 };
 
 union prov_elt {

@@ -1,5 +1,5 @@
-kernel-version=5.7.7
-lsm-version=0.7.0
+kernel-version=5.9.11
+lsm-version=0.7.1
 arch=x86_64
 
 all: config compile install
@@ -15,7 +15,7 @@ prepare_kernel_raw:
 
 prepare_information_flow:
 	mkdir -p patches
-	rm -f ~/build//0001-information-flow.patch
+	rm -f ~/build/0001-information-flow.patch
 	cd ~/build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
 	cd ~/build/linux-stable && git apply --whitespace=fix --verbose ../0001-information-flow.patch
 
@@ -24,36 +24,31 @@ finalize:
 
 prepare_kernel: prepare_kernel_raw prepare_information_flow finalize
 
+prepare_submodules:
+	git submodule update --init --recursive
+
 prepare_provenance:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/libprovenance.git
 	cd us-dependencies/libprovenance && $(MAKE) prepare
 
 prepare_config:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/camconfd.git
 	cd us-dependencies/camconfd && $(MAKE) prepare
 
 prepare_cli:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/camflow-cli.git
 	cd us-dependencies/camflow-cli && $(MAKE) prepare
 
 prepare_service:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/camflowd.git
 	cd us-dependencies/camflowd && $(MAKE) prepare
 
 prepare_smatch:
 	mkdir -p ~/build
 	cd ~/build && git clone git://repo.or.cz/smatch.git
-	cd ~/build/smatch && git checkout 1.60
+	cd ~/build/smatch && git checkout a196836a9addc799dc9bd057358656cec869d49b
 	cd ~/build/smatch && $(MAKE)
 
 prepare_sparse:
 	mkdir -p ~/build
 	cd ~/build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git
-	cd ~/build/sparse && git checkout v0.6.1
+	cd ~/build/sparse && git checkout v0.6.2
 	cd ~/build/sparse && make
 	cd ~/build/sparse && sudo make install
 
@@ -74,9 +69,9 @@ prepare_ltp:
 	cd ~/build/ltp && $(MAKE)
 	cd ~/build/ltp && sudo $(MAKE) install
 
-prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
+prepare_us: prepare_submodules prepare_provenance prepare_config prepare_cli prepare_service
 
-prepare_update:
+prepare_update: prepare_kernel
 	mv include/linux/fs.h include/linux/_fs.h
 	cp ~/build/pristine/linux-stable/include/linux/fs.h include/linux/fs.h
 	mv include/net/sock.h include/net/_sock.h
@@ -289,12 +284,12 @@ uncrustify:
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_record.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_relay.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_task.h
+	uncrustify -c uncrustify.cfg --replace security/provenance/include/provenance_utils.h
 	uncrustify -c uncrustify.cfg --replace security/provenance/include/memcpy_ss.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_query.h
 	uncrustify -c uncrustify.cfg --replace include/linux/provenance_types.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_fs.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_types.h
-	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance_utils.h
 	uncrustify -c uncrustify.cfg --replace include/uapi/linux/provenance.h
 
 uncrustify_clean:

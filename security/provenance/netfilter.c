@@ -45,7 +45,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 
 	if (!cprov)
 		return NF_ACCEPT;
-	if (provenance_is_tracked(prov_elt(cprov))) {
+	if (should_record_packet(prov_elt(cprov))) {
 		iprov = get_sk_inode_provenance(skb->sk);
 		if (!iprov)
 			return NF_ACCEPT;
@@ -96,7 +96,7 @@ static struct pernet_operations provenance_net_ops = {
 /*!
  * Initialization of netfilter hooks.
  */
-static int __init provenance_nf_ip_init(void)
+static __init int provenance_nf_ip_init(void)
 {
 	int err;
 

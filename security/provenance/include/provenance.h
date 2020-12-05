@@ -22,6 +22,7 @@
 #include <linux/lsm_hooks.h>
 #include <linux/msg.h>
 #include <linux/cred.h>
+#include <linux/utsname.h>
 #include <uapi/linux/mman.h>
 #include <uapi/linux/provenance.h>
 #include <uapi/linux/provenance_types.h>
@@ -29,8 +30,10 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 #include <linux/xattr.h>
+#include <linux/provenance_types.h>
 
 #include "provenance_policy.h"
+#include "provenance_utils.h"
 #include "provenance_filter.h"
 #include "provenance_query.h"
 

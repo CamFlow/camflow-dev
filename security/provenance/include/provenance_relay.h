@@ -28,8 +28,6 @@
 #define PROV_RELAY_BUFF_EXP 20
 #define PROV_RELAY_BUFF_SIZE ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
 #define PROV_NB_SUBBUF 64
-#define PROV_INITIAL_BUFF_SIZE (1024 * 16)
-#define PROV_INITIAL_LONG_BUFF_SIZE 512
 
 struct boot_buffer {
 	struct list_head list;

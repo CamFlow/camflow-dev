@@ -21,7 +21,6 @@
 #include <stdbool.h>
 #endif
 
-
 #define TYPE_MASK                               0xFFFF000000000000UL
 #define SUBTYPE_MASK                            0x0000FFFFFFFFFFFFUL
 
@@ -106,6 +105,8 @@
 #define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 31))
 #define RL_PTRACE_ATTACH                        (RL_GENERATED | (0x0000000000000001ULL << 32))
 #define RL_GENERATED_DISC                       (RL_GENERATED | (0x0000000000000001ULL << 33))
+#define RL_COPY_UP_NEW_CRED                     (RL_GENERATED | (0x0000000000000001ULL << 34))
+#define RL_COPY_UP_INODE                        (RL_GENERATED | (0x0000000000000001ULL << 35))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -156,14 +157,13 @@
 /* INFLUENCED  SUBTYPES */
 #define RL_LOAD_UNKNOWN                         (RL_INFLUENCED | (0x0000000000000001ULL))
 #define RL_LOAD_FIRMWARE                        (RL_INFLUENCED | (0x0000000000000001ULL << 1))
-#define RL_LOAD_FIRMWARE_PREALLOC_BUFFER        (RL_INFLUENCED | (0x0000000000000001ULL << 2))
-#define RL_LOAD_MODULE                          (RL_INFLUENCED | (0x0000000000000001ULL << 3))
-#define RL_LOAD_KEXEC_IMAGE                     (RL_INFLUENCED | (0x0000000000000001ULL << 4))
-#define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 5))
-#define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 6))
-#define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 7))
-#define RL_LOAD_UNDEFINED                       (RL_INFLUENCED | (0x0000000000000001ULL << 8))
-#define RL_INFLUENCED_DISC                      (RL_INFLUENCED | (0x0000000000000001ULL << 9))
+#define RL_LOAD_MODULE                          (RL_INFLUENCED | (0x0000000000000001ULL << 2))
+#define RL_LOAD_KEXEC_IMAGE                     (RL_INFLUENCED | (0x0000000000000001ULL << 3))
+#define RL_LOAD_KEXEC_INITRAMFS                 (RL_INFLUENCED | (0x0000000000000001ULL << 4))
+#define RL_LOAD_POLICY                          (RL_INFLUENCED | (0x0000000000000001ULL << 5))
+#define RL_LOAD_CERTIFICATE                     (RL_INFLUENCED | (0x0000000000000001ULL << 6))
+#define RL_LOAD_UNDEFINED                       (RL_INFLUENCED | (0x0000000000000001ULL << 7))
+#define RL_INFLUENCED_DISC                      (RL_INFLUENCED | (0x0000000000000001ULL << 8))
 
 /* ASSOCIATED  SUBTYPES */
 #define RL_RAN_ON                               (RL_ASSOCIATED | (0x0000000000000001ULL))

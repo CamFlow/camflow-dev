@@ -139,6 +139,18 @@ static __always_inline bool filter_propagate_relation(uint64_t type)
 			return true;
 	return false;
 }
+/*!
+ * @brief Wether packet should be recorded or not.
+ * @param iprov the provenance corresponding to the socket inode
+ */
+static __always_inline bool should_record_packet(union prov_elt *prov)
+{
+	if (prov_policy.prov_all)
+		return true;
+	if (provenance_is_tracked(prov))
+		return true;
+	return false;
+}
 
 /*!
  * @brief Whether a provenance relation between two nodes should be recorded

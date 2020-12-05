@@ -19,7 +19,6 @@
  *
  */
 #include <linux/security.h>
-#include <linux/provenance_types.h>
 #include <crypto/hash.h>
 
 #include "provenance.h"
@@ -313,15 +312,15 @@ static inline void update_prov_config(union prov_elt *setting,
 	}
 
 	if ((op & PROV_SET_TAINT) != 0)
-		prov_bloom_merge(prov_taint(prov_elt(prov)),
-				 prov_taint(setting));
+		provenance_taint_merge(prov_taint(prov_elt(prov)),
+				       prov_taint(setting));
 }
 
 static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = provenance_cred_from_task(current);
+	struct provenance *prov = provenance_task(current);
 
 	if (!prov)
 		return -EINVAL;
@@ -339,7 +338,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 static ssize_t prov_read_self(struct file *filp, char __user *buf,
 			      size_t count, loff_t *ppos)
 {
-	struct provenance *cprov = provenance_cred_from_task(current);
+	struct provenance *cprov = provenance_task(current);
 
 	if (count < sizeof(struct task_prov_struct))
 		return -ENOMEM;
@@ -678,7 +677,7 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 		struct filters *s;								  \
 		if (count < sizeof(struct info))						  \
 		return -ENOMEM;									  \
-		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);				  \
 		if (!s)										  \
 		return -ENOMEM;									  \
 		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {			  \
@@ -686,8 +685,8 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 			return -EAGAIN;								  \
 		}										  \
 		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
-		add_function (s); else								  \
-		delete_function (s); return sizeof(struct filters);				  \
+		add_function(s); else								  \
+		delete_function(s); return sizeof(struct filters);				  \
 	}
 
 #define declare_generic_filter_read(function_name, filters, info)			    \
@@ -1086,7 +1085,7 @@ declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 		provenance_mark_as_opaque_dentry(dentry);			      \
 	} while (0)
 
-static int __init init_prov_fs(void)
+static __init int init_prov_fs(void)
 {
 	struct dentry *prov_dir;
 	struct dentry *dentry;

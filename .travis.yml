@@ -26,6 +26,7 @@ before_install:
 before_script:
   - git config --global user.email $GH_EMAIL
   - git config --global user.name $GH_NAME
+  - make prepare_us
   - make prepare_kernel
   - make patch
 

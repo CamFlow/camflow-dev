@@ -216,7 +216,6 @@ static int provenance_ptrace_traceme(struct task_struct *parent)
  * Therefore, no information flow occurred.
  * We simply create a ENT_PROC provenance node and associate the provenance
  * entry to the newly allocated @cred.
- * Set the proper UID and GID of the node based on the information from @cred.
  * @param cred Points to the new credentials.
  * @param gfp Indicates the atomicity of any memory allocations.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated for
@@ -229,9 +228,6 @@ static int provenance_cred_alloc_blank(struct cred *cred, gfp_t gfp)
 
 	if (!prov)
 		return -ENOMEM;
-
-	node_uid(prov_elt(prov)) = __kuid_val(cred->euid);
-	node_gid(prov_elt(prov)) = __kgid_val(cred->egid);
 	return 0;
 }
 
@@ -354,32 +350,29 @@ static int provenance_task_fix_setuid(struct cred *new,
 /*!
  * @brief Record provenance when task_setpgid hook is triggered.
  *
- * This hooks is triggered when checking permission before setting the process
- * group identifier of the process @p to @pgid.
- * @cprov is the cred provenance of the @current process, and @tprov is the
- * task provenance of the @current process.
- * During "get_cred_provenance" and "get_task_provenance" functions, their
- * provenances are updated too.
- * We update process @p's cred provenance's pgid info as required by the trigger
- * of the hook.
- * Record provenance relation RL_SETGID by calling "generates" function.
- * Information flows from cred of the @current process, which sets the @pgid,
- * to the current process, and eventually to the process @p whose @pgid is
- * updated.
- * @param p The task_struct for process being modified.
- * @param pgid The new pgid.
- * @return 0 if permission is granted. Other error codes unknown.
+ *      Update the module's state after setting one or more of the group
+ *      identity attributes of the current process.  The @flags parameter
+ *      indicates which of the set*gid system calls invoked this hook.
+ *      @new is the set of credentials that will be installed.  Modifications
+ *      should be made to this rather than to @current->cred.
+ *      @old is the set of credentials that are being replaced
+ *      @flags contains one of the LSM_SETID_* values.
+ *      Return 0 on success.
  *
  */
-static int provenance_task_setpgid(struct task_struct *p, pid_t pgid)
+static int provenance_task_fix_setgid(struct cred *new,
+				      const struct cred *old,
+				      int flags)
 {
-	struct provenance *cprov = get_cred_provenance();
+	struct provenance *old_prov = provenance_cred(old);
+	struct provenance *nprov = provenance_cred(new);
 	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *nprov = provenance_cred_from_task(p);
+	unsigned long irqflags;
 	int rc;
 
-	prov_elt(nprov)->proc_info.gid = pgid;
-	rc = generates(RL_SETGID, cprov, tprov, nprov, NULL, 0);
+	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
+	rc = generates(RL_SETGID, old_prov, tprov, nprov, NULL, flags);
+	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }
 
@@ -908,7 +901,7 @@ static int provenance_inode_setxattr(struct dentry *dentry,
 		else
 			clear_propagate(prov_elt(prov));
 
-		prov_bloom_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
+		provenance_taint_merge(prov_taint(prov_elt(prov)), prov_taint(setting));
 	}
 	return 0;
 }
@@ -1133,6 +1126,27 @@ static int provenance_inode_listsecurity(struct inode *inode,
 	return len;
 }
 
+static int provenance_inode_copy_up(struct dentry *src, struct cred **new)
+{
+	struct provenance *cprov = get_cred_provenance();
+	struct provenance *tprov = get_task_provenance(true);
+	struct provenance *iprov = get_dentry_provenance(src, true);
+	struct provenance *nprov = provenance_cred(*new);
+	unsigned long irqflags;
+	int rc = 0;
+
+	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
+	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
+	rc = generates(RL_COPY_UP_NEW_CRED, cprov, tprov, nprov, NULL, 0);
+	if (rc < 0)
+		goto out;
+	rc = generates(RL_COPY_UP_INODE, nprov, tprov, iprov, NULL, 0);
+out:
+	spin_unlock(prov_lock(iprov));
+	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
+	return rc;
+}
+
 /*!
  * @brief Record provenance when file_permission hook is triggered.
  *
@@ -1286,9 +1300,6 @@ static int provenance_kernel_read_file(struct file *file
 		break;
 	case READING_FIRMWARE:
 		rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
-		break;
-	case READING_FIRMWARE_PREALLOC_BUFFER:
-		rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
 		break;
 	case READING_MODULE:
 		rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
@@ -2431,7 +2442,7 @@ static int provenance_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (!iprov)
 		return -ENOMEM;
 
-	if (provenance_is_tracked(prov_elt(iprov))) {
+	if (should_record_packet(prov_elt(iprov))) {
 		pckprov = provenance_alloc_with_ipv4_skb(ENT_PACKET, skb);
 
 		if (!pckprov)
@@ -2516,15 +2527,13 @@ static int provenance_unix_may_send(struct socket *sock,
 }
 
 /*!
- * @brief Record provenance when bprm_set_creds hook is triggered.
+ * @brief Record provenance when bprm_creds_for_exec hook is triggered.
  *
  * This hook is triggered when saving security information in the bprm->security
  * field, typically based on information about the bprm->file, for later use by
  * the apply_creds hook.
  * This hook may also optionally check permissions (e.g. for transitions between
  * security domains).
- * This hook may be called multiple times during a single execve, e.g. for
- * interpreters.
  * The hook can tell whether it has already been called by checking to see if
  * @bprm->security is non-NULL.
  * If so, then the hook may decide either to retain the security information
@@ -2539,7 +2548,7 @@ static int provenance_unix_may_send(struct socket *sock,
  * derives function.
  *
  */
-static int provenance_bprm_set_creds(struct linux_binprm *bprm)
+static int provenance_bprm_creds_for_exec(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *iprov = get_file_provenance(bprm->file, true);
@@ -2560,17 +2569,14 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
 }
 
 /*!
- * @brief Record provenance when bprm_check hook is triggered.
+ * @brief Record provenance when bprm_creds_from_file hook is triggered.
  *
- * This hook mediates the point when a search for a binary handler will begin.
- * It allows a check the @bprm->security value which is set in the preceding
- * set_creds call.
- * The primary difference from set_creds is that the argv list and envp list are
- * reliably available in @bprm.
- * This hook may be called multiple times during a single execve;
- * and in each pass set_creds is called first.
- * If the inode of bprm->file is opaque, we set the bprm->cred to be opaque
- * (i.e., do not track).
+ * This is called after finding the binary that will be executed.
+ *	without an interpreter.  This ensures that the credentials will not
+ *	be derived from a script that the binary will need to reopen, which
+ *	when reopend may end up being a completely different file.  This
+ *	hook may also optionally check permissions (e.g. for transitions
+ *	between security domains).
  * The relations between the bprm arguments and bprm->cred are recorded by
  * calling record_args function.
  * @param bprm The linux_binprm structure.
@@ -2578,11 +2584,12 @@ static int provenance_bprm_set_creds(struct linux_binprm *bprm)
  * exist. Other error codes inherited from record_args function.
  *
  */
-static int provenance_bprm_check_security(struct linux_binprm *bprm)
+static int provenance_bprm_creds_from_file(struct linux_binprm *bprm,
+					   struct file *file)
 {
 	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *tprov = get_task_provenance(false);
-	struct provenance *iprov = get_file_provenance(bprm->file, false);
+	struct provenance *iprov = get_file_provenance(file, false);
 
 	if (!nprov)
 		return -ENOMEM;
@@ -2603,11 +2610,12 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
  * This hook is triggered when preparing to install the new security attributes
  * of a process being transformed by an execve operation,
  * based on the old credentials pointed to by @current->cred,
- * and the information set in @bprm->cred by the bprm_set_creds hook.
- * This hook is a good place to perform state changes on the process such as
- * closing open file descriptors to which access will no longer
- * be granted when the attributes are changed.
- * This is called immediately before commit_creds().
+ * and the information set in @bprm->cred by the bprm_creds_for_exec hook.
+ * @bprm points to the linux_binprm
+ *	structure.  This hook is a good place to perform state changes on the
+ *	process such as closing open file descriptors to which access will no
+ *	longer be granted when the attributes are changed.  This is called
+ *	immediately before commit_creds().
  * Since the process is being transformed to the new process,
  * record provenance relation RL_EXEC_TASK by calling "derives" function.
  * Information flows from the old process's cred to the new process's cred.
@@ -2729,7 +2737,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(task_alloc,               provenance_task_alloc),
 	LSM_HOOK_INIT(task_free,                provenance_task_free),
 	LSM_HOOK_INIT(task_fix_setuid,          provenance_task_fix_setuid),
-	LSM_HOOK_INIT(task_setpgid,             provenance_task_setpgid),
+	LSM_HOOK_INIT(task_fix_setgid,          provenance_task_fix_setgid),
 	LSM_HOOK_INIT(task_getpgid,             provenance_task_getpgid),
 	LSM_HOOK_INIT(task_kill,                provenance_task_kill),
 	LSM_HOOK_INIT(ptrace_access_check,      provenance_ptrace_access_check),
@@ -2754,6 +2762,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(inode_removexattr,        provenance_inode_removexattr),
 	LSM_HOOK_INIT(inode_getsecurity,        provenance_inode_getsecurity),
 	LSM_HOOK_INIT(inode_listsecurity,       provenance_inode_listsecurity),
+	LSM_HOOK_INIT(inode_copy_up,            provenance_inode_copy_up),
 
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,          provenance_file_permission),
@@ -2807,8 +2816,8 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(unix_may_send,            provenance_unix_may_send),
 
 	/* exec related hooks */
-	LSM_HOOK_INIT(bprm_check_security,      provenance_bprm_check_security),
-	LSM_HOOK_INIT(bprm_set_creds,           provenance_bprm_set_creds),
+	LSM_HOOK_INIT(bprm_creds_from_file,     provenance_bprm_creds_from_file),
+	LSM_HOOK_INIT(bprm_creds_for_exec,      provenance_bprm_creds_for_exec),
 	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
 
 	/* file system related hooks */
@@ -2843,14 +2852,14 @@ uint32_t prov_boot_id;
 uint32_t epoch;
 bool prov_written;
 
-static void __init init_prov_policy(void)
+static __init void init_prov_policy(void)
 {
 	pr_info("Provenance: policy initialization started...");
 	prov_policy.prov_enabled = true;
 	prov_policy.should_duplicate = false;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
-#ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
+#ifdef CONFIG_SECURITY_PROVENANCE_BOOT
 	prov_policy.prov_all = true;
 #else
 	prov_policy.prov_all = false;
@@ -2858,7 +2867,7 @@ static void __init init_prov_policy(void)
 	pr_info("Provenance: policy initialization finished.");
 }
 
-static void __init init_boot_cache(void)
+static __init void init_boot_cache(void)
 {
 	pr_info("Provenance: boot cache initialization started...");
 	boot_buffer_cache = kmem_cache_create("boot_buffer_cache",
@@ -2874,7 +2883,7 @@ static void __init init_boot_cache(void)
 	pr_info("Provenance: boot cache initialization finished.");
 }
 
-static void __init init_prov_cache(void)
+static __init void init_prov_cache(void)
 {
 	pr_info("Provenance: cache initialization started...");
 	provenance_cache = kmem_cache_create("provenance_struct",
@@ -2912,7 +2921,7 @@ static void __init init_prov_cache(void)
  * needed).
  *
  */
-static int __init provenance_init(void)
+static __init int provenance_init(void)
 {
 	pr_info("Provenance: initialization started...");
 	init_prov_policy();
@@ -2925,7 +2934,11 @@ static int __init provenance_init(void)
 	spin_lock_init(&lock_buffer);
 	spin_lock_init(&lock_long_buffer);
 	relay_ready = false;
+#ifdef CONFIG_SECURITY_PROVENANCE_BOOT
+	pr_info("Provenance: boot cature is on.");
+#endif
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
+	pr_info("Provenance: persistence is on.");
 	provq = alloc_workqueue("provq", 0, 0);
 	if (!provq)
 		pr_err("Provenance: could not initialize work queue.");

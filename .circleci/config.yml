@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   checkout:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
@@ -41,7 +41,7 @@ jobs:
 
   doc:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
@@ -68,15 +68,23 @@ jobs:
             - scripts
   security:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -86,7 +94,7 @@ jobs:
       - run: 'make compile_security_only'
   security_clang:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
@@ -94,7 +102,7 @@ jobs:
           at: ~/build
       - run: 'ls'
       - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y apt-utils zstd'
       - run: 'sudo apt-get install -y sudo'
       - run: 'wget https://apt.llvm.org/llvm.sh'
       - run: 'chmod +x llvm.sh'
@@ -111,15 +119,23 @@ jobs:
       - run: 'make compile_security_only_clang'
   compile_default:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -129,14 +145,14 @@ jobs:
       - run: 'make compile_kernel'
   compile_default_clang:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
       - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y apt-utils zstd'
       - run: 'sudo apt-get install -y sudo'
       - run: 'wget https://apt.llvm.org/llvm.sh'
       - run: 'chmod +x llvm.sh'
@@ -153,15 +169,23 @@ jobs:
       - run: 'make compile_kernel_clang'
   compile_no_flow_friendly:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -172,15 +196,23 @@ jobs:
       - run: 'make compile_kernel'
   compile_whole:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -191,15 +223,23 @@ jobs:
       - run: 'make compile_kernel'
   compile_persist:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -210,15 +250,23 @@ jobs:
       - run: 'make compile_kernel'
   sparse:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_sparse'
@@ -235,15 +283,23 @@ jobs:
             - test/sparse.txt
   flawfinder:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install -y flawfinder'
       - run: 'sudo apt-get install --reinstall make'
@@ -260,15 +316,23 @@ jobs:
             - test/flawfinder.txt
   checkpatch:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'cp -f scripts/.config ~/build/linux-stable/'
@@ -287,15 +351,23 @@ jobs:
             - test/headers_checkpatch.txt
   smatch:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_smatch'
@@ -347,15 +419,23 @@ jobs:
             - test/cocci.txt
   tinkerbell:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev'
       - run: 'sudo apt-get install --reinstall make'
       - run: 'make prepare_tinkerbell'
@@ -375,15 +455,23 @@ jobs:
             - test/cocci.txt
   deploy_dev:
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:202007-01
     working_directory: ~/build
     steps:
       - checkout
       - attach_workspace:
           at: ~/build
-      - run: 'sudo apt-get update -qq'
       - run: 'sudo apt-get install -y apt-utils'
       - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y software-properties-common'
+      - run: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test'
+      - run: 'sudo apt-get update'
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y g++-9 gcc-9 zstd'
+      - run: 'sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9'
+      - run: 'sudo update-alternatives --config gcc'
+      - run: 'gcc --version'
+      - run: 'g++ --version'
       - run: 'sudo apt-get install -y git rsync'
       - run: 'sudo apt-get install -y ruby'
       - run: 'ruby ./scripts/clean_test.rb'
@@ -489,17 +577,14 @@ workflows:
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
-      - doc:
-          requires:
-            - sparse
-            - flawfinder
-            - checkpatch
-            - smatch
-            - coccinelle
       - deploy_dev:
           filters:
             branches:
               only:
                 - dev
           requires:
-            - doc
+            - sparse
+            - flawfinder
+            - checkpatch
+            - smatch
+            - coccinelle
