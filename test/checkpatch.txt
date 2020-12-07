@@ -77,18 +77,45 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	{											  \
 +		struct filters *s;								  \
 +		if (count < sizeof(struct info))						  \
-+			return -ENOMEM;								  \
-+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);				  \
++		return -ENOMEM;									  \
++		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
 +		if (!s)										  \
-+			return -ENOMEM;								  \
++		return -ENOMEM;									  \
 +		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {			  \
 +			kfree(s);								  \
 +			return -EAGAIN;								  \
 +		}										  \
 +		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
-+			add_function(s); else							  \
-+			delete_function(s); return sizeof(struct filters);			  \
++		add_function (s); else								  \
++		delete_function (s); return sizeof(struct filters);				  \
 +	}
+
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#678: FILE: security/provenance/fs.c:678:
++		if (count < sizeof(struct info))						  \
++		return -ENOMEM;									  \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#680: FILE: security/provenance/fs.c:680:
++		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
+
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#681: FILE: security/provenance/fs.c:681:
++		if (!s)										  \
++		return -ENOMEM;									  \
+
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#687: FILE: security/provenance/fs.c:687:
++		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
++		add_function (s); else								  \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#688: FILE: security/provenance/fs.c:688:
++		add_function (s); else								  \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#689: FILE: security/provenance/fs.c:689:
++		delete_function (s); return sizeof(struct filters);				  \
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
 #692: FILE: security/provenance/fs.c:692:
@@ -129,7 +156,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		}											 \
 +	} while (0)
 
-total: 0 errors, 9 warnings, 1140 lines checked
+total: 0 errors, 15 warnings, 1140 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
