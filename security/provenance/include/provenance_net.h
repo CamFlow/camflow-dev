@@ -213,11 +213,6 @@ struct ipv4_filters {
 extern struct list_head ingress_ipv4filters;
 extern struct list_head egress_ipv4filters;
 
-#define prov_ipv4_ingressOP(ip, port) \
-	prov_ipv4_whichOP(&ingress_ipv4filters, ip, port)
-#define prov_ipv4_egressOP(ip, port) \
-	prov_ipv4_whichOP(&egress_ipv4filters, ip, port)
-
 /*!
  * @brief Returns op value of the filter of a specific IP and/or port.
  *
@@ -386,6 +381,7 @@ static inline void record_packet_content(struct sk_buff *skb,
 
 static __always_inline int check_track_socket(const struct sockaddr *address,
 					      const int addrlen,
+					      struct list_head *ipv4_filters,
 					      struct provenance *cprov,
 					      struct provenance *iprov)
 {
@@ -395,7 +391,8 @@ static __always_inline int check_track_socket(const struct sockaddr *address,
 	if (address->sa_family == PF_INET) {
 		ipv4_addr = (struct sockaddr_in *)address;
 		// force parse endian casting
-		op = prov_ipv4_egressOP(
+		op = prov_ipv4_whichOP(
+			ipv4_filters,
 			(__force uint32_t)ipv4_addr->sin_addr.s_addr,
 			(__force uint32_t)ipv4_addr->sin_port);
 		if ((op & PROV_SET_TRACKED) != 0) {
