@@ -2139,7 +2139,8 @@ static int provenance_socket_bind(struct socket *sock,
 	// start tracking/propagating @iprov and @cprov
 	if (provenance_is_opaque(prov_elt(cprov)))
 		return 0;
-	rc = check_track_socket(address, addrlen, &ingress_ipv4filters, cprov, iprov);
+	rc = check_track_socket(address, addrlen, &ingress_ipv4filters,
+                            cprov, iprov);
 	if (rc < 0)
 		return rc;
 	rc = record_address(address, addrlen, iprov);
@@ -2183,7 +2184,8 @@ static int provenance_socket_connect(struct socket *sock,
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
 	if (provenance_is_opaque(prov_elt(cprov)))
 		goto out;
-	rc = check_track_socket(address, addrlen, &egress_ipv4filters, cprov, iprov);
+	rc = check_track_socket(address, addrlen, &egress_ipv4filters,
+                            cprov, iprov);
 	if (rc < 0)
 		goto out;
 	rc = record_address(address, addrlen, iprov);
