@@ -40,7 +40,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "b5962b3634f5f8bdfebf287eaa919176668e12c3"
+#define CAMFLOW_COMMIT "48ceaa5d2ee66659408d9346bd190395a47a5e29"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -123,7 +123,7 @@ union prov_identifier {
 #define RECORD_PACKET_BIT       3
 #define set_record_packet(node)                 prov_set_flag(node, RECORD_PACKET_BIT)
 #define clear_record_packet(node)               prov_clear_flag(node, RECORD_PACKET_BIT)
-#define provenance_records_packet(node)         prov_check_flag(node, RECORD_PACKET_BIT)
+#define should_record_packet_content(node)      prov_check_flag(node, RECORD_PACKET_BIT)
 
 #define OUTGOING_BIT            4
 #define set_has_outgoing(node)                  prov_set_flag(node, OUTGOING_BIT)

@@ -55,6 +55,7 @@
 
 ## v0.7.2
 ```
+- Fix ingress/egress network filter.
 - Reverse 0.7.1 (expect for what appear bellow).
 -- Made git dependencies explicit.
 -- Change to how taints are handled.

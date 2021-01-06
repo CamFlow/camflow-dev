@@ -54,7 +54,7 @@ static unsigned int provenance_ipv4_out(void *priv,
 		if (!pckprov)
 			return -ENOMEM;
 
-		if (provenance_records_packet(prov_elt(iprov)))
+		if (should_record_packet_content(prov_elt(iprov)))
 			record_packet_content(skb, pckprov);
 
 		spin_lock_irqsave(prov_lock(iprov), irqflags);
