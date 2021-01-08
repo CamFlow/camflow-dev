@@ -94,7 +94,7 @@ security/provenance/include/provenance_machine.h has no obvious style problems a
 --------------------------------------------
 security/provenance/include/provenance_net.h
 --------------------------------------------
-total: 0 errors, 0 warnings, 414 lines checked
+total: 0 errors, 0 warnings, 411 lines checked
 
 security/provenance/include/provenance_net.h has no obvious style problems and is ready for submission.
 -------------------------------------------
