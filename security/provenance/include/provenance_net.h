@@ -365,7 +365,7 @@ static inline void record_packet_content(struct sk_buff *skb,
 	if (!cnt)
 		return;
 
-    // TODO check if that is correct
+	// TODO check if that is correct
 	cnt->pckcnt_info.length = skb_end_offset(skb);
 	if (cnt->pckcnt_info.length >= PATH_MAX) {
 		cnt->pckcnt_info.truncated = PROV_TRUNCATED;

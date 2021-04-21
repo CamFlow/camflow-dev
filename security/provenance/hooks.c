@@ -1261,13 +1261,17 @@ out:
 }
 #endif
 
-static int provenance_kernel_read_file(struct file *file
-				       , enum kernel_read_file_id id)
+static int provenance_kernel_read_file(struct file *file,
+				       enum kernel_read_file_id id,
+				       bool content)
 {
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = get_file_provenance(file, true);
 	unsigned long irqflags;
 	int rc = 0;
+
+	if (!content)
+		return 0;
 
 	if (!iprov)   // not sure it could happen, ignore it for now
 		return 0;
@@ -2119,7 +2123,7 @@ static int provenance_socket_bind(struct socket *sock,
 	if (provenance_is_opaque(prov_elt(cprov)))
 		return 0;
 	rc = check_track_socket(address, addrlen, &ingress_ipv4filters,
-                            cprov, iprov);
+				cprov, iprov);
 	if (rc < 0)
 		return rc;
 	rc = record_address(address, addrlen, iprov);
@@ -2164,7 +2168,7 @@ static int provenance_socket_connect(struct socket *sock,
 	if (provenance_is_opaque(prov_elt(cprov)))
 		goto out;
 	rc = check_track_socket(address, addrlen, &egress_ipv4filters,
-                            cprov, iprov);
+				cprov, iprov);
 	if (rc < 0)
 		goto out;
 	rc = record_address(address, addrlen, iprov);
