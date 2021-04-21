@@ -83,7 +83,7 @@ prepare_update: prepare_kernel
 	mv security/Makefile security/_Makefile
 	cp ~/build/pristine/linux-stable/security/Makefile security/Makefile
 
-copy_change: update_commit uncrustify uncrustify_clean
+copy_change: uncrustify uncrustify_clean
 	cp -r ./security ~/build/linux-stable
 	cp -r ./include ~/build/linux-stable
 
@@ -168,11 +168,14 @@ convert_png:
 doc: hooklist relationlist vertexlist generate_dot convert_png
 
 update_commit:
-	ruby ./scripts/commit.rb
+	ruby ./scripts/update_commit.rb
 
-compile: compile_security compile_kernel compile_us doc
+remove_commit:
+	ruby ./scripts/remove_commit.rb
 
-compile_clang: compile_security_clang compile_kernel_clang compile_us_clang doc
+compile: update_commit compile_security compile_kernel compile_us doc remove_commit
+
+compile_clang: update_commit compile_security_clang compile_kernel_clang compile_us_clang doc remove_commit
 
 compile_security_only:
 	cd ~/build/linux-stable && $(MAKE) security W=1
