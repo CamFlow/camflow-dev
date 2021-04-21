@@ -262,8 +262,7 @@ delete_us:
 	cd us-dependencies && rm -rf ./camflowd
 	cd us-dependencies && rm -rf ./libprovenance
 
-delete:
-	rm -rf us-dependencies/
+delete: delete_us delete_kernel
 
 run_ltp:
 	cd /opt/ltp && sudo ./runltp -R -o /tmp/ltp.txt -l /tmp/ltp.log -g /tmp/ltp.html -K /tmp/kernel
