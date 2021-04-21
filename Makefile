@@ -1,5 +1,5 @@
-kernel-version=5.7.7
-lsm-version=0.7.0
+kernel-version=5.11.2
+lsm-version=0.7.2
 arch=x86_64
 
 all: config compile install
@@ -76,7 +76,7 @@ prepare_ltp:
 
 prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
 
-prepare_update:
+prepare_update: prepare_kernel
 	mv include/linux/fs.h include/linux/_fs.h
 	cp ~/build/pristine/linux-stable/include/linux/fs.h include/linux/fs.h
 	mv include/net/sock.h include/net/_sock.h

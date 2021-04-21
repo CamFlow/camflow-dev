@@ -36,12 +36,12 @@
 
 #define CAMFLOW_VERSION_MAJOR           0
 #define CAMFLOW_VERSION_MINOR           7
-#define CAMFLOW_VERSION_PATCH           0
+#define CAMFLOW_VERSION_PATCH           2
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "9532c0b5b4a61e9a27406e4caf4ca95f538212d8"
+#define CAMFLOW_COMMIT "c89e60e1ebe4ab3228335e1b276cc29799c60c58"
 
 #define PROVENANCE_HASH                 "sha256"
 

@@ -2,6 +2,8 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.7.2           | 5.11.2         | N/A				|
+| 0.7.1           | 5.9.11         | 05/12/2020 |
 | 0.7.0           | 5.7.7	         | 09/07/2020	|
 | 0.6.7           | 5.6.15         | 31/05/2020 |
 | 0.6.6           | 5.6.7          | 30/04/2020 |
@@ -50,6 +52,26 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+## v0.7.2
+```
+- Reverse 0.7.2.
+- Update to kernel version 5.11.2.
+```
+
+## v0.7.1
+```
+- Record packet length properly.
+- Remove dependencies related to READING_FIRMWARE_PREALLOC_BUFFER (which was removed from mainline).
+- Made git dependencies explicit.
+- Rename build (SECURITY_PROVENANCE_WHOLE_SYSTEM -> SECURITY_PROVENANCE_BOOT).
+- Track copy up (overlayfs) operations.
+- Change the way setgid is handled.
+- Read/Write self applies to tasks (aka threads).
+- Change to how taints are handled.
+- Clean up UAPI header files.
+- Update to kernel version 5.9.11.
+```
 
 ## v0.7.0
 ```
