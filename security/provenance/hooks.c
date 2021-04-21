@@ -1268,8 +1268,9 @@ out:
 }
 #endif
 
-static int provenance_kernel_read_file(struct file *file
-				       , enum kernel_read_file_id id)
+static int provenance_kernel_read_file(struct file *file,
+				       enum kernel_read_file_id id,
+				       bool contents)
 {
 	struct provenance *tprov = get_task_provenance(true);
 	struct provenance *iprov = get_file_provenance(file, true);
@@ -1286,9 +1287,6 @@ static int provenance_kernel_read_file(struct file *file
 		break;
 	case READING_FIRMWARE:
 		rc = record_influences_kernel(RL_LOAD_FIRMWARE, iprov, tprov, file);
-		break;
-	case READING_FIRMWARE_PREALLOC_BUFFER:
-		rc = record_influences_kernel(RL_LOAD_FIRMWARE_PREALLOC_BUFFER, iprov, tprov, file);
 		break;
 	case READING_MODULE:
 		rc = record_influences_kernel(RL_LOAD_MODULE, iprov, tprov, file);
@@ -2516,7 +2514,7 @@ static int provenance_unix_may_send(struct socket *sock,
 }
 
 /*!
- * @brief Record provenance when bprm_set_creds hook is triggered.
+ * @brief Record provenance when bprm_creds_for_exec hook is triggered.
  *
  * This hook is triggered when saving security information in the bprm->security
  * field, typically based on information about the bprm->file, for later use by
@@ -2539,7 +2537,7 @@ static int provenance_unix_may_send(struct socket *sock,
  * derives function.
  *
  */
-static int provenance_bprm_set_creds(struct linux_binprm *bprm)
+static int provenance_bprm_creds_for_exec(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = provenance_cred(bprm->cred);
 	struct provenance *iprov = get_file_provenance(bprm->file, true);
@@ -2808,7 +2806,7 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 
 	/* exec related hooks */
 	LSM_HOOK_INIT(bprm_check_security,      provenance_bprm_check_security),
-	LSM_HOOK_INIT(bprm_set_creds,           provenance_bprm_set_creds),
+	LSM_HOOK_INIT(bprm_creds_for_exec,      provenance_bprm_creds_for_exec),
 	LSM_HOOK_INIT(bprm_committing_creds,    provenance_bprm_committing_creds),
 
 	/* file system related hooks */

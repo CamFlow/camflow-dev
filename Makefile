@@ -24,24 +24,19 @@ finalize:
 
 prepare_kernel: prepare_kernel_raw prepare_information_flow finalize
 
+prepare_submodules:
+	git submodule update --init --recursive
+
 prepare_provenance:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/libprovenance.git
 	cd us-dependencies/libprovenance && $(MAKE) prepare
 
 prepare_config:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/camconfd.git
 	cd us-dependencies/camconfd && $(MAKE) prepare
 
 prepare_cli:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/camflow-cli.git
 	cd us-dependencies/camflow-cli && $(MAKE) prepare
 
 prepare_service:
-	mkdir -p us-dependencies
-	cd us-dependencies && git clone https://github.com/CamFlow/camflowd.git
 	cd us-dependencies/camflowd && $(MAKE) prepare
 
 prepare_smatch:
@@ -74,7 +69,7 @@ prepare_ltp:
 	cd ~/build/ltp && $(MAKE)
 	cd ~/build/ltp && sudo $(MAKE) install
 
-prepare_us: prepare_provenance prepare_config prepare_cli prepare_service
+prepare_us: prepare_submodules prepare_provenance prepare_config prepare_cli prepare_service
 
 prepare_update: prepare_kernel
 	mv include/linux/fs.h include/linux/_fs.h

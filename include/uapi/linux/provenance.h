@@ -41,7 +41,7 @@
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
 
-#define CAMFLOW_COMMIT "c89e60e1ebe4ab3228335e1b276cc29799c60c58"
+#define CAMFLOW_COMMIT "da08fb3ceeb62d23b57c5a9c256eccc36437d5dd"
 
 #define PROVENANCE_HASH                 "sha256"
 
@@ -238,7 +238,7 @@ struct sb_struct {
 struct pck_struct {
 	basic_elements;
 	shared_node_elements;
-	uint16_t length;
+	uint16_t len;
 };
 
 union prov_elt {

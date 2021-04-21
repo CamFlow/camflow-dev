@@ -20,8 +20,6 @@ machine -> machine[fontsize = 8,label = version_entity]
 
 task -> machine[fontsize = 8,label = load_firmware]
 
-task -> machine[fontsize = 8,label = load_firmware_prealloc_buffer]
-
 task -> machine[fontsize = 8,label = load_module]
 
 task -> machine[fontsize = 8,label = load_kexec_image]
