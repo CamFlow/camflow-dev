@@ -58,6 +58,7 @@
 - Reverse 0.7.1 (expect for what appear bellow).
 -- Made git dependencies explicit.
 -- Change to how taints are handled.
+-- Remove dependencies related to READING_FIRMWARE_PREALLOC_BUFFER (which was removed from mainline).
 - Update to kernel version 5.11.2.
 ```
 
