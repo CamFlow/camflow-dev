@@ -1126,27 +1126,6 @@ static int provenance_inode_listsecurity(struct inode *inode,
 	return len;
 }
 
-static int provenance_inode_copy_up(struct dentry *src, struct cred **new)
-{
-	struct provenance *cprov = get_cred_provenance();
-	struct provenance *tprov = get_task_provenance(true);
-	struct provenance *iprov = get_dentry_provenance(src, true);
-	struct provenance *nprov = provenance_cred(*new);
-	unsigned long irqflags;
-	int rc = 0;
-
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	rc = generates(RL_COPY_UP_NEW_CRED, cprov, tprov, nprov, NULL, 0);
-	if (rc < 0)
-		goto out;
-	rc = generates(RL_COPY_UP_INODE, nprov, tprov, iprov, NULL, 0);
-out:
-	spin_unlock(prov_lock(iprov));
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-	return rc;
-}
-
 /*!
  * @brief Record provenance when file_permission hook is triggered.
  *
@@ -2764,7 +2743,6 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(inode_removexattr,        provenance_inode_removexattr),
 	LSM_HOOK_INIT(inode_getsecurity,        provenance_inode_getsecurity),
 	LSM_HOOK_INIT(inode_listsecurity,       provenance_inode_listsecurity),
-	LSM_HOOK_INIT(inode_copy_up,            provenance_inode_copy_up),
 
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,          provenance_file_permission),
