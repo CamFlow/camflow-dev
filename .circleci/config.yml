@@ -38,7 +38,6 @@ jobs:
             - linux-stable
             - pristine
             - patches
-
   doc:
     machine:
       image: ubuntu-2004:202010-01
@@ -423,11 +422,25 @@ jobs:
             else
               echo 'Nothing to commit.'
             fi
+  patch:
+    docker:
+      - image: circleci/golang
+    steps:
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t ${GH_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/build/patches/
 workflows:
   version: 2
   build-and-deploy:
     jobs:
       - checkout
+          filters:
+            tags:
+              only: /.*/
       - security:
           requires:
             - checkout
@@ -503,3 +516,11 @@ workflows:
                 - dev
           requires:
             - doc
+      - patch:
+          requires:
+            - checkout
+          filters:
+            tags:
+              ignore: /test/
+            branches:
+              ignore: /.*/
