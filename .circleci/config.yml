@@ -38,33 +38,6 @@ jobs:
             - linux-stable
             - pristine
             - patches
-  doc:
-    machine:
-      image: ubuntu-2004:202010-01
-    working_directory: ~/build
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/build
-      - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y apt-utils'
-      - run: 'sudo apt-get install -y sudo'
-      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev zstd'
-      - run: 'sudo apt-get install --reinstall make'
-      - run: 'cd ./scripts && make prepare'
-      - run: 'cd ./scripts && make config'
-      - run:
-          command: 'cd ./scripts && make compile'
-          no_output_timeout: '30m'
-      - run: 'pwd'
-      - run: 'cd ./scripts && make run'
-      - run: 'cd ./scripts && cat syslist.txt'
-      - run: 'make doc'
-      - persist_to_workspace:
-          root: .
-          paths:
-            - docs
-            - scripts
   security:
     machine:
       image: ubuntu-2004:202010-01
@@ -502,20 +475,17 @@ workflows:
             - compile_no_flow_friendly
             - compile_whole
             - compile_persist
-      - doc:
-          requires:
-            - sparse
-            - flawfinder
-            - checkpatch
-            - smatch
-            - coccinelle
       - deploy_dev:
           filters:
             branches:
               only:
                 - dev
           requires:
-            - doc
+            - sparse
+            - flawfinder
+            - checkpatch
+            - smatch
+            - coccinelle
       - patch:
           requires:
             - checkout
