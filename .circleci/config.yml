@@ -411,7 +411,7 @@ jobs:
             else
               echo 'Nothing to commit.'
             fi
-  patch:
+  release:
     docker:
       - image: circleci/golang
     steps:
