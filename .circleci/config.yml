@@ -53,7 +53,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - patches  
+            - patches
   security:
     machine:
       image: ubuntu-2004:202010-01
