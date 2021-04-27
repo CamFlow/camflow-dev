@@ -77,18 +77,45 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	{											  \
 +		struct filters *s;								  \
 +		if (count < sizeof(struct info))						  \
-+			return -ENOMEM;								  \
-+		s = kzalloc(sizeof(struct filters), GFP_KERNEL);				  \
++		return -ENOMEM;									  \
++		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
 +		if (!s)										  \
-+			return -ENOMEM;								  \
++		return -ENOMEM;									  \
 +		if (copy_from_user(&s->filter, buf, sizeof(struct info))) {			  \
 +			kfree(s);								  \
 +			return -EAGAIN;								  \
 +		}										  \
 +		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
-+			add_function(s); else							  \
-+			delete_function(s); return sizeof(struct filters);			  \
++		add_function (s); else								  \
++		delete_function (s); return sizeof(struct filters);				  \
 +	}
+
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#679: FILE: security/provenance/fs.c:679:
++		if (count < sizeof(struct info))						  \
++		return -ENOMEM;									  \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#681: FILE: security/provenance/fs.c:681:
++		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
+
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#682: FILE: security/provenance/fs.c:682:
++		if (!s)										  \
++		return -ENOMEM;									  \
+
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#688: FILE: security/provenance/fs.c:688:
++		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
++		add_function (s); else								  \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#689: FILE: security/provenance/fs.c:689:
++		add_function (s); else								  \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#690: FILE: security/provenance/fs.c:690:
++		delete_function (s); return sizeof(struct filters);				  \
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
 #693: FILE: security/provenance/fs.c:693:
@@ -129,7 +156,15 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		}											 \
 +	} while (0)
 
-total: 0 errors, 9 warnings, 1141 lines checked
+WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
+#1010: FILE: security/provenance/fs.c:1010:
++			strlcpy(type_info->str, relation_str(type_info->id),
+
+WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
+#1016: FILE: security/provenance/fs.c:1016:
++			strlcpy(type_info->str,
+
+total: 0 errors, 17 warnings, 1141 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -138,9 +173,20 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-total: 0 errors, 0 warnings, 2950 lines checked
+WARNING:REPEATED_WORD: Possible repeated word: 'task'
+#97: FILE: security/provenance/hooks.c:97:
++ * @param task Task being allocated.
 
-security/provenance/hooks.c has no obvious style problems and is ready for submission.
+WARNING:REPEATED_WORD: Possible repeated word: 'and'
+#2010: FILE: security/provenance/hooks.c:2010:
++ * Typically, the inode alloc_security hook will allocate and and attach
+
+total: 0 errors, 2 warnings, 2948 lines checked
+
+NOTE: For some of the reported defects, checkpatch may be able to
+      mechanically convert to the typical style using --fix or --fix-inplace.
+
+security/provenance/hooks.c has style problems, please review.
 -----------------------------
 security/provenance/machine.c
 -----------------------------
@@ -181,15 +227,15 @@ security/provenance/relay.c has no obvious style problems and is ready for submi
 security/provenance/type.c
 --------------------------
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#156: FILE: security/provenance/type.c:156:
+#155: FILE: security/provenance/type.c:155:
 +#define MATCH_AND_RETURN(str1, str2, v)	\
 +	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
 WARNING:BRACES: braces {} are not necessary for single statement blocks
-#157: FILE: security/provenance/type.c:157:
+#156: FILE: security/provenance/type.c:156:
 +	do { if (strcmp(str1, str2) == 0) { return v; } } while (0)
 
-total: 0 errors, 2 warnings, 588 lines checked
+total: 0 errors, 2 warnings, 583 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.

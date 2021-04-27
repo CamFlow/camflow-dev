@@ -1,4 +1,4 @@
-scripts/kconfig/conf  --syncconfig Kconfig
+  SYNC    include/config/auto.conf.cmd
   SYSTBL  arch/x86/include/generated/asm/syscalls_32.h
   SYSHDR  arch/x86/include/generated/asm/unistd_32_ia32.h
   SYSHDR  arch/x86/include/generated/asm/unistd_64_x32.h
@@ -38,76 +38,19 @@ scripts/kconfig/conf  --syncconfig Kconfig
   WRAP    arch/x86/include/generated/asm/early_ioremap.h
   WRAP    arch/x86/include/generated/asm/export.h
   WRAP    arch/x86/include/generated/asm/mcs_spinlock.h
-  WRAP    arch/x86/include/generated/asm/dma-contiguous.h
+  WRAP    arch/x86/include/generated/asm/irq_regs.h
+  WRAP    arch/x86/include/generated/asm/kmap_size.h
+  WRAP    arch/x86/include/generated/asm/local64.h
   WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
+  WRAP    arch/x86/include/generated/asm/module.lds.h
+  WRAP    arch/x86/include/generated/asm/rwonce.h
   UPD     include/config/kernel.release
   UPD     include/generated/uapi/linux/version.h
   UPD     include/generated/utsrelease.h
-  CHECK   scripts/mod/empty.c
   CC      scripts/mod/empty.o
-  HOSTCC  scripts/mod/mk_elfconfig
-  MKELF   scripts/mod/elfconfig.h
-  HOSTCC  scripts/mod/modpost.o
-  CC      scripts/mod/devicetable-offsets.s
-  UPD     scripts/mod/devicetable-offsets.h
-  HOSTCC  scripts/mod/file2alias.o
-  HOSTCC  scripts/mod/sumversion.o
-  HOSTLD  scripts/mod/modpost
-  CC      kernel/bounds.s
-  UPD     include/generated/bounds.h
-  UPD     include/generated/timeconst.h
-  CC      arch/x86/kernel/asm-offsets.s
-  UPD     include/generated/asm-offsets.h
-  CALL    scripts/checksyscalls.sh
-  CALL    scripts/atomic/check-atomics.sh
-  DESCEND  objtool
-  HOSTCC   /home/circleci/build/linux-stable/tools/objtool/fixdep.o
-  HOSTLD   /home/circleci/build/linux-stable/tools/objtool/fixdep-in.o
-  LINK     /home/circleci/build/linux-stable/tools/objtool/fixdep
-  CC       /home/circleci/build/linux-stable/tools/objtool/exec-cmd.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/help.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/pager.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/parse-options.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/run-command.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/sigchain.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/subcmd-config.o
-  LD       /home/circleci/build/linux-stable/tools/objtool/libsubcmd-in.o
-  AR       /home/circleci/build/linux-stable/tools/objtool/libsubcmd.a
-  MKDIR    /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/
-  GEN      /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
-  CC       /home/circleci/build/linux-stable/tools/objtool/arch/x86/decode.o
-  LD       /home/circleci/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/builtin-check.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/builtin-orc.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/check.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/orc_gen.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/orc_dump.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/elf.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/special.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/objtool.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/libstring.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/libctype.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/str_error_r.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/librbtree.o
-  LD       /home/circleci/build/linux-stable/tools/objtool/objtool-in.o
-  LINK     /home/circleci/build/linux-stable/tools/objtool/objtool
-  CHECK   security/provenance/relay.c
-  CC      security/provenance/relay.o
-  CHECK   security/provenance/hooks.c
-  CC      security/provenance/hooks.o
-  CHECK   security/provenance/query.c
-  CC      security/provenance/query.o
-  CHECK   security/provenance/fs.c
-  CC      security/provenance/fs.o
-  CHECK   security/provenance/netfilter.c
-  CC      security/provenance/netfilter.o
-  CHECK   security/provenance/propagate.c
-  CC      security/provenance/propagate.o
-  CHECK   security/provenance/type.c
-  CC      security/provenance/type.o
-  CHECK   security/provenance/machine.c
-  CC      security/provenance/machine.o
-  CHECK   security/provenance/memcpy_ss.c
-  CC      security/provenance/memcpy_ss.o
-  AR      security/provenance/built-in.a
+  CHECK   scripts/mod/empty.c
+/bin/sh: 1: sparse: not found
+make[1]: *** [scripts/Makefile.build:280: scripts/mod/empty.o] Error 127
+make[1]: *** Deleting file 'scripts/mod/empty.o'
+make: *** [Makefile:1200: prepare0] Error 2

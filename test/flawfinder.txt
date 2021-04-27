@@ -1,5 +1,6 @@
-Flawfinder version 1.31, (C) 2001-2014 David A. Wheeler.
-Number of rules (primarily dangerous function names) in C/C++ ruleset: 169
+Flawfinder version 2.0.10, (C) 2001-2019 David A. Wheeler.
+Number of rules (primarily dangerous function names) in C/C++ ruleset: 223
+File name removed
 File name removed
 File name removed
 File name removed
@@ -39,21 +40,17 @@ FINAL RESULTS:
 ./security/provenance/include/provenance_task.h:201:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/relay.c:289:  [1] (port) snprintf:
-  On some very old systems, snprintf is incorrectly implemented and permits
-  buffer overflows; there are also incompatible standard definitions of it.
-  Check it during installation, or use something else.
 
 ANALYSIS SUMMARY:
 
-Hits = 6
+Hits = 5
 Stat removed
-Physical Source Lines of Code (SLOC) = 5427
-Hits@level = [0]   0 [1]   5 [2]   1 [3]   0 [4]   0 [5]   0
-Hits@level+ = [0+]   6 [1+]   6 [2+]   1 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 1.10558 [1+] 1.10558 [2+] 0.184264 [3+]   0 [4+]   0 [5+]   0
+Physical Source Lines of Code (SLOC) = 5432
+Hits@level = [0]   1 [1]   4 [2]   1 [3]   0 [4]   0 [5]   0
+Hits@level+ = [0+]   6 [1+]   5 [2+]   1 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 1.10457 [1+] 0.920471 [2+] 0.184094 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!
-See 'Secure Programming for Linux and Unix HOWTO'
-(http://www.dwheeler.com/secure-programs) for more information.
+See 'Secure Programming HOWTO'
+(https://dwheeler.com/secure-programs) for more information.
