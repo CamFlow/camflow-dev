@@ -301,6 +301,7 @@ uncrustify_clean:
 	rm ./include/uapi/linux/*backup*~
 
 patch: copy_change
+	rm -rf patches
 	mkdir -p patches
 	cd ~/build/pristine/linux-stable && rm -f .config
 	cd ~/build/pristine/linux-stable && rm -f  config_sav

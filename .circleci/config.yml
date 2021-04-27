@@ -23,8 +23,6 @@ jobs:
               git config --global user.email $GH_EMAIL
               git config --global user.name $GH_NAME
               make prepare_kernel
-              make patch
-              make save_space
             fi
             ls
       - save_cache:
@@ -32,13 +30,30 @@ jobs:
           paths:
             - linux-stable
             - pristine
-            - patches
       - persist_to_workspace:
           root: .
           paths:
             - linux-stable
             - pristine
-            - patches
+  patch:
+    machine:
+      image: ubuntu-2004:202010-01
+    working_directory: ~/build
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/build
+      - run: 'sudo apt-get update -qq'
+      - run: 'sudo apt-get install -y apt-utils'
+      - run: 'sudo apt-get install -y sudo'
+      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev zstd'
+      - run: 'sudo apt-get install --reinstall make'
+      - run: 'make patch'
+      - run: 'cd patches && ls'
+      - persist_to_workspace:
+          root: .
+          paths:
+            - patches  
   security:
     machine:
       image: ubuntu-2004:202010-01
@@ -415,6 +430,12 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - patch:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /.*/
       - security:
           requires:
             - checkout
@@ -487,9 +508,9 @@ workflows:
             - checkpatch
             - smatch
             - coccinelle
-      - patch:
+      - release:
           requires:
-            - checkout
+            - patch
           filters:
             tags:
               ignore: /test/
