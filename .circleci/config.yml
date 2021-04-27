@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   checkout:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -37,7 +37,7 @@ jobs:
             - pristine
   patch:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -58,7 +58,7 @@ jobs:
             - patches
   security:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -76,7 +76,7 @@ jobs:
       - run: 'make compile_security_only'
   security_clang:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -101,7 +101,7 @@ jobs:
       - run: 'make compile_security_only_clang'
   compile_default:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -119,7 +119,7 @@ jobs:
       - run: 'make compile_kernel'
   compile_default_clang:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -143,7 +143,7 @@ jobs:
       - run: 'make compile_kernel_clang'
   compile_no_flow_friendly:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -162,7 +162,7 @@ jobs:
       - run: 'make compile_kernel'
   compile_whole:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -181,7 +181,7 @@ jobs:
       - run: 'make compile_kernel'
   compile_persist:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -200,7 +200,7 @@ jobs:
       - run: 'make compile_kernel'
   sparse:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -225,7 +225,7 @@ jobs:
             - test/sparse.txt
   flawfinder:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -250,7 +250,7 @@ jobs:
             - test/flawfinder.txt
   checkpatch:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -277,7 +277,7 @@ jobs:
             - test/headers_checkpatch.txt
   smatch:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -303,7 +303,7 @@ jobs:
             - test/smatch.txt
   coccinelle:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -337,7 +337,7 @@ jobs:
             - test/cocci.txt
   tinkerbell:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
@@ -365,7 +365,7 @@ jobs:
             - test/cocci.txt
   deploy_dev:
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/build
     steps:
       - checkout
