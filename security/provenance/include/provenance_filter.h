@@ -3,7 +3,7 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2020 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol
  *
  * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
  *
