@@ -48,6 +48,8 @@ jobs:
       - run: 'sudo apt-get install -y sudo'
       - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev zstd'
       - run: 'sudo apt-get install --reinstall make'
+      - run: 'git config --global user.email $GH_EMAIL'
+      - run: 'git config --global user.name $GH_NAME'
       - run: 'make patch'
       - run: 'cd patches && ls'
       - persist_to_workspace:
