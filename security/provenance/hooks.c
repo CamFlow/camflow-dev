@@ -109,6 +109,7 @@ static int provenance_task_alloc(struct task_struct *task,
 	struct provenance *cprov;
 
 	init_provenance_struct(ACT_TASK, ntprov);
+	update_task_namespaces(task, ntprov);
 	if (t != NULL) {
 		cred = (__force struct cred *)t->real_cred;
 		tprov = provenance_task(t);
@@ -284,9 +285,6 @@ static int provenance_cred_prepare(struct cred *new,
 	node_gid(prov_elt(nprov)) = __kgid_val(new->egid);
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
 	if (current != NULL) {
-		// Here we use current->provenance instead of calling get_task_provenance
-		// because at this point pid and vpid are not ready yet.
-		// System will crash if attempt to update those values.
 		tprov = provenance_task(current);
 		if (tprov != NULL)
 			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
