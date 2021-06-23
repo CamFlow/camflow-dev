@@ -1,5 +1,5 @@
 kernel-version=5.11.2
-lsm-version=0.7.2
+lsm-version=0.7.3
 arch=x86_64
 
 all: config compile install
