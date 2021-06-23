@@ -44,107 +44,108 @@
  * information of the current process.
  */
 #define current_pid()    (current->pid)
-static inline uint32_t current_cgroupns(void)
+static inline uint32_t get_cgroupns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct cgroup_namespace *cns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		cns = current->nsproxy->cgroup_ns;
+	if (task->nsproxy) {
+		cns = task->nsproxy->cgroup_ns;
 		if (cns) {
 			get_cgroup_ns(cns);
 			id = cns->ns.inum;
 			put_cgroup_ns(cns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_utsns(void)
+static inline uint32_t get_utsns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct uts_namespace *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->uts_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->uts_ns;
 		if (ns) {
 			get_uts_ns(ns);
 			id = ns->ns.inum;
 			put_uts_ns(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_ipcns(void)
+static inline uint32_t get_ipcns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct ipc_namespace *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->ipc_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->ipc_ns;
 		if (ns) {
 			get_ipc_ns(ns);
 			id = ns->ns.inum;
 			put_ipc_ns(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_mntns(void)
+static inline uint32_t get_mntns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct mnt_namespace *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->mnt_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->mnt_ns;
 		if (ns) {
 			get_mnt_ns(ns);
 			id = ns->ns.inum;
 			put_mnt_ns(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_netns(void)
+static inline uint32_t get_netns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct net *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->net_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->net_ns;
 		if (ns) {
 			get_net(ns);
 			id = ns->ns.inum;
 			put_net(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_pidns(void)
+static inline uint32_t get_pidns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct pid_namespace *ns;
 
-	task_lock(current);
-	ns = task_active_pid_ns(current);
+	ns = task_active_pid_ns(task);
 	if (ns)
 		id = ns->ns.inum;
-	task_unlock(current);
 	return id;
+}
+
+static inline void update_task_namespaces(struct task_struct *task,
+					  struct provenance *prov)
+{
+	task_lock(task);
+	prov_elt(prov)->task_info.utsns = get_utsns(task);
+	prov_elt(prov)->task_info.ipcns = get_ipcns(task);
+	prov_elt(prov)->task_info.mntns = get_mntns(task);
+	prov_elt(prov)->task_info.pidns = get_pidns(task);
+	prov_elt(prov)->task_info.netns = get_netns(task);
+	prov_elt(prov)->task_info.cgroupns = get_cgroupns(task);
+	task_unlock(task);
 }
 
 #define vm_write(flags) ((flags & VM_WRITE) == VM_WRITE)
@@ -351,12 +352,6 @@ static inline struct provenance *get_cred_provenance(void)
 	spin_lock_irqsave_nested(prov_lock(prov),
 				 irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
-	prov_elt(prov)->proc_info.utsns = current_utsns();
-	prov_elt(prov)->proc_info.ipcns = current_ipcns();
-	prov_elt(prov)->proc_info.mntns = current_mntns();
-	prov_elt(prov)->proc_info.pidns = current_pidns();
-	prov_elt(prov)->proc_info.netns = current_netns();
-	prov_elt(prov)->proc_info.cgroupns = current_cgroupns();
 	prov_elt(prov)->proc_info.uid = __kuid_val(current_uid());
 	prov_elt(prov)->proc_info.gid = __kgid_val(current_gid());
 	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
@@ -384,6 +379,7 @@ static inline struct provenance *get_task_provenance(bool link)
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
 	update_task_perf(current, tprov);
+	update_task_namespaces(current, tprov);
 	if (!provenance_is_opaque(prov_elt(tprov)) && link)
 		record_kernel_link(prov_entry(tprov));
 	return tprov;

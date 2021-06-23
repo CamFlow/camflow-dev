@@ -291,13 +291,13 @@ static __always_inline void apply_target(union prov_elt *prov)
 	uint8_t op = 0;
 
 	// track based on ns
-	if (prov_type(prov) == ENT_PROC)
-		op |= prov_ns_whichOP(prov->proc_info.utsns,
-				      prov->proc_info.ipcns,
-				      prov->proc_info.mntns,
-				      prov->proc_info.pidns,
-				      prov->proc_info.netns,
-				      prov->proc_info.cgroupns);
+	if (prov_type(prov) == ACT_TASK)
+		op |= prov_ns_whichOP(prov->task_info.utsns,
+				      prov->task_info.ipcns,
+				      prov->task_info.mntns,
+				      prov->task_info.pidns,
+				      prov->task_info.netns,
+				      prov->task_info.cgroupns);
 
 	if (prov_has_secid(node_type(prov)))
 		op |= prov_secctx_whichOP(node_secid(prov));

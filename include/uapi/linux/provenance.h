@@ -171,12 +171,6 @@ struct proc_prov_struct {
 	basic_elements;
 	shared_node_elements;
 	uint32_t tgid;
-	uint32_t utsns;
-	uint32_t ipcns;
-	uint32_t mntns;
-	uint32_t pidns;
-	uint32_t netns;
-	uint32_t cgroupns;
 };
 
 struct task_prov_struct {
@@ -195,6 +189,13 @@ struct task_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
+	/* namespaces */
+	uint32_t utsns;
+	uint32_t ipcns;
+	uint32_t mntns;
+	uint32_t pidns;
+	uint32_t netns;
+	uint32_t cgroupns;
 	union long_prov_elt *disc;
 };
 
