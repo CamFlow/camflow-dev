@@ -1189,18 +1189,7 @@ security/selinux/ss/ebitmap.c:207 ebitmap_netlbl_import() warn: ignoring unreach
   CHECK   security/integrity/ima/ima_asymmetric_keys.c
   CC      security/integrity/ima/ima_queue_keys.o
   CHECK   security/integrity/ima/ima_queue_keys.c
-  CC      security/integrity/ima/ima_efi.o
-  CHECK   security/integrity/ima/ima_efi.c
   AR      security/integrity/ima/built-in.a
-  CC      security/integrity/evm/evm_main.o
-  CHECK   security/integrity/evm/evm_main.c
-  CC      security/integrity/evm/evm_crypto.o
-  CHECK   security/integrity/evm/evm_crypto.c
-  CC      security/integrity/evm/evm_secfs.o
-  CHECK   security/integrity/evm/evm_secfs.c
-  CC      security/integrity/evm/evm_posix_acl.o
-  CHECK   security/integrity/evm/evm_posix_acl.c
-  AR      security/integrity/evm/built-in.a
   CC      security/integrity/iint.o
   CHECK   security/integrity/iint.c
   CC      security/integrity/integrity_audit.o
