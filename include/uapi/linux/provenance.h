@@ -57,6 +57,7 @@
 #define node_uid(node)                          ((node)->node_info.uid)
 #define node_gid(node)                          ((node)->node_info.gid)
 #define node_previous_id(node)                  ((node)->node_info.previous_id)
+#define node_previous_version(node)             ((node)->node_info.previous_version)
 #define node_previous_type(node)                ((node)->node_info.previous_type)
 #define node_kernel_version(node)               ((node)->node_info.k_version)
 
@@ -143,7 +144,7 @@ union prov_identifier {
 
 
 #define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
-#define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
+#define shared_node_elements    uint64_t previous_id; uint32_t previous_version; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;

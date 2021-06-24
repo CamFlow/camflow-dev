@@ -56,6 +56,7 @@
 
 ## v0.7.3
 ```
+- Consider node version for edge compression.
 - Namespaces associated to tasks instead of process state (align with kernel).
 - Update to kernel version 5.11.2.
 ```

@@ -121,10 +121,12 @@ static __always_inline int record_relation(const uint64_t type,
 
 	if (prov_policy.should_compress_edge) {
 		if (node_previous_id(to) == node_identifier(from).id
+		    && node_previous_version(to) == node_identifier(from).version
 		    && node_previous_type(to) == type)
 			return 0;
 
 		node_previous_id(to) = node_identifier(from).id;
+		node_previous_version(to) = node_identifier(from).version;
 		node_previous_type(to) = type;
 	}
 
