@@ -126,10 +126,10 @@ security/provenance/include/provenance_query.h has no obvious style problems and
 security/provenance/include/provenance_record.h
 -----------------------------------------------
 WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
-#223: FILE: security/provenance/include/provenance_record.h:223:
+#225: FILE: security/provenance/include/provenance_record.h:225:
 +	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
 
-total: 0 errors, 1 warnings, 581 lines checked
+total: 0 errors, 1 warnings, 583 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
