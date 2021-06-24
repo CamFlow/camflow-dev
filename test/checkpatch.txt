@@ -178,10 +178,10 @@ WARNING:REPEATED_WORD: Possible repeated word: 'task'
 + * @param task Task being allocated.
 
 WARNING:REPEATED_WORD: Possible repeated word: 'and'
-#2010: FILE: security/provenance/hooks.c:2010:
+#2008: FILE: security/provenance/hooks.c:2008:
 + * Typically, the inode alloc_security hook will allocate and and attach
 
-total: 0 errors, 2 warnings, 2948 lines checked
+total: 0 errors, 2 warnings, 2946 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
