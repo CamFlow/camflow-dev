@@ -2914,7 +2914,7 @@ static int __init provenance_init(void)
 	init_prov_policy();
 	prov_machine_id = 0;
 	prov_boot_id = 0;
-	epoch = 1;
+	epoch = 0;
 	prov_written = false;
 	init_prov_cache();
 	init_boot_cache();
