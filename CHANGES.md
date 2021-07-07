@@ -56,6 +56,7 @@
 
 ## v0.7.3
 ```
+- Protect epoch update with RCU.
 - Epoch starts from zero instead of one (0 before daemon, 1 after daemon start).
 - Consider node version for edge compression.
 - Namespaces associated to tasks instead of process state (align with kernel).

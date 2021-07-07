@@ -139,7 +139,9 @@ static __always_inline void __prepare_relation(const uint64_t type,
 		relation->relation_info.offset = file->f_pos;
 	}
 	relation->relation_info.flags = flags;
-	relation->msg_info.epoch = epoch;
+	rcu_read_lock();
+	relation->msg_info.epoch = *epoch;
+	rcu_read_unlock();
 	relation->relation_info.task_id = current_provid();
 }
 

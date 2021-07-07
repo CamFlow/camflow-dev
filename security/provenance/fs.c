@@ -1071,11 +1071,27 @@ static ssize_t prov_write_channel(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
 
+
+spinlock_t lock_epoch;
+
 static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	epoch++;
-	pr_info("Provenance: epoch changed to %d.", epoch);
+	uint32_t *old_epoch;
+	uint32_t *new_epoch;
+
+	new_epoch = kmalloc(sizeof(uint32_t), GFP_KERNEL);
+
+	spin_lock(&lock_epoch);
+	old_epoch = rcu_dereference_protected(epoch, lockdep_is_held(&lock_epoch));
+	*new_epoch = *old_epoch + 1;
+	rcu_assign_pointer(epoch, new_epoch);
+	spin_unlock(&lock_epoch);
+	synchronize_rcu();
+
+	kfree(old_epoch);
+
+	pr_info("Provenance: epoch changed to %d.", *new_epoch);
 	return count;
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
@@ -1090,6 +1106,9 @@ static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
 	struct dentry *dentry;
+
+
+	spin_lock_init(&lock_epoch);
 
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	prov_create_file("enable", 0644, &prov_enable_ops);

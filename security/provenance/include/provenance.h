@@ -39,7 +39,7 @@ extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
-extern uint32_t epoch;
+extern uint32_t __rcu *epoch;
 extern bool prov_written;
 
 #define prov_next_relation_id()	\
@@ -175,7 +175,9 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 	__set_recorded((union long_prov_elt *)node)
 static inline void __set_recorded(union long_prov_elt *node)
 {
-	node->msg_info.epoch = epoch;
+	rcu_read_lock();
+	node->msg_info.epoch = *epoch;
+	rcu_read_unlock();
 }
 
 #define clear_recorded(node) \
@@ -189,16 +191,22 @@ static inline void __clear_recorded(union long_prov_elt *node)
 	__provenance_is_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_recorded(union long_prov_elt *node)
 {
-	if (epoch > node->msg_info.epoch)
-		return false;
-	return true;
+	bool ret = true;
+
+	rcu_read_lock();
+	if (*epoch > node->msg_info.epoch)
+		ret = false;
+	rcu_read_unlock();
+	return ret;
 }
 
 #define set_name_recorded(node)	\
 	__set_name_recorded((union long_prov_elt *)node)
 static inline void __set_name_recorded(union long_prov_elt *node)
 {
-	node->msg_info.nepoch = epoch;
+	rcu_read_lock();
+	node->msg_info.nepoch = *epoch;
+	rcu_read_unlock();
 }
 
 #define clear_name_recorded(node) \
@@ -212,9 +220,14 @@ static inline void __clear_name_recorded(union long_prov_elt *node)
 	__provenance_is_name_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 {
-	if (epoch > node->msg_info.nepoch)
-		return false;
-	return true;
+	bool ret = true;
+
+	rcu_read_lock();
+	if (*epoch > node->msg_info.nepoch)
+		ret = false;
+	rcu_read_unlock();
+
+	return ret;
 }
 
 // reference to node representing the machine/kernel

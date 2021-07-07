@@ -2836,7 +2836,7 @@ struct capture_policy prov_policy;
 
 uint32_t prov_machine_id;
 uint32_t prov_boot_id;
-uint32_t epoch;
+uint32_t __rcu *epoch;
 bool prov_written;
 
 static void __init init_prov_policy(void)
@@ -2914,7 +2914,8 @@ static int __init provenance_init(void)
 	init_prov_policy();
 	prov_machine_id = 0;
 	prov_boot_id = 0;
-	epoch = 0;
+	epoch = kmalloc(sizeof(uint32_t), GFP_KERNEL);
+	*epoch = 0;
 	prov_written = false;
 	init_prov_cache();
 	init_boot_cache();
@@ -2930,7 +2931,7 @@ static int __init provenance_init(void)
 	init_prov_machine();
 	pr_info("Provenance: init propagate query.");
 	init_prov_propagate();
-	pr_info("Provenance: starting in epoch %d.", epoch);
+	pr_info("Provenance: starting in epoch %d.", *epoch);
 	// Register provenance security hooks.
 	security_add_hooks(provenance_hooks,
 			   ARRAY_SIZE(provenance_hooks), "provenance");
