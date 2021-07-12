@@ -164,7 +164,7 @@ WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CA
 #1016: FILE: security/provenance/fs.c:1016:
 +			strlcpy(type_info->str,
 
-total: 0 errors, 17 warnings, 1141 lines checked
+total: 0 errors, 17 warnings, 1160 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -181,7 +181,7 @@ WARNING:REPEATED_WORD: Possible repeated word: 'and'
 #2008: FILE: security/provenance/hooks.c:2008:
 + * Typically, the inode alloc_security hook will allocate and and attach
 
-total: 0 errors, 2 warnings, 2946 lines checked
+total: 0 errors, 2 warnings, 2947 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
