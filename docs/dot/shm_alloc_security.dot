@@ -14,7 +14,7 @@ process_memory -> task[fontsize = 8,label = memory_read]
 
 shm[fontsize = 8,label = shm,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-task -> shm[fontsize = 8,label = sh_create_read]
+task -> shm[fontsize = 8,label = sh_create]
 
 task -> task[fontsize = 8,label = version_activity]
 
@@ -25,7 +25,5 @@ inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = f
 inode -> process_memory[fontsize = 8,label = sh_read]
 
 process_memory -> process_memory[fontsize = 8,label = version_entity]
-
-task -> shm[fontsize = 8,label = sh_create_write]
 
 }

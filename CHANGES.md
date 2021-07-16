@@ -56,6 +56,8 @@
 
 ## v0.7.3
 ```
+- Simplify relations that can be inferred from the flag attributes
+-- RL_SH_CREATE_READ & RL_SH_CREATE_WRITE -> RL_SH_CREATE
 - Protect epoch update with RCU.
 - Epoch starts from zero instead of one (0 before daemon, 1 after daemon start).
 - Consider node version for edge compression.
