@@ -70,9 +70,7 @@ static const char RL_STR_GETXATTR_INODE[] = "getxattr_inode";                   
 static const char RL_STR_LSTXATTR[] = "listxattr";                                                      // listxattr operation
 static const char RL_STR_READ_LINK[] = "read_link";                                                     // readlink operation
 static const char RL_STR_MMAP[] = "mmap";                                                               // mmap mountings
-static const char RL_STR_MMAP_READ_PRIVATE[] = "mmap_read_private";                                     // mmap private mounting with read perm
-static const char RL_STR_MMAP_EXEC_PRIVATE[] = "mmap_exec_private";                                     // mmap private mounting with exec perm
-static const char RL_STR_MMAP_WRITE_PRIVATE[] = "mmap_write_private";                                   // mmap private  mounting with write perm
+static const char RL_STR_MMAP_PRIVATE[] = "mmap_private";                                               // mmap private mounting
 static const char RL_STR_SH_READ[] = "sh_read";                                                         // sh_read operation
 static const char RL_STR_PROC_READ[] = "memory_read";                                                   // read from process memory
 static const char RL_STR_SND[] = "send";                                                                // send over socket
@@ -253,12 +251,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_READ_LINK;
 	case RL_MMAP:
 		return RL_STR_MMAP;
-	case RL_MMAP_READ_PRIVATE:
-		return RL_STR_MMAP_READ_PRIVATE;
-	case RL_MMAP_EXEC_PRIVATE:
-		return RL_STR_MMAP_EXEC_PRIVATE;
-	case RL_MMAP_WRITE_PRIVATE:
-		return RL_STR_MMAP_WRITE_PRIVATE;
+	case RL_MMAP_PRIVATE:
+		return RL_STR_MMAP_PRIVATE;
 	case RL_SND:
 		return RL_STR_SND;
 	case RL_SND_PACKET:
@@ -407,9 +401,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_GETXATTR_INODE, RL_GETXATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_LSTXATTR, RL_LSTXATTR);
 	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_READ_PRIVATE, RL_MMAP_READ_PRIVATE);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_EXEC_PRIVATE, RL_MMAP_EXEC_PRIVATE);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE_PRIVATE, RL_MMAP_WRITE_PRIVATE);
+	MATCH_AND_RETURN(str, RL_STR_MMAP_PRIVATE, RL_MMAP_PRIVATE);
 	MATCH_AND_RETURN(str, RL_STR_SND, RL_SND);
 	MATCH_AND_RETURN(str, RL_STR_SND_PACKET, RL_SND_PACKET);
 	MATCH_AND_RETURN(str, RL_STR_SND_UNIX, RL_SND_UNIX);

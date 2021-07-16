@@ -26,10 +26,6 @@ process_memory -> inode[fontsize = 8,label = sh_write]
 
 inode -> inode[fontsize = 8,label = version_entity]
 
-inode -> task[fontsize = 8,label = mmap_write_private]
-
-inode -> task[fontsize = 8,label = mmap_read_private]
-
-inode -> task[fontsize = 8,label = mmap_exec_private]
+inode -> task[fontsize = 8,label = mmap_private]
 
 }

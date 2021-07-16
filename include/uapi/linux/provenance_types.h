@@ -128,12 +128,10 @@
 #define RL_GETGID                               (RL_USED        | (0x0000000000000001ULL << 17))
 #define RL_SPLICE_IN                            (RL_USED        | (0x0000000000000001ULL << 18))
 #define RL_MMAP                                 (RL_USED        | (0x0000000000000001ULL << 19))
-#define RL_MMAP_READ_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 20))
-#define RL_MMAP_EXEC_PRIVATE                    (RL_USED        | (0x0000000000000001ULL << 21))
-#define RL_MMAP_WRITE_PRIVATE                   (RL_USED        | (0x0000000000000001ULL << 22))
-#define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 23))
-#define RL_PTRACE_READ                          (RL_USED        | (0x0000000000000001ULL << 24))
-#define RL_USED_DISC                            (RL_USED        | (0x0000000000000001ULL << 25))
+#define RL_MMAP_PRIVATE                                         (RL_USED        | (0x0000000000000001ULL << 20))
+#define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 21))
+#define RL_PTRACE_READ                          (RL_USED        | (0x0000000000000001ULL << 22))
+#define RL_USED_DISC                            (RL_USED        | (0x0000000000000001ULL << 23))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */

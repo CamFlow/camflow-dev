@@ -1450,20 +1450,8 @@ static int provenance_mmap_file(struct file *file,
 	if ((flags & MAP_TYPE) == MAP_SHARED
 	    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE)
 		rc = uses(RL_MMAP, iprov, tprov, cprov, file, prot);
-	else {
-		if (rc < 0)
-			goto out;
-		if ((prot & (PROT_WRITE)) != 0)
-			rc = uses(RL_MMAP_WRITE_PRIVATE, iprov, tprov, cprov, file, flags);
-		if (rc < 0)
-			goto out;
-		if ((prot & (PROT_READ)) != 0)
-			rc = uses(RL_MMAP_READ_PRIVATE, iprov, tprov, cprov, file, flags);
-		if (rc < 0)
-			goto out;
-		if ((prot & (PROT_EXEC)) != 0)
-			rc = uses(RL_MMAP_EXEC_PRIVATE, iprov, tprov, cprov, file, flags);
-	}
+	else
+		rc = uses(RL_MMAP_PRIVATE, iprov, tprov, cprov, file, prot);
 out:
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
