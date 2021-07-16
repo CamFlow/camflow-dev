@@ -30,13 +30,7 @@ path -> inode[fontsize = 8,label = named]
 
 inode -> task[fontsize = 8,label = getattr]
 
-inode -> task[fontsize = 8,label = perm_exec]
-
-inode -> task[fontsize = 8,label = perm_read]
-
-inode -> task[fontsize = 8,label = perm_append]
-
-inode -> task[fontsize = 8,label = perm_write]
+inode -> task[fontsize = 8,label = perm_check]
 
 task -> task[fontsize = 8,label = terminate_task]
 

@@ -75,10 +75,7 @@ RL_RCV_PACKET|receive_packet|connect packet to socket on receive operation|
 RL_RCV_UNIX|receive_unix|receive on unix socket|
 RL_RCV_MSG|receive_msg|receive message|
 RL_RCV_MSG_Q|receive_msg_queue|receive message from queue|
-RL_PERM_READ|perm_read|check read permission|
-RL_PERM_WRITE|perm_write|check write permission|
-RL_PERM_EXEC|perm_exec|check exec permission|
-RL_PERM_APPEND|perm_append|check append permission|
+RL_PERM|perm_check|check permission|
 RL_TERMINATE_TASK|terminate_task|created when task data structure is freed|
 RL_TERMINATE_PROC|terminate_proc|created when cred data structure is freed|
 RL_FREED|free|created when an inode is freed|

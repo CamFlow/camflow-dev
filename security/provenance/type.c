@@ -87,10 +87,7 @@ static const char RL_STR_RCV_PACKET[] = "receive_packet";                       
 static const char RL_STR_RCV_UNIX[] = "receive_unix";                                                   // receive on unix socket
 static const char RL_STR_RCV_MSG[] = "receive_msg";                                                     // receive message
 static const char RL_STR_RCV_MSG_Q[] = "receive_msg_queue";                                             // receive message from queue
-static const char RL_STR_PERM_READ[] = "perm_read";                                                     // check read permission
-static const char RL_STR_PERM_WRITE[] = "perm_write";                                                   // check write permission
-static const char RL_STR_PERM_EXEC[] = "perm_exec";                                                     // check exec permission
-static const char RL_STR_PERM_APPEND[] = "perm_append";                                                 // check append permission
+static const char RL_STR_PERM[] = "perm_check";                                                         // check permission
 static const char RL_STR_TERMINATE_TASK[] = "terminate_task";                                           // created when task data structure is freed
 static const char RL_STR_TERMINATE_PROC[] = "terminate_proc";                                           // created when cred data structure is freed
 static const char RL_STR_FREED[] = "free";                                                              // created when an inode is freed
@@ -288,10 +285,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_RCV_MSG;
 	case RL_RCV_MSG_Q:
 		return RL_STR_RCV_MSG_Q;
-	case RL_PERM_READ:
-		return RL_STR_PERM_READ;
-	case RL_PERM_WRITE:
-		return RL_STR_PERM_WRITE;
+	case RL_PERM:
+		return RL_STR_PERM;
 	case RL_SH_READ:
 		return RL_STR_SH_READ;
 	case RL_PROC_READ:
@@ -300,10 +295,6 @@ const char *relation_str(uint64_t type)
 		return RL_STR_SH_WRITE;
 	case RL_PROC_WRITE:
 		return RL_STR_PROC_WRITE;
-	case RL_PERM_EXEC:
-		return RL_STR_PERM_EXEC;
-	case RL_PERM_APPEND:
-		return RL_STR_PERM_APPEND;
 	case RL_TERMINATE_TASK:
 		return RL_STR_TERMINATE_TASK;
 	case RL_TERMINATE_PROC:
@@ -437,10 +428,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_RCV_UNIX, RL_RCV_UNIX);
 	MATCH_AND_RETURN(str, RL_STR_RCV_MSG, RL_RCV_MSG);
 	MATCH_AND_RETURN(str, RL_STR_RCV_MSG_Q, RL_RCV_MSG_Q);
-	MATCH_AND_RETURN(str, RL_STR_PERM_READ, RL_PERM_READ);
-	MATCH_AND_RETURN(str, RL_STR_PERM_WRITE, RL_PERM_WRITE);
-	MATCH_AND_RETURN(str, RL_STR_PERM_EXEC, RL_PERM_EXEC);
-	MATCH_AND_RETURN(str, RL_STR_PERM_APPEND, RL_PERM_APPEND);
+	MATCH_AND_RETURN(str, RL_STR_PERM, RL_PERM);
 	MATCH_AND_RETURN(str, RL_STR_SH_READ, RL_SH_READ);
 	MATCH_AND_RETURN(str, RL_STR_PROC_READ, RL_PROC_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_WRITE, RL_SH_WRITE);

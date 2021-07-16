@@ -518,15 +518,6 @@ static int provenance_inode_create(struct inode *dir,
  * read/write operations are performed.
  * Depending on the permission specified in @mask,
  * Zero or more relation may be recorded during this permission check.
- * If permission is:
- * 1. MAY_EXEC: record provenance relation RL_PERM_EXEC by calling "uses"
- * function, and
- * 2. MAY_READ: record provenance relation MAY_READ by calling "uses" function,
- * and
- * 3. MAY_APPEND: record provenance relation RL_PERM_APPEND by calling "uses"
- * function, and
- * 4. MAY_WRITE: record provenance relation RL_PERM_WRITE by calling "uses"
- * function.
  * Note that "uses" function also generates provenance relation RL_PROC_WRITE.
  * Information flows from @inode's provenance to the current process that
  * attempts to access the inode, and eventually to the cred of the task.
@@ -561,27 +552,7 @@ static int provenance_inode_permission(struct inode *inode, int mask)
 
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-	if (mask & MAY_EXEC) {
-		rc = uses(RL_PERM_EXEC, iprov, tprov, cprov, NULL, mask);
-		if (rc < 0)
-			goto out;
-	}
-	if (mask & MAY_READ) {
-		rc = uses(RL_PERM_READ, iprov, tprov, cprov, NULL, mask);
-		if (rc < 0)
-			goto out;
-	}
-	if (mask & MAY_APPEND) {
-		rc = uses(RL_PERM_APPEND, iprov, tprov, cprov, NULL, mask);
-		if (rc < 0)
-			goto out;
-	}
-	if (mask & MAY_WRITE) {
-		rc = uses(RL_PERM_WRITE, iprov, tprov, cprov, NULL, mask);
-		if (rc < 0)
-			goto out;
-	}
-out:
+	rc = uses(RL_PERM, iprov, tprov, cprov, NULL, mask);
 	spin_unlock(prov_lock(iprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;

@@ -32,13 +32,7 @@ machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style =
 
 machine -> task[fontsize = 8,label = ran_on]
 
-inode -> task[fontsize = 8,label = perm_exec]
-
-inode -> task[fontsize = 8,label = perm_read]
-
-inode -> task[fontsize = 8,label = perm_append]
-
-inode -> task[fontsize = 8,label = perm_write]
+inode -> task[fontsize = 8,label = perm_check]
 
 task -> task[fontsize = 8,label = terminate_task]
 
