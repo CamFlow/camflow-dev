@@ -97,8 +97,7 @@ static const char RL_STR_FREED[] = "free";                                      
 static const char RL_STR_ARG[] = "arg";                                                                 // connect arg value to process
 static const char RL_STR_ENV[] = "env";                                                                 // connect env value to process
 static const char RL_STR_LOG[] = "log";                                                                 // connect string to task
-static const char RL_STR_SH_ATTACH_READ[] = "sh_attach_read";                                           // attach sh with read perm
-static const char RL_STR_SH_ATTACH_WRITE[] = "sh_attach_write";                                         // attach sh with write perm
+static const char RL_STR_SH_ATTACH[] = "sh_attach";                                                     // attach sh
 static const char RL_STR_SH_CREATE[] = "sh_create";                                                     // sh create perm
 static const char RL_STR_LOAD_FILE[] = "load_file";                                                     // load file into kernel
 static const char RL_STR_RAN_ON[] = "ran_on";                                                           // task run on this machine
@@ -317,10 +316,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_ENV;
 	case RL_LOG:
 		return RL_STR_LOG;
-	case RL_SH_ATTACH_READ:
-		return RL_STR_SH_ATTACH_READ;
-	case RL_SH_ATTACH_WRITE:
-		return RL_STR_SH_ATTACH_WRITE;
+	case RL_SH_ATTACH:
+		return RL_STR_SH_ATTACH;
 	case RL_SH_CREATE:
 		return RL_STR_SH_CREATE;
 	case RL_LOAD_FILE:
@@ -454,8 +451,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_ARG, RL_ARG);
 	MATCH_AND_RETURN(str, RL_STR_ENV, RL_ENV);
 	MATCH_AND_RETURN(str, RL_STR_LOG, RL_LOG);
-	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_READ, RL_SH_ATTACH_READ);
-	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_WRITE, RL_SH_ATTACH_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH, RL_SH_ATTACH);
 	MATCH_AND_RETURN(str, RL_STR_SH_CREATE, RL_SH_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FILE, RL_LOAD_FILE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNKNOWN, RL_LOAD_UNKNOWN);

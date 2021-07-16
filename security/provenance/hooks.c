@@ -1919,15 +1919,7 @@ static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr,
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
 	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
-	if (shmflg & SHM_RDONLY)
-		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
-	else {
-		rc = uses(RL_SH_ATTACH_READ, sprov, tprov, cprov, NULL, shmflg);
-		if (rc < 0)
-			goto out;
-		rc = generates(RL_SH_ATTACH_WRITE, cprov, tprov, sprov, NULL, shmflg);
-	}
-out:
+	rc = generates(RL_SH_ATTACH, cprov, tprov, sprov, NULL, shmflg);
 	spin_unlock(prov_lock(sprov));
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
