@@ -57,9 +57,7 @@ RL_GETXATTR|getxattr|getxattr operation |
 RL_GETXATTR_INODE|getxattr_inode|getxattr operation |
 RL_LSTXATTR|listxattr|listxattr operation|
 RL_READ_LINK|read_link|readlink operation|
-RL_MMAP_READ|mmap_read|mmap mounting with read perm|
-RL_MMAP_EXEC|mmap_exec|mmap mounting with exec perm|
-RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
+RL_MMAP|mmap|mmap mountings|
 RL_MMAP_READ_PRIVATE|mmap_read_private|mmap private mounting with read perm|
 RL_MMAP_EXEC_PRIVATE|mmap_exec_private|mmap private mounting with exec perm|
 RL_MMAP_WRITE_PRIVATE|mmap_write_private|mmap private  mounting with write perm|

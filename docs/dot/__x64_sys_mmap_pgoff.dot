@@ -40,11 +40,7 @@ task -> xattr[fontsize = 8,label = setxattr]
 
 xattr -> inode[fontsize = 8,label = setxattr_inode]
 
-inode -> task[fontsize = 8,label = mmap_write]
-
-inode -> task[fontsize = 8,label = mmap_read]
-
-inode -> task[fontsize = 8,label = mmap_exec]
+inode -> task[fontsize = 8,label = mmap]
 
 inode -> task[fontsize = 8,label = mmap_write_private]
 

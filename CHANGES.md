@@ -60,6 +60,7 @@
 -- RL_SH_CREATE_READ & RL_SH_CREATE_WRITE -> RL_SH_CREATE
 -- RL_SH_ATTACH_READ & RL_SH_ATTACH_WRITE -> RL_SH_ATTACH
 -- RL_PERM_READ,  RL_PERM_WRITE, RL_PERM_EXEC, RL_PERM_APPEND  -> RL_PERM
+-- RL_MMAP_READ, RL_MMAP_EXEC, RL_MMAP_WRITE -> RL_MMAP
 - Protect epoch update with RCU.
 - Epoch starts from zero instead of one (0 before daemon, 1 after daemon start).
 - Consider node version for edge compression.

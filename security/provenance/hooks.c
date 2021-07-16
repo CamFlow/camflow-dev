@@ -1414,22 +1414,10 @@ static int provenance_file_send_sigiotask(struct task_struct *task,
  * 2. Failure occurred.
  * If the mmap is shared (flag: MAP_SHARED or MAP_SHARED_VALIDATE),
  * depending on the action allowed by the kernel,
- * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or
- * RL_MMAP_EXEC by calling "derives" function.
+ * record provenance relation RL_MMAP.
  * Information flows between the mmap file and calling process and its cred.
  * The direction of the information flow depends on the action allowed.
- * If the mmap is private (flag: MAP_PRIVATE),
- * we create an additional provenance node to represent the private mapped inode
- * by calling function "branch_mmap", record provenance relation RL_MMAP by
- * calling "derives" function because information flows from the original mapped
- * file to the private file.
- * Then depending on the action allowed by the kernel,
- * record provenance relation RL_MMAP_WRITE and/or RL_MMAP_READ and/or
- * RL_MMAP_EXEC by calling "derives" function.
- * Information flows between the new private mmap node and calling process and
- * its cred.
- * The direction of the information flow depends on the action allowed.
- * Note that this new node is short-lived.
+ * If the mmap is private (flag: MAP_PRIVATE)..
  * @param file The file structure for file to map (may be NULL).
  * @param reqprot The protection requested by the application.
  * @param prot The protection that will be applied by the kernel.
@@ -1460,18 +1448,9 @@ static int provenance_mmap_file(struct file *file,
 	if (provenance_is_opaque(prov_elt(cprov)))
 		goto out;
 	if ((flags & MAP_TYPE) == MAP_SHARED
-	    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE) {
-		if ((prot & (PROT_WRITE)) != 0)
-			rc = uses(RL_MMAP_WRITE, iprov, tprov, cprov, file, flags);
-		if (rc < 0)
-			goto out;
-		if ((prot & (PROT_READ)) != 0)
-			rc = uses(RL_MMAP_READ, iprov, tprov, cprov, file, flags);
-		if (rc < 0)
-			goto out;
-		if ((prot & (PROT_EXEC)) != 0)
-			rc = uses(RL_MMAP_EXEC, iprov, tprov, cprov, file, flags);
-	} else {
+	    || (flags & MAP_TYPE) == MAP_SHARED_VALIDATE)
+		rc = uses(RL_MMAP, iprov, tprov, cprov, file, prot);
+	else {
 		if (rc < 0)
 			goto out;
 		if ((prot & (PROT_WRITE)) != 0)
