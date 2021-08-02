@@ -1052,25 +1052,6 @@ static ssize_t prov_read_commit(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_commit, no_write, prov_read_commit);
 
-static ssize_t prov_write_channel(struct file *file, const char __user *buf,
-				  size_t count, loff_t *ppos)
-{
-	char *buffer;
-	int rtn = 0;
-
-	if (count <= 0 || count > PATH_MAX)
-		return -ENOMEM;
-
-	buffer = memdup_user(buf, count);
-	if (IS_ERR(buffer))
-		return PTR_ERR(buffer);
-
-	rtn = prov_create_channel(buffer, count);
-	kfree(buffer);
-	return rtn;
-}
-declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
-
 
 spinlock_t lock_epoch;
 
@@ -1151,7 +1132,6 @@ static int __init init_prov_fs(void)
 	prov_create_file("type", 0444, &prov_type_ops);
 	prov_create_file("version", 0444, &prov_version);
 	prov_create_file("commit", 0444, &prov_commit);
-	prov_create_file("channel", 0644, &prov_channel_ops);
 	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
 	prov_create_file("epoch", 0644, &prov_epoch_ops);
 	pr_info("Provenance: fs ready.\n");

@@ -41,10 +41,8 @@ struct long_boot_buffer {
 	union long_prov_elt msg;
 };
 
-int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan);
-void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
 extern struct kmem_cache *boot_buffer_cache;

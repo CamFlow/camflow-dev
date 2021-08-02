@@ -26,65 +26,23 @@
 #define PROV_BASE_NAME          "provenance"
 #define LONG_PROV_BASE_NAME     "long_provenance"
 
-/*!
- * @brief A list of relay channel data structure.
- *
- * struct rchan is defined in /include/linux/relay.h Linux kernel source code.
- */
-struct relay_list {
-	struct list_head list;
-	// The name of the relay channel.
-	char *name;
-	// Relay buffer for regular provenance entries.
-	struct rchan *prov;
-	// Relay buffer for long provenance entries.
-	struct rchan *long_prov;
-};
-static LIST_HEAD(relay_list);
-
-/*!
- * @brief Add an element to the tail end of the relay list, which is identified
- * by the "extern struct list_head relay_list" above.
- * @param name Member of the element in the relay list
- * @param prov Member of the element in the relay list. This is a relay channel
- * pointer.
- * @param long_prov Member of the element in the relay list. This is a relay
- * channel pointer.
- *
- * @todo Failure case checking is missing.
- */
-void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov)
-{
-	struct relay_list *elt;
-
-	elt = kzalloc(sizeof(struct relay_list), GFP_KERNEL);
-	elt->name = name;
-	elt->prov = prov;
-	elt->long_prov = long_prov;
-	list_add_tail(&(elt->list), &relay_list);
-}
+/* Global variables: variable declarations in provenance.h */
+static struct rchan *prov_chan;
+static struct rchan *long_prov_chan;
+atomic64_t prov_relation_id = ATOMIC64_INIT(0);
+atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
 /*!
  * @brief Flush every relay buffer element in the relay list.
  */
 void prov_flush(void)
 {
-	struct relay_list *tmp;
-
 	if (unlikely(!relay_ready))
 		return;
 
-	list_for_each_entry(tmp, &relay_list, list) {
-		relay_flush(tmp->prov);
-		relay_flush(tmp->long_prov);
-	}
+	relay_flush(prov_chan);
+	relay_flush(long_prov_chan);
 }
-
-/* Global variables: variable declarations in provenance.h */
-static struct rchan *prov_chan;
-static struct rchan *long_prov_chan;
-atomic64_t prov_relation_id = ATOMIC64_INIT(0);
-atomic64_t prov_node_id = ATOMIC64_INIT(0);
 
 bool is_relay_full(struct rchan *chan)
 {
@@ -251,64 +209,6 @@ void write_boot_buffer(void)
 	}
 }
 
-/*!
- * @brief Create a provenance relay buffer channel for both regular and long
- * provenance entries.
- *
- * Each relay channel in the list must have a unique name.
- * Each relay channel contains a relay buffer for regular provenance entries and
- * a relay buffer for long provenance entries.
- * @param buffer Contains the name of the relay buffer for regular provenance
- * entries (prepend "long_" for the relay buffer name for long provenance
- * entries)
- * @param len The length of the name of the regular relay buffer.
- * @return 0 if no error occurred; -EFAULT if name already exists for relay
- * buffer or opening new relay buffer failed; -ENOMEM if length of the name of
- * the relay buffer is too long. Other error codes unknown.
- *
- */
-int prov_create_channel(char *buffer, size_t len)
-{
-	struct relay_list *tmp;
-	char *long_name = kzalloc(PATH_MAX, GFP_KERNEL);
-	struct rchan *chan;
-	struct rchan *long_chan;
-	int rc = 0;
-
-	// Test if channel already exists based on the name.
-	list_for_each_entry(tmp, &relay_list, list) {
-		if (strcmp(tmp->name, buffer) == 0) {
-			rc = -EFAULT;
-			goto out;
-		}
-	}
-	if (len > PATH_MAX - 5) {
-		rc = -ENOMEM;
-		goto out;
-	}
-	snprintf(long_name, PATH_MAX, "long_%s", buffer);
-	chan = relay_open(buffer, NULL, PROV_RELAY_BUFF_SIZE, PROV_NB_SUBBUF,
-			  &relay_callbacks, NULL);
-	if (!chan) {
-		rc = -EFAULT;
-		goto out;
-	}
-	long_chan = relay_open(long_name, NULL,
-			       PROV_RELAY_BUFF_SIZE,
-			       PROV_NB_SUBBUF,
-			       &relay_callbacks,
-			       NULL);
-	if (!long_chan) {
-		rc = -EFAULT;
-		goto out;
-	}
-	prov_add_relay(buffer, chan, long_chan);
-out:
-	kfree(long_name);
-	return rc;
-}
-
-
 static void insert_boot_buffer(union prov_elt *msg)
 {
 	struct boot_buffer *tmp = kmem_cache_zalloc(boot_buffer_cache,
@@ -334,8 +234,6 @@ static void insert_boot_buffer(union prov_elt *msg)
  * Otherwise (i.e., boot buffer is not full) provenance information is written
  * to the next empty slot in the boot buffer.
  * If relay buffer is ready, write to relay buffer.
- * It will write to every relay buffer in the relay_list for every CamQuery
- * query use.
  * This is because once provenance is read from a relay buffer, it will be
  * consumed from the buffer.
  * We therefore need to write to multiple relay buffers if we want to
@@ -347,8 +245,6 @@ static void insert_boot_buffer(union prov_elt *msg)
  */
 void prov_write(union prov_elt *msg, size_t size)
 {
-	struct relay_list *tmp;
-
 	BUG_ON(prov_type_is_long(prov_type(msg)));
 
 	prov_jiffies(msg) = get_jiffies_64();
@@ -356,9 +252,7 @@ void prov_write(union prov_elt *msg, size_t size)
 		insert_boot_buffer(msg);
 	else {
 		prov_written = true;
-		list_for_each_entry(tmp, &relay_list, list) {
-			relay_write(tmp->prov, msg, size);
-		}
+		relay_write(prov_chan, msg, size);
 	}
 }
 
@@ -389,8 +283,6 @@ static void insert_long_boot_buffer(union long_prov_elt *msg)
  */
 void long_prov_write(union long_prov_elt *msg, size_t size)
 {
-	struct relay_list *tmp;
-
 	BUG_ON(!prov_type_is_long(prov_type(msg)));
 
 	prov_jiffies(msg) = get_jiffies_64();
@@ -398,9 +290,7 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
 		insert_long_boot_buffer(msg);
 	else {
 		prov_written = true;
-		list_for_each_entry(tmp, &relay_list, list) {
-			relay_write(tmp->long_prov, msg, size);
-		}
+		relay_write(long_prov_chan, msg, size);
 	}
 }
 
@@ -410,9 +300,7 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  * Initialize provenance relay buffer with a base relay buffer for regular
  * provenance entries,
  * and a base relay buffer for long provenance entries.
- * This will become the first relay channel in the relay_list.
  * Then we can write down whatever is in the boot buffer to relay buffer.
- * Head of the relay_list is defined in hooks.c file.
  * @return 0 if no error occurred.
  *
  */
@@ -430,7 +318,7 @@ static int __init relay_prov_init(void)
 				    NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
-	prov_add_relay(PROV_BASE_NAME, prov_chan, long_prov_chan);
+
 	relay_initialized = true;
 	init_prov_machine();
 	write_boot_buffer();
