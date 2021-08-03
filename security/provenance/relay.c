@@ -86,9 +86,39 @@ static int remove_buf_file_handler(struct dentry *dentry)
 	return 0;
 }
 
+/*
+ * subbuf_start - called on buffer-switch to a new sub-buffer
+ * @buf: the channel buffer containing the new sub-buffer
+ * @subbuf: the start of the new sub-buffer
+ * @prev_subbuf: the start of the previous sub-buffer
+ * @prev_padding: unused space at the end of previous sub-buffer
+ *
+ * return 1 do not log
+ * return 0 do not log
+ */
+static int subbuf_start_handler(struct rchan_buf *buf,
+				void *subbuf,
+				void *prev_subbuf,
+				size_t prev_padding)
+{
+	struct prov_rchan_private *priv;
+
+	// the relay is full let's not log
+	// this avoid overwritting
+	if (relay_buf_full(buf)) {
+		priv = buf->chan->private_data;
+		// count the number of element dropped
+		atomic64_inc(&priv->dropped);
+		return 0;
+	}
+
+	return 1;
+}
+
 
 /* Relay interface callback functions */
 static struct rchan_callbacks relay_callbacks = {
+	.subbuf_start = subbuf_start_handler,
 	.create_buf_file = create_buf_file_handler,
 	.remove_buf_file = remove_buf_file_handler,
 };
@@ -306,10 +336,16 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  */
 static int __init relay_prov_init(void)
 {
+	struct prov_rchan_private *priv;
+
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
 			       PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!prov_chan)
 		panic("Provenance: relay_open failure\n");
+	// allocate and initialize private data
+	prov_chan->private_data = kzalloc(sizeof(struct prov_rchan_private), GFP_KERNEL);
+	priv = prov_chan->private_data;
+	atomic64_set(&priv->dropped, 0);
 
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL,
 				    PROV_RELAY_BUFF_SIZE,
@@ -318,6 +354,10 @@ static int __init relay_prov_init(void)
 				    NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
+	// allocate and initialize private data
+	long_prov_chan->private_data = kzalloc(sizeof(struct prov_rchan_private), GFP_KERNEL);
+	priv = long_prov_chan->private_data;
+	atomic64_set(&priv->dropped, 0);
 
 	relay_initialized = true;
 	init_prov_machine();

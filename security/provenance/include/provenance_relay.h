@@ -41,6 +41,10 @@ struct long_boot_buffer {
 	union long_prov_elt msg;
 };
 
+struct prov_rchan_private {
+	atomic64_t dropped;
+};
+
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan);
 void prov_flush(void);
