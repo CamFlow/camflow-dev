@@ -2768,14 +2768,17 @@ bool prov_written;
 static void __init init_prov_policy(void)
 {
 	pr_info("Provenance: policy initialization started...");
-	prov_policy.prov_enabled = true;
 	prov_policy.should_duplicate = false;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM
+	prov_policy.prov_enabled = true;
 	prov_policy.prov_all = true;
+	pr_info("Provenance: capture at boot on.");
 #else
+	prov_policy.prov_enabled = false;
 	prov_policy.prov_all = false;
+	pr_info("Provenance: capture at boot off.");
 #endif
 	pr_info("Provenance: policy initialization finished.");
 }
@@ -2862,7 +2865,7 @@ static int __init provenance_init(void)
 	// Register provenance security hooks.
 	security_add_hooks(provenance_hooks,
 			   ARRAY_SIZE(provenance_hooks), "provenance");
-	pr_info("Provenance: hooks ready.\n");
+	pr_info("Provenance: hooks ready.");
 	return 0;
 }
 
