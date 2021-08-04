@@ -58,6 +58,7 @@ extern spinlock_t lock_long_buffer;
 extern struct list_head long_buffer_list;
 
 extern bool relay_ready;
+extern bool relay_initialized;
 
 void prov_write(union prov_elt *msg, size_t size);
 void long_prov_write(union long_prov_elt *msg, size_t size);

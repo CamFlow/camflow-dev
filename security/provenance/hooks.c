@@ -2847,6 +2847,7 @@ static int __init provenance_init(void)
 	init_boot_cache();
 	spin_lock_init(&lock_buffer);
 	spin_lock_init(&lock_long_buffer);
+	relay_initialized = false;
 	relay_ready = false;
 #ifdef CONFIG_SECURITY_PROVENANCE_PERSISTENCE
 	provq = alloc_workqueue("provq", 0, 0);
