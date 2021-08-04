@@ -64,7 +64,6 @@
 -- RL_MMAP_READ, RL_MMAP_EXEC, RL_MMAP_WRITE -> RL_MMAP;
 -- RL_MMAP_READ_PRIVATE, RL_MMAP_EXEC_PRIVATE, RL_MMAP_WRITE_PRIVATE -> RL_MMAP_PRIVATE.
 - Protect epoch update with RCU.
-- Epoch starts from zero instead of one (0 before daemon, 1 after daemon start).
 - Consider node version for edge compression.
 - Namespaces associated to tasks instead of process state (align with kernel).
 - Reduce overhead when capture is not enabled.
