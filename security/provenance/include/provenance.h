@@ -37,6 +37,7 @@
 
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
+extern atomic64_t prov_drop;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
 extern uint32_t __rcu *epoch;

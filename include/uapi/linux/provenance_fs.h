@@ -125,7 +125,6 @@ struct nsinfo {
 
 struct dropped {
 	uint64_t s;
-	uint64_t l;
 };
 
 #endif

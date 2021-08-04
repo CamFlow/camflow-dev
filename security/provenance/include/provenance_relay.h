@@ -41,10 +41,6 @@ struct long_boot_buffer {
 	union long_prov_elt msg;
 };
 
-struct prov_rchan_private {
-	atomic64_t dropped;
-};
-
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan);
 void prov_flush(void);
@@ -59,9 +55,6 @@ extern struct list_head long_buffer_list;
 
 extern bool relay_ready;
 extern bool relay_initialized;
-
-extern struct rchan *prov_chan;
-extern struct rchan *long_prov_chan;
 
 void prov_write(union prov_elt *msg, size_t size);
 void long_prov_write(union long_prov_elt *msg, size_t size);

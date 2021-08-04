@@ -1081,16 +1081,11 @@ static ssize_t prov_read_dropped(struct file *filp, char __user *buf,
 				 size_t count, loff_t *ppos)
 {
 	struct dropped drop;
-	struct prov_rchan_private *priv;
 
 	if (count < sizeof(struct dropped))
 		return -ENOMEM;
 
-	priv = prov_chan->private_data;
-	drop.s = atomic64_read(&priv->dropped);
-
-	priv = long_prov_chan->private_data;
-	drop.l = atomic64_read(&priv->dropped);
+	drop.s = atomic64_read(&prov_drop);
 
 	if (copy_to_user(buf, &drop, sizeof(struct dropped)))
 		return -EAGAIN;

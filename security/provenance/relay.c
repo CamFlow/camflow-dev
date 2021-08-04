@@ -26,11 +26,13 @@
 #define PROV_BASE_NAME          "provenance"
 #define LONG_PROV_BASE_NAME     "long_provenance"
 
+static struct rchan *prov_chan;
+static struct rchan *long_prov_chan;
+
 /* Global variables: variable declarations in provenance.h */
-struct rchan *prov_chan;
-struct rchan *long_prov_chan;
 atomic64_t prov_relation_id = ATOMIC64_INIT(0);
 atomic64_t prov_node_id = ATOMIC64_INIT(0);
+atomic64_t prov_drop = ATOMIC64_INIT(0);
 
 /*!
  * @brief Flush every relay buffer element in the relay list.
@@ -101,17 +103,13 @@ static int subbuf_start_handler(struct rchan_buf *buf,
 				void *prev_subbuf,
 				size_t prev_padding)
 {
-	struct prov_rchan_private *priv;
-
 	// the relay is full let's not log
 	// this avoid overwritting
 	if (relay_buf_full(buf)) {
-		priv = buf->chan->private_data;
 		// count the number of element dropped
-		atomic64_inc(&priv->dropped);
+		atomic64_inc(&prov_drop);
 		return 0;
 	}
-
 	return 1;
 }
 
@@ -336,16 +334,10 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  */
 static int __init relay_prov_init(void)
 {
-	struct prov_rchan_private *priv;
-
 	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
 			       PROV_NB_SUBBUF, &relay_callbacks, NULL);
 	if (!prov_chan)
 		panic("Provenance: relay_open failure\n");
-	// allocate and initialize private data
-	prov_chan->private_data = kzalloc(sizeof(struct prov_rchan_private), GFP_KERNEL);
-	priv = prov_chan->private_data;
-	atomic64_set(&priv->dropped, 0);
 
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL,
 				    PROV_RELAY_BUFF_SIZE,
@@ -354,10 +346,6 @@ static int __init relay_prov_init(void)
 				    NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
-	// allocate and initialize private data
-	long_prov_chan->private_data = kzalloc(sizeof(struct prov_rchan_private), GFP_KERNEL);
-	priv = long_prov_chan->private_data;
-	atomic64_set(&priv->dropped, 0);
 
 	relay_initialized = true;
 	init_prov_machine();
