@@ -1,10 +1,6 @@
-digraph RGL__DirectedAdjacencyGraph {machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+digraph RGL__DirectedAdjacencyGraph {msg[fontsize = 8,label = msg,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
-
-machine -> task[fontsize = 8,label = ran_on]
-
-msg[fontsize = 8,label = msg,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 msg -> task[fontsize = 8,label = receive_msg_queue]
 
