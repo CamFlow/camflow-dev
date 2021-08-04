@@ -3190,7 +3190,7 @@ static int __init provenance_init(void)
 	prov_machine_id = 0;
 	prov_boot_id = 0;
 	epoch = kmalloc(sizeof(uint32_t), GFP_KERNEL);
-	*epoch = 0;
+	*epoch = 1;
 	prov_written = false;
 	init_prov_cache();
 	init_boot_cache();
