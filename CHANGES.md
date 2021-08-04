@@ -56,6 +56,7 @@
 
 ## v0.7.3
 ```
+- Capture information about the number of graph elements dropped.
 - Switch back to single relay channel support.
 - Simplify relations that can be inferred from the flag attributes:
 -- RL_SH_CREATE_READ & RL_SH_CREATE_WRITE -> RL_SH_CREATE;

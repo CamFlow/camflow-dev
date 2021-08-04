@@ -57,6 +57,7 @@
  #define PROV_CHANNEL                            "/sys/kernel/security/provenance/channel"
  #define PROV_DUPLICATE_FILE                     "/sys/kernel/security/provenance/duplicate"
  #define PROV_EPOCH_FILE                         "/sys/kernel/security/provenance/epoch"
+ #define PROV_DROPPED_FILE                       "/sys/kernel/security/provenance/dropped"
 
  #define PROV_RELAY_NAME                         "/sys/kernel/debug/provenance"
  #define PROV_LONG_RELAY_NAME                    "/sys/kernel/debug/long_provenance"
@@ -121,4 +122,10 @@ struct nsinfo {
 	uint8_t op;
 	uint64_t taint;
 };
- #endif
+
+struct dropped {
+	uint64_t s;
+	uint64_t l;
+};
+
+#endif

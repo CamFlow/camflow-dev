@@ -1077,6 +1077,27 @@ static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
 
+static ssize_t prov_read_dropped(struct file *filp, char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	struct dropped drop;
+	struct prov_rchan_private *priv;
+
+	if (count < sizeof(struct dropped))
+		return -ENOMEM;
+
+	priv = prov_chan->private_data;
+	drop.s = atomic64_read(&priv->dropped);
+
+	priv = long_prov_chan->private_data;
+	drop.l = atomic64_read(&priv->dropped);
+
+	if (copy_to_user(buf, &drop, sizeof(struct dropped)))
+		return -EAGAIN;
+	return sizeof(struct dropped);
+}
+declare_file_operations(prov_dropped, no_write, prov_read_dropped);
+
 #define prov_create_file(name, perm, fun_ptr)					      \
 	do {									      \
 		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
@@ -1134,6 +1155,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("commit", 0444, &prov_commit);
 	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
 	prov_create_file("epoch", 0644, &prov_epoch_ops);
+	prov_create_file("dropped", 0444, &prov_dropped);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }
