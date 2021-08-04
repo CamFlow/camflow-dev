@@ -45,6 +45,8 @@
  */
 static __always_inline bool __filter_node(uint64_t filter, prov_entry_t *node)
 {
+	if (!prov_policy.prov_enabled)
+		return true;
 	if (provenance_is_opaque(node))
 		return true;
 	if (HIT_FILTER(filter, node_identifier(node).type))
