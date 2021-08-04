@@ -74,6 +74,7 @@ extern struct kmem_cache *long_provenance_cache;
 static __always_inline void init_provenance_struct(uint64_t ntype,
 						   struct provenance *prov)
 {
+	memset(prov, 0, sizeof(struct provenance));
 	spin_lock_init(prov_lock(prov));
 	prov_type(prov_elt(prov)) = ntype;
 	node_identifier(prov_elt(prov)).id = prov_next_node_id();
