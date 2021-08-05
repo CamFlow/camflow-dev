@@ -164,7 +164,7 @@ WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CA
 #1016: FILE: security/provenance/fs.c:1016:
 +			strlcpy(type_info->str,
 
-total: 0 errors, 17 warnings, 1162 lines checked
+total: 0 errors, 17 warnings, 1157 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -220,7 +220,7 @@ security/provenance/query.c has no obvious style problems and is ready for submi
 ---------------------------
 security/provenance/relay.c
 ---------------------------
-total: 0 errors, 0 warnings, 368 lines checked
+total: 0 errors, 0 warnings, 356 lines checked
 
 security/provenance/relay.c has no obvious style problems and is ready for submission.
 --------------------------
