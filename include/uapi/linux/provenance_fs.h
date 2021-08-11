@@ -54,7 +54,6 @@
  #define PROV_TYPE                               "/sys/kernel/security/provenance/type"
  #define PROV_VERSION                            "/sys/kernel/security/provenance/version"
  #define PROV_COMMIT                             "/sys/kernel/security/provenance/commit"
- #define PROV_CHANNEL                            "/sys/kernel/security/provenance/channel"
  #define PROV_DUPLICATE_FILE                     "/sys/kernel/security/provenance/duplicate"
  #define PROV_EPOCH_FILE                         "/sys/kernel/security/provenance/epoch"
  #define PROV_DROPPED_FILE                       "/sys/kernel/security/provenance/dropped"
