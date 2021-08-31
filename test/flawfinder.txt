@@ -45,10 +45,10 @@ ANALYSIS SUMMARY:
 
 Hits = 5
 Stat removed
-Physical Source Lines of Code (SLOC) = 5560
+Physical Source Lines of Code (SLOC) = 5562
 Hits@level = [0]   0 [1]   4 [2]   1 [3]   0 [4]   0 [5]   0
 Hits@level+ = [0+]   5 [1+]   5 [2+]   1 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 0.899281 [1+] 0.899281 [2+] 0.179856 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 0.898957 [1+] 0.898957 [2+] 0.179791 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!

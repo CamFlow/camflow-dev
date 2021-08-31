@@ -1,12 +1,12 @@
   SYNC    include/config/auto.conf.cmd
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_32.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_64.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_x32.h
   SYSTBL  arch/x86/include/generated/asm/syscalls_32.h
   SYSHDR  arch/x86/include/generated/asm/unistd_32_ia32.h
   SYSHDR  arch/x86/include/generated/asm/unistd_64_x32.h
   SYSTBL  arch/x86/include/generated/asm/syscalls_64.h
   HYPERCALLS arch/x86/include/generated/asm/xen-hypercalls.h
-  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_32.h
-  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_64.h
-  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_x32.h
   HOSTCC  arch/x86/tools/relocs_32.o
   HOSTCC  arch/x86/tools/relocs_64.o
   HOSTCC  arch/x86/tools/relocs_common.o
@@ -15,7 +15,6 @@
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/recordmcount
   HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
@@ -41,7 +40,6 @@
   WRAP    arch/x86/include/generated/asm/irq_regs.h
   WRAP    arch/x86/include/generated/asm/kmap_size.h
   WRAP    arch/x86/include/generated/asm/local64.h
-  WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
   WRAP    arch/x86/include/generated/asm/module.lds.h
   WRAP    arch/x86/include/generated/asm/rwonce.h
@@ -51,6 +49,6 @@
   CC      scripts/mod/empty.o
   CHECK   scripts/mod/empty.c
 /bin/sh: 1: sparse: not found
-make[1]: *** [scripts/Makefile.build:280: scripts/mod/empty.o] Error 127
+make[1]: *** [scripts/Makefile.build:274: scripts/mod/empty.o] Error 127
 make[1]: *** Deleting file 'scripts/mod/empty.o'
-make: *** [Makefile:1200: prepare0] Error 2
+make: *** [Makefile:1240: prepare0] Error 2

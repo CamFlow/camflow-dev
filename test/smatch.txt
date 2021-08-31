@@ -6,19 +6,20 @@
   LEX     scripts/kconfig/lexer.lex.c
   YACC    scripts/kconfig/parser.tab.[ch]
   HOSTCC  scripts/kconfig/lexer.lex.o
+  HOSTCC  scripts/kconfig/menu.o
   HOSTCC  scripts/kconfig/parser.tab.o
   HOSTCC  scripts/kconfig/preprocess.o
   HOSTCC  scripts/kconfig/symbol.o
   HOSTCC  scripts/kconfig/util.o
   HOSTLD  scripts/kconfig/conf
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_32.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_64.h
+  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_x32.h
   SYSTBL  arch/x86/include/generated/asm/syscalls_32.h
   SYSHDR  arch/x86/include/generated/asm/unistd_32_ia32.h
   SYSHDR  arch/x86/include/generated/asm/unistd_64_x32.h
   SYSTBL  arch/x86/include/generated/asm/syscalls_64.h
   HYPERCALLS arch/x86/include/generated/asm/xen-hypercalls.h
-  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_32.h
-  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_64.h
-  SYSHDR  arch/x86/include/generated/uapi/asm/unistd_x32.h
   HOSTCC  arch/x86/tools/relocs_32.o
   HOSTCC  arch/x86/tools/relocs_64.o
   HOSTCC  arch/x86/tools/relocs_common.o
@@ -27,7 +28,6 @@
   HOSTCC  scripts/selinux/mdp/mdp
   HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
-  HOSTCC  scripts/recordmcount
   HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
@@ -53,7 +53,6 @@
   WRAP    arch/x86/include/generated/asm/irq_regs.h
   WRAP    arch/x86/include/generated/asm/kmap_size.h
   WRAP    arch/x86/include/generated/asm/local64.h
-  WRAP    arch/x86/include/generated/asm/mm-arch-hooks.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
   WRAP    arch/x86/include/generated/asm/module.lds.h
   WRAP    arch/x86/include/generated/asm/rwonce.h
@@ -77,39 +76,39 @@
   UPD     include/generated/asm-offsets.h
   CALL    scripts/checksyscalls.sh
   CALL    scripts/atomic/check-atomics.sh
-  DESCEND  objtool
-  HOSTCC   /home/circleci/build/linux-stable/tools/objtool/fixdep.o
-  HOSTLD   /home/circleci/build/linux-stable/tools/objtool/fixdep-in.o
-  LINK     /home/circleci/build/linux-stable/tools/objtool/fixdep
-  CC       /home/circleci/build/linux-stable/tools/objtool/exec-cmd.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/help.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/pager.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/parse-options.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/run-command.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/sigchain.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/subcmd-config.o
-  LD       /home/circleci/build/linux-stable/tools/objtool/libsubcmd-in.o
-  AR       /home/circleci/build/linux-stable/tools/objtool/libsubcmd.a
-  CC       /home/circleci/build/linux-stable/tools/objtool/arch/x86/special.o
-  MKDIR    /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/
-  GEN      /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
-  CC       /home/circleci/build/linux-stable/tools/objtool/arch/x86/decode.o
-  LD       /home/circleci/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/weak.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/check.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/special.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/orc_gen.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/orc_dump.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/builtin-check.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/builtin-orc.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/elf.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/objtool.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/libstring.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/libctype.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/str_error_r.o
-  CC       /home/circleci/build/linux-stable/tools/objtool/librbtree.o
-  LD       /home/circleci/build/linux-stable/tools/objtool/objtool-in.o
-  LINK     /home/circleci/build/linux-stable/tools/objtool/objtool
+  DESCEND objtool
+  HOSTCC  /home/circleci/build/linux-stable/tools/objtool/fixdep.o
+  HOSTLD  /home/circleci/build/linux-stable/tools/objtool/fixdep-in.o
+  LINK    /home/circleci/build/linux-stable/tools/objtool/fixdep
+  CC      /home/circleci/build/linux-stable/tools/objtool/exec-cmd.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/help.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/pager.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/parse-options.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/run-command.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/sigchain.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/subcmd-config.o
+  LD      /home/circleci/build/linux-stable/tools/objtool/libsubcmd-in.o
+  AR      /home/circleci/build/linux-stable/tools/objtool/libsubcmd.a
+  CC      /home/circleci/build/linux-stable/tools/objtool/arch/x86/special.o
+  MKDIR   /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/
+  GEN     /home/circleci/build/linux-stable/tools/objtool/arch/x86/lib/inat-tables.c
+  CC      /home/circleci/build/linux-stable/tools/objtool/arch/x86/decode.o
+  LD      /home/circleci/build/linux-stable/tools/objtool/arch/x86/objtool-in.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/weak.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/check.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/special.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/orc_gen.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/orc_dump.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/builtin-check.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/builtin-orc.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/elf.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/objtool.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/libstring.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/libctype.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/str_error_r.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/librbtree.o
+  LD      /home/circleci/build/linux-stable/tools/objtool/objtool-in.o
+  LINK    /home/circleci/build/linux-stable/tools/objtool/objtool
   HOSTCC  scripts/unifdef
   HDRINST usr/include/video/sisfb.h
   HDRINST usr/include/video/uvesafb.h
@@ -235,6 +234,7 @@
   HDRINST usr/include/linux/elf-fdpic.h
   HDRINST usr/include/linux/udp.h
   HDRINST usr/include/linux/capability.h
+  HDRINST usr/include/linux/landlock.h
   HDRINST usr/include/linux/mount.h
   HDRINST usr/include/linux/netlink.h
   HDRINST usr/include/linux/nfs4_mount.h
@@ -251,6 +251,7 @@
   HDRINST usr/include/linux/dm-ioctl.h
   HDRINST usr/include/linux/iio/events.h
   HDRINST usr/include/linux/iio/types.h
+  HDRINST usr/include/linux/iio/buffer.h
   HDRINST usr/include/linux/parport.h
   HDRINST usr/include/linux/vfio.h
   HDRINST usr/include/linux/hpet.h
@@ -258,6 +259,8 @@
   HDRINST usr/include/linux/mroute.h
   HDRINST usr/include/linux/if_ether.h
   HDRINST usr/include/linux/userio.h
+  HDRINST usr/include/linux/ccs.h
+  HDRINST usr/include/linux/cxl_mem.h
   HDRINST usr/include/linux/ipv6.h
   HDRINST usr/include/linux/v4l2-mediabus.h
   HDRINST usr/include/linux/v4l2-dv-timings.h
@@ -282,6 +285,7 @@
   HDRINST usr/include/linux/if_addr.h
   HDRINST usr/include/linux/netfilter_ipv4.h
   HDRINST usr/include/linux/kvm_para.h
+  HDRINST usr/include/linux/acrn.h
   HDRINST usr/include/linux/fsmap.h
   HDRINST usr/include/linux/sched.h
   HDRINST usr/include/linux/elf-em.h
@@ -418,6 +422,7 @@
   HDRINST usr/include/linux/cdrom.h
   HDRINST usr/include/linux/rio_mport_cdev.h
   HDRINST usr/include/linux/vtpm_proxy.h
+  HDRINST usr/include/linux/virtio_snd.h
   HDRINST usr/include/linux/rpl_iptunnel.h
   HDRINST usr/include/linux/nfs_fs.h
   HDRINST usr/include/linux/param.h
@@ -434,6 +439,7 @@
   HDRINST usr/include/linux/wmi.h
   HDRINST usr/include/linux/atmarp.h
   HDRINST usr/include/linux/if_fc.h
+  HDRINST usr/include/linux/misc/bcm_vk.h
   HDRINST usr/include/linux/uvcvideo.h
   HDRINST usr/include/linux/fanotify.h
   HDRINST usr/include/linux/sync_file.h
@@ -472,6 +478,7 @@
   HDRINST usr/include/linux/atm_he.h
   HDRINST usr/include/linux/bpqether.h
   HDRINST usr/include/linux/fscrypt.h
+  HDRINST usr/include/linux/spi/spi.h
   HDRINST usr/include/linux/spi/spidev.h
   HDRINST usr/include/linux/virtio_ring.h
   HDRINST usr/include/linux/dlm_plock.h
@@ -526,6 +533,7 @@
   HDRINST usr/include/linux/tls.h
   HDRINST usr/include/linux/timex.h
   HDRINST usr/include/linux/pktcdvd.h
+  HDRINST usr/include/linux/virtio_bt.h
   HDRINST usr/include/linux/dma-buf.h
   HDRINST usr/include/linux/virtio_pci.h
   HDRINST usr/include/linux/bcm933xx_hcs.h
@@ -623,6 +631,7 @@
   HDRINST usr/include/linux/pg.h
   HDRINST usr/include/linux/aio_abi.h
   HDRINST usr/include/linux/ipc.h
+  HDRINST usr/include/linux/vdpa.h
   HDRINST usr/include/linux/bpf_perf_event.h
   HDRINST usr/include/linux/libc-compat.h
   HDRINST usr/include/linux/baycom.h
@@ -713,7 +722,6 @@
   HDRINST usr/include/linux/pkt_sched.h
   HDRINST usr/include/linux/filter.h
   HDRINST usr/include/linux/nilfs2_ondisk.h
-  HDRINST usr/include/linux/cyclades.h
   HDRINST usr/include/linux/reiserfs_fs.h
   HDRINST usr/include/linux/ncsi.h
   HDRINST usr/include/linux/tty_flags.h
@@ -749,6 +757,7 @@
   HDRINST usr/include/linux/media-bus-format.h
   HDRINST usr/include/linux/virtio_balloon.h
   HDRINST usr/include/linux/unistd.h
+  HDRINST usr/include/linux/fsl_mc.h
   HDRINST usr/include/linux/mroute6.h
   HDRINST usr/include/linux/ivtvfb.h
   HDRINST usr/include/linux/mpls_iptunnel.h
@@ -953,6 +962,8 @@
   HDRINST usr/include/linux/vmcore.h
   HDRINST usr/include/linux/coresight-stm.h
   HDRINST usr/include/linux/fsl_hypervisor.h
+  HDRINST usr/include/linux/surface_aggregator/dtx.h
+  HDRINST usr/include/linux/surface_aggregator/cdev.h
   HDRINST usr/include/linux/android/binderfs.h
   HDRINST usr/include/linux/android/binder.h
   HDRINST usr/include/linux/cciss_ioctl.h
@@ -1134,6 +1145,8 @@ security/selinux/ss/ebitmap.c:207 ebitmap_netlbl_import() warn: ignoring unreach
   CHECK   security/selinux/xfrm.c
   CC      security/selinux/netlabel.o
   CHECK   security/selinux/netlabel.c
+  CC      security/selinux/ima.o
+  CHECK   security/selinux/ima.c
   AR      security/selinux/built-in.a
   CC      security/yama/yama_lsm.o
   CHECK   security/yama/yama_lsm.c

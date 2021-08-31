@@ -2,6 +2,6 @@
 Please check for false positives in the output before submitting a patch.
 When using "patch" mode, carefully review the patch before submitting it.
 
-/usr/local/bin/spatch -D report --no-show-diff --very-quiet --cocci-file ./scripts/coccinelle/api/alloc/alloc_cast.cocci --no-includes --include-headers --patch . --dir security/provenance -I ./arch/x86/include -I ./arch/x86/include/generated -I ./include -I ./arch/x86/include/uapi -I ./arch/x86/include/generated/uapi -I ./include/uapi -I ./include/generated/uapi --include ./include/linux/kconfig.h --jobs 2 --chunksize 1
+/usr/local/bin/spatch -D report --no-show-diff --very-quiet --cocci-file ./scripts/coccinelle/api/alloc/alloc_cast.cocci --no-includes --include-headers --patch . --dir security/provenance -I ./arch/x86/include -I ./arch/x86/include/generated -I ./include -I ./arch/x86/include/uapi -I ./arch/x86/include/generated/uapi -I ./include/uapi -I ./include/generated/uapi --include ./include/linux/compiler-version.h --include ./include/linux/kconfig.h --jobs 2 --chunksize 1
 Py.find_library: unable to find the Python library [libpython2.7m.so returned Library not found] [/opt/circleci/.pyenv/shims/../lib/libpython2.7m.so returned Library not found] [libpython2.7.so returned Library not found] [/opt/circleci/.pyenv/shims/../lib/libpython2.7.so returned Library not found]
 coccicheck failed
