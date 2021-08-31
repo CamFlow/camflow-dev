@@ -72,8 +72,6 @@ prepare_ltp:
 prepare_us: prepare_submodules prepare_provenance prepare_config prepare_cli prepare_service
 
 prepare_update: prepare_kernel
-	mv include/linux/fs.h include/linux/_fs.h
-	cp ~/build/pristine/linux-stable/include/linux/fs.h include/linux/fs.h
 	mv include/net/sock.h include/net/_sock.h
 	cp ~/build/pristine/linux-stable/include/net/sock.h include/net/sock.h
 	mv include/uapi/linux/xattr.h include/uapi/linux/_xattr.h
