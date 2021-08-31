@@ -354,7 +354,7 @@ static inline struct provenance *get_cred_provenance(void)
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
 	prov_elt(prov)->proc_info.uid = __kuid_val(current_uid());
 	prov_elt(prov)->proc_info.gid = __kgid_val(current_gid());
-	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
+	security_task_getsecid_obj(current, &(prov_elt(prov)->proc_info.secid));
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 	return prov;
 }

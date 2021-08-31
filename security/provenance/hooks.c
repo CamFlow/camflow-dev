@@ -492,7 +492,7 @@ static int provenance_inode_alloc_security(struct inode *inode)
 	if (unlikely(!iprov))
 		return -ENOMEM;
 	init_provenance_struct(ENT_INODE_UNKNOWN, iprov);
-	sprov = inode->i_sb->s_provenance;
+	sprov = provenance_superblock(inode->i_sb);
 	__memcpy_ss(prov_elt(iprov)->inode_info.sb_uuid, PROV_SBUUID_LEN,
 		    prov_elt(sprov)->sb_info.uuid, 16 * sizeof(uint8_t));
 	refresh_inode_provenance(inode, iprov);
@@ -947,7 +947,8 @@ static int provenance_inode_readlink(struct dentry *dentry)
  * codes unknown.
  *
  */
-static int provenance_inode_setxattr(struct dentry *dentry,
+static int provenance_inode_setxattr(struct user_namespace *mnt_userns,
+				     struct dentry *dentry,
 				     const char *name,
 				     const void *value,
 				     size_t size,
@@ -1132,7 +1133,8 @@ static int provenance_inode_listxattr(struct dentry *dentry)
  * @param name The name of the extended attribute.
  *
  */
-static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
+static int provenance_inode_removexattr(struct user_namespace *mnt_userns,
+					struct dentry *dentry, const char *name)
 {
 	struct provenance *cprov;
 	struct provenance *tprov;
@@ -1182,7 +1184,8 @@ static int provenance_inode_removexattr(struct dentry *dentry, const char *name)
  * the attribute is not provenance.
  *
  */
-static int provenance_inode_getsecurity(struct inode *inode,
+static int provenance_inode_getsecurity(struct user_namespace *mnt_userns,
+					struct inode *inode,
 					const char *name,
 					void **buffer,
 					bool alloc)
@@ -2909,8 +2912,8 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
  * This hook is triggered when allocating and attaching a security structure to
  * the sb->s_security field.
  * The s_security field is initialized to NULL when the structure is allocated.
- * This function allocates and initializes a provenance structure to
- * sb->s_provenance field.
+ * This function initializes a provenance structure to
+ * the superblock.
  * It also creates a new provenance node ENT_SBLCK.
  * SB represents the existence of a device/pipe.
  * @param sb The super_block structure to be modified.
@@ -2920,29 +2923,12 @@ static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
  */
 static int provenance_sb_alloc_security(struct super_block *sb)
 {
-	struct provenance *sbprov = alloc_provenance(ENT_SBLCK, GFP_KERNEL);
+	struct provenance *sbprov = provenance_superblock(sb);
 
 	if (!sbprov)
 		return -ENOMEM;
-	sb->s_provenance = sbprov;
+	init_provenance_struct(ENT_SBLCK, sbprov);
 	return 0;
-}
-
-/*!
- * @brief Record provenance when sb_free_security hook is triggered.
- *
- * This hooks is triggered when deallocating and clearing the sb->s_security
- * field.
- * This function frees the memory of the allocated provenance field and set the
- * pointer to NULL.
- * @param sb The super_block structure to be modified.
- *
- */
-static void provenance_sb_free_security(struct super_block *sb)
-{
-	if (sb->s_provenance)
-		free_provenance(sb->s_provenance);
-	sb->s_provenance = NULL;
 }
 
 /*!
@@ -2950,7 +2936,7 @@ static void provenance_sb_free_security(struct super_block *sb)
  *
  * This hook is triggered when mounting a kernel device, including pipe.
  * This function will update the Universal Unique ID of the provenance entry
- * of the device @sb->s_provenance once it is mounted.
+ * of the device superblock once it is mounted.
  * We obtain this information from @sb if it exists, or we give it a random
  * value.
  * @param sb The super block structure.
@@ -2963,7 +2949,7 @@ static int provenance_sb_kern_mount(struct super_block *sb)
 {
 	int i;
 	uint8_t c = 0;
-	struct provenance *sbprov = sb->s_provenance;
+	struct provenance *sbprov = provenance_superblock(sb);
 
 	for (i = 0; i < 16; i++) {
 		prov_elt(sbprov)->sb_info.uuid[i] = sb->s_uuid.b[i];
@@ -2981,6 +2967,7 @@ struct lsm_blob_sizes provenance_blob_sizes __lsm_ro_after_init = {
 	.lbs_ipc = sizeof(struct provenance),
 	.lbs_msg_msg = sizeof(struct provenance),
 	.lbs_task = sizeof(struct provenance),
+	.lbs_superblock = sizeof(struct provenance),
 };
 
 /*!
@@ -3081,7 +3068,6 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 
 	/* file system related hooks */
 	LSM_HOOK_INIT(sb_alloc_security,        provenance_sb_alloc_security),
-	LSM_HOOK_INIT(sb_free_security,         provenance_sb_free_security),
 	LSM_HOOK_INIT(sb_kern_mount,            provenance_sb_kern_mount)
 };
 

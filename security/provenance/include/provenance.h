@@ -297,4 +297,10 @@ static inline struct provenance *provenance_ipc(
 {
 	return ipc->security + provenance_blob_sizes.lbs_ipc;
 }
+
+static inline struct provenance *provenance_superblock(
+	const struct super_block *superblock)
+{
+	return superblock->s_security + provenance_blob_sizes.lbs_superblock;
+}
 #endif
