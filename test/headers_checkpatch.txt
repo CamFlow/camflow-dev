@@ -76,7 +76,7 @@ security/provenance/include/provenance_filter.h has style problems, please revie
 ----------------------------------------
 security/provenance/include/provenance.h
 ----------------------------------------
-total: 0 errors, 0 warnings, 299 lines checked
+total: 0 errors, 0 warnings, 300 lines checked
 
 security/provenance/include/provenance.h has no obvious style problems and is ready for submission.
 ----------------------------------------------
@@ -138,7 +138,7 @@ security/provenance/include/provenance_record.h has style problems, please revie
 ----------------------------------------------
 security/provenance/include/provenance_relay.h
 ----------------------------------------------
-total: 0 errors, 0 warnings, 196 lines checked
+total: 0 errors, 0 warnings, 189 lines checked
 
 security/provenance/include/provenance_relay.h has no obvious style problems and is ready for submission.
 ---------------------------------------------
