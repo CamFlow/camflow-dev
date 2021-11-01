@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.7.3           | 5.13.9         | N/A				|
+| 0.8.0           | 5.13.9         | N/A				|
 | 0.7.2           | 5.11.2         | 27/04/2021	|
 | 0.7.1           | 5.9.11         | 05/12/2020 |
 | 0.7.0           | 5.7.7	         | 09/07/2020	|
@@ -54,7 +54,7 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-## v0.7.3
+## v0.8.0
 ```
 - Capture information about the number of graph elements dropped.
 - Switch back to single relay channel support.
