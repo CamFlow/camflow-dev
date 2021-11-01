@@ -68,7 +68,7 @@
 - Consider node version for edge compression.
 - Namespaces associated to tasks instead of process state (align with kernel).
 - Reduce overhead when capture is not enabled.
-- Update to kernel version 5.13.9.
+- Update to kernel version 5.15.
 ```
 
 ## v0.7.2
