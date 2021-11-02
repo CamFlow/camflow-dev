@@ -145,15 +145,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		}											 \
 +	} while (0)
 
-WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
-#1012: FILE: security/provenance/fs.c:1012:
-+			strlcpy(type_info->str, relation_str(type_info->id),
-
-WARNING:STRLCPY: Prefer strscpy over strlcpy - see: https://lore.kernel.org/r/CAHk-=wgfRnXz0W3D37d01q3JFkr_i_uTL=V6A6G1oUZcprmknw@mail.gmail.com/
-#1018: FILE: security/provenance/fs.c:1018:
-+			strlcpy(type_info->str,
-
-total: 0 errors, 14 warnings, 1159 lines checked
+total: 0 errors, 12 warnings, 1159 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -162,20 +154,9 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-WARNING:REPEATED_WORD: Possible repeated word: 'task'
-#97: FILE: security/provenance/hooks.c:97:
-+ * @param task Task being allocated.
+total: 0 errors, 0 warnings, 3209 lines checked
 
-WARNING:REPEATED_WORD: Possible repeated word: 'and'
-#2198: FILE: security/provenance/hooks.c:2198:
-+ * Typically, the inode alloc_security hook will allocate and and attach
-
-total: 0 errors, 2 warnings, 3209 lines checked
-
-NOTE: For some of the reported defects, checkpatch may be able to
-      mechanically convert to the typical style using --fix or --fix-inplace.
-
-security/provenance/hooks.c has style problems, please review.
+security/provenance/hooks.c has no obvious style problems and is ready for submission.
 -----------------------------
 security/provenance/machine.c
 -----------------------------
