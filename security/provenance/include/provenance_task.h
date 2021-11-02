@@ -452,8 +452,10 @@ static inline struct page *get_arg_page(struct linux_binprm *bprm,
 	 * We are doing an exec().  'current' is the process
 	 * doing the exec and bprm->mm is the new process's mm.
 	 */
+	mmap_read_lock(bprm->mm);
 	ret = get_user_pages_remote(bprm->mm, pos, 1, gup_flags,
 				    &page, NULL, NULL);
+	mmap_read_unlock(bprm->mm);
 	if (ret <= 0)
 		return NULL;
 
@@ -519,33 +521,38 @@ static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 	unsigned long ofs, bytes;
 	struct page *page = NULL, *new_page;
 	const char *kaddr;
-	unsigned long src;
+	unsigned long pos;
 
-	src = bprm->p;
-	ofs = src % PAGE_SIZE;
+	pos = bprm->p;
+	ofs = pos % PAGE_SIZE;
 	while (len) {
-		new_page = get_arg_page(bprm, src, 0);
+		new_page = get_arg_page(bprm, pos, 0);
 		if (!new_page) {
 			rv = -E2BIG;
 			goto out;
 		}
 		if (page) {
+			flush_dcache_page(page);
 			kunmap(page);
 			put_page(page);
 		}
 		page = new_page;
 		kaddr = kmap(page);
-		flush_cache_page(bprm->vma, ofs, page_to_pfn(page));
+
+		flush_cache_page(bprm->vma, pos, page_to_pfn(page));
+
 		bytes = min_t(unsigned int, len, PAGE_SIZE - ofs);
 		__memcpy_ss(buff, len, kaddr + ofs, bytes);
-		src += bytes;
+		pos += bytes;
 		buff += bytes;
 		len -= bytes;
 		ofs = 0;
 	}
-	rv = src - bprm->p;
+	rv = pos - bprm->p;
+
 out:
 	if (page) {
+		flush_dcache_page(page);
 		kunmap(page);
 		put_page(page);
 	}
