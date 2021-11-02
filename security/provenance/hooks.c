@@ -2858,7 +2858,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 	}
 	if (provenance_is_tracked(prov_elt(iprov)))
 		set_tracked(prov_elt(nprov));
-	return record_args(nprov, bprm);
+	return 0;// record_args(nprov, bprm);
 }
 
 /*!
