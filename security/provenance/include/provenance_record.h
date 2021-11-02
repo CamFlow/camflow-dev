@@ -222,7 +222,7 @@ static __always_inline int record_node_name(struct provenance *node,
 	if (!fname_prov)
 		return -ENOMEM;
 
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	strscpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length =
 		strnlen(fname_prov->file_name_info.name, PATH_MAX);
 

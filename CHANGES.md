@@ -68,6 +68,7 @@
 - Consider node version for edge compression.
 - Namespaces associated to tasks instead of process state (align with kernel).
 - Reduce overhead when capture is not enabled.
+- Replace usage of strlcpy by strscpy.
 - Update to kernel version 5.15.
 ```
 

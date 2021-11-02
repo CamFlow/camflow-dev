@@ -521,7 +521,7 @@ static __always_inline int record_arg(struct provenance *prov,
 	aprov->arg_info.length = len;
 	if (len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
-	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
+	strscpy(aprov->arg_info.value, arg, PATH_MAX);
 
 	rc = record_relation(etype, aprov, prov_entry(prov), NULL, 0);
 	free_long_provenance(aprov);

@@ -94,7 +94,7 @@ static inline void queue_save_provenance(struct provenance *provenance,
  * We create a ACT_TASK node for the newly allocated task.
  * Since @cred is shared by all threads, we use @cred to save process's
  * provenance, and @task to save provenance of each thread.
- * @param task Task being allocated.
+ * @param task The task being allocated.
  * @param clone_flags The flags indicating what should be shared.
  * @return 0 if no error occurred. Other error codes unknown.
  *
@@ -2195,7 +2195,7 @@ static int provenance_sk_alloc_security(struct sock *sk,
  * Note that the security field was not added directly to the socket structure,
  * but rather, the socket security information is stored in the associated
  * inode.
- * Typically, the inode alloc_security hook will allocate and and attach
+ * Typically, the inode alloc_security hook will allocate and attach
  * security information to sock->inode->i_security.
  * This hook may be used to update the sock->inode->i_security field
  * with additional information that wasn't available when the inode was
