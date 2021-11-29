@@ -34,8 +34,8 @@
 #define str(s)          # s
 
 #define CAMFLOW_VERSION_MAJOR           0
-#define CAMFLOW_VERSION_MINOR           7
-#define CAMFLOW_VERSION_PATCH           2
+#define CAMFLOW_VERSION_MINOR           8
+#define CAMFLOW_VERSION_PATCH           0
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
 	"."xstr (CAMFLOW_VERSION_PATCH)					\
@@ -57,6 +57,7 @@
 #define node_uid(node)                          ((node)->node_info.uid)
 #define node_gid(node)                          ((node)->node_info.gid)
 #define node_previous_id(node)                  ((node)->node_info.previous_id)
+#define node_previous_version(node)             ((node)->node_info.previous_version)
 #define node_previous_type(node)                ((node)->node_info.previous_type)
 #define node_kernel_version(node)               ((node)->node_info.k_version)
 
@@ -143,7 +144,7 @@ union prov_identifier {
 
 
 #define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
-#define shared_node_elements    uint64_t previous_id; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
+#define shared_node_elements    uint64_t previous_id; uint32_t previous_version; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;
@@ -171,12 +172,6 @@ struct proc_prov_struct {
 	basic_elements;
 	shared_node_elements;
 	uint32_t tgid;
-	uint32_t utsns;
-	uint32_t ipcns;
-	uint32_t mntns;
-	uint32_t pidns;
-	uint32_t netns;
-	uint32_t cgroupns;
 };
 
 struct task_prov_struct {
@@ -195,6 +190,13 @@ struct task_prov_struct {
 	uint64_t rbytes;
 	uint64_t wbytes;
 	uint64_t cancel_wbytes;
+	/* namespaces */
+	uint32_t utsns;
+	uint32_t ipcns;
+	uint32_t mntns;
+	uint32_t pidns;
+	uint32_t netns;
+	uint32_t cgroupns;
 	union long_prov_elt *disc;
 };
 

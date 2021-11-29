@@ -395,7 +395,7 @@ static inline void save_provenance(struct dentry *dentry)
 	clear_name_recorded(&buf);
 	if (!dentry)
 		return;
-	__vfs_setxattr_noperm(dentry, XATTR_NAME_PROVENANCE,
+	__vfs_setxattr_noperm(&init_user_ns, dentry, XATTR_NAME_PROVENANCE,
 			      &buf, sizeof(union prov_elt), 0);
 }
 
@@ -430,7 +430,7 @@ static inline void save_provenance(struct dentry *dentry)
  * @param name The name of the extended attribute.
  * @param value The value of that attribute.
  * @param size The size of the value.
- * @param flags Flags passed by LSM hooks.
+ * @param flags The flags passed by LSM hooks.
  * @return 0 if no error occurred; -ENOMEM if no memory can be allocated from
  * long provenance cache to create a new long provenance entry. Other error
  * codes from "record_relation" function or unknown.

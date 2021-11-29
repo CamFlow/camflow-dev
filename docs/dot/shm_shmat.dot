@@ -10,28 +10,20 @@ task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = f
 
 machine -> task[fontsize = 8,label = ran_on]
 
+process_memory -> task[fontsize = 8,label = memory_read]
+
 shm[fontsize = 8,label = shm,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-shm -> task[fontsize = 8,label = sh_attach_read]
-
-task -> process_memory[fontsize = 8,label = memory_write]
+task -> shm[fontsize = 8,label = sh_attach]
 
 task -> task[fontsize = 8,label = version_activity]
 
-process_memory -> process_memory[fontsize = 8,label = version_entity]
+shm -> shm[fontsize = 8,label = version_entity]
 
 inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-process_memory -> inode[fontsize = 8,label = sh_write]
-
-inode -> inode[fontsize = 8,label = version_entity]
-
-process_memory -> task[fontsize = 8,label = memory_read]
-
-task -> shm[fontsize = 8,label = sh_attach_write]
-
-shm -> shm[fontsize = 8,label = version_entity]
-
 inode -> process_memory[fontsize = 8,label = sh_read]
+
+process_memory -> process_memory[fontsize = 8,label = version_entity]
 
 }

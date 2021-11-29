@@ -30,13 +30,7 @@ inode -> inode[fontsize = 8,label = version_entity]
 
 inode -> task[fontsize = 8,label = file_sigio]
 
-inode -> task[fontsize = 8,label = perm_exec]
-
-inode -> task[fontsize = 8,label = perm_read]
-
-inode -> task[fontsize = 8,label = perm_append]
-
-inode -> task[fontsize = 8,label = perm_write]
+inode -> task[fontsize = 8,label = perm_check]
 
 process_memory -> task[fontsize = 8,label = memory_read]
 
@@ -46,17 +40,9 @@ task -> xattr[fontsize = 8,label = setxattr]
 
 xattr -> inode[fontsize = 8,label = setxattr_inode]
 
-inode -> task[fontsize = 8,label = mmap_write]
+inode -> task[fontsize = 8,label = mmap]
 
-inode -> task[fontsize = 8,label = mmap_read]
-
-inode -> task[fontsize = 8,label = mmap_exec]
-
-inode -> task[fontsize = 8,label = mmap_write_private]
-
-inode -> task[fontsize = 8,label = mmap_read_private]
-
-inode -> task[fontsize = 8,label = mmap_exec_private]
+inode -> task[fontsize = 8,label = mmap_private]
 
 task -> inode[fontsize = 8,label = munmap]
 

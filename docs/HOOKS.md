@@ -72,4 +72,3 @@ bprm_check_security| ![bprm_check_security graph](./img/bprm_check_security.png)
 bprm_creds_for_exec| ![bprm_creds_for_exec graph](./img/bprm_creds_for_exec.png)|
 bprm_committing_creds| ![bprm_committing_creds graph](./img/bprm_committing_creds.png)|
 sb_alloc_security| ![sb_alloc_security graph](./img/sb_alloc_security.png)|
-sb_free_security| ![sb_free_security graph](./img/sb_free_security.png)|

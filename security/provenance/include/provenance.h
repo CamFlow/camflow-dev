@@ -37,9 +37,10 @@
 
 extern atomic64_t prov_relation_id;
 extern atomic64_t prov_node_id;
+extern atomic64_t prov_drop;
 extern uint32_t prov_machine_id;
 extern uint32_t prov_boot_id;
-extern uint32_t epoch;
+extern uint32_t __rcu *epoch;
 extern bool prov_written;
 
 #define prov_next_relation_id()	\
@@ -74,6 +75,7 @@ extern struct kmem_cache *long_provenance_cache;
 static __always_inline void init_provenance_struct(uint64_t ntype,
 						   struct provenance *prov)
 {
+	memset(prov, 0, sizeof(struct provenance));
 	spin_lock_init(prov_lock(prov));
 	prov_type(prov_elt(prov)) = ntype;
 	node_identifier(prov_elt(prov)).id = prov_next_node_id();
@@ -175,7 +177,9 @@ static inline void free_long_provenance(union long_prov_elt *prov)
 	__set_recorded((union long_prov_elt *)node)
 static inline void __set_recorded(union long_prov_elt *node)
 {
-	node->msg_info.epoch = epoch;
+	rcu_read_lock();
+	node->msg_info.epoch = *epoch;
+	rcu_read_unlock();
 }
 
 #define clear_recorded(node) \
@@ -189,16 +193,22 @@ static inline void __clear_recorded(union long_prov_elt *node)
 	__provenance_is_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_recorded(union long_prov_elt *node)
 {
-	if (epoch > node->msg_info.epoch)
-		return false;
-	return true;
+	bool ret = true;
+
+	rcu_read_lock();
+	if (*epoch > node->msg_info.epoch)
+		ret = false;
+	rcu_read_unlock();
+	return ret;
 }
 
 #define set_name_recorded(node)	\
 	__set_name_recorded((union long_prov_elt *)node)
 static inline void __set_name_recorded(union long_prov_elt *node)
 {
-	node->msg_info.nepoch = epoch;
+	rcu_read_lock();
+	node->msg_info.nepoch = *epoch;
+	rcu_read_unlock();
 }
 
 #define clear_name_recorded(node) \
@@ -212,9 +222,14 @@ static inline void __clear_name_recorded(union long_prov_elt *node)
 	__provenance_is_name_recorded((union long_prov_elt *)node)
 static inline bool __provenance_is_name_recorded(union long_prov_elt *node)
 {
-	if (epoch > node->msg_info.nepoch)
-		return false;
-	return true;
+	bool ret = true;
+
+	rcu_read_lock();
+	if (*epoch > node->msg_info.nepoch)
+		ret = false;
+	rcu_read_unlock();
+
+	return ret;
 }
 
 // reference to node representing the machine/kernel
@@ -281,5 +296,11 @@ static inline struct provenance *provenance_ipc(
 	const struct kern_ipc_perm *ipc)
 {
 	return ipc->security + provenance_blob_sizes.lbs_ipc;
+}
+
+static inline struct provenance *provenance_superblock(
+	const struct super_block *superblock)
+{
+	return superblock->s_security + provenance_blob_sizes.lbs_superblock;
 }
 #endif

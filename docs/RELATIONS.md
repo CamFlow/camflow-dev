@@ -57,12 +57,8 @@ RL_GETXATTR|getxattr|getxattr operation |
 RL_GETXATTR_INODE|getxattr_inode|getxattr operation |
 RL_LSTXATTR|listxattr|listxattr operation|
 RL_READ_LINK|read_link|readlink operation|
-RL_MMAP_READ|mmap_read|mmap mounting with read perm|
-RL_MMAP_EXEC|mmap_exec|mmap mounting with exec perm|
-RL_MMAP_WRITE|mmap_write|mmap mounting with write perm|
-RL_MMAP_READ_PRIVATE|mmap_read_private|mmap private mounting with read perm|
-RL_MMAP_EXEC_PRIVATE|mmap_exec_private|mmap private mounting with exec perm|
-RL_MMAP_WRITE_PRIVATE|mmap_write_private|mmap private  mounting with write perm|
+RL_MMAP|mmap|mmap mountings|
+RL_MMAP_PRIVATE|mmap_private|mmap private mounting|
 RL_SH_READ|sh_read|sh_read operation|
 RL_PROC_READ|memory_read|read from process memory|
 RL_SND|send|send over socket|
@@ -75,20 +71,15 @@ RL_RCV_PACKET|receive_packet|connect packet to socket on receive operation|
 RL_RCV_UNIX|receive_unix|receive on unix socket|
 RL_RCV_MSG|receive_msg|receive message|
 RL_RCV_MSG_Q|receive_msg_queue|receive message from queue|
-RL_PERM_READ|perm_read|check read permission|
-RL_PERM_WRITE|perm_write|check write permission|
-RL_PERM_EXEC|perm_exec|check exec permission|
-RL_PERM_APPEND|perm_append|check append permission|
+RL_PERM|perm_check|check permission|
 RL_TERMINATE_TASK|terminate_task|created when task data structure is freed|
 RL_TERMINATE_PROC|terminate_proc|created when cred data structure is freed|
 RL_FREED|free|created when an inode is freed|
 RL_ARG|arg|connect arg value to process|
 RL_ENV|env|connect env value to process|
 RL_LOG|log|connect string to task|
-RL_SH_ATTACH_READ|sh_attach_read|attach sh with read perm|
-RL_SH_ATTACH_WRITE|sh_attach_write|attach sh with write perm|
-RL_SH_CREATE_READ|sh_create_read|sh create with read perm|
-RL_SH_CREATE_WRITE|sh_create_write|sh create with write perm|
+RL_SH_ATTACH|sh_attach|attach sh|
+RL_SH_CREATE|sh_create|sh create perm|
 RL_LOAD_FILE|load_file|load file into kernel|
 RL_RAN_ON|ran_on|task run on this machine|
 RL_LOAD_UNKNOWN|load_unknown|load file into kernel|

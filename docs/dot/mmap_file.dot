@@ -14,7 +14,7 @@ inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = f
 
 path -> inode[fontsize = 8,label = named]
 
-inode -> task[fontsize = 8,label = mmap_write]
+inode -> task[fontsize = 8,label = mmap]
 
 task -> process_memory[fontsize = 8,label = memory_write]
 
@@ -26,14 +26,6 @@ process_memory -> inode[fontsize = 8,label = sh_write]
 
 inode -> inode[fontsize = 8,label = version_entity]
 
-inode -> task[fontsize = 8,label = mmap_read]
-
-inode -> task[fontsize = 8,label = mmap_exec]
-
-inode -> task[fontsize = 8,label = mmap_write_private]
-
-inode -> task[fontsize = 8,label = mmap_read_private]
-
-inode -> task[fontsize = 8,label = mmap_exec_private]
+inode -> task[fontsize = 8,label = mmap_private]
 
 }

@@ -121,10 +121,12 @@ static __always_inline int record_relation(const uint64_t type,
 
 	if (prov_policy.should_compress_edge) {
 		if (node_previous_id(to) == node_identifier(from).id
+		    && node_previous_version(to) == node_identifier(from).version
 		    && node_previous_type(to) == type)
 			return 0;
 
 		node_previous_id(to) = node_identifier(from).id;
+		node_previous_version(to) = node_identifier(from).version;
 		node_previous_type(to) = type;
 	}
 
@@ -220,7 +222,7 @@ static __always_inline int record_node_name(struct provenance *node,
 	if (!fname_prov)
 		return -ENOMEM;
 
-	strlcpy(fname_prov->file_name_info.name, name, PATH_MAX);
+	strscpy(fname_prov->file_name_info.name, name, PATH_MAX);
 	fname_prov->file_name_info.length =
 		strnlen(fname_prov->file_name_info.name, PATH_MAX);
 

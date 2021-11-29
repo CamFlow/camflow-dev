@@ -12,7 +12,7 @@ machine -> task[fontsize = 8,label = ran_on]
 
 inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
-inode -> task[fontsize = 8,label = perm_exec]
+inode -> task[fontsize = 8,label = perm_check]
 
 task -> process_memory[fontsize = 8,label = memory_write]
 
@@ -23,11 +23,5 @@ process_memory -> process_memory[fontsize = 8,label = version_entity]
 process_memory -> inode[fontsize = 8,label = sh_write]
 
 inode -> inode[fontsize = 8,label = version_entity]
-
-inode -> task[fontsize = 8,label = perm_read]
-
-inode -> task[fontsize = 8,label = perm_append]
-
-inode -> task[fontsize = 8,label = perm_write]
 
 }

@@ -41,10 +41,8 @@ struct long_boot_buffer {
 	union long_prov_elt msg;
 };
 
-int prov_create_channel(char *buffer, size_t len);
 void write_boot_buffer(void);
 bool is_relay_full(struct rchan *chan);
-void prov_add_relay(char *name, struct rchan *prov, struct rchan *long_prov);
 void prov_flush(void);
 
 extern struct kmem_cache *boot_buffer_cache;
@@ -56,6 +54,7 @@ extern spinlock_t lock_long_buffer;
 extern struct list_head long_buffer_list;
 
 extern bool relay_ready;
+extern bool relay_initialized;
 
 void prov_write(union prov_elt *msg, size_t size);
 void long_prov_write(union long_prov_elt *msg, size_t size);
@@ -139,7 +138,9 @@ static __always_inline void __prepare_relation(const uint64_t type,
 		relation->relation_info.offset = file->f_pos;
 	}
 	relation->relation_info.flags = flags;
-	relation->msg_info.epoch = epoch;
+	rcu_read_lock();
+	relation->msg_info.epoch = *epoch;
+	rcu_read_unlock();
 	relation->relation_info.task_id = current_provid();
 }
 

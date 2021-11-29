@@ -69,12 +69,8 @@ static const char RL_STR_GETXATTR[] = "getxattr";                               
 static const char RL_STR_GETXATTR_INODE[] = "getxattr_inode";                                           // getxattr operation (inode -> xattr)
 static const char RL_STR_LSTXATTR[] = "listxattr";                                                      // listxattr operation
 static const char RL_STR_READ_LINK[] = "read_link";                                                     // readlink operation
-static const char RL_STR_MMAP_READ[] = "mmap_read";                                                     // mmap mounting with read perm
-static const char RL_STR_MMAP_EXEC[] = "mmap_exec";                                                     // mmap mounting with exec perm
-static const char RL_STR_MMAP_WRITE[] = "mmap_write";                                                   // mmap mounting with write perm
-static const char RL_STR_MMAP_READ_PRIVATE[] = "mmap_read_private";                                     // mmap private mounting with read perm
-static const char RL_STR_MMAP_EXEC_PRIVATE[] = "mmap_exec_private";                                     // mmap private mounting with exec perm
-static const char RL_STR_MMAP_WRITE_PRIVATE[] = "mmap_write_private";                                   // mmap private  mounting with write perm
+static const char RL_STR_MMAP[] = "mmap";                                                               // mmap mountings
+static const char RL_STR_MMAP_PRIVATE[] = "mmap_private";                                               // mmap private mounting
 static const char RL_STR_SH_READ[] = "sh_read";                                                         // sh_read operation
 static const char RL_STR_PROC_READ[] = "memory_read";                                                   // read from process memory
 static const char RL_STR_SND[] = "send";                                                                // send over socket
@@ -87,20 +83,15 @@ static const char RL_STR_RCV_PACKET[] = "receive_packet";                       
 static const char RL_STR_RCV_UNIX[] = "receive_unix";                                                   // receive on unix socket
 static const char RL_STR_RCV_MSG[] = "receive_msg";                                                     // receive message
 static const char RL_STR_RCV_MSG_Q[] = "receive_msg_queue";                                             // receive message from queue
-static const char RL_STR_PERM_READ[] = "perm_read";                                                     // check read permission
-static const char RL_STR_PERM_WRITE[] = "perm_write";                                                   // check write permission
-static const char RL_STR_PERM_EXEC[] = "perm_exec";                                                     // check exec permission
-static const char RL_STR_PERM_APPEND[] = "perm_append";                                                 // check append permission
+static const char RL_STR_PERM[] = "perm_check";                                                         // check permission
 static const char RL_STR_TERMINATE_TASK[] = "terminate_task";                                           // created when task data structure is freed
 static const char RL_STR_TERMINATE_PROC[] = "terminate_proc";                                           // created when cred data structure is freed
 static const char RL_STR_FREED[] = "free";                                                              // created when an inode is freed
 static const char RL_STR_ARG[] = "arg";                                                                 // connect arg value to process
 static const char RL_STR_ENV[] = "env";                                                                 // connect env value to process
 static const char RL_STR_LOG[] = "log";                                                                 // connect string to task
-static const char RL_STR_SH_ATTACH_READ[] = "sh_attach_read";                                           // attach sh with read perm
-static const char RL_STR_SH_ATTACH_WRITE[] = "sh_attach_write";                                         // attach sh with write perm
-static const char RL_STR_SH_CREATE_READ[] = "sh_create_read";                                           // sh create with read perm
-static const char RL_STR_SH_CREATE_WRITE[] = "sh_create_write";                                         // sh create with write perm
+static const char RL_STR_SH_ATTACH[] = "sh_attach";                                                     // attach sh
+static const char RL_STR_SH_CREATE[] = "sh_create";                                                     // sh create perm
 static const char RL_STR_LOAD_FILE[] = "load_file";                                                     // load file into kernel
 static const char RL_STR_RAN_ON[] = "ran_on";                                                           // task run on this machine
 static const char RL_STR_LOAD_UNKNOWN[] = "load_unknown";                                               // load file into kernel
@@ -258,18 +249,10 @@ const char *relation_str(uint64_t type)
 		return RL_STR_LSTXATTR;
 	case RL_READ_LINK:
 		return RL_STR_READ_LINK;
-	case RL_MMAP_READ:
-		return RL_STR_MMAP_READ;
-	case RL_MMAP_EXEC:
-		return RL_STR_MMAP_EXEC;
-	case RL_MMAP_WRITE:
-		return RL_STR_MMAP_WRITE;
-	case RL_MMAP_READ_PRIVATE:
-		return RL_STR_MMAP_READ_PRIVATE;
-	case RL_MMAP_EXEC_PRIVATE:
-		return RL_STR_MMAP_EXEC_PRIVATE;
-	case RL_MMAP_WRITE_PRIVATE:
-		return RL_STR_MMAP_WRITE_PRIVATE;
+	case RL_MMAP:
+		return RL_STR_MMAP;
+	case RL_MMAP_PRIVATE:
+		return RL_STR_MMAP_PRIVATE;
 	case RL_SND:
 		return RL_STR_SND;
 	case RL_SND_PACKET:
@@ -290,10 +273,8 @@ const char *relation_str(uint64_t type)
 		return RL_STR_RCV_MSG;
 	case RL_RCV_MSG_Q:
 		return RL_STR_RCV_MSG_Q;
-	case RL_PERM_READ:
-		return RL_STR_PERM_READ;
-	case RL_PERM_WRITE:
-		return RL_STR_PERM_WRITE;
+	case RL_PERM:
+		return RL_STR_PERM;
 	case RL_SH_READ:
 		return RL_STR_SH_READ;
 	case RL_PROC_READ:
@@ -302,10 +283,6 @@ const char *relation_str(uint64_t type)
 		return RL_STR_SH_WRITE;
 	case RL_PROC_WRITE:
 		return RL_STR_PROC_WRITE;
-	case RL_PERM_EXEC:
-		return RL_STR_PERM_EXEC;
-	case RL_PERM_APPEND:
-		return RL_STR_PERM_APPEND;
 	case RL_TERMINATE_TASK:
 		return RL_STR_TERMINATE_TASK;
 	case RL_TERMINATE_PROC:
@@ -318,14 +295,10 @@ const char *relation_str(uint64_t type)
 		return RL_STR_ENV;
 	case RL_LOG:
 		return RL_STR_LOG;
-	case RL_SH_ATTACH_READ:
-		return RL_STR_SH_ATTACH_READ;
-	case RL_SH_ATTACH_WRITE:
-		return RL_STR_SH_ATTACH_WRITE;
-	case RL_SH_CREATE_READ:
-		return RL_STR_SH_CREATE_READ;
-	case RL_SH_CREATE_WRITE:
-		return RL_STR_SH_CREATE_WRITE;
+	case RL_SH_ATTACH:
+		return RL_STR_SH_ATTACH;
+	case RL_SH_CREATE:
+		return RL_STR_SH_CREATE;
 	case RL_LOAD_FILE:
 		return RL_STR_LOAD_FILE;
 	case RL_LOAD_UNKNOWN:
@@ -427,12 +400,8 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_GETXATTR, RL_GETXATTR);
 	MATCH_AND_RETURN(str, RL_STR_GETXATTR_INODE, RL_GETXATTR_INODE);
 	MATCH_AND_RETURN(str, RL_STR_LSTXATTR, RL_LSTXATTR);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_READ, RL_MMAP_READ);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_EXEC, RL_MMAP_EXEC);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE, RL_MMAP_WRITE);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_READ_PRIVATE, RL_MMAP_READ_PRIVATE);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_EXEC_PRIVATE, RL_MMAP_EXEC_PRIVATE);
-	MATCH_AND_RETURN(str, RL_STR_MMAP_WRITE_PRIVATE, RL_MMAP_WRITE_PRIVATE);
+	MATCH_AND_RETURN(str, RL_STR_MMAP, RL_MMAP);
+	MATCH_AND_RETURN(str, RL_STR_MMAP_PRIVATE, RL_MMAP_PRIVATE);
 	MATCH_AND_RETURN(str, RL_STR_SND, RL_SND);
 	MATCH_AND_RETURN(str, RL_STR_SND_PACKET, RL_SND_PACKET);
 	MATCH_AND_RETURN(str, RL_STR_SND_UNIX, RL_SND_UNIX);
@@ -443,10 +412,7 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_RCV_UNIX, RL_RCV_UNIX);
 	MATCH_AND_RETURN(str, RL_STR_RCV_MSG, RL_RCV_MSG);
 	MATCH_AND_RETURN(str, RL_STR_RCV_MSG_Q, RL_RCV_MSG_Q);
-	MATCH_AND_RETURN(str, RL_STR_PERM_READ, RL_PERM_READ);
-	MATCH_AND_RETURN(str, RL_STR_PERM_WRITE, RL_PERM_WRITE);
-	MATCH_AND_RETURN(str, RL_STR_PERM_EXEC, RL_PERM_EXEC);
-	MATCH_AND_RETURN(str, RL_STR_PERM_APPEND, RL_PERM_APPEND);
+	MATCH_AND_RETURN(str, RL_STR_PERM, RL_PERM);
 	MATCH_AND_RETURN(str, RL_STR_SH_READ, RL_SH_READ);
 	MATCH_AND_RETURN(str, RL_STR_PROC_READ, RL_PROC_READ);
 	MATCH_AND_RETURN(str, RL_STR_SH_WRITE, RL_SH_WRITE);
@@ -457,10 +423,8 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_ARG, RL_ARG);
 	MATCH_AND_RETURN(str, RL_STR_ENV, RL_ENV);
 	MATCH_AND_RETURN(str, RL_STR_LOG, RL_LOG);
-	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_READ, RL_SH_ATTACH_READ);
-	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH_WRITE, RL_SH_ATTACH_WRITE);
-	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_READ, RL_SH_CREATE_READ);
-	MATCH_AND_RETURN(str, RL_STR_SH_CREATE_WRITE, RL_SH_CREATE_WRITE);
+	MATCH_AND_RETURN(str, RL_STR_SH_ATTACH, RL_SH_ATTACH);
+	MATCH_AND_RETURN(str, RL_STR_SH_CREATE, RL_SH_CREATE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FILE, RL_LOAD_FILE);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_UNKNOWN, RL_LOAD_UNKNOWN);
 	MATCH_AND_RETURN(str, RL_STR_LOAD_FIRMWARE, RL_LOAD_FIRMWARE);

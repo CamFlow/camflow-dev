@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.8.0           | 5.13.9         | N/A				|
 | 0.7.2           | 5.11.2         | 27/04/2021	|
 | 0.7.1           | 5.9.11         | 05/12/2020 |
 | 0.7.0           | 5.7.7	         | 09/07/2020	|
@@ -52,6 +53,24 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+## v0.8.0
+```
+- Capture information about the number of graph elements dropped.
+- Switch back to single relay channel support.
+- Simplify relations that can be inferred from the flag attributes:
+-- RL_SH_CREATE_READ & RL_SH_CREATE_WRITE -> RL_SH_CREATE;
+-- RL_SH_ATTACH_READ & RL_SH_ATTACH_WRITE -> RL_SH_ATTACH;
+-- RL_PERM_READ,  RL_PERM_WRITE, RL_PERM_EXEC, RL_PERM_APPEND  -> RL_PERM;
+-- RL_MMAP_READ, RL_MMAP_EXEC, RL_MMAP_WRITE -> RL_MMAP;
+-- RL_MMAP_READ_PRIVATE, RL_MMAP_EXEC_PRIVATE, RL_MMAP_WRITE_PRIVATE -> RL_MMAP_PRIVATE.
+- Protect epoch update with RCU.
+- Consider node version for edge compression.
+- Namespaces associated to tasks instead of process state (align with kernel).
+- Reduce overhead when capture is not enabled.
+- Replace usage of strlcpy by strscpy.
+- Update to kernel version 5.15.
+```
 
 ## v0.7.2
 ```

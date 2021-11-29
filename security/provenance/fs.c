@@ -88,18 +88,18 @@ static ssize_t __read_flag(struct file *filp, char __user *buf,
 
 #define declare_write_flag_fcn(fcn_name, flag)			    \
 	static ssize_t fcn_name(struct file *file,		    \
-				const char __user *buf,		    \
+				const char __user * buf,	    \
 				size_t count,			    \
-				loff_t *ppos)			    \
+				loff_t * ppos)			    \
 	{							    \
 		return __write_flag(file, buf, count, ppos, &flag); \
 	}
 
 #define declare_read_flag_fcn(fcn_name, flag)			  \
 	static ssize_t fcn_name(struct file *filp,		  \
-				char __user *buf,		  \
+				char __user * buf,		  \
 				size_t count,			  \
-				loff_t *ppos)			  \
+				loff_t * ppos)			  \
 	{							  \
 		return __read_flag(filp, buf, count, ppos, flag); \
 	}
@@ -388,18 +388,18 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 
 #define declare_write_filter_fcn(fcn_name, filter)		  \
 	static ssize_t fcn_name(struct file *file,		  \
-				const char __user *buf,		  \
+				const char __user * buf,	  \
 				size_t count,			  \
-				loff_t *ppos)			  \
+				loff_t * ppos)			  \
 	{							  \
 		return __write_filter(file, buf, count, &filter); \
 	}
 
 #define declare_read_filter_fcn(fcn_name, filter)		\
 	static ssize_t fcn_name(struct file *filp,		\
-				char __user *buf,		\
+				char __user * buf,		\
 				size_t count,			\
-				loff_t *ppos)			\
+				loff_t * ppos)			\
 	{							\
 		return __read_filter(filp, buf, count, filter);	\
 	}
@@ -601,18 +601,18 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 
 #define declare_write_ipv4_filter_fcn(fcn_name, filter)		       \
 	static ssize_t fcn_name(struct file *file,		       \
-				const char __user *buf,		       \
+				const char __user * buf,	       \
 				size_t count,			       \
-				loff_t *ppos)			       \
+				loff_t * ppos)			       \
 	{							       \
 		return __write_ipv4_filter(file, buf, count, &filter); \
 	}
 
 #define declare_reader_ipv4_filter_fcn(fcn_name, filter)	      \
 	static ssize_t fcn_name(struct file *filp,		      \
-				char __user *buf,		      \
+				char __user * buf,		      \
 				size_t count,			      \
-				loff_t *ppos)			      \
+				loff_t * ppos)			      \
 	{							      \
 		return __read_ipv4_filter(filp, buf, count, &filter); \
 	}
@@ -671,9 +671,9 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
 #define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
 	static ssize_t function_name(struct file *file,						  \
-				     const char __user *buf,					  \
+				     const char __user * buf,					  \
 				     size_t count,						  \
-				     loff_t *ppos)						  \
+				     loff_t * ppos)						  \
 	{											  \
 		struct filters *s;								  \
 		if (count < sizeof(struct info))						  \
@@ -685,16 +685,18 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 			kfree(s);								  \
 			return -EAGAIN;								  \
 		}										  \
-		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE)			  \
-		add_function(s); else								  \
-		delete_function(s); return sizeof(struct filters);				  \
+		if ((s->filter.op & PROV_SET_DELETE) != PROV_SET_DELETE) {			  \
+			add_function(s);							  \
+		} else {									  \
+			delete_function(s);							  \
+		} return sizeof(struct filters);						  \
 	}
 
 #define declare_generic_filter_read(function_name, filters, info)			    \
 	static ssize_t function_name(struct file *filp,					    \
-				     char __user *buf,					    \
+				     char __user * buf,					    \
 				     size_t count,					    \
-				     loff_t *ppos)					    \
+				     loff_t * ppos)					    \
 	{										    \
 		struct list_head *listentry, *listtmp;					    \
 		struct filters *tmp;							    \
@@ -1007,13 +1009,13 @@ static ssize_t prov_read_prov_type(struct file *filp, char __user *buf,
 
 	if (type_info->is_relation) {
 		if (type_info->id)
-			strlcpy(type_info->str, relation_str(type_info->id),
+			strscpy(type_info->str, relation_str(type_info->id),
 				PROV_TYPE_STR_MAX_LEN);
 		else
 			type_info->id = relation_id(type_info->str);
 	} else {
 		if (type_info->id)
-			strlcpy(type_info->str,
+			strscpy(type_info->str,
 				node_str(type_info->id),
 				PROV_TYPE_STR_MAX_LEN);
 		else
@@ -1052,33 +1054,46 @@ static ssize_t prov_read_commit(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_commit, no_write, prov_read_commit);
 
-static ssize_t prov_write_channel(struct file *file, const char __user *buf,
-				  size_t count, loff_t *ppos)
-{
-	char *buffer;
-	int rtn = 0;
 
-	if (count <= 0 || count > PATH_MAX)
-		return -ENOMEM;
-
-	buffer = memdup_user(buf, count);
-	if (IS_ERR(buffer))
-		return PTR_ERR(buffer);
-
-	rtn = prov_create_channel(buffer, count);
-	kfree(buffer);
-	return rtn;
-}
-declare_file_operations(prov_channel_ops, prov_write_channel, no_read);
+spinlock_t lock_epoch;
 
 static ssize_t prov_write_epoch(struct file *file, const char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	epoch++;
-	pr_info("Provenance: epoch changed to %d.", epoch);
+	uint32_t *old_epoch;
+	uint32_t *new_epoch;
+
+	new_epoch = kmalloc(sizeof(uint32_t), GFP_KERNEL);
+
+	spin_lock(&lock_epoch);
+	old_epoch = rcu_dereference_protected(epoch, lockdep_is_held(&lock_epoch));
+	*new_epoch = *old_epoch + 1;
+	rcu_assign_pointer(epoch, new_epoch);
+	spin_unlock(&lock_epoch);
+	synchronize_rcu();
+
+	kfree(old_epoch);
+
+	pr_info("Provenance: epoch changed to %d.", *new_epoch);
 	return count;
 }
 declare_file_operations(prov_epoch_ops, prov_write_epoch, no_read);
+
+static ssize_t prov_read_dropped(struct file *filp, char __user *buf,
+				 size_t count, loff_t *ppos)
+{
+	struct dropped drop;
+
+	if (count < sizeof(struct dropped))
+		return -ENOMEM;
+
+	drop.s = atomic64_read(&prov_drop);
+
+	if (copy_to_user(buf, &drop, sizeof(struct dropped)))
+		return -EAGAIN;
+	return sizeof(struct dropped);
+}
+declare_file_operations(prov_dropped, no_write, prov_read_dropped);
 
 #define prov_create_file(name, perm, fun_ptr)					      \
 	do {									      \
@@ -1090,6 +1105,9 @@ static int __init init_prov_fs(void)
 {
 	struct dentry *prov_dir;
 	struct dentry *dentry;
+
+
+	spin_lock_init(&lock_epoch);
 
 	prov_dir = securityfs_create_dir("provenance", NULL);
 	prov_create_file("enable", 0644, &prov_enable_ops);
@@ -1132,9 +1150,9 @@ static int __init init_prov_fs(void)
 	prov_create_file("type", 0444, &prov_type_ops);
 	prov_create_file("version", 0444, &prov_version);
 	prov_create_file("commit", 0444, &prov_commit);
-	prov_create_file("channel", 0644, &prov_channel_ops);
 	prov_create_file("duplicate", 0644, &prov_duplicate_ops);
 	prov_create_file("epoch", 0644, &prov_epoch_ops);
+	prov_create_file("dropped", 0444, &prov_dropped);
 	pr_info("Provenance: fs ready.\n");
 	return 0;
 }

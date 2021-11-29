@@ -44,107 +44,108 @@
  * information of the current process.
  */
 #define current_pid()    (current->pid)
-static inline uint32_t current_cgroupns(void)
+static inline uint32_t get_cgroupns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct cgroup_namespace *cns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		cns = current->nsproxy->cgroup_ns;
+	if (task->nsproxy) {
+		cns = task->nsproxy->cgroup_ns;
 		if (cns) {
 			get_cgroup_ns(cns);
 			id = cns->ns.inum;
 			put_cgroup_ns(cns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_utsns(void)
+static inline uint32_t get_utsns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct uts_namespace *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->uts_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->uts_ns;
 		if (ns) {
 			get_uts_ns(ns);
 			id = ns->ns.inum;
 			put_uts_ns(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_ipcns(void)
+static inline uint32_t get_ipcns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct ipc_namespace *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->ipc_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->ipc_ns;
 		if (ns) {
 			get_ipc_ns(ns);
 			id = ns->ns.inum;
 			put_ipc_ns(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_mntns(void)
+static inline uint32_t get_mntns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct mnt_namespace *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->mnt_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->mnt_ns;
 		if (ns) {
 			get_mnt_ns(ns);
 			id = ns->ns.inum;
 			put_mnt_ns(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_netns(void)
+static inline uint32_t get_netns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct net *ns;
 
-	task_lock(current);
-	if (current->nsproxy) {
-		ns = current->nsproxy->net_ns;
+	if (task->nsproxy) {
+		ns = task->nsproxy->net_ns;
 		if (ns) {
 			get_net(ns);
 			id = ns->ns.inum;
 			put_net(ns);
 		}
 	}
-	task_unlock(current);
 	return id;
 }
 
-static inline uint32_t current_pidns(void)
+static inline uint32_t get_pidns(struct task_struct *task)
 {
 	uint32_t id = 0;
 	struct pid_namespace *ns;
 
-	task_lock(current);
-	ns = task_active_pid_ns(current);
+	ns = task_active_pid_ns(task);
 	if (ns)
 		id = ns->ns.inum;
-	task_unlock(current);
 	return id;
+}
+
+static inline void update_task_namespaces(struct task_struct *task,
+					  struct provenance *prov)
+{
+	task_lock(task);
+	prov_elt(prov)->task_info.utsns = get_utsns(task);
+	prov_elt(prov)->task_info.ipcns = get_ipcns(task);
+	prov_elt(prov)->task_info.mntns = get_mntns(task);
+	prov_elt(prov)->task_info.pidns = get_pidns(task);
+	prov_elt(prov)->task_info.netns = get_netns(task);
+	prov_elt(prov)->task_info.cgroupns = get_cgroupns(task);
+	task_unlock(task);
 }
 
 #define vm_write(flags) ((flags & VM_WRITE) == VM_WRITE)
@@ -351,15 +352,9 @@ static inline struct provenance *get_cred_provenance(void)
 	spin_lock_irqsave_nested(prov_lock(prov),
 				 irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
-	prov_elt(prov)->proc_info.utsns = current_utsns();
-	prov_elt(prov)->proc_info.ipcns = current_ipcns();
-	prov_elt(prov)->proc_info.mntns = current_mntns();
-	prov_elt(prov)->proc_info.pidns = current_pidns();
-	prov_elt(prov)->proc_info.netns = current_netns();
-	prov_elt(prov)->proc_info.cgroupns = current_cgroupns();
 	prov_elt(prov)->proc_info.uid = __kuid_val(current_uid());
 	prov_elt(prov)->proc_info.gid = __kgid_val(current_gid());
-	security_task_getsecid(current, &(prov_elt(prov)->proc_info.secid));
+	security_task_getsecid_obj(current, &(prov_elt(prov)->proc_info.secid));
 	spin_unlock_irqrestore(prov_lock(prov), irqflags);
 	return prov;
 }
@@ -384,6 +379,7 @@ static inline struct provenance *get_task_provenance(bool link)
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
 	update_task_perf(current, tprov);
+	update_task_namespaces(current, tprov);
 	if (!provenance_is_opaque(prov_elt(tprov)) && link)
 		record_kernel_link(prov_entry(tprov));
 	return tprov;
@@ -416,99 +412,24 @@ static inline struct provenance *prov_from_vpid(pid_t pid)
  * See fs/exec.c
  *
  */
-static inline void acct_arg_size(struct linux_binprm *bprm, unsigned long pages)
-{
-	struct mm_struct *mm = current->mm;
-	long diff = (long)(pages - bprm->vma_pages);
-
-	if (!mm || !diff)
-		return;
-
-	bprm->vma_pages = pages;
-	add_mm_counter(mm, MM_ANONPAGES, diff);
-}
-
-/*!
- * Helper function used to copy arguments.
- * See fs/exec.c
- *
- */
-static inline struct page *get_arg_page(struct linux_binprm *bprm,
-					unsigned long pos,
-					int write)
+static inline struct page *__get_arg_page_r(struct linux_binprm *bprm,
+					    unsigned long pos)
 {
 	struct page *page;
 	int ret;
-	unsigned int gup_flags = FOLL_FORCE;
-
-#ifdef CONFIG_STACK_GROWSUP
-	if (write) {
-		ret = expand_downwards(bprm->vma, pos);
-		if (ret < 0)
-			return NULL;
-	}
-#endif
-
-	if (write)
-		gup_flags |= FOLL_WRITE;
 
 	/*
 	 * We are doing an exec().  'current' is the process
 	 * doing the exec and bprm->mm is the new process's mm.
 	 */
-	ret = get_user_pages_remote(bprm->mm, pos, 1, gup_flags,
+	mmap_read_lock(bprm->mm);
+	ret = get_user_pages_remote(bprm->mm, pos, 1, FOLL_FORCE,
 				    &page, NULL, NULL);
+	mmap_read_unlock(bprm->mm);
 	if (ret <= 0)
 		return NULL;
 
-	if (write) {
-		unsigned long size = bprm->vma->vm_end - bprm->vma->vm_start;
-		unsigned long ptr_size;
-		struct rlimit *rlim;
-
-		/*
-		 * Since the stack will hold pointers to the strings, we
-		 * must account for them as well.
-		 *
-		 * The size calculation is the entire vma while each arg page is
-		 * built, so each time we get here it's calculating how far it
-		 * is currently (rather than each call being just the newly
-		 * added size from the arg page).  As a result, we need to
-		 * always add the entire size of the pointers, so that on the
-		 * last call to get_arg_page() we'll actually have the entire
-		 * correct size.
-		 */
-		ptr_size = (bprm->argc + bprm->envc) * sizeof(void *);
-		if (ptr_size > ULONG_MAX - size)
-			goto fail;
-		size += ptr_size;
-
-		acct_arg_size(bprm, size / PAGE_SIZE);
-
-		/*
-		 * We've historically supported up to 32 pages (ARG_MAX)
-		 * of argument strings even with small stacks
-		 */
-		if (size <= ARG_MAX)
-			return page;
-
-		/*
-		 * Limit to 1/4-th the stack size for the argv+env strings.
-		 * This ensures that:
-		 *  - the remaining binfmt code will not run out of stack space,
-		 *  - the program will have a reasonable amount of stack left
-		 *    to work from.
-		 */
-		rlim = current->signal->rlim;
-		if (size > READ_ONCE(rlim[RLIMIT_STACK].rlim_cur) / 4)
-			goto fail;
-	}
-
 	return page;
-
-fail:
-	put_page(page);
-	return NULL;
 }
 
 /*!
@@ -523,33 +444,38 @@ static inline int copy_argv_bprm(struct linux_binprm *bprm, char *buff,
 	unsigned long ofs, bytes;
 	struct page *page = NULL, *new_page;
 	const char *kaddr;
-	unsigned long src;
+	unsigned long pos;
 
-	src = bprm->p;
-	ofs = src % PAGE_SIZE;
+	pos = bprm->p;
+	ofs = pos % PAGE_SIZE;
 	while (len) {
-		new_page = get_arg_page(bprm, src, 0);
+		new_page = __get_arg_page_r(bprm, pos);
 		if (!new_page) {
 			rv = -E2BIG;
 			goto out;
 		}
 		if (page) {
+			flush_dcache_page(page);
 			kunmap(page);
 			put_page(page);
 		}
 		page = new_page;
 		kaddr = kmap(page);
-		flush_cache_page(bprm->vma, ofs, page_to_pfn(page));
+
+		flush_cache_page(bprm->vma, pos, page_to_pfn(page));
+
 		bytes = min_t(unsigned int, len, PAGE_SIZE - ofs);
 		__memcpy_ss(buff, len, kaddr + ofs, bytes);
-		src += bytes;
+		pos += bytes;
 		buff += bytes;
 		len -= bytes;
 		ofs = 0;
 	}
-	rv = src - bprm->p;
+	rv = pos - bprm->p;
+
 out:
 	if (page) {
+		flush_dcache_page(page);
 		kunmap(page);
 		put_page(page);
 	}
@@ -595,7 +521,7 @@ static __always_inline int record_arg(struct provenance *prov,
 	aprov->arg_info.length = len;
 	if (len >= PATH_MAX)
 		aprov->arg_info.truncated = PROV_TRUNCATED;
-	strlcpy(aprov->arg_info.value, arg, PATH_MAX - 1);
+	strscpy(aprov->arg_info.value, arg, PATH_MAX);
 
 	rc = record_relation(etype, aprov, prov_entry(prov), NULL, 0);
 	free_long_provenance(aprov);

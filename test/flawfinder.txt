@@ -28,16 +28,16 @@ FINAL RESULTS:
 ./security/provenance/memcpy_ss.c:64:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/include/provenance_record.h:251:  [1] (buffer) read:
+./security/provenance/include/provenance_record.h:253:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:177:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:178:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:195:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:196:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:201:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:202:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
 
@@ -45,10 +45,10 @@ ANALYSIS SUMMARY:
 
 Hits = 5
 Stat removed
-Physical Source Lines of Code (SLOC) = 5432
-Hits@level = [0]   1 [1]   4 [2]   1 [3]   0 [4]   0 [5]   0
-Hits@level+ = [0+]   6 [1+]   5 [2+]   1 [3+]   0 [4+]   0 [5+]   0
-Hits/KSLOC@level+ = [0+] 1.10457 [1+] 0.920471 [2+] 0.184094 [3+]   0 [4+]   0 [5+]   0
+Physical Source Lines of Code (SLOC) = 5530
+Hits@level = [0]   0 [1]   4 [2]   1 [3]   0 [4]   0 [5]   0
+Hits@level+ = [0+]   5 [1+]   5 [2+]   1 [3+]   0 [4+]   0 [5+]   0
+Hits/KSLOC@level+ = [0+] 0.904159 [1+] 0.904159 [2+] 0.180832 [3+]   0 [4+]   0 [5+]   0
 Minimum risk level = 1
 Not every hit is necessarily a security vulnerability.
 There may be other security vulnerabilities; review your code!

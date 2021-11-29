@@ -1,5 +1,5 @@
-kernel-version=5.11.2
-lsm-version=0.7.2
+kernel-version=5.15.4
+lsm-version=0.8.0
 arch=x86_64
 
 all: config compile install
@@ -72,8 +72,6 @@ prepare_ltp:
 prepare_us: prepare_submodules prepare_provenance prepare_config prepare_cli prepare_service
 
 prepare_update: prepare_kernel
-	mv include/linux/fs.h include/linux/_fs.h
-	cp ~/build/pristine/linux-stable/include/linux/fs.h include/linux/fs.h
 	mv include/net/sock.h include/net/_sock.h
 	cp ~/build/pristine/linux-stable/include/net/sock.h include/net/sock.h
 	mv include/uapi/linux/xattr.h include/uapi/linux/_xattr.h
@@ -106,7 +104,7 @@ config: copy_change copy_config
 	cd ~/build/linux-stable &&  mv .config config_sav
 	cd ~/build/linux-stable &&  mv config_strip .config
 	cd ~/build/linux-stable && $(MAKE) menuconfig
-	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock\"/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock,provenance\"/g" .config
 	cp ~/build/linux-stable/.config .config
 	cp -f .config ./scripts/.config
 
@@ -115,7 +113,7 @@ config_clang: copy_change copy_config
 	cd ~/build/linux-stable &&  mv .config config_sav
 	cd ~/build/linux-stable &&  mv config_strip .config
 	cd ~/build/linux-stable && $(MAKE) menuconfig CC=clang HOSTCC=clang
-	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock\"/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock,provenance\"/g" .config
 	cp ~/build/linux-stable/.config .config
 	cp -f .config ./scripts/.config
 
@@ -125,23 +123,23 @@ config_travis: copy_change copy_config
 	cd ~/build/linux-stable &&  mv config_strip .config
 	cd ~/build/linux-stable && $(MAKE) olddefconfig
 	cd ~/build/linux-stable && $(MAKE) oldconfig
-	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock\"/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock,provenance\"/g" .config
 
 config_old: copy_change copy_config
 	cd ~/build/linux-stable && $(MAKE) olddefconfig
 	cd ~/build/linux-stable && $(MAKE) menuconfig
-	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock\"/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock,provenance\"/g" .config
 
 
 config_circle: copy_change
 	cd ~/build/linux-stable && $(MAKE) olddefconfig
-	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock\"/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock,provenance\"/g" .config
 	cd ~/build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
 	cd ~/build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
 
 config_circle_clang: copy_change
 	cd ~/build/linux-stable && $(MAKE) olddefconfig CC=clang HOSTCC=clang
-	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor\"/CONFIG_LSM=\"yama,loadpin,safesetid,integrity,selinux,smack,tomoyo,apparmor,provenance\"/g" .config
+	cd ~/build/linux-stable && sed -i -e "s/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock\"/CONFIG_LSM=\"lockdown,yama,integrity,selinux,bpf,landlock,provenance\"/g" .config
 	cd ~/build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO=y/CONFIG_DEBUG_INFO=n/g" .config
 	cd ~/build/linux-stable && sed -i -e "s/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g" .config
 
