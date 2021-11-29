@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.8.0           | 5.13.9         | 29/11/2021 |
+| 0.8.0           | 5.15.4         | 29/11/2021 |
 | 0.7.2           | 5.11.2         | 27/04/2021	|
 | 0.7.1           | 5.9.11         | 05/12/2020 |
 | 0.7.0           | 5.7.7	         | 09/07/2020	|
@@ -69,7 +69,7 @@
 - Namespaces associated to tasks instead of process state (align with kernel).
 - Reduce overhead when capture is not enabled.
 - Replace usage of strlcpy by strscpy.
-- Update to kernel version 5.15.
+- Update to kernel version 5.15.4.
 ```
 
 ## v0.7.2
