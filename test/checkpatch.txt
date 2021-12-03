@@ -190,7 +190,7 @@ security/provenance/query.c has no obvious style problems and is ready for submi
 ---------------------------
 security/provenance/relay.c
 ---------------------------
-total: 0 errors, 0 warnings, 367 lines checked
+total: 0 errors, 0 warnings, 368 lines checked
 
 security/provenance/relay.c has no obvious style problems and is ready for submission.
 --------------------------
