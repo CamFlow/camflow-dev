@@ -25,11 +25,13 @@
 #include "provenance_query.h"
 #include "memcpy_ss.h"
 
-#define PROV_RELAY_BUFF_EXP 20
-#define PROV_RELAY_BUFF_SIZE ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
-#define PROV_NB_SUBBUF 64
 #define PROV_INITIAL_BUFF_SIZE (1024 * 16)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
+
+#define prov_relay_size(exp) ((1 << exp) * sizeof(uint8_t))
+
+int relay_prov_init(struct relay_conf *conf);
+void prov_flush(void);
 
 struct boot_buffer {
 	struct list_head list;
@@ -40,10 +42,6 @@ struct long_boot_buffer {
 	struct list_head list;
 	union long_prov_elt msg;
 };
-
-void write_boot_buffer(void);
-bool is_relay_full(struct rchan *chan);
-void prov_flush(void);
 
 extern struct kmem_cache *boot_buffer_cache;
 extern spinlock_t lock_buffer;

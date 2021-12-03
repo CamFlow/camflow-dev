@@ -29,6 +29,7 @@
  #define PROV_SELF_FILE                          "/sys/kernel/security/provenance/self"
  #define PROV_MACHINE_ID_FILE                    "/sys/kernel/security/provenance/machine_id"
  #define PROV_BOOT_ID_FILE                       "/sys/kernel/security/provenance/boot_id"
+ #define PROV_RELAY_CONF_FILE                    "/sys/kernel/security/provenance/relay_conf"
  #define PROV_NODE_FILTER_FILE                   "/sys/kernel/security/provenance/node_filter"
  #define PROV_DERIVED_FILTER_FILE                "/sys/kernel/security/provenance/derived_filter"
  #define PROV_GENERATED_FILTER_FILE              "/sys/kernel/security/provenance/generated_filter"
@@ -124,6 +125,13 @@ struct nsinfo {
 
 struct dropped {
 	uint64_t s;
+};
+
+struct relay_conf {
+	uint32_t boot_id;
+	uint32_t machine_id;
+	uint32_t buff_exp;
+	uint32_t subuf_nb;
 };
 
 #endif
