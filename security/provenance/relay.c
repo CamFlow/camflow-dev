@@ -215,9 +215,6 @@ static void __write_boot_buffer(void)
 {
 	async_cookie_t cookie;
 
-	if (!relay_initialized)
-		return;
-
 	relay_ready = true;
 
 	refresh_prov_machine();
@@ -334,6 +331,9 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  */
 int relay_prov_init(struct relay_conf *conf)
 {
+	if (relay_initialized) // cannot be initialized twice
+		return 0;
+
 	// set boot and machine IDs
 	prov_boot_id = conf->boot_id;
 	prov_machine_id = conf->machine_id;
@@ -352,7 +352,6 @@ int relay_prov_init(struct relay_conf *conf)
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
 
-	relay_initialized = true;
 	init_prov_machine();
 	__write_boot_buffer();
 
@@ -362,6 +361,8 @@ int relay_prov_init(struct relay_conf *conf)
 	pr_info("Provenance: machine_id %u", conf->machine_id);
 	pr_info("Provenance: buff_exp %u", conf->buff_exp);
 	pr_info("Provenance: subuf_nb %u", conf->subuf_nb);
+
+	relay_initialized = true;
 
 	return 0;
 }
