@@ -518,3 +518,95 @@ workflows:
               ignore: /test/
             branches:
               ignore: /.*/
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+                - dev
+    jobs:
+      - checkout:
+          filters:
+            tags:
+              only: /.*/
+      - patch:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /.*/
+      - security:
+          requires:
+            - checkout
+      - security_clang:
+          requires:
+            - checkout
+      - compile_default:
+          requires:
+            - security
+            - security_clang
+      - compile_default_clang:
+          requires:
+            - security
+            - security_clang
+      - compile_no_flow_friendly:
+          requires:
+            - security
+            - security_clang
+      - compile_whole:
+          requires:
+            - security
+            - security_clang
+      - compile_persist:
+          requires:
+            - security
+            - security_clang
+      - sparse:
+          requires:
+            - compile_default
+            - compile_default_clang
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
+      - flawfinder:
+          requires:
+            - compile_default
+            - compile_default_clang
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
+      - checkpatch:
+          requires:
+            - compile_default
+            - compile_default_clang
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
+      - smatch:
+          requires:
+            - compile_default
+            - compile_default_clang
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
+      - coccinelle:
+          requires:
+            - compile_default
+            - compile_default_clang
+            - compile_no_flow_friendly
+            - compile_whole
+            - compile_persist
+      - deploy_dev:
+          filters:
+            branches:
+              only:
+                - dev
+          requires:
+            - sparse
+            - flawfinder
+            - checkpatch
+            - smatch
+            - coccinelle
