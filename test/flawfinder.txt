@@ -25,19 +25,19 @@ File name removed
 
 FINAL RESULTS:
 
-./security/provenance/memcpy_ss.c:64:  [2] (buffer) memcpy:
+./security/provenance/memcpy_ss.c:65:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/include/provenance_record.h:253:  [1] (buffer) read:
+./security/provenance/include/provenance_record.h:254:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:178:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:179:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:196:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:197:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
-./security/provenance/include/provenance_task.h:202:  [1] (buffer) read:
+./security/provenance/include/provenance_task.h:203:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
 
