@@ -56,6 +56,9 @@ static __always_inline int __update_version(const uint64_t type,
 	union prov_elt old_prov;
 	int rc = 0;
 
+	if (!prov_policy.should_be_versioned)
+		return 0;
+
 	if (!provenance_has_outgoing(prov) && prov_policy.should_compress_node)
 		return 0;
 
@@ -169,14 +172,17 @@ static __always_inline int record_terminate(uint64_t type,
 	if (filter_node(prov_entry(prov)))
 		return 0;
 
-	__memcpy_ss(&old_prov, sizeof(union prov_elt),
-		    prov_elt(prov), sizeof(union prov_elt));
-	node_identifier(prov_elt(prov)).version++;
-	clear_recorded(prov_elt(prov));
+	if (prov_policy.should_be_versioned) {
+		__memcpy_ss(&old_prov, sizeof(union prov_elt),
+			    prov_elt(prov), sizeof(union prov_elt));
+		node_identifier(prov_elt(prov)).version++;
+		clear_recorded(prov_elt(prov));
 
-	rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
-	// Newer version now has no outgoing edge.
-	clear_has_outgoing(prov_elt(prov));
+		rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
+		// Newer version now has no outgoing edge.
+		clear_has_outgoing(prov_elt(prov));
+	} else
+		rc = __write_relation(type, prov_elt(prov), prov_elt(prov), NULL, 0);
 	return rc;
 }
 

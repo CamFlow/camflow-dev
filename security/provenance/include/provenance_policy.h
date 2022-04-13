@@ -25,6 +25,8 @@ struct capture_policy {
 	bool prov_enabled;
 	// Whether to record provenance of all kernel object.
 	bool prov_all;
+	// Whether versions should be created. Necessary to get acyclic graph.
+	bool should_be_versioned;
 	// Whether nodes should be compressed into one if possible.
 	bool should_compress_node;
 	// Whether edges should be compressed into one if possible.

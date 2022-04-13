@@ -116,6 +116,14 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 declare_read_flag_fcn(prov_read_written, prov_written);
 declare_file_operations(prov_written_ops, no_write, prov_read_written);
 
+declare_write_flag_fcn(prov_write_should_version,
+		       prov_policy.should_be_versioned);
+declare_read_flag_fcn(prov_read_should_version,
+		      prov_policy.should_be_versioned);
+declare_file_operations(prov_should_version_ops,
+			prov_write_should_version,
+			prov_read_should_version);
+
 declare_write_flag_fcn(prov_write_compress_node,
 		       prov_policy.should_compress_node);
 declare_read_flag_fcn(prov_read_compress_node,
@@ -1086,6 +1094,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("enable", 0644, &prov_enable_ops);
 	prov_create_file("all", 0644, &prov_all_ops);
 	prov_create_file("written", 0444, &prov_written_ops);
+	prov_create_file("should_version", 0644, &prov_should_version_ops);
 	prov_create_file("compress_node", 0644, &prov_compress_node_ops);
 	prov_create_file("compress_edge", 0644, &prov_compress_edge_ops);
 	prov_create_file("node", 0666, &prov_node_ops);

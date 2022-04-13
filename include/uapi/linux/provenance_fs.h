@@ -23,6 +23,7 @@
  #define PROV_ENABLE_FILE                        "/sys/kernel/security/provenance/enable"
  #define PROV_ALL_FILE                           "/sys/kernel/security/provenance/all"
  #define PROV_WRITTEN_FILE                       "/sys/kernel/security/provenance/written"
+ #define PROV_SHOULD_VERSION_FILE                "/sys/kernel/security/provenance/should_version"
  #define PROV_COMPRESS_NODE_FILE                 "/sys/kernel/security/provenance/compress_node"
  #define PROV_COMPRESS_EDGE_FILE                 "/sys/kernel/security/provenance/compress_edge"
  #define PROV_NODE_FILE                          "/sys/kernel/security/provenance/node"

@@ -58,6 +58,9 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	uint64_t type = ENT_INODE_UNKNOWN;
 	unsigned long irqflags;
 
+	if (!prov_policy.should_be_versioned)
+		return;
+
 	if (S_ISBLK(mode))
 		type = ENT_INODE_BLOCK;
 	else if (S_ISCHR(mode))
