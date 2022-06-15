@@ -1192,6 +1192,11 @@ security/selinux/ss/ebitmap.c:207 ebitmap_netlbl_import() warn: ignoring unreach
   CHECK   security/provenance/query.c
   CC      security/provenance/fs.o
   CHECK   security/provenance/fs.c
+security/provenance/fs.c:927 prov_read_policy_hash() error: strnlen() '"v0.8.1"' too small (7 vs 32)
+security/provenance/fs.c:935 prov_read_policy_hash() error: strnlen() '""' too small (1 vs 256)
+security/provenance/fs.c:953 prov_read_policy_hash() error: crypto_shash_update() '&ns_tmp->filter' too small (40 vs 56)
+security/provenance/fs.c:1015 prov_read_version() error: strnlen() '"v0.8.1"' too small (7 vs 32)
+security/provenance/fs.c:1028 prov_read_commit() error: strnlen() '""' too small (1 vs 256)
   CC      security/provenance/netfilter.o
   CHECK   security/provenance/netfilter.c
   CC      security/provenance/propagate.o
@@ -1200,6 +1205,7 @@ security/selinux/ss/ebitmap.c:207 ebitmap_netlbl_import() warn: ignoring unreach
   CHECK   security/provenance/type.c
   CC      security/provenance/machine.o
   CHECK   security/provenance/machine.c
+security/provenance/machine.c:46 init_prov_machine() error: strnlen() '""' too small (1 vs 256)
   CC      security/provenance/memcpy_ss.o
   CHECK   security/provenance/memcpy_ss.c
   AR      security/provenance/built-in.a
