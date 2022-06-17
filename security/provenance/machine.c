@@ -44,7 +44,7 @@ void init_prov_machine(void)
 		    PROV_COMMIT_MAX_LENGTH,
 		    CAMFLOW_COMMIT,
 		    strnlen(CAMFLOW_COMMIT,
-			    PROV_COMMIT_MAX_LENGTH));
+			    sizeof(CAMFLOW_COMMIT)));
 	prov_type(prov_machine) = AGT_MACHINE;
 	node_identifier(prov_machine).version = 1;
 	refresh_prov_machine();
