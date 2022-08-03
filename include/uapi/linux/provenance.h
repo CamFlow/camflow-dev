@@ -52,6 +52,7 @@
 #define node_identifier(node)                   ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation)           ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)               ((node)->node_info.identifier)
+#define get_prov_name_id(node)                  ((node)->node_info.name_id)
 #define packet_identifier(packet)               ((packet)->pck_info.identifier.packet_id)
 #define packet_info(packet)                                                                                     ((packet)->pck_info)
 #define node_secid(node)                        ((node)->node_info.secid)
@@ -145,7 +146,7 @@ union prov_identifier {
 
 
 #define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
-#define shared_node_elements    uint64_t previous_id; uint32_t previous_version; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
+#define shared_node_elements    union prov_identifier name_id; uint64_t previous_id; uint32_t previous_version; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;

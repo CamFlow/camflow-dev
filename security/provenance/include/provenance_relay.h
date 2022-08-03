@@ -95,6 +95,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
+	tighten_identifier(&get_prov_name_id(node));
 	set_recorded(node);
 	if (prov_type_is_long(node_type(node)))
 		long_prov_write(node, sizeof(union long_prov_elt));
