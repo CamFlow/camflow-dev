@@ -244,6 +244,7 @@ static inline int record_task_name(struct task_struct *task,
 	char *ptr;
 	int rc = 0;
 
+	// logic here prevent the first node to have an associated name
 	if (provenance_is_name_recorded(prov_elt(prov)) ||
 	    !provenance_is_recorded(prov_elt(prov)))
 		return 0;

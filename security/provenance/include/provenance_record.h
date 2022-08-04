@@ -221,6 +221,7 @@ static __always_inline int record_node_name(struct provenance *node,
 	if (provenance_is_opaque(prov_elt(node)))
 		return 0;
 
+	// logic here prevent the first node to have an associated name
 	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
 	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
@@ -234,9 +235,9 @@ static __always_inline int record_node_name(struct provenance *node,
 		strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
 	__memcpy_ss(&get_prov_name_id(prov_elt(node)),
-		    sizeof(union prov_identifier),
-		    &get_prov_identifier(fname_prov),
-		    sizeof(union prov_identifier));
+	sizeof(union prov_identifier),
+	&get_prov_identifier(fname_prov),
+	sizeof(union prov_identifier));
 
 	// Here we record the relation.
 	spin_lock(prov_lock(node));
