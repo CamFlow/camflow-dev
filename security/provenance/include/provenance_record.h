@@ -235,9 +235,9 @@ static __always_inline int record_node_name(struct provenance *node,
 		strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
 	__memcpy_ss(&get_prov_name_id(prov_elt(node)),
-	sizeof(union prov_identifier),
-	&get_prov_identifier(fname_prov),
-	sizeof(union prov_identifier));
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(fname_prov),
+		    sizeof(union prov_identifier));
 
 	// Here we record the relation.
 	spin_lock(prov_lock(node));

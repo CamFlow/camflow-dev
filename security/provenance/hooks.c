@@ -2846,7 +2846,6 @@ static int provenance_bprm_creds_for_exec(struct linux_binprm *bprm)
 static int provenance_bprm_check_security(struct linux_binprm *bprm)
 {
 	struct provenance *nprov = provenance_cred(bprm->cred);
-	struct provenance *cprov = get_cred_provenance();
 	struct provenance *tprov = get_task_provenance(false);
 	struct provenance *iprov = get_file_provenance(bprm->file, false);
 
@@ -2855,6 +2854,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 
 	if (provenance_is_opaque(prov_elt(iprov))) {
 		set_opaque(prov_elt(nprov));
+		set_opaque(prov_elt(tprov));
 		return 0;
 	}
 	if (provenance_is_tracked(prov_elt(iprov)))
