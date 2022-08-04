@@ -28,7 +28,7 @@ FINAL RESULTS:
 ./security/provenance/memcpy_ss.c:65:  [2] (buffer) memcpy:
   Does not check for buffer overflows when copying to destination (CWE-120).
   Make sure destination can always hold the source data.
-./security/provenance/include/provenance_record.h:265:  [1] (buffer) read:
+./security/provenance/include/provenance_record.h:266:  [1] (buffer) read:
   Check buffer boundaries if used in a loop including recursive loops
   (CWE-120, CWE-20).
 ./security/provenance/include/provenance_task.h:179:  [1] (buffer) read:
