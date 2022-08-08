@@ -249,6 +249,24 @@ static __always_inline int record_node_name(struct provenance *node,
 	return rc;
 }
 
+static __always_inline void copy_cred_name(struct provenance *cred,
+					   struct provenance *prov)
+{
+	// name already recorded for this object
+	if (provenance_is_name_recorded(prov_elt(prov)))
+		return;
+
+	// name has not be set so nothing to copy
+	if (!provenance_is_name_recorded(prov_elt(cred)))
+		return;
+
+	__memcpy_ss(&get_prov_name_id(prov_elt(prov)),
+		    sizeof(union prov_identifier),
+		    &get_prov_name_id(prov_elt(cred)),
+		    sizeof(union prov_identifier));
+	set_name_recorded(prov_elt(prov));
+}
+
 static __always_inline int record_kernel_link(prov_entry_t *node)
 {
 	int rc;
@@ -319,6 +337,9 @@ static __always_inline int uses(const uint64_t type,
 	if (!should_record_relation(
 		    type, prov_entry(entity), prov_entry(activity)))
 		return 0;
+
+
+	copy_cred_name(activity_mem, activity);
 
 	rc = record_relation(type, prov_entry(entity),
 			     prov_entry(activity), file, flags);
@@ -443,6 +464,8 @@ static __always_inline int generates(const uint64_t type,
 	if (!should_record_relation(
 		    type, prov_entry(activity), prov_entry(entity)))
 		return 0;
+
+	copy_cred_name(activity_mem, activity);
 
 	rc = current_update_shst(activity_mem, true);
 	if (rc < 0)
