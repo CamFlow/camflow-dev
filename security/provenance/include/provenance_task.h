@@ -244,9 +244,17 @@ static inline int record_cred_name(struct task_struct *task,
 	char *ptr;
 	int rc = 0;
 
-	// logic here prevent the first node to have an associated name
-	if (provenance_is_name_recorded(prov_elt(prov)) ||
-	    !provenance_is_recorded(prov_elt(prov)))
+	// task/prov are not set
+	if (task == NULL || prov == NULL)
+		return 0;
+
+	// we already recorded the name, don't do it again
+	if (provenance_is_name_recorded(prov_elt(prov)))
+		return 0;
+
+	// node is not tracked and we are not recording everything
+	if (!provenance_is_tracked(prov_elt(prov))
+	    && !prov_policy.prov_all)
 		return 0;
 
 	mm = get_task_mm(task);
