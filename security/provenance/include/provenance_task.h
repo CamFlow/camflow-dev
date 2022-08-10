@@ -233,7 +233,7 @@ static __always_inline int current_update_shst(struct provenance *cprov,
  * buffer to hold file path.
  *
  */
-static inline int record_task_name(struct task_struct *task,
+static inline int record_cred_name(struct task_struct *task,
 				   struct provenance *prov)
 {
 	// const struct cred *cred;
@@ -350,7 +350,7 @@ static inline struct provenance *get_cred_provenance(void)
 
 	if (provenance_is_opaque(prov_elt(prov)))
 		return prov;
-	record_task_name(current, prov);
+	record_cred_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov),
 				 irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
