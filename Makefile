@@ -307,7 +307,7 @@ patch: copy_change
 	cp -r include ~/build/pristine/linux-stable/.
 	cd ~/build/pristine/linux-stable && git add .
 	cd ~/build/pristine/linux-stable && git commit -a -m 'camflow'
-	cd ~/build/pristine/linux-stable && git format-patch HEAD~~ -s
+	cd ~/build/pristine/linux-stable && git format-patch HEAD~ -s
 	cp -f ~/build/pristine/linux-stable/*.patch patches/
 
 save_space:
