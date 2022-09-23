@@ -57,7 +57,7 @@
 
 ## v0.8.1
 ```
-- Support node name attribute.
+- Support node path name attribute (beta).
 - Allow to turn versioning on/off (on by default).
 - Add mechanism to set relay buffer size through configuration.
 - Update to kernel version 5.15.5.
