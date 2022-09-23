@@ -36,13 +36,11 @@ inode_getsecurity| ![inode_getsecurity graph](./img/inode_getsecurity.png)|
 inode_listsecurity| ![inode_listsecurity graph](./img/inode_listsecurity.png)|
 file_permission| ![file_permission graph](./img/file_permission.png)|
 mmap_file| ![mmap_file graph](./img/mmap_file.png)|
-mmap_munmap| ![mmap_munmap graph](./img/mmap_munmap.png)|
 file_ioctl| ![file_ioctl graph](./img/file_ioctl.png)|
 file_open| ![file_open graph](./img/file_open.png)|
 file_receive| ![file_receive graph](./img/file_receive.png)|
 file_lock| ![file_lock graph](./img/file_lock.png)|
 file_send_sigiotask| ![file_send_sigiotask graph](./img/file_send_sigiotask.png)|
-file_splice_pipe_to_pipe| ![file_splice_pipe_to_pipe graph](./img/file_splice_pipe_to_pipe.png)|
 kernel_read_file| ![kernel_read_file graph](./img/kernel_read_file.png)|
 msg_msg_alloc_security| ![msg_msg_alloc_security graph](./img/msg_msg_alloc_security.png)|
 msg_msg_free_security| ![msg_msg_free_security graph](./img/msg_msg_free_security.png)|
@@ -51,7 +49,6 @@ msg_queue_msgrcv| ![msg_queue_msgrcv graph](./img/msg_queue_msgrcv.png)|
 shm_alloc_security| ![shm_alloc_security graph](./img/shm_alloc_security.png)|
 shm_free_security| ![shm_free_security graph](./img/shm_free_security.png)|
 shm_shmat| ![shm_shmat graph](./img/shm_shmat.png)|
-shm_shmdt| ![shm_shmdt graph](./img/shm_shmdt.png)|
 sk_alloc_security| ![sk_alloc_security graph](./img/sk_alloc_security.png)|
 socket_post_create| ![socket_post_create graph](./img/socket_post_create.png)|
 socket_socketpair| ![socket_socketpair graph](./img/socket_socketpair.png)|
@@ -59,10 +56,6 @@ socket_bind| ![socket_bind graph](./img/socket_bind.png)|
 socket_connect| ![socket_connect graph](./img/socket_connect.png)|
 socket_listen| ![socket_listen graph](./img/socket_listen.png)|
 socket_accept| ![socket_accept graph](./img/socket_accept.png)|
-socket_sendmsg_always| ![socket_sendmsg_always graph](./img/socket_sendmsg_always.png)|
-socket_recvmsg_always| ![socket_recvmsg_always graph](./img/socket_recvmsg_always.png)|
-mq_timedreceive| ![mq_timedreceive graph](./img/mq_timedreceive.png)|
-mq_timedsend| ![mq_timedsend graph](./img/mq_timedsend.png)|
 socket_sendmsg| ![socket_sendmsg graph](./img/socket_sendmsg.png)|
 socket_recvmsg| ![socket_recvmsg graph](./img/socket_recvmsg.png)|
 socket_sock_rcv_skb| ![socket_sock_rcv_skb graph](./img/socket_sock_rcv_skb.png)|

@@ -57,6 +57,7 @@
 
 ## v0.8.1
 ```
+- Remove support for better flow tracking introduce in patch 0.3.3 to ease maintenance.
 - Support node path name attribute (beta).
 - Allow to turn versioning on/off (on by default).
 - Add mechanism to set relay buffer size through configuration.

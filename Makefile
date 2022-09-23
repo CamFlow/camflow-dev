@@ -13,16 +13,10 @@ prepare_kernel_raw:
 	cd ~/build && mkdir -p pristine
 	cd ~/build && cp -r ./linux-stable ./pristine
 
-prepare_information_flow:
-	mkdir -p patches
-	rm -f ~/build//0001-information-flow.patch
-	cd ~/build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
-	cd ~/build/linux-stable && git apply --whitespace=fix --verbose ../0001-information-flow.patch
-
 finalize:
 	cd ~/build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
 
-prepare_kernel: prepare_kernel_raw prepare_information_flow finalize
+prepare_kernel: prepare_kernel_raw finalize
 
 prepare_submodules:
 	git submodule update --init --recursive
@@ -309,10 +303,6 @@ patch: copy_change
 	cd ~/build/pristine/linux-stable && rm -f tools/objtool/arch/x86/insn/inat-tables.c
 	cd ~/build/pristine/linux-stable && $(MAKE) clean
 	cd ~/build/pristine/linux-stable && $(MAKE) mrproper
-	cd ~/build && wget https://github.com/camflow/information-flow-patch/releases/download/$(kernel-version)/0001-information-flow.patch
-	cd ~/build/pristine/linux-stable && git apply ../../0001-information-flow.patch
-	cd ~/build/pristine/linux-stable && git add .
-	cd ~/build/pristine/linux-stable && git commit -a -m 'information flow'
 	cp -r security ~/build/pristine/linux-stable/.
 	cp -r include ~/build/pristine/linux-stable/.
 	cd ~/build/pristine/linux-stable && git add .
