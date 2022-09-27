@@ -19,7 +19,6 @@
 
 #ifndef __KERNEL__
 #include <stdint.h>
-#include <stdbool.h>
 #endif
 
 
@@ -222,7 +221,7 @@
 					 || val == RL_TERMINATE_PROC \
 					 || val == RL_FREED)
 
-static inline bool prov_has_uidgid(uint64_t type)
+static inline uint8_t prov_has_uidgid(uint64_t type)
 {
 	switch (type) {
 	case ENT_PROC:
@@ -234,12 +233,12 @@ static inline bool prov_has_uidgid(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-		return true;
-	default: return false;
+		return 1;
+	default: return 0;
 	}
 }
 
-static inline bool prov_is_inode(uint64_t type)
+static inline uint8_t prov_is_inode(uint64_t type)
 {
 	switch (type) {
 	case ENT_INODE_UNKNOWN:
@@ -250,12 +249,12 @@ static inline bool prov_is_inode(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-		return true;
-	default: return false;
+		return 1;
+	default: return 0;
 	}
 }
 
-static inline bool prov_has_secid(uint64_t type)
+static inline uint8_t prov_has_secid(uint64_t type)
 {
 	switch (type) {
 	case ENT_PROC:
@@ -267,8 +266,8 @@ static inline bool prov_has_secid(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-		return true;
-	default: return false;
+		return 1;
+	default: return 0;
 	}
 }
 
