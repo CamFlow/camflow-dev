@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -56,6 +57,9 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	union prov_elt old_prov;
 	uint64_t type = ENT_INODE_UNKNOWN;
 	unsigned long irqflags;
+
+	if (!prov_policy.should_be_versioned)
+		return;
 
 	if (S_ISBLK(mode))
 		type = ENT_INODE_BLOCK;

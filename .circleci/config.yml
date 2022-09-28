@@ -141,25 +141,6 @@ jobs:
       - run: 'cd ~/build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
       - run: 'cd ~/build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
       - run: 'make compile_kernel_clang'
-  compile_no_flow_friendly:
-    machine:
-      image: ubuntu-2004:202101-01
-    working_directory: ~/build
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/build
-      - run: 'sudo apt-get update -qq'
-      - run: 'sudo apt-get install -y apt-utils'
-      - run: 'sudo apt-get install -y sudo'
-      - run: 'sudo apt-get install -y uncrustify rsync build-essential ruby python autoconf automake libtool libncurses5-dev libncursesw5-dev bc libssl-dev pkg-config zsh libelf-dev bison flex sqlite3 libsqlite3-dev liblz4-tool liblz4-dev zstd'
-      - run: 'sudo apt-get install --reinstall make'
-      - run: 'cp -f scripts/.config ~/build/linux-stable/'
-      - run: 'make config_circle'
-      - run: 'cd ~/build/linux-stable && sed -i "s/CONFIG_CC_STACKPROTECTOR_STRONG=y/CONFIG_CC_STACKPROTECTOR_STRONG=n/" .config'
-      - run: 'cd ~/build/linux-stable && sed -i "s/CONFIG_RETPOLINE=y/CONFIG_RETPOLINE=n/" .config'
-      - run: 'cd ~/build/linux-stable && sed -i "s/CONFIG_SECURITY_FLOW_FRIENDLY=y/CONFIG_SECURITY_FLOW_FRIENDLY=n/" .config'
-      - run: 'make compile_kernel'
   compile_whole:
     machine:
       image: ubuntu-2004:202101-01
@@ -452,10 +433,6 @@ workflows:
           requires:
             - security
             - security_clang
-      - compile_no_flow_friendly:
-          requires:
-            - security
-            - security_clang
       - compile_whole:
           requires:
             - security
@@ -468,35 +445,30 @@ workflows:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - flawfinder:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - checkpatch:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - smatch:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - coccinelle:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - deploy_dev:
@@ -552,10 +524,6 @@ workflows:
           requires:
             - security
             - security_clang
-      - compile_no_flow_friendly:
-          requires:
-            - security
-            - security_clang
       - compile_whole:
           requires:
             - security
@@ -568,35 +536,30 @@ workflows:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - flawfinder:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - checkpatch:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - smatch:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - coccinelle:
           requires:
             - compile_default
             - compile_default_clang
-            - compile_no_flow_friendly
             - compile_whole
             - compile_persist
       - deploy_dev:

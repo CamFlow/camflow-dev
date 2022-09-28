@@ -29,13 +29,10 @@ RL_FILE_RCV|file_rcv|open file descriptor recevied through IPC|
 RL_FILE_LOCK|file_lock|represent file lock operation|
 RL_FILE_SIGIO|file_sigio|represent IO signal|
 RL_VERSION|version_entity|connect version of entity object|
-RL_MUNMAP|munmap|munmap operation|
-RL_SHMDT|shmdt|shmdt operation|
 RL_LINK|link|create a link|
 RL_RENAME|rename|rename inode|
 RL_UNLINK|unlink|delete a link|
 RL_SYMLINK|symlink|create a symlink|
-RL_SPLICE_IN|splice_in|pipe splice operation from in file|
 RL_SPLICE_OUT|splice_out|pipe splice operation to out file|
 RL_SETATTR|setattr|setattr operation |
 RL_SETATTR_INODE|setattr_inode|setattr operation |

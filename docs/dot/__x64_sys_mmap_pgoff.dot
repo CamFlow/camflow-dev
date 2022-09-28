@@ -44,10 +44,6 @@ inode -> task[fontsize = 8,label = mmap]
 
 inode -> task[fontsize = 8,label = mmap_private]
 
-task -> inode[fontsize = 8,label = munmap]
-
-inode -> process_memory[fontsize = 8,label = sh_read]
-
 task -> task[fontsize = 8,label = terminate_task]
 
 }

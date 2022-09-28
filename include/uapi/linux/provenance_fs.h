@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2020 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -22,6 +23,7 @@
  #define PROV_ENABLE_FILE                        "/sys/kernel/security/provenance/enable"
  #define PROV_ALL_FILE                           "/sys/kernel/security/provenance/all"
  #define PROV_WRITTEN_FILE                       "/sys/kernel/security/provenance/written"
+ #define PROV_SHOULD_VERSION_FILE                "/sys/kernel/security/provenance/should_version"
  #define PROV_COMPRESS_NODE_FILE                 "/sys/kernel/security/provenance/compress_node"
  #define PROV_COMPRESS_EDGE_FILE                 "/sys/kernel/security/provenance/compress_edge"
  #define PROV_NODE_FILE                          "/sys/kernel/security/provenance/node"

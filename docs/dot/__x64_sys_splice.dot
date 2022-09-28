@@ -44,10 +44,6 @@ inode -> process_memory[fontsize = 8,label = exec]
 
 inode -> task[fontsize = 8,label = file_sigio]
 
-inode -> task[fontsize = 8,label = splice_in]
-
-task -> inode[fontsize = 8,label = splice_out]
-
 task -> task[fontsize = 8,label = terminate_task]
 
 }

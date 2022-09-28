@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -114,6 +115,14 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 
 declare_read_flag_fcn(prov_read_written, prov_written);
 declare_file_operations(prov_written_ops, no_write, prov_read_written);
+
+declare_write_flag_fcn(prov_write_should_version,
+		       prov_policy.should_be_versioned);
+declare_read_flag_fcn(prov_read_should_version,
+		      prov_policy.should_be_versioned);
+declare_file_operations(prov_should_version_ops,
+			prov_write_should_version,
+			prov_read_should_version);
 
 declare_write_flag_fcn(prov_write_compress_node,
 		       prov_policy.should_compress_node);
@@ -915,7 +924,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	}
 	/* LSM version */
 	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR,
-				 strnlen(CAMFLOW_VERSION_STR, 32));
+				 strnlen(CAMFLOW_VERSION_STR, sizeof(CAMFLOW_VERSION_STR)));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -924,7 +933,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	rc = crypto_shash_update(hashdesc,
 				 (u8 *)CAMFLOW_COMMIT,
 				 strnlen(CAMFLOW_COMMIT,
-					 PROV_COMMIT_MAX_LENGTH));
+					 sizeof(CAMFLOW_COMMIT)));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -1003,7 +1012,7 @@ declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 static ssize_t prov_read_version(struct file *filp, char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	size_t len = strnlen(CAMFLOW_VERSION_STR, 32);
+	size_t len = strnlen(CAMFLOW_VERSION_STR, sizeof(CAMFLOW_VERSION_STR));
 
 	if (count < len)
 		return -ENOMEM;
@@ -1016,7 +1025,7 @@ declare_file_operations(prov_version, no_write, prov_read_version);
 static ssize_t prov_read_commit(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	size_t len = strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH);
+	size_t len = strnlen(CAMFLOW_COMMIT, sizeof(CAMFLOW_COMMIT));
 
 	if (count < len)
 		return -ENOMEM;
@@ -1085,6 +1094,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("enable", 0644, &prov_enable_ops);
 	prov_create_file("all", 0644, &prov_all_ops);
 	prov_create_file("written", 0444, &prov_written_ops);
+	prov_create_file("should_version", 0644, &prov_should_version_ops);
 	prov_create_file("compress_node", 0644, &prov_compress_node_ops);
 	prov_create_file("compress_edge", 0644, &prov_compress_edge_ops);
 	prov_create_file("node", 0666, &prov_node_ops);

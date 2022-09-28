@@ -26,17 +26,15 @@ machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style =
 
 machine -> task[fontsize = 8,label = ran_on]
 
-process_memory -> task[fontsize = 8,label = memory_read]
-
-task -> inode[fontsize = 8,label = munmap]
-
-inode -> process_memory[fontsize = 8,label = sh_read]
-
 task -> task[fontsize = 8,label = ptrace_read_task]
 
 process_memory -> task[fontsize = 8,label = ptrace_read]
 
+process_memory -> task[fontsize = 8,label = memory_read]
+
 task -> process_memory[fontsize = 8,label = ptrace_attach]
+
+inode -> process_memory[fontsize = 8,label = sh_read]
 
 task -> task[fontsize = 8,label = ptrace_attach_task]
 

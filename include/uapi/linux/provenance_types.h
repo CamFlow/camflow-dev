@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2020 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -18,7 +19,6 @@
 
 #ifndef __KERNEL__
 #include <stdint.h>
-#include <stdbool.h>
 #endif
 
 
@@ -94,17 +94,15 @@
 #define RL_SETATTR                              (RL_GENERATED | (0x0000000000000001ULL << 19))
 #define RL_SETXATTR                             (RL_GENERATED | (0x0000000000000001ULL << 20))
 #define RL_RMVXATTR                             (RL_GENERATED | (0x0000000000000001ULL << 21))
-#define RL_SHMDT                                (RL_GENERATED | (0x0000000000000001ULL << 22))
-#define RL_SETUID                               (RL_GENERATED | (0x0000000000000001ULL << 23))
-#define RL_SETGID                               (RL_GENERATED | (0x0000000000000001ULL << 24))
-#define RL_SH_ATTACH                            (RL_GENERATED | (0x0000000000000001ULL << 25))
-#define RL_SH_CREATE                            (RL_GENERATED | (0x0000000000000001ULL << 26))
-#define RL_FILE_LOCK                            (RL_GENERATED | (0x0000000000000001ULL << 27))
-#define RL_MUNMAP                               (RL_GENERATED | (0x0000000000000001ULL << 28))
-#define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 29))
-#define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 30))
-#define RL_PTRACE_ATTACH                        (RL_GENERATED | (0x0000000000000001ULL << 31))
-#define RL_GENERATED_DISC                       (RL_GENERATED | (0x0000000000000001ULL << 32))
+#define RL_SETUID                               (RL_GENERATED | (0x0000000000000001ULL << 22))
+#define RL_SETGID                               (RL_GENERATED | (0x0000000000000001ULL << 23))
+#define RL_SH_ATTACH                            (RL_GENERATED | (0x0000000000000001ULL << 24))
+#define RL_SH_CREATE                            (RL_GENERATED | (0x0000000000000001ULL << 25))
+#define RL_FILE_LOCK                            (RL_GENERATED | (0x0000000000000001ULL << 26))
+#define RL_SPLICE_OUT                           (RL_GENERATED | (0x0000000000000001ULL << 27))
+#define RL_EXEC_TASK                            (RL_GENERATED | (0x0000000000000001ULL << 28))
+#define RL_PTRACE_ATTACH                        (RL_GENERATED | (0x0000000000000001ULL << 29))
+#define RL_GENERATED_DISC                       (RL_GENERATED | (0x0000000000000001ULL << 30))
 /* no more than 51!!!! */
 
 /* USED SUBTYPES */
@@ -126,12 +124,11 @@
 #define RL_LOG                                  (RL_USED        | (0x0000000000000001ULL << 15))
 #define RL_PERM                                 (RL_USED        | (0x0000000000000001ULL << 16))
 #define RL_GETGID                               (RL_USED        | (0x0000000000000001ULL << 17))
-#define RL_SPLICE_IN                            (RL_USED        | (0x0000000000000001ULL << 18))
-#define RL_MMAP                                 (RL_USED        | (0x0000000000000001ULL << 19))
-#define RL_MMAP_PRIVATE                                         (RL_USED        | (0x0000000000000001ULL << 20))
-#define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 21))
-#define RL_PTRACE_READ                          (RL_USED        | (0x0000000000000001ULL << 22))
-#define RL_USED_DISC                            (RL_USED        | (0x0000000000000001ULL << 23))
+#define RL_MMAP                                 (RL_USED        | (0x0000000000000001ULL << 18))
+#define RL_MMAP_PRIVATE                         (RL_USED        | (0x0000000000000001ULL << 19))
+#define RL_LOAD_FILE                            (RL_USED        | (0x0000000000000001ULL << 20))
+#define RL_PTRACE_READ                          (RL_USED        | (0x0000000000000001ULL << 21))
+#define RL_USED_DISC                            (RL_USED        | (0x0000000000000001ULL << 22))
 /* no more than 51!!!! */
 
 /* INFORMED SUBTYPES */
@@ -224,7 +221,7 @@
 					 || val == RL_TERMINATE_PROC \
 					 || val == RL_FREED)
 
-static inline bool prov_has_uidgid(uint64_t type)
+static inline uint8_t prov_has_uidgid(uint64_t type)
 {
 	switch (type) {
 	case ENT_PROC:
@@ -236,12 +233,12 @@ static inline bool prov_has_uidgid(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-		return true;
-	default: return false;
+		return 1;
+	default: return 0;
 	}
 }
 
-static inline bool prov_is_inode(uint64_t type)
+static inline uint8_t prov_is_inode(uint64_t type)
 {
 	switch (type) {
 	case ENT_INODE_UNKNOWN:
@@ -252,12 +249,12 @@ static inline bool prov_is_inode(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-		return true;
-	default: return false;
+		return 1;
+	default: return 0;
 	}
 }
 
-static inline bool prov_has_secid(uint64_t type)
+static inline uint8_t prov_has_secid(uint64_t type)
 {
 	switch (type) {
 	case ENT_PROC:
@@ -269,8 +266,8 @@ static inline bool prov_has_secid(uint64_t type)
 	case ENT_INODE_BLOCK:
 	case ENT_INODE_PIPE:
 	case ENT_INODE_SOCKET:
-		return true;
-	default: return false;
+		return 1;
+	default: return 0;
 	}
 }
 

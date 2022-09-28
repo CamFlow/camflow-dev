@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -54,6 +55,9 @@ static __always_inline int __update_version(const uint64_t type,
 {
 	union prov_elt old_prov;
 	int rc = 0;
+
+	if (!prov_policy.should_be_versioned)
+		return 0;
 
 	if (!provenance_has_outgoing(prov) && prov_policy.should_compress_node)
 		return 0;
@@ -168,14 +172,17 @@ static __always_inline int record_terminate(uint64_t type,
 	if (filter_node(prov_entry(prov)))
 		return 0;
 
-	__memcpy_ss(&old_prov, sizeof(union prov_elt),
-		    prov_elt(prov), sizeof(union prov_elt));
-	node_identifier(prov_elt(prov)).version++;
-	clear_recorded(prov_elt(prov));
+	if (prov_policy.should_be_versioned) {
+		__memcpy_ss(&old_prov, sizeof(union prov_elt),
+			    prov_elt(prov), sizeof(union prov_elt));
+		node_identifier(prov_elt(prov)).version++;
+		clear_recorded(prov_elt(prov));
 
-	rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
-	// Newer version now has no outgoing edge.
-	clear_has_outgoing(prov_elt(prov));
+		rc = __write_relation(type, &old_prov, prov_elt(prov), NULL, 0);
+		// Newer version now has no outgoing edge.
+		clear_has_outgoing(prov_elt(prov));
+	} else
+		rc = __write_relation(type, prov_elt(prov), prov_elt(prov), NULL, 0);
 	return rc;
 }
 
@@ -214,6 +221,7 @@ static __always_inline int record_node_name(struct provenance *node,
 	if (provenance_is_opaque(prov_elt(node)))
 		return 0;
 
+	// logic here prevent the first node to have an associated name
 	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
 	    || !provenance_is_recorded(prov_elt(node)))
 		return 0;
@@ -226,6 +234,11 @@ static __always_inline int record_node_name(struct provenance *node,
 	fname_prov->file_name_info.length =
 		strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
+	__memcpy_ss(&get_prov_name_id(prov_elt(node)),
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(fname_prov),
+		    sizeof(union prov_identifier));
+
 	// Here we record the relation.
 	spin_lock(prov_lock(node));
 	rc = record_relation(RL_NAMED, fname_prov,
@@ -234,6 +247,24 @@ static __always_inline int record_node_name(struct provenance *node,
 	spin_unlock(prov_lock(node));
 	free_long_provenance(fname_prov);
 	return rc;
+}
+
+static __always_inline void copy_cred_name(struct provenance *cred,
+					   struct provenance *prov)
+{
+	// name already recorded for this object
+	if (provenance_is_name_recorded(prov_elt(prov)))
+		return;
+
+	// name has not be set so nothing to copy
+	if (!provenance_is_name_recorded(prov_elt(cred)))
+		return;
+
+	__memcpy_ss(&get_prov_name_id(prov_elt(prov)),
+		    sizeof(union prov_identifier),
+		    &get_prov_name_id(prov_elt(cred)),
+		    sizeof(union prov_identifier));
+	set_name_recorded(prov_elt(prov));
 }
 
 static __always_inline int record_kernel_link(prov_entry_t *node)
@@ -306,6 +337,9 @@ static __always_inline int uses(const uint64_t type,
 	if (!should_record_relation(
 		    type, prov_entry(entity), prov_entry(activity)))
 		return 0;
+
+
+	copy_cred_name(activity_mem, activity);
 
 	rc = record_relation(type, prov_entry(entity),
 			     prov_entry(activity), file, flags);
@@ -430,6 +464,8 @@ static __always_inline int generates(const uint64_t type,
 	if (!should_record_relation(
 		    type, prov_entry(activity), prov_entry(entity)))
 		return 0;
+
+	copy_cred_name(activity_mem, activity);
 
 	rc = current_update_shst(activity_mem, true);
 	if (rc < 0)

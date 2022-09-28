@@ -34,8 +34,6 @@ machine -> task[fontsize = 8,label = ran_on]
 
 inode -> task[fontsize = 8,label = perm_check]
 
-task -> inode[fontsize = 8,label = munmap]
-
 packet_content[fontsize = 8,label = packet_content,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 packet[fontsize = 8,label = packet,shape = ellipse, fillcolor="#fffacd", style = filled]
