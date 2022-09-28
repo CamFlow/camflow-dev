@@ -48,7 +48,7 @@ prepare_smatch:
 prepare_sparse:
 	mkdir -p ~/build
 	cd ~/build && git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git
-	cd ~/build/sparse && git checkout v0.6.1
+	cd ~/build/sparse && git checkout v0.6.4
 	cd ~/build/sparse && make
 	cd ~/build/sparse && sudo make install
 
