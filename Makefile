@@ -13,6 +13,13 @@ prepare_kernel_raw:
 	cd ~/build && mkdir -p pristine
 	cd ~/build && cp -r ./linux-stable ./pristine
 
+test_patch_rolling:
+	mkdir -p ~/build/tmp
+	cd ~/build/tmp && git clone -b linux-rolling-stable --single-branch --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+	cd ~/build/tmp/linux-stable && $(MAKE) mrproper
+	cp patches/0001-camflow.patch ~/build/tmp
+	cd ~/build/tmp/linux-stable && git apply ../0001-camflow.patch
+
 finalize:
 	cd ~/build/linux-stable && sed -i -e "s/EXTRAVERSION =/EXTRAVERSION = camflow$(lsm-version)/g" Makefile
 
