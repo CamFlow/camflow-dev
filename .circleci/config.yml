@@ -506,7 +506,7 @@ workflows:
             - coccinelle
       - release:
           requires:
-            - patch
+            - test_patch_rolling
           filters:
             tags:
               ignore: /test/
