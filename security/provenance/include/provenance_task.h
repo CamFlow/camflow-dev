@@ -388,6 +388,7 @@ static inline struct provenance *get_task_provenance(bool link)
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+	security_task_getsecid_obj(current, &(prov_elt(tprov)->task_info.secid));
 	update_task_perf(current, tprov);
 	update_task_namespaces(current, tprov);
 	if (!provenance_is_opaque(prov_elt(tprov)) && link)
