@@ -1083,10 +1083,22 @@
   CC      /home/circleci/build/linux-stable/tools/objtool/librbtree.o
   LD      /home/circleci/build/linux-stable/tools/objtool/objtool-in.o
   LINK    /home/circleci/build/linux-stable/tools/objtool/objtool
+  ASN.1   security/keys/trusted-keys/tpm2key.asn1.[ch]
+  CC      security/keys/trusted-keys/trusted_core.o
+  CHECK   security/keys/trusted-keys/trusted_core.c
+  CC      security/keys/trusted-keys/trusted_tpm1.o
+  CHECK   security/keys/trusted-keys/trusted_tpm1.c
+  CC      security/keys/trusted-keys/trusted_tpm2.o
+  CHECK   security/keys/trusted-keys/trusted_tpm2.c
+  CC      security/keys/trusted-keys/tpm2key.asn1.o
+  CHECK   security/keys/trusted-keys/tpm2key.asn1.c
+  AR      security/keys/trusted-keys/built-in.a
   CC      security/keys/encrypted-keys/encrypted.o
   CHECK   security/keys/encrypted-keys/encrypted.c
   CC      security/keys/encrypted-keys/ecryptfs_format.o
   CHECK   security/keys/encrypted-keys/ecryptfs_format.c
+  CC      security/keys/encrypted-keys/masterkey_trusted.o
+  CHECK   security/keys/encrypted-keys/masterkey_trusted.c
   AR      security/keys/encrypted-keys/built-in.a
   CC      security/keys/gc.o
   CHECK   security/keys/gc.c
@@ -1263,6 +1275,8 @@ security/provenance/fs.c:953 prov_read_policy_hash() error: crypto_shash_update(
   CHECK   security/integrity/digsig_asymmetric.c
   CC      security/integrity/platform_certs/platform_keyring.o
   CHECK   security/integrity/platform_certs/platform_keyring.c
+  CC      security/integrity/platform_certs/machine_keyring.o
+  CHECK   security/integrity/platform_certs/machine_keyring.c
   CC      security/integrity/platform_certs/efi_parser.o
   CHECK   security/integrity/platform_certs/efi_parser.c
   CC      security/integrity/platform_certs/load_uefi.o
