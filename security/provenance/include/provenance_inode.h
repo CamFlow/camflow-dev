@@ -157,8 +157,15 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
 	char *ptr;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) ||
-	    !provenance_is_recorded(prov_elt(prov)))
+	// we already recorded the name
+	if (provenance_is_name_recorded(prov_elt(prov)))
+		return 0;
+
+	// the corresponding node isn't tracked, recorded, and we are not tracking
+	// everything
+	if (!provenance_is_recorded(prov_elt(prov))
+	    && !provenance_is_tracked(prov_elt(prov))
+	    && !prov_policy.prov_all)
 		return 0;
 
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
@@ -193,9 +200,17 @@ static inline int record_inode_name(struct inode *inode,
 	struct dentry *dentry;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(prov))
-	    || !provenance_is_recorded(prov_elt(prov)))
+	// we already recorded the name
+	if (provenance_is_name_recorded(prov_elt(prov)))
 		return 0;
+
+	// the corresponding node isn't tracked, recorded, and we are not tracking
+	// everything
+	if (!provenance_is_recorded(prov_elt(prov))
+	    && !provenance_is_tracked(prov_elt(prov))
+	    && !prov_policy.prov_all)
+		return 0;
+
 	dentry = d_find_alias(inode);
 	// We did not find a dentry, not sure if it should ever happen.
 	if (!dentry)

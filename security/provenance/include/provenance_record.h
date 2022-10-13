@@ -221,11 +221,21 @@ static __always_inline int record_node_name(struct provenance *node,
 	if (provenance_is_opaque(prov_elt(node)))
 		return 0;
 
-	// logic here prevent the first node to have an associated name
-	if ((provenance_is_name_recorded(prov_elt(node)) && !force)
-	    || !provenance_is_recorded(prov_elt(node)))
+	if (force)
+		goto record_name;
+
+	// we already recorded the name
+	if (provenance_is_name_recorded(prov_elt(node)))
 		return 0;
 
+	// the corresponding node isn't tracked, recorded, and we are not tracking
+	// everything
+	if (!provenance_is_recorded(prov_elt(node))
+	    && !provenance_is_tracked(prov_elt(node))
+	    && !prov_policy.prov_all)
+		return 0;
+
+record_name:
 	fname_prov = alloc_long_provenance(ENT_PATH, djb2_hash(name));
 	if (!fname_prov)
 		return -ENOMEM;
