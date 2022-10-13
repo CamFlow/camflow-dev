@@ -82,7 +82,7 @@ security/provenance/include/provenance.h has no obvious style problems and is re
 ----------------------------------------------
 security/provenance/include/provenance_inode.h
 ----------------------------------------------
-total: 0 errors, 0 warnings, 608 lines checked
+total: 0 errors, 0 warnings, 623 lines checked
 
 security/provenance/include/provenance_inode.h has no obvious style problems and is ready for submission.
 ------------------------------------------------
@@ -118,7 +118,7 @@ security/provenance/include/provenance_query.h has no obvious style problems and
 -----------------------------------------------
 security/provenance/include/provenance_record.h
 -----------------------------------------------
-total: 0 errors, 0 warnings, 619 lines checked
+total: 0 errors, 0 warnings, 629 lines checked
 
 security/provenance/include/provenance_record.h has no obvious style problems and is ready for submission.
 ----------------------------------------------
@@ -130,7 +130,7 @@ security/provenance/include/provenance_relay.h has no obvious style problems and
 ---------------------------------------------
 security/provenance/include/provenance_task.h
 ---------------------------------------------
-total: 0 errors, 0 warnings, 593 lines checked
+total: 0 errors, 0 warnings, 598 lines checked
 
 security/provenance/include/provenance_task.h has no obvious style problems and is ready for submission.
 ----------------------------------------------
