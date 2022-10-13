@@ -131,8 +131,11 @@ static inline uint32_t get_pidns(struct task_struct *task)
 	struct pid_namespace *ns;
 
 	ns = task_active_pid_ns(task);
-	if (ns)
+	if (ns) {
+		ns = get_pid_ns(ns);
 		id = ns->ns.inum;
+		put_pid_ns(ns);
+	}
 	return id;
 }
 
