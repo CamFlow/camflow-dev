@@ -314,6 +314,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 		return -ENOMEM;
 
 	update_prov_config(&(msg.prov), msg.op, cprov);
+	record_cred_name(current, cprov);
 	return sizeof(struct prov_process_config);
 }
 
