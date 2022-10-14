@@ -302,9 +302,9 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = provenance_cred_from_task(current);
+	struct provenance *cprov = provenance_cred_from_task(current);
 
-	if (!prov)
+	if (!cprov)
 		return -EINVAL;
 
 	if (count < sizeof(struct prov_process_config))
@@ -313,7 +313,7 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
 		return -ENOMEM;
 
-	update_prov_config(&(msg.prov), msg.op, prov);
+	update_prov_config(&(msg.prov), msg.op, cprov);
 	return sizeof(struct prov_process_config);
 }
 
@@ -322,7 +322,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 {
 	struct provenance *cprov = provenance_cred_from_task(current);
 
-	if (count < sizeof(struct task_prov_struct))
+	if (count < sizeof(union prov_elt))
 		return -ENOMEM;
 
 	spin_lock(prov_lock(cprov));

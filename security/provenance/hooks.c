@@ -121,6 +121,8 @@ static int provenance_task_alloc(struct task_struct *task,
 		if (cred != NULL) {
 			cprov = provenance_cred(cred);
 			if (tprov != NULL &&  cprov != NULL) {
+				if (provenance_is_tracked(prov_elt(cprov)))
+					set_tracked(prov_elt(tprov));
 				record_cred_name(current, cprov);
 				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
 				informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
@@ -311,6 +313,8 @@ static int provenance_cred_prepare(struct cred *new,
 		return 0;
 
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
+	if (provenance_is_tracked(prov_elt(old_prov)))
+		set_tracked(prov_elt(nprov));
 	if (current != NULL) {
 		tprov = provenance_task(current);
 		if (tprov != NULL)
