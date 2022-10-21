@@ -24,7 +24,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#370: FILE: security/provenance/fs.c:370:
+#371: FILE: security/provenance/fs.c:371:
 +#define declare_write_filter_fcn(fcn_name, filter)		  \
 +	static ssize_t fcn_name(struct file *file,		  \
 +				const char __user *buf,		  \
@@ -35,7 +35,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#379: FILE: security/provenance/fs.c:379:
+#380: FILE: security/provenance/fs.c:380:
 +#define declare_read_filter_fcn(fcn_name, filter)		\
 +	static ssize_t fcn_name(struct file *filp,		\
 +				char __user *buf,		\
@@ -46,7 +46,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#583: FILE: security/provenance/fs.c:583:
+#584: FILE: security/provenance/fs.c:584:
 +#define declare_write_ipv4_filter_fcn(fcn_name, filter)		       \
 +	static ssize_t fcn_name(struct file *file,		       \
 +				const char __user *buf,		       \
@@ -57,7 +57,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#592: FILE: security/provenance/fs.c:592:
+#593: FILE: security/provenance/fs.c:593:
 +#define declare_reader_ipv4_filter_fcn(fcn_name, filter)	      \
 +	static ssize_t fcn_name(struct file *filp,		      \
 +				char __user *buf,		      \
@@ -68,7 +68,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#653: FILE: security/provenance/fs.c:653:
+#654: FILE: security/provenance/fs.c:654:
 +#define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
 +	static ssize_t function_name(struct file *file,						  \
 +				     const char __user *buf,					  \
@@ -93,21 +93,21 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
-#660: FILE: security/provenance/fs.c:660:
+#661: FILE: security/provenance/fs.c:661:
 +		if (count < sizeof(struct info))						  \
 +		return -ENOMEM;									  \
 
 WARNING:SPACING: space prohibited between function name and open parenthesis '('
-#662: FILE: security/provenance/fs.c:662:
+#663: FILE: security/provenance/fs.c:663:
 +		s = kzalloc (sizeof(struct filters), GFP_KERNEL);				  \
 
 WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
-#663: FILE: security/provenance/fs.c:663:
+#664: FILE: security/provenance/fs.c:664:
 +		if (!s)										  \
 +		return -ENOMEM;									  \
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#676: FILE: security/provenance/fs.c:676:
+#677: FILE: security/provenance/fs.c:677:
 +#define declare_generic_filter_read(function_name, filters, info)			    \
 +	static ssize_t function_name(struct file *filp,					    \
 +				     char __user *buf,					    \
@@ -131,7 +131,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +	}
 
 WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be avoided
-#870: FILE: security/provenance/fs.c:870:
+#871: FILE: security/provenance/fs.c:871:
 +#define hash_filters(filters, filters_type, tmp, tmp_type)						 \
 +	do {												 \
 +		list_for_each_safe(listentry, listtmp, &filters) {					 \
@@ -145,7 +145,7 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		}											 \
 +	} while (0)
 
-total: 0 errors, 12 warnings, 1142 lines checked
+total: 0 errors, 12 warnings, 1143 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
@@ -154,7 +154,7 @@ security/provenance/fs.c has style problems, please review.
 ---------------------------
 security/provenance/hooks.c
 ---------------------------
-total: 0 errors, 0 warnings, 2994 lines checked
+total: 0 errors, 0 warnings, 2998 lines checked
 
 security/provenance/hooks.c has no obvious style problems and is ready for submission.
 -----------------------------
