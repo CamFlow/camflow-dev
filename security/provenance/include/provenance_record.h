@@ -244,6 +244,7 @@ record_name:
 	fname_prov->file_name_info.length =
 		strnlen(fname_prov->file_name_info.name, PATH_MAX);
 
+	// record name associated with the object
 	__memcpy_ss(&get_prov_name_id(prov_elt(node)),
 		    sizeof(union prov_identifier),
 		    &get_prov_identifier(fname_prov),
