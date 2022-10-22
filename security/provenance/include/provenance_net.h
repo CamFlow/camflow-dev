@@ -356,11 +356,11 @@ static __always_inline int record_address(struct sockaddr *address,
 	__memcpy_ss(&(addr_info->address_info.addr),
 		    sizeof(struct sockaddr_storage), address, addrlen);
 
-		// record name associated with the object
-		__memcpy_ss(&get_prov_name_id(prov_elt(prov)),
-			    sizeof(union prov_identifier),
-			    &get_prov_identifier(addr_info),
-			    sizeof(union prov_identifier));
+	// record name associated with the object
+	__memcpy_ss(&get_prov_name_id(prov_elt(prov)),
+		    sizeof(union prov_identifier),
+		    &get_prov_identifier(addr_info),
+		    sizeof(union prov_identifier));
 
 	rc = record_relation(RL_ADDRESSED, addr_info,
 			     prov_entry(prov), NULL, 0);
