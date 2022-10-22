@@ -336,15 +336,8 @@ static __always_inline int record_address(struct sockaddr *address,
 	union long_prov_elt *addr_info;
 	int rc = 0;
 
-	// we already recorded the name
-	if (provenance_is_name_recorded(prov_elt(prov)))
-		return 0;
-
-	// the corresponding node isn't tracked, recorded, and we are not tracking
-	// everything
-	if (!provenance_is_recorded(prov_elt(prov))
-	    && !provenance_is_tracked(prov_elt(prov))
-	    && !prov_policy.prov_all)
+	if (provenance_is_name_recorded(prov_elt(prov))
+	    || !provenance_is_recorded(prov_elt(prov)))
 		return 0;
 
 	addr_info = alloc_long_provenance(ENT_ADDR, 0);
@@ -355,12 +348,6 @@ static __always_inline int record_address(struct sockaddr *address,
 	addr_info->address_info.length = addrlen;
 	__memcpy_ss(&(addr_info->address_info.addr),
 		    sizeof(struct sockaddr_storage), address, addrlen);
-
-	// record name associated with the object
-	__memcpy_ss(&get_prov_name_id(prov_elt(prov)),
-		    sizeof(union prov_identifier),
-		    &get_prov_identifier(addr_info),
-		    sizeof(union prov_identifier));
 
 	rc = record_relation(RL_ADDRESSED, addr_info,
 			     prov_entry(prov), NULL, 0);
