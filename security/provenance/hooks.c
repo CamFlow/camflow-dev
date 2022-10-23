@@ -1421,6 +1421,14 @@ static int provenance_file_open(struct file *file)
 	tprov = get_task_provenance(true);
 	iprov = get_file_provenance(file, true);
 
+	if (provenance_is_tracked(prov_elt(cprov))
+	    || provenance_is_tracked(prov_elt(tprov))) {
+		set_tracked(prov_elt(iprov));
+		record_inode_name(file_inode(file), iprov);
+	} else if (prov_policy.prov_all) {
+		record_inode_name(file_inode(file), iprov);
+	}
+
 	if (!iprov)
 		return -ENOMEM;
 	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
