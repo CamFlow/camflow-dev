@@ -55,7 +55,7 @@
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
 
-## v0.8.1
+## v0.9.0
 ```
 - Associating security context to task.
 - Remove support for better flow tracking introduce in patch 0.3.3 to ease maintenance.
