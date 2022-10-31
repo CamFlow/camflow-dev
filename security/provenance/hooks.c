@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -120,7 +121,9 @@ static int provenance_task_alloc(struct task_struct *task,
 		if (cred != NULL) {
 			cprov = provenance_cred(cred);
 			if (tprov != NULL &&  cprov != NULL) {
-				record_task_name(current, cprov);
+				if (provenance_is_tracked(prov_elt(cprov)))
+					set_tracked(prov_elt(tprov));
+				record_cred_name(current, cprov);
 				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
 				informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
 			}
@@ -310,13 +313,15 @@ static int provenance_cred_prepare(struct cred *new,
 		return 0;
 
 	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
+	if (provenance_is_tracked(prov_elt(old_prov)))
+		set_tracked(prov_elt(nprov));
 	if (current != NULL) {
 		tprov = provenance_task(current);
 		if (tprov != NULL)
 			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
 	}
 	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
-	record_task_name(current, nprov);
+	record_cred_name(current, nprov);
 	return rc;
 }
 
@@ -1337,54 +1342,6 @@ out:
 	return rc;
 }
 
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-/*!
- * @brief Record provenance when file_splice_pipe_to_pipe hook is triggered
- * (splice system call).
- *
- * Record provenance relation RL_SPLICE by calling "derives" function.
- * Information flows from one pipe @in to another pipe @out.
- * Fail if either file inode provenance does not exist.
- * @param in Information source file.
- * @param out Information drain file.
- * @return 0 if no error occurred; -ENOMEM if either end of the file provenance
- * entry is NULL; Other error code inherited from derives function.
- *
- */
-static int provenance_file_splice_pipe_to_pipe(struct file *in,
-					       struct file *out)
-{
-	struct provenance *cprov;
-	struct provenance *tprov;
-	struct provenance *inprov;
-	struct provenance *outprov;
-	unsigned long irqflags;
-	int rc = 0;
-
-	if (!prov_policy.prov_enabled)
-		return 0;
-
-	cprov = get_cred_provenance();
-	tprov = get_task_provenance(true);
-	inprov = get_file_provenance(in, true);
-	outprov = get_file_provenance(out, true);
-
-	if (!inprov || !outprov)
-		return -ENOMEM;
-
-	spin_lock_irqsave_nested(prov_lock(inprov), irqflags, PROVENANCE_LOCK_INODE);
-	spin_lock_nested(prov_lock(outprov), PROVENANCE_LOCK_INODE);
-	rc = uses(RL_SPLICE_IN, inprov, tprov, cprov, NULL, 0);
-	if (rc < 0)
-		goto out;
-	rc = generates(RL_SPLICE_OUT, cprov, tprov, outprov, NULL, 0);
-out:
-	spin_unlock(prov_lock(outprov));
-	spin_unlock_irqrestore(prov_lock(inprov), irqflags);
-	return rc;
-}
-#endif
-
 static int provenance_kernel_read_file(struct file *file,
 				       enum kernel_read_file_id id,
 				       bool contents)
@@ -1463,6 +1420,13 @@ static int provenance_file_open(struct file *file)
 	cprov = get_cred_provenance();
 	tprov = get_task_provenance(true);
 	iprov = get_file_provenance(file, true);
+
+	if (provenance_is_tracked(prov_elt(cprov))
+	    || provenance_is_tracked(prov_elt(tprov))) {
+		set_tracked(prov_elt(iprov));
+		record_inode_name(file_inode(file), iprov);
+	} else if (prov_policy.prov_all)
+		record_inode_name(file_inode(file), iprov);
 
 	if (!iprov)
 		return -ENOMEM;
@@ -1647,56 +1611,6 @@ out:
 	return rc;
 }
 
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-/*!
- * @brief Record provenance when mmap_munmap hook is triggered.
- *
- * This hook is triggered when a file is unmmap'ed.
- * We obtain the provenance entry of the mmap'ed file, and if it shows that the
- * mmap'ed file is shared based on the flags,
- * record provenance relation RL_MUNMAP by calling "derives" function.
- * Information flows from cred of the process that unmmaps the file to the
- * mmap'ed file.
- * Note that if the file to be unmmap'ed is private, the provenance of the
- * mmap'ed file is short-lived and thus no longer exists.
- * @param mm Unused parameter.
- * @param vma Virtual memory of the calling process.
- * @param start Unused parameter.
- * @param end Unused parameter.
- *
- */
-static void provenance_mmap_munmap(struct mm_struct *mm,
-				   struct vm_area_struct *vma,
-				   unsigned long start,
-				   unsigned long end)
-{
-	struct provenance *cprov;
-	struct provenance *tprov;
-	struct provenance *iprov;
-	struct file *mmapf;
-	unsigned long irqflags;
-	vm_flags_t flags = vma->vm_flags;
-
-	if (!prov_policy.prov_enabled)
-		return;
-
-	if (vm_mayshare(flags)) {       // It is a shared mmap.
-		mmapf = vma->vm_file;
-		if (mmapf) {
-			cprov = get_cred_provenance();
-			tprov = get_task_provenance(true);
-			iprov = get_file_provenance(mmapf, false);
-			spin_lock_irqsave_nested(prov_lock(cprov),
-						 irqflags, PROVENANCE_LOCK_PROC);
-			spin_lock_nested(prov_lock(iprov), PROVENANCE_LOCK_INODE);
-			generates(RL_MUNMAP, cprov, tprov, iprov, mmapf, flags);
-			spin_unlock(prov_lock(iprov));
-			spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-		}
-	}
-}
-#endif
-
 /*!
  * @brief Record provenance when file_ioctl hook is triggered.
  *
@@ -1876,28 +1790,6 @@ static int provenance_msg_queue_msgsnd(struct kern_ipc_perm *msq,
 	return __mq_msgsnd(msg);
 }
 
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-
-/*!
- * @brief Record provenance when mq_timedsend hook is triggered.
- *
- * This function simply calls the helper function __mq_msgsnd.
- * @param inode Unused parameter.
- * @param msg The message to be enqueued.
- * @param ts Unused parameter.
- * @return 0 if permission is granted. Other error codes inherited from
- * __mq_msgsnd function.
- *
- */
-static int provenance_mq_timedsend(struct inode *inode, struct msg_msg *msg,
-				   struct timespec64 *ts)
-{
-	if (!prov_policy.prov_enabled)
-		return 0;
-	return __mq_msgsnd(msg);
-}
-#endif
-
 /*!
  * @brief Helper function for two security hooks: msg_queue_msgrcv and
  * mq_timedreceive.
@@ -1967,37 +1859,6 @@ static int provenance_msg_queue_msgrcv(struct kern_ipc_perm *msq,
 
 	return __mq_msgrcv(cprov, tprov, msg);
 }
-
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-
-/*!
- * @brief Record provenance when mq_timedreceive hook is triggered.
- *
- * Current process will be receiving the message.
- * We simply calls the helper function __mq_msgrcv to record the information
- * flow.
- * @param inode Unused parameter.
- * @param msg The message destination.
- * @param ts Unused parameter.
- * @return 0 if permission is granted. Other error codes inherited from
- * __mq_msgrcv function.
- *
- */
-static int provenance_mq_timedreceive(struct inode *inode, struct msg_msg *msg,
-				      struct timespec64 *ts)
-{
-	struct provenance *cprov;
-	struct provenance *tprov;
-
-	if (!prov_policy.prov_enabled)
-		return 0;
-
-	cprov = get_cred_provenance();
-	tprov = get_task_provenance(false);
-
-	return __mq_msgrcv(cprov, tprov, msg);
-}
-#endif
 
 /*!
  * @brief Record provenance when shm_alloc_security hook is triggered.
@@ -2119,44 +1980,6 @@ static int provenance_shm_shmat(struct kern_ipc_perm *shp, char __user *shmaddr,
 	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
 	return rc;
 }
-
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-/*!
- * @brief Record provenance when shm_shmdt hook is triggered.
- *
- * This hook is triggered when detaching the shared memory segment from the
- * address space of the calling process.
- * The to-be-detached segment must be currently attached with shmaddr equal to
- * the value returned by the attaching shmat() call.
- * Record provenance relation RL_SHMDT by calling "generates" function.
- * Information flows from the calling process's cred to the process, and
- * eventually to the shared memory.
- * @param shp The shared memory structure to be modified.
- *
- */
-static void provenance_shm_shmdt(struct kern_ipc_perm *shp)
-{
-	struct provenance *cprov;
-	struct provenance *tprov;
-	struct provenance *sprov;
-	unsigned long irqflags;
-
-	if (!prov_policy.prov_enabled)
-		return;
-
-	cprov = get_cred_provenance();
-	tprov = get_task_provenance(true);
-	sprov = provenance_ipc(shp);
-
-	if (!sprov)
-		return;
-	spin_lock_irqsave_nested(prov_lock(cprov), irqflags, PROVENANCE_LOCK_PROC);
-	spin_lock_nested(prov_lock(sprov), PROVENANCE_LOCK_SHM);
-	generates(RL_SHMDT, cprov, tprov, sprov, NULL, 0);
-	spin_unlock(prov_lock(sprov));
-	spin_unlock_irqrestore(prov_lock(cprov), irqflags);
-}
-#endif
 
 /*!
  * @brief Record provenance when sk_alloc_security hook is triggered.
@@ -2509,15 +2332,9 @@ out:
  * from generates and derives function.
  *
  */
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-static int provenance_socket_sendmsg_always(struct socket *sock,
-					    struct msghdr *msg,
-					    int size)
-#else
 static int provenance_socket_sendmsg(struct socket *sock,
 				     struct msghdr *msg,
 				     int size)
-#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	struct provenance *cprov;
 	struct provenance *tprov;
@@ -2585,17 +2402,10 @@ out:
  * inherited from uses and derives function.
  *
  */
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-static int provenance_socket_recvmsg_always(struct socket *sock,
-					    struct msghdr *msg,
-					    int size,
-					    int flags)
-#else
 static int provenance_socket_recvmsg(struct socket *sock,
 				     struct msghdr *msg,
 				     int size,
 				     int flags)
-#endif /* CONFIG_SECURITY_FLOW_FRIENDLY */
 {
 	struct provenance *cprov;
 	struct provenance *tprov;
@@ -2858,6 +2668,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
 	}
 	if (provenance_is_tracked(prov_elt(iprov)))
 		set_tracked(prov_elt(nprov));
+
 	return record_args(nprov, bprm);
 }
 
@@ -3013,17 +2824,11 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	/* file related hooks */
 	LSM_HOOK_INIT(file_permission,          provenance_file_permission),
 	LSM_HOOK_INIT(mmap_file,                provenance_mmap_file),
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(mmap_munmap,              provenance_mmap_munmap),
-#endif
 	LSM_HOOK_INIT(file_ioctl,               provenance_file_ioctl),
 	LSM_HOOK_INIT(file_open,                provenance_file_open),
 	LSM_HOOK_INIT(file_receive,             provenance_file_receive),
 	LSM_HOOK_INIT(file_lock,                provenance_file_lock),
 	LSM_HOOK_INIT(file_send_sigiotask,      provenance_file_send_sigiotask),
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(file_splice_pipe_to_pipe, provenance_file_splice_pipe_to_pipe),
-#endif
 	LSM_HOOK_INIT(kernel_read_file,         provenance_kernel_read_file),
 
 	/* msg related hooks */
@@ -3036,9 +2841,6 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(shm_alloc_security,       provenance_shm_alloc_security),
 	LSM_HOOK_INIT(shm_free_security,        provenance_shm_free_security),
 	LSM_HOOK_INIT(shm_shmat,                provenance_shm_shmat),
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(shm_shmdt,                provenance_shm_shmdt),
-#endif
 
 	/* socket related hooks */
 	LSM_HOOK_INIT(sk_alloc_security,        provenance_sk_alloc_security),
@@ -3048,15 +2850,8 @@ static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
 	LSM_HOOK_INIT(socket_connect,           provenance_socket_connect),
 	LSM_HOOK_INIT(socket_listen,            provenance_socket_listen),
 	LSM_HOOK_INIT(socket_accept,            provenance_socket_accept),
-#ifdef CONFIG_SECURITY_FLOW_FRIENDLY
-	LSM_HOOK_INIT(socket_sendmsg_always,    provenance_socket_sendmsg_always),
-	LSM_HOOK_INIT(socket_recvmsg_always,    provenance_socket_recvmsg_always),
-	LSM_HOOK_INIT(mq_timedreceive,          provenance_mq_timedreceive),
-	LSM_HOOK_INIT(mq_timedsend,             provenance_mq_timedsend),
-#else   /* CONFIG_SECURITY_FLOW_FRIENDLY */
 	LSM_HOOK_INIT(socket_sendmsg,           provenance_socket_sendmsg),
 	LSM_HOOK_INIT(socket_recvmsg,           provenance_socket_recvmsg),
-#endif  /* CONFIG_SECURITY_FLOW_FRIENDLY */
 	LSM_HOOK_INIT(socket_sock_rcv_skb,      provenance_socket_sock_rcv_skb),
 	LSM_HOOK_INIT(unix_stream_connect,      provenance_unix_stream_connect),
 	LSM_HOOK_INIT(unix_may_send,            provenance_unix_may_send),
@@ -3101,6 +2896,7 @@ static void __init init_prov_policy(void)
 {
 	pr_info("Provenance: policy initialization started...");
 	prov_policy.should_duplicate = false;
+	prov_policy.should_be_versioned = true;
 	prov_policy.should_compress_node = true;
 	prov_policy.should_compress_edge = true;
 #ifdef CONFIG_SECURITY_PROVENANCE_WHOLE_SYSTEM

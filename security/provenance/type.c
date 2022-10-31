@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -41,13 +42,10 @@ static const char RL_STR_FILE_RCV[] = "file_rcv";                               
 static const char RL_STR_FILE_LOCK[] = "file_lock";                                                     // represent file lock operation
 static const char RL_STR_FILE_SIGIO[] = "file_sigio";                                                   // represent IO signal
 static const char RL_STR_VERSION[] = "version_entity";                                                  // connect version of entity object
-static const char RL_STR_MUNMAP[] = "munmap";                                                           // munmap operation
-static const char RL_STR_SHMDT[] = "shmdt";                                                             // shmdt operation
 static const char RL_STR_LINK[] = "link";                                                               // create a link
 static const char RL_STR_RENAME[] = "rename";                                                           // rename inode
 static const char RL_STR_UNLINK[] = "unlink";                                                           // delete a link
 static const char RL_STR_SYMLINK[] = "symlink";                                                         // create a symlink
-static const char RL_STR_SPLICE_IN[] = "splice_in";                                                     // pipe splice operation from in file
 static const char RL_STR_SPLICE_OUT[] = "splice_out";                                                   // pipe splice operation to out file
 static const char RL_STR_SETATTR[] = "setattr";                                                         // setattr operation (task -> iattr)
 static const char RL_STR_SETATTR_INODE[] = "setattr_inode";                                             // setattr operation (iattr -> inode)
@@ -193,10 +191,6 @@ const char *relation_str(uint64_t type)
 		return RL_STR_FILE_SIGIO;
 	case RL_VERSION:
 		return RL_STR_VERSION;
-	case RL_MUNMAP:
-		return RL_STR_MUNMAP;
-	case RL_SHMDT:
-		return RL_STR_SHMDT;
 	case RL_LINK:
 		return RL_STR_LINK;
 	case RL_RENAME:
@@ -207,8 +201,6 @@ const char *relation_str(uint64_t type)
 		return RL_STR_SYMLINK;
 	case RL_SPLICE_OUT:
 		return RL_STR_SPLICE_OUT;
-	case RL_SPLICE_IN:
-		return RL_STR_SPLICE_IN;
 	case RL_SETATTR:
 		return RL_STR_SETATTR;
 	case RL_SETATTR_INODE:
@@ -372,13 +364,10 @@ uint64_t relation_id(const char *str)
 	MATCH_AND_RETURN(str, RL_STR_FILE_LOCK, RL_FILE_LOCK);
 	MATCH_AND_RETURN(str, RL_STR_FILE_SIGIO, RL_FILE_SIGIO);
 	MATCH_AND_RETURN(str, RL_STR_VERSION, RL_VERSION);
-	MATCH_AND_RETURN(str, RL_STR_MUNMAP, RL_MUNMAP);
-	MATCH_AND_RETURN(str, RL_STR_SHMDT, RL_SHMDT);
 	MATCH_AND_RETURN(str, RL_STR_LINK, RL_LINK);
 	MATCH_AND_RETURN(str, RL_STR_RENAME, RL_RENAME);
 	MATCH_AND_RETURN(str, RL_STR_UNLINK, RL_UNLINK);
 	MATCH_AND_RETURN(str, RL_STR_SYMLINK, RL_SYMLINK);
-	MATCH_AND_RETURN(str, RL_STR_SPLICE_IN, RL_SPLICE_IN);
 	MATCH_AND_RETURN(str, RL_STR_SPLICE_OUT, RL_SPLICE_OUT);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR, RL_SETATTR);
 	MATCH_AND_RETURN(str, RL_STR_SETATTR_INODE, RL_SETATTR_INODE);

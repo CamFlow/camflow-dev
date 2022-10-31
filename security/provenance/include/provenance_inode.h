@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -56,6 +57,9 @@ static inline void update_inode_type(uint16_t mode, struct provenance *prov)
 	union prov_elt old_prov;
 	uint64_t type = ENT_INODE_UNKNOWN;
 	unsigned long irqflags;
+
+	if (!prov_policy.should_be_versioned)
+		return;
 
 	if (S_ISBLK(mode))
 		type = ENT_INODE_BLOCK;
@@ -153,8 +157,15 @@ static inline int record_inode_name_from_dentry(struct dentry *dentry,
 	char *ptr;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) ||
-	    !provenance_is_recorded(prov_elt(prov)))
+	// we already recorded the name
+	if (provenance_is_name_recorded(prov_elt(prov)))
+		return 0;
+
+	// the corresponding node isn't tracked, recorded, and we are not tracking
+	// everything
+	if (!provenance_is_recorded(prov_elt(prov))
+	    && !provenance_is_tracked(prov_elt(prov))
+	    && !prov_policy.prov_all)
 		return 0;
 
 	buffer = kcalloc(PATH_MAX, sizeof(char), GFP_ATOMIC);
@@ -189,9 +200,17 @@ static inline int record_inode_name(struct inode *inode,
 	struct dentry *dentry;
 	int rc;
 
-	if (provenance_is_name_recorded(prov_elt(prov))
-	    || !provenance_is_recorded(prov_elt(prov)))
+	// we already recorded the name
+	if (provenance_is_name_recorded(prov_elt(prov)))
 		return 0;
+
+	// the corresponding node isn't tracked, recorded, and we are not tracking
+	// everything
+	if (!provenance_is_recorded(prov_elt(prov))
+	    && !provenance_is_tracked(prov_elt(prov))
+	    && !prov_policy.prov_all)
+		return 0;
+
 	dentry = d_find_alias(inode);
 	// We did not find a dentry, not sure if it should ever happen.
 	if (!dentry)

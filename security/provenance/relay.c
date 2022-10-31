@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -46,7 +47,7 @@ void prov_flush(void)
 	relay_flush(long_prov_chan);
 }
 
-bool is_relay_full(struct rchan *chan)
+static bool __is_relay_full(struct rchan *chan)
 {
 	int ret;
 	int rc = 0;
@@ -135,7 +136,7 @@ static void __async_handle_boot_buffer(void *_buf, async_cookie_t cookie)
 		entry = list_entry(ele, struct boot_buffer, list);
 
 		// check if relay is full
-		if (is_relay_full(prov_chan)) {
+		if (__is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_boot_buffer,
 						NULL);
 			pr_info("Provenance: schedlued async task %llu.",
@@ -175,7 +176,7 @@ static void __async_handle_long_boot_buffer(void *_buf, async_cookie_t cookie)
 		entry = list_entry(ele, struct long_boot_buffer, list);
 
 		// check if relay is full
-		if (is_relay_full(prov_chan)) {
+		if (__is_relay_full(prov_chan)) {
 			cookie = async_schedule(__async_handle_long_boot_buffer,
 						NULL);
 			pr_info("Provenance: schedlued long async task %llu.",
@@ -211,12 +212,9 @@ bool relay_initialized;
  * is ready to be used.
  *
  */
-void write_boot_buffer(void)
+static void __write_boot_buffer(void)
 {
 	async_cookie_t cookie;
-
-	if (prov_machine_id == 0 || prov_boot_id == 0 || !relay_initialized)
-		return;
 
 	relay_ready = true;
 
@@ -332,25 +330,40 @@ void long_prov_write(union long_prov_elt *msg, size_t size)
  * @return 0 if no error occurred.
  *
  */
-static int __init relay_prov_init(void)
+int relay_prov_init(struct relay_conf *conf)
 {
-	prov_chan = relay_open(PROV_BASE_NAME, NULL, PROV_RELAY_BUFF_SIZE,
-			       PROV_NB_SUBBUF, &relay_callbacks, NULL);
+	if (relay_initialized) // cannot be initialized twice
+		return 0;
+
+	// set boot and machine IDs
+	prov_boot_id = conf->boot_id;
+	prov_machine_id = conf->machine_id;
+
+	// initializing relays
+	prov_chan = relay_open(PROV_BASE_NAME, NULL, prov_relay_size(conf->buff_exp),
+			       conf->subuf_nb, &relay_callbacks, NULL);
 	if (!prov_chan)
 		panic("Provenance: relay_open failure\n");
 
 	long_prov_chan = relay_open(LONG_PROV_BASE_NAME, NULL,
-				    PROV_RELAY_BUFF_SIZE,
-				    PROV_NB_SUBBUF,
+				    prov_relay_size(conf->buff_exp),
+				    conf->subuf_nb,
 				    &relay_callbacks,
 				    NULL);
 	if (!long_prov_chan)
 		panic("Provenance: relay_open failure\n");
 
-	relay_initialized = true;
 	init_prov_machine();
-	write_boot_buffer();
+	__write_boot_buffer();
+
+	// all good logging info
 	pr_info("Provenance: relay ready.\n");
+	pr_info("Provenance: boot_id %u", conf->boot_id);
+	pr_info("Provenance: machine_id %u", conf->machine_id);
+	pr_info("Provenance: buff_exp %u", conf->buff_exp);
+	pr_info("Provenance: subuf_nb %u", conf->subuf_nb);
+
+	relay_initialized = true;
+
 	return 0;
 }
-fs_initcall(relay_prov_init);

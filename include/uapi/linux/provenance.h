@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2020 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -22,7 +23,6 @@
 #endif
 #ifndef __KERNEL__
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -34,7 +34,7 @@
 #define str(s)          # s
 
 #define CAMFLOW_VERSION_MAJOR           0
-#define CAMFLOW_VERSION_MINOR           8
+#define CAMFLOW_VERSION_MINOR           9
 #define CAMFLOW_VERSION_PATCH           0
 #define CAMFLOW_VERSION_STR             "v"xstr (CAMFLOW_VERSION_MAJOR)	\
 	"."xstr (CAMFLOW_VERSION_MINOR)					\
@@ -51,6 +51,7 @@
 #define node_identifier(node)                   ((node)->node_info.identifier.node_id)
 #define relation_identifier(relation)           ((relation)->relation_info.identifier.relation_id)
 #define get_prov_identifier(node)               ((node)->node_info.identifier)
+#define get_prov_name_id(node)                  ((node)->node_info.name_id)
 #define packet_identifier(packet)               ((packet)->pck_info.identifier.packet_id)
 #define packet_info(packet)                                                                                     ((packet)->pck_info)
 #define node_secid(node)                        ((node)->node_info.secid)
@@ -144,7 +145,7 @@ union prov_identifier {
 
 
 #define basic_elements          union prov_identifier identifier; uint32_t epoch; uint32_t nepoch; uint32_t internal_flag; uint64_t jiffies; uint64_t taint
-#define shared_node_elements    uint64_t previous_id; uint32_t previous_version; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
+#define shared_node_elements    union prov_identifier name_id; uint64_t previous_id; uint32_t previous_version; uint64_t previous_type; uint32_t k_version; uint32_t secid; uint32_t uid; uint32_t gid; void *var_ptr
 
 struct msg_struct {
 	basic_elements;

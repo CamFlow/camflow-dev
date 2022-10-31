@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -25,11 +26,13 @@
 #include "provenance_query.h"
 #include "memcpy_ss.h"
 
-#define PROV_RELAY_BUFF_EXP 20
-#define PROV_RELAY_BUFF_SIZE ((1 << PROV_RELAY_BUFF_EXP) * sizeof(uint8_t))
-#define PROV_NB_SUBBUF 64
 #define PROV_INITIAL_BUFF_SIZE (1024 * 16)
 #define PROV_INITIAL_LONG_BUFF_SIZE 512
+
+#define prov_relay_size(exp) ((1 << exp) * sizeof(uint8_t))
+
+int relay_prov_init(struct relay_conf *conf);
+void prov_flush(void);
 
 struct boot_buffer {
 	struct list_head list;
@@ -40,10 +43,6 @@ struct long_boot_buffer {
 	struct list_head list;
 	union long_prov_elt msg;
 };
-
-void write_boot_buffer(void);
-bool is_relay_full(struct rchan *chan);
-void prov_flush(void);
 
 extern struct kmem_cache *boot_buffer_cache;
 extern spinlock_t lock_buffer;
@@ -96,6 +95,7 @@ static __always_inline void __write_node(prov_entry_t *node)
 	if (provenance_is_recorded(node) && !prov_policy.should_duplicate)
 		return;
 	tighten_identifier(&get_prov_identifier(node));
+	tighten_identifier(&get_prov_name_id(node));
 	set_recorded(node);
 	if (prov_type_is_long(node_type(node)))
 		long_prov_write(node, sizeof(union long_prov_elt));

@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -43,7 +44,7 @@ void init_prov_machine(void)
 		    PROV_COMMIT_MAX_LENGTH,
 		    CAMFLOW_COMMIT,
 		    strnlen(CAMFLOW_COMMIT,
-			    PROV_COMMIT_MAX_LENGTH));
+			    sizeof(CAMFLOW_COMMIT)));
 	prov_type(prov_machine) = AGT_MACHINE;
 	node_identifier(prov_machine).version = 1;
 	refresh_prov_machine();

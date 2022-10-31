@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -115,6 +116,14 @@ declare_file_operations(prov_all_ops, prov_write_all, prov_read_all);
 declare_read_flag_fcn(prov_read_written, prov_written);
 declare_file_operations(prov_written_ops, no_write, prov_read_written);
 
+declare_write_flag_fcn(prov_write_should_version,
+		       prov_policy.should_be_versioned);
+declare_read_flag_fcn(prov_read_should_version,
+		      prov_policy.should_be_versioned);
+declare_file_operations(prov_should_version_ops,
+			prov_write_should_version,
+			prov_read_should_version);
+
 declare_write_flag_fcn(prov_write_compress_node,
 		       prov_policy.should_compress_node);
 declare_read_flag_fcn(prov_read_compress_node,
@@ -137,29 +146,6 @@ declare_file_operations(prov_duplicate_ops,
 			prov_write_duplicate,
 			prov_read_duplicate);
 
-static ssize_t prov_write_machine_id(struct file *file, const char __user *buf,
-				     size_t count, loff_t *ppos)
-{
-	if (prov_machine_id != 0)   // it has already been set
-		return -EPERM;
-
-	if (!capable(CAP_AUDIT_CONTROL))
-		return -EPERM;
-
-	if (count < sizeof(uint32_t))
-		return -ENOMEM;
-
-	if (copy_from_user(&prov_machine_id, buf, sizeof(uint32_t)))
-		return -EAGAIN;
-
-	if (prov_machine_id == 0)
-		return -EINVAL;
-
-	pr_info("Provenance: machine ID %d\n", prov_machine_id);
-	write_boot_buffer();
-	return count; // read only
-}
-
 static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 				    size_t count, loff_t *ppos)
 {
@@ -172,31 +158,8 @@ static ssize_t prov_read_machine_id(struct file *filp, char __user *buf,
 	return count;
 }
 declare_file_operations(prov_machine_id_ops,
-			prov_write_machine_id,
+			no_write,
 			prov_read_machine_id);
-
-static ssize_t prov_write_boot_id(struct file *file, const char __user *buf,
-				  size_t count, loff_t *ppos)
-{
-	if (prov_boot_id != 0)   // it has already been set
-		return -EPERM;
-
-	if (!capable(CAP_AUDIT_CONTROL))
-		return -EPERM;
-
-	if (count < sizeof(uint32_t))
-		return -ENOMEM;
-
-	if (copy_from_user(&prov_boot_id, buf, sizeof(uint32_t)))
-		return -EAGAIN;
-
-	if (prov_boot_id == 0)
-		return -EINVAL;
-
-	pr_info("Provenance: boot ID %d\n", prov_boot_id);
-	write_boot_buffer();
-	return count; // read only
-}
 
 static ssize_t prov_read_boot_id(struct file *filp, char __user *buf,
 				 size_t count, loff_t *ppos)
@@ -210,9 +173,27 @@ static ssize_t prov_read_boot_id(struct file *filp, char __user *buf,
 	return count;
 }
 declare_file_operations(prov_boot_id_ops,
-			prov_write_boot_id,
+			no_write,
 			prov_read_boot_id);
 
+static ssize_t prov_write_relay_conf(struct file *file, const char __user *buf,
+				     size_t count, loff_t *ppos)
+{
+	struct relay_conf conf;
+
+	if (count < sizeof(struct relay_conf))
+		return -ENOMEM;
+	if (copy_from_user(&conf, buf, sizeof(struct relay_conf)))
+		return -EAGAIN;
+
+	// start the relay
+	relay_prov_init(&conf);
+
+	return count;
+}
+declare_file_operations(prov_relay_conf_ops,
+			prov_write_relay_conf,
+			no_read);
 
 static ssize_t prov_write_node(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
@@ -321,9 +302,9 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct prov_process_config msg;
-	struct provenance *prov = provenance_cred_from_task(current);
+	struct provenance *cprov = provenance_cred_from_task(current);
 
-	if (!prov)
+	if (!cprov)
 		return -EINVAL;
 
 	if (count < sizeof(struct prov_process_config))
@@ -332,7 +313,8 @@ static ssize_t prov_write_self(struct file *file, const char __user *buf,
 	if (copy_from_user(&msg, buf, sizeof(struct prov_process_config)))
 		return -ENOMEM;
 
-	update_prov_config(&(msg.prov), msg.op, prov);
+	update_prov_config(&(msg.prov), msg.op, cprov);
+	record_cred_name(current, cprov);
 	return sizeof(struct prov_process_config);
 }
 
@@ -341,7 +323,7 @@ static ssize_t prov_read_self(struct file *filp, char __user *buf,
 {
 	struct provenance *cprov = provenance_cred_from_task(current);
 
-	if (count < sizeof(struct task_prov_struct))
+	if (count < sizeof(union prov_elt))
 		return -ENOMEM;
 
 	spin_lock(prov_lock(cprov));
@@ -943,7 +925,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	}
 	/* LSM version */
 	rc = crypto_shash_update(hashdesc, (u8 *)CAMFLOW_VERSION_STR,
-				 strnlen(CAMFLOW_VERSION_STR, 32));
+				 strnlen(CAMFLOW_VERSION_STR, sizeof(CAMFLOW_VERSION_STR)));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -952,7 +934,7 @@ static ssize_t prov_read_policy_hash(struct file *filp, char __user *buf,
 	rc = crypto_shash_update(hashdesc,
 				 (u8 *)CAMFLOW_COMMIT,
 				 strnlen(CAMFLOW_COMMIT,
-					 PROV_COMMIT_MAX_LENGTH));
+					 sizeof(CAMFLOW_COMMIT)));
 	if (rc) {
 		pos = -EAGAIN;
 		goto out;
@@ -1031,7 +1013,7 @@ declare_file_operations(prov_type_ops, no_write, prov_read_prov_type);
 static ssize_t prov_read_version(struct file *filp, char __user *buf,
 				 size_t count, loff_t *ppos)
 {
-	size_t len = strnlen(CAMFLOW_VERSION_STR, 32);
+	size_t len = strnlen(CAMFLOW_VERSION_STR, sizeof(CAMFLOW_VERSION_STR));
 
 	if (count < len)
 		return -ENOMEM;
@@ -1044,7 +1026,7 @@ declare_file_operations(prov_version, no_write, prov_read_version);
 static ssize_t prov_read_commit(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
 {
-	size_t len = strnlen(CAMFLOW_COMMIT, PROV_COMMIT_MAX_LENGTH);
+	size_t len = strnlen(CAMFLOW_COMMIT, sizeof(CAMFLOW_COMMIT));
 
 	if (count < len)
 		return -ENOMEM;
@@ -1113,6 +1095,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("enable", 0644, &prov_enable_ops);
 	prov_create_file("all", 0644, &prov_all_ops);
 	prov_create_file("written", 0444, &prov_written_ops);
+	prov_create_file("should_version", 0644, &prov_should_version_ops);
 	prov_create_file("compress_node", 0644, &prov_compress_node_ops);
 	prov_create_file("compress_edge", 0644, &prov_compress_edge_ops);
 	prov_create_file("node", 0666, &prov_node_ops);
@@ -1120,6 +1103,7 @@ static int __init init_prov_fs(void)
 	prov_create_file("self", 0666, &prov_self_ops);
 	prov_create_file("machine_id", 0444, &prov_machine_id_ops);
 	prov_create_file("boot_id", 0444, &prov_boot_id_ops);
+	prov_create_file("relay_conf", 0666, &prov_relay_conf_ops);
 	prov_create_file("node_filter", 0644, &prov_node_filter_ops);
 	prov_create_file("derived_filter", 0644, &prov_derived_filter_ops);
 	prov_create_file("generated_filter", 0644, &prov_generated_filter_ops);

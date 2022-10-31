@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -130,8 +131,11 @@ static inline uint32_t get_pidns(struct task_struct *task)
 	struct pid_namespace *ns;
 
 	ns = task_active_pid_ns(task);
-	if (ns)
+	if (ns) {
+		ns = get_pid_ns(ns);
 		id = ns->ns.inum;
+		put_pid_ns(ns);
+	}
 	return id;
 }
 
@@ -232,7 +236,7 @@ static __always_inline int current_update_shst(struct provenance *cprov,
  * buffer to hold file path.
  *
  */
-static inline int record_task_name(struct task_struct *task,
+static inline int record_cred_name(struct task_struct *task,
 				   struct provenance *prov)
 {
 	// const struct cred *cred;
@@ -243,8 +247,19 @@ static inline int record_task_name(struct task_struct *task,
 	char *ptr;
 	int rc = 0;
 
-	if (provenance_is_name_recorded(prov_elt(prov)) ||
-	    !provenance_is_recorded(prov_elt(prov)))
+	// task/prov are not set
+	if (task == NULL || prov == NULL)
+		return 0;
+
+	// we already recorded the name
+	if (provenance_is_name_recorded(prov_elt(prov)))
+		return 0;
+
+	// the corresponding node isn't tracked, recorded, and we are not tracking
+	// everything
+	if (!provenance_is_recorded(prov_elt(prov))
+	    && !provenance_is_tracked(prov_elt(prov))
+	    && !prov_policy.prov_all)
 		return 0;
 
 	mm = get_task_mm(task);
@@ -348,7 +363,7 @@ static inline struct provenance *get_cred_provenance(void)
 
 	if (provenance_is_opaque(prov_elt(prov)))
 		return prov;
-	record_task_name(current, prov);
+	record_cred_name(current, prov);
 	spin_lock_irqsave_nested(prov_lock(prov),
 				 irqflags, PROVENANCE_LOCK_PROC);
 	prov_elt(prov)->proc_info.tgid = task_tgid_nr(current);
@@ -378,6 +393,7 @@ static inline struct provenance *get_task_provenance(bool link)
 
 	prov_elt(tprov)->task_info.pid = task_pid_nr(current);
 	prov_elt(tprov)->task_info.vpid = task_pid_vnr(current);
+	security_task_getsecid_obj(current, &(prov_elt(tprov)->task_info.secid));
 	update_task_perf(current, tprov);
 	update_task_namespaces(current, tprov);
 	if (!provenance_is_opaque(prov_elt(tprov)) && link)

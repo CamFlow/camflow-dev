@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2021 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -24,6 +25,8 @@ struct capture_policy {
 	bool prov_enabled;
 	// Whether to record provenance of all kernel object.
 	bool prov_all;
+	// Whether versions should be created. Necessary to get acyclic graph.
+	bool should_be_versioned;
 	// Whether nodes should be compressed into one if possible.
 	bool should_compress_node;
 	// Whether edges should be compressed into one if possible.

@@ -13,12 +13,10 @@
   HOSTLD  arch/x86/tools/relocs
   HOSTCC  scripts/selinux/genheaders/genheaders
   HOSTCC  scripts/selinux/mdp/mdp
-  HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
   HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
   HOSTCC  scripts/sign-file
-  HOSTCC  scripts/extract-cert
   HOSTCC  scripts/insert-sys-cert
   WRAP    arch/x86/include/generated/uapi/asm/bpf_perf_event.h
   WRAP    arch/x86/include/generated/uapi/asm/errno.h
@@ -124,6 +122,7 @@
   HDRINST usr/include/asm-generic/ioctl.h
   HDRINST usr/include/asm-generic/param.h
   HDRINST usr/include/asm-generic/ipcbuf.h
+  HDRINST usr/include/asm-generic/termbits-common.h
   HDRINST usr/include/asm-generic/mman-common.h
   HDRINST usr/include/asm-generic/poll.h
   HDRINST usr/include/asm-generic/siginfo.h
@@ -164,6 +163,7 @@
   HDRINST usr/include/rdma/mlx4-abi.h
   HDRINST usr/include/rdma/mlx5-abi.h
   HDRINST usr/include/rdma/rvt-abi.h
+  HDRINST usr/include/rdma/erdma-abi.h
   HDRINST usr/include/rdma/ib_user_verbs.h
   HDRINST usr/include/rdma/rdma_user_ioctl.h
   HDRINST usr/include/rdma/qedr-abi.h
@@ -176,6 +176,7 @@
   HDRINST usr/include/misc/ocxl.h
   HDRINST usr/include/misc/cxl.h
   HDRINST usr/include/misc/pvpanic.h
+  HDRINST usr/include/linux/comedi.h
   HDRINST usr/include/linux/bpf_perf_event.h
   HDRINST usr/include/linux/ip6_tunnel.h
   HDRINST usr/include/linux/hidraw.h
@@ -209,6 +210,7 @@
   HDRINST usr/include/linux/vbox_vmmdev_types.h
   HDRINST usr/include/linux/veth.h
   HDRINST usr/include/linux/mii.h
+  HDRINST usr/include/linux/ublk_cmd.h
   HDRINST usr/include/linux/gpio.h
   HDRINST usr/include/linux/auto_fs.h
   HDRINST usr/include/linux/cycx_cfm.h
@@ -228,7 +230,6 @@
   HDRINST usr/include/linux/dqblk_xfs.h
   HDRINST usr/include/linux/lwtunnel.h
   HDRINST usr/include/linux/nfsd/debug.h
-  HDRINST usr/include/linux/nfsd/nfsfh.h
   HDRINST usr/include/linux/nfsd/cld.h
   HDRINST usr/include/linux/nfsd/stats.h
   HDRINST usr/include/linux/nfsd/export.h
@@ -316,6 +317,7 @@
   HDRINST usr/include/linux/nitro_enclaves.h
   HDRINST usr/include/linux/dcbnl.h
   HDRINST usr/include/linux/dlm_plock.h
+  HDRINST usr/include/linux/cyclades.h
   HDRINST usr/include/linux/nfc.h
   HDRINST usr/include/linux/uio.h
   HDRINST usr/include/linux/map_to_7segment.h
@@ -324,7 +326,6 @@
   HDRINST usr/include/linux/fdreg.h
   HDRINST usr/include/linux/netconf.h
   HDRINST usr/include/linux/sock_diag.h
-  HDRINST usr/include/linux/bcache.h
   HDRINST usr/include/linux/atmapi.h
   HDRINST usr/include/linux/mpls.h
   HDRINST usr/include/linux/ethtool.h
@@ -370,6 +371,7 @@
   HDRINST usr/include/linux/mman.h
   HDRINST usr/include/linux/limits.h
   HDRINST usr/include/linux/cxl_mem.h
+  HDRINST usr/include/linux/counter.h
   HDRINST usr/include/linux/atmdev.h
   HDRINST usr/include/linux/bcm933xx_hcs.h
   HDRINST usr/include/linux/baycom.h
@@ -473,6 +475,7 @@
   HDRINST usr/include/linux/serial.h
   HDRINST usr/include/linux/wireless.h
   HDRINST usr/include/linux/landlock.h
+  HDRINST usr/include/linux/kfd_sysfs.h
   HDRINST usr/include/linux/scif_ioctl.h
   HDRINST usr/include/linux/nbd.h
   HDRINST usr/include/linux/ipv6.h
@@ -626,6 +629,7 @@
   HDRINST usr/include/linux/provenance_fs.h
   HDRINST usr/include/linux/pfkeyv2.h
   HDRINST usr/include/linux/if_arcnet.h
+  HDRINST usr/include/linux/pfrut.h
   HDRINST usr/include/linux/usbdevice_fs.h
   HDRINST usr/include/linux/pci.h
   HDRINST usr/include/linux/times.h
@@ -652,6 +656,7 @@
   HDRINST usr/include/linux/netfilter_ipv6.h
   HDRINST usr/include/linux/virtio_fs.h
   HDRINST usr/include/linux/media-bus-format.h
+  HDRINST usr/include/linux/cachefiles.h
   HDRINST usr/include/linux/elf.h
   HDRINST usr/include/linux/vduse.h
   HDRINST usr/include/linux/if_addrlabel.h
@@ -675,6 +680,7 @@
   HDRINST usr/include/linux/usb/audio.h
   HDRINST usr/include/linux/genwqe/genwqe_card.h
   HDRINST usr/include/linux/meye.h
+  HDRINST usr/include/linux/map_to_14segment.h
   HDRINST usr/include/linux/matroxfb.h
   HDRINST usr/include/linux/dlm_device.h
   HDRINST usr/include/linux/tiocl.h
@@ -705,6 +711,7 @@
   HDRINST usr/include/linux/can/vxcan.h
   HDRINST usr/include/linux/can/gw.h
   HDRINST usr/include/linux/screen_info.h
+  HDRINST usr/include/linux/sev-guest.h
   HDRINST usr/include/linux/close_range.h
   HDRINST usr/include/linux/v4l2-dv-timings.h
   HDRINST usr/include/linux/input.h
@@ -777,6 +784,7 @@
   HDRINST usr/include/linux/ppp-comp.h
   HDRINST usr/include/linux/media.h
   HDRINST usr/include/linux/nfs4.h
+  HDRINST usr/include/linux/amt.h
   HDRINST usr/include/linux/suspend_ioctls.h
   HDRINST usr/include/linux/dn.h
   HDRINST usr/include/linux/msdos_fs.h
@@ -932,15 +940,18 @@
   HDRINST usr/include/linux/wmi.h
   HDRINST usr/include/linux/signalfd.h
   HDRINST usr/include/linux/if.h
+  HDRINST usr/include/linux/loadpin.h
   HDRINST usr/include/linux/if_cablemodem.h
   HDRINST usr/include/sound/asound_fm.h
   HDRINST usr/include/sound/asequencer.h
   HDRINST usr/include/sound/hdsp.h
+  HDRINST usr/include/sound/intel/avs/tokens.h
   HDRINST usr/include/sound/asound.h
   HDRINST usr/include/sound/usb_stream.h
   HDRINST usr/include/sound/compress_offload.h
   HDRINST usr/include/sound/tlv.h
   HDRINST usr/include/sound/skl-tplg-interface.h
+  HDRINST usr/include/sound/snd_ar_tokens.h
   HDRINST usr/include/sound/firewire.h
   HDRINST usr/include/sound/hdspm.h
   HDRINST usr/include/sound/emu10k1.h
@@ -955,6 +966,7 @@
   HDRINST usr/include/sound/sb16_csp.h
   HDRINST usr/include/scsi/cxlflash_ioctl.h
   HDRINST usr/include/scsi/scsi_netlink_fc.h
+  HDRINST usr/include/scsi/scsi_bsg_mpi3mr.h
   HDRINST usr/include/scsi/scsi_bsg_fc.h
   HDRINST usr/include/scsi/scsi_netlink.h
   HDRINST usr/include/scsi/scsi_bsg_ufs.h
@@ -963,6 +975,7 @@
   HDRINST usr/include/scsi/fc/fc_ns.h
   HDRINST usr/include/scsi/fc/fc_els.h
   HDRINST usr/include/linux/version.h
+  HDRINST usr/include/asm/amd_hsmp.h
   HDRINST usr/include/asm/a.out.h
   HDRINST usr/include/asm/swab.h
   HDRINST usr/include/asm/ldt.h
@@ -1047,12 +1060,11 @@
   CC      /home/circleci/build/linux-stable/tools/objtool/weak.o
   CC      /home/circleci/build/linux-stable/tools/objtool/check.o
   CC      /home/circleci/build/linux-stable/tools/objtool/special.o
-  CC      /home/circleci/build/linux-stable/tools/objtool/orc_gen.o
-  CC      /home/circleci/build/linux-stable/tools/objtool/orc_dump.o
   CC      /home/circleci/build/linux-stable/tools/objtool/builtin-check.o
-  CC      /home/circleci/build/linux-stable/tools/objtool/builtin-orc.o
   CC      /home/circleci/build/linux-stable/tools/objtool/elf.o
   CC      /home/circleci/build/linux-stable/tools/objtool/objtool.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/orc_gen.o
+  CC      /home/circleci/build/linux-stable/tools/objtool/orc_dump.o
   CC      /home/circleci/build/linux-stable/tools/objtool/libstring.o
   CC      /home/circleci/build/linux-stable/tools/objtool/libctype.o
   CC      /home/circleci/build/linux-stable/tools/objtool/str_error_r.o
@@ -1064,42 +1076,68 @@
 ./include/asm-generic/rwonce.h:67:16: error: typename in expression
 ./include/asm-generic/rwonce.h:67:16: error: Expected ) in function call
 ./include/asm-generic/rwonce.h:67:16: error: got :
-./include/linux/list.h:282:16: error: typename in expression
-./include/linux/list.h:282:16: error: Expected ) in function call
-./include/linux/list.h:282:16: error: got :
-./include/linux/list.h:318:34: error: typename in expression
-./include/linux/list.h:318:34: error: Expected ) in function call
-./include/linux/list.h:318:34: error: got :
-./include/linux/list.h:821:17: error: typename in expression
-./include/linux/list.h:821:17: error: Expected ) in function call
-./include/linux/list.h:821:17: error: got :
-./include/linux/list.h:830:17: error: typename in expression
-./include/linux/list.h:830:17: error: Expected ) in function call
-./include/linux/list.h:830:17: error: got :
+./include/linux/list.h:292:16: error: typename in expression
+./include/linux/list.h:292:16: error: Expected ) in function call
+./include/linux/list.h:292:16: error: got :
+./include/linux/list.h:328:34: error: typename in expression
+./include/linux/list.h:328:34: error: Expected ) in function call
+./include/linux/list.h:328:34: error: got :
+./include/linux/list.h:329:53: error: typename in expression
+./include/linux/list.h:329:53: error: Expected ) in function call
+./include/linux/list.h:329:53: error: got :
+./include/linux/list.h:867:17: error: typename in expression
+./include/linux/list.h:867:17: error: Expected ) in function call
+./include/linux/list.h:867:17: error: got :
+./include/linux/list.h:876:17: error: typename in expression
+./include/linux/list.h:876:17: error: Expected ) in function call
+./include/linux/list.h:876:17: error: got :
+./include/asm-generic/bitops/generic-non-atomic.h:140:23: error: typename in expression
+./include/asm-generic/bitops/generic-non-atomic.h:140:23: error: Expected ) in function call
+./include/asm-generic/bitops/generic-non-atomic.h:140:23: error: got :
 ./arch/x86/include/asm/atomic.h:29:16: error: typename in expression
 ./arch/x86/include/asm/atomic.h:29:16: error: Expected ) in function call
 ./arch/x86/include/asm/atomic.h:29:16: error: got :
 ./arch/x86/include/asm/atomic64_64.h:22:16: error: typename in expression
 ./arch/x86/include/asm/atomic64_64.h:22:16: error: Expected ) in function call
 ./arch/x86/include/asm/atomic64_64.h:22:16: error: got :
-./include/linux/atomic/atomic-arch-fallback.h:154:16: error: typename in expression
-./include/linux/atomic/atomic-arch-fallback.h:154:16: error: Expected ) in function call
-./include/linux/atomic/atomic-arch-fallback.h:154:16: error: got :
-./include/linux/atomic/atomic-arch-fallback.h:1261:16: error: typename in expression
-./include/linux/atomic/atomic-arch-fallback.h:1261:16: error: Expected ) in function call
-./include/linux/atomic/atomic-arch-fallback.h:1261:16: error: got :
-./include/linux/llist.h:189:16: error: typename in expression
-./include/linux/llist.h:189:16: error: Expected ) in function call
-./include/linux/llist.h:189:16: error: got :
-./include/linux/rcupdate.h:996:31: error: typename in expression
-./include/linux/rcupdate.h:996:31: error: Expected ) in function call
-./include/linux/rcupdate.h:996:31: error: got :
-./include/linux/rtmutex.h:44:16: error: typename in expression
-./include/linux/rtmutex.h:44:16: error: Expected ) in function call
-./include/linux/rtmutex.h:44:16: error: got :
-./include/linux/seqlock.h:261:16: error: typename in expression
-./include/linux/seqlock.h:261:16: error: Expected ) in function call
-./include/linux/seqlock.h:261:16: error: got :
+./include/linux/atomic/atomic-arch-fallback.h:227:23: error: typename in expression
+./include/linux/atomic/atomic-arch-fallback.h:227:23: error: Expected ) in function call
+./include/linux/atomic/atomic-arch-fallback.h:227:23: error: got :
+./include/linux/atomic/atomic-arch-fallback.h:1348:23: error: typename in expression
+./include/linux/atomic/atomic-arch-fallback.h:1348:23: error: Expected ) in function call
+./include/linux/atomic/atomic-arch-fallback.h:1348:23: error: got :
+./include/linux/thread_info.h:127:16: error: typename in expression
+./include/linux/thread_info.h:127:16: error: Expected ) in function call
+./include/linux/thread_info.h:127:16: error: got :
+./include/linux/thread_info.h:233:13: error: Expected ; at end of statement
+./include/linux/thread_info.h:233:13: error: got __flags
+./include/linux/llist.h:191:16: error: typename in expression
+./include/linux/llist.h:191:16: error: Expected ) in function call
+./include/linux/llist.h:191:16: error: got :
+./include/linux/rcupdate.h:1015:31: error: typename in expression
+./include/linux/rcupdate.h:1015:31: error: Expected ) in function call
+./include/linux/rcupdate.h:1015:31: error: got :
+./include/linux/rcupdate.h:1019:9: error: Expected ; at end of statement
+./include/linux/rcupdate.h:1019:9: error: got __flags
+./include/linux/ktime.h:154:9: error: Expected ; at end of statement
+./include/linux/ktime.h:154:9: error: got __flags
+./include/linux/srcu.h:189:9: error: Expected ; at end of statement
+./include/linux/srcu.h:189:9: error: got __flags
+./include/linux/seqlock.h:259:16: error: typename in expression
+./include/linux/seqlock.h:259:16: error: Expected ) in function call
+./include/linux/seqlock.h:259:16: error: got :
+./include/linux/seqlock.h:274:1: error: typename in expression
+./include/linux/seqlock.h:274:1: error: Expected ) in function call
+./include/linux/seqlock.h:274:1: error: got :
+./include/linux/seqlock.h:274:1: error: typename in expression
+./include/linux/seqlock.h:274:1: error: Expected ) in function call
+./include/linux/seqlock.h:274:1: error: got :
+./include/linux/seqlock.h:275:1: error: typename in expression
+./include/linux/seqlock.h:275:1: error: Expected ) in function call
+./include/linux/seqlock.h:275:1: error: got :
+./include/linux/seqlock.h:275:1: error: typename in expression
+./include/linux/seqlock.h:275:1: error: Expected ) in function call
+./include/linux/seqlock.h:275:1: error: got :
 ./include/linux/seqlock.h:276:1: error: typename in expression
 ./include/linux/seqlock.h:276:1: error: Expected ) in function call
 ./include/linux/seqlock.h:276:1: error: got :
@@ -1112,59 +1150,33 @@
 ./include/linux/seqlock.h:277:1: error: typename in expression
 ./include/linux/seqlock.h:277:1: error: Expected ) in function call
 ./include/linux/seqlock.h:277:1: error: got :
-./include/linux/seqlock.h:278:1: error: typename in expression
-./include/linux/seqlock.h:278:1: error: Expected ) in function call
-./include/linux/seqlock.h:278:1: error: got :
-./include/linux/seqlock.h:278:1: error: typename in expression
-./include/linux/seqlock.h:278:1: error: Expected ) in function call
-./include/linux/seqlock.h:278:1: error: got :
-./include/linux/seqlock.h:279:1: error: typename in expression
-./include/linux/seqlock.h:279:1: error: Expected ) in function call
-./include/linux/seqlock.h:279:1: error: got :
-./include/linux/seqlock.h:279:1: error: typename in expression
-./include/linux/seqlock.h:279:1: error: Expected ) in function call
-./include/linux/seqlock.h:279:1: error: got :
-./include/linux/seqlock.h:280:1: error: typename in expression
-./include/linux/seqlock.h:280:1: error: Expected ) in function call
-./include/linux/seqlock.h:280:1: error: got :
-./include/linux/seqlock.h:280:1: error: typename in expression
-./include/linux/seqlock.h:280:1: error: Expected ) in function call
-./include/linux/seqlock.h:280:1: error: got :
-./include/linux/seqlock.h:433:16: error: typename in expression
-./include/linux/seqlock.h:433:16: error: Expected ) in function call
-./include/linux/seqlock.h:433:16: error: got :
-./include/linux/seqlock.h:686:16: error: typename in expression
-./include/linux/seqlock.h:686:16: error: Expected ) in function call
-./include/linux/seqlock.h:686:16: error: got :
-./include/linux/seqlock.h:699:16: error: typename in expression
-./include/linux/seqlock.h:699:16: error: Expected ) in function call
-./include/linux/seqlock.h:699:16: error: got :
-./include/linux/seqlock.h:840:24: error: typename in expression
-./include/linux/seqlock.h:840:24: error: Expected ) in function call
-./include/linux/seqlock.h:840:24: error: got :
-./include/linux/seqlock.h:866:16: error: typename in expression
-./include/linux/seqlock.h:866:16: error: Expected ) in function call
-./include/linux/seqlock.h:866:16: error: got :
-./include/linux/page-flags.h:196:30: error: typename in expression
-./include/linux/page-flags.h:196:30: error: Expected ) in function call
-./include/linux/page-flags.h:196:30: error: got :
-./include/linux/page-flags.h:207:16: error: typename in expression
-./include/linux/page-flags.h:207:16: error: Expected ) in function call
-./include/linux/page-flags.h:207:16: error: got :
-./include/linux/mmzone.h:105:16: error: typename in expression
-./include/linux/mmzone.h:105:16: error: Expected ) in function call
-./include/linux/mmzone.h:105:16: error: got :
-./include/linux/xarray.h:1166:16: error: typename in expression
-./include/linux/xarray.h:1166:16: error: Expected ) in function call
-./include/linux/xarray.h:1166:16: error: got :
-./include/linux/xarray.h:1182:16: error: typename in expression
-./include/linux/xarray.h:1182:16: error: Expected ) in function call
-./include/linux/xarray.h:1182:16: error: got :
-./include/linux/xarray.h:1199:16: error: typename in expression
-./include/linux/xarray.h:1199:16: error: Expected ) in function call
-./include/linux/xarray.h:1199:16: error: too many errors
+./include/linux/seqlock.h:429:16: error: typename in expression
+./include/linux/seqlock.h:429:16: error: Expected ) in function call
+./include/linux/seqlock.h:429:16: error: got :
+./include/linux/seqlock.h:682:16: error: typename in expression
+./include/linux/seqlock.h:682:16: error: Expected ) in function call
+./include/linux/seqlock.h:682:16: error: got :
+./include/linux/seqlock.h:695:16: error: typename in expression
+./include/linux/seqlock.h:695:16: error: Expected ) in function call
+./include/linux/seqlock.h:695:16: error: got :
+./include/linux/seqlock.h:836:24: error: typename in expression
+./include/linux/seqlock.h:836:24: error: Expected ) in function call
+./include/linux/seqlock.h:836:24: error: got :
+./include/linux/seqlock.h:862:16: error: typename in expression
+./include/linux/seqlock.h:862:16: error: Expected ) in function call
+./include/linux/seqlock.h:862:16: error: got :
+./include/linux/random.h:118:9: error: Expected ; at end of statement
+./include/linux/random.h:118:9: error: got __flags
+./include/linux/random.h:126:9: error: Expected ; at end of statement
+./include/linux/random.h:126:9: error: got __flags
+./include/linux/page-flags.h:232:38: error: typename in expression
+./include/linux/page-flags.h:232:38: error: Expected ) in function call
+./include/linux/page-flags.h:232:38: error: got :
+./include/linux/page-flags.h:253:30: error: typename in expression
+./include/linux/page-flags.h:253:30: error: Expected ) in function call
+./include/linux/page-flags.h:253:30: error: too many errors
 Segmentation fault (core dumped)
-make[2]: *** [scripts/Makefile.build:278: security/provenance/relay.o] Error 139
+make[2]: *** [scripts/Makefile.build:250: security/provenance/relay.o] Error 139
 make[2]: *** Deleting file 'security/provenance/relay.o'
-make[1]: *** [scripts/Makefile.build:540: security/provenance] Error 2
-make: *** [Makefile:1868: security] Error 2
+make[1]: *** [scripts/Makefile.build:465: security/provenance] Error 2
+make: *** [Makefile:1852: security] Error 2

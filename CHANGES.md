@@ -2,6 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
+| 0.9.0           | 6.0.5          | 30/10/2022 |
 | 0.8.0           | 5.15.5         | 29/11/2021 |
 | 0.7.2           | 5.11.2         | 27/04/2021	|
 | 0.7.1           | 5.9.11         | 05/12/2020 |
@@ -53,6 +54,16 @@
 | 0.1.2           | 4.4.6          | 26/05/2016 |
 | 0.1.1           | 4.4.6          | 03/04/2016 |
 | 0.1.0           | 4.2.8          | 28/03/2016 |
+
+## v0.9.0
+```
+- Associating security context to task.
+- Remove support for better flow tracking introduce in patch 0.3.3 to ease maintenance.
+- Support node path name attribute (beta).
+- Allow to turn versioning on/off (on by default).
+- Add mechanism to set relay buffer size through configuration.
+- Update to kernel version 6.0.5.
+```
 
 ## v0.8.0
 ```

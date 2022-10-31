@@ -3,9 +3,10 @@
  * Copyright (C) 2015-2016 University of Cambridge,
  * Copyright (C) 2016-2017 Harvard University,
  * Copyright (C) 2017-2018 University of Cambridge,
- * Copyright (C) 2018-2020 University of Bristol
+ * Copyright (C) 2018-2021 University of Bristol,
+ * Copyright (C) 2021-2022 University of British Columbia
  *
- * Author: Thomas Pasquier <thomas.pasquier@bristol.ac.uk>
+ * Author: Thomas Pasquier <tfjmp@cs.ubc.ca>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2, as
@@ -22,6 +23,7 @@
  #define PROV_ENABLE_FILE                        "/sys/kernel/security/provenance/enable"
  #define PROV_ALL_FILE                           "/sys/kernel/security/provenance/all"
  #define PROV_WRITTEN_FILE                       "/sys/kernel/security/provenance/written"
+ #define PROV_SHOULD_VERSION_FILE                "/sys/kernel/security/provenance/should_version"
  #define PROV_COMPRESS_NODE_FILE                 "/sys/kernel/security/provenance/compress_node"
  #define PROV_COMPRESS_EDGE_FILE                 "/sys/kernel/security/provenance/compress_edge"
  #define PROV_NODE_FILE                          "/sys/kernel/security/provenance/node"
@@ -29,6 +31,7 @@
  #define PROV_SELF_FILE                          "/sys/kernel/security/provenance/self"
  #define PROV_MACHINE_ID_FILE                    "/sys/kernel/security/provenance/machine_id"
  #define PROV_BOOT_ID_FILE                       "/sys/kernel/security/provenance/boot_id"
+ #define PROV_RELAY_CONF_FILE                    "/sys/kernel/security/provenance/relay_conf"
  #define PROV_NODE_FILTER_FILE                   "/sys/kernel/security/provenance/node_filter"
  #define PROV_DERIVED_FILTER_FILE                "/sys/kernel/security/provenance/derived_filter"
  #define PROV_GENERATED_FILTER_FILE              "/sys/kernel/security/provenance/generated_filter"
@@ -124,6 +127,13 @@ struct nsinfo {
 
 struct dropped {
 	uint64_t s;
+};
+
+struct relay_conf {
+	uint32_t boot_id;
+	uint32_t machine_id;
+	uint32_t buff_exp;
+	uint32_t subuf_nb;
 };
 
 #endif
