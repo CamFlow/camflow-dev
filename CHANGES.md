@@ -2,7 +2,7 @@
 
 | CamFlow version | Kernel version | Date       |
 | --------------- |----------------| ---------- |
-| 0.9.0           | 5.19.13        | N/A				|
+| 0.9.0           | 6.0.5          | N/A				|
 | 0.8.0           | 5.15.5         | 29/11/2021 |
 | 0.7.2           | 5.11.2         | 27/04/2021	|
 | 0.7.1           | 5.9.11         | 05/12/2020 |
@@ -62,7 +62,7 @@
 - Support node path name attribute (beta).
 - Allow to turn versioning on/off (on by default).
 - Add mechanism to set relay buffer size through configuration.
-- Update to kernel version 5.19.11.
+- Update to kernel version 6.0.5.
 ```
 
 ## v0.8.0

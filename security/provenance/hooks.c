@@ -1425,9 +1425,8 @@ static int provenance_file_open(struct file *file)
 	    || provenance_is_tracked(prov_elt(tprov))) {
 		set_tracked(prov_elt(iprov));
 		record_inode_name(file_inode(file), iprov);
-	} else if (prov_policy.prov_all) {
+	} else if (prov_policy.prov_all)
 		record_inode_name(file_inode(file), iprov);
-	}
 
 	if (!iprov)
 		return -ENOMEM;
