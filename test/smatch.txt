@@ -26,7 +26,6 @@
   HOSTLD  arch/x86/tools/relocs
   HOSTCC  scripts/selinux/genheaders/genheaders
   HOSTCC  scripts/selinux/mdp/mdp
-  HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
   HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
@@ -54,7 +53,6 @@
   WRAP    arch/x86/include/generated/asm/local64.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
   WRAP    arch/x86/include/generated/asm/module.lds.h
-  WRAP    arch/x86/include/generated/asm/platform-feature.h
   WRAP    arch/x86/include/generated/asm/rwonce.h
   WRAP    arch/x86/include/generated/asm/unaligned.h
   UPD     include/config/kernel.release
@@ -178,6 +176,7 @@
   HDRINST usr/include/rdma/mlx4-abi.h
   HDRINST usr/include/rdma/mlx5-abi.h
   HDRINST usr/include/rdma/rvt-abi.h
+  HDRINST usr/include/rdma/erdma-abi.h
   HDRINST usr/include/rdma/ib_user_verbs.h
   HDRINST usr/include/rdma/rdma_user_ioctl.h
   HDRINST usr/include/rdma/qedr-abi.h
@@ -224,6 +223,7 @@
   HDRINST usr/include/linux/vbox_vmmdev_types.h
   HDRINST usr/include/linux/veth.h
   HDRINST usr/include/linux/mii.h
+  HDRINST usr/include/linux/ublk_cmd.h
   HDRINST usr/include/linux/gpio.h
   HDRINST usr/include/linux/auto_fs.h
   HDRINST usr/include/linux/cycx_cfm.h
@@ -953,6 +953,7 @@
   HDRINST usr/include/linux/wmi.h
   HDRINST usr/include/linux/signalfd.h
   HDRINST usr/include/linux/if.h
+  HDRINST usr/include/linux/loadpin.h
   HDRINST usr/include/linux/if_cablemodem.h
   HDRINST usr/include/sound/asound_fm.h
   HDRINST usr/include/sound/asequencer.h
@@ -1088,6 +1089,11 @@
   CHECK   security/keys/trusted-keys/trusted_core.c
   CC      security/keys/trusted-keys/trusted_tpm1.o
   CHECK   security/keys/trusted-keys/trusted_tpm1.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/trusted-keys/trusted_tpm2.o
   CHECK   security/keys/trusted-keys/trusted_tpm2.c
   CC      security/keys/trusted-keys/tpm2key.asn1.o
@@ -1102,21 +1108,56 @@
   AR      security/keys/encrypted-keys/built-in.a
   CC      security/keys/gc.o
   CHECK   security/keys/gc.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/key.o
   CHECK   security/keys/key.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/keyring.o
   CHECK   security/keys/keyring.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
 security/keys/keyring.c:1230 keyring_detect_cycle() warn: passing zero to 'PTR_ERR'
   CC      security/keys/keyctl.o
   CHECK   security/keys/keyctl.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/permission.o
   CHECK   security/keys/permission.c
   CC      security/keys/process_keys.o
   CHECK   security/keys/process_keys.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/request_key.o
   CHECK   security/keys/request_key.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/request_key_auth.o
   CHECK   security/keys/request_key_auth.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/keys/user_defined.o
   CHECK   security/keys/user_defined.c
   CC      security/keys/compat.o
@@ -1133,6 +1174,11 @@ security/keys/keyring.c:1230 keyring_detect_cycle() warn: passing zero to 'PTR_E
   CHECK   security/keys/dh.c
   CC      security/keys/keyctl_pkey.o
   CHECK   security/keys/keyctl_pkey.c
+./include/asm-generic/bitops/generic-non-atomic.h:75 generic___test_and_set_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:76 generic___test_and_set_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:77 generic___test_and_set_bit() info: 'old' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:79 generic___test_and_set_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:99 ___test_and_set_bit() warn: ignoring unreachable code.
   CC      security/keys/big_key.o
   CHECK   security/keys/big_key.c
   AR      security/keys/built-in.a
@@ -1141,8 +1187,18 @@ security/keys/keyring.c:1230 keyring_detect_cycle() warn: passing zero to 'PTR_E
   CHECK   security/selinux/avc.c
   CC      security/selinux/hooks.o
   CHECK   security/selinux/hooks.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/selinux/selinuxfs.o
   CHECK   security/selinux/selinuxfs.c
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
   CC      security/selinux/netlink.o
   CHECK   security/selinux/netlink.c
   CC      security/selinux/nlmsgtab.o
@@ -1196,6 +1252,11 @@ security/selinux/ss/ebitmap.c:207 ebitmap_netlbl_import() warn: ignoring unreach
   CHECK   security/landlock/setup.c
   CC      security/landlock/syscalls.o
   CHECK   security/landlock/syscalls.c
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
   CC      security/landlock/object.o
   CHECK   security/landlock/object.c
   CC      security/landlock/ruleset.o
@@ -1235,6 +1296,11 @@ security/provenance/fs.c:954 prov_read_policy_hash() error: crypto_shash_update(
   CHECK   security/integrity/ima/ima_init.c
   CC      security/integrity/ima/ima_main.o
   CHECK   security/integrity/ima/ima_main.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/integrity/ima/ima_crypto.o
   CHECK   security/integrity/ima/ima_crypto.c
   CC      security/integrity/ima/ima_api.o
@@ -1245,16 +1311,33 @@ security/provenance/fs.c:954 prov_read_policy_hash() error: crypto_shash_update(
   CHECK   security/integrity/ima/ima_template.c
   CC      security/integrity/ima/ima_template_lib.o
   CHECK   security/integrity/ima/ima_template_lib.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/integrity/ima/ima_appraise.o
   CHECK   security/integrity/ima/ima_appraise.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   CC      security/integrity/ima/ima_modsig.o
   CHECK   security/integrity/ima/ima_modsig.c
+  CC      security/integrity/ima/ima_kexec.o
+  CHECK   security/integrity/ima/ima_kexec.c
   CC      security/integrity/ima/ima_asymmetric_keys.o
   CHECK   security/integrity/ima/ima_asymmetric_keys.c
   CC      security/integrity/ima/ima_queue_keys.o
   CHECK   security/integrity/ima/ima_queue_keys.c
   CC      security/integrity/ima/ima_efi.o
   CHECK   security/integrity/ima/ima_efi.c
+./include/asm-generic/bitops/generic-non-atomic.h:168 const_test_bit() info: 'p' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:169 const_test_bit() info: 'mask' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:170 const_test_bit() info: 'val' is not actually initialized (unreached code).
+./include/asm-generic/bitops/generic-non-atomic.h:172 const_test_bit() warn: ignoring unreachable code.
+./include/asm-generic/bitops/instrumented-non-atomic.h:141 _test_bit() warn: ignoring unreachable code.
   AR      security/integrity/ima/built-in.a
   CC      security/integrity/evm/evm_main.o
   CHECK   security/integrity/evm/evm_main.c

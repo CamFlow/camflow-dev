@@ -13,7 +13,6 @@
   HOSTLD  arch/x86/tools/relocs
   HOSTCC  scripts/selinux/genheaders/genheaders
   HOSTCC  scripts/selinux/mdp/mdp
-  HOSTCC  scripts/bin2c
   HOSTCC  scripts/kallsyms
   HOSTCC  scripts/sorttable
   HOSTCC  scripts/asn1_compiler
@@ -41,7 +40,6 @@
   WRAP    arch/x86/include/generated/asm/local64.h
   WRAP    arch/x86/include/generated/asm/mmiowb.h
   WRAP    arch/x86/include/generated/asm/module.lds.h
-  WRAP    arch/x86/include/generated/asm/platform-feature.h
   WRAP    arch/x86/include/generated/asm/rwonce.h
   WRAP    arch/x86/include/generated/asm/unaligned.h
   UPD     include/config/kernel.release
@@ -165,6 +163,7 @@
   HDRINST usr/include/rdma/mlx4-abi.h
   HDRINST usr/include/rdma/mlx5-abi.h
   HDRINST usr/include/rdma/rvt-abi.h
+  HDRINST usr/include/rdma/erdma-abi.h
   HDRINST usr/include/rdma/ib_user_verbs.h
   HDRINST usr/include/rdma/rdma_user_ioctl.h
   HDRINST usr/include/rdma/qedr-abi.h
@@ -211,6 +210,7 @@
   HDRINST usr/include/linux/vbox_vmmdev_types.h
   HDRINST usr/include/linux/veth.h
   HDRINST usr/include/linux/mii.h
+  HDRINST usr/include/linux/ublk_cmd.h
   HDRINST usr/include/linux/gpio.h
   HDRINST usr/include/linux/auto_fs.h
   HDRINST usr/include/linux/cycx_cfm.h
@@ -940,6 +940,7 @@
   HDRINST usr/include/linux/wmi.h
   HDRINST usr/include/linux/signalfd.h
   HDRINST usr/include/linux/if.h
+  HDRINST usr/include/linux/loadpin.h
   HDRINST usr/include/linux/if_cablemodem.h
   HDRINST usr/include/sound/asound_fm.h
   HDRINST usr/include/sound/asequencer.h
@@ -1090,6 +1091,9 @@
 ./include/linux/list.h:876:17: error: typename in expression
 ./include/linux/list.h:876:17: error: Expected ) in function call
 ./include/linux/list.h:876:17: error: got :
+./include/asm-generic/bitops/generic-non-atomic.h:140:23: error: typename in expression
+./include/asm-generic/bitops/generic-non-atomic.h:140:23: error: Expected ) in function call
+./include/asm-generic/bitops/generic-non-atomic.h:140:23: error: got :
 ./arch/x86/include/asm/atomic.h:29:16: error: typename in expression
 ./arch/x86/include/asm/atomic.h:29:16: error: Expected ) in function call
 ./arch/x86/include/asm/atomic.h:29:16: error: got :
@@ -1110,11 +1114,11 @@
 ./include/linux/llist.h:191:16: error: typename in expression
 ./include/linux/llist.h:191:16: error: Expected ) in function call
 ./include/linux/llist.h:191:16: error: got :
-./include/linux/rcupdate.h:1004:31: error: typename in expression
-./include/linux/rcupdate.h:1004:31: error: Expected ) in function call
-./include/linux/rcupdate.h:1004:31: error: got :
-./include/linux/rcupdate.h:1008:9: error: Expected ; at end of statement
-./include/linux/rcupdate.h:1008:9: error: got __flags
+./include/linux/rcupdate.h:1015:31: error: typename in expression
+./include/linux/rcupdate.h:1015:31: error: Expected ) in function call
+./include/linux/rcupdate.h:1015:31: error: got :
+./include/linux/rcupdate.h:1019:9: error: Expected ; at end of statement
+./include/linux/rcupdate.h:1019:9: error: got __flags
 ./include/linux/ktime.h:154:9: error: Expected ; at end of statement
 ./include/linux/ktime.h:154:9: error: got __flags
 ./include/linux/srcu.h:189:9: error: Expected ; at end of statement
@@ -1161,21 +1165,18 @@
 ./include/linux/seqlock.h:862:16: error: typename in expression
 ./include/linux/seqlock.h:862:16: error: Expected ) in function call
 ./include/linux/seqlock.h:862:16: error: got :
-./include/linux/page-flags.h:246:38: error: typename in expression
-./include/linux/page-flags.h:246:38: error: Expected ) in function call
-./include/linux/page-flags.h:246:38: error: got :
-./include/linux/page-flags.h:272:30: error: typename in expression
-./include/linux/page-flags.h:272:30: error: Expected ) in function call
-./include/linux/page-flags.h:272:30: error: got :
-./include/linux/page-flags.h:311:16: error: typename in expression
-./include/linux/page-flags.h:311:16: error: Expected ) in function call
-./include/linux/page-flags.h:311:16: error: got :
-./include/linux/page-flags.h:317:16: error: typename in expression
-./include/linux/page-flags.h:317:16: error: Expected ) in function call
-./include/linux/page-flags.h:317:16: error: got :
-./include/linux/page-flags.h:323:16: error: too many errors
+./include/linux/random.h:118:9: error: Expected ; at end of statement
+./include/linux/random.h:118:9: error: got __flags
+./include/linux/random.h:126:9: error: Expected ; at end of statement
+./include/linux/random.h:126:9: error: got __flags
+./include/linux/page-flags.h:232:38: error: typename in expression
+./include/linux/page-flags.h:232:38: error: Expected ) in function call
+./include/linux/page-flags.h:232:38: error: got :
+./include/linux/page-flags.h:253:30: error: typename in expression
+./include/linux/page-flags.h:253:30: error: Expected ) in function call
+./include/linux/page-flags.h:253:30: error: too many errors
 Segmentation fault (core dumped)
 make[2]: *** [scripts/Makefile.build:250: security/provenance/relay.o] Error 139
 make[2]: *** Deleting file 'security/provenance/relay.o'
-make[1]: *** [scripts/Makefile.build:466: security/provenance] Error 2
-make: *** [Makefile:1846: security] Error 2
+make[1]: *** [scripts/Makefile.build:465: security/provenance] Error 2
+make: *** [Makefile:1852: security] Error 2
