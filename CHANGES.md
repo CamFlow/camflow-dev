@@ -58,6 +58,7 @@
 
 ## v0.9.1
 ```
+- Should fix some of the issue where name was not being properly recorded.
 - Update to kernel version 6.0.5.
 ```
 

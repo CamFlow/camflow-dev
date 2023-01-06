@@ -125,6 +125,11 @@ static int provenance_task_alloc(struct task_struct *task,
 					set_tracked(prov_elt(tprov));
 				record_cred_name(current, cprov);
 				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
+				// copy name
+				__memcpy_ss(&get_prov_name_id(prov_elt(tprov)),
+					    sizeof(union prov_identifier),
+					    &get_prov_name_id(prov_elt(ntprov)),
+					    sizeof(union prov_identifier));
 				informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
 			}
 		}
