@@ -145,7 +145,16 @@ WARNING:MACRO_WITH_FLOW_CONTROL: Macros with flow control statements should be a
 +		}											 \
 +	} while (0)
 
-total: 0 errors, 12 warnings, 1143 lines checked
+WARNING:SUSPECT_CODE_INDENT: suspect code indent for conditional statements (16, 16)
+#1083: FILE: security/provenance/fs.c:1083:
++		if (IS_ERR(dentry))							      \
++		pr_err ("Provenance: error mounting file %s (%d).\n", name, PTR_ERR(dentry)); \
+
+WARNING:SPACING: space prohibited between function name and open parenthesis '('
+#1084: FILE: security/provenance/fs.c:1084:
++		pr_err ("Provenance: error mounting file %s (%d).\n", name, PTR_ERR(dentry)); \
+
+total: 0 errors, 14 warnings, 1145 lines checked
 
 NOTE: For some of the reported defects, checkpatch may be able to
       mechanically convert to the typical style using --fix or --fix-inplace.
