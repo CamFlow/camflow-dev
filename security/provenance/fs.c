@@ -1077,10 +1077,12 @@ static ssize_t prov_read_dropped(struct file *filp, char __user *buf,
 }
 declare_file_operations(prov_dropped, no_write, prov_read_dropped);
 
-#define prov_create_file(name, perm, fun_ptr)					      \
-	do {									      \
-		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr); \
-		provenance_mark_as_opaque_dentry(dentry);			      \
+#define prov_create_file(name, perm, fun_ptr)						     \
+	do {										     \
+		dentry = securityfs_create_file(name, perm, prov_dir, NULL, fun_ptr);	     \
+		if (IS_ERR(dentry))							     \
+		pr_err("Provenance: error mounting file %s (%d).\n", name, PTR_ERR(dentry)); \
+		provenance_mark_as_opaque_dentry(dentry);				     \
 	} while (0)
 
 static int __init init_prov_fs(void)
