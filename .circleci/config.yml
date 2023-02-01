@@ -52,6 +52,7 @@ jobs:
       - run: 'git config --global user.name $GH_NAME'
       - run: 'make patch'
       - run: 'cd patches && ls'
+      - run: 'cd patches && cat ./0001-camflow.patch'
       - persist_to_workspace:
           root: .
           paths:
