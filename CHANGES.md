@@ -60,7 +60,7 @@
 ```
 - Print error when securityfs file cannot be created.
 - Should fix some of the issue where name was not being properly recorded.
-- Update to kernel version 6.0.5.
+- Update to kernel version 6.0.1.
 ```
 
 ## v0.9.0

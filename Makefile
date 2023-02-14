@@ -1,5 +1,5 @@
-kernel-version=6.0.5
-lsm-version=0.9.0
+kernel-version=6.0.1
+lsm-version=0.9.1
 arch=x86_64
 
 all: config compile install
