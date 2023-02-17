@@ -115,25 +115,34 @@ static int provenance_task_alloc(struct task_struct *task,
 	if (!prov_policy.prov_enabled)
 		return 0;
 
-	if (t != NULL) {
-		cred = (__force struct cred *)t->real_cred;
-		tprov = provenance_task(t);
-		if (cred != NULL) {
-			cprov = provenance_cred(cred);
-			if (tprov != NULL &&  cprov != NULL) {
-				if (provenance_is_tracked(prov_elt(cprov)))
-					set_tracked(prov_elt(tprov));
-				record_cred_name(current, cprov);
-				uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
-				// copy name
-				__memcpy_ss(&get_prov_name_id(prov_elt(tprov)),
-					    sizeof(union prov_identifier),
-					    &get_prov_name_id(prov_elt(ntprov)),
-					    sizeof(union prov_identifier));
-				informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
-			}
-		}
+	if (t == NULL)
+		return 0;
+
+	cred = (__force struct cred *)t->real_cred;
+	if (cred == NULL)
+		return 0;
+
+	tprov = provenance_task(t);
+	if (tprov == NULL)
+		return 0;
+
+	cprov = provenance_cred(cred);
+	if (cprov == NULL)
+		return 0;
+
+	if (provenance_is_tracked(prov_elt(cprov))) {
+		set_tracked(prov_elt(tprov));
+		set_tracked(prov_elt(ntprov));
 	}
+
+	record_cred_name(current, cprov);
+	// copy name
+	__memcpy_ss(&get_prov_name_id(prov_elt(ntprov)),
+		    sizeof(union prov_identifier),
+		    &get_prov_name_id(prov_elt(cprov)),
+		    sizeof(union prov_identifier));
+	uses_two(RL_PROC_READ, cprov, tprov, NULL, clone_flags);
+	informs(RL_CLONE, tprov, ntprov, NULL, clone_flags);
 	return 0;
 }
 
@@ -317,16 +326,22 @@ static int provenance_cred_prepare(struct cred *new,
 	if (!prov_policy.prov_enabled)
 		return 0;
 
-	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
-	if (provenance_is_tracked(prov_elt(old_prov)))
+	if (current == NULL)
+		return 0;
+
+	tprov = provenance_task(current);
+	if (tprov == NULL)
+		return 0;
+
+	if (provenance_is_tracked(prov_elt(old_prov))) {
 		set_tracked(prov_elt(nprov));
-	if (current != NULL) {
-		tprov = provenance_task(current);
-		if (tprov != NULL)
-			rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
+		set_tracked(prov_elt(tprov));
 	}
-	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	record_cred_name(current, nprov);
+
+	spin_lock_irqsave_nested(prov_lock(old_prov), irqflags, PROVENANCE_LOCK_PROC);
+	rc = generates(RL_CLONE_MEM, old_prov, tprov, nprov, NULL, 0);
+	spin_unlock_irqrestore(prov_lock(old_prov), irqflags);
 	return rc;
 }
 

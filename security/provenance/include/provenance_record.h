@@ -216,6 +216,7 @@ static __always_inline int record_node_name(struct provenance *node,
 					    bool force)
 {
 	union long_prov_elt *fname_prov;
+	prov_entry_t *n;
 	int rc;
 
 	if (provenance_is_opaque(prov_elt(node)))
@@ -230,8 +231,7 @@ static __always_inline int record_node_name(struct provenance *node,
 
 	// the corresponding node isn't tracked, recorded, and we are not tracking
 	// everything
-	if (!provenance_is_recorded(prov_elt(node))
-	    && !provenance_is_tracked(prov_elt(node))
+	if (!provenance_is_tracked(prov_elt(node))
 	    && !prov_policy.prov_all)
 		return 0;
 
@@ -251,8 +251,8 @@ record_name:
 
 	// Here we record the relation.
 	spin_lock(prov_lock(node));
-	rc = record_relation(RL_NAMED, fname_prov,
-			     prov_entry(node), NULL, 0);
+	n = fname_prov;
+	__write_node(n);
 	set_name_recorded(prov_elt(node));
 	spin_unlock(prov_lock(node));
 	free_long_provenance(fname_prov);

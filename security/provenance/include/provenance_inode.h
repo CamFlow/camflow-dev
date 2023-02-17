@@ -206,8 +206,7 @@ static inline int record_inode_name(struct inode *inode,
 
 	// the corresponding node isn't tracked, recorded, and we are not tracking
 	// everything
-	if (!provenance_is_recorded(prov_elt(prov))
-	    && !provenance_is_tracked(prov_elt(prov))
+	if (!provenance_is_tracked(prov_elt(prov))
 	    && !prov_policy.prov_all)
 		return 0;
 
