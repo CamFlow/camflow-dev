@@ -112,14 +112,6 @@ class Instruction
     return 'machine-' + self.relation_to_str('RL_RAN_ON') + '->task'
   end
 
-  def self.get_cred_provenance_to_relation
-    return 'path-' + self.relation_to_str('RL_NAMED') + '->process_memory'
-  end
-
-  def self.inode_provenance_to_relation
-    return 'path-' + self.relation_to_str('RL_NAMED') + '->inode'
-  end
-
   def self.record_address_to_relation
     return 'address-' + self.relation_to_str('RL_ADDRESSED') + '->inode'
   end

@@ -1,8 +1,4 @@
-digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-path -> inode[fontsize = 8,label = named]
+digraph RGL__DirectedAdjacencyGraph {inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 

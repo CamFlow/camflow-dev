@@ -58,8 +58,9 @@
 
 ## v0.9.1
 ```
+- Modify how pathnames are handled. Now directly associated to nodes
+	(closer to other provenance capture systems)
 - Print error when securityfs file cannot be created.
-- Should fix some of the issue where name was not being properly recorded.
 - Update to kernel version 6.0.1.
 ```
 

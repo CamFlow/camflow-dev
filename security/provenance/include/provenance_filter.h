@@ -67,8 +67,6 @@ static __always_inline bool filter_update_node(const uint64_t relation_type)
 		return true;
 	if (relation_type == RL_VERSION)
 		return true;
-	if (relation_type == RL_NAMED)
-		return true;
 	return false;
 }
 

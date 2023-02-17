@@ -1,10 +1,4 @@
-digraph RGL__DirectedAdjacencyGraph {path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-path -> process_memory[fontsize = 8,label = named]
-
-machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
+digraph RGL__DirectedAdjacencyGraph {machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
 task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = filled]
 
@@ -17,6 +11,8 @@ inode -> inode[fontsize = 8,label = accept_socket]
 inode -> inode[fontsize = 8,label = version_entity]
 
 inode -> task[fontsize = 8,label = accept]
+
+process_memory[fontsize = 8,label = process_memory,shape = ellipse, fillcolor="#fffacd", style = filled]
 
 task -> process_memory[fontsize = 8,label = memory_write]
 

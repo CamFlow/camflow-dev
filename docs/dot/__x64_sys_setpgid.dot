@@ -20,10 +20,6 @@ inode -> inode[fontsize = 8,label = version_entity]
 
 task -> task[fontsize = 8,label = terminate_task]
 
-path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-path -> process_memory[fontsize = 8,label = named]
-
 machine[fontsize = 8,label = machine,shape = house, fillcolor="#ff8c00", style = filled]
 
 machine -> task[fontsize = 8,label = ran_on]

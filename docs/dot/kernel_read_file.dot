@@ -4,11 +4,7 @@ task[fontsize = 8,label = task,shape = rectangle, fillcolor="#e6e6fa", style = f
 
 machine -> task[fontsize = 8,label = ran_on]
 
-path[fontsize = 8,label = path,shape = ellipse, fillcolor="#fffacd", style = filled]
-
 inode[fontsize = 8,label = inode,shape = ellipse, fillcolor="#fffacd", style = filled]
-
-path -> inode[fontsize = 8,label = named]
 
 inode -> task[fontsize = 8,label = load_file]
 

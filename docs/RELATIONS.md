@@ -41,7 +41,6 @@ RL_SETXATTR|setxattr|setxattr operation |
 RL_SETXATTR_INODE|setxattr_inode|setxattr operation |
 RL_RMVXATTR|removexattr|remove xattr operation |
 RL_RMVXATTR_INODE|removexattr_inode|remove xattr operation |
-RL_NAMED|named|connect path to inode|
 RL_ADDRESSED|addressed|connect address to inode|
 RL_EXEC|exec|exec operation|
 RL_EXEC_TASK|exec_task|exec operation|

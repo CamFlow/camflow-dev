@@ -95,21 +95,6 @@ File.readlines('./security/provenance/hooks.c').each do |line|
   elsif line.include?('get_task_provenance(')
     str += ',' unless str == ''
     str += Instruction.get_task_provenance_to_relation
-  elsif line.include?('get_cred_provenance(')
-    str += ',' unless str == ''
-    str += Instruction.get_cred_provenance_to_relation
-  elsif line.include?('inode_provenance(') && line.include?('true')
-    str += ',' unless str == ''
-    str += Instruction.inode_provenance_to_relation
-  elsif line.include?('dentry_provenance(') && line.include?('true')
-    str += ',' unless str == ''
-    str += Instruction.inode_provenance_to_relation
-  elsif line.include?('file_provenance(') && line.include?('true')
-    str += ',' unless str == ''
-    str += Instruction.inode_provenance_to_relation
-  elsif line.include?('refresh_inode_provenance(')
-    str += ',' unless str == ''
-    str += Instruction.inode_provenance_to_relation
   elsif line.include?('record_address(')
     str += ',' unless str == ''
     str += Instruction.record_address_to_relation
