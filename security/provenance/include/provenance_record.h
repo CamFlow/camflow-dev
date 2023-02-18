@@ -217,7 +217,6 @@ static __always_inline int record_node_name(struct provenance *node,
 {
 	union long_prov_elt *fname_prov;
 	prov_entry_t *n;
-	int rc;
 
 	if (provenance_is_opaque(prov_elt(node)))
 		return 0;
@@ -256,7 +255,7 @@ record_name:
 	set_name_recorded(prov_elt(node));
 	spin_unlock(prov_lock(node));
 	free_long_provenance(fname_prov);
-	return rc;
+	return 0;
 }
 
 static __always_inline void copy_cred_name(struct provenance *cred,
