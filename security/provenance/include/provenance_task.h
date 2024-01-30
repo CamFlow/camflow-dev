@@ -25,7 +25,8 @@
 #include <linux/utsname.h>
 #include <linux/ipc_namespace.h>
 #include <linux/mnt_namespace.h>
-#include <linux/mm.h> // used for get_page
+#include <linux/mm.h>           // used for get_page
+#include <linux/mm_types.h>     /* to iterate through vma maple tree */
 #include <net/net_namespace.h>
 #include <linux/pid_namespace.h>
 #include <linux/sched/cputime.h>
@@ -190,8 +191,9 @@ static __always_inline int current_update_shst(struct provenance *cprov,
 
 	if (!mm)
 		return rc;
-	vma = mm->mmap;
-	while (vma) { // We go through all the mmaped files.
+	/* See an iterator example at validate_mm() in /mm/mmap.c from line 281 */
+	VMA_ITERATOR(vmi, mm, 0);
+	for_each_vma(vmi, vma) { /* We go through all the mmapped files. */
 		mmapf = vma->vm_file;
 		if (mmapf) {
 			flags = vma->vm_flags;
@@ -211,7 +213,6 @@ static __always_inline int current_update_shst(struct provenance *cprov,
 							     flags);
 			}
 		}
-		vma = vma->vm_next;
 	}
 	mmput_async(mm);        // Release the file.
 	return rc;
@@ -439,7 +440,7 @@ static inline struct page *__get_arg_page_r(struct linux_binprm *bprm,
 	 */
 	mmap_read_lock(bprm->mm);
 	ret = get_user_pages_remote(bprm->mm, pos, 1, FOLL_FORCE,
-				    &page, NULL, NULL);
+				    &page, NULL);
 	mmap_read_unlock(bprm->mm);
 	if (ret <= 0)
 		return NULL;

@@ -972,7 +972,7 @@ static int provenance_inode_readlink(struct dentry *dentry)
  * codes unknown.
  *
  */
-static int provenance_inode_setxattr(struct user_namespace *mnt_userns,
+static int provenance_inode_setxattr(struct mnt_idmap *idmap,
 				     struct dentry *dentry,
 				     const char *name,
 				     const void *value,
@@ -1158,7 +1158,7 @@ static int provenance_inode_listxattr(struct dentry *dentry)
  * @param name The name of the extended attribute.
  *
  */
-static int provenance_inode_removexattr(struct user_namespace *mnt_userns,
+static int provenance_inode_removexattr(struct mnt_idmap *idmap,
 					struct dentry *dentry, const char *name)
 {
 	struct provenance *cprov;
@@ -1209,7 +1209,7 @@ static int provenance_inode_removexattr(struct user_namespace *mnt_userns,
  * the attribute is not provenance.
  *
  */
-static int provenance_inode_getsecurity(struct user_namespace *mnt_userns,
+static int provenance_inode_getsecurity(struct mnt_idmap *idmap,
 					struct inode *inode,
 					const char *name,
 					void **buffer,
@@ -2717,7 +2717,7 @@ static int provenance_bprm_check_security(struct linux_binprm *bprm)
  * @param bprm points to the linux_binprm structure.
  *
  */
-static void provenance_bprm_committing_creds(struct linux_binprm *bprm)
+static void provenance_bprm_committing_creds(const struct linux_binprm *bprm)
 {
 	struct provenance *tprov;
 	struct provenance *cprov;
@@ -2776,7 +2776,7 @@ static int provenance_sb_alloc_security(struct super_block *sb)
  * @return always return 0.
  *
  */
-static int provenance_sb_kern_mount(struct super_block *sb)
+static int provenance_sb_kern_mount(const struct super_block *sb)
 {
 	int i;
 	uint8_t c = 0;
@@ -2791,7 +2791,7 @@ static int provenance_sb_kern_mount(struct super_block *sb)
 	return 0;
 }
 
-struct lsm_blob_sizes provenance_blob_sizes __lsm_ro_after_init = {
+struct lsm_blob_sizes provenance_blob_sizes __ro_after_init = {
 	.lbs_cred = sizeof(struct provenance),
 	.lbs_file = sizeof(struct provenance),
 	.lbs_inode = sizeof(struct provenance),
@@ -2804,7 +2804,7 @@ struct lsm_blob_sizes provenance_blob_sizes __lsm_ro_after_init = {
 /*!
  * @brief Add provenance hooks to security_hook_list.
  */
-static struct security_hook_list provenance_hooks[] __lsm_ro_after_init = {
+static struct security_hook_list provenance_hooks[] __ro_after_init = {
 	/* cred related hooks */
 	LSM_HOOK_INIT(cred_free,                provenance_cred_free),
 	LSM_HOOK_INIT(cred_alloc_blank,         provenance_cred_alloc_blank),

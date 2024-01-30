@@ -89,18 +89,18 @@ static ssize_t __read_flag(struct file *filp, char __user *buf,
 
 #define declare_write_flag_fcn(fcn_name, flag)			    \
 	static ssize_t fcn_name(struct file *file,		    \
-				const char __user * buf,	    \
+				const char __user *buf,		    \
 				size_t count,			    \
-				loff_t * ppos)			    \
+				loff_t *ppos)			    \
 	{							    \
 		return __write_flag(file, buf, count, ppos, &flag); \
 	}
 
 #define declare_read_flag_fcn(fcn_name, flag)			  \
 	static ssize_t fcn_name(struct file *filp,		  \
-				char __user * buf,		  \
+				char __user *buf,		  \
 				size_t count,			  \
-				loff_t * ppos)			  \
+				loff_t *ppos)			  \
 	{							  \
 		return __read_flag(filp, buf, count, ppos, flag); \
 	}
@@ -370,18 +370,18 @@ static inline ssize_t __read_filter(struct file *filp, char __user *buf,
 
 #define declare_write_filter_fcn(fcn_name, filter)		  \
 	static ssize_t fcn_name(struct file *file,		  \
-				const char __user * buf,	  \
+				const char __user *buf,		  \
 				size_t count,			  \
-				loff_t * ppos)			  \
+				loff_t *ppos)			  \
 	{							  \
 		return __write_filter(file, buf, count, &filter); \
 	}
 
 #define declare_read_filter_fcn(fcn_name, filter)		\
 	static ssize_t fcn_name(struct file *filp,		\
-				char __user * buf,		\
+				char __user *buf,		\
 				size_t count,			\
-				loff_t * ppos)			\
+				loff_t *ppos)			\
 	{							\
 		return __read_filter(filp, buf, count, filter);	\
 	}
@@ -583,18 +583,18 @@ static ssize_t __read_ipv4_filter(struct file *filp, char __user *buf,
 
 #define declare_write_ipv4_filter_fcn(fcn_name, filter)		       \
 	static ssize_t fcn_name(struct file *file,		       \
-				const char __user * buf,	       \
+				const char __user *buf,		       \
 				size_t count,			       \
-				loff_t * ppos)			       \
+				loff_t *ppos)			       \
 	{							       \
 		return __write_ipv4_filter(file, buf, count, &filter); \
 	}
 
 #define declare_reader_ipv4_filter_fcn(fcn_name, filter)	      \
 	static ssize_t fcn_name(struct file *filp,		      \
-				char __user * buf,		      \
+				char __user *buf,		      \
 				size_t count,			      \
-				loff_t * ppos)			      \
+				loff_t *ppos)			      \
 	{							      \
 		return __read_ipv4_filter(filp, buf, count, &filter); \
 	}
@@ -653,9 +653,9 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
 #define declare_generic_filter_write(function_name, filters, info, add_function, delete_function) \
 	static ssize_t function_name(struct file *file,						  \
-				     const char __user * buf,					  \
+				     const char __user *buf,					  \
 				     size_t count,						  \
-				     loff_t * ppos)						  \
+				     loff_t *ppos)						  \
 	{											  \
 		struct filters *s;								  \
 		if (count < sizeof(struct info))						  \
@@ -676,9 +676,9 @@ declare_file_operations(prov_secctx_ops, no_write, prov_read_secctx);
 
 #define declare_generic_filter_read(function_name, filters, info)			    \
 	static ssize_t function_name(struct file *filp,					    \
-				     char __user * buf,					    \
+				     char __user *buf,					    \
 				     size_t count,					    \
-				     loff_t * ppos)					    \
+				     loff_t *ppos)					    \
 	{										    \
 		struct list_head *listentry, *listtmp;					    \
 		struct filters *tmp;							    \
