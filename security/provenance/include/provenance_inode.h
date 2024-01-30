@@ -414,7 +414,7 @@ static inline void save_provenance(struct dentry *dentry)
 	clear_name_recorded(&buf);
 	if (!dentry)
 		return;
-	__vfs_setxattr_noperm(&init_user_ns, dentry, XATTR_NAME_PROVENANCE,
+	__vfs_setxattr_noperm(&nop_mnt_idmap, dentry, XATTR_NAME_PROVENANCE,
 			      &buf, sizeof(union prov_elt), 0);
 }
 
