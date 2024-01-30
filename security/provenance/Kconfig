@@ -10,7 +10,7 @@ config SECURITY_PROVENANCE
          select CRYPTO_SHA256
          default y
          help
-          This selects CamFlow provenance modules. It captures provenance through
+          This selects CamFlow provenance related modules. It captures provenance through
           a Linux Security Module.
 
 config SECURITY_PROVENANCE_WHOLE_SYSTEM
@@ -18,7 +18,7 @@ config SECURITY_PROVENANCE_WHOLE_SYSTEM
 	depends on SECURITY_PROVENANCE
 	default n
 	help
-	  This option activate whole system provenance capture from boot.
+	  This option activates whole system provenance capture from boot.
 
 	  If you are unsure how to answer this question, answer N.
 
@@ -27,6 +27,6 @@ config SECURITY_PROVENANCE_PERSISTENCE
 	depends on SECURITY_PROVENANCE
 	default n
 	help
-	  This option persist inode provenance state across reboot.
+	  This option persists inode provenance states across reboots.
 
 	  If you are unsure how to answer this question, answer N.
